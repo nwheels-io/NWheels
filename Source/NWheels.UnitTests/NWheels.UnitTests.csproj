@@ -100,6 +100,7 @@
     <Compile Include="Entities\DomainObjectFactoryTests.cs" />
     <Compile Include="Entities\PresentationObjectFactoryTests.cs" />
     <Compile Include="Extensions\AutofacExtensionTests.cs" />
+    <Compile Include="Extensions\StringExtensionTests.cs" />
     <Compile Include="Extensions\TypeExtensionTests.cs" />
     <Compile Include="Globalization\GlobalizationAssumptionTests.cs" />
     <Compile Include="Hosting\AutofacRegistrationTests.cs" />

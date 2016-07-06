@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Concurrency.Impl;
 
 namespace NWheels.Extensions
 {
@@ -313,6 +315,162 @@ namespace NWheels.Extensions
             }
 
             return s + suffix;
+        }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<string[]> TakeChunks(this IEnumerable<string> source, int maxChunkTextLength)
+        {
+            return new StringArrayChunkingEnumerable(source, maxChunkTextLength);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class StringArrayChunkingEnumerable : IEnumerable<string[]>
+        {
+            private readonly IEnumerable<string> _inner;
+            private readonly int _maxTextLength;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public StringArrayChunkingEnumerable(IEnumerable<string> inner, int maxTextLength)
+            {
+                _inner = inner;
+                _maxTextLength = maxTextLength;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of IEnumerable
+
+            public IEnumerator<string[]> GetEnumerator()
+            {
+                return new StringArrayChunkingEnumerator(_inner.GetEnumerator(), _maxTextLength);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class StringArrayChunkingEnumerator : IEnumerator<string[]>
+        {
+            private readonly IEnumerator<string> _inner;
+            private readonly int _maxTextLength;
+            private string _leftOver;
+            private string[] _current;
+            private bool _endOfInner;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public StringArrayChunkingEnumerator(IEnumerator<string> inner, int maxTextLength)
+            {
+                _inner = inner;
+                _maxTextLength = maxTextLength;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of IDisposable
+
+            public void Dispose()
+            {
+                _inner.Dispose();
+                _current = null;
+                _leftOver = null;
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of IEnumerator
+
+            public bool MoveNext()
+            {
+                var currentBuffer = new List<string>();
+                var currentLength = 0;
+
+                if (_leftOver != null)
+                {
+                    currentBuffer.Add(_leftOver);
+                    currentLength += (_leftOver != null ? _leftOver.Length : 0);
+                    _leftOver = null;
+                }
+
+                while (currentLength < _maxTextLength && !_endOfInner)
+                {
+                    if (!_inner.MoveNext())
+                    {
+                        _endOfInner = true;
+                        break;
+                    }
+
+                    var innerCurrent = _inner.Current;
+                    currentLength += (innerCurrent != null ? innerCurrent.Length : 0);
+
+                    if (currentLength <= _maxTextLength || currentBuffer.Count == 0)
+                    {
+                        currentBuffer.Add(innerCurrent);
+                    }
+                    else
+                    {
+                        _leftOver = innerCurrent;
+                    }
+                }
+
+                if (currentBuffer.Count > 0)
+                {
+                    _current = currentBuffer.ToArray();
+                    return true;
+                }
+
+                _current = null;
+                return false;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Reset()
+            {
+                _inner.Reset();
+                _current = null;
+                _leftOver = null;
+                _endOfInner = false;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string[] Current
+            {
+                get
+                {
+                    if (_current != null)
+                    {
+                        return _current;
+                    }
+
+                    throw new InvalidOperationException();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            object IEnumerator.Current
+            {
+                get
+                {
+                    return this.Current;
+                }
+            }
+
+            #endregion
         }
     }
 }
