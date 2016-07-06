@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using NWheels.Extensions;
 
-namespace NWheels.Globalization.Locales
+namespace NWheels.Globalization.Core
 {
-    public class DbBasedLocale : ILocale
+    public class DbBasedLocale : ILocale, ICoreLocale
     {
         private readonly Dictionary<string, string> _translations;
 
@@ -67,6 +65,17 @@ namespace NWheels.Globalization.Locales
         public CultureInfo Culture { get; private set; }
         public string ListSeparator { get; private set; }
         public string EqualitySign { get; private set; }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Implementation of ICoreLocale
+
+        public virtual void SetLocalStrings(Dictionary<string, string> localStringByStringId)
+        {
+            throw new System.NotImplementedException();
+        }
 
         #endregion
     }

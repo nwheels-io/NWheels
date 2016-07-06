@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using NWheels.Hosting;
-using NWheels.Extensions;
 
-namespace NWheels.Globalization.Locales
+namespace NWheels.Globalization.Core
 {
-    public abstract class LocalizationProviderBase : LifecycleEventListenerBase, ILocalizationProvider
+    public abstract class LocalizationProviderBase : LifecycleEventListenerBase, ILocalizationProvider, ICoreLocalizationProvider
     {
         private readonly object _initSyncRoot = new object();
         private readonly ILocale _fallbackLocale = new VoidLocalizationProvider();
-        private Dictionary<string, ILocale> _localeByCultureName;
+        private ImmutableDictionary<string, ILocale> _localeByCultureName;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -82,7 +80,37 @@ namespace NWheels.Globalization.Locales
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected abstract void Initialize(out Dictionary<string, ILocale> localeByCultureName);
+        #region Implementation of ICoreLocalizationProvider
+
+        public virtual ICoreLocale GetCoreLocale(CultureInfo culture)
+        {
+            return (ICoreLocale)GetLocale(culture);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual void Refresh()
+        {
+            if (!Monitor.TryEnter(_initSyncRoot, 30000))
+            {
+                throw new TimeoutException("LocalizationProviderBase.Refresh failed to acquire lock within allotted timeout.");
+            }
+
+            try
+            {
+                Initialize(out _localeByCultureName);
+            }
+            finally
+            {
+                Monitor.Exit(_initSyncRoot);
+            }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected abstract void Initialize(out ImmutableDictionary<string, ILocale> localeByCultureName);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

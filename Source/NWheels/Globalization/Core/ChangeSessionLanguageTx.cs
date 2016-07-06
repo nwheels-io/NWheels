@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading;
 using NWheels.Authorization.Core;
-using NWheels.Core;
 using NWheels.Processing;
 using NWheels.UI;
 using NWheels.UI.Factories;
 
-namespace NWheels.Globalization.Locales
+namespace NWheels.Globalization.Core
 {
     [SecurityCheck.AllowAnonymous]
     [TransactionScript(SupportsInitializeInput = true)]

@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.DataObjects;
+﻿using NWheels.DataObjects;
 using NWheels.Entities;
 
-namespace NWheels.Globalization.Locales
+namespace NWheels.Globalization.Core
 {
     [EntityPartContract]
     public interface IApplicationLocaleEntryEntityPart

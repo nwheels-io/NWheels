@@ -62,6 +62,10 @@
       <HintPath>..\packages\SmartFormat.NET.1.6.1.0\lib\net40\SmartFormat.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>..\packages\System.Collections.Immutable.1.1.37\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -155,16 +159,18 @@
     <Compile Include="Extensions\QueryableExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Extensions\UidlExtensions.cs" />
-    <Compile Include="Globalization\Locales\ApplicationLocaleEntrySource.cs" />
-    <Compile Include="Globalization\Locales\ChangeSessionLanguageTx.cs" />
-    <Compile Include="Globalization\Locales\DbBasedLocale.cs" />
-    <Compile Include="Globalization\Locales\DbBasedLocalizationProvider.cs" />
-    <Compile Include="Globalization\Locales\LocalizationProviderBase.cs" />
-    <Compile Include="Globalization\Locales\IApplicationLocaleEntity.cs" />
-    <Compile Include="Globalization\Locales\IApplicationLocaleEntryEntityPart.cs" />
-    <Compile Include="Globalization\Locales\IApplicationLocalizationContext.cs" />
-    <Compile Include="Globalization\Locales\LocaleCrudScreenPart.cs" />
-    <Compile Include="Globalization\Locales\LocaleEntryExportTx.cs" />
+    <Compile Include="Globalization\Core\ApplicationLocaleEntrySource.cs" />
+    <Compile Include="Globalization\Core\ChangeSessionLanguageTx.cs" />
+    <Compile Include="Globalization\Core\DbBasedLocale.cs" />
+    <Compile Include="Globalization\Core\DbBasedLocalizationProvider.cs" />
+    <Compile Include="Globalization\Core\ICoreLocale.cs" />
+    <Compile Include="Globalization\Core\ICoreLocalizationProvider.cs" />
+    <Compile Include="Globalization\Core\LocalizationProviderBase.cs" />
+    <Compile Include="Globalization\Core\IApplicationLocaleEntity.cs" />
+    <Compile Include="Globalization\Core\IApplicationLocaleEntryEntityPart.cs" />
+    <Compile Include="Globalization\Core\IApplicationLocalizationContext.cs" />
+    <Compile Include="Globalization\Core\LocaleCrudScreenPart.cs" />
+    <Compile Include="Globalization\Core\LocaleEntryExportTx.cs" />
     <Compile Include="Hosting\Core\IComponentAspectProvider.cs" />
     <Compile Include="Logging\Factories\CallLoggingAspectConvention.cs" />
     <Compile Include="Logging\LogCallsAttribute.cs" />
@@ -426,6 +432,7 @@
     <Compile Include="UI\Toolbox\Report.cs" />
     <Compile Include="UI\Toolbox\ReportSelector.cs" />
     <Compile Include="UI\Toolbox\TransactionForm.cs" />
+    <Compile Include="UI\Uidl\UidlExtension.cs" />
     <Compile Include="UI\Uidl\WidgetAlertStyle.cs" />
     <Compile Include="UI\Toolbox\WidgetScreenPart.cs" />
     <Compile Include="UI\Toolbox\CrudScreenPart.cs" />

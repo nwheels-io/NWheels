@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autofac;
 using NWheels.Core;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Extensions;
-using NWheels.Processing.Documents;
-using NWheels.UI;
-using NWheels.UI.Uidl;
 
-namespace NWheels.Globalization.Locales
+namespace NWheels.Globalization.Core
 {
     [EntityContract]
     public interface IApplicationLocaleEntity

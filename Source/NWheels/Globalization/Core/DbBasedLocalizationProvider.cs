@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace NWheels.Globalization.Locales
+namespace NWheels.Globalization.Core
 {
     public class DbBasedLocalizationProvider : LocalizationProviderBase
     {
@@ -21,7 +19,7 @@ namespace NWheels.Globalization.Locales
 
         #region Overrides of LocalizationProviderBase
 
-        protected override void Initialize(out Dictionary<string, ILocale> localeByCultureName)
+        protected override void Initialize(out ImmutableDictionary<string, ILocale> localeByCultureName)
         {
             using (var context = _framework.NewUnitOfWork<IApplicationLocalizationContext>())
             {
@@ -29,7 +27,7 @@ namespace NWheels.Globalization.Locales
 
                 localeByCultureName = allLocales
                     .Select(entity => new DbBasedLocale(entity))
-                    .ToDictionary(
+                    .ToImmutableDictionary(
                         locale => locale.Culture.Name, 
                         locale => (ILocale)locale);
             }

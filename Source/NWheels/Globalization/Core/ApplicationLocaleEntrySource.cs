@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autofac;
 using NWheels.DataObjects;
 using NWheels.UI;
 using NWheels.UI.Uidl;
 
-namespace NWheels.Globalization.Locales
+namespace NWheels.Globalization.Core
 {
     public abstract class ApplicationLocaleEntrySource
     {
