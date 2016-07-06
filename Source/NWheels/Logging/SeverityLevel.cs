@@ -8,6 +8,8 @@ namespace NWheels.Logging
 {
     public enum SeverityLevel
     {
+        None,
+        Success,
         Info,
         Warning,
         Error,

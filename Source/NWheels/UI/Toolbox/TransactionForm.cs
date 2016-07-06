@@ -101,6 +101,20 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void UseOKCancelNotation(bool withIcons = false)
+        {
+            this.Execute.Text = "OK";
+            this.Reset.Text = "Cancel";
+
+            if (withIcons)
+            {
+                this.Execute.Icon = "check";
+                this.Reset.Icon = "times";
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
             return base.GetNestedWidgets().ConcatOneIf(InputForm).ConcatOneIf(InputFormTypeSelector).ConcatOneIf(OutputForm);

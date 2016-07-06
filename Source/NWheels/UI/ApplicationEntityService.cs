@@ -1200,6 +1200,14 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private EntityHandler CreateAdHocEntityHandler(string entityQualifiedName)
+        {
+            var metaType = _metadataCache.GetTypeMetadata(entityQualifiedName);
+            return new AdHocEntityHandler(this, metaType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         internal interface IBuildCacheKey
         {
             void BuildCacheKey(StringBuilder key);
@@ -2440,6 +2448,81 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public class AdHocEntityHandler : EntityHandler
+        {
+            public AdHocEntityHandler(ApplicationEntityService owner, ITypeMetadata metaType)
+                : base(owner, metaType, domainContextType: null, extensions: new IEntityHandlerExtension[0])
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of EntityHandler
+
+            public override IDomainObject CreateNew()
+            {
+                return Framework.As<ICoreFramework>().NewDomainObject(MetaType.ContractType);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override IEntityId ParseEntityId(string id)
+            {
+                throw NewNotSupportedException();
+            }
+            public override IUnitOfWork NewUnitOfWork(object txViewModel = null, bool debugPerformStaleCheck = false)
+            {
+                throw NewNotSupportedException();
+            }
+            public override QueryResults Query(QueryOptions options, IQueryable query = null, object txViewModel = null)
+            {
+                throw NewNotSupportedException();
+            }
+            public override EntityCursor QueryCursor(QueryOptions options, IQueryable query = null, object txViewModel = null)
+            {
+                throw NewNotSupportedException();
+            }
+            public override IDomainObject GetById(string id)
+            {
+                throw NewNotSupportedException();
+            }
+            public override IDomainObject[] GetByIdList(object[] idList)
+            {
+                throw NewNotSupportedException();
+            }
+            public override IDomainObject[] GetByForeignKeyList(IPropertyMetadata inverseForeignKeyProperty, object[] leftSideIds)
+            {
+                throw NewNotSupportedException();
+            }
+            public override bool TryGetById(string id, out IDomainObject entity)
+            {
+                throw NewNotSupportedException();
+            }
+            public override void Insert(IDomainObject entity)
+            {
+                throw NewNotSupportedException();
+            }
+            public override void Update(IDomainObject entity)
+            {
+                throw NewNotSupportedException();
+            }
+            public override void Delete(string id)
+            {
+                throw NewNotSupportedException();
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private NotSupportedException NewNotSupportedException()
+            {
+                return new NotSupportedException("AdHocEntityHandler does not support requested operation.");
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private class OutputEntityPropertyAccessControl : IEntityMemberAccessControl
         {
             private readonly ITypeMetadata _metaType;
@@ -2565,6 +2648,7 @@ namespace NWheels.UI
 
             protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
             {
+                var typeName = type.Name;
                 var properties = base.CreateProperties(type, memberSerialization);
                 var contractTypes = GetContractTypes(type);
 
@@ -2913,7 +2997,7 @@ namespace NWheels.UI
 
             public object GetValue(object target)
             {
-                var domainObject = target as IDomainObject;
+                var domainObject = target as IObject;
 
                 if ( domainObject != null )
                 {
@@ -3338,12 +3422,12 @@ namespace NWheels.UI
                 JObject jo = JObject.Load(reader);
 
                 var typeName = jo["$type"].Value<string>();
-                var handler = _ownerService._handlerByEntityName[typeName];
-                IDomainObject target;
+                var handler = _ownerService._handlerByEntityName.GetValueOrCreateDefault(typeName, _ownerService.CreateAdHocEntityHandler);
+                IObject target;
 
                 if (existingValue != null && handler.MetaType.ContractType.IsInstanceOfType(existingValue))
                 {
-                    target = (IDomainObject)existingValue;
+                    target = (IObject)existingValue;
                 }
                 else
                 {
@@ -3411,7 +3495,6 @@ namespace NWheels.UI
                 return true;
             }
         }
-
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
