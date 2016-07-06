@@ -53,6 +53,8 @@ namespace NWheels.UI
             {
                 PostDescribingPresenter(new PresenterBuilder<TScreenPart, TData, TState>(builder, this));
             }
+
+            base.ApplyExtensions(builder);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

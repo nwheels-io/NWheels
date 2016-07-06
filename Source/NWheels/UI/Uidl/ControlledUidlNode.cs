@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using NWheels.UI.Core;
 
 namespace NWheels.UI.Uidl
@@ -11,6 +12,10 @@ namespace NWheels.UI.Uidl
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
     public abstract class ControlledUidlNode : InteractiveUidlNode
     {
+        private readonly List<UidlExtensionRegistration> _registeredExtensions = new List<UidlExtensionRegistration>();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected ControlledUidlNode(UidlNodeType nodeType, string idName, ControlledUidlNode parent)
             : base(nodeType, idName, parent)
         {
@@ -27,6 +32,19 @@ namespace NWheels.UI.Uidl
         public void AddCommands(params UidlCommand[] commands)
         {
             this.Commands.AddRange(commands);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void AttachExtensions(UidlExtensionRegistration[] registeredExtensions)
+        {
+            for (int i = 0; i < registeredExtensions.Length; i++)
+            {
+                if (registeredExtensions[i].NodeType.IsInstanceOfType(this))
+                {
+                    _registeredExtensions.Add(registeredExtensions[i]);
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -64,7 +82,18 @@ namespace NWheels.UI.Uidl
 
             return "B" + index;
         }
-    
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal void ApplyExtensions(UidlBuilder builder)
+        {
+            for (int i = 0 ; i < _registeredExtensions.Count ; i++)
+            {
+                var extension = (IUidlExtension)builder.Components.Resolve(_registeredExtensions[i].ExtensionType);
+                extension.ApplyTo(this, builder);
+            }
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         internal string ModelDataType { get; set; }

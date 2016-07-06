@@ -27,7 +27,7 @@ using NWheels.Entities.Impl;
 using NWheels.Entities.Migrations;
 using NWheels.Exceptions;
 using NWheels.Globalization;
-using NWheels.Globalization.Locales;
+using NWheels.Globalization.Core;
 using NWheels.Hosting;
 using NWheels.Hosting.Factories;
 using NWheels.Logging;
@@ -387,9 +387,9 @@ namespace NWheels.Extensions
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
             public void RegisterLocalizationProvider<TProvider>()
-                where TProvider : class, ILocalizationProvider
+                where TProvider : class, ILocalizationProvider, ICoreLocalizationProvider
             {
-                _builder.RegisterType<TProvider>().As<ILocalizationProvider>().AsSelf().SingleInstance();
+                _builder.RegisterType<TProvider>().As<ILocalizationProvider, ICoreLocalizationProvider>().AsSelf().SingleInstance();
             }
         }
 
@@ -886,6 +886,16 @@ namespace NWheels.Extensions
                 where TExtension : ApplicationEntityService.IEntityHandlerExtension
             {
                 return _builder.RegisterType<TExtension>().As<ApplicationEntityService.IEntityHandlerExtension>();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RegisterUidlExtension<TUidlNode, TExtension>()
+                where TUidlNode : ControlledUidlNode
+                where TExtension : IUidlExtension<TUidlNode>
+            {
+                _builder.RegisterType<TExtension>().AsSelf().InstancePerDependency();
+                _builder.RegisterInstance(new UidlExtensionRegistration(nodeType: typeof(TUidlNode), extensionType: typeof(TExtension)));
             }
         }
 

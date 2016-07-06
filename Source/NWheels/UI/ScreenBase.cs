@@ -34,6 +34,7 @@ namespace NWheels.UI
             DescribePresenter(new PresenterBuilder<TScreen, TData, TState>(builder, this));
             builder.DescribeNodePresenters(this.ContentRoot);
             PostDescribePresenter(new PresenterBuilder<TScreen, TData, TState>(builder, this));
+            base.ApplyExtensions(builder);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

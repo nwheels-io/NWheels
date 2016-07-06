@@ -21,17 +21,26 @@ namespace NWheels.UI
     {
         private readonly IDomainObjectFactory _domainObjectFactory;
         private readonly IEntityObjectFactory _entityObjectFactory;
+        private readonly UidlExtensionRegistration[] _registeredExtensions;
+        private readonly IComponentContext _components;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly UidlDocument _document;
         private UidlApplication _applicationBeingAdded = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UidlBuilder(ITypeMetadataCache metadataCache, IDomainObjectFactory domainObjectFactory, IEntityObjectFactory entityObjectFactory)
+        public UidlBuilder(
+            IComponentContext components,
+            ITypeMetadataCache metadataCache, 
+            IDomainObjectFactory domainObjectFactory, 
+            IEntityObjectFactory entityObjectFactory,
+            IEnumerable<UidlExtensionRegistration> registeredExtensions)
         {
+            _components = components;
             _metadataCache = metadataCache;
             _domainObjectFactory = domainObjectFactory;
             _entityObjectFactory = entityObjectFactory;
+            _registeredExtensions = registeredExtensions.ToArray();
             _document = new UidlDocument();
         }
 
@@ -140,6 +149,13 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IComponentContext Components
+        {
+            get { return _components; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public ITypeMetadataCache MetadataCache
         {
             get { return _metadataCache; }
@@ -163,33 +179,45 @@ namespace NWheels.UI
 
         internal void InstantiateDeclaredMemberNodes(AbstractUidlNode parent)
         {
-            var instantiatedNodes = new List<AbstractUidlNode>();
-            var memberProperties = parent.GetType().GetProperties().Where(p => IsAssignableDeclaredMemberNodeProperty(parent, p)).ToArray();
+            InstantiateDeclaredMemberNodes(parent, declaringTarget: parent);
+        }
 
-            foreach ( var property in memberProperties )
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal IEnumerable<AbstractUidlNode> InstantiateDeclaredMemberNodes(AbstractUidlNode parent, object declaringTarget)
+        {
+            var instantiatedNodes = new List<AbstractUidlNode>();
+            var memberProperties = declaringTarget.GetType().GetProperties().Where(p => IsAssignableDeclaredMemberNodeProperty(declaringTarget, p)).ToArray();
+
+            foreach (var property in memberProperties)
             {
-                if ( property.PropertyType.IsInstanceOfType(_applicationBeingAdded) )
+                if (property.PropertyType.IsInstanceOfType(_applicationBeingAdded))
                 {
-                    property.SetValue(parent, _applicationBeingAdded);
+                    property.SetValue(declaringTarget, _applicationBeingAdded);
                 }
-                else if ( typeof(UidlScreenPart).IsAssignableFrom(property.PropertyType) )
+                else if (typeof(UidlScreenPart).IsAssignableFrom(property.PropertyType))
                 {
-                    property.SetValue(parent, GetOrCreateScreenPartInstance(property));
+                    var screenPart = GetOrCreateScreenPartInstance(property);
+                    property.SetValue(declaringTarget, screenPart);
+                    AttachExtensions(screenPart);
                 }
                 else
                 {
                     var instance = (AbstractUidlNode)Activator.CreateInstance(property.PropertyType, property.Name, parent);
                     instance.MetadataCache = _metadataCache;
-                    
-                    property.SetValue(parent, instance);
+
+                    property.SetValue(declaringTarget, instance);
                     instantiatedNodes.Add(instance);
                     TryApplyWidgetTemplate(instance, property);
                     parent.OnDeclaredMemberNodeCreated(property, instance);
+                    AttachExtensions(instance);
                 }
             }
 
             AddNodesToParentCollections(parent, instantiatedNodes);
             instantiatedNodes.ForEach(InstantiateDeclaredMemberNodes);
+
+            return instantiatedNodes;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -249,6 +277,18 @@ namespace NWheels.UI
                 parentAsControlled.Behaviors.AddRange(instantiatedNodes.OfType<BehaviorUidlNode>());
                 parentAsControlled.Commands.AddRange(instantiatedNodes.OfType<UidlCommandBase>());
                 parentAsControlled.DataBindings.AddRange(instantiatedNodes.OfType<DataBindingUidlNode>());
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void AttachExtensions(AbstractUidlNode node)
+        {
+            var controlledNode = (node as ControlledUidlNode);
+
+            if (controlledNode != null)
+            {
+                controlledNode.AttachExtensions(_registeredExtensions);
             }
         }
 
@@ -344,7 +384,12 @@ namespace NWheels.UI
             ILocalizationProvider localizationProvider,
             IComponentContext components)
         {
-            var builder = new UidlBuilder(metadataCache, components.Resolve<IDomainObjectFactory>(), components.Resolve<IEntityObjectFactory>());
+            var builder = new UidlBuilder(
+                components,
+                metadataCache, 
+                components.Resolve<IDomainObjectFactory>(), 
+                components.Resolve<IEntityObjectFactory>(),
+                components.Resolve<IEnumerable<UidlExtensionRegistration>>());
             builder.AddApplication(application);
 
             var allTranslatables = builder.GetTranslatables().ToArray();
@@ -359,11 +404,11 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static bool IsAssignableDeclaredMemberNodeProperty(AbstractUidlNode parent, PropertyInfo property)
+        private static bool IsAssignableDeclaredMemberNodeProperty(object target, PropertyInfo property)
         {
             return (
                 property.CanWrite &&
-                property.DeclaringType.IsAssignableFrom(parent.GetType()) && 
+                property.DeclaringType.IsAssignableFrom(target.GetType()) && 
                 typeof(AbstractUidlNode).IsAssignableFrom(property.PropertyType) && 
                 !property.HasAttribute<ManuallyAssignedAttribute>());
         }
@@ -385,6 +430,7 @@ namespace NWheels.UI
         {
             void Build(UidlBuilder builder);
             void DescribePresenter(UidlBuilder builder);
+            void AttachExtensions(UidlExtensionRegistration[] registeredExtensions);
         }
     }
 }

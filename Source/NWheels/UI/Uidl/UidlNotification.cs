@@ -49,5 +49,11 @@ namespace NWheels.UI.Uidl
         void UidlBuilder.IBuildableUidlNode.DescribePresenter(UidlBuilder builder)
         {
         }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void UidlBuilder.IBuildableUidlNode.AttachExtensions(UidlExtensionRegistration[] registeredExtensions)
+        {
+        }
     }
 }

@@ -56,6 +56,7 @@ namespace NWheels.UI
             DescribePresenter(new PresenterBuilder<TApp, TData, TState>(builder, this));
             builder.DescribeNodePresenters(base.Screens.Cast<AbstractUidlNode>().ToArray());
             builder.DescribeNodePresenters(base.ScreenParts.Cast<AbstractUidlNode>().ToArray());
+            base.ApplyExtensions(builder);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
