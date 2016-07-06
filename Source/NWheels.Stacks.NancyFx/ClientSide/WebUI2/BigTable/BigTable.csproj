@@ -37,10 +37,10 @@
     <TypeScriptCompile Include="lib\typings\smartFormat\smartFormat.d.ts" />
     <TypeScriptCompile Include="src\UIDLError.ts" />
     <TypeScriptCompile Include="src\UIDLEvent.ts" />
-    <TypeScriptCompile Include="src\widgets\dataGrid\DataGridBindingBase.ts" />
-    <TypeScriptCompile Include="src\widgets\dataGrid\VirtualDataGridBinding.ts" />
-    <TypeScriptCompile Include="src\widgets\dataGrid\LocalDataGridBinding.ts" />
-    <TypeScriptCompile Include="src\widgets\dataGrid\NestedSetTreeDataGridBinding.ts" />
+    <TypeScriptCompile Include="src\widgets\dataGrid\DataGridLayerBase.ts" />
+    <TypeScriptCompile Include="src\widgets\dataGrid\VirtualDataGridLayer.ts" />
+    <TypeScriptCompile Include="src\widgets\dataGrid\LocalDataGridLayer.ts" />
+    <TypeScriptCompile Include="src\widgets\dataGrid\NestedSetTreeDataGridLayer.ts" />
     <TypeScriptCompile Include="test\lib\SmartFormatTests.ts" />
     <TypeScriptCompile Include="test\UIDLErrorTests.ts" />
     <TypeScriptCompile Include="test\UIDLEventTests.ts" />

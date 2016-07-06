@@ -1,7 +1,7 @@
 ﻿namespace UIDL.Widgets.DataGrid
 {
-    export interface IDataGridBinding {
-        attachView(view: UIDLDataGrid);
+    export interface IDataGridUpstreamLayer {
+        attachDownstreamLayer(layer: IDataGridDownstreamLayer);
         renderRow(index: number, el: HTMLTableRowElement): void;
         expandRow(index: number, recursive?: boolean): void;
         collapseRow(index: number): void;
@@ -9,24 +9,31 @@
         getRealRowCount(): number;
         getRowDataAt(index: number): Object;
         getAllRowsData(): Object[];
-        changed(): UIDLEvent<DataGridRowsChangedEventArgs>;
+        changed(): UIDLEvent<RowsChangedEventArgs>;
     }
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    export class DataGridRowsChangedEventArgs {
-        private _changeType: DataGridRowsChangeType;
+    export interface IDataGridDownstreamLayer {
+        attachUpstreamLayer(layer: IDataGridUpstreamLayer);
+        scrolled(): UIDLEvent<ScrollEventArgs>;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    export class RowsChangedEventArgs {
+        private _changeType: RowsChangeType;
         private _startIndex: number;
         private _count: number;
-        private _virtualPage: DataGridVirtualPage;
+        private _virtualPage: RowsVirtualPage;
 
         //--------------------------------------------------------------------------------------------------------------
 
         public constructor(
-            changeType: DataGridRowsChangeType,
+            changeType: RowsChangeType,
             startIndex: number,
             count: number,
-            virtualPage: DataGridVirtualPage = null)
+            virtualPage: RowsVirtualPage = null)
         {
             this._changeType = changeType;
             this._startIndex = startIndex;
@@ -36,7 +43,7 @@
 
         //--------------------------------------------------------------------------------------------------------------
 
-        public changeType(): DataGridRowsChangeType {
+        public changeType(): RowsChangeType {
             return this._changeType;
         }
 
@@ -54,14 +61,14 @@
 
         //--------------------------------------------------------------------------------------------------------------
 
-        public virtualPage(): DataGridVirtualPage {
+        public virtualPage(): RowsVirtualPage {
             return this._virtualPage;
         }
     }
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    export enum DataGridRowsChangeType {
+    export enum RowsChangeType {
         inserted,
         updated,
         deleted
@@ -69,7 +76,7 @@
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    export class DataGridVirtualPage {
+    export class RowsVirtualPage {
         public constructor(private _startIndex: number, private _endIndex: number, private _realRowCount: number) {
         }
         public startIndex(): number {
@@ -85,8 +92,9 @@
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    export abstract class DataGridBindingBase implements IDataGridBinding {
-        private _changed: UIDLEvent<DataGridRowsChangedEventArgs> = new UIDLEvent<DataGridRowsChangedEventArgs>();
+    export abstract class DataGridLayerBase implements IDataGridLayer {
+        private _changed: UIDLEvent<RowsChangedEventArgs> = new UIDLEvent<RowsChangedEventArgs>();
+        private _scrolled: UIDLEvent<ScrollEventArgs> = new UIDLEvent<ScrollEventArgs>();
 
         //-------------------------------------------------------------------------------------------------------------
 
@@ -108,13 +116,19 @@
 
         //-------------------------------------------------------------------------------------------------------------
 
-        public attachView(view: UIDLDataGrid): void {
+        public attachDownstreamLayer(layer: IDataGridLayer): void {
         }
 
         //-------------------------------------------------------------------------------------------------------------
 
-        public changed(): UIDLEvent<DataGridRowsChangedEventArgs> {
+        public changed(): UIDLEvent<RowsChangedEventArgs> {
             return this._changed;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public scrolled(): UIDLEvent<ScrollEventArgs> {
+            return this._scrolled;
         }
     }
 }

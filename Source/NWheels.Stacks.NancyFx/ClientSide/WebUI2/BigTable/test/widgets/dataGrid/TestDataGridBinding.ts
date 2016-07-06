@@ -2,7 +2,7 @@
 
 namespace UIDL.Widgets.DataGrid.Tests
 {
-    export class TestDataGridBinding<T> extends DataGridBindingBase {
+    export class TestDataGridBinding<T> extends DataGridLayerBase {
         private _data: T[];
 
         //-------------------------------------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             }
 
             this._data = newData;
-            let args = new DataGridRowsChangedEventArgs(DataGridRowsChangeType.inserted, atIndex, data.length);
+            let args = new RowsChangedEventArgs(RowsChangeType.inserted, atIndex, data.length);
             this.changed().raise(args);
         }
 
@@ -69,7 +69,7 @@ namespace UIDL.Widgets.DataGrid.Tests
                 this._data[atIndex + i] = data[i];
             }
 
-            let args = new DataGridRowsChangedEventArgs(DataGridRowsChangeType.updated, atIndex, data.length);
+            let args = new RowsChangedEventArgs(RowsChangeType.updated, atIndex, data.length);
             this.changed().raise(args);
         }
 
@@ -78,7 +78,7 @@ namespace UIDL.Widgets.DataGrid.Tests
         public deleteRows(atIndex: number, count: number) {
             this._data.splice(atIndex, count);
 
-            let args = new DataGridRowsChangedEventArgs(DataGridRowsChangeType.deleted, atIndex, count);
+            let args = new RowsChangedEventArgs(RowsChangeType.deleted, atIndex, count);
             this.changed().raise(args);
         }
     }

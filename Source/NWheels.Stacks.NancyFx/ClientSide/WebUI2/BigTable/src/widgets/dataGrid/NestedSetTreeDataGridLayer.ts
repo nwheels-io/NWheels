@@ -1,7 +1,7 @@
 ﻿namespace UIDL.Widgets.DataGrid
 {
-    export class NestedSetTreeDataGridBinding extends DataGridBindingBase {
-        private _upstream: IDataGridBinding;
+    export class NestedSetTreeDataGridLayer extends DataGridLayerBase {
+        private _upstream: IDataGridLayer;
         private _nestedSetProperty: string;
         private _treeRoot: SubTreeState;
         private _lastRootNodeCount: number;
@@ -10,7 +10,7 @@
 
         //-------------------------------------------------------------------------------------------------------------
 
-        public constructor(upstream: IDataGridBinding, nestedSetProperty: string) {
+        public constructor(upstream: IDataGridLayer, nestedSetProperty: string) {
             super();
             this._upstream = upstream;
             this._nestedSetProperty = nestedSetProperty;
@@ -99,8 +99,8 @@
 
         //-------------------------------------------------------------------------------------------------------------
 
-        private onUpstreamBindingChanged(args: DataGridRowsChangedEventArgs) {
-            if (args.changeType() !== DataGridRowsChangeType.inserted ||
+        private onUpstreamBindingChanged(args: RowsChangedEventArgs) {
+            if (args.changeType() !== RowsChangeType.inserted ||
                 args.startIndex() !== this._lastRootNodeCount)
             {
                 throw UIDLError.factory().generalNotSupported(
@@ -110,7 +110,7 @@
 
             this._lastRootNodeCount = this._upstream.getRowCount();
 
-            const downstreamArgs = new DataGridRowsChangedEventArgs(
+            const downstreamArgs = new RowsChangedEventArgs(
                 args.changeType(),
                 this._treeRoot.getVisibleSubTreeSize(),
                 args.count());
@@ -122,7 +122,7 @@
     //-----------------------------------------------------------------------------------------------------------------
 
     class SubTreeState {
-        private _ownerBinding: NestedSetTreeDataGridBinding;
+        private _ownerBinding: NestedSetTreeDataGridLayer;
         private _parentSubTree: SubTreeState;
         private _childIndex: number;
         private _nodeData: Object;
@@ -140,7 +140,7 @@
         //-------------------------------------------------------------------------------------------------------------
 
         public constructor(
-            ownerBinding: NestedSetTreeDataGridBinding,
+            ownerBinding: NestedSetTreeDataGridLayer,
             parentSubTree: SubTreeState,
             childIndex: number,
             nodeData: Object)

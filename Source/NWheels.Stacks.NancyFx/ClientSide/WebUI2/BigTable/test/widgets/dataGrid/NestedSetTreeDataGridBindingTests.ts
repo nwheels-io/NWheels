@@ -33,7 +33,7 @@ namespace UIDL.Widgets.DataGrid.Tests
 
         //-------------------------------------------------------------------------------------------------------------
 
-        function selectVisibleNodeValues(binding: IDataGridBinding): string[] {
+        function selectVisibleNodeValues(binding: IDataGridLayer): string[] {
             let values: string[] = [];
 
             for (let i = 0; i < binding.getRowCount(); i++) {
@@ -51,11 +51,11 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let localBinding = new LocalDataGridBinding(nodes);
+            let localBinding = new LocalDataGridLayer(nodes);
 
             //- act
 
-            let binding = new NestedSetTreeDataGridBinding(localBinding, 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(localBinding, 'subNodes');
 
             //- assert
 
@@ -71,7 +71,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(new LocalDataGridLayer(nodes), 'subNodes');
 
             //- act
 
@@ -92,7 +92,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(new LocalDataGridLayer(nodes), 'subNodes');
 
             //- act
 
@@ -115,7 +115,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(new LocalDataGridLayer(nodes), 'subNodes');
 
             //- act
 
@@ -140,7 +140,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(new LocalDataGridLayer(nodes), 'subNodes');
 
             //- act
 
@@ -166,7 +166,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(new LocalDataGridLayer(nodes), 'subNodes');
 
             //- act
 
@@ -191,7 +191,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(new LocalDataGridLayer(nodes), 'subNodes');
 
             //- act
 
@@ -215,7 +215,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(new LocalDataGridLayer(nodes), 'subNodes');
 
             //- act
 
@@ -238,7 +238,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(new LocalDataGridLayer(nodes), 'subNodes');
 
             //- act
 
@@ -261,7 +261,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(new LocalDataGridLayer(nodes), 'subNodes');
 
             //- act
 
@@ -284,7 +284,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(new LocalDataGridLayer(nodes), 'subNodes');
 
             binding.expandRow(1, true);
 
@@ -309,7 +309,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(new LocalDataGridLayer(nodes), 'subNodes');
 
             binding.expandRow(1);
             binding.expandRow(0);
@@ -341,7 +341,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(new LocalDataGridLayer(nodes), 'subNodes');
 
             binding.expandRow(2, true);
             binding.expandRow(1);
@@ -373,7 +373,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(new LocalDataGridLayer(nodes), 'subNodes');
 
             binding.expandRow(2, true);
 
@@ -402,7 +402,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let nodes = createTestTreeData();
-            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+            let binding = new NestedSetTreeDataGridLayer(new LocalDataGridLayer(nodes), 'subNodes');
 
             binding.expandRow(1); // A2
             binding.expandRow(2); // A2B1
@@ -435,7 +435,7 @@ namespace UIDL.Widgets.DataGrid.Tests
 
             const nodes = createTestTreeData();
             const upstreamBinding = new TestDataGridBinding(nodes);
-            const binding = new NestedSetTreeDataGridBinding(upstreamBinding, 'subNodes');
+            const binding = new NestedSetTreeDataGridLayer(upstreamBinding, 'subNodes');
 
             let visibleNodeValuesBefore = selectVisibleNodeValues(binding);
 

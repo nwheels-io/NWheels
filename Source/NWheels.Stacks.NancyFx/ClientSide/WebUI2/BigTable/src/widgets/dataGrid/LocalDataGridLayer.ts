@@ -1,6 +1,6 @@
 ﻿namespace UIDL.Widgets.DataGrid
 {
-    export class LocalDataGridBinding extends DataGridBindingBase  {
+    export class LocalDataGridLayer extends DataGridLayerBase  {
         private _rows: Object[];
 
         //-------------------------------------------------------------------------------------------------------------

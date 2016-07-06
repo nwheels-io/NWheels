@@ -11,7 +11,7 @@ namespace UIDL.Widgets.DataGrid.Tests
 
             //- act
 
-            let binding = new LocalDataGridBinding(dataRows);
+            let binding = new LocalDataGridLayer(dataRows);
 
             //- assert
 
@@ -25,7 +25,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let dataRows = ["AAA", "BBB", "CCC"];
-            let binding = new LocalDataGridBinding(dataRows);
+            let binding = new LocalDataGridLayer(dataRows);
 
             //- act
 
@@ -42,8 +42,8 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let dataRows = ["AAA", "BBB", "CCC"];
-            let binding = new LocalDataGridBinding(dataRows);
-            let handler = (args: DataGridRowsChangedEventArgs) => {
+            let binding = new LocalDataGridLayer(dataRows);
+            let handler = (args: RowsChangedEventArgs) => {
                 fail("onChange handler should never be invoked by LocalDataTableBinding!");
             };
 
@@ -59,8 +59,8 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- arrange
 
             let dataRows = ["AAA", "BBB", "CCC"];
-            let binding = new LocalDataGridBinding(dataRows);
-            let handler = (args: DataGridRowsChangedEventArgs) => {
+            let binding = new LocalDataGridLayer(dataRows);
+            let handler = (args: RowsChangedEventArgs) => {
                 fail("onChange handler should never be invoked by LocalDataTableBinding!");
             };
             binding.changed().bind(handler);
@@ -85,7 +85,7 @@ namespace UIDL.Widgets.DataGrid.Tests
 
             //- act
 
-            let binding = new LocalDataGridBinding(dataRows);
+            let binding = new LocalDataGridLayer(dataRows);
 
             //- assert
 

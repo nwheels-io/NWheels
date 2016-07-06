@@ -24,7 +24,7 @@ namespace UIDL.Widgets.DataGrid.Tests
 
             //- act
 
-            const binding = new VirtualDataGridBinding(upstream, pageSize);
+            const binding = new VirtualDataGridLayer(upstream, pageSize);
 
             //- assert
 
@@ -42,7 +42,7 @@ namespace UIDL.Widgets.DataGrid.Tests
 
             //- act
 
-            const binding = new VirtualDataGridBinding(upstream, pageSize);
+            const binding = new VirtualDataGridLayer(upstream, pageSize);
 
             //- assert
 
@@ -57,10 +57,10 @@ namespace UIDL.Widgets.DataGrid.Tests
 
             const upstream = new TestDataGridBinding<string>(createTestDataSet(1, 100));
             const pageSize = 10;
-            const binding = new VirtualDataGridBinding(upstream, pageSize);
+            const binding = new VirtualDataGridLayer(upstream, pageSize);
             const view = new UIDLDataGrid();
 
-            binding.attachView(view);
+            binding.attachDownstreamLayer(view);
 
             //- act
 
@@ -79,10 +79,10 @@ namespace UIDL.Widgets.DataGrid.Tests
 
             const upstream = new TestDataGridBinding<string>(createTestDataSet(1, 100));
             const pageSize = 10;
-            const binding = new VirtualDataGridBinding(upstream, pageSize);
+            const binding = new VirtualDataGridLayer(upstream, pageSize);
 
             const view = new UIDLDataGrid();
-            binding.attachView(view);
+            binding.attachDownstreamLayer(view);
 
             view.verticalScroll().raise(new ScrollEventArgs(0, 10));
 
@@ -103,7 +103,7 @@ namespace UIDL.Widgets.DataGrid.Tests
 
             const upstream = new TestDataGridBinding<string>(createTestDataSet(1, 100));
             const pageSize = 10;
-            const binding = new VirtualDataGridBinding(upstream, pageSize);
+            const binding = new VirtualDataGridLayer(upstream, pageSize);
 
             const view = new TestDataGridView();
             view.setBinding(binding);
@@ -116,7 +116,7 @@ namespace UIDL.Widgets.DataGrid.Tests
             //- assert
 
             expect(view.changeLog.length).toEqual(1);
-            expect(view.changeLog[0].changeType()).toEqual(DataGridRowsChangeType.inserted);
+            expect(view.changeLog[0].changeType()).toEqual(RowsChangeType.inserted);
             expect(view.changeLog[0].startIndex()).toEqual(2);
             expect(view.changeLog[0].count()).toEqual(5);
 
@@ -131,7 +131,7 @@ namespace UIDL.Widgets.DataGrid.Tests
 
             const upstream = new TestDataGridBinding<string>(createTestDataSet(1, 100));
             const pageSize = 10;
-            const binding = new VirtualDataGridBinding(upstream, pageSize);
+            const binding = new VirtualDataGridLayer(upstream, pageSize);
 
             const view = new TestDataGridView();
             view.setBinding(binding);
@@ -155,7 +155,7 @@ namespace UIDL.Widgets.DataGrid.Tests
 
             const upstream = new TestDataGridBinding<string>(createTestDataSet(1, 100));
             const pageSize = 10;
-            const binding = new VirtualDataGridBinding(upstream, pageSize);
+            const binding = new VirtualDataGridLayer(upstream, pageSize);
 
             const view = new TestDataGridView();
             view.setBinding(binding);

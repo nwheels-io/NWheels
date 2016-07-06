@@ -1,14 +1,14 @@
 ﻿namespace UIDL.Widgets.DataGrid
 {
-    export class VirtualDataGridBinding extends DataGridBindingBase  {
-        private _upstream: IDataGridBinding;
+    export class VirtualDataGridLayer extends DataGridLayerBase  {
+        private _upstream: IDataGridLayer;
         private _pageSize: number;
         private _realRowCount: number;
         private _pageStart: number;
 
         //-------------------------------------------------------------------------------------------------------------
 
-        public constructor(upstream: IDataGridBinding, pageSize: number) {
+        public constructor(upstream: IDataGridLayer, pageSize: number) {
             super();
             this._upstream = upstream;
             this._pageSize = pageSize;
@@ -20,9 +20,9 @@
 
         //-------------------------------------------------------------------------------------------------------------
 
-        public attachView(view: UIDLDataGrid): void {
-            super.attachView(view);
-            view.verticalScroll().bind((args) => this.onViewVerticalScroll(args));
+        public attachDownstreamLayer(layer: IDataGridLayer): void {
+            super.attachDownstreamLayer(layer);
+            layer.scrolled().bind((args) => this.onViewVerticalScroll(args));
         }
 
         //-------------------------------------------------------------------------------------------------------------
@@ -66,10 +66,10 @@
 
         //-------------------------------------------------------------------------------------------------------------
 
-        private onUpstreamBindingChanged(args: DataGridRowsChangedEventArgs): void {
+        private onUpstreamBindingChanged(args: RowsChangedEventArgs): void {
             this._realRowCount = this._upstream.getRealRowCount();
 
-            const downstreamArgs = new DataGridRowsChangedEventArgs(
+            const downstreamArgs = new RowsChangedEventArgs(
                 args.changeType(),
                 args.startIndex() - this._pageStart,
                 args.count());
