@@ -393,8 +393,14 @@ namespace NWheels.UI
             builder.AddApplication(application);
 
             var allTranslatables = builder.GetTranslatables().ToArray();
+            var allLocales = localizationProvider.GetAllSupportedLocales().ToList();
 
-            foreach (var locale in localizationProvider.GetAllSupportedLocales())
+            if (allLocales.Count == 0)
+            {
+                allLocales.Add(localizationProvider.GetCurrentLocale());
+            }
+
+            foreach (var locale in allLocales)
             {
                 builder.AddLocale(locale, allTranslatables);
             }

@@ -62,7 +62,7 @@ namespace NWheels.Globalization.Core
             UpateEntriesMethod.AttachTo(
                 presenter,
                 command: UpdateEntries,
-                onExecute: (deal, vm) => deal.UpdateEntries());
+                onExecute: (locale, vm) => locale.UpdateEntries());
             
             presenter.On(UpateEntriesMethod.OperationCompleted).Broadcast(Crud.RefreshRequested).TunnelDown();
 

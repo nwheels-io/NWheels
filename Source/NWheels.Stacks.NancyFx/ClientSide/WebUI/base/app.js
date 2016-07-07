@@ -353,10 +353,14 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         if (!stringId) {
             return '';
         }
-        var localizedString = getCurrentLocale().translations[toCamelCase(stringId)] || stringId;
-        //if (localizedString) {
-        //    return localizedString;
-        //}
+
+        var locale = getCurrentLocale();
+        
+        if (!locale) {
+            return stringId;
+        }
+        
+        var localizedString = locale.translations[toCamelCase(stringId)] || stringId;
         
         if (options && options.upperCase === true) {
             localizedString = localizedString.toUpperCase();
