@@ -41,5 +41,12 @@ namespace NWheels.Extensions
         {
             return new DateTime(dt.Year, 1, 1, 0, 0, 0, dt.Kind);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static DateTime MakeUtc(this DateTime value)
+        {
+            return new DateTime(value.Ticks, DateTimeKind.Utc);
+        }
     }
 }
