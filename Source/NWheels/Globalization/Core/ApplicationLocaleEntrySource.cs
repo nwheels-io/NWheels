@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Autofac;
+using NWheels.Core;
 using NWheels.DataObjects;
+using NWheels.Extensions;
 using NWheels.UI;
 using NWheels.UI.Uidl;
 
@@ -9,7 +12,23 @@ namespace NWheels.Globalization.Core
 {
     public abstract class ApplicationLocaleEntrySource
     {
-        public abstract string[] GetAllEntryKeys();
+        public abstract LocaleEntryKey[] GetAllEntryKeys();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static HashSet<LocaleEntryKey> GetKeysFromAllRegisteredSources(IFramework framework)
+        {
+            var components = framework.As<ICoreFramework>().Components;
+            var allSources = components.Resolve<IEnumerable<ApplicationLocaleEntrySource>>();
+            var allKeys = new HashSet<LocaleEntryKey>();
+
+            foreach (var source in allSources)
+            {
+                allKeys.UnionWith(source.GetAllEntryKeys());
+            }
+
+            return allKeys;
+        }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,13 +58,12 @@ namespace NWheels.Globalization.Core
 
         #region Overrides of ApplicationLocaleEntrySource
 
-        public override string[] GetAllEntryKeys()
+        public override LocaleEntryKey[] GetAllEntryKeys()
         {
             var application = (UidlApplication)_components.Resolve(_uidlApplicationType);
             var uidl = UidlBuilder.GetApplicationDocument(application, _metadataCache, _localizationProvider, _components);
 
-            var firstLocale = uidl.Locales.Values.First();
-            return firstLocale.Translations.Keys.ToArray();
+            return uidl.GetTranslatables().ToArray();
         }
 
         #endregion

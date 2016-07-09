@@ -8,6 +8,6 @@ namespace NWheels.Globalization.Core
 {
     public interface ICoreLocale
     {
-        void SetLocalStrings(Dictionary<string, string> localStringByStringId);
+        Dictionary<string, string> GetAllTranslations(IEnumerable<LocaleEntryKey> keys, bool includeOriginFallbacks = true);
     }
 }

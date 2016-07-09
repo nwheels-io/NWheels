@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Hapil;
 using NWheels.Extensions;
+using NWheels.Globalization.Core;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 
@@ -23,11 +24,14 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
             return base.GetTranslatables()
-                .ConcatIf(AlertText)
-                .Concat(Values.SelectMany(v => new[] { v.Title, v.AlertText }).Where(s => s != null));
+                .Concat(LocaleEntryKey.Enumerate(this, AlertText, "AlertText"))
+                .Concat(Values.SelectMany((v, index) => LocaleEntryKey.Enumerate(
+                    this, 
+                    v.Title, string.Format("Values[{0}].Title", index + 1),
+                    v.AlertText, string.Format("Values[{0}].AlertText", index + 1))));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

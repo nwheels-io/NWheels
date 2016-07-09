@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Extensions;
+using NWheels.Globalization.Core;
 using NWheels.TypeModel;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
@@ -189,11 +190,11 @@ namespace NWheels.UI.Toolbox
 
         #region Overrides of RootContentUidlNode
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
             return base.GetTranslatables()
-                .Concat(EntityCommands.Select(cmd => cmd.Text))
-                .Concat(StaticCommands.Select(cmd => cmd.Text));
+                .Concat(EntityCommands.Select(cmd => new LocaleEntryKey(cmd.Text, cmd, "Text")))
+                .Concat(StaticCommands.Select(cmd => new LocaleEntryKey(cmd.Text, cmd, "Text")));
         }
 
         #endregion

@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Extensions;
+using NWheels.Globalization.Core;
 
 namespace NWheels.UI.Uidl
 {
@@ -17,6 +18,10 @@ namespace NWheels.UI.Uidl
     public class UidlDocument
     {
         public const string DataContractNamespace = "nwheels.uidl";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private LocaleEntryKey[] _translatables = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -39,6 +44,13 @@ namespace NWheels.UI.Uidl
             this.Locales = locales;
             this.MetaTypes = metaTypes;
             this.CurrentLocaleIdName = localeIdName;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEnumerable<LocaleEntryKey> GetTranslatables()
+        {
+            return _translatables;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -71,5 +83,12 @@ namespace NWheels.UI.Uidl
 
         [DataMember]
         public string CurrentLocaleIdName { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal void SetTranslatables(IEnumerable<LocaleEntryKey> translatables)
+        {
+            _translatables = translatables.ToArray();
+        }
     }
 }

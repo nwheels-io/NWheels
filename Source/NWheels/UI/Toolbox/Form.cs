@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Hapil;
 using NWheels.DataObjects;
 using NWheels.Extensions;
+using NWheels.Globalization.Core;
 using NWheels.TypeModel;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
@@ -267,21 +268,22 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
-            var metaTypeTranslatables = new List<string>();
+            var metaTypeTranslatables = new List<LocaleEntryKey>();
 
             for ( var metaType = MetadataCache.GetTypeMetadata(typeof(TEntity)) ; metaType != null ; metaType = metaType.BaseType )
             {
-                metaTypeTranslatables.Add(metaType.QualifiedName);
+                metaTypeTranslatables.Add(new LocaleEntryKey(metaType.QualifiedName, this, "EntityType"));
             }
 
             return base.GetTranslatables()
                 .Concat(metaTypeTranslatables)
-                .Concat(Fields.Select(f => f.PropertyName))
-                .Concat(Fields.Select(f => f.Label))
-                .Concat(Fields.Where(f => f.StandardValues != null && f.StandardValuesExclusive).SelectMany(f => f.StandardValues))
-                .Concat(Commands.Select(c => c.Text)); 
+                .Concat(Fields.Select(f => new LocaleEntryKey(f.PropertyName, this, string.Format("Field[{0}].PropertyName", f.PropertyName))))
+                .Concat(Fields.Select(f => new LocaleEntryKey(f.Label, this, string.Format("Field[{0}].Label", f.PropertyName))))
+                .Concat(Fields.Where(f => f.StandardValues != null && f.StandardValuesExclusive).SelectMany(f => 
+                    f.StandardValues.Select(v => new LocaleEntryKey(v, this, string.Format("Field[{0}].StandardValues", f.PropertyName)))))
+                .Concat(Commands.SelectMany(c => c.GetTranslatables())); 
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

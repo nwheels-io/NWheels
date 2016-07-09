@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Extensions;
+using NWheels.Globalization.Core;
 using NWheels.UI;
 using NWheels.UI.Core;
 using NWheels.UI.Toolbox;
@@ -26,9 +27,11 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
-            return base.GetTranslatables().Concat(Selections.Select(s => s.Text)).ConcatOneIf(EmptySelectionText);
+            return base.GetTranslatables()
+                .Concat(Selections.Select(s => new LocaleEntryKey(s.Text, this, "Selections")))
+                .Concat(LocaleEntryKey.Enumerate(this, EmptySelectionText, "EmptySelectionText"));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

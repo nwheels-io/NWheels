@@ -7,7 +7,9 @@ namespace NWheels.Globalization.Core
     public interface IApplicationLocaleEntryEntityPart
     {
         [PropertyContract.Required]
-        string EntryId { get; set; }
+        string StringId { get; set; }
+
+        string Origin { get; set; }
 
         [PropertyContract.Required]
         string Translation { get; set; }

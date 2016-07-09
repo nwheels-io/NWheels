@@ -9,6 +9,7 @@ using NWheels.DataObjects;
 using NWheels.Domains.Security.Core;
 using NWheels.Domains.Security.Impl;
 using NWheels.Globalization;
+using NWheels.Globalization.Core;
 using NWheels.UI;
 using NWheels.UI.Uidl;
 
@@ -23,11 +24,18 @@ namespace NWheels.Domains.Security.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
-            return base.GetTranslatables().Concat(new[] {
-                "LoginName", "Password", "EnterLoginName", "EnterPassword", "SignUp", "ForgotPassword", "RememberMe"
-            });
+            return base.GetTranslatables().Concat(LocaleEntryKey.Enumerate(
+                this,                
+                "LoginName", null,
+                "Password", null,
+                "EnterLoginName", null,
+                "EnterPassword", null,
+                "SignUp", null,
+                "ForgotPassword", null,
+                "RememberMe", null
+            ));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

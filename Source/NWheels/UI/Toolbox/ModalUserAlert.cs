@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using NWheels.Extensions;
+using NWheels.Globalization.Core;
 using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
@@ -17,9 +19,10 @@ namespace NWheels.UI.Toolbox
 
         #region Overrides of WidgetUidlNode
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
-            return base.GetTranslatables().Concat(Enum.GetNames(typeof(UserAlertType)));
+            return base.GetTranslatables().Concat(Enum.GetNames(typeof(UserAlertType)).Select(v => 
+                new LocaleEntryKey(v, this, "AlertType")));
         }
 
         #endregion

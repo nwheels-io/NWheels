@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using NWheels.Globalization.Core;
 using NWheels.UI.Core;
 
 namespace NWheels.UI.Uidl
@@ -64,7 +65,7 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
             return base.GetTranslatables().Concat(Commands.SelectMany(c => c.GetTranslatables()));
         }

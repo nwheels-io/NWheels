@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NWheels.Extensions;
+using NWheels.Globalization.Core;
 using NWheels.UI.Uidl;
 
 namespace NWheels.UI
@@ -59,7 +60,7 @@ namespace NWheels.UI
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
             return base.GetTranslatables().Concat(base.PopupContents.SelectMany(popup => popup.GetTranslatables()));
         }

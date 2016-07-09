@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Hapil;
+using NWheels.Globalization.Core;
 using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
@@ -22,9 +23,11 @@ namespace NWheels.UI.Toolbox
 
         #region Overrides of WidgetUidlNode
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
-            return base.GetTranslatables().ConcatIf<string>(this.Contents);
+            return base.GetTranslatables().Concat(LocaleEntryKey.Enumerate(
+                this,
+                this.Contents, null));
         }
 
         #endregion

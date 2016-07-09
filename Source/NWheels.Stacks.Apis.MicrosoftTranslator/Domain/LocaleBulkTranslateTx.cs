@@ -128,8 +128,8 @@ namespace NWheels.Stacks.Apis.MicrosoftTranslator.Domain
             httpRequestProperty.Method = "POST";
             httpRequestProperty.Headers.Add("Authorization", "Bearer\x20" + accessToken);
 
-            string[] entryIds = input.TranslateFrom.Entries.Keys.ToArray();
-            string[] sourceTexts = input.TranslateFrom.Entries.Values.ToArray();
+            LocaleEntryKey[] entryKeys = input.TranslateFrom.Entries.Select(e => new LocaleEntryKey(e.StringId, e.Origin)).ToArray();
+            string[] sourceTexts = input.TranslateFrom.Entries.Select(e => e.Translation).ToArray();
             List<string> translatedTexts = new List<string>();
 
             try
@@ -145,13 +145,10 @@ namespace NWheels.Stacks.Apis.MicrosoftTranslator.Domain
                     }
                 }
 
-                for (int i = 0; i < translatedTexts.Count; i++)
-                {
-                    input.TranslateTo.Entries[entryIds[i]] = translatedTexts[i];
-                }
+                input.TranslateTo.BulkTranslate(entryKeys, translatedTexts);
 
                 output.Status = SeverityLevel.Success;
-                output.Details = string.Format("Translation completed successfully. {0} entries translated.", entryIds.Length);
+                output.Details = string.Format("Translation completed successfully. {0} entries translated.", entryKeys.Length);
 
                 return true;
             }

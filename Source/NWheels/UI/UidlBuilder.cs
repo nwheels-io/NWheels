@@ -12,6 +12,7 @@ using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Globalization;
+using NWheels.Globalization.Core;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 
@@ -25,6 +26,7 @@ namespace NWheels.UI
         private readonly IComponentContext _components;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly UidlDocument _document;
+        private readonly HashSet<LocaleEntryKey> _translatables;
         private UidlApplication _applicationBeingAdded = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -42,6 +44,7 @@ namespace NWheels.UI
             _entityObjectFactory = entityObjectFactory;
             _registeredExtensions = registeredExtensions.ToArray();
             _document = new UidlDocument();
+            _translatables = new HashSet<LocaleEntryKey>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -62,6 +65,7 @@ namespace NWheels.UI
                     buildable.DescribePresenter(this);
                 }
 
+                _translatables.UnionWith(application.GetTranslatables());
                 _document.Applications.Add(application);
             }
             finally
@@ -72,16 +76,27 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void AddLocale(ILocale locale, IEnumerable<string> translationEntryIds)
+        public void AddLocales(IEnumerable<ILocale> locales)
+        {
+            foreach (var locale in locales)
+            {
+                AddLocale(locale, _translatables);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void AddLocale(ILocale locale, IEnumerable<LocaleEntryKey> translatables)
         {
             var culture = locale.Culture;
+            var translations = locale.As<ICoreLocale>().GetAllTranslations(translatables, includeOriginFallbacks: true);
 
             _document.Locales.Add(culture.Name, new UidlLocale() {
                 IdName = culture.Name,
                 FullName = culture.DisplayName,
                 IsRightToLeft = culture.TextInfo.IsRightToLeft,
                 ListSeparator = culture.TextInfo.ListSeparator,
-                Translations = locale.GetAllLocalStrings(translationEntryIds)
+                Translations = translations
             });
         }
 
@@ -128,22 +143,20 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IEnumerable<string> GetTranslatables()
+        public IEnumerable<LocaleEntryKey> GetTranslatables()
         {
-            var translatables = new HashSet<string>();
-
-            foreach ( var application in _document.Applications )
-            {
-                translatables.UnionWith(application.GetTranslatables().Where(s => !string.IsNullOrEmpty(s)));
-            }
-
-            return translatables;
+            return _translatables;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlDocument GetDocument()
         {
+            if (_document.GetTranslatables() == null)
+            {
+                _document.SetTranslatables(_translatables);
+            }
+
             return _document;
         }
 
@@ -378,6 +391,14 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private string GetLocaleEntryValue(LocaleEntryKey entry)
+        {
+            //TODO: include entry origin as a prefix or a suffix
+            return entry.StringId;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static UidlDocument GetApplicationDocument(
             UidlApplication application, 
             ITypeMetadataCache metadataCache, 
@@ -390,20 +411,8 @@ namespace NWheels.UI
                 components.Resolve<IDomainObjectFactory>(), 
                 components.Resolve<IEntityObjectFactory>(),
                 components.Resolve<IEnumerable<UidlExtensionRegistration>>());
+            
             builder.AddApplication(application);
-
-            var allTranslatables = builder.GetTranslatables().ToArray();
-            var allLocales = localizationProvider.GetAllSupportedLocales().ToList();
-
-            if (allLocales.Count == 0)
-            {
-                allLocales.Add(localizationProvider.GetCurrentLocale());
-            }
-
-            foreach (var locale in allLocales)
-            {
-                builder.AddLocale(locale, allTranslatables);
-            }
 
             return builder.GetDocument();
         }

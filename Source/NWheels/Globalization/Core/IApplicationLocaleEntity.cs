@@ -26,10 +26,12 @@ namespace NWheels.Globalization.Core
 
         DateTime LastTranslationUpload { get; set; }
         DateTime LastEntriesUpdate { get; set; }
+        DateTime LastBulkTranstale { get; set; }
 
-        Dictionary<string, string> Entries { get; set; }
+        IList<IApplicationLocaleEntryEntityPart> Entries { get; }
 
         void UpdateEntries();
+        void BulkTranslate(IList<LocaleEntryKey> keys, IList<string> translations);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -43,26 +45,40 @@ namespace NWheels.Globalization.Core
         public abstract string EnglishName { get; set; }
         public abstract DateTime LastTranslationUpload { get; set; }
         public abstract DateTime LastEntriesUpdate { get; set; }
-        public abstract Dictionary<string, string> Entries { get; set; }
+        public abstract DateTime LastBulkTranstale { get; set; }
+        public abstract IList<IApplicationLocaleEntryEntityPart> Entries { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         public virtual void UpdateEntries()
         {
-            var components = Framework.As<ICoreFramework>().Components;
-            var entrySources = components.Resolve<IEnumerable<ApplicationLocaleEntrySource>>();
+            var allKeysInUse = ApplicationLocaleEntrySource.GetKeysFromAllRegisteredSources(Framework);
+            var currentEntries = this.Entries.ToDictionary(e => new LocaleEntryKey(e.StringId, e.Origin));
 
-            foreach (var source in entrySources)
-            {
-                var allEntryKeys = source.GetAllEntryKeys();
-
-                HandleRemovedEntries(allEntryKeys);
-                HandleAddedEntries(allEntryKeys);
-            }
+            HandleRemovedEntries(currentEntries, allKeysInUse);
+            HandleAddedEntries(currentEntries, allKeysInUse);
+            RebuildEntriesList(currentEntries);
 
             this.LastEntriesUpdate = Framework.UtcNow;
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual void BulkTranslate(IList<LocaleEntryKey> keys, IList<string> translations)
+        {
+            var currentEntries = this.Entries.ToDictionary(e => new LocaleEntryKey(e.StringId, e.Origin));
+
+            for (int i = 0 ; i < keys.Count ; i++)
+            {
+                var entry = currentEntries.GetOrAdd(keys[i], CreateNewLocaleEntry);
+                entry.Translation = translations[i];
+            }
+
+            RebuildEntriesList(currentEntries);
+
+            this.LastBulkTranstale = Framework.UtcNow;
+        }
+        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [EntityImplementation.CalculatedProperty]
@@ -81,7 +97,6 @@ namespace NWheels.Globalization.Core
         [EntityImplementation.TriggerOnNew]
         protected virtual void TriggerOnNew()
         {
-            Entries = new Dictionary<string, string>();
             UpdateEntries();
         }
         
@@ -98,51 +113,63 @@ namespace NWheels.Globalization.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void HandleAddedEntries(string[] entryKeysInUse)
+        private void HandleAddedEntries(
+            Dictionary<LocaleEntryKey, IApplicationLocaleEntryEntityPart> currentEntries,
+            IEnumerable<LocaleEntryKey> allKeysInUse)
         {
-            var addedEntryIds = new HashSet<string>(entryKeysInUse);
-            addedEntryIds.ExceptWith(this.Entries.Keys);
+            var addedKeys = new HashSet<LocaleEntryKey>(allKeysInUse);
+            addedKeys.ExceptWith(currentEntries.Keys);
 
-            foreach (var addedId in addedEntryIds.OrderBy(id => id))
+            var originFallbackAddedKeys = addedKeys
+                .GroupBy(key => key.StringId)
+                .Select(g => new LocaleEntryKey(g.Key, origin: null))
+                .ToArray();
+
+            foreach (var key in originFallbackAddedKeys)
             {
-                this.Entries.Add(addedId, addedId.SplitPascalCase());
+                var newEntry = CreateNewLocaleEntry(key);
+                currentEntries.Add(key, newEntry);
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void HandleRemovedEntries(string[] entryKeysInUse)
+        private IApplicationLocaleEntryEntityPart CreateNewLocaleEntry(LocaleEntryKey key)
         {
-            //var entryById = this.Entries.Distinct(new EntryIdEqualityComparer()).ToDictionary(e => e.EntryId);
+            var newEntry = Framework.NewDomainObject<IApplicationLocaleEntryEntityPart>();
+
+            newEntry.StringId = key.StringId;
+            newEntry.Origin = key.Origin;
+            newEntry.Translation = key.StringId.SplitPascalCase();
             
-            var removedEntryIds = new HashSet<string>(this.Entries.Keys);
-            removedEntryIds.ExceptWith(entryKeysInUse);
+            return newEntry;
+        }
 
-            foreach (var removedId in removedEntryIds)
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void RebuildEntriesList(Dictionary<LocaleEntryKey, IApplicationLocaleEntryEntityPart> currentEntries)
+        {
+            this.Entries.Clear();
+
+            foreach (var entryPair in currentEntries.OrderBy(e => e.Key.ToString()))
             {
-                this.Entries.Remove(removedId);
+                this.Entries.Add(entryPair.Value);
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class EntryIdEqualityComparer : IEqualityComparer<IApplicationLocaleEntryEntityPart>
+        private void HandleRemovedEntries(
+            Dictionary<LocaleEntryKey, IApplicationLocaleEntryEntityPart> currentEntries, 
+            IEnumerable<LocaleEntryKey> allKeysInUse)
         {
-            #region Implementation of IEqualityComparer<in IApplicationLocaleEntryEntityPart>
+            var removedKeys = new HashSet<LocaleEntryKey>(currentEntries.Keys);
+            removedKeys.ExceptWith(allKeysInUse);
 
-            public bool Equals(IApplicationLocaleEntryEntityPart x, IApplicationLocaleEntryEntityPart y)
+            foreach (var key in removedKeys)
             {
-                return x.EntryId.Equals(y.EntryId);
+                currentEntries.Remove(key);
             }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public int GetHashCode(IApplicationLocaleEntryEntityPart obj)
-            {
-                return obj.EntryId.GetHashCode();
-            }
-
-            #endregion
         }
     }
 }

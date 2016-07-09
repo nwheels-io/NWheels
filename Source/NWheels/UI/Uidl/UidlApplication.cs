@@ -13,6 +13,7 @@ using NWheels.Authorization;
 using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Endpoints.Core;
+using NWheels.Globalization.Core;
 using NWheels.UI.Toolbox;
 
 namespace NWheels.UI.Uidl
@@ -37,12 +38,12 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
             return base.GetTranslatables()
                 .Concat(Screens.SelectMany(s => s.GetTranslatables()))
                 .Concat(ScreenParts.SelectMany(sp => sp.GetTranslatables()))
-                .Concat(UserAlerts.Values.Select(ua => ua.Text));
+                .Concat(UserAlerts.Values.SelectMany(ua => ua.GetTranslatables()));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

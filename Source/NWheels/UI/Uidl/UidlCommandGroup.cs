@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using NWheels.Globalization.Core;
 
 namespace NWheels.UI.Uidl
 {
@@ -58,9 +59,9 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
-            return base.GetTranslatables().Concat(Items.Select(item => item.Text));
+            return base.GetTranslatables().Concat(Items.Select(item => new LocaleEntryKey(item.Text, this, "GroupItem")));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

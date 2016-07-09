@@ -433,6 +433,7 @@
     <Compile Include="UI\Toolbox\ReportSelector.cs" />
     <Compile Include="UI\Toolbox\TransactionForm.cs" />
     <Compile Include="UI\Uidl\UidlExtension.cs" />
+    <Compile Include="Globalization\Core\LocaleEntryKey.cs" />
     <Compile Include="UI\Uidl\WidgetAlertStyle.cs" />
     <Compile Include="UI\Toolbox\WidgetScreenPart.cs" />
     <Compile Include="UI\Toolbox\CrudScreenPart.cs" />

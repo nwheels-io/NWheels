@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Globalization.Core;
 
 namespace NWheels.UI.Uidl
 {
@@ -27,7 +28,7 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
             return base.GetTranslatables().Concat(GetNestedWidgets().Where(widget => widget != null).SelectMany(widget => widget.GetTranslatables()));
         }

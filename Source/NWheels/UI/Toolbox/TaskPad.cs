@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Globalization.Core;
 using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
@@ -47,9 +48,12 @@ namespace NWheels.UI.Toolbox
 
         #region Overrides of WidgetBase<TaskPadItem,Data,State>
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
-            return base.GetTranslatables().Concat(new[] { Text, Description });
+            return base.GetTranslatables().Concat(LocaleEntryKey.Enumerate(
+                this, 
+                Text, "Text",
+                Description, "Description"));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using NWheels.Extensions;
+using NWheels.Globalization.Core;
 
 namespace NWheels.Globalization
 {
@@ -19,8 +20,8 @@ namespace NWheels.Globalization
 
     public interface ILocale
     {
-        Dictionary<string, string> GetAllLocalStrings(IEnumerable<string> stringIds);
         string Translate(string stringId);
+        string Translate(string stringId, string origin);
         void AppendListItem(StringBuilder output, string item);
         string MakeKeyValuePair(string key, string value);
         CultureInfo Culture { get; }
@@ -30,7 +31,7 @@ namespace NWheels.Globalization
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class VoidLocalizationProvider : ILocalizationProvider, ILocale
+    public class VoidLocalizationProvider : ILocalizationProvider, ILocale, ICoreLocale
     {
         private readonly CultureInfo _enUS = CultureInfo.GetCultureInfo("en-US");
 
@@ -71,21 +72,14 @@ namespace NWheels.Globalization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Dictionary<string, string> GetLocalStrings(IEnumerable<string> stringIds, CultureInfo culture)
-        {
-            return stringIds.ToDictionary(s => s, s => s.SplitPascalCase().ConvertToPascalCase());
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        Dictionary<string, string> ILocale.GetAllLocalStrings(IEnumerable<string> stringIds)
-        {
-            return stringIds.ToDictionary(s => s, s => s.SplitPascalCase().ConvertToPascalCase());
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         string ILocale.Translate(string stringId)
+        {
+            return stringId.SplitPascalCase().ConvertToPascalCase();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        string ILocale.Translate(string stringId, string origin)
         {
             return stringId.SplitPascalCase().ConvertToPascalCase();
         }
@@ -128,6 +122,25 @@ namespace NWheels.Globalization
         string ILocale.EqualitySign
         {
             get { return "="; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Dictionary<string, string> ICoreLocale.GetAllTranslations(IEnumerable<LocaleEntryKey> keys, bool includeOriginFallbacks)
+        {
+            var result = new Dictionary<string, string>();
+
+            foreach (var key in keys)
+            {
+                result[key.ToString()] = key.StringId.SplitPascalCase();
+
+                if (!string.IsNullOrEmpty(key.Origin) && includeOriginFallbacks)
+                {
+                    result[LocaleEntryKey.MakeKey(key.StringId, null)] = result[key.ToString()];
+                }
+            }
+
+            return result;
         }
     }
 }

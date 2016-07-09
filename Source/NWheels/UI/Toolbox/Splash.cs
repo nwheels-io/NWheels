@@ -23,15 +23,6 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IEnumerable<string> GetTranslatables()
-        {
-            return base.GetTranslatables().Concat(new[] {
-                "SplashImageGoesHere"
-            });
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         protected override void DescribePresenter(PresenterBuilder<Splash, Empty.Data, Empty.State> presenter)
         {
         }

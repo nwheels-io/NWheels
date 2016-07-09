@@ -1,7 +1,9 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using NWheels.Exceptions;
+using NWheels.Globalization.Core;
 using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Uidl
@@ -33,6 +35,19 @@ namespace NWheels.UI.Uidl
             this.ResultChoices = attribute.AlertResults;
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEnumerable<LocaleEntryKey> GetTranslatables()
+        {
+            return LocaleEntryKey.Enumerate(
+                this, 
+                Text, "Text",
+                Type.ToString(), "Type"
+            ).Concat(
+                ResultChoices.ToString().Split(new[] { ',', ' ' }).Select(ch => new LocaleEntryKey(ch, this, "ResultChoices"))
+            );
+        }
+        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]

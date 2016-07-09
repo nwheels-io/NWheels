@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Globalization.Core;
 
 namespace NWheels.UI.Uidl
 {
@@ -22,11 +23,14 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public virtual IEnumerable<string> GetTranslatables()
+        public virtual IEnumerable<LocaleEntryKey> GetTranslatables()
         {
-            return new[] {
-                this.Text, this.HelpText, this.Icon
-            };
+            return LocaleEntryKey.Enumerate(
+                this, 
+                this.Text, "Text", 
+                this.HelpText, "HelpText",
+                this.Icon, "Icon"
+            );
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

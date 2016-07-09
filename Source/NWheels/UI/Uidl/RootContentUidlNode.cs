@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Extensions;
+using NWheels.Globalization.Core;
 using NWheels.UI.Core;
 
 namespace NWheels.UI.Uidl
@@ -20,9 +21,9 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
-            if ( ContentRoot != null )
+            if (ContentRoot != null)
             {
                 return base.GetTranslatables().Concat(ContentRoot.GetTranslatables());
             }
@@ -47,7 +48,7 @@ namespace NWheels.UI.Uidl
 
             var widget = (instance as WidgetUidlNode);
 
-            if ( widget != null && declaration.HasAttribute<ContentRootAttribute>() )
+            if (widget != null && declaration.HasAttribute<ContentRootAttribute>())
             {
                 this.ContentRoot = widget;
             }

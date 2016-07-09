@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 using Hapil;
 using NWheels.DataObjects;
 using NWheels.Extensions;
+using NWheels.Globalization.Core;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 using NWheels.TypeModel;
@@ -144,9 +145,9 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
-            return base.GetTranslatables().Concat(DisplayColumns.Select(c => c.Title));
+            return base.GetTranslatables().Concat(DisplayColumns.Select(c => new LocaleEntryKey(c.Title, this, "DisplayColumns")));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

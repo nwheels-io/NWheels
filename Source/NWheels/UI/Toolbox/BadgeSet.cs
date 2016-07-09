@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Extensions;
+using NWheels.Globalization.Core;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 
@@ -21,11 +22,12 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IEnumerable<string> GetTranslatables()
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
-            return Enumerable.Concat(
-                base.GetTranslatables(), 
-                Badges.Where(b => b.ValueText != null).SelectMany(b => b.ValueText.Values));
+            return base.GetTranslatables().Concat(Badges
+                .Where(b => b.ValueText != null)
+                .SelectMany(b => b.ValueText.Values
+                    .Select(v => new LocaleEntryKey(v, this, "Badges"))));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

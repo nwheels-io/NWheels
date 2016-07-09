@@ -20,25 +20,43 @@ namespace NWheels.Globalization.Core
             this.ListSeparator = ",";
             this.EqualitySign = "=";
 
-            _translations = new Dictionary<string, string>(localeEntity.Entries);
+            _translations = new Dictionary<string, string>();
+
+            foreach (var entry in localeEntity.Entries)
+            {
+                _translations[LocaleEntryKey.MakeKey(entry.StringId, entry.Origin)] = entry.Translation;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region Implementation of ILocale
 
-        public Dictionary<string, string> GetAllLocalStrings(IEnumerable<string> stringIds)
+        public string Translate(string stringId)
         {
-            return stringIds
-                .Select(id => new KeyValuePair<string, string>(id, _translations.GetValueOrDefault(id, id)))
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            var key = LocaleEntryKey.MakeKey(stringId, null);
+            return _translations.GetValueOrDefault(key, defaultValue: stringId);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        public string Translate(string stringId)
+
+        public string Translate(string stringId, string origin)
         {
-            return _translations.GetValueOrDefault(stringId, stringId);
+            var key = LocaleEntryKey.MakeKey(stringId, origin);
+            string translation;
+
+            if (_translations.TryGetValue(key, out translation))
+            {
+                return translation;
+            }
+
+            if (string.IsNullOrEmpty(origin))
+            {
+                return stringId;
+            }
+
+            var fallbackKey = LocaleEntryKey.MakeKey(stringId, null);
+            return _translations.GetValueOrDefault(fallbackKey, defaultValue: stringId);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -72,9 +90,36 @@ namespace NWheels.Globalization.Core
 
         #region Implementation of ICoreLocale
 
-        public virtual void SetLocalStrings(Dictionary<string, string> localStringByStringId)
+        public Dictionary<string, string> GetAllTranslations(IEnumerable<LocaleEntryKey> keys, bool includeOriginFallbacks = true)
         {
-            throw new System.NotImplementedException();
+            var result = new Dictionary<string, string>();
+
+            foreach (var key in keys)
+            {
+                string translation = null;
+                string originFallbackKey = null;
+                string originFallbackTranslation = null;
+                
+                _translations.TryGetValue(key.ToString(), out translation);
+
+                if ((translation == null || includeOriginFallbacks) && !string.IsNullOrEmpty(key.Origin))
+                {
+                    originFallbackKey = LocaleEntryKey.MakeKey(key.StringId, null);
+                    _translations.TryGetValue(originFallbackKey, out originFallbackTranslation);
+                }
+
+                if (translation != null)
+                {
+                    result[key.ToString()] = translation;
+                }
+
+                if (originFallbackTranslation != null)
+                {
+                    result[originFallbackKey] = translation;
+                }
+            }
+
+            return result;
         }
 
         #endregion
