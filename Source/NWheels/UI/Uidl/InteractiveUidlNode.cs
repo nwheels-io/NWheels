@@ -28,8 +28,8 @@ namespace NWheels.UI.Uidl
             return LocaleEntryKey.Enumerate(
                 this, 
                 this.Text, "Text", 
-                this.HelpText, "HelpText",
-                this.Icon, "Icon"
+                this.HelpText, "HelpText"
+                //this.Icon, "Icon"
             );
         }
 

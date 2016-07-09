@@ -63,7 +63,7 @@ namespace NWheels.Globalization.Core
             var application = (UidlApplication)_components.Resolve(_uidlApplicationType);
             var uidl = UidlBuilder.GetApplicationDocument(application, _metadataCache, _localizationProvider, _components);
 
-            return uidl.GetTranslatables().ToArray();
+            return uidl.GetTranslatables().Where(t => !string.IsNullOrEmpty(t.StringId)).ToArray();
         }
 
         #endregion

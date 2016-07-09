@@ -279,7 +279,7 @@ namespace NWheels.UI.Toolbox
 
             return base.GetTranslatables()
                 .Concat(metaTypeTranslatables)
-                .Concat(Fields.Select(f => new LocaleEntryKey(f.PropertyName, this, string.Format("Field[{0}].PropertyName", f.PropertyName))))
+                //.Concat(Fields.Select(f => new LocaleEntryKey(f.PropertyName, this, string.Format("Field[{0}].PropertyName", f.PropertyName))))
                 .Concat(Fields.Select(f => new LocaleEntryKey(f.Label, this, string.Format("Field[{0}].Label", f.PropertyName))))
                 .Concat(Fields.Where(f => f.StandardValues != null && f.StandardValuesExclusive).SelectMany(f => 
                     f.StandardValues.Select(v => new LocaleEntryKey(v, this, string.Format("Field[{0}].StandardValues", f.PropertyName)))))

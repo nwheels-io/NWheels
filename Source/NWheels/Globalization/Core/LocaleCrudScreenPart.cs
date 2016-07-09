@@ -39,7 +39,8 @@ namespace NWheels.Globalization.Core
                 .Column(x => x.CultureCode)
                 .Column(x => x.EntryCount, size: FieldSize.Small)
                 .Column(x => x.LastEntriesUpdate, format: "d")
-                .Column(x => x.LastTranslationUpload, format: "d");
+                .Column(x => x.LastTranslationUpload, format: "d")
+                .Column(x => x.LastBulkTranstale, format: "d");
 
             Crud.Form
                 .UseSectionsInsteadOfTabs()
@@ -49,7 +50,8 @@ namespace NWheels.Globalization.Core
                     x => x.CultureCode, 
                     x => x.EntryCount, 
                     x => x.LastEntriesUpdate, 
-                    x => x.LastTranslationUpload)
+                    x => x.LastTranslationUpload,
+                    x => x.LastBulkTranstale)
                 .Field(x => x.LastEntriesUpdate, type: FormFieldType.Label)
                 .Field(x => x.LastTranslationUpload, type: FormFieldType.Label);
 
