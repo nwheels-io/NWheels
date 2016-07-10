@@ -108,14 +108,14 @@ namespace NWheels.Globalization.Core
                     _translations.TryGetValue(originFallbackKey, out originFallbackTranslation);
                 }
 
-                if (translation != null)
+                if (!includeOriginFallbacks)
                 {
-                    result[key.ToString()] = translation;
+                    result[key.ToString()] = translation ?? originFallbackTranslation;
                 }
 
-                if (originFallbackTranslation != null)
+                if (includeOriginFallbacks && originFallbackTranslation != null)
                 {
-                    result[originFallbackKey] = translation;
+                    result[originFallbackKey] = originFallbackTranslation;
                 }
             }
 

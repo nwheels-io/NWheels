@@ -413,6 +413,7 @@ namespace NWheels.UI
                 components.Resolve<IEnumerable<UidlExtensionRegistration>>());
             
             builder.AddApplication(application);
+            builder.AddLocales(localizationProvider.GetAllSupportedLocales());
 
             return builder.GetDocument();
         }

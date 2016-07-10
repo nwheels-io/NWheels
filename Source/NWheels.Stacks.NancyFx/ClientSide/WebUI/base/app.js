@@ -360,7 +360,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             return stringId;
         }
         
-        var localizedString = locale.translations[toCamelCase(stringId)] || stringId;
+        var localizedString = locale.translations['##' + stringId] || stringId; //TODO: implement UI-location-specific lookup
         
         if (options && options.upperCase === true) {
             localizedString = localizedString.toUpperCase();
