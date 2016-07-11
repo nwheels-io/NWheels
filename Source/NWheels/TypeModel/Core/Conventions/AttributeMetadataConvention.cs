@@ -145,8 +145,6 @@ namespace NWheels.DataObjects.Core.Conventions
                 prop.Access = PropertyAccess.SearchOnly);
             AddPropertyAttribute<PropertyContract.AccessAttribute>((attr, prop) => 
                 prop.Access = attr.AllowedAccessFlags);
-            AddPropertyAttribute<PropertyContract.UniqueAttribute>((attr, prop) => 
-                prop.Validation.IsUnique = true);
             AddPropertyAttribute<PropertyContract.DefaultValueAttribute>((attr, prop) => 
                 prop.DefaultValue = attr.Value);
             AddPropertyAttribute<System.ComponentModel.DefaultValueAttribute>((attr, prop) =>

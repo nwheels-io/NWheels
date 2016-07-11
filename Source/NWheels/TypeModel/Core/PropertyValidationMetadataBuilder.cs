@@ -27,7 +27,6 @@ namespace NWheels.DataObjects.Core
         #region IPropertyValidationMetadata Members
 
         public bool IsRequired { get; set; }
-        public bool IsUnique { get; set; }
         public bool IsEmptyAllowed { get; set; }
         public int? MinLength { get; set; }
         public int? MaxLength { get; set; }
@@ -45,7 +44,6 @@ namespace NWheels.DataObjects.Core
         public void MergeWith(IPropertyValidationMetadata other)
         {
             this.IsRequired |= other.IsRequired;
-            this.IsUnique |= other.IsUnique;
             this.IsEmptyAllowed &= other.IsEmptyAllowed;
 
             if ( this.MinLength.HasValue )
@@ -87,7 +85,6 @@ namespace NWheels.DataObjects.Core
         public override void AcceptVisitor(ITypeMetadataVisitor visitor)
         {
             IsRequired = visitor.VisitAttribute("IsRequired", IsRequired);
-            IsUnique = visitor.VisitAttribute("IsUnique", IsUnique);
             IsEmptyAllowed = visitor.VisitAttribute("IsEmptyAllowed", IsEmptyAllowed);
             MinLength = visitor.VisitAttribute("MinLength", MinLength);
             MaxLength = visitor.VisitAttribute("MaxLength", MaxLength);

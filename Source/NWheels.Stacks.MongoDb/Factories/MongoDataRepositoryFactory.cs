@@ -293,21 +293,33 @@ namespace NWheels.Stacks.MongoDb.Factories
             private void WriteCollectionIndexes(MethodWriterBase writer, Operand<MongoDatabase> database)
             {
                 var w = writer;
+                var propertyNamesArrayLocal = w.Local<string[]>();
                 var visitedIndexSet = new HashSet<string>();
 
-                foreach ( var entity in base.EntitiesInRepository )
+                foreach (var entity in base.EntitiesInRepository)
                 {
                     var collectionName = MongoDataRepositoryBase.GetMongoCollectionName(base.MetadataCache, entity.Metadata, null, null);
 
-                    if ( entity.Metadata != null && entity.Metadata.DerivedTypes.Count > 0 && visitedIndexSet.Add("D:" + collectionName) )
+                    if (entity.Metadata != null && entity.Metadata.DerivedTypes.Count > 0 && visitedIndexSet.Add("D:" + collectionName))
                     {
-                        Static.Void(RuntimeHelpers.CreateSearchIndex,
+                        propertyNamesArrayLocal.Assign(w.NewArray(constantValues: "_t"));
+
+                        Static.Void(RuntimeHelpers.CreateIndexOnCollection,
                             database,
                             w.Const(collectionName),
-                            w.Const("_t"));
+                            w.Const<string>(null),
+                            w.Const(false),
+                            propertyNamesArrayLocal);
                     }
 
-                    WriteCollectionIndexesForType(writer, database, visitedIndexSet, collectionName, propertyPrefix: "", metaType: entity.Metadata);
+                    WriteCollectionIndexesForType(
+                        writer, 
+                        propertyNamesArrayLocal,
+                        database, 
+                        visitedIndexSet, 
+                        collectionName, 
+                        propertyPrefix: "", 
+                        metaType: entity.Metadata);
                 }
             }
 
@@ -315,6 +327,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             private void WriteCollectionIndexesForType(
                 MethodWriterBase writer, 
+                Local<string[]> propertyNamesArrayLocal,
                 Operand<MongoDatabase> database, 
                 HashSet<string> visitedIndexSet,
                 string collectionName, 
@@ -323,29 +336,23 @@ namespace NWheels.Stacks.MongoDb.Factories
             {
                 var w = writer;
 
-                foreach ( var key in metaType.AllKeys.Where(k => k.Kind == KeyKind.Index && k.Properties.Count == 1) )
+                foreach (var key in metaType.AllKeys.Where(k => k.Kind == KeyKind.Unique))
                 {
-                    if ( visitedIndexSet.Add("U:" + collectionName + propertyPrefix + key.Properties.First().Name) )
-                    { 
-                        Static.Void(RuntimeHelpers.CreateSearchIndex,
-                            database,
-                            w.Const(collectionName),
-                            w.Const(propertyPrefix + key.Properties.First().Name));
-                    }
-                }
-
-                foreach ( var uniqueProperty in metaType.Properties.Where(p => p.Validation.IsUnique) )
-                {
-                    if ( uniqueProperty.DeclaringContract == metaType && visitedIndexSet.Add("S:" + collectionName + propertyPrefix + uniqueProperty.Name) )
+                    if (visitedIndexSet.Add("U:" + collectionName + propertyPrefix + key.Properties.First().Name))
                     {
-                        Static.Void(RuntimeHelpers.CreateUniqueIndex,
-                            database,
-                            w.Const(collectionName),
-                            w.Const(propertyPrefix + uniqueProperty.Name));
+                        WriteCreateIndexOnCollection(w, propertyNamesArrayLocal, database, collectionName, propertyPrefix, key);
                     }
                 }
 
-                foreach ( var partProperty in metaType.Properties.Where(
+                foreach (var key in metaType.AllKeys.Where(k => k.Kind == KeyKind.Search))
+                {
+                    if (visitedIndexSet.Add("S:" + collectionName + propertyPrefix + key.Properties.First().Name))
+                    {
+                        WriteCreateIndexOnCollection(w, propertyNamesArrayLocal, database, collectionName, propertyPrefix, key);
+                    }
+                }
+
+                foreach (var partProperty in metaType.Properties.Where(
                     p => p.Relation != null && 
                     p.Relation.RelatedPartyType != null && 
                     p.Relation.RelatedPartyType.IsEntityPart &&
@@ -353,12 +360,35 @@ namespace NWheels.Stacks.MongoDb.Factories
                 {
                     WriteCollectionIndexesForType(
                         writer, 
+                        propertyNamesArrayLocal,
                         database,
                         visitedIndexSet,
                         collectionName, 
                         propertyPrefix + partProperty.Name + ".", 
                         partProperty.Relation.RelatedPartyType);
                 }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static void WriteCreateIndexOnCollection(
+                MethodWriterBase writer, 
+                Local<string[]> propertyNamesArrayLocal,
+                Operand<MongoDatabase> database, 
+                string collectionName, 
+                string propertyPrefix, 
+                IKeyMetadata key)
+            {
+                var unique = (key.Kind == KeyKind.Primary || key.Kind == KeyKind.Unique);
+
+                propertyNamesArrayLocal.Assign(writer.NewArray(constantValues: key.Properties.Select(p => propertyPrefix + p.Name).ToArray()));
+
+                Static.Void(RuntimeHelpers.CreateIndexOnCollection, 
+                    database, 
+                    writer.Const(collectionName), 
+                    writer.Const(key.Name),
+                    writer.Const(unique), 
+                    propertyNamesArrayLocal);
             }
         }
     }

@@ -5,6 +5,7 @@
         Undefined = 0,
         Primary = 1,
         Foreign = 2,
-        Index = 3
+        Unique = 3,
+        Search = 4
     }
 }

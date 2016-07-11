@@ -3,6 +3,7 @@ using System.Linq;
 using System.Xml.Linq;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.StorageTypes;
+using NWheels.Extensions;
 using NWheels.TypeModel;
 using NWheels.TypeModel.Core.StorageTypes;
 
@@ -17,29 +18,66 @@ namespace NWheels.DataObjects
             {
                 this.Kind = kind;
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
             public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
             {
                 base.ApplyTo(property, cache);
-                var key = new KeyMetadataBuilder() {
-                    Kind = this.Kind
+
+                this.Name = this.Name.OrDefaultIfNullOrEmpty(this.Kind.ToString()[0] + "K_" + property.Name);
+                
+                var existingKey = property.DeclaringContract.AllKeys.FirstOrDefault(k => k.Name.EqualsIgnoreCase(this.Name));
+                
+                if (existingKey != null)
+                {
+                    if (!existingKey.Properties.Any(p => p.Name.EqualsIgnoreCase(property.Name)))
+                    {
+                        existingKey.Properties.Add(property);
+                    }
+                    return;
+                }
+                
+                var newKey = new KeyMetadataBuilder() {
+                    Name = Name,
+                    Kind = this.Kind,
                 };
-                key.Properties.Add(property);
-                ConfigureKey(key, property, cache);
-                property.DeclaringContract.AllKeys.Add(key);
+
+                newKey.Properties.Add(property);
+                ConfigureKey(newKey, property, cache);
+                property.DeclaringContract.AllKeys.Add(newKey);
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public KeyKind Kind { get; private set; }
+            public string Name { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
             protected abstract void ConfigureKey(KeyMetadataBuilder key, PropertyMetadataBuilder property, TypeMetadataCache cache);
         }
 
         [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
         public class SearchKeyAttribute : KeyAttribute
         {
-            public SearchKeyAttribute() : base(KeyKind.Index)
+            public SearchKeyAttribute() : base(KeyKind.Search)
             {
             }
             protected override void ConfigureKey(KeyMetadataBuilder key, PropertyMetadataBuilder property, TypeMetadataCache cache)
             {
-                key.Name = "SK_" + property.Name;
+            }
+        }
+
+        [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+        public class UniqueKeyAttribute : KeyAttribute
+        {
+            public UniqueKeyAttribute()
+                : base(KeyKind.Unique)
+            {
+            }
+            protected override void ConfigureKey(KeyMetadataBuilder key, PropertyMetadataBuilder property, TypeMetadataCache cache)
+            {
             }
         }
 
@@ -106,7 +144,7 @@ namespace NWheels.DataObjects
             public PropertyAccess AllowedAccessFlags { get; private set; }
         }
 
-        public class UniqueAttribute : PropertyContractAttribute { }
+        public class UniqueAttribute : UniqueKeyAttribute { }
 
         public class UniquePerParentAttribute : PropertyContractAttribute { }
 
@@ -370,11 +408,18 @@ namespace NWheels.DataObjects
             {
                 public LoginNameAttribute()
                     : base(typeof(string), WellKnownSemanticType.LoginName, sem => {
-                        sem.DefaultValidation.IsUnique = true;
                         sem.DefaultValidation.MinLength = 5;
                         sem.DefaultValidation.MaxLength = 100;
                     })
                 {
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
+                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+                {
+                    base.ApplyTo(property, cache);
+                    new UniqueKeyAttribute().ApplyTo(property, cache);
                 }
             }
 

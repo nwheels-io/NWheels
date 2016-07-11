@@ -6,7 +6,6 @@ namespace NWheels.DataObjects
     public interface IPropertyValidationMetadata : IMetadataElement
     {
         bool IsRequired { get; }
-        bool IsUnique { get; }
         bool IsEmptyAllowed { get; }
         int? MinLength { get; }
         int? MaxLength { get; }

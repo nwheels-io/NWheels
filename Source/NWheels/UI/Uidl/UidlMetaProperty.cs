@@ -77,7 +77,6 @@ namespace NWheels.UI.Uidl
             public MetaValidation(IPropertyValidationMetadata metadata)
             {
                 this.IsRequired = metadata.IsRequired;
-                this.IsUnique = metadata.IsUnique;
                 this.IsEmptyAllowed = metadata.IsEmptyAllowed;
                 this.MinLength = metadata.MinLength;
                 this.MaxLength = metadata.MaxLength;
@@ -92,8 +91,6 @@ namespace NWheels.UI.Uidl
 
             [DataMember]
             public bool IsRequired { get; set; }
-            [DataMember]
-            public bool IsUnique { get; set; }
             [DataMember]
             public bool IsEmptyAllowed { get; set; }
             [DataMember]

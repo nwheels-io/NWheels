@@ -22,28 +22,60 @@ namespace NWheels.Stacks.MongoDb
             return null;
         }
 
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //public static void CreateSearchIndex(MongoDatabase database, string collectionName, string indexName, string[] propertyNames)
+        //{
+        //    var options = new IndexOptionsBuilder();
+        //    options.SetBackground(true);
+
+        //    if (!string.IsNullOrEmpty(indexName))
+        //    {
+        //        options.SetName(indexName);
+        //    }
+
+        //    database.GetCollection(collectionName).CreateIndex(
+        //        new IndexKeysBuilder().Ascending(propertyNames),
+        //        options);
+        //}
+
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //public static void CreateUniqueIndex(MongoDatabase database, string collectionName, string indexName, string[] propertyNames)
+        //{
+        //    var options = new IndexOptionsBuilder();
+        //    options.SetBackground(true);
+        //    options.SetUnique(true);
+
+        //    if (!string.IsNullOrEmpty(indexName))
+        //    {
+        //        options.SetName(indexName);
+        //    }
+
+        //    database.GetCollection(collectionName).CreateIndex(
+        //        new IndexKeysBuilder().Ascending(propertyNames), 
+        //        options);
+        //}
+        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void CreateSearchIndex(MongoDatabase database, string collectionName, string propertyName)
+        public static void CreateIndexOnCollection(MongoDatabase database, string collectionName, string indexName, bool unique, string[] propertyNames)
         {
             var options = new IndexOptionsBuilder();
             options.SetBackground(true);
 
-            database.GetCollection(collectionName).CreateIndex(
-                new IndexKeysBuilder().Ascending(propertyName),
-                options);
-        }
+            if (unique)
+            {
+                options.SetUnique(true);
+            }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static void CreateUniqueIndex(MongoDatabase database, string collectionName, string propertyName)
-        {
-            var options = new IndexOptionsBuilder();
-            options.SetBackground(true);
-            options.SetUnique(true);
+            if (!string.IsNullOrEmpty(indexName))
+            {
+                options.SetName(indexName);
+            }
 
             database.GetCollection(collectionName).CreateIndex(
-                new IndexKeysBuilder().Ascending(propertyName), 
+                new IndexKeysBuilder().Ascending(propertyNames),
                 options);
         }
     }
