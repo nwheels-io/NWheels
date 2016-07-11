@@ -109,7 +109,7 @@ namespace NWheels.UI.Uidl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
-        public string InitialScreenQualifiedName
+        public virtual string InitialScreenQualifiedName
         {
             get
             {

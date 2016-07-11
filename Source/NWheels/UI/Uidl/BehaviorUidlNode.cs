@@ -57,6 +57,8 @@ namespace NWheels.UI.Uidl
         [DataMember]
         public string TargetQualifiedName { get; set; }
         [DataMember]
+        public string TargetQualifiedNameExpression { get; set; }
+        [DataMember]
         public string TargetContainerQualifiedName { get; set; }
         [DataMember]
         public string InputExpression { get; set; }

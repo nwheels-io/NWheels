@@ -751,7 +751,15 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             
             switch (behavior.targetType) {
                 case 'Screen':
-                    var screenUidl = m_index.screens[behavior.targetQualifiedName];
+                    var screenQualifiedName = null;
+                    if (behavior.targetQualifiedNameExpression) {
+                        var screenNameContext = createInputContext(scope.model, input);
+                        screenQualifiedName = selectValue(screenNameContext, behavior.targetQualifiedNameExpression);
+                    } else {
+                        screenQualifiedName = behavior.targetQualifiedName;
+                    }
+                
+                    var screenUidl = m_index.screens[screenQualifiedName];
                     $rootScope.currentScreen = null;
                     $timeout(function() {
                         $rootScope.currentScreen = screenUidl;

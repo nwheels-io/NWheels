@@ -106,18 +106,30 @@ namespace NWheels.Domains.Security
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void ValidateUidlEndpointLogin(ISession currentSession, UserAccountPrincipal principal)
+        public static UidlApplication TryGetUidlApplication(ISession session)
         {
-            if ( currentSession == null )
+            if (session != null)
             {
-                return;
+                var uidlEndpoint = session.Endpoint as IUidlApplicationEndpoint;
+
+                if (uidlEndpoint != null)
+                {
+                    return uidlEndpoint.UidlApplication;
+                }
             }
 
-            var uidlEndpoint = currentSession.Endpoint as IUidlApplicationEndpoint;
+            return null;
+        }
 
-            if (uidlEndpoint != null)
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void ValidateUidlEndpointLogin(ISession currentSession, UserAccountPrincipal principal)
+        {
+            var uidlApp = TryGetUidlApplication(currentSession);
+
+            if (uidlApp != null)
             {
-                if (!uidlEndpoint.UidlApplication.ValidateUser(principal))
+                if (!uidlApp.ValidateUser(principal))
                 {
                     throw new DomainFaultException<LoginFault>(LoginFault.NotAuthorized);
                 }

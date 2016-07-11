@@ -677,6 +677,19 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public PromiseBuilder<TInput> ToScreen(
+                Expression<Func<ViewModel<TData, TState, TInput>, string>> screenSelector,
+                NavigationType navigationType = NavigationType.LoadInline)
+            {
+                _behavior.TargetType = UidlNodeType.Screen;
+                _behavior.TargetQualifiedNameExpression = screenSelector.ToNormalizedNavigationString("model");
+                _behavior.NavigationType = navigationType;
+
+                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public NavigateBehaviorInputBuilder<TInput, TScreenInput> ToScreen<TScreenInput>(
                 IScreenWithInput<TScreenInput> screen, 
                 NavigationType navigationType = NavigationType.LoadInline)
