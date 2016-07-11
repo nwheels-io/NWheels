@@ -51,6 +51,7 @@ function ($http, $q, $timeout) {
                     isRestrictedEntry: response.data.IsRestrictedEntry,
                     restrictedEntryProperties: null,
                     enabledOperations: null,
+                    fullEntity: response.data.FullEntity
                 };
                 
                 if (response.data.RestrictedEntryProperties) {

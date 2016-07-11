@@ -709,12 +709,25 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
+            var handler = _context.EntityService.GetEntityHandler(entityName);
+
             using (new UIOperationContext(
                 _context, ApiCallType.RequestReply, ApiCallResultType.Command, 
                 target: null, contract: "ApplicationEntityService", operation: "CheckAuth", entity: entityName))
-            { 
-                var checkResults = _context.EntityService.CheckEntityAuthorization(entityName, entityId);
-                return Json(checkResults, _context.EntityService.CreateSerializerSettings());
+            {
+                using (handler.NewUnitOfWork())
+                {
+                    var checkResults = handler.CheckAuthorization(entityId);
+                    
+                    var responseJsonString = JsonConvert.SerializeObject(
+                        checkResults,
+                        _context.EntityService.CreateSerializerSettings());
+
+                    return ResponseMessage(new HttpResponseMessage() {
+                        StatusCode = HttpStatusCode.OK,
+                        Content = new StringContent(responseJsonString, Encoding.UTF8, "application/json")
+                    });
+                }
             }
         }
 

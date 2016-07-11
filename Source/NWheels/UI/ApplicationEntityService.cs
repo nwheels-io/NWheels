@@ -571,7 +571,8 @@ namespace NWheels.UI
             public bool IsRestrictedEntry { get; set; }
             public List<string> RestrictedEntryProperties { get; set; }
             public List<string> EnabledOperations { get; set; }
-
+            public IDomainObject FullEntity { get; set; }
+            
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public static AuthorizationCheckResults AllTrue()
@@ -989,6 +990,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            private readonly HashSet<string> _selectPropertyNames = null;
             private string _cacheKey = null;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1048,6 +1050,8 @@ namespace NWheels.UI
                 {
                     Skip = (Page.Value - 1) * Take.Value;
                 }
+
+                _selectPropertyNames = new HashSet<string>(SelectPropertyNames.Select(p => p.AliasName).Where(n => n != null));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1065,6 +1069,13 @@ namespace NWheels.UI
             public int? Take { get; private set; }
             public int? Page { get; private set; }
             public string OfType { get; private set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool IsPropertyIncludedInSelectList(string propertyName)
+            {
+                return (_selectPropertyNames.Count == 0 || _selectPropertyNames.Contains(propertyName));
+            }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1906,6 +1917,11 @@ namespace NWheels.UI
                         checkResults.RestrictedEntryProperties = memberAccessControl.GetPropertiesAllowedToChange();
                         checkResults.EnabledOperations = memberAccessControl.GetMethodsAllowedToInvoke();
                     }
+
+                    if (checkResults.CanRetrieve)
+                    {
+                        checkResults.FullEntity = entity;
+                    }
                 }
                 else
                 {
@@ -2661,6 +2677,8 @@ namespace NWheels.UI
                     IncludeNavigationProperties(metaTypes, properties);
                     //IncludeForeignKeyDisplayNameProperties(metaTypes, properties);
 
+                    AttachSerializationFilter(properties);
+
                     properties.Insert(0, CreateObjectTypeProperty());
                     properties.Insert(1, CreateEntityIdProperty());
                 }
@@ -2669,6 +2687,26 @@ namespace NWheels.UI
             }
 
             #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void AttachSerializationFilter(IList<JsonProperty> properties)
+            {
+                foreach (var property in properties)
+                {
+                    var localProperty = property;
+                    property.ShouldSerialize = (obj) => {
+                        var query = QueryContext.Current;
+                        
+                        if (query != null)
+                        {
+                            return query.Options.IsPropertyIncludedInSelectList(localProperty.PropertyName);
+                        }
+                        
+                        return true;
+                    };
+                }
+            }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -2899,7 +2937,7 @@ namespace NWheels.UI
                     Writable = false,
                     PropertyType = typeof(string),
                     ValueProvider = new EntityIdValueProvider(_metadataCache),
-                    NullValueHandling = NullValueHandling.Ignore
+                    NullValueHandling = NullValueHandling.Ignore,
                 };
             }
 

@@ -134,5 +134,23 @@ namespace NWheels.UnitTests.Globalization
             upperEn.ShouldBe("INPUT");
             upperTr.ShouldBe("\u0130NPUT");
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test, Category("Manual")]
+        public void PrintListOfAllCultures()
+        {
+            Console.WriteLine("Language                                            ISO Code  Culture Code");
+            Console.WriteLine("--------------------------------------------------  --------  ------------");
+
+            foreach (var culture in CultureInfo.GetCultures(CultureTypes.SpecificCultures).OrderBy(c => c.DisplayName))
+            {
+                Console.WriteLine(
+                    "{0}  {1,-8}  {2}", 
+                    culture.DisplayName.PadRight(50, '.'), 
+                    culture.TwoLetterISOLanguageName.ToUpper(), 
+                    culture.Name);
+            }
+        }
     }
 }

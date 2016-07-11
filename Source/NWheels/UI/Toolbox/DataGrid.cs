@@ -692,6 +692,7 @@ namespace NWheels.UI.Toolbox
 
         public DataGrid<TDataRow> PageSize(int defaultSize, int[] pageSizeOptions)
         {
+            this.EnablePaging = true;
             this.DefaultPageSize = defaultSize;
             this.PageSizeOptions = pageSizeOptions;
             return this;

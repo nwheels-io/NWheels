@@ -1583,14 +1583,19 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                             scope.$broadcast(scope.uidl.form.qualifiedName + ':EditAuthorized', response);
                         }
                     }
-                });
-
-                $timeout(function() {
-                    if (scope.uidl.formTypeSelector) {
-                        scope.$broadcast(scope.uidl.formTypeSelector.qualifiedName + ':ModelSetter', scope.model.entity);
-                    } else {
-                        scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelSetter', scope.model.entity);
+                    
+                    if (response.fullEntity) {
+                        scope.entityService.trackRetrievedEntities([ response.fullEntity ]);
+                        scope.model.entity = response.fullEntity;
                     }
+                    
+                    $timeout(function() {
+                        if (scope.uidl.formTypeSelector) {
+                            scope.$broadcast(scope.uidl.formTypeSelector.qualifiedName + ':ModelSetter', scope.model.entity);
+                        } else {
+                            scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelSetter', scope.model.entity);
+                        }
+                    });
                 });
             };
 
