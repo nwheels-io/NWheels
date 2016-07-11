@@ -341,8 +341,15 @@ namespace NWheels.Stacks.AspNet
                         });
 
                     _s_nodeHost.LoadAndActivate();
-                    _s_nodeHost.Components.TryResolve<UidlApplication>(out _s_uidlApplication);
+                    
                     _s_nodeHost.Components.TryResolve<ISessionManager>(out _s_sessionManager);
+
+                    if (UidlApplicationComponent.Instance != null)
+                    {
+                        _s_uidlApplication = UidlApplicationComponent.Instance.Application;
+                    }
+
+                    //_s_nodeHost.Components.TryResolve<UidlApplication>(out _s_uidlApplication);
                 }
             }
             finally

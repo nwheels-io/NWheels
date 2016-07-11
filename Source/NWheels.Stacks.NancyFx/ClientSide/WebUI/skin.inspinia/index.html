@@ -2380,7 +2380,7 @@ HEAD, JS/CSS LINKS
                    name="{{::uniqueFieldId}}">
             <textarea ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Memo')"
                       class="form-control fieldTypeEdit" 
-                      readonly="{{::hasUidlModifier('ReadOnly') ? '' : undefined}}"
+                      ng-readonly="hasUidlModifier('ReadOnly')"
                       ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                       ng-model="entity[uidl.propertyName]" 
                       id="{{::uniqueFieldId}}" 

@@ -876,7 +876,16 @@ namespace NWheels.Extensions
 
             public UIAppEndpointRegistrations<TApp> RegisterApplication<TApp>() where TApp : UidlApplication
             {
-                _builder.RegisterType<TApp>().As<TApp, UidlApplication>().SingleInstance();
+                _builder
+                    .RegisterType<TApp>()
+                    .As<TApp, UidlApplication>()
+                    .OnActivated(e => {
+                        e.Instance.MetadataCache = e.Context.Resolve<ITypeMetadataCache>();
+                    })
+                    .InstancePerDependency();
+
+                // MUST BE INSTANCE PER DEPENDENCY! Apps are instantiated multiple times in 'design mode' for locale management.
+
                 return new UIAppEndpointRegistrations<TApp>(_builder);
             }
 

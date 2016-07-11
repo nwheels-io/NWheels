@@ -45,6 +45,8 @@ namespace NWheels.Stacks.AspNet
             IWebApplicationLogger logger,
             IFrameworkUIConfig frameworkUIConfig)
         {
+            UidlApplicationComponent.Instance = this;
+
             _components = components;
             _endpointRegistration = endpointRegistration;
             _metadataCache = metadataCache;
@@ -152,6 +154,11 @@ namespace NWheels.Stacks.AspNet
         public override void Unload()
         {
         }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IWebModuleContext Instance { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
