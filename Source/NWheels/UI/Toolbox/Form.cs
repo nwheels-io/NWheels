@@ -792,6 +792,10 @@ namespace NWheels.UI.Toolbox
                     {
                         return FormFieldModifiers.Password;
                     }
+                    else if (MetaProperty.SemanticType != null && MetaProperty.SemanticType.WellKnownSemantic == WellKnownSemanticType.MultilineText)
+                    {
+                        return FormFieldModifiers.Memo;
+                    }
                     return FormFieldModifiers.None;
                 case FormFieldType.Lookup:
                     return (
@@ -963,7 +967,8 @@ namespace NWheels.UI.Toolbox
         RangeEnd = 0x2000,
         Memo = 0x4000,
         FlatStyle = 0x8000,
-        Nullable = 0x10000,
+        MaxSpace = 0x10000,
+        Nullable = 0x20000,
         System = 0x40000000
     }
 

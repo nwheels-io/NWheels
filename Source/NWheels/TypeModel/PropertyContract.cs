@@ -356,6 +356,16 @@ namespace NWheels.DataObjects
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public class MultilineTextAttribute : SemanticAttributeBase
+            {
+                public MultilineTextAttribute()
+                    : base(typeof(string), WellKnownSemanticType.MultilineText)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public class LoginNameAttribute : SemanticAttributeBase
             {
                 public LoginNameAttribute()

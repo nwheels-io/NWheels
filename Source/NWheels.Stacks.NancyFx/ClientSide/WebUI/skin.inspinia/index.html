@@ -225,6 +225,9 @@ HEAD, JS/CSS LINKS
         .compensateZeroPadding {
             padding: 5px 10px 5px 10px;
         }
+        .form-control[readonly].fieldTypeEdit {
+            background-color: white;
+        }
         i.jqgDetailPaneIcon.expanded:before {
             content: "\f068";
         }     
@@ -2180,6 +2183,32 @@ HEAD, JS/CSS LINKS
             </div>
         </form>
     </script>
+    <script type="text/ng-template" id="app/uidl-element-template/FormBigFrontEndFullScreen">
+        <form class="form-horizontal" id="{{::uidl.elementName}}">
+            <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
+            <div class="form-group" ng-repeat-start="field in plainFields" style="margin:0">
+                <div style="margin-bottom:10px;">
+                    <label class="control-label" for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.label, { upperCase: true })}}</label>
+                </div>
+                <div>
+                    <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
+                </div>
+            </div>
+            <div ng-repeat-end class="hr-line-dashed"></div>
+            <!-- COMMAND BUTTONS -->
+            <div ng-if="uidl.commands.length && !uidl.autoSubmitOnChange" class="form-group">
+                <div class="col-sm-8 col-sm-offset-4">
+                    <button ng-repeat="command in uidl.commands"
+                            type="button"
+                            class="btn"
+                            style="margin-right: 5px;"
+                            ng-disabled="commandInProgress"
+                            ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy', 'btn-white':command.severity=='None'}"
+                            ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                </div>
+            </div>
+        </form>
+    </script>
     <script type="text/ng-template" id="app/uidl-element-template/FormLoginStyle">
         <form class="m-t" role="form" id="{{::uidl.elementName}}" novalidate autocomplete="off">
             <div class="form-group" ng-repeat="field in plainFields">
@@ -2304,7 +2333,8 @@ HEAD, JS/CSS LINKS
                       ng-model="entity[uidl.propertyName]" 
                       id="{{::uniqueFieldId}}" 
                       name="{{::uniqueFieldId}}"
-                      style="width:100%;height:100px;resize:vertical;font-family: Consolas, Courier New;font-size: 10pt;"></textarea>
+                      style="width:100%;resize:vertical;font-family: Consolas, Courier New;font-size: 10pt;"
+                      ng-style="{height: (hasUidlModifier('MaxSpace') ? '50vh' : '100px')}"></textarea>
             <!-- ALERT -->
             <div ng-if="uidl.fieldType==='Alert'"
                  ng-show="entity[uidl.propertyName] || uidl.label || !uidl.hiddenIfEmpty"
@@ -2349,12 +2379,14 @@ HEAD, JS/CSS LINKS
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}">
             <textarea ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Memo')"
-                      class="form-control" 
+                      class="form-control fieldTypeEdit" 
+                      readonly="{{::hasUidlModifier('ReadOnly') ? '' : undefined}}"
                       ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                       ng-model="entity[uidl.propertyName]" 
                       id="{{::uniqueFieldId}}" 
                       name="{{::uniqueFieldId}}"
-                      style="width:100%;height:100px;resize:vertical;font-family: Consolas, Courier New;font-size: 10pt;"></textarea>
+                      style="width:100%;resize:vertical;font-family: Consolas, Courier New;font-size: 10pt;"
+                      ng-style="{height: (hasUidlModifier('MaxSpace') ? '50vh' : '100px')}"></textarea>
             <!-- PASSWORD -->
             <div ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Password')" ng-class="{'m-b': !uidl.$skin.zeroPadding}">
                 <div>
