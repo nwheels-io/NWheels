@@ -990,7 +990,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private readonly HashSet<string> _selectPropertyNames = null;
+            private readonly HashSet<string> _selectListLookup = null;
             private string _cacheKey = null;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1051,7 +1051,8 @@ namespace NWheels.UI
                     Skip = (Page.Value - 1) * Take.Value;
                 }
 
-                _selectPropertyNames = new HashSet<string>(SelectPropertyNames.Select(p => p.AliasName).Where(n => n != null));
+                _selectListLookup = new HashSet<string>();
+                BuildSelectListLookup();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1074,7 +1075,7 @@ namespace NWheels.UI
 
             public bool IsPropertyIncludedInSelectList(string propertyName)
             {
-                return (_selectPropertyNames.Count == 0 || _selectPropertyNames.Contains(propertyName));
+                return (_selectListLookup.Count == 0 || _selectListLookup.Contains(propertyName));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1206,6 +1207,16 @@ namespace NWheels.UI
 
                 var filterItem = new QueryFilterItem(propertyName, @operator, parameter.Value);
                 this.Filter.Add(filterItem);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void BuildSelectListLookup()
+            {
+                foreach (var selectItem in SelectPropertyNames)
+                {
+                    _selectListLookup.UnionWith(selectItem.AliasName.Split('.'));
+                }
             }
         }
 
