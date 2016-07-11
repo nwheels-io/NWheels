@@ -876,7 +876,7 @@ namespace NWheels.Extensions
 
             public UIAppEndpointRegistrations<TApp> RegisterApplication<TApp>() where TApp : UidlApplication
             {
-                _builder.RegisterType<TApp>().As<TApp, UidlApplication>();
+                _builder.RegisterType<TApp>().As<TApp, UidlApplication>().SingleInstance();
                 return new UIAppEndpointRegistrations<TApp>(_builder);
             }
 
