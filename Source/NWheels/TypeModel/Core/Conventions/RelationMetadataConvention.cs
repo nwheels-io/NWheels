@@ -187,7 +187,9 @@ namespace NWheels.DataObjects.Core.Conventions
 
         private static KeyMetadataBuilder FindOrAddForeignKey(TypeMetadataBuilder type, PropertyMetadataBuilder relationProperty)
         {
-            var existingKey = type.AllKeys.FirstOrDefault(k => k.Properties.Select(p => p.ClrType).SingleOrDefault() == relationProperty.ClrType);
+            var existingKey = type.AllKeys
+                .Where(k => k.Kind == KeyKind.Foreign)
+                .FirstOrDefault(k => k.Properties.Select(p => p.ClrType).SingleOrDefault() == relationProperty.ClrType);
 
             if ( existingKey != null )
             {
