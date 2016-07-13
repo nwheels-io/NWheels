@@ -1215,6 +1215,7 @@ namespace NWheels.UI
             {
                 foreach (var selectItem in SelectPropertyNames)
                 {
+                    _selectListLookup.Add(selectItem.AliasName);
                     _selectListLookup.UnionWith(selectItem.AliasName.Split('.'));
                 }
             }
