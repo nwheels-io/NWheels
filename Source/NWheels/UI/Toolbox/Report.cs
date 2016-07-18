@@ -17,6 +17,7 @@ namespace NWheels.UI.Toolbox
         where TScript : ITransactionScript<TContext, TCriteria, IQueryable<TResultRow>>
         where TContext : class
         where TCriteria : class
+        where TResultRow : class
     {
         private UidlBuilder _builder;
         private VisualRangeSelectionHandler _visualRangeSelectionHandler;

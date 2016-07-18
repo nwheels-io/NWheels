@@ -1213,7 +1213,7 @@ namespace NWheels.UI
 
             private void BuildSelectListLookup()
             {
-                foreach (var selectItem in SelectPropertyNames)
+                foreach (var selectItem in SelectPropertyNames.Concat(IncludePropertyNames))
                 {
                     _selectListLookup.Add(selectItem.AliasName);
                     _selectListLookup.UnionWith(selectItem.AliasName.Split('.'));

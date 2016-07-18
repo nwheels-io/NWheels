@@ -1,0 +1,45 @@
+Metaphor
+
+- N stands for .NET
+- Wheels stands for wheels being reinvented over and over again by numerous software projects.
+
+Motivation
+
+- Observations made while taking part in various enterprise application development projects:
+
+  - Commonality in the needs of these projects is much higher than variability
+    - This applies to both dev/ops/ALM toolchain and processes, and both to the application being developed
+    - Most of developers' efforts are not unique, but rather repetitive and mechanical. These can be minimized or completely eliminated.
+  
+  - Every project invents mostly the same types of wheels for itself. 
+    - It takes significant effort and budget to build reliable wheels of good quality.
+    - Not every project has enough people on board with proper background and expertise, in order do build the wheels right. Bad quality then hits back.
+  
+  - Projects that run on a limited budget, and must deliver business value quickly in order to survive (e.g. start-ups), 
+    have no choice but to focus solely on delivering business value, at first stages.
+  
+  - Projects that focus solely on delivering business value, and abandon infrastructural efforts, 
+    hit the wall later, as the system grows, more features are requested, and higher evolution rate is expected.
+    - What happens then, is that either significant resources are invested into re-engineering of the system, or even more resources are invested in proceeding as is. 
+
+Goals
+
+  - Put an end to enormous waste of resources spent by every project on its own. 
+  - Collaborate to build an infrastructural ecosystem that supplies common needs of most of .NET-based enterprise application projects.
+  - Let projects work both right and fast from day one.
+  - Let projects deliver quickly by minimizing developers efforts on most of the tasks, which are repetitive and mechanical rather than unique. 
+  - Make NWheels an attractive option for development of new enterprise applications
+  
+Strategy and tactics
+
+  - The strategy: 
+    - Build a community and collaborate continuously to design and implement NWheels in an iterative process
+  
+  - The tactics:
+    - Provide proof of concept through real applications running in production
+    - Reflect on what is done, and define put the high-level architecture right.
+    - Start advertising and building community of contributors.
+    - Let every wheel be built by developers and architects that have strong background and expertise in relevant subjects.
+    - Capture every task in application development process, that can be programmed and automated, and allow delivering significantly more value for significantly less effort.
+    - 
+

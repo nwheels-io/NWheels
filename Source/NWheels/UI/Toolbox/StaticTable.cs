@@ -10,6 +10,7 @@ namespace NWheels.UI.Toolbox
 {
     [DataContract(Namespace = UidlDocument.DataContractNamespace, Name = "StaticTable")]
     public class StaticTable<TDataRow> : DataGrid<TDataRow>
+        where TDataRow : class
     {
         public StaticTable(string idName, ControlledUidlNode parent)
             : base(idName, parent)

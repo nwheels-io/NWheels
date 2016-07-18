@@ -48,6 +48,8 @@ namespace NWheels.UI
 
         void UidlBuilder.IBuildableUidlNode.DescribePresenter(UidlBuilder builder)
         {
+            OnBuildManuallyInstantiatedNodes(builder);
+
             var presenter = new PresenterBuilder<TWidget, TData, TState>(builder, this);
             
             DescribePresenter(presenter);
@@ -82,6 +84,12 @@ namespace NWheels.UI
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected virtual void OnBuild(UidlBuilder builder)
+        {
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void OnBuildManuallyInstantiatedNodes(UidlBuilder builder)
         {
         }
 

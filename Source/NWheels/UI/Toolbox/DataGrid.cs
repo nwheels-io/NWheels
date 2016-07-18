@@ -80,7 +80,7 @@ namespace NWheels.UI.Toolbox
         public bool EnableAutonomousQuery { get; set; }
 
         [DataMember]
-        public bool EnableEditInline { get; set; }
+        public bool IsInlineEditEnabled { get; set; }
 
         [DataMember]
         public bool EnableDetailPane { get; set; }
@@ -321,6 +321,8 @@ namespace NWheels.UI.Toolbox
             public UidlAuthorization Authorization { get; set; }
             [DataMember, ManuallyAssigned]
             public WidgetUidlNode NestedWidget { get; set; }
+            [DataMember, ManuallyAssigned]
+            public WidgetUidlNode EditorWidget { get; set; }
             [DataMember]
             public string IconPropertyName { get; set; }
             [DataMember]
@@ -403,7 +405,7 @@ namespace NWheels.UI.Toolbox
 
                 if ( metaProperty.Kind == PropertyKind.Relation || metaProperty.Relation != null )
                 {
-                    return GridColumnType.Key;
+                    return (metaProperty.IsCollection ? GridColumnType.LookupMany : GridColumnType.Key);
                 }
 
                 if ( metaProperty.ClrType.IsNumericType() )
@@ -482,6 +484,7 @@ namespace NWheels.UI.Toolbox
 
     [DataContract(Namespace = UidlDocument.DataContractNamespace, Name = "Crud")]
     public class DataGrid<TDataRow> : DataGrid
+        where TDataRow : class
     {
         public DataGrid(string idName, ControlledUidlNode parent)
             : base(idName, parent)
@@ -690,6 +693,16 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public DataGrid<TDataRow> UseInlineEditor()
+        {
+            this.IsInlineEditEnabled = true;
+            this.InlineEditor = new Form<TDataRow>("InlineEditor", this);
+
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public DataGrid<TDataRow> PageSize(int defaultSize, int[] pageSizeOptions)
         {
             this.EnablePaging = true;
@@ -697,6 +710,18 @@ namespace NWheels.UI.Toolbox
             this.PageSizeOptions = pageSizeOptions;
             return this;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
+        {
+            return base.GetNestedWidgets().ConcatIf(this.InlineEditor);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember, ManuallyAssigned]
+        public Form<TDataRow> InlineEditor { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -722,6 +747,40 @@ namespace NWheels.UI.Toolbox
                 .Select(p => new GridColumn(MetaType, MetaType.MakePropertyExpression(p), size: FieldSize.Medium))
                 .OrderByDescending(c => GetColumnPropertyDefaultOrder(c.MetaProperty))
                 .ToList();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnBuildManuallyInstantiatedNodes(UidlBuilder builder)
+        {
+            if (InlineEditor != null)
+            {
+                builder.BuildManuallyInstantiatedNodes(InlineEditor);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void PostDescribePresenter(PresenterBuilder<DataGrid, Empty.Data, Empty.State> presenter)
+        {
+            if (IsInlineEditEnabled && InlineEditor != null)
+            {
+                InlineEditor.FilterFields(f => (f.Modifiers & (FormFieldModifiers.Tab | FormFieldModifiers.Section)) == 0);
+
+                var editableFields = InlineEditor.Fields
+                    .Where(f => !f.Modifiers.HasFlag(FormFieldModifiers.ReadOnly))
+                    .ToDictionary(f => f.PropertyName);
+
+                foreach (var column in this.DisplayColumns)
+                {
+                    column.IsEditSupported = (editableFields.ContainsKey(column.Expression));
+                }
+
+                foreach (var column in this.DefaultDisplayColumns)
+                {
+                    column.IsEditSupported = (editableFields.ContainsKey(column.Expression));
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -824,6 +883,8 @@ namespace NWheels.UI.Toolbox
         Key = 60,
         Widget = 70,
         Type = 80,
+        Lookup = 90,
+        LookupMany = 100,
         Hidden = 1000
     }
 }

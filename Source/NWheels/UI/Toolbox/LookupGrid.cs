@@ -13,6 +13,7 @@ namespace NWheels.UI.Toolbox
 {
     [DataContract(Namespace = UidlDocument.DataContractNamespace, Name = "LookupGrid")]
     public class LookupGrid<TLookupId, TLookupRow> : DataGrid<TLookupRow>
+        where TLookupRow : class
     {
         public LookupGrid(string idName, ControlledUidlNode parent)
             : base(idName, parent)

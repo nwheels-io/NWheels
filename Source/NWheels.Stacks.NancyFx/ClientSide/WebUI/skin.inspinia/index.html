@@ -289,6 +289,13 @@ HEAD, JS/CSS LINKS
         }
         .ui-jqgrid tr.jqgrow td {
             vertical-align: top !important;
+            overflow: visible !important;
+        }
+        .dropdown.editable .dropdown-cell {
+            cursor: pointer;
+        }
+        .dropdown.editable i {
+            margin: 5px;
         }
         .jqgrow .ui-icon {
             background-image: url("app/skin/assets/css/plugins/jQueryUI/images/ui-icons_222222_256x240_jqg.png");
@@ -330,6 +337,25 @@ HEAD, JS/CSS LINKS
         tr.jqg_rowstyle_Warning > td { color: #CC6600; }
         tr.jqg_rowstyle_Error > td { color: #990000; }
         tr.jqg_rowstyle_Critical > td { color: #FF3300; }
+        
+        #global_div_dropdown_popup {
+            position: absolute;
+            z-index:2000;
+            background-color:red;
+        }
+        
+        .grid-inline-edit-control {
+            border: none;
+            width: 100%;
+            background-color: #C6F4DE;        
+        }
+        
+        .grid-inline-edit-dropdown-panel {
+            background-color: #C6F4DE;
+            border: 3px solid #C6F4DE;
+            border-radius: 5px;
+            padding: 3px;
+        }
     </style>
 </head>
 <body 
@@ -435,7 +461,13 @@ HEAD, JS/CSS LINKS
     IFRAME FOR 'BEGIN DOWNLOAD' BEHAVIOR
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-    <iframe id="iframe_content_download" style="display:none;"></iframe>
+    <iframe id="global_iframe_content_download" style="display:none;"></iframe>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    DIV FOR MODAL DROP-DOWNS
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <div id="global_div_dropdown_popup" style="display:none;"></div>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL USER ALERT - MODAL
@@ -1078,6 +1110,14 @@ HEAD, JS/CSS LINKS
     <script type="text/javascript">
         function initWidget_DataGrid($scope) {
             var columnsModel = [];
+            var inlineEditorFields = null;
+            if ($scope.uidl.inlineEditor) {
+                var fields = $scope.uidl.inlineEditor.fields;
+                inlineEditorFields = { };
+                for (var i = 0 ; i < fields.length ; i++) {
+                    inlineEditorFields[fields[i].propertyName] = fields[i];
+                }
+            }
             if ($scope.uidl.expandableTreeMode) {
                 columnsModel.push({ name: '$id', index: '$id', width: 1, hidden: true, key: true });
             }
@@ -1094,7 +1134,7 @@ HEAD, JS/CSS LINKS
                     name: metaColumn.expression,
                     label: $scope.translate(metaColumn.title),
                     index: metaColumn.expression,
-                    editable: ($scope.uidl.enableEditInline===true && metaColumn.isEditSupported===true),
+                    editable: ($scope.uidl.isInlineEditEnabled===true && metaColumn.isEditSupported===true),
                     width: colWidthPx,
                     search: metaColumn.isFilterSupported===true,
                     sortable: metaColumn.isSortSupported===true,
@@ -1177,6 +1217,35 @@ HEAD, JS/CSS LINKS
                     modelItem.formatter = function(cellvalue, options, rowObject) {
                         return '<a href="javascript:void(0);" onclick="jqgrid_onRowCellClick()">' + cellvalue + '</a>';
                     };
+                }
+                if (modelItem.editable) {
+                    var editorField = inlineEditorFields[metaColumn.expression];
+                    if (editorField) {
+                        modelItem.edittype = 'custom';
+                        modelItem.editoptions = {
+                            custom_element: function (value, options) {
+                                var rowId = $scope.lastSelectedRowId;
+                                var rowData = $scope.getDataByRowId(rowId);
+                                var editEl = $(
+                                    '<div class="editable">' + 
+                                    '<uidl-form-field parent-uidl="formUidl" uidl="fieldUidl" entity="rowEntity" template-name="FormFieldGridInlineEditStyle" />' +
+                                    '</div>'
+                                );
+                                var editorScope = $scope.compileEditorWidget(editorField, rowData, editEl);
+                                if (editorField.nestedWidget) {
+                                    $scope.$timeout(function() {
+                                        editorScope.$broadcast(editorField.nestedWidget.qualifiedName + ':ModelSetter', rowData[metaColumn.expression]);
+                                    });
+                                }
+                                return editEl;
+                            },
+                            custom_value: function ($elem, operation, value) {
+                                if (operation === "get") {
+                                    return $elem.val(); 
+                                }
+                            },
+                        };
+                    }
                 }
                 columnsModel.push(modelItem);
             });
@@ -1297,6 +1366,20 @@ HEAD, JS/CSS LINKS
                 element.html(template);
                 $scope.$compile(element.contents())(childScope);
             };
+
+            $scope.compileEditorWidget = function(fieldUidl, rowData, element) {
+                var childScope = $scope.$rootScope.$new(true, $scope);
+                childScope.formUidl = $scope.uidl.inlineEditor;
+                childScope.fieldUidl = fieldUidl;
+                childScope.rowEntity = rowData;
+                $scope.$compile(element.contents())(childScope);
+                childScope.$digest();
+                cleanDom(element.children('.ng-isolate-scope')[0]);
+                return childScope;
+                //var fieldDirectiveEl = element.children('.ng-isolate-scope');
+                //fieldDirectiveEl.contents().filter(function() { return this.nodeType !== 1; /*Node.ELEMENT_NODE*/ }).remove();
+                //editEl.css({display: 'block'});
+            };
             
             $scope.onDataReceived = function (event, data) {
                 $scope.defineElementIds();
@@ -1364,6 +1447,15 @@ HEAD, JS/CSS LINKS
                             }
                             for (var i = 0; i < $scope.gridColumns.length; i++) {
                                 queryBuilder.select($scope.gridColumns[i].expression);
+                                if ($scope.uidl.isInlineEditEnabled && inlineEditorFields) {
+                                    var editorField = inlineEditorFields[$scope.gridColumns[i].expression];
+                                    if (editorField && editorField.lookupDisplayProperty) {
+                                        queryBuilder.include($scope.gridColumns[i].expression + '.' + editorField.lookupDisplayProperty);
+                                    }
+                                    if (editorField && editorField.lookupValueProperty) {
+                                        queryBuilder.include($scope.gridColumns[i].expression + '.' + editorField.lookupValueProperty);
+                                    }
+                                }
                             }
                             if (postData._search === true) {
                                 var filterObject = JSON.parse(postData.filters);
@@ -1470,13 +1562,14 @@ HEAD, JS/CSS LINKS
                                 $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
                             }
                             
-                            if ($scope.uidl.enableEditInline) {
+                            if ($scope.uidl.isInlineEditEnabled) {
                                 var gridObj = $('#' + $scope.tableElementId);
                                 if (rowId && rowId!==$scope.lastSelectedRowId) { 
                                     gridObj.restoreRow($scope.lastSelectedRowId); 
                                 }
                                 $scope.lastSelectedRowId = rowId;
                                 gridObj.editRow(rowId, true, null, null, 'clientArray', null, function(saveRowId, saveIsOK) {
+                                    /*
                                     var editedRowData = gridObj.getRowData(rowId);
                                     for (var i = 0; i < $scope.gridColumns.length ; i++) {
                                         var column = $scope.gridColumns[i];
@@ -1485,8 +1578,10 @@ HEAD, JS/CSS LINKS
 											$scope.uidlService.writeValueByNavigationPath(rowObject, column.navigations, value);
 										}
                                     }
+                                    */
+                                    var rowData = $scope.getDataByRowId(rowId);
                                     $scope.$apply(function() {
-                                        $scope.$emit($scope.uidl.qualifiedName + ':InlineSave:Executing', rowObject);
+                                        $scope.$emit($scope.uidl.qualifiedName + ':InlineSave:Executing', rowData);
                                     });
                                 }); 
                             }
@@ -1757,10 +1852,50 @@ HEAD, JS/CSS LINKS
             <div id="rdtpager_{{uniqueWidgetId}}"></div>
         </div>
     </script>
+    <script type="text/ng-template" id="app/uidl-element-template/LookupDualList">
+        <table style="width:100%">
+            <thead>
+                <tr>
+                    <th>Included</th>
+                    <th>&nbsp;</th>
+                    <th>Available</th>
+                </tr>
+            <thead>
+            <tbody>
+                <tr>
+                    <td width="50%">
+                        <select style="width: 100%;display:block;" size="10" 
+                            multiple
+                            ng-dblclick="excludeSelected()"
+                            ng-model="selection.exclude" 
+                            ng-options="item as item[parentUidl.lookupDisplayProperty] for item in model track by item['$id']">
+                    </td>
+                    <td style="padding:3px;">
+                        <a ng-click="excludeSelected()"><i class="fa fa-lg fa-chevron-circle-right"></i></a>
+                        <br/>
+                        <a ng-click="includeSelected()"><i class="fa fa-lg fa-chevron-circle-left"></i></a>
+                    </td>
+                    <td width="50%">
+                        <select style="width: 100%;display:block;" size="10" 
+                            multiple
+                            ng-dblclick="includeSelected()"
+                            ng-model="selection.include" 
+                            ng-options="item as item[parentUidl.lookupDisplayProperty] for item in ResultSet track by item['$id']">
+                        </select>  
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-right"><a ng-click="excludeAll()">Exclude All <i class="fa fa-lg fa-chevron-circle-right"></i></a></td>
+                    <td>&nbsp;</td>
+                    <td><a ng-click="includeAll()"><i class="fa fa-lg fa-chevron-circle-left"></i> Include All</a></td>
+                </tr>
+            <tbody>
+        </table>
+    </script>
     <script type="text/javascript">
         function initWidget_LookupGrid($scope) {
-            $scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
-                $scope.ResultSet = data;
+        
+            function initAsLookupGrid(data) {
                 $scope.$timeout(function () {
                     $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
 
@@ -1819,10 +1954,88 @@ HEAD, JS/CSS LINKS
                         }
                     });
                 });
+            }
+            
+            function initAsDualList(data) {
+                $scope.ResultSet = $scope.ResultSet.filter(function(r) {
+                    var id = r['$id'];
+                    var count = $scope.model.length;
+                    for (var i = 0; i < count ; i++) {
+                        if ($scope.model[i]['$id'] === id) {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+                $scope.selection = {
+                    include: [],
+                    exclude: []
+                };
+                
+                $scope.includeAll = function() {
+                    for (var i = 0 ; i < $scope.ResultSet.length ; i++) {
+                        $scope.model.push($scope.ResultSet[i]);
+                    }
+                    $scope.ResultSet = [ ];
+                    $scope.selection.include = [ ];
+                    $scope.selection.exclude = [ ];
+                };
+                
+                $scope.excludeAll = function() {
+                    for (var i = 0 ; i < $scope.model.length ; i++) {
+                        $scope.ResultSet.push($scope.model[i]);
+                    }
+                    $scope.model = [ ];
+                    $scope.selection.include = [ ];
+                    $scope.selection.exclude = [ ];
+                };
+                
+                $scope.includeSelected = function() {
+                    var addedIds = { };
+                    for (var i = 0 ; i < $scope.selection.include.length ; i++) {
+                        var item = $scope.selection.include[i];
+                        $scope.model.push(item);
+                        addedIds[item['$id']] = true;
+                    }
+                    for (var i = 0 ; i < $scope.ResultSet.length ; ) {
+                        var item = $scope.ResultSet[i];
+                        if (addedIds[item['$id']]) {
+                            $scope.ResultSet.splice(i, 1);
+                        } else {
+                            i++;
+                        }
+                    }
+                };
+                
+                $scope.excludeSelected = function() {
+                    var removedIds = { };
+                    for (var i = 0 ; i < $scope.selection.exclude.length ; i++) {
+                        var item = $scope.selection.exclude[i];
+                        $scope.ResultSet.push(item);
+                        removedIds[item['$id']] = true;
+                    }
+                    for (var i = 0 ; i < $scope.model.length ; ) {
+                        var item = $scope.model[i];
+                        if (removedIds[item['$id']]) {
+                            $scope.model.splice(i, 1);
+                        } else {
+                            i++;
+                        }
+                    }
+                };
+            }
+            
+            $scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
+                $scope.ResultSet = data;
+                if ($scope.uidl.templateName === 'LookupGrid') {
+                    initAsLookupGrid(data);
+                } else if ($scope.uidl.templateName === 'LookupDualList') {
+                    initAsDualList(data);
+                }
             });
         }
     </script>
-
+    
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL ELLIPSIS LOOKUP - MODAL
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -2668,7 +2881,167 @@ HEAD, JS/CSS LINKS
             </div>
         </div>
     </script>
+    <script type="text/ng-template" id="app/uidl-element-template/FormFieldGridInlineEditStyle">
+        <div>
+            <!-- CHECKBOX -->
+            <input ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Checkbox'"
+                   type="checkbox" 
+                   ng-model="entity[uidl.propertyName]" 
+                   id="{{::uniqueFieldId}}"
+                   name="{{::uniqueFieldId}}"
+                   class="grid-inline-edit-control"
+                   ng-true-value="true"
+                   ng-false-value="false">
+            <!-- TEXT -->
+            <input ng-if="uidl.fieldType==='Edit' && (uidl.modifiers==='None' || !uidl.modifiers)"
+                   type="text"
+                   ng-model="entity[uidl.propertyName]"
+                   id="{{::uniqueFieldId}}"
+                   name="{{::uniqueFieldId}}"
+                   class="grid-inline-edit-control">
+            <!-- LOOKUP -->
+            <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown') && hasUidlModifier('LookupShowSelectAll')"
+                    class="grid-inline-edit-control"
+                    ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
+                    ng-model="entity[lookupForeignKeyProperty]"
+                    id="{{::uniqueFieldId}}"
+                    name="{{::uniqueFieldId}}">
+                <option value="">All</option>
+            </select>
+            <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown') && hasUidlModifier('LookupShowSelectNone')"
+                    class="grid-inline-edit-control"
+                    ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
+                    ng-model="entity[lookupForeignKeyProperty]"
+                    id="{{::uniqueFieldId}}"
+                    name="{{::uniqueFieldId}}">
+                <option value="">- Choose -</option>
+            </select>
+            <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown') && !hasUidlModifier('LookupShowSelectAll') && !hasUidlModifier('LookupShowSelectNone')"
+                    class="grid-inline-edit-control"
+                    ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
+                    ng-model="entity[lookupForeignKeyProperty]"
+                    id="{{::uniqueFieldId}}"
+                    name="{{::uniqueFieldId}}">
+            </select>
+            <!-- LOOKUP MANY -->
+            <div ng-if="uidl.fieldType==='LookupMany' && hasUidlModifier('DropDown') && hasUidlModifier('DualList')"
+                    class="grid-inline-edit-control"
+                    id="{{::uniqueFieldId}}"
+                    name="{{::uniqueFieldId}}">
+                    <div class="global-dropdown-toggle"><i class="fa fa-lg fa-caret-down"></i><span ng-if="entity[uidl.propertyName]">{{entity[uidl.propertyName].length || '0'}} items</span>
+                </div>
+                <div class="global-dropdown-content" style="display:none;">
+                    <div class="grid-inline-edit-dropdown-panel">
+                        <uidl-widget uidl="uidl.nestedWidget" parent-uidl="uidl"></uidl-widget>
+                    </div>
+                </div>
+            </div>
+            <!-- DATE-TIME PICKER -->
+            <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='DateTimePicker'"
+                 class="input-group date"
+                 ng-class="{'m-b': !uidl.$skin.zeroPadding}"
+                 ng-disabled="!editAuthorized">
+                <input type="text"
+                       class="form-control"
+                       ng-model="entity[uidl.propertyName]"
+                       ng-disabled="!editAuthorized"
+                       id="{{::uniqueFieldId}}"
+                       name="{{::uniqueFieldId}}">
+                <div class="input-group-addon">
+                    <span class="glyphicon glyphicon-th"></span>
+                </div>
+            </div>
+            <!-- DATE-TIME RANGE PICKER -->
+            <div ng-if="uidl.fieldType==='Edit' && hasUidlModifier('DateTimePicker') && hasUidlModifier('RangeStart')"
+                 class="form-control"
+                 ng-class="{'m-b': !uidl.$skin.zeroPadding}"
+                 id="{{::uniqueFieldId}}"
+                 name="{{::uniqueFieldId}}"
+                 ng-disabled="!editAuthorized">
+                <i class="fa fa-calendar"></i>
+                <span></span> <b class="caret"></b>
+            </div>
+            <!-- LOOKUP ELLIPSIS -->
+            <div ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('Ellipsis')"
+                 class="input-group"
+                 ng-class="{'m-b': !uidl.$skin.zeroPadding}"
+                 ng-disabled="!editAuthorized">
+                 <span ng-show ="entity && entity[uidl.propertyName]" class="input-group-addon">{{entity[uidl.propertyName]}}</span>
+                 <input type="text" 
+                        class="form-control"
+                        ng-init="isNowFocused=false" 
+                        ng-focus="isNowFocused=!hasUidlModifier('ReadOnly')" 
+                        ng-blur="isNowFocused=false"                        
+                        ng-model="displayName"
+                        readonly
+                        id="{{::uniqueFieldId}}"
+                        name="{{::uniqueFieldId}}"> 
+                 <span class="input-group-btn"> 
+                     <button type="button" 
+                             class="btn" 
+                             ng-disabled="hasUidlModifier('ReadOnly') || !editAuthorized"
+                             ng-class="{'btn-primary':isNowFocused, 'btn-white':!isNowFocused}"
+                             ng-click="ellipsisClicked()">
+                        <i class="fa fa-search"></i>
+                     </button>
+                 </span>
+            </div>            
+            <!-- TYPEAHEAD -->
+            <input ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('TypeAhead')"
+                type="text" 
+                ng-model="entity[lookupForeignKeyProperty]" 
+                ng-disabled="!editAuthorized"
+                placeholder="None Selected" 
+                typeahead="item as item for item in loadTypeAhead($viewValue)" 
+                typeahead-input-formatter="formatTypeAheadItem($model)"
+                typeahead-loading="isLoadingTypeAhead" 
+                typeahead-no-results="isTypeAheadResultSetEmpty" 
+                typeahead-on-select="entity[lookupForeignKeyProperty]=$item['$id']"
+                class="form-control"
+                ng-class="{'m-b': !uidl.$skin.zeroPadding}"
+                id="{{::uniqueFieldId}}"
+                name="{{::uniqueFieldId}}">
+            <!-- FILE UPLOAD -->
+            <div ng-if="uidl.fieldType==='FileUpload'" 
+                 id="{{::uniqueFieldId}}"
+                 class="dropzone" 
+                 style="border-radius:2px;border: 2px lightgray dotted;background-color:white;">
+                 <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
+            </div>
+            <div ng-if="uidl.fieldType==='FileUpload'" ng-class="{'m-b': !uidl.$skin.zeroPadding}">
+                <a href="" ng-click="clearDropzone()" ng-disabled="!editAuthorized">Clear</a>
+            </div>
+            <!-- IMAGE + UPLOAD -->
+            <div class="row" ng-if="uidl.fieldType==='ImageUpload'">
+                <div ng-if="uidl.fieldType==='ImageUpload'" class="col-sm-3">
+                    <img ng-show="entity[uidl.propertyName]" ng-src="{{entity[uidl.propertyName]}}" err-src="app/skin/assets/img/avatar_missing.jpg" class="img-circle circle-border m-b-md" width="128" height="128" alt="profile photo">
+                    <img ng-hide="entity[uidl.propertyName]" ng-src="app/skin/assets/img/avatar_missing.jpg" class="img-circle circle-border m-b-md" width="128" height="128" alt="profile photo missing">
+                </div>
+                <div ng-if="uidl.fieldType==='ImageUpload'" 
+                     class="col-sm-5 dropzone m-l" 
+                     id="{{::uniqueFieldId}}"
+                     style="border-radius:2px;border: 2px lightgray dotted;background-color:white;">
+                     <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
+                </div>
+            </div>
+        </div>
+    </script>
+    
+    
     <script type="text/javascript">
+
+        /*
+        '<div class="editable">' +
+        '<div class="global-dropdown-toggle">' +
+        '<i class="fa fa-lg fa-caret-down"></i>' +
+        '<span class="dropdown-cell-text">3 item(s)</span>' + 
+        '</div>' +
+        '<div class="global-dropdown-content">' +
+        '<uidl-widget uidl="uidl" parent-uidl="parentUidl" parent-model="data"></uidl-widget>' +
+        '</div>' +
+        '</div>'
+        */
+    
         function initWidget_FormField($scope) {
             var dateTimePickerValueChanged = function(e) {
                 if (e.date===false) {
@@ -3515,6 +3888,53 @@ HEAD, JS/CSS LINKS
                 showMethod: 'slideDown',
                 timeOut: 4000
             };
+            
+            var isDivGlobalDropdownVisible = false;
+            var divGlobalDropdownPopup = $('#global_div_dropdown_popup');
+            var divGlobalDropdownContent = null;
+            var divGlobalDropdownContentParent = null;
+
+            function showGlobalDropdownContent(event) {
+                if (!isDivGlobalDropdownVisible) {
+                    var targetQ = $(event.target);
+                    var toggleQ = targetQ.closest('.global-dropdown-toggle');
+                    var toggleOffset = toggleQ.offset();
+                    var toggleHeight = toggleQ.height();
+                    var toggleWidth = toggleQ.width();
+                    
+                    divGlobalDropdownContent = toggleQ.next();
+                    divGlobalDropdownContentParent = divGlobalDropdownContent.parent();
+                    divGlobalDropdownContent.appendTo(divGlobalDropdownPopup);
+                    divGlobalDropdownContent.css({display:'block'});
+                    divGlobalDropdownPopup.css({
+                        top: (toggleOffset.top + toggleHeight) + 'px', 
+                        left: toggleOffset.left + 'px', 
+                        width: toggleWidth + 'px', 
+                        //height: '300px', 
+                        display: 'block'
+                    });
+                    isDivGlobalDropdownVisible = true;
+                    event.stopPropagation();
+                    $('body').on('click', hideGlobalDropdownContent);
+                }
+            }
+            
+            function hideGlobalDropdownContent(event) {
+                if ($(event.target).parents('#global_div_dropdown_popup').length > 0) {
+                    return;
+                }
+                
+                if (isDivGlobalDropdownVisible) {
+                    divGlobalDropdownPopup.css({display:'none'});
+                    divGlobalDropdownContent.css({display:'none'});
+                    divGlobalDropdownContent.appendTo(divGlobalDropdownContentParent);
+                    isDivGlobalDropdownVisible = false;
+                    event.stopPropagation();
+                    $('body').off('click', hideGlobalDropdownContent);
+                }
+            }
+
+            $('body').on('click', '.global-dropdown-toggle', showGlobalDropdownContent);
         });
         
         angular.module('theApp').run(['$rootScope', 'uidlService', 
@@ -3558,7 +3978,7 @@ HEAD, JS/CSS LINKS
                 }
             };
             $rootScope.beginBrowserDownload = function(url) {
-                document.getElementById('iframe_content_download').src = url;
+                document.getElementById('global_iframe_content_download').src = url;
             };
             $rootScope.$watch('uidl', function(newValue, oldValue) {
                 if ($rootScope.uidl && !$rootScope.pageCodeSnippetsInserted) {

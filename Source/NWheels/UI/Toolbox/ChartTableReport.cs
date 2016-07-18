@@ -18,6 +18,7 @@ namespace NWheels.UI.Toolbox
         where TResultScript : ITransactionScript<TContext, TCriteria, IQueryable<TResultRow>>
         where TContext : class
         where TCriteria : class
+        where TResultRow : class
     {
         public ChartTableReport(string idName, ControlledUidlNode parent)
             : base(idName, parent)
