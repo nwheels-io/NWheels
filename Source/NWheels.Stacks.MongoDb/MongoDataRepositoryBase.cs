@@ -387,6 +387,11 @@ namespace NWheels.Stacks.MongoDb
 
             private static Stack<MongoDataRepositoryBase> GetOrAddStack(Type implType)
             {
+                if (implType == null && _s_stackByImplType.Count == 1)
+                {
+                    return _s_stackByImplType.Values.First();
+                }
+
                 foreach ( var entry in _s_stackByImplType )
                 {
                     if ( implType.IsAssignableFrom(entry.Key) )
