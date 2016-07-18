@@ -2941,7 +2941,7 @@ function ($timeout, $rootScope, uidlService, entityService) {
 
             $scope.lookupObjectSelected = function(selectedObject) {
                 $scope.hideLookupSearchModal();
-                $scope.lookupContext.targetEntity[$scope.lookupContext.targetProperty] = selectedObject[$scope.lookupContext.lookupValueProperty];
+                $scope.lookupContext.targetEntity[$scope.lookupContext.targetProperty] = selectedObject[$scope.lookupContext.lookupValueProperty] || selectedObject['$id'];
                 $scope.lookupContext = null;
             };
 
