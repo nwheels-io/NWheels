@@ -3045,6 +3045,11 @@ namespace NWheels.UI
                     return true;
                 }
 
+                if (metaProperty.IsCalculated)
+                {
+                    return true;
+                }
+
                 return (metaProperty.RelationalMapping != null && metaProperty.RelationalMapping.IsEmbeddedInParent);
             }
         }
