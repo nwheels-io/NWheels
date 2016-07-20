@@ -858,6 +858,7 @@ HEAD, JS/CSS LINKS
             <li ng-repeat="item in item.subItems" ng-if="isUidlAuthorized(item)" ng-include="'app/uidl-element-template/ManagementConsole-menu-item'"></li>
         </ul>
     </script>
+
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - CONTAINER
@@ -1454,6 +1455,11 @@ HEAD, JS/CSS LINKS
                                     }
                                     if (editorField && editorField.lookupValueProperty) {
                                         queryBuilder.include($scope.gridColumns[i].expression + '.' + editorField.lookupValueProperty);
+                                    }
+                                    if (editorField && editorField.lookupQueryFilter) {
+                                        for (var j = 0; j < editorField.lookupQueryFilter.length; j++) {
+                                            queryBuilder.include(editorField.lookupQueryFilter[j].propertyName);
+                                        }
                                     }
                                 }
                             }
@@ -2932,7 +2938,7 @@ HEAD, JS/CSS LINKS
                 </div>
                 <div class="global-dropdown-content" style="display:none;">
                     <div class="grid-inline-edit-dropdown-panel">
-                        <uidl-widget uidl="uidl.nestedWidget" parent-uidl="uidl"></uidl-widget>
+                        <uidl-widget uidl="uidl.nestedWidget" parent-uidl="uidl" parent-model="entity"></uidl-widget>
                     </div>
                 </div>
             </div>
@@ -4014,6 +4020,18 @@ HEAD, JS/CSS LINKS
             }
         }]);
 
+        /*angular.module('theApp').directive('mainMenuItrem', ['uidlService', 'entityService', function (uidlService, entityService) {
+            return {
+                restrict: 'A',
+                scope: {
+                    item: '='
+                },
+                template: 'app/uidl-element-template/ManagementConsole-menu-item'
+                link: function ($scope, elem, attrs, ctrl) {
+                }
+            }
+        }]);*/
+        
         function getCssRulePropertyValue(stylePropertyName, selector, sheet) {
             var sheets = typeof sheet !== 'undefined' ? [sheet] : document.styleSheets;
             for (var i = 0, l = sheets.length; i < l; i++) {

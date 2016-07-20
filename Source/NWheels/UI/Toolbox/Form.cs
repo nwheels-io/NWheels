@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -207,6 +208,7 @@ namespace NWheels.UI.Toolbox
                 fieldSelector,
                 lookupValueProperty,
                 lookupDisplayProperty,
+                null,
                 lookupFilterProperty,
                 lookupFilterValue,
                 applyDistinctToResults);
@@ -218,6 +220,7 @@ namespace NWheels.UI.Toolbox
             Expression<Func<TDerivedEntity, object>> fieldSelector,
             Expression<Func<TLookupEntity, object>> lookupValueProperty,
             Expression<Func<TLookupEntity, object>> lookupDisplayProperty,
+            Expression<Func<TLookupEntity, ViewModel<Empty.Data, Empty.State, TDerivedEntity>, bool>> lookupFilterExpression = null,
             Expression<Func<TLookupEntity, object>> lookupFilterProperty = null,
             object lookupFilterValue = null,
             bool applyDistinctToResults = true)
@@ -238,12 +241,12 @@ namespace NWheels.UI.Toolbox
 
             if (lookupFilterProperty != null)
             {
-                field.LookupQueryFilter = new List<FormFieldLookupFilter>() {
-                    new FormFieldLookupFilter(
-                        lookupFilterProperty.GetPropertyInfo().Name, 
-                        ApplicationEntityService.QueryOptions.EqualOperator.TrimLead(":"), 
-                        lookupFilterValue.ToStringOrDefault())
-                };
+                DefineSimpleLookupFilter<TDerivedEntity, TLookupEntity>(field, lookupFilterProperty, lookupFilterValue);
+            }
+
+            if (lookupFilterExpression != null)
+            {
+                field.LookupQueryFilter = LookupDataFilter.DefineByExpression(lookupFilterExpression);
             }
 
             return this;
@@ -495,6 +498,19 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private void DefineSimpleLookupFilter<TDerivedEntity, TLookupEntity>(FormField field, Expression<Func<TLookupEntity, object>> filterProperty, object filterValue)
+            where TDerivedEntity : TEntity
+        {
+            field.LookupQueryFilter = new List<LookupDataFilter>() {
+                new LookupDataFilter(
+                    filterProperty.GetPropertyInfo().Name,
+                    ApplicationEntityService.QueryOptions.EqualOperator.TrimLead(":"),
+                    filterValue.ToStringOrDefault())
+            };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public interface IFormData
         {
             TEntity Entity { get; set; }
@@ -559,7 +575,7 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string LookupDisplayProperty { get; set; }
         [DataMember]
-        public List<FormFieldLookupFilter> LookupQueryFilter { get; set; }
+        public List<LookupDataFilter> LookupQueryFilter { get; set; }
         [DataMember]
         public string ImageTypeProperty { get; set; }
         [DataMember]
@@ -752,6 +768,7 @@ namespace NWheels.UI.Toolbox
                     {
                         widgetInstance.TemplateName = "LookupDualList";
                     }
+                    ((IUidlLookupGrid)widgetInstance).QueryFilter = this.LookupQueryFilter;
                     break;
                 case FormFieldType.InlineGrid:
                     widgetClosedType = typeof(Crud<>).MakeGenericType(nestedMetaType.ContractType);
@@ -974,13 +991,22 @@ namespace NWheels.UI.Toolbox
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-    public class FormFieldLookupFilter
+    public class LookupDataFilter
     {
-        public FormFieldLookupFilter(string propertyName, string @operator, string stringValue)
+        public LookupDataFilter(string propertyName, string @operator, string stringValue)
         {
             PropertyName = propertyName;
             Operator = @operator;
             StringValue = stringValue;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public LookupDataFilter(MemberExpression propertySelector, ExpressionType operatorType, MemberExpression valueExpression)
+        {
+            PropertyName = propertySelector.ToString().TrimLead("x.");
+            Operator = ApplicationEntityService.QueryFilterItem.GetOperatorFromExpression(operatorType);
+            ValueExpression = valueExpression.ToString();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -991,6 +1017,47 @@ namespace NWheels.UI.Toolbox
         public string Operator { get; set; }
         [DataMember]
         public string StringValue { get; set; }
+        [DataMember]
+        public string ValueExpression { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static List<LookupDataFilter> DefineByExpression(LambdaExpression expression)
+        {
+            var normalized = expression.ToNormalizedNavigationExpression("x", "model");
+            var binaryBody = (BinaryExpression)normalized.Body;
+
+            List<LookupDataFilter> filters = null;
+            ConvertExpressionToLookupDataFilters(ref filters, binaryBody);
+
+            return filters;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void ConvertExpressionToLookupDataFilters(ref List<LookupDataFilter> filters, BinaryExpression binary)
+        {
+            switch (binary.NodeType)
+            {
+                case ExpressionType.AndAlso:
+                    ConvertExpressionToLookupDataFilters(ref filters, (BinaryExpression)binary.Left);
+                    ConvertExpressionToLookupDataFilters(ref filters, (BinaryExpression)binary.Right);
+                    break;
+                case ExpressionType.Equal:
+                case ExpressionType.NotEqual:
+                    if (filters == null)
+                    {
+                        filters = new List<LookupDataFilter>();
+                    }
+                    filters.Add(new LookupDataFilter(
+                        (MemberExpression)binary.Left,
+                        binary.NodeType,
+                        (MemberExpression)binary.Right));
+                    break;
+                default:
+                    throw new NotSupportedException("LookupDataFilter: unsupported expression type - " + binary.NodeType);
+            }
+        }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

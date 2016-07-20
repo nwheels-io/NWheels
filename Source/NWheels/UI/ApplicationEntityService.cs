@@ -1625,6 +1625,25 @@ namespace NWheels.UI
                     { QueryOptions.StringStartsWithOperator, (left, right) => Expression.Call(_s_stringExtensionsStartsWithIgnoreCaseMethod, left, right) },
                     { QueryOptions.StringEndsWithOperator, (left, right) => Expression.Call(_s_stringExtensionsEndsWithIgnoreCaseMethod, left, right) },
                 };
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static readonly Dictionary<ExpressionType, string> _s_binaryOperatorByExpressionType =
+                new Dictionary<ExpressionType, string>() {
+                    { ExpressionType.Equal, QueryOptions.EqualOperator },
+                    { ExpressionType.NotEqual, QueryOptions.NotEqualOperator },
+                    { ExpressionType.GreaterThan, QueryOptions.GreaterThanOperator },
+                    { ExpressionType.GreaterThanOrEqual, QueryOptions.GreaterThanOrEqualOperator },
+                    { ExpressionType.LessThan, QueryOptions.LessThanOperator },
+                    { ExpressionType.LessThanOrEqual, QueryOptions.LessThanOrEqualOperator }
+                };
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static string GetOperatorFromExpression(ExpressionType nodeType)
+            {
+                return _s_binaryOperatorByExpressionType[nodeType];
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -2236,7 +2236,12 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 
             scope.queryLookupRecords = function () {
                 scope.lookupRecords = null;
-                scope.entityService.queryEntity(scope.uidl.entityName).then(function (data) {
+                scope.entityService.queryEntity(scope.uidl.entityName, function(query) {
+                    if (scope.uidl.queryFilter) {
+                        var filterValueContext = createInputContext(scope.model, scope.parentModel);
+                        query.applyUidlFilters(scope.uidlService, scope.uidl.queryFilter, filterValueContext);
+                    }
+                }).then(function (data) {
                     scope.lookupRecords = data.ResultSet;
                     var modelAsEnumerable = Enumerable.From(scope.model); 
                     for (var i = 0; i < scope.lookupRecords.length; i++) {
@@ -2823,10 +2828,8 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
                     if ($scope.hasUidlModifier('DropDown') && !$scope.hasUidlModifier('TypeAhead')) {
                         $scope.entityService.queryEntity($scope.uidl.lookupEntityName, function(query) {
                             if ($scope.uidl.lookupQueryFilter) {
-                                for (var i = 0; i < $scope.uidl.lookupQueryFilter.length ; i++) {
-                                    var filterItem = $scope.uidl.lookupQueryFilter[i];
-                                    query.where(filterItem.propertyName, filterItem.stringValue, filterItem.operator);
-                                }
+                                var filterValueContext = createInputContext($scope.model, $scope.entity);
+                                query.applyUidlFilters($scope.uidlService, $scope.uidl.lookupQueryFilter, filterValueContext);
                             }
                         }).then(function(data) {
                             $scope.lookupResultSet = data.ResultSet;

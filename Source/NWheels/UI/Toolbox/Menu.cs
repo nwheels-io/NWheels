@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Serialization;
+using NWheels.DataObjects;
 using NWheels.Extensions;
 using NWheels.UI.Uidl;
 
@@ -66,6 +67,10 @@ namespace NWheels.UI.Toolbox
                 {
                     DefineItemAction(anonymous, property, item);
                 }
+                else if (typeof(ItemRepeater).IsAssignableFrom(property.PropertyType))
+                {
+                    DefineItemRepeater(anonymous, property, item);
+                }
             }
         }
 
@@ -106,16 +111,37 @@ namespace NWheels.UI.Toolbox
 
         private static void DefineItemAction(object anonymous, PropertyInfo property, MenuItem item)
         {
-            item.Action = (ItemAction)property.GetValue(anonymous);
+            DefineItemAction((ItemAction)property.GetValue(anonymous), item);
+        }
 
-            if ( item.Action.Text != null )
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void DefineItemAction(ItemAction action, MenuItem item)
+        {
+            item.Action = action;
+
+            if (item.Action.Text != null)
             {
                 item.Text = item.Action.Text;
             }
 
-            if ( item.Action.Icon != null )
+            if (item.Action.Icon != null)
             {
                 item.Icon = item.Action.Icon;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void DefineItemRepeater(object anonymous, PropertyInfo property, MenuItem item)
+        {
+            var repeater = (ItemRepeater)property.GetValue(anonymous);
+            
+            repeater.ApplyToItem(item);
+
+            if (repeater.ItemAction != null)
+            {
+                DefineItemAction(repeater.ItemAction, item);
             }
         }
 
@@ -129,6 +155,52 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public delegate void DescribeActionCallback(PresenterBuilder<MenuItem, Empty.Data, Empty.State>.BehaviorBuilder<Empty.Payload> behavior);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static class Repeat
+        {
+            public static ItemRepeater FromValues(object[] staticValues)
+            {
+                return new StaticListItemRepeater() {
+                    StaticValues = staticValues.ToDictionary(v => v, v => v.ToString())
+                };
+            }
+
+            //--------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static ItemRepeater FromValues(Dictionary<object, string> staticValues)
+            {
+                return new StaticListItemRepeater() {
+                    StaticValues = staticValues
+                };
+            }
+
+            //--------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static ItemRepeater FromInheritorsOf<TEntity>(bool includeBase = false)
+                where TEntity : class
+            {
+                return new DerivedTypeItemRepeater() {
+                    AncestorType = typeof(TEntity),
+                };
+            }
+
+            //--------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static ItemRepeater FromQuery<TEntity>(
+                Expression<Func<ViewModel<Empty.Data, Empty.State, Empty.Input>, bool>> filter = null,
+                Expression<Func<ViewModel<Empty.Data, Empty.State, Empty.Input>, object>> displayProperty = null,
+                Expression<Func<ViewModel<Empty.Data, Empty.State, Empty.Input>, object>> valueProperty = null)
+                where TEntity : class
+            {
+                return new ServerQueryItemRepeater() {
+                    EntityContract = typeof(TEntity),
+                    DisplayPropertyExpression = displayProperty != null ? displayProperty.ToNormalizedNavigationString("model") : null,
+                    ValuePropertyExpression = valueProperty != null ? valueProperty.ToNormalizedNavigationString("model") : null
+                };
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -251,6 +323,73 @@ namespace NWheels.UI.Toolbox
             public string Text { get; set; }
             public string Icon { get; set; }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public abstract class ItemRepeater
+        {
+            public ItemRepeater WithAction(ItemAction action)
+            {
+                this.ItemAction = action;
+                return this;
+            }
+            internal abstract void ApplyToItem(MenuItem item);
+            internal ItemAction ItemAction { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class DerivedTypeItemRepeater : ItemRepeater
+        {
+            internal override void ApplyToItem(MenuItem item)
+            {
+                var ancestorMetaType = item.MetadataCache.GetTypeMetadata(this.AncestorType);
+                var derivedTypes = new List<ITypeMetadata>();
+
+                if (IncludeAbstract || !ancestorMetaType.IsAbstract)
+                {
+                    derivedTypes.Add(ancestorMetaType);
+                }
+
+                derivedTypes.AddRange(ancestorMetaType.DerivedTypes.Where(t => IncludeAbstract || !t.IsAbstract));
+
+                item.Repeater = MenuItem.RepeaterType.Static;
+                item.RepeaterStaticValues = derivedTypes.ToDictionary(t => (object)t.Name, t => t.QualifiedName);
+            }
+            internal Type AncestorType { get; set; }
+            internal bool IncludeAbstract { get; set; }
+        }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class StaticListItemRepeater : ItemRepeater
+        {
+            internal override void ApplyToItem(MenuItem item)
+            {
+                item.Repeater = MenuItem.RepeaterType.Static;
+                item.RepeaterStaticValues = StaticValues;
+            }
+            internal Dictionary<object, string> StaticValues { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ServerQueryItemRepeater : ItemRepeater
+        {
+            internal override void ApplyToItem(MenuItem item)
+            {
+                var metaType = item.MetadataCache.GetTypeMetadata(this.EntityContract);
+
+                item.Repeater = MenuItem.RepeaterType.Query;
+                item.RepeaterQueryEntityName = metaType.QualifiedName;
+                item.RepeaterQueryDisplayProperty = (DisplayPropertyExpression ?? (metaType.DisplayNameProperty != null ? metaType.DisplayNameProperty.Name : null));
+                item.RepeaterQueryValueProperty = (ValuePropertyExpression ?? (metaType.EntityIdProperty != null ? metaType.EntityIdProperty.Name : null));
+            }
+            internal Type EntityContract { get; set; }
+            internal string DisplayPropertyExpression { get; set; }
+            internal string ValuePropertyExpression { get; set; }
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -283,6 +422,16 @@ namespace NWheels.UI.Toolbox
         public int Level { get; set; }
         [DataMember]
         public List<MenuItem> SubItems { get; set; }
+        [DataMember]
+        public RepeaterType Repeater { get; set; }
+        [DataMember]
+        public Dictionary<object, string> RepeaterStaticValues { get; set; }
+        [DataMember]
+        public string RepeaterQueryEntityName { get; set; }
+        [DataMember]
+        public string RepeaterQueryDisplayProperty { get; set; }
+        [DataMember]
+        public string RepeaterQueryValueProperty { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -315,6 +464,15 @@ namespace NWheels.UI.Toolbox
                     this.Authorization.RequiredClaims.UnionWith(value.Authorization.RequiredClaims);
                 }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public enum RepeaterType
+        {
+            None,
+            Static,
+            Query
         }
     }
 }

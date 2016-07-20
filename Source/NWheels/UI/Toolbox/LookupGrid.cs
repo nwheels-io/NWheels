@@ -12,7 +12,7 @@ using NWheels.UI.Uidl;
 namespace NWheels.UI.Toolbox
 {
     [DataContract(Namespace = UidlDocument.DataContractNamespace, Name = "LookupGrid")]
-    public class LookupGrid<TLookupId, TLookupRow> : DataGrid<TLookupRow>
+    public class LookupGrid<TLookupId, TLookupRow> : DataGrid<TLookupRow>, IUidlLookupGrid
         where TLookupRow : class
     {
         public LookupGrid(string idName, ControlledUidlNode parent)
@@ -26,6 +26,26 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public LookupGrid<TLookupId, TLookupRow> Filter<TInput>(Expression<Func<TInput, ViewModel<Empty.Data, Empty.State, TLookupRow>, bool>> expression)
+        {
+            QueryFilter = LookupDataFilter.DefineByExpression(expression);
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public List<LookupDataFilter> QueryFilter { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public UidlNotification<TLookupId[]> ModelSetter { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface IUidlLookupGrid
+    {
+        List<LookupDataFilter> QueryFilter { get; set; }
     }
 }

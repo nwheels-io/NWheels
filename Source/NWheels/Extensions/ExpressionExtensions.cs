@@ -118,6 +118,29 @@ namespace NWheels.Extensions
             return string.Join(".", stepStrings);
         }
 
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static LambdaExpression ToNormalizedNavigationExpression(this LambdaExpression expression, params string[] formalParameterNames)
+        {
+            if (expression == null)
+            {
+                return null;
+            }
+
+            if (expression.Body is UnaryExpression && expression.Body.NodeType == ExpressionType.Convert)
+            {
+                expression = Expression.Lambda(((UnaryExpression)expression.Body).Operand, expression.Parameters);
+            }
+
+            for (int i = 0; i < formalParameterNames.Length; i++)
+            {
+                EnsureParameterName(expression.Parameters[i], formalParameterNames[i]);
+            }
+
+            return expression;
+        }
+
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static string[] ToNormalizedNavigationStringArray(this LambdaExpression navigationExpression, params string[] formalParameterNames)

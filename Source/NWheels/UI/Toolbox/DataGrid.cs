@@ -321,8 +321,6 @@ namespace NWheels.UI.Toolbox
             public UidlAuthorization Authorization { get; set; }
             [DataMember, ManuallyAssigned]
             public WidgetUidlNode NestedWidget { get; set; }
-            [DataMember, ManuallyAssigned]
-            public WidgetUidlNode EditorWidget { get; set; }
             [DataMember]
             public string IconPropertyName { get; set; }
             [DataMember]

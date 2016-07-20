@@ -278,6 +278,27 @@ function EntityQueryBuilder(entityName, commandUrl) {
     
     //-----------------------------------------------------------------------------------------------------------------
 
+    this.applyUidlFilters = function(uidlService, filterArray, filterValueContext) {
+        for (var i = 0; i < filterArray.length ; i++) {
+            var filterItem = filterArray[i];
+            var filterValue = null;
+            
+            if (filterItem.valueExpression) {
+                filterValue = '' + uidlService.selectValue(filterValueContext, filterItem.valueExpression);
+            } else {
+                filterValue = filterItem.stringValue;
+            }
+            
+            var normalizedOperator = (filterItem.operator.substring(0, 1) == ':' ? 
+                filterItem.operator.substring(1) : 
+                filterItem.operator);
+
+            this.where(filterItem.propertyName, filterValue, normalizedOperator);
+        }
+    }
+    
+    //-----------------------------------------------------------------------------------------------------------------
+
     this.getQueryString = function () {
         var queryString = '';
         var delimiter = ((me._commandUrl && me._commandUrl.indexOf('?') > -1) ? '&' : '?');   
