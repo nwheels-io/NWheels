@@ -75,6 +75,13 @@ namespace NWheels.UI
             return new BehaviorBuilder<TItem>(_ownerNode, commandGroup.Executing, _uidl);
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void Defer(Action initializer)
+        {
+            _uidl.AddDeferredInitializer(initializer);
+        }
+
         ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         //TElement New<TElement>() where TElement : IUIElement;

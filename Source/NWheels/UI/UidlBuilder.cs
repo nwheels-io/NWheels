@@ -27,6 +27,7 @@ namespace NWheels.UI
         private readonly ITypeMetadataCache _metadataCache;
         private readonly UidlDocument _document;
         private readonly HashSet<LocaleEntryKey> _translatables;
+        private readonly List<Action> _deferredInitializers;
         private UidlApplication _applicationBeingAdded = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -45,6 +46,7 @@ namespace NWheels.UI
             _registeredExtensions = registeredExtensions.ToArray();
             _document = new UidlDocument();
             _translatables = new HashSet<LocaleEntryKey>();
+            _deferredInitializers = new List<Action>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -63,6 +65,11 @@ namespace NWheels.UI
                     InstantiateDeclaredMemberNodes(application);
                     buildable.Build(this);
                     buildable.DescribePresenter(this);
+
+                    foreach (var initializer in _deferredInitializers)
+                    {
+                        initializer();
+                    }
                 }
 
                 _translatables.UnionWith(application.GetTranslatables());
@@ -71,6 +78,7 @@ namespace NWheels.UI
             finally
             {
                 _applicationBeingAdded = null;
+                _deferredInitializers.Clear();
             }
         }
 
@@ -186,6 +194,13 @@ namespace NWheels.UI
         internal void DescribeNodePresenters(params AbstractUidlNode[] nodes)
         {
             nodes.OfType<IBuildableUidlNode>().ForEach(node => node.DescribePresenter(this));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal void AddDeferredInitializer(Action initializer)
+        {
+            _deferredInitializers.Add(initializer);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

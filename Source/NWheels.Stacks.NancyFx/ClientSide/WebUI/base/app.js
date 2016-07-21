@@ -1821,7 +1821,14 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 scope.saveChanges(scope.model.entity);
             });
             scope.$on(scope.uidl.grid.qualifiedName + ':InlineSave:Executing', function (event, entity) {
-                scope.saveChanges(entity);
+				if (scope.uidl.grid.inlineEditor) {
+					scope.$emit(scope.uidl.grid.inlineEditor.qualifiedName + ':Submitting', entity);
+					$timeout(function() {
+						scope.saveChanges(entity);
+					});
+				} else {
+					scope.saveChanges(entity);
+				}
             });
             scope.$on(scope.uidl.qualifiedName + ':Cancel:Executing', function (event) {
                 scope.rejectChanges(scope.model.entity);

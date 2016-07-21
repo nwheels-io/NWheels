@@ -100,7 +100,7 @@ namespace NWheels.Extensions
             var arrowToken = "=>";
             var leftSideLength = expressionString.IndexOf(arrowToken) + arrowToken.Length;
 
-            var rightSideString = expressionString.Substring(leftSideLength).TrimStart().Replace(")", "");
+            var rightSideString = expressionString.Substring(leftSideLength).TrimStart().TrimLead("Convert(").Replace(")", "");
             return rightSideString;
         }
 
