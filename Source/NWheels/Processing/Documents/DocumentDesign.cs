@@ -14,14 +14,6 @@ namespace NWheels.Processing.Documents
 {
     public class DocumentDesign
     {
-        public DocumentDesign(string idName, Element contents)
-        {
-            this.IdName = idName;
-            this.Contents = contents;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public DocumentDesign(
             string idName, 
             Element contents,
