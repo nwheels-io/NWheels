@@ -1403,6 +1403,17 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    m_controllerImplementations['MenuItem'] = {
+        implement: function (scope) {
+            scope.displayItems = [{
+                text: scope.uidl.text,
+                icon: scope.uidl.icon
+            }];
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     m_controllerImplementations['Gauge'] = {
         implement: function (scope) {
 			scope.$on(scope.uidl.modelSetterQualifiedName, function (event, data) {

@@ -1,3 +1,46 @@
+## Metaphor
+
+ - _**N**_ stands for .NET
+ - _**Wheels**_ stands for wheels being reinvented over and over again by numerous software projects.
+
+## Motivation
+
+Observations made while taking part in various enterprise application development projects:
+
+ - Commonality in the needs of these projects is significantly higher than variability.
+   - This is true for both the application being developed, and the DevOps/ALM toolchain and processes.
+   - Most of developers' efforts are not unique, but rather repetitive and mechanical. These can be minimized or eliminated.
+  
+ - Every project invents mostly the same types of wheels for itself. The downside:
+   - It takes significant effort and budget to build reliable wheels of good quality.
+   - Not every project has enough people on board with proper background and expertise, in order do build the wheels right. Bad quality then hits back.
+  
+ - Projects that run on a tight budget, and must deliver business value quickly in order to survive (e.g. start-ups), 
+   have no choice but to focus solely on delivering business value, at first stages.
+  
+ - Projects that focus solely on delivering business value, and abandon infrastructural efforts, 
+   hit the wall later, as the system grows, more features are requested, and high evolution rate is expected.
+   - What happens then, is that either significant resources are invested into re-engineering of the system, or even more resources are invested in proceeding as is. 
+
+Based on the above observations, I conclude that:
+
+ - Significant amount of efforts can be saved in every project, if the efforts spent on non-unique tasks are minimized or eliminated.
+
+ - Moreover, if an infrastructural solution exists, which out-of-the-box supplies common needs and eliminates non-unique tasks, and yet is easily adaptable to requirements of a specific project, the resources and the timeframes required by the project can be reduced dramatically.
+
+ - 
+
+## Goals
+
+
+ - Put an end to enormous waste of resources spent by every project on its own. 
+ - Collaborate to build an infrastructural ecosystem that supplies common needs of most of .NET-based enterprise application projects.
+ - Let projects work both right and fast from day one.
+ - Let projects deliver quickly by minimizing developers efforts on most of the tasks, which are repetitive and mechanical rather than unique. 
+
+ 
+ 
+
 Metaphor
 
 - N stands for .NET

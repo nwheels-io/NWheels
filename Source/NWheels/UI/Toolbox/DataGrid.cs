@@ -289,6 +289,14 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public GridColumn DisplayCollectionItemsAs<TItem>(Expression<Func<TItem, object>> propertySelector)
+            {
+                this.ItemDisplayAsExpression = propertySelector.ToNormalizedNavigationString(skipSteps: 1);
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             [DataMember]
             public FieldSpecialName SpecialName { get; set; }
             [DataMember]
@@ -303,6 +311,8 @@ namespace NWheels.UI.Toolbox
             public WidgetAlignment Alignment { get; set; }
             [DataMember]
             public string Expression { get; set; }
+            [DataMember]
+            public string ItemDisplayAsExpression { get; set; }
             [DataMember]
             public string[] Navigations { get; set; }
             [DataMember]

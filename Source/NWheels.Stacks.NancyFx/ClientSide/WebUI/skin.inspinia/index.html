@@ -289,7 +289,6 @@ HEAD, JS/CSS LINKS
         }
         .ui-jqgrid tr.jqgrow td {
             vertical-align: top !important;
-            overflow: visible !important;
         }
         .dropdown.editable .dropdown-cell {
             cursor: pointer;
@@ -1202,6 +1201,23 @@ HEAD, JS/CSS LINKS
                                 sopt: ['eq'],
                                 value: optionString, 
                                 defaultValue: '' 
+                            };
+                        }
+                        break;
+                    case 'LookupMany':
+                        if (metaColumn.itemDisplayAsExpression) {
+                            modelItem.formatter = function(cellvalue, options, rowObject) {
+                                if (Array.isArray(cellvalue)) {
+                                    var text = '';
+                                    for (var i = 0 ; i < cellvalue.length ; i++) {
+                                        if (i > 0) {
+                                            text += ', ';
+                                        }
+                                        text += cellvalue[i][metaColumn.itemDisplayAsExpression];
+                                    }
+                                    return text;
+                                }
+                                return cellvalue;
                             };
                         }
                         break;
@@ -4020,17 +4036,17 @@ HEAD, JS/CSS LINKS
             }
         }]);
 
-        /*angular.module('theApp').directive('mainMenuItrem', ['uidlService', 'entityService', function (uidlService, entityService) {
+        angular.module('theApp').directive('mainMenuItrem', ['uidlService', 'entityService', function (uidlService, entityService) {
             return {
                 restrict: 'A',
                 scope: {
                     item: '='
                 },
-                template: 'app/uidl-element-template/ManagementConsole-menu-item'
+                template: 'app/uidl-element-template/ManagementConsole-menu-item',
                 link: function ($scope, elem, attrs, ctrl) {
                 }
             }
-        }]);*/
+        }]);
         
         function getCssRulePropertyValue(stylePropertyName, selector, sheet) {
             var sheets = typeof sheet !== 'undefined' ? [sheet] : document.styleSheets;

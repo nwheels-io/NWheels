@@ -471,8 +471,8 @@ namespace NWheels.UI.Toolbox
         public enum RepeaterType
         {
             None,
-            Static,
-            Query
+            Static = 10,
+            Query = 20
         }
     }
 }
