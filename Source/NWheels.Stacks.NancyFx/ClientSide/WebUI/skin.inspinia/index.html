@@ -847,8 +847,8 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - MANAGEMENT CONSOLE MENU ITEM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/ManagementConsole-menu-item">
-        <a ng-class="{bold: item.level==0}" ng-show="item.subItems.length==0" href="#" ng-click="$emit(item.notifications[1].qualifiedName)"><i ng-if="item.icon" style="width:19px;" class="fa fa-{{::item.icon}}"></i>{{::translate(item.text)}}</a>
-        <a href="#" ng-show="item.subItems.length > 0">
+        <a ng-class="{bold: item.level==0}" ng-show="item.subItems.length==0" href="#" ng-click="$emit(item.notifications[1].qualifiedName, item.value)"><i ng-if="item.icon" style="width:19px;" class="fa fa-{{::item.icon}}"></i>{{::translate(item.text)}}</a>
+        <a href="#" ng-show="::item.subItems.length > 0" ng-controller="menuSubItemsExpander" ng-click="toggleSubItems()">
             <i ng-if="item.icon" style="width:16px;" class="fa fa-{{::item.icon}}"></i>
             <span class="nav-label" ng-class="{bold: item.level==0}">{{::translate(item.text)}}</span>
             <span class="fa arrow"></span>
@@ -4036,18 +4036,6 @@ HEAD, JS/CSS LINKS
             }
         }]);
 
-        angular.module('theApp').directive('mainMenuItrem', ['uidlService', 'entityService', function (uidlService, entityService) {
-            return {
-                restrict: 'A',
-                scope: {
-                    item: '='
-                },
-                template: 'app/uidl-element-template/ManagementConsole-menu-item',
-                link: function ($scope, elem, attrs, ctrl) {
-                }
-            }
-        }]);
-        
         function getCssRulePropertyValue(stylePropertyName, selector, sheet) {
             var sheets = typeof sheet !== 'undefined' ? [sheet] : document.styleSheets;
             for (var i = 0, l = sheets.length; i < l; i++) {

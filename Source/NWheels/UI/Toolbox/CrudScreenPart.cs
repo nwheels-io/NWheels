@@ -12,7 +12,7 @@ using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
 {
-    public class CrudScreenPart<TEntity> : ScreenPartBase<CrudScreenPart<TEntity>, Empty.Input, Empty.Data, CrudScreenPart<TEntity>.IState>
+    public class CrudScreenPart<TEntity> : ScreenPartBase<CrudScreenPart<TEntity>, object, Empty.Data, CrudScreenPart<TEntity>.IState>
         where TEntity : class
     {
         public CrudScreenPart(string idName, UidlApplication parent)
@@ -91,7 +91,8 @@ namespace NWheels.UI.Toolbox
                         alt => alt.Copy(entityName).To(vm => vm.State.ImportContext.EntityName),
                         alt => alt.Copy(entityName).To(vm => vm.State.ExportContext.EntityName))
                     .Then(b => b.Broadcast(ImportForm.ContextSetter).WithPayload(vm => vm.State.ImportContext).TunnelDown()
-                    .Then(bb => bb.Broadcast(ExportForm.ContextSetter).WithPayload(vm => vm.State.ExportContext).TunnelDown()));
+                    .Then(bb => bb.Broadcast(ExportForm.ContextSetter).WithPayload(vm => vm.State.ExportContext).TunnelDown()
+                    .ThenIf(NavigateToFormEnabled, bbb => bbb.Broadcast(Crud.ContextSetter).WithPayload(vm => vm.Input).TunnelDown())));
 
                 presenter.On(ImportForm.OutputReady).Broadcast(Crud.RefreshRequested).TunnelDown();
             }
@@ -99,6 +100,11 @@ namespace NWheels.UI.Toolbox
             {
                 ImportForm = null;
                 ExportForm = null;
+
+                if (NavigateToFormEnabled)
+                {
+                    presenter.On(NavigatedHere).Broadcast(Crud.ContextSetter).WithPayload(vm => vm.Input).TunnelDown();
+                }
             }
 
             var metaType = base.MetadataCache.GetTypeMetadata(typeof(TEntity));
@@ -110,6 +116,7 @@ namespace NWheels.UI.Toolbox
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public bool ImportExportEnabled { get; set; }
+        public bool NavigateToFormEnabled { get; set; }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 

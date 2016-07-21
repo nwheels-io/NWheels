@@ -154,7 +154,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public delegate void DescribeActionCallback(PresenterBuilder<MenuItem, Empty.Data, Empty.State>.BehaviorBuilder<Empty.Payload> behavior);
+        public delegate void DescribeActionCallback(PresenterBuilder<MenuItem, Empty.Data, Empty.State>.BehaviorBuilder<object> behavior);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -190,14 +190,14 @@ namespace NWheels.UI.Toolbox
 
             public static ItemRepeater FromQuery<TEntity>(
                 Expression<Func<ViewModel<Empty.Data, Empty.State, Empty.Input>, bool>> filter = null,
-                Expression<Func<ViewModel<Empty.Data, Empty.State, Empty.Input>, object>> displayProperty = null,
-                Expression<Func<ViewModel<Empty.Data, Empty.State, Empty.Input>, object>> valueProperty = null)
+                Expression<Func<TEntity, object>> displayProperty = null,
+                Expression<Func<TEntity, object>> valueProperty = null)
                 where TEntity : class
             {
                 return new ServerQueryItemRepeater() {
                     EntityContract = typeof(TEntity),
-                    DisplayPropertyExpression = displayProperty != null ? displayProperty.ToNormalizedNavigationString("model") : null,
-                    ValuePropertyExpression = valueProperty != null ? valueProperty.ToNormalizedNavigationString("model") : null
+                    DisplayPropertyExpression = displayProperty != null ? displayProperty.ToNormalizedNavigationString(skipSteps: 1) : null,
+                    ValuePropertyExpression = valueProperty != null ? valueProperty.ToNormalizedNavigationString(skipSteps: 1) : null
                 };
             }
         }
@@ -208,26 +208,26 @@ namespace NWheels.UI.Toolbox
         {
             public static ItemAction Goto<TInput>(IScreenWithInput<TInput> screen, TInput value = default(TInput))
             {
-                return Describe(b => b.Navigate().ToScreen(screen).WithInput(vm => value));
+                return Describe(b => b.Navigate().ToScreen(screen)/*.WithInput(vm => value)*/);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public static ItemAction PopupScreen<TInput>(IScreenWithInput<TInput> screen, TInput value = default(TInput))
             {
-                return Describe(b => b.Navigate().ToScreen(screen, NavigationType.Popup).WithInput(vm => value));
+                return Describe(b => b.Navigate().ToScreen(screen, NavigationType.Popup)/*.WithInput(vm => value)*/);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public static ItemAction Goto<TInput>(IScreenPartWithInput<TInput> screenPart, ScreenPartContainer targetContainer, TInput value = default(TInput))
             {
-                return Describe(b => b.Navigate().FromContainer(targetContainer).ToScreenPart(screenPart).WithInput(vm => value));
+                return Describe(b => b.Navigate().FromContainer(targetContainer).ToScreenPart(screenPart)/*.WithInput(vm => value)*/);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static ItemAction AlertUserPopup<TRepo>(Expression<Func<TRepo, ViewModel<Empty.Data, Empty.State, Empty.Payload>, UidlUserAlert>> alertCall)
+            public static ItemAction AlertUserPopup<TRepo>(Expression<Func<TRepo, ViewModel<Empty.Data, Empty.State, object>, UidlUserAlert>> alertCall)
                 where TRepo : IUserAlertRepository
             {
                 return Describe(b => b.UserAlertFrom<TRepo>().ShowPopup(alertCall));
@@ -235,7 +235,7 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static ItemAction AlertUserInline<TRepo>(Expression<Func<TRepo, ViewModel<Empty.Data, Empty.State, Empty.Payload>, UidlUserAlert>> alertCall)
+            public static ItemAction AlertUserInline<TRepo>(Expression<Func<TRepo, ViewModel<Empty.Data, Empty.State, object>, UidlUserAlert>> alertCall)
                 where TRepo : IUserAlertRepository
             {
                 return Describe(b => b.UserAlertFrom<TRepo>().ShowInline(alertCall));
@@ -243,7 +243,7 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static ItemAction AlertUserModal<TRepo>(Expression<Func<TRepo, ViewModel<Empty.Data, Empty.State, Empty.Payload>, UidlUserAlert>> alertCall)
+            public static ItemAction AlertUserModal<TRepo>(Expression<Func<TRepo, ViewModel<Empty.Data, Empty.State, object>, UidlUserAlert>> alertCall)
                 where TRepo : IUserAlertRepository
             {
                 return Describe(b => b.UserAlertFrom<TRepo>().ShowModal(alertCall));
@@ -405,7 +405,7 @@ namespace NWheels.UI.Toolbox
             : base(idName, parent)
         {
             this.SubItems = new List<MenuItem>();
-            this.Selected = new UidlNotification("Selected", this);
+            this.Selected = new UidlNotification<object>("Selected", this);
             base.Notifications.Add(this.Selected);
         }
 
@@ -435,7 +435,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UidlNotification Selected { get; set; }
+        public UidlNotification<object> Selected { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

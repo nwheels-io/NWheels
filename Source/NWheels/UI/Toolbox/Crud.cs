@@ -134,6 +134,7 @@ namespace NWheels.UI.Toolbox
         public UidlCommand Save { get; set; }
         public UidlCommand Cancel { get; set; }
         public UidlNotification RefreshRequested { get; set; }
+        public UidlNotification<object> ContextSetter { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

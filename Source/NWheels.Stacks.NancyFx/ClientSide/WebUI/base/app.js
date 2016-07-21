@@ -1596,6 +1596,12 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     scope.editEntity(scope.selectedEntity);
                 });
             });
+
+            scope.$on(scope.uidl.qualifiedName + ':ContextSetter', function(event, id) {
+                if (id) {
+                    scope.editEntity({ '$id': id });
+                }
+            });
             
             scope.editEntity = function (entity) {
                 if (!entity || scope.uidl.disableForm) {
@@ -3156,6 +3162,99 @@ theApp.directive('uidlDisplayFormat', ['uidlService', function (uidlService) {
                 return uidlService.formatValue(scope.uidl.format, value);
             }
         }
+    };
+}]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+theApp.controller('menuSubItemsExpander', 
+['$scope', '$q', 'uidlService', 'entityService', 
+function ($scope, $q, uidlService, entityService) {
+    var newSubItems = [ ];
+    
+    for (var i = 0 ; i < $scope.item.subItems.length ; i++) {
+        var subItem = $scope.item.subItems[i];
+        if (subItem.repeater && !subItem.$previewed) {
+            newSubItems.push({
+                $previewed: true,
+                $expanded: false,
+                $source: subItem,
+                icon: 'refresh',
+                text: 'Loading...',
+                subItems: [ ],
+            });
+        } else {
+            subItem.$previewed = true;
+            subItem.$expanded = true;
+            newSubItems.push(subItem);
+        }
+    }
+    
+    $scope.item.subItems = newSubItems;
+
+    $scope.toggleSubItems = function() {
+        var subItemsArray = $scope.item.subItems;
+        
+        for (var i = 0 ; i < subItemsArray.length ; i++) {
+            var subItem = subItemsArray[i];
+            
+            if (subItem.$previewed && !subItem.$expanded) {
+                $scope.beginExpandSubItem(subItem).then(function(realSubItems) {
+                    subItemsArray.splice(i, 1);
+                    for (var j = 0; j < realSubItems.length ; j++) {
+                        subItemsArray.splice(i + j, 0, realSubItems[j]);
+                    }
+                });
+                break;
+            }
+        }
+    };
+    
+    $scope.beginExpandSubItem = function(subItem) {
+        var templateItem = subItem.$source;
+        switch (templateItem.repeater) {
+            case 'Query': 
+                return entityService.queryEntity(templateItem.repeaterQueryEntityName, function(query) {
+                    if (templateItem.repeaterQueryDisplayProperty) {
+                        query.select(templateItem.repeaterQueryDisplayProperty);
+                    }
+                    if (templateItem.repeaterQueryValueProperty) {
+                        query.select(templateItem.repeaterQueryValueProperty);
+                    }
+                }).then(
+                    function(data) {
+                        var realSubItems = [ ];
+                        var records = data.ResultSet;
+                        for (var i = 0; i < records.length; i++) {
+                            var realItem = $.extend(true, { }, templateItem);
+                            realItem.text = '' + (templateItem.repeaterQueryDisplayProperty ? 
+                                records[i][templateItem.repeaterQueryDisplayProperty] : 
+                                records[i]['$type']);
+                            realItem.value = '' + (templateItem.repeaterQueryValueProperty ? 
+                                records[i][templateItem.repeaterQueryValueProperty] : 
+                                records[i]['$id']);
+                            realSubItems.push(realItem);
+                        }
+                        return realSubItems;
+                    },
+                    function (fault) {
+                        return $q.reject(fault);
+                    }
+                );
+            case 'Static': 
+                var realSubItems = [ ];
+                for (var p in templateItem.repeaterStaticValues) {
+                    if (templateItem.repeaterStaticValues.hasOwnProperty(p) && p.length > 0 && p.charAt(0) != '$') {
+                        var realItem = $.extend(true, { }, templateItem);
+                        realItem.text = p;
+                        realItem.value = templateItem.repeaterStaticValues[p];
+                        realSubItems.push(realItem);
+                    }
+                }
+                return $q.when(realSubItems);
+        }
+        
+        return [ ];
     };
 }]);
 
