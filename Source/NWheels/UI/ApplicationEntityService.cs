@@ -2752,7 +2752,7 @@ namespace NWheels.UI
                         continue;
                     }
 
-                    if ( IsEmbeddedObjectCollectionProperty(metaProperty) )
+                    if (IsEmbeddedObjectCollectionProperty(metaProperty) && metaProperty.Relation != null)
                     {
                         var converterClosedType =
                             typeof(EmbeddedDomainObjectCollectionConverter<>).MakeGenericType(metaProperty.Relation.RelatedPartyType.ContractType);
