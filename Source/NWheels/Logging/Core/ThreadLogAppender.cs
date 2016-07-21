@@ -40,7 +40,10 @@
                 }
             }
 
-            _plainLog.LogNode(node);
+            if ((node.Options & LogOptions.PlainLog) != 0)
+            {
+                _plainLog.LogNode(node);
+            }
 
             //if ( node.Level >= LogLevel.Warning )
             //{
@@ -63,7 +66,10 @@
                 StartThreadLogNoCheck(ThreadTaskType.Unspecified, activity);
             }
 
-            _plainLog.LogActivity(activity);
+            if ((activity.Options & LogOptions.PlainLog) != 0)
+            {
+                _plainLog.LogActivity(activity);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -75,7 +81,11 @@
             if ( currentLog != null )
             {
                 currentLog.AppendNode(rootActivity);
-                _plainLog.LogActivity(rootActivity);
+
+                if ((rootActivity.Options & LogOptions.PlainLog) != 0)
+                {
+                    _plainLog.LogActivity(rootActivity);
+                }
             }
             else
             {
@@ -88,7 +98,11 @@
         private void StartThreadLogNoCheck(ThreadTaskType taskType, ActivityLogNode rootActivity)
         {
             _anchor.CurrentThreadLog = new ThreadLog(_framework, new StopwatchClock(), _registry, _anchor, taskType, rootActivity);
-            _plainLog.LogActivity(rootActivity);
+            
+            if ((rootActivity.Options & LogOptions.PlainLog) != 0)
+            {
+                _plainLog.LogActivity(rootActivity);
+            }
         }
     }
 }
