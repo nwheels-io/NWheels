@@ -2404,7 +2404,6 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             if (scope.model.entity && scope.model.entity['$type']) {
                 scope.selectedType.name = scope.model.entity['$type'];
                 scope.selectTabByType(scope.selectedType.name);
-                scope.sendModelToSelectedWidget();
             } else if (scope.uidl.defaultTypeName) {
                 scope.selectTabByType(scope.uidl.defaultTypeName);
             }
