@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
@@ -29,8 +31,10 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void PersistBatch()
+        public void PersistBatch(out TimeSpan dbTime)
         {
+            var dbClock = new Stopwatch();
+
             foreach ( var log in _threadLogs )
             {
                 VisitLogActivity(log.RootActivity);
@@ -44,23 +48,34 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             if ( _dailySummaryRecordById.Count > 0 )
             {
                 var dailySummaryBulkWrite = BuildDailySummaryBulkWriteOperation();
+
+                dbClock.Start();
                 dailySummaryBulkWrite.Execute(WriteConcern.Acknowledged);
+                dbClock.Stop();
             }
 
             if ( _logMessageBatch.Count > 0 )
             {
+                dbClock.Start();
                 _owner.LogMessageCollection.InsertBatch(_logMessageBatch, WriteConcern.Acknowledged);
+                dbClock.Stop();
             }
 
             if ( _threadLogBatch.Count > 0 )
             {
+                dbClock.Start();
                 _owner.ThreadLogCollection.InsertBatch(_threadLogBatch, WriteConcern.Acknowledged);
+                dbClock.Stop();
 
                 foreach (var threadLog in _threadLogBatch)
                 {
+                    dbClock.Start();
                     _owner.ThreadLogGridfs.Upload(SerializeThreadLogSnapshot(threadLog.VolatileSnapshot), threadLog.LogId);
+                    dbClock.Stop();
                 }
             }
+
+            dbTime = dbClock.Elapsed;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

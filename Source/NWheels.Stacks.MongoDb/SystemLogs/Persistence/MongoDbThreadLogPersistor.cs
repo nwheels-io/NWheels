@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using Autofac;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
@@ -105,8 +106,34 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         private void StoreThreadLogsToDb(IReadOnlyThreadLog[] threadLogs)
         {
-            var batchPersistor = new ThreadLogBatchPersistor(this, threadLogs);
-            batchPersistor.PersistBatch();
+            var clock = Stopwatch.StartNew();
+
+            try
+            {
+                TimeSpan dbTime;
+
+                var batchPersistor = new ThreadLogBatchPersistor(this, threadLogs);
+                batchPersistor.PersistBatch(out dbTime);
+
+                var elapsed = clock.Elapsed;
+                var cpuTime = elapsed.Subtract(dbTime);
+
+                _plainLog.Info(
+                    "MongoDbThreadLogPersistor.StoreThreadLogsToDb[thread {0}] : {1} in batch, {2} queued, time CPU: {3}, DB: {4} ; done {5} in total",
+                    Thread.CurrentThread.ManagedThreadId,
+                    threadLogs.Length,
+                    _persistenceShuttle.DepartureQueueLength,
+                    cpuTime,
+                    dbTime,
+                    Interlocked.Add(ref _s_totalThreadLogsReceived, threadLogs.Length));
+            }
+            catch (Exception e)
+            {
+                _plainLog.Error(
+                    "MongoDbThreadLogPersistor.StoreThreadLogsToDb[thread {0}] : FAILED! {1}", 
+                    Thread.CurrentThread.ManagedThreadId,
+                    e.Message);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -125,6 +152,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         private static readonly int _s_processId = Process.GetCurrentProcess().Id;
         private static readonly string _s_machineName = System.Environment.MachineName;
+        private static int _s_totalThreadLogsReceived = 0;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
