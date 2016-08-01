@@ -1213,7 +1213,12 @@ HEAD, JS/CSS LINKS
                                         if (i > 0) {
                                             text += ', ';
                                         }
-                                        text += cellvalue[i][metaColumn.itemDisplayAsExpression];
+										if (cellvalue[i]) {
+											text += cellvalue[i][metaColumn.itemDisplayAsExpression];
+										}
+										else {
+											text += '?';
+										}
                                     }
                                     return text;
                                 }
