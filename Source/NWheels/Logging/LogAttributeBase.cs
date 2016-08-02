@@ -293,7 +293,7 @@ namespace NWheels.Logging
     public class LogThreadAttribute : LogAttributeBase
     {
         public LogThreadAttribute(ThreadTaskType taskType)
-            : base(LogLevel.Info, isActivity: true, isThread: true, isMethodCall: false)
+            : base(LogLevel.Verbose, isActivity: true, isThread: true, isMethodCall: false)
         {
             base.TaskType = taskType;
         }

@@ -39,7 +39,8 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
                 .Column(x => x.DurationMilliseconds, size: FieldSize.Small, format: "#,##0.00", setup: DisableSortingAndFiltering)
                 .Column(x => x.DbDurationMilliseconds, size: FieldSize.Small, format: "#,##0.00", setup: DisableSortingAndFiltering)
                 .Column(x => x.DbCount, size: FieldSize.Small, format: "#,##0", setup: DisableSortingAndFiltering)
-                .Column(x => x.CpuTimeMilliseconds, size: FieldSize.Small, format: "#,##0.000", setup: DisableSortingAndFiltering);
+                .Column(x => x.CpuTimeMilliseconds, size: FieldSize.Small, format: "#,##0.000", setup: DisableSortingAndFiltering)
+                .Column(x => x.SubNodes, columnType: GridColumnType.Hidden);
                 //.Column<IRootThreadLogUINodeEntity, string>(x => x.LogId, setup: DisableSortingAndFiltering)
                 //.Column<IRootThreadLogUINodeEntity, string>(x => x.CorrelationId, setup: DisableSortingAndFiltering);
 

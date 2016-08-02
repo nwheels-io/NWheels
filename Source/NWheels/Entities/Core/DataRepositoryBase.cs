@@ -41,7 +41,17 @@ namespace NWheels.Entities.Core
         protected DataRepositoryBase(IResourceConsumerScopeHandle consumerScope, IComponentContext components, bool autoCommit)
         {
             var currentThreadLog = components.Resolve<IThreadLogAnchor>().CurrentThreadLog;
-            InitializerThreadText = (currentThreadLog != null ? currentThreadLog.RootActivity.SingleLineText : string.Empty);
+
+            if (currentThreadLog != null)
+            {
+                InitializerThreadText = (currentThreadLog.CurrentActivity == currentThreadLog.RootActivity
+                    ? currentThreadLog.RootActivity.SingleLineText
+                    : currentThreadLog.RootActivity.SingleLineText + " -> ... -> " + currentThreadLog.CurrentActivity.SingleLineText);
+            }
+            else
+            {
+                InitializerThreadText = string.Empty;
+            }
 
             _entityRepositoryByContractType = new Dictionary<Type, IEntityRepository>();
             _partitionedRepositoryByContractType = new Dictionary<Type, IPartitionedRepository>();

@@ -41,7 +41,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
                 .Column(x => x.Logger)
                 .Column(x => x.MessageId, size: FieldSize.Large)
                 .Column(x => x.ExceptionType, size: FieldSize.Large)
-                //.Column(x => x.ThreadLogId)
+                .Column(x => x.ThreadLogId)
                 //.Column(x => x.CorrelationId)
                 .Column(x => x.KeyValues, size: FieldSize.Large);
 
