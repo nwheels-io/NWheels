@@ -32,6 +32,7 @@ namespace NWheels.Stacks.MongoDb
             builder.NWheelsFeatures().Entities().UseDefaultIdsOfType<ObjectId>();
             builder.NWheelsFeatures().Logging().RegisterLogger<IMongoDbLogger>();
 
+            builder.NWheelsFeatures().Configuration().RegisterSection<IMongoDbThreadLogPersistorConfig>();
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<MongoDbThreadLogPersistor>().As<IThreadPostMortem>();
 
             ConventionRegistry.Register(

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading;
 using Autofac;
 using MongoDB.Driver;
+using MongoDB.Driver.Builders;
 using MongoDB.Driver.GridFS;
 using NWheels.Concurrency;
 using NWheels.Core;
@@ -17,8 +18,9 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
     {
         private readonly IFramework _framework;
         private readonly IPlainLog _plainLog;
-        private readonly ShuttleService<IReadOnlyThreadLog> _persistenceShuttle;
+        private ShuttleService<IReadOnlyThreadLog> _persistenceShuttle;
         private IFrameworkLoggingConfiguration _loggingConfig;
+        private IMongoDbThreadLogPersistorConfig _persistenceConfig;
         private MongoDatabase _database;
         private MongoCollection _threadLogCollection;
         private MongoCollection _logMessageCollection;
@@ -31,13 +33,6 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
         {
             _framework = framework;
             _plainLog = plainLog;
-            _persistenceShuttle = new ShuttleService<IReadOnlyThreadLog>(
-                _framework,
-                "MongoDbThreadLogPersistor",
-                maxItemsOnBoard: 100,
-                boardingTimeout: TimeSpan.FromMilliseconds(500),
-                driverThreadCount: 2,
-                driver: StoreThreadLogsToDb);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -56,7 +51,18 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
         public override void NodeLoading()
         {
             _loggingConfig = _framework.As<ICoreFramework>().Components.Resolve<IFrameworkLoggingConfiguration>();
+            _persistenceConfig = _framework.As<ICoreFramework>().Components.Resolve<IMongoDbThreadLogPersistorConfig>();
+            
             ConnectToDatabase();
+
+            _persistenceShuttle = new ShuttleService<IReadOnlyThreadLog>(
+                _framework,
+                "MongoDbThreadLogPersistor",
+                maxItemsOnBoard: _persistenceConfig.BatchSize,
+                boardingTimeout: _persistenceConfig.BatchTimeout,
+                driverThreadCount: _persistenceConfig.ThreadCount,
+                driver: StoreThreadLogsToDb);
+
             _persistenceShuttle.Start();
         }
 
@@ -142,10 +148,35 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
         {
             _database = ConnectToDatabase(_loggingConfig);
 
-            _dailySummaryCollection = _database.GetCollection(DbNamingConvention.GetDailySummaryCollectionName(_framework.CurrentNode.EnvironmentName));
-            _logMessageCollection = _database.GetCollection(DbNamingConvention.GetLogMessageCollectionName(_framework.CurrentNode.EnvironmentName));
-            _threadLogCollection = _database.GetCollection(DbNamingConvention.GetThreadLogCollectionName(_framework.CurrentNode.EnvironmentName));
+            var dailySummaryCollectionName = DbNamingConvention.GetDailySummaryCollectionName(_framework.CurrentNode.EnvironmentName);
+            var logMessageCollectionName = DbNamingConvention.GetLogMessageCollectionName(_framework.CurrentNode.EnvironmentName);
+            var threadLogCollectionName = DbNamingConvention.GetThreadLogCollectionName(_framework.CurrentNode.EnvironmentName);
+
+            var maxSize = _persistenceConfig.MaxCollectionSizeMb * 1024L * 1024L;
+            var maxDocuments = _persistenceConfig.MaxCollectionDocuments;
+
+            _dailySummaryCollection = GetOrCreateCappedCollection(dailySummaryCollectionName, maxSize, maxDocuments);
+            _logMessageCollection = GetOrCreateCappedCollection(logMessageCollectionName, maxSize, maxDocuments);
+            _threadLogCollection = GetOrCreateCappedCollection(threadLogCollectionName, maxSize, maxDocuments);
+
             _threadLogGridfs = _database.GetGridFS(DbNamingConvention.GetThreadLogGridfsSettings(_framework.CurrentNode.EnvironmentName));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private MongoCollection GetOrCreateCappedCollection(string collectionName, long maxSize, long maxDocuments)
+        {
+            if (!_database.CollectionExists(collectionName))
+            {
+                var options = CollectionOptions
+                   .SetCapped(true)
+                   .SetMaxSize(maxSize)
+                   .SetMaxDocuments(maxDocuments);
+
+                _database.CreateCollection(collectionName, options);
+            }
+
+            return _database.GetCollection(collectionName);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

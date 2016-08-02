@@ -109,6 +109,7 @@
     <Compile Include="SystemLogs\Domain\Transactions\VisualizationHelpers.cs" />
     <Compile Include="SystemLogs\Persistence\DailySummaryRecord.cs" />
     <Compile Include="SystemLogs\Domain\Entities\LogLevelSummaryEntity.cs" />
+    <Compile Include="SystemLogs\Persistence\IMongoDbThreadLogPersistorConfig.cs" />
     <Compile Include="SystemLogs\Persistence\LogMessageRecord.cs" />
     <Compile Include="SystemLogs\Persistence\LogRecordBase.cs" />
     <Compile Include="SystemLogs\Persistence\MongoDbThreadLogQueryService.cs" />

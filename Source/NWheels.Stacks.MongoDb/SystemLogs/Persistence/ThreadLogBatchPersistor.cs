@@ -171,16 +171,39 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         private void VisitLogNode(LogNode node)
         {
-            if ( node.Level >= LogLevel.Info )
+            if (ShouldCountMessageInSummary(node))
             {
                 var summaryRecord = _dailySummaryRecordById.GetOrAdd(
-                    DailySummaryRecord.GetRecordId(node),
+                    DailySummaryRecord.GetRecordId(node), 
                     id => new DailySummaryRecord(node));
-                summaryRecord.Increment(node);
 
+                summaryRecord.Increment(node);
+            }
+
+            if (ShouldPersistMessageDetails(node))
+            {
                 var messageRecord = new LogMessageRecord(node);
                 _logMessageBatch.Add(messageRecord);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static bool ShouldCountMessageInSummary(LogNode node)
+        {
+            return (
+                node.IsImportant ||
+                (node.Options & (LogOptions.CollectCount | LogOptions.CollectStats)) != 0 || 
+                node.Options.HasAggregation());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static bool ShouldPersistMessageDetails(LogNode node)
+        {
+            return (
+                node.IsImportant || 
+                (node.Options & LogOptions.RetainDetails) != 0);
         }
     }
 }
