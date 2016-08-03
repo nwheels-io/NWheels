@@ -24,9 +24,14 @@ namespace NWheels.Entities
             type.IsEntityPart = true;
             type.IsAbstract = this.IsAbstract;
 
-            if ( BaseEntityPart != null )
+            if (BaseEntityPart != null)
             {
                 type.BaseType = cache.FindTypeMetadataAllowIncomplete(BaseEntityPart);
+            }
+
+            if (DefaultContext != null)
+            {
+                type.DefaultContextContract = this.DefaultContext;
             }
         }
 
@@ -42,6 +47,7 @@ namespace NWheels.Entities
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Type BaseEntityPart { get; set; }
+        public Type DefaultContext { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
