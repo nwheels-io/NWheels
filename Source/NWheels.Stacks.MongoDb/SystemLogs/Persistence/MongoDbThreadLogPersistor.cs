@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using Autofac;
 using MongoDB.Driver;
@@ -124,21 +125,31 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
                 var elapsed = clock.Elapsed;
                 var cpuTime = elapsed.Subtract(dbTime);
 
-                _plainLog.Info(
-                    "MongoDbThreadLogPersistor.StoreThreadLogsToDb[thread {0}] : {1} in batch, {2} queued, time CPU: {3}, DB: {4} ; done {5} in total",
+                //_plainLog.Info(
+                //    "MongoDbThreadLogPersistor.StoreThreadLogsToDb[thread {0}] : {1} in batch, {2} queued, time CPU: {3}, DB: {4} ; done {5} in total",
+                //    Thread.CurrentThread.ManagedThreadId,
+                //    threadLogs.Length,
+                //    _persistenceShuttle.DepartureQueueLength,
+                //    cpuTime,
+                //    dbTime,
+                //    Interlocked.Add(ref _s_totalThreadLogsReceived, threadLogs.Length));
+            }
+            catch (MongoBulkWriteException e)
+            {
+                _plainLog.Error(
+                    "MongoDbThreadLogPersistor.StoreThreadLogsToDb[thread {0}] : FAILED! {1}: {2} -- BULK WRITE ERRORS: {3}", 
                     Thread.CurrentThread.ManagedThreadId,
-                    threadLogs.Length,
-                    _persistenceShuttle.DepartureQueueLength,
-                    cpuTime,
-                    dbTime,
-                    Interlocked.Add(ref _s_totalThreadLogsReceived, threadLogs.Length));
+                    e.GetType().Name,
+                    e.ToString(),
+                    string.Join(";", e.WriteErrors.Select(err => err.Message)));
             }
             catch (Exception e)
             {
                 _plainLog.Error(
-                    "MongoDbThreadLogPersistor.StoreThreadLogsToDb[thread {0}] : FAILED! {1}", 
+                    "MongoDbThreadLogPersistor.StoreThreadLogsToDb[thread {0}] : FAILED! {1}: {2}", 
                     Thread.CurrentThread.ManagedThreadId,
-                    e.Message);
+                    e.GetType().Name,
+                    e.ToString());
             }
         }
 
@@ -155,7 +166,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             var maxSize = _persistenceConfig.MaxCollectionSizeMb * 1024L * 1024L;
             var maxDocuments = _persistenceConfig.MaxCollectionDocuments;
 
-            _dailySummaryCollection = GetOrCreateCappedCollection(dailySummaryCollectionName, maxSize, maxDocuments);
+            _dailySummaryCollection = _database.GetCollection(dailySummaryCollectionName);
             _logMessageCollection = GetOrCreateCappedCollection(logMessageCollectionName, maxSize, maxDocuments);
             _threadLogCollection = GetOrCreateCappedCollection(threadLogCollectionName, maxSize, maxDocuments);
 
