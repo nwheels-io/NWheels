@@ -19,5 +19,7 @@ namespace NWheels.Entities
             string connectionString = null);
 
         Type GetDataRepositoryContract(Type entityContractType);
+
+        void EnsureImplementationGenerated(Type repositoryType);
     }
 }

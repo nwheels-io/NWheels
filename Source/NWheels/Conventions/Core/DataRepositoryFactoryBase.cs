@@ -88,6 +88,14 @@ namespace NWheels.Conventions.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void EnsureImplementationGenerated(Type repositoryType)
+        {
+            var typeKey = CreateTypeKey(repositoryType);
+            GetOrBuildType(typeKey);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public string ResolveConnectionString(string connectionStringOverride, Type domainContextType)
         {
             if ( !string.IsNullOrEmpty(connectionStringOverride) )

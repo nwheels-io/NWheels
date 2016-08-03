@@ -373,7 +373,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<UnitOfWorkFactory>().SingleInstance();
 
             builder.NWheelsFeatures().Logging().RegisterLogger<DatabaseInitializer.ILogger>();
-            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>().FirstInPipeline().AsSelf();
+            builder.RegisterType<DatabaseInitializer>().SingleInstance();
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<CrudEntityImportTx>();
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<CrudEntityExportTx>();
 
@@ -893,10 +893,10 @@ namespace NWheels.Hosting.Core
                 sequence.Once().OnRevert(SaveDynamicModuleToAssembly);
                 sequence.Once().OnRevert(WriteEffectiveMetadataJson);
                 sequence.Once().OnPerform(LoadConfiguration);
+                sequence.Once().OnPerform(WriteEffectiveConfigurationXml);
+                sequence.Once().OnPerform(InitializeDataAccessComponents);
                 sequence.Once().OnPerform(FindLifecycleComponents);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeConfigured);
-                sequence.Once().OnPerform(WriteEffectiveConfigurationXml);
-                sequence.Once().OnPerform(LoadDataRepositories);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeLoading).OnRevert(CallComponentNodeUnloaded);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentLoad).OnRevert(CallComponentUnload);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeLoaded).OnRevert(CallComponentNodeUnloading);
@@ -919,13 +919,16 @@ namespace NWheels.Hosting.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void LoadDataRepositories()
+            private void InitializeDataAccessComponents()
             {
                 var loggingConfiguration = OwnerLifetime.LifetimeContainer.Resolve<IFrameworkLoggingConfiguration>();
                 _suppressDynamicArtifacts = loggingConfiguration.SuppressDynamicArtifacts;
 
-                using ( _logger.InitializingDataRepositories() )
+                using ( _logger.InitializingDataAccessComponents() )
                 {
+                    var databaseInitializer = OwnerLifetime.LifetimeContainer.Resolve<DatabaseInitializer>();
+                    databaseInitializer.InitializeStorageOnStartup();
+
                     var repositoryFactory = OwnerLifetime.LifetimeContainer.Resolve<IDataRepositoryFactory>();
                     var allRepositoryRegistrations = OwnerLifetime.LifetimeContainer.Resolve<IEnumerable<DataRepositoryRegistration>>().ToArray();
 
@@ -944,6 +947,10 @@ namespace NWheels.Hosting.Core
                 {
                     try
                     {
+                        var dataRepositoryFactory = OwnerLifetime.LifetimeContainer.Resolve<IDataRepositoryFactory>();
+                        dataRepositoryFactory.EnsureImplementationGenerated(registration.DataRepositoryType);
+                        _logger.GeneratedContextImplementation(contextType: registration.DataRepositoryType.FullName);
+
                         var dbConfiguration = OwnerLifetime.LifetimeContainer.Resolve<IFrameworkDatabaseConfig>();
                         var contextConfig = dbConfiguration.GetContextConnectionConfig(registration.DataRepositoryType);
                         if (contextConfig == null)

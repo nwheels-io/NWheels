@@ -2,22 +2,17 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autofac;
-using NWheels;
 using NWheels.Authorization;
 using NWheels.Core;
-using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Entities.Migrations;
 using NWheels.Extensions;
-using NWheels.Hosting;
 using NWheels.Logging;
 
 namespace NWheels.Entities.Impl
 {
-    public class DatabaseInitializer : LifecycleEventListenerBase
+    public class DatabaseInitializer
     {
         private readonly IComponentContext _components;
         private readonly IStorageInitializer _storageInitializer;
@@ -59,7 +54,7 @@ namespace NWheels.Entities.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void NodeConfigured(List<ILifecycleEventListener> additionalComponentsToHost)
+        public void InitializeStorageOnStartup()
         {
             _configuration = _components.Resolve<IFrameworkDatabaseConfig>();
 

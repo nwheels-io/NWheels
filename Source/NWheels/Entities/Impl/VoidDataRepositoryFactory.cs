@@ -29,6 +29,11 @@ namespace NWheels.Entities.Impl
             throw new NotSupportedException();
         }
 
+        public void EnsureImplementationGenerated(Type repositoryType)
+        {
+            throw new NotImplementedException();
+        }
+
         public Type ServiceAncestorMarkerType
         {
             get { throw new NotSupportedException(); }

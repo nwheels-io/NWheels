@@ -162,7 +162,7 @@ namespace NWheels.Hosting.Core
         void SavingDynamicModuleToAssembly(string filePath);
 
         [LogActivity]
-        ILogActivity InitializingDataRepositories();
+        ILogActivity InitializingDataAccessComponents();
 
         [LogActivity]
         ILogActivity InitializingDataRepository(string type);
@@ -175,5 +175,8 @@ namespace NWheels.Hosting.Core
 
         [LogCritical]
         void ThreadTerminatedByException(ThreadTaskType taskType, string rootActivity, Exception exception);
+
+        [LogInfo]
+        void GeneratedContextImplementation(string contextType);
     }
 }
