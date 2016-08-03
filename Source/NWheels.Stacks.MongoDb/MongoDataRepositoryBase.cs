@@ -223,16 +223,15 @@ namespace NWheels.Stacks.MongoDb
 
             var isPartitionedEntity = (entityArray.Length > 0 && entityArray[0] is IPartitionedObject);
 
-            if ( isPartitionedEntity )
+            if (isPartitionedEntity)
             {
-                var singleEntityGroup = new IEntityObject[1];
+                var entityGroupPerPartition = entityArray.GroupBy(e => (IMongoEntityRepository)base.GetEntityRepository(e));
 
-                for (int i = 0 ; i < entityArray.Length ; i++)
+                foreach (var entityPartitionGroup in entityGroupPerPartition)
                 {
-                    var entity = entityArray[i];
-                    var repository = (IMongoEntityRepository)base.GetEntityRepository(entity);
-                    singleEntityGroup[0] = entity;
-                    commitAction(repository, singleEntityGroup);
+                    var partitionRepository = entityPartitionGroup.Key;
+                    var entityPartitionGroupArray = entityPartitionGroup.ToArray();
+                    commitAction(partitionRepository, entityPartitionGroupArray);
                 }
             }
             else
