@@ -1260,10 +1260,12 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             function implementMenuItems(items) {
                 for (var i = 0; i < items.length; i++) {
                     var item = items[i];
-                    for (var j = 0; j < item.behaviors.length; j++) {
-                        var behavior = item.behaviors[j];
-                        if (behavior.subscription) {
-                            implementSubscription(scope, behavior);
+                    if (item.behaviors) {
+                        for (var j = 0; j < item.behaviors.length; j++) {
+                            var behavior = item.behaviors[j];
+                            if (behavior.subscription) {
+                                implementSubscription(scope, behavior);
+                            }
                         }
                     }
                     implementMenuItems(item.subItems);
