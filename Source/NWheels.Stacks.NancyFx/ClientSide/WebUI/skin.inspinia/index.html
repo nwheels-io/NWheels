@@ -2269,6 +2269,9 @@ HEAD, JS/CSS LINKS
         function initWidget_TransactionForm($scope) {
             if ($scope.uidl.inputForm && $scope.uidl.inputForm.isModalPopup) {
                 $scope.$on($scope.uidl.qualifiedName + ':ShowModal', function () {
+                    if ($scope.model.State) {
+                        $scope.model.State.Output = null;
+                    }
                     $("#divModal_" + $scope.uidl.elementName).modal('show');
                 });
                 $scope.$on($scope.uidl.qualifiedName + ':HideModal', function () {

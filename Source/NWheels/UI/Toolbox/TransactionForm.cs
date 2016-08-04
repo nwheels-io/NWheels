@@ -191,30 +191,44 @@ namespace NWheels.UI.Toolbox
                 InputFormTypeSelector.ForEachWidgetOfType<IUidlForm>(form => ConfigureInputForm(form, shouldInvokeInitializeInput));
             }
 
-            if (shouldInvokeInitializeInput && hasCustomContext)
+            if (hasCustomContext)
             {
                 presenter.On(ContextSetter)
-                    .AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Context))
-                    .Then(b => b.InvokeTransactionScript<TScript>(ContextEntityType, ApiCallResultType.Command)
-                        .WaitForReply((script, vm) => script.InitializeInput(vm.Input))
-                        .Then(bb => bb.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Input))
-                        .Then(InvokeFormModelSetter)));
+                    .AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Context));
             }
 
-            if (shouldInvokeInitializeInput && !hasCustomContext)
+            if (IsPopupContent)
             {
-                presenter.On(Loaded)
-                    .InvokeTransactionScript<TScript>(ContextEntityType, ApiCallResultType.Command)
-                    .WaitForReply((script, vm) => script.InitializeInput(null))
-                    .Then(b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Input))
-                    .Then(InvokeFormModelSetter));
+                if (shouldInvokeInitializeInput)
+                {
+                    presenter.On(ShowModal)
+                        .InvokeTransactionScript<TScript>(ContextEntityType, ApiCallResultType.Command)
+                        .WaitForReply((script, vm) => script.InitializeInput(vm.State.Context))
+                        .Then(b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Input))
+                        .Then(InvokeFormModelSetter));
+                }
+                else
+                {
+                    presenter.On(ShowModal)
+                        .QueryModel(vm => vm.State.Input)
+                        .Then(InvokeFormModelSetter);
+                }
             }
-
-            if (!shouldInvokeInitializeInput)
+            else 
             {
-                presenter.On(Loaded)
-                    .QueryModel(vm => vm.State.Input)
-                    .Then(InvokeFormModelSetter);
+                if (shouldInvokeInitializeInput)
+                {
+                    presenter.On(Loaded)
+                        .InvokeTransactionScript<TScript>(ContextEntityType, ApiCallResultType.Command)
+                        .WaitForReply((script, vm) => script.InitializeInput(vm.State.Context))
+                        .Then(b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Input)).Then(InvokeFormModelSetter));
+                }
+                else
+                {
+                    presenter.On(Loaded)
+                        .QueryModel(vm => vm.State.Input)
+                        .Then(InvokeFormModelSetter);
+                }
             }
 
             if (string.IsNullOrWhiteSpace(OutputDownloadFormat))
