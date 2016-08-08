@@ -58,7 +58,7 @@ namespace NWheels.DataObjects
             protected abstract void ConfigureKey(KeyMetadataBuilder key, PropertyMetadataBuilder property, TypeMetadataCache cache);
         }
 
-        [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+        [AttributeUsage(AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
         public class SearchKeyAttribute : KeyAttribute
         {
             public SearchKeyAttribute() : base(KeyKind.Search)
@@ -69,7 +69,7 @@ namespace NWheels.DataObjects
             }
         }
 
-        [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+        [AttributeUsage(AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
         public class UniqueKeyAttribute : KeyAttribute
         {
             public UniqueKeyAttribute()
