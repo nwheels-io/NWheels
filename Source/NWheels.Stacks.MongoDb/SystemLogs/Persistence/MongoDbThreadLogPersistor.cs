@@ -42,7 +42,10 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         public void Examine(IReadOnlyThreadLog threadLog)
         {
-            _persistenceShuttle.Board(threadLog);
+            if (_persistenceShuttle != null)
+            {
+                _persistenceShuttle.Board(threadLog);
+            }
         }
 
         #endregion
@@ -53,7 +56,12 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
         {
             _loggingConfig = _framework.As<ICoreFramework>().Components.Resolve<IFrameworkLoggingConfiguration>();
             _persistenceConfig = _framework.As<ICoreFramework>().Components.Resolve<IMongoDbThreadLogPersistorConfig>();
-            
+
+            if (!_persistenceConfig.Enabled)
+            {
+                return;
+            }
+
             ConnectToDatabase();
 
             _persistenceShuttle = new ShuttleService<IReadOnlyThreadLog>(
@@ -71,7 +79,10 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         public override void NodeUnloaded()
         {
-            _persistenceShuttle.Stop(TimeSpan.FromSeconds(15));
+            if (_persistenceShuttle != null)
+            {
+                _persistenceShuttle.Stop(TimeSpan.FromSeconds(15));
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

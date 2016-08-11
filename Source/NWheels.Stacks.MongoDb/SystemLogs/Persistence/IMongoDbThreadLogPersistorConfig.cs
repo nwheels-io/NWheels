@@ -11,6 +11,9 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
     [ConfigurationSection(XmlName = "MongoDb.ThreadLogs")]
     public interface IMongoDbThreadLogPersistorConfig : IConfigurationSection
     {
+        [DefaultValue(true)]
+        bool Enabled { get; set; }
+
         [DefaultValue(2)]
         int ThreadCount { get; set; }
 
