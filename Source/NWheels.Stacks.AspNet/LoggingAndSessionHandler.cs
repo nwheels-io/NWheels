@@ -18,6 +18,7 @@ namespace NWheels.Stacks.AspNet
         private readonly ISessionManager _sessionManager;
         private readonly IWebApplicationLogger _logger;
         private readonly string _sessionCookieName;
+        private readonly string _singleSignOnTokenName;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -26,6 +27,7 @@ namespace NWheels.Stacks.AspNet
             _sessionManager = sessionManager;
             _logger = logger;
             _sessionCookieName = _sessionManager.As<ICoreSessionManager>().SessionIdCookieName;
+            _singleSignOnTokenName = _sessionManager.As<ICoreSessionManager>().SingleSignOnTokenName;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -40,7 +42,7 @@ namespace NWheels.Stacks.AspNet
             {
                 try
                 {
-                    var sessionId = HttpContext.Current.Session[_sessionCookieName] as string;
+                    var sessionId = GetRequestSessionId();
 
                     if ( _sessionManager.IsValidSessionId(sessionId) )
                     {
@@ -79,6 +81,22 @@ namespace NWheels.Stacks.AspNet
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string GetRequestSessionId()
+        {
+            var singleSignOnToken = HttpContext.Current.Request.QueryString.Get(_singleSignOnTokenName);
+
+            if (!string.IsNullOrEmpty(singleSignOnToken))
+            {
+                var singleSignOnSessionIdBytes = Convert.FromBase64String(singleSignOnToken);
+                var singleSignOnSessionId = _sessionManager.As<ICoreSessionManager>().DecryptSessionId(singleSignOnSessionIdBytes);
+                return singleSignOnSessionId;
+            }
+
+            return HttpContext.Current.Session[_sessionCookieName] as string;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

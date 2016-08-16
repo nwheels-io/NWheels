@@ -21,5 +21,6 @@ namespace NWheels.Authorization.Core
         byte[] EncryptSessionId(string clearSessionId);
         string DecryptSessionId(byte[] encryptedSessionId);
         string SessionIdCookieName { get; }
+        string SingleSignOnTokenName { get; }
     }
 }

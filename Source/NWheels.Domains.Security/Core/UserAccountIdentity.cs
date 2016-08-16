@@ -212,7 +212,7 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal void DoneExtendingClaims()
+        public void DoneExtendingClaims()
         {
             if ( _extendedClaimByType == null )
             {

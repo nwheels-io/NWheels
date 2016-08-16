@@ -280,6 +280,16 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string SingleSignOnTokenName
+        {
+            get
+            {
+                return _s_singleSignOnTokenName;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public ISession CurrentSession
         {
             get
@@ -293,6 +303,8 @@ namespace NWheels.Authorization.Impl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static readonly string _s_sessionIdCookieName = "nw";
+        private static readonly string _s_singleSignOnTokenName = "ssotkn";
+        
         protected static readonly RijndaelManaged CryptoProvider;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
