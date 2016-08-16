@@ -3,51 +3,53 @@ Welcome to NWheels
 
 According to our observations, commonality in the needs of enterprise application projects is significantly higher than variability. We take this as an opportunity to cut project costs and timeframes, and reduce technical risks. 
 
-see [Highlights](#highlights)
+(see [Highlights](#highlights) below)
 
-## Goal
+## What is NWheels
 
 NWheels is an infrastructural ecosystem and ongoing development effort, which is aimed to supply A-to-Z architectural recipes, runtime platform, and high productivity development framework for .NET-based enterprise applications. 
 
+(see [Motivation and goals](https://github.com/felix-b/NWheels/wiki/Motivation-and-goals) in Wiki)
+
 ## Status
 
-NWheels is an ongoing development, and has not yet delivered its platform for general availability. 
+NWheels has not yet delivered its platform for general availability. Nevertheless, initial incubated version is now stable and serves a basis for two proprietary real-world applications. 
 
 #### August 2016
 
-The project has completed its first milestone Afra. Core set of platform components were developed, and several real-world applications were built on top of the platform, which allowed validation of architectural concept. 
+- **Milestone Afra - completed** - an initial version with core set of platform components was developed, and two real-world applications were built on top of the platform, allowing validation of architectural concept. This was mostly one-person project. 
 
 #### Next Step 
 
-The second milestone Boda, is starting with a fresh new codebase. This rewrite will be based on the lessons learned from milestone Afra, on well documented architecture and feature designs, and on contributions from community. 
+- **Milestone Boda** - starting with **fresh new codebase** and switching to **community-driven phase**. It will be based on the lessons learned from milestone Afra, on well documented architecture and feature designs, and on contributions from community. 
 
 ## Highlights
 
 NWheels is aimed to have the following characteristics:
 
-- A-to-Z response to common demands:
+- **A-to-Z response to common demands**
   - one framework that covers all application layers and tiers: projects are not left to sweat over gluing multiple 3rd-party building blocks together
   - ready answers to common requirements and concerns, ranging from basic features like authorization, to advanced scenarios like elastic scalability
   - built-in support for DevOps procedures and easy integration with application lifecycle management
-- Get more for doing less. For instance: 
+- **Get more for doing less**. For instance: 
   - code domain model, logic, and conceptual UI - and get whole layers such as UI apps, data persistence, and REST/backend APIs, automatically implemented by conventions.
   - define authorization rules - and have them automatically enforced through all application layers
   - define semantic logging messages - and get automatic metric collection, thresholds, circuit breakers, and alerts
-- Proven architectures, approaches, and patterns, for dramatically less effort on your side. To name a few:
+- **Proven architectures, approaches, and patterns, for dramatically less effort on your side**. To name a few:
   - micro-services
   - hexagonal architecture 
   - domain-driven design 
-- Innovative approaches:
+- **Innovative approaches**
   - prefer convention over implementation - automatic implementation of abstractions by pluggable pipelines of conventions
   - layered customization - multiple reusable orthogonal adaptations, which extend or alter domain model, logic, and conceptual UI, are plugged into customer-specific configurations
   - late compilation - model-based components are late-compiled against customized models and concrete technology stacks
   - building block domains - adaptive and reusable models, logic, and conceptual UI parts for common domains, such as e-commerce, CRM, booking, accounting.
-- Platform at your service:
+- **Platform at your service**
   - communication endpoints, backend APIs, messaging, workflows, scheduled jobs, and more
   - elastic on-demand scalability and failover redundancy
   - cloud, hybrid, and on-premise deployments
   - no need to depend on cloud vendor PasS - no vendor lock-in
-- Ready DevOps/ALM toolchain
+- **Ready DevOps/ALM toolchain**
   - automated deployment to dev boxes and test/prod environments on premise, hybrid, and on cloud
   - runtime health monitoring, metric collection, and tools for production intelligence
   - continuous deployment and continuous integration with optional developer git flow, personal builds, and gated commits
