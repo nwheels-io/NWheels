@@ -6,11 +6,17 @@ namespace NWheels.Concurrency.Core
     {
         private readonly ResourceLockMode _mode;
         private readonly string _resourceName;
+        //private int _waitQueueLength = 0;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ResourceLock(ResourceLockMode mode, string resourceName)
         {
+            if (mode != ResourceLockMode.Exclusive)
+            {
+                throw new NotSupportedException("ResourceLockMode is not yet supported: " + mode);
+            }
+
             _resourceName = resourceName;
             _mode = mode;
         }
@@ -19,7 +25,7 @@ namespace NWheels.Concurrency.Core
 
         public IDisposable AcquireReadAccess(string forWhat, int holdDurationMs)
         {
-            return null;
+            return AcquireReadAccess(forWhat, holdDurationMs, waitTimeoutMs: 10000);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,7 +39,7 @@ namespace NWheels.Concurrency.Core
 
         public IDisposable AcquireWriteAccess(string forWhat, int holdDurationMs)
         {
-            return null;
+            return AcquireWriteAccess(forWhat, holdDurationMs, waitTimeoutMs: 10000);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

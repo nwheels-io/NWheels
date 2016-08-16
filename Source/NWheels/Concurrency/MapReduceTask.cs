@@ -59,7 +59,11 @@ namespace NWheels.Concurrency
             return Task.Factory.ContinueWhenAll(
                 mapTasks,
                 tasks => {
-                    return PerformReduce(reduce, tasks);
+                    if (reduce != null)
+                    {
+                        return PerformReduce(reduce, tasks);
+                    }
+                    return default(TResult);
                 },
                 cancellation);
         }
