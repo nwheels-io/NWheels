@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -75,6 +76,142 @@ namespace NWheels.Extensions
                 action(item, index);
                 index++;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<IReadOnlyList<T>> TakeChunks<T>(this IEnumerable<T> source, int length)
+        {
+            return new ChunkingEnumerable<T>(source, length);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ChunkingEnumerable<T> : IEnumerable<IReadOnlyList<T>>
+        {
+            private readonly IEnumerable<T> _inner;
+            private readonly int _length;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ChunkingEnumerable(IEnumerable<T> inner, int length)
+            {
+                _inner = inner;
+                _length = length;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of IEnumerable
+
+            public IEnumerator<IReadOnlyList<T>> GetEnumerator()
+            {
+                return new ChunkingEnumerator<T>(_inner.GetEnumerator(), _length);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ChunkingEnumerator<T> : IEnumerator<IReadOnlyList<T>>
+        {
+            private readonly IEnumerator<T> _inner;
+            private readonly int _length;
+            private IReadOnlyList<T> _current;
+            private bool _endOfInner;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ChunkingEnumerator(IEnumerator<T> inner, int length)
+            {
+                _inner = inner;
+                _length = length;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of IDisposable
+
+            public void Dispose()
+            {
+                _inner.Dispose();
+                _current = null;
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of IEnumerator
+
+            public bool MoveNext()
+            {
+                var currentBuffer = new List<T>();
+
+                while (currentBuffer.Count < _length && !_endOfInner)
+                {
+                    if (!_inner.MoveNext())
+                    {
+                        _endOfInner = true;
+                        break;
+                    }
+
+                    currentBuffer.Add(_inner.Current);
+                }
+
+                if (currentBuffer.Count > 0)
+                {
+                    _current = currentBuffer;
+                    return true;
+                }
+
+                _current = null;
+                return false;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Reset()
+            {
+                _inner.Reset();
+                _current = null;
+                _endOfInner = false;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IReadOnlyList<T> Current
+            {
+                get
+                {
+                    if (_current != null)
+                    {
+                        return _current;
+                    }
+
+                    throw new InvalidOperationException();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            object IEnumerator.Current
+            {
+                get
+                {
+                    return this.Current;
+                }
+            }
+
+            #endregion
         }
     }
 }
