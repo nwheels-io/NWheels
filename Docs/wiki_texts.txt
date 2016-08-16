@@ -1,3 +1,260 @@
+-----------------------------------------------------
+ONE SENTENCE DESCRIPTION
+-----------------------------------------------------
+
+A game-changing infrastructural ecosystem for .NET-based enterprise applications, which dramatically decreases costs and timeframes, reduces technical risks, and helps avoid cloud vendor lock-in.
+
+-----------------------------------------------------
+README
+-----------------------------------------------------
+
+Welcome to NWheels
+=======
+
+According to our observations, commonality in the needs of enterprise application projects is significantly higher than variability. We take this as an opportunity to cut project costs and timeframes, and reduce technical risks. 
+
+(see [Highlights](#highlights) below)
+
+## What is NWheels
+
+NWheels is an infrastructural ecosystem and ongoing development effort, which is aimed to supply A-to-Z architectural recipes, runtime platform, and high productivity development framework for .NET-based enterprise applications. 
+
+(see [Motivation and goals](https://github.com/felix-b/NWheels/wiki/Motivation-and-goals) in Wiki)
+
+## Status
+
+NWheels has not yet delivered its platform for general availability. Nevertheless, initial incubated version is now stable and serves a basis for two proprietary real-world applications. 
+
+#### August 2016
+
+- **Milestone Afra - completed** - an initial version with core set of platform components was developed, and two real-world applications were built on top of the platform, allowing validation of architectural concept. This was mostly one-person project. 
+
+#### Next Step 
+
+- **Milestone Boda** - starting with **fresh new codebase** and switching to **community-driven phase**. It will be based on the lessons learned from milestone Afra, on well documented architecture and feature designs, and on contributions from community. 
+
+## Highlights
+
+NWheels is aimed to have the following characteristics:
+
+- **A-to-Z response to common demands**
+  - one framework that covers all application layers and tiers: projects are not left to sweat over gluing multiple 3rd-party building blocks together
+  - ready answers to common requirements and concerns, ranging from basic features like authorization, to advanced scenarios like elastic scalability
+  - built-in support for DevOps procedures and easy integration with application lifecycle management
+- **Get more for doing less**. For instance: 
+  - code domain model, logic, and conceptual UI - and get whole layers such as UI apps, data persistence, and REST/backend APIs, automatically implemented by conventions.
+  - use Information Security building block domain - and get user account management, authentication, and common user stories like 'confirm email' and 'change password', out of the box.
+  - define access control rules for different user profiles - and have them transparently enforced through all application layers, including access to both operations and data.
+  - define semantic logging messages - and get automatic metric collection, thresholds, circuit breakers, and alerts
+- **Proven architectures, approaches, and patterns, for dramatically less effort on your side**. To name a few:
+  - micro-services
+  - hexagonal architecture 
+  - domain-driven design 
+- **Innovative approaches**
+  - prefer convention over implementation - automatic implementation of abstractions by pluggable pipelines of conventions
+  - layered customization - multiple reusable orthogonal adaptations, which extend or alter domain model, logic, and conceptual UI, are plugged into customer-specific configurations
+  - late compilation - model-based components are late-compiled against customized models and concrete technology stacks
+  - building block domains - adaptive and reusable models, logic, and conceptual UI parts for common domains, such as e-commerce, CRM, booking, accounting.
+- **Platform at your service**
+  - communication endpoints, backend APIs, messaging, workflows, scheduled jobs, and more
+  - elastic on-demand scalability and failover redundancy
+  - cloud, hybrid, and on-premise deployments
+  - no need to depend on cloud vendor PaaS - no vendor lock-in
+- **Ready DevOps/ALM toolchain**
+  - automated deployment to dev boxes and test/prod environments on premise, hybrid, and on cloud
+  - runtime health monitoring, metric collection, and tools for production intelligence
+  - continuous deployment and continuous integration with optional developer git flow, personal builds, and gated commits
+  - product and agile process management
+  - all of the above is cross-tracked for maximal visibility and decision support
+
+### What types of applications can be built
+
+NWheels is primarily aimed to support enterprise applications, of any size and complexity.
+
+#### Architectures
+
+- Typical N-tier applications, which consist of:
+  - application tier, composed of one or more micro-services that execute business logic
+  - communication endpoints, exposed by application tier for client UI apps and B2B integrations
+  - data tier, containing any number of databases, possibly of different vendors and technologies
+  - UI apps on various presentation platforms, such as web browser (single-page app), desktop GUI, native mobile apps, and less common ones like Smart TV and IVR. 
+- Serverless architecture is naturally achieved by:
+  - giving up explicit service boundaries
+  - letting domain models and logic be transparently hosted and scaled by the platform
+
+#### SLA categories
+  
+- non-business-critical
+- business-critical (9x5) and mission-critical (24x7)
+- low-latency and high-throughput processing, e.g. trading
+  
+### Where it can run 
+
+- Server side: the platform targets .NET Core, thus server-side components can run on Windows, Linux, or Mac servers.
+- Client side: can run on variety of presentation platforms mentioned earlier.
+ 
+### Read more
+
+- Project Wiki - comprehensive information for both consumers and contributors
+- Introduction
+- Motivation and goals
+- Feature explorer 
+
+## Milestones
+
+#### Milestone Afra - completed
+
+[![Build status](https://ci.appveyor.com/api/projects/status/x0xcs9lfg4tee88s?svg=true)]
+(https://ci.appveyor.com/project/felix-b/nwheels)
+
+The first milestone was fundamental in that it included development of core components, and validation of architectural concept, through building several real-world applications on top of it.
+
+This milestone was mostly one-person project, with no community involved. 
+
+The following was done:
+- minimal set of core features was developed, enough for a simple typical enterprise application 
+- a couple of real-world applications were built on top of the platform
+- architectural concept and feasibility of implementation were proven
+- a lot of lessons learned
+
+#### Milestone Boda - starting
+
+This milestone starts with a fresh new codebase. 
+
+Targets:
+- document overall architecture and details of the planned features
+- start building community of contributors
+- work with the community to refine architecture and feature designs
+- proceed with development of the platform, targeting .NET Core
+
+The decision to start a new codebase was for these reasons:
+- take full benefits of lessons learned in Milestone I
+- write code clean from numerous deficiencies and technical debts found in Milestone I
+- use a more elegant and friendly library for implementation-by-convention and late-compilation 
+- target .NET Core
+- let the community build knowledge and take ownership of the entire codebase
+
+-----------------------------------------------------
+WIKI HOME
+-----------------------------------------------------
+
+
+
+-----------------------------------------------------
+ONE PARAGRAPH DESCRIPTION
+-----------------------------------------------------
+
+V2:
+
+Welcome to NWheels source code repository. 
+
+NWheels is a front-end and a back-end platform, and a super-high-productivity framework for development of .NET-based enterprise applications. Special emphasis is put 
+
+
+
+which supplies ready answers, eliminates non-unique tasks, and avoids vendor lock-in.
+
+
+
+Like any rapid application development (RAD) tool, we say that we let you focus on the core business of your application, while having the technical details handled for you. What's different then, that justifies creation of yet another framework?
+
+The difference is in how far we go in order to provide an A-to-Z solution that covers common architectures and requirements, 
+
+-----------------------------------------------------
+ONE PAGE DESCRIPTION
+-----------------------------------------------------
+
+V2:
+
+According to our observations, commonality in the needs of enterprise application projects is significantly higher than variability. 
+
+NWheels takes this as an opportunity to cut project costs and timeframes. It supplies ready architectures, implementations, and answers to common requirements, issues, and concerns. Those are field-proven solutions based on best known practices by time of writing, and as such, they lower overall technical risk of the project. 
+
+NWheels lets you focus on coding. You code conceptual models of domains and user interfaces, the domain logic, and all kinds of tests. Programming model exposed by NWheels naturally steers you into writing concise and expressive code. Then, in no time, and at any time, all of the surrounding machinery is up and running, with derivative and repetitive parts (which you didn't have to code) rolled out and late-compiled on the fly against a concrete technology stack that you picked. 
+
+## Save time
+
+Having all of the mechanical coding tasks handled for you by the platform, you are left with the most important piece - the unique features of your application. The time freed up from coding all those HTML markups, API controllers, data contracts, SQL queries, interactions with MQ connectors, etc etc, can now be put into deeper investigation of domain concepts, and the different ways of expressing them in code.
+
+## Experimentation
+
+The short code-and-see-it-running cycles allow for immediate and repetitive field-testing of your decisions as you go. For example, you can change a few lines of code in a domain model (imagine replacing a one-to-many relationship with its many-to-many counterpart), and quickly see the impact it had on user interfaces and persisted data, and even stress/load-test it in an elastic horizontally scalable deployment. This gives another significant decrease in technical risk, because great deal of experimentation can now be done easily, up-front and whenever a doubt arises.
+
+## Vendor lock-in
+
+The core part of NWheels is its execution platform for server-side components. Among other capabilities, the platform includes features typically offered as part of cloud vendors PaaS, such as runtime metrics collection, API backends, and message buses, to name just a few. That is to say, in hybrid and cloud deployments NWheels takes on a role of PaaS, and lets you use IaaS-level hosting plans instead. Such tactics steer you clear of vendor lock-in, and cut the PaaS component off your hosting costs. 
+
+## Domain model
+
+Server-side components are responsible for execution of domain models and logic. Domain models are based on the concept of Domain-Driven Design (DDD). On one hand, DDD is commonly recognized as beneficial for application development. On the other hand, technology abstraction and proper layering, which are required by DDD, are expensive and complex to implement. NWheels however, supplies those both ingredients built in, and the major part of complexity and cost goes away. For this exact reason, in application code, there is little difference between CRUD-oriented anemic model, and a rich domain model, except that in the latter, domain objects have methods that encapsulate logic and behaviors. 
+
+Domain models are passive in their nature, they contain behaviors that have to be triggered in some way. NWheels complements that with many ways of triggering domain functions, such as backend APIs, work item queues, scheduled jobs, workflows, publish/subscribe, and rule engines. 
+
+## User interface
+
+User interfaces are implemented as presentation engines, which execute conceptual UI models. The UI model is rather high level, it describes overall structure and navigation, interaction between UI parts, and bindings to domain objects, such as entities and transaction scripts. Domain bindings generate calls to backend server APIs, which are provided transparently by the platform, and need not be explicitly coded. Visual details and layouts are abstracted out of the UI model, because one-size-fits-all approach here would be wrong. Instead, pluggable sets of themes, distinct for each presentation platform, make the GUI look and feel stunning and native to the platform at hand. Variety of platforms are covered, such as web, native mobile apps, desktop apps, and even less common ones like Smart TV and IVR. 
+
+## Logging and metric collection
+
+Runtime events and metrics are easy to report and analyze. Every log message is treated as an event with a formal signature, potentially important for analysis (e.g. system health assessment or production intelligence). 
+
+## Customizations
+
+Another important aspect, especially for off-the-shelf products, is customization - for example, adaptation to different verticals, countries/regions, distribution partners, and specific customers. Equally important is the ability to turn features and subsystems on and off for flexible pricing. If not done correctly, those can become a huge problem. With NWheels, all those are packaged into sets of pluggable modules and features. All customizations are kept in the same codebase and versioned together with the main product, which greatly reduces maintenance overhead. Deployment for a customer (or a server process dedicated to a customer in multi-tenant deployments) includes set of modules and features appropriate for that specific customer. 
+
+Customizations can extend or otherwise alter the logic and the models of domains and user interfaces. Moreover, if designed to treat distinct aspects, customizations can be authored as stackable layers for code reuse and consistency - e.g. an adaptation to a vertical can be combined with an adaptation to a region, and those only need to be developed and maintained once. For distributed partners that have their own professional service teams, a partner can manage its own development cycle and a separate codebase, getting white-label distribution from software vendor, then developing its own customizations on top of it.
+
+## Fine-tuning
+
+The downside of relying on an infrastructural framework is always the loss of control. Now you cannot just tweak a specific place on a web page, or a specific field in a database, because "this is how the infrastructure works". In order to minimize this problem, NWheels provides fine-tuning APIs in many areas, which allow you override default behaviors. With its "all-pluggable" architecture, NWheels allows custom implementations of almost any infrastructure component. It even steps back completely where you want to be in full control. For example, in a web user interface, beyond the extensible set of client-side themes, you can bring your own HTML, CSS, and JavaScript assets for a specific place in a web app, or even replace the client side of the web app entirely.
+
+
+
+## History (bottom-up)
+
+- August 2016
+  - working hard towards kicking off the community phase
+  - retrospecting existing codebase; realizing lessons learned, technical debts, and design mistakes
+  - deciding to treat existing code as proof of concept; starting a fresh new codebase to be driven by community
+  - custom low-latency software in the domain of trading [App#3] enters beta-testing stage.
+- May 2016
+  - all components of NWheels platform undergo further evolution.
+  - affiliate marketing application [App#2] enters beta-testing stage, on its first production environment, adapted to its first customer
+  - custom low-latency application in the trading domain [App#3] enters alpha-testing stage.
+  - starting development of yet another NWheels-based low-latency custom software in the domain of trading [App#4]
+- January 2016
+  - a more complete versions of UIDL and web presentation engine are ready in NWheels.
+  - all components of the platform undergo significant evolution.
+  - affiliate marketing application [App#2] enters alpha-testing stage
+  - development of one more NWheels-based application is started - custom low-latency software in the domain of trading [App#3]
+  - media marketing application [App#1] goes in production
+- August 2015
+  - NWheels is integrated as server-side platform in the media marketing application [App#1].
+  - the very minimal version of UIDL and web presentation engine is ready.
+  - moving to full time position at BitWize for development of first off-the-shelf product completely based on NWheels [App#2], in the domain of affiliate marketing
+- May 2015
+  - starting part time position at BitWize for a limited period of daytime development of NWheels
+  - starting development of UIDL (user interface definition language) and web presentation engine
+  - integration of NWheels into media marketing application [App#1] continues at daytime.
+  - development of server-side components continues in spare time.
+- January 2015 
+  - the very minimal functionality of server-side platform is ready
+  - beginning integration of NWheels into a commercial application [App#1] in the domain of media marketing, being developed at daytime job
+  - development of server-side components continues in spare time
+- December 2014 
+  - Hapil feature set is serious enough for real use
+  - starting spare-time development of NWheels core components
+- January 2013
+  - starting spare-time development of Hapil, a late compilation library which greatly aids implementation of abstractions by conventions
+
+## 
+
+
+
+-----------------------------------------------------
+MOTIVATION AND GOALS
+-----------------------------------------------------
+
 ## Metaphor
 
  - _**N**_ stands for .NET
@@ -85,4 +342,146 @@ Strategy and tactics
     - Let every wheel be built by developers and architects that have strong background and expertise in relevant subjects.
     - Capture every task in application development process, that can be programmed and automated, and allow delivering significantly more value for significantly less effort.
     - 
+
+-----------------------------------------------------
+HIGH LEVEL ARCHITECTURE
+-----------------------------------------------------
+
+This page provides different views on architecture of NWheels platform together with enterprise applications built on top of it. 
+
+### Table of Contents
+
+- Goals
+- Concept
+- Views
+  - 3-tier deployment
+  - microservices
+  - orthogonal composition
+  - enabling serverless and FaaS execution
+- Scalability & deployment
+- Convention over implementation
+- 
+
+
+## Goals
+
+  - Let application developers focus on coding of:
+    - conceptual UI and domain models
+    - domain logic
+    - all kinds of tests
+  - Automate implementation of:
+    - user interfaces (support various presentation platforms)
+    - data access layers (support various database technologies)
+    - communication endpoints (support various networking protocols and MQs, sync/async and duplex channels)
+  - Make it easy to:
+    - manage multiple related and orthogonal customizations, for example, adaptation to specific verticals, regions/locales, and customers.
+    - manage multiple dimensions of pluggable configurations
+    - fine-tune automatic implementations, or take full control wherever necessary
+  - Provide backend platform which:
+    - runs server-side components of the application.
+    - provides application components with commonly required infrastrcutural facilities, such as:
+      - user session management
+      - authorization
+      - messaging
+      - scheduled jobs
+      - and more... 
+    - supports serverless, micro-service, and monolith service architectures
+    - allows on-premise, hybrid, and cloud deployments
+    - supports horizontal scaling and active/passive failover on micro-service level.
+    - when deployed on cloud:
+      - depends on vendor IaaS and not PaaS; by doing so, avoids vendor lock-in, and lowers hosting costs.
+      - transparently handles elastic horizontal scaling through automation of underlying vendor IaaS (provided IaaS adapter exists for the vendor).
+
+## Opportunities
+
+- Dramatically decrease timeframes and budgets
+- Lower technical risks
+- Avoid vendor lock-in
+
+    
+## 3-Tier Architecture
+
+An enterprise application built with NWheels follows typical 3-tier architecture, where the tiers are defined as follows:
+
+ - **Presentation** tier
+   - is responsible for interaction with user
+   - executes user interface models defined by the application  
+   - delegates all other functions to application tier through REST API
+ - **Application** tier
+   - is responsible for execution of processing logic and business rules
+   - exposes communication endpoints for UI apps and B2B integrations
+ - **Data** tier 
+   - is responsible for persistence of application data.
+
+[[https://github.com/felix-b/nwheels/blob/master/Docs/Images/nwheels-architecture-3tier.png|alt=3-tier architecture]]
+
+### Application tier
+
+Application tier is the core part of the system. It consists of one or more processes, running on one or more server machines. The processes are classified by _node_, _instance_, and _replica_, as explained below:
+
+ - **Node** is a type of server process. It is characterized by a set of loaded modules and features, as well as node-specific configuration values. An application always consists of one or more nodes.
+ - **Instance** is a specialization of node. While sharing same set of modules and features, different instances of the same node may for example, target different partitions of data, or expose different endpoints, or be connected to different external systems, or just balance the load. Instances can also override configuration values, which they inherit from their node. A node always has one or more instances.
+ - **Replica** is at the leaf level of the hierarchy. It represents a running process in host operating system. 
+   - Each instance has one or more replicas. Multiple replicas of the same instance all provide identical functionality, and act as a fail-over cluster with active/passive redundancy. 
+   - At any given moment, only one replica of the same instance can be active and actually execute processing. The rest of replicas are in standby mode, ready to take over as soon as the active replica fails, or when an administrator explicitly transfers the leadership.
+
+The figure below demonstrates an application, which consists of 3 nodes A, B, and C, where:
+  - node A has 2 instances, with 2 replicas each
+  - node B has 1 instance with 3 replicas
+  - node C has a single instance with a single replica - the single replica is always active
+
+[[https://github.com/felix-b/nwheels/blob/master/Docs/Images/nwheels-architecture-server-side-processes.png|alt=Processes in application tier]]
+
+### Presentation tier
+
+Presentation tier, also known as _client side_, consists of one or more _client apps_, or simply _apps_. 
+
+> **Disambiguation**: the term _app_, or _client app_, is chosen in order to distinguish between user interface apps and the _application_, which is the enterprise application as a whole. 
+
+Presentation tier can be implemented on various platforms and in different flavors, for example:
+- a desktop app, implemented for Windows, Linux, and Mac
+- a single-page web app with responsive design
+- native mobile app, implemented for Android, iOS, and Windows Phone
+- Smart TV application, implemented for LG, Samsung, and the Smart TV Alliance SDKs
+- IVR (interactive voice recognition) 
+
+> It worth nothing that in contrast to other types of apps, IVR apps are actually implemented by server-side components and run in a server process.
+
+The apps are defined as user interface models, using _UIDL_, which stands for _User Interface Definition Language_. UIDL is explained later in the document. For now, we'll just mention that the responsibility of a client app is:
+- Request user interface model (or simply UIDL) from the application tier
+- Execute user interaction according to the model
+- Request functionality from the application tier when so is prescribed by the model.
+
+
+***
+
+The apps are defined as user interface models, using _UIDL_, which stands for _User Interface Definition Language_. UIDL is a conceptual model, which focuses on:
+- composite structure of the app and its UI parts
+- data binding and interaction between the UI parts
+- binding of UI parts to data and functions provided by the application tier
+
+Presentation tier can be implemented on various platforms and in different flavors, for example:
+- a desktop app, implemented for Windows, Linux, and Mac
+- a single-page web app with responsive design
+- native mobile app, implemented for Android, iOS, and Windows Phone
+- Smart TV application, implemented for LG, Samsung, and the Smart TV Alliance SDKs
+- IVR (interactive voice recognition) 
+
+Each implementation provides consistent look and feel which are native to its platform, e.g. mobile phone or a desktop app. Since all implementations adhere to the model, application developers usually don't need to possess expertise in each of the 
+
+> It worth nothing that in contrast to other types of apps, IVR apps are actually implemented by server-side components and run in a server process.
+
+UIDL is not concerned with low-level presentation details such as background color or layout of controls.
+
+Thus, the responsibility of a client app is:
+
+1. Request user interface model (or simply UIDL) from the sever
+1. Execute user interaction according to the model
+
+
+
+
+ in UIDL. It can be implemented in a variety of user interaction platforms. For example, it can be a web browser, a native mobile app, or a desktop GUI app. It can also be a server-side component, like with an IVR app. 
+
+The client side is responsible for requesting UIDL definitions of client apps from the server, and running user interface according to those definitions.
 
