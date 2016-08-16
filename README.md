@@ -33,7 +33,8 @@ NWheels is aimed to have the following characteristics:
   - built-in support for DevOps procedures and easy integration with application lifecycle management
 - **Get more for doing less**. For instance: 
   - code domain model, logic, and conceptual UI - and get whole layers such as UI apps, data persistence, and REST/backend APIs, automatically implemented by conventions.
-  - define authorization rules - and have them automatically enforced through all application layers
+  - use Information Security building block domain - and get user account management, authentication, and common user stories like 'confirm email' and 'change password', out of the box.
+  - define access control rules for different user profiles - and have them transparently enforced through all application layers, including access to both operations and data.
   - define semantic logging messages - and get automatic metric collection, thresholds, circuit breakers, and alerts
 - **Proven architectures, approaches, and patterns, for dramatically less effort on your side**. To name a few:
   - micro-services
@@ -48,7 +49,7 @@ NWheels is aimed to have the following characteristics:
   - communication endpoints, backend APIs, messaging, workflows, scheduled jobs, and more
   - elastic on-demand scalability and failover redundancy
   - cloud, hybrid, and on-premise deployments
-  - no need to depend on cloud vendor PasS - no vendor lock-in
+  - no need to depend on cloud vendor PaaS - no vendor lock-in
 - **Ready DevOps/ALM toolchain**
   - automated deployment to dev boxes and test/prod environments on premise, hybrid, and on cloud
   - runtime health monitoring, metric collection, and tools for production intelligence
@@ -57,6 +58,8 @@ NWheels is aimed to have the following characteristics:
   - all of the above is cross-tracked for maximal visibility and decision support
 
 ### What types of applications can be built
+
+NWheels is primarily aimed to support enterprise applications, of any size and complexity.
 
 #### Architectures
 
@@ -87,21 +90,9 @@ NWheels is aimed to have the following characteristics:
 - Motivation and goals
 - Feature explorer 
 
-## Status - August 2016
+## Milestones
 
-NWheels is an ongoing development effort. 
-
-Though several real-world applications exist that were built on top of the platform, the project has not yet delivered its product on the level appropriate for general availability. 
-
-Moreover, Milestone II (see below) is starting with a fresh new codebase. Reasons:
-
-- take full benefits of lessons learned in Milestone I
-- write code clean from numerous deficiencies and technical debts found in Milestone I
-- use a more elegant and friendly library for implementation-by-convention and late-compilation 
-- target .NET Core
-- let the community build knowledge and take ownership of the entire codebase
-
-#### Milestone I - completed
+#### Milestone Afra - completed
 
 [![Build status](https://ci.appveyor.com/api/projects/status/x0xcs9lfg4tee88s?svg=true)]
 (https://ci.appveyor.com/project/felix-b/nwheels)
@@ -116,7 +107,7 @@ The following was done:
 - architectural concept and feasibility of implementation were proven
 - a lot of lessons learned
 
-#### Milestone II - starting
+#### Milestone Boda - starting
 
 This milestone starts with a fresh new codebase. 
 
@@ -125,3 +116,11 @@ Targets:
 - start building community of contributors
 - work with the community to refine architecture and feature designs
 - proceed with development of the platform, targeting .NET Core
+
+The decision to start a new codebase was for these reasons:
+- take full benefits of lessons learned in Milestone I
+- write code clean from numerous deficiencies and technical debts found in Milestone I
+- use a more elegant and friendly library for implementation-by-convention and late-compilation 
+- target .NET Core
+- let the community build knowledge and take ownership of the entire codebase
+
