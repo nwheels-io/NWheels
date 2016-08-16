@@ -416,7 +416,7 @@ namespace NWheels.UI.Toolbox
                     return (metaProperty.IsCollection ? GridColumnType.LookupMany : GridColumnType.Key);
                 }
 
-                if ( metaProperty.ClrType.IsNumericType() )
+                if ( metaProperty.ClrType.IsAnyNumericType() )
                 {
                     return GridColumnType.Number;
                 }

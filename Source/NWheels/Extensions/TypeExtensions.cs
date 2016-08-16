@@ -227,6 +227,74 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static bool IsAnyNumericType(this Type type)
+        {
+            type = GetNonNullableType(type); 
+            if (!type.IsEnum)
+            {
+                switch (Type.GetTypeCode(type))
+                {
+                    case TypeCode.SByte:
+                    case TypeCode.Byte:
+                    case TypeCode.Int16:
+                    case TypeCode.Int32:
+                    case TypeCode.Int64:
+                    case TypeCode.UInt16:
+                    case TypeCode.UInt32:
+                    case TypeCode.UInt64:
+                    case TypeCode.Single:
+                    case TypeCode.Double:
+                    case TypeCode.Decimal:
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool IsIntegerNumericType(this Type type)
+        {
+            type = GetNonNullableType(type);
+            if (!type.IsEnum)
+            {
+                switch (Type.GetTypeCode(type))
+                {
+                    case TypeCode.SByte:
+                    case TypeCode.Byte:
+                    case TypeCode.Int16:
+                    case TypeCode.Int32:
+                    case TypeCode.Int64:
+                    case TypeCode.UInt16:
+                    case TypeCode.UInt32:
+                    case TypeCode.UInt64:
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static Type GetNonNullableType(this Type type)
+        {
+            if (IsNullableType(type))
+            {
+                return type.GetGenericArguments()[0];
+            }
+
+            return type;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool IsNullableType(this Type type)
+        {
+            return (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static bool IsSignificantNamespacePart(string part)
         {
             var comparer = StringComparer.InvariantCultureIgnoreCase;

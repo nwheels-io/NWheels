@@ -12,8 +12,10 @@ using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.Processing.Documents;
 using NWheels.Processing.Documents.Core;
+using NWheels.TypeModel;
 using NWheels.UI;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Utilities;
 
 namespace NWheels.Stacks.Formats.EPPlus
 {
@@ -125,25 +127,70 @@ namespace NWheels.Stacks.Formats.EPPlus
         private void FormatDefaultReportDocument(ApplicationEntityService.EntityCursor queryResults, ExcelPackage package)
         {
             var worksheet = package.Workbook.Worksheets.Add("Report");
-
-            for (int i = 0; i < queryResults.ColumnCount; i++)
-            {
-                worksheet.Cells[1, i + 1].Value = queryResults.Columns[i].AliasName;
-                worksheet.Cells[1, i + 1].Style.Font.Bold = true;
-            }
+            
+            FormatDefaultReportDocumentColumns(queryResults, worksheet);
             worksheet.View.FreezePanes(2, 1);
-
+            
             int rowNumber = 2;
 
             foreach (var row in queryResults)
             {
                 for (int i = 0; i < queryResults.ColumnCount; i++)
                 {
-                    worksheet.Cells[rowNumber, i + 1].Value = row[i].ToStringOrDefault("N/A");
+                    worksheet.Cells[rowNumber, i + 1].Value = row[i] ?? "N/A";
                 }
 
                 rowNumber++;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void FormatDefaultReportDocumentColumns(ApplicationEntityService.EntityCursor queryResults, ExcelWorksheet worksheet)
+        {
+            for (int i = 0 ; i < queryResults.ColumnCount ; i++)
+            {
+                var column = queryResults.Columns[i];
+
+                worksheet.Cells[1, i + 1].Value = column.AliasName;
+                worksheet.Cells[1, i + 1].Style.Font.Bold = true;
+
+                if (column.MetaProperty != null)
+                {
+                    worksheet.Column(i + 1).Style.Numberformat.Format = GetColumnDefaultFormat(column.MetaProperty);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string GetColumnDefaultFormat(IPropertyMetadata metaProperty)
+        {
+            if (!string.IsNullOrEmpty(metaProperty.DefaultDisplayFormat))
+            {
+                return metaProperty.DefaultDisplayFormat;
+            }
+            else if (metaProperty.ClrType.IsAnyNumericType())
+            {
+                return (metaProperty.ClrType.IsIntegerNumericType() ? "#,##0" : "#,##0.0000");
+            }
+            else if (metaProperty.ClrType == typeof(DateTime) || metaProperty.ClrType == typeof(DateTimeOffset))
+            {
+                if (metaProperty.SemanticType != null)
+                {
+                    switch (metaProperty.SemanticType.WellKnownSemantic)
+                    {
+                        case WellKnownSemanticType.Date:
+                            return "dd MMM yyyy";
+                        case WellKnownSemanticType.Time:
+                            return "HH:mm:ss";
+                    }
+                }
+
+                return "yyyy-MM-dd HH:mm:ss";
+            }
+
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
