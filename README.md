@@ -3,23 +3,27 @@ Welcome to NWheels
 
 According to our observations, commonality in the needs of enterprise application projects is significantly higher than variability. We take this as an opportunity to cut project costs and timeframes, and reduce technical risks. 
 
-#### Goal
+see [Highlights](#highlights)
+
+## Goal
 
 NWheels is an infrastructural ecosystem and ongoing development effort, which is aimed to supply A-to-Z architectural recipes, runtime platform, and high productivity development framework for .NET-based enterprise applications. 
 
-#### Status
+## Status
 
-Though several real-world applications exist that were built on top of the platform, the project has not yet delivered its product on the level appropriate for general availability. 
+NWheels is an ongoing development, and has not yet delivered its platform for general availability. 
 
-The project has completed its first milestone, which included development of core components, and validation of architectural concept.
+#### August 2016
 
-#### Current Efforts - August 2016 
+The project has completed its first milestone Afra. Core set of platform components were developed, and several real-world applications were built on top of the platform, which allowed validation of architectural concept. 
 
-The second milestone is starting with a fresh new codebase. This rewrite is aimed to be based on the lessons learned from the first milestone, well documented architecture and feature designs, and contributions from community. 
+#### Next Step 
+
+The second milestone Boda, is starting with a fresh new codebase. This rewrite will be based on the lessons learned from milestone Afra, on well documented architecture and feature designs, and on contributions from community. 
 
 ## Highlights
 
-NWheels goal is to have the following characteristics:
+NWheels is aimed to have the following characteristics:
 
 - A-to-Z response to common demands:
   - one framework that covers all application layers and tiers: projects are not left to sweat over gluing multiple 3rd-party building blocks together
