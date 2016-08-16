@@ -11,5 +11,6 @@ namespace NWheels.Processing.Messages
         void EnqueueMessage(IMessageObject message);
         void DispatchMessageOnCurrentThread(IMessageObject message);
         void SubscribeActor(object actorInstance);
+        IEnumerable<Type> GetSubscribedMessageBodyTypes();
     }
 }

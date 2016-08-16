@@ -67,7 +67,8 @@ namespace NWheels.Processing.Messages.Impl
 
         public void DispatchMessageOnCurrentThread(IMessageObject message)
         {
-            IMessageHandlerAdapter adapter = (IMessageHandlerAdapter)_adaptersByBodyType[message.BodyType];
+            IMessageHandlerAdapter adapter = TryGetAdapterByBodyType(message);
+
             if (adapter != null)
             {
                 adapter.InvokeHandleMessage(message);
@@ -84,7 +85,7 @@ namespace NWheels.Processing.Messages.Impl
 
         public void SubscribeActor(object actorInstance)
         {
-            lock ( _writeSyncObject )
+            lock (_writeSyncObject)
             {
                 var messageHandlerInterfaces = GetMessageHandlerInterfaces(actorInstance.GetType()).ToArray();
 
@@ -95,15 +96,28 @@ namespace NWheels.Processing.Messages.Impl
 
                     _logger.DynamicSubscribeActor(actorType: actorInstance.GetType(), messageType: messageBodyType);
 
-                    if ( adapter == null )
+                    if (adapter == null)
                     {
                         adapter = CreateMessageHandlerAdapter(_components, handlerInterface);
                         _adaptersByBodyType[messageBodyType] = adapter;
                         MapBodyTypeInheritors(_adaptersByBodyType, messageBodyType);
                     }
 
-                    adapter.RegisterMessageHandler(actorInstance);
+                    //adapter.RegisterMessageHandler(actorInstance);
+                    
+                    SubscribeActorToAncestorBodyTypes(_adaptersByBodyType, messageBodyType, actorInstance);
+                    SubscribeActorToInheritorBodyTypes(_adaptersByBodyType, messageBodyType, actorInstance);
                 }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEnumerable<Type> GetSubscribedMessageBodyTypes()
+        {
+            lock (_writeSyncObject)
+            {
+                return _adaptersByBodyType.Keys.Cast<Type>().ToArray();
             }
         }
 
@@ -225,6 +239,20 @@ namespace NWheels.Processing.Messages.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private IMessageHandlerAdapter TryGetAdapterByBodyType(IMessageObject message)
+        {
+            var adapter = (IMessageHandlerAdapter)_adaptersByBodyType[message.BodyType];
+
+            if (adapter != null)
+            {
+                return adapter;
+            }
+
+            return (IMessageHandlerAdapter)_adaptersByBodyType[typeof(IMessageObject)];
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static IEnumerable<Type> GetMessageHandlerInterfaces(Type actorType)
         {
             return actorType.GetInterfaces().Where(IsMessageHandlerInterface);
@@ -264,6 +292,38 @@ namespace NWheels.Processing.Messages.Impl
                 {
                     baseAdapter = (IMessageHandlerAdapter)map[baseType];
                     map.Add(derivedType, baseAdapter);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void SubscribeActorToAncestorBodyTypes(IDictionary map, Type bodyType, object actorInstance)
+        {
+            var hierarchy = bodyType.GetBaseTypesTopDown();
+
+            for (int i = 1; i < hierarchy.Count; i++)
+            {
+                var ancestorBodyType = hierarchy[i];
+                var adapter = (IMessageHandlerAdapter)map[ancestorBodyType];
+
+                if (adapter != null)
+                {
+                    adapter.RegisterMessageHandler(actorInstance);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void SubscribeActorToInheritorBodyTypes(IDictionary map, Type bodyType, object actorInstance)
+        {
+            foreach (var adapterBodyType in map.Keys.Cast<Type>())
+            {
+                if (bodyType.IsAssignableFrom(adapterBodyType))
+                {
+                    var adapter = (IMessageHandlerAdapter)map[adapterBodyType];
+                    adapter.RegisterMessageHandler(actorInstance);
                 }
             }
         }

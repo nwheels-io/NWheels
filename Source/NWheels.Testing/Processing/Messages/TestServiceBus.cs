@@ -33,7 +33,16 @@ namespace NWheels.Testing.Processing.Messages
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void SubscribeActor(object actorInstance)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEnumerable<Type> GetSubscribedMessageBodyTypes()
         {
             throw new NotImplementedException();
         }

@@ -29,6 +29,12 @@ namespace NWheels.Processing.Messages
 
         #region Implementation of IMessageObject
 
+        void IMessageObject.AddHeader(IMessageHeader header)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Guid MessageId
         {
             get

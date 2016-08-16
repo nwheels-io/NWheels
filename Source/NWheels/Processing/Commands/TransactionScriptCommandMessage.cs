@@ -27,6 +27,8 @@ namespace NWheels.Processing.Commands
 
         public Type TransactionScriptType { get; private set; }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Overrides of AbstractCommandMessage
 
         public override string AuditName

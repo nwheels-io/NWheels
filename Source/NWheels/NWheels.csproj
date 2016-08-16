@@ -204,6 +204,8 @@
     <Compile Include="Processing\Jobs\Core\IFrameworkApplicationJobConfig.cs" />
     <Compile Include="Processing\Jobs\Impl\SequentialBatchJobScheduler.cs" />
     <Compile Include="Processing\Messages\Impl\SmtpOutgoingEmailActor.cs" />
+    <Compile Include="Processing\Messages\MessageFromHeader.cs" />
+    <Compile Include="Processing\Messages\MessageToHeader.cs" />
     <Compile Include="Processing\SmptEmailSenderFeatureLoader.cs" />
     <Compile Include="TypeModel\Core\Conventions\MutationMetadataConvention.cs" />
     <Compile Include="TypeModel\Core\DomainContextMetadataBuilder.cs" />
