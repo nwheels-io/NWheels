@@ -57,7 +57,7 @@ namespace NWheels.Testing.Entities.Impl
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
             return new IObjectFactoryConvention[] {
-                new TestDataRepositoryConvention(base.MetadataCache, _entityFactory)
+                new TestDataRepositoryConvention(base.MetadataCache, _entityFactory, _components.Resolve<IDomainObjectFactory>())
             };
         }
 
@@ -65,8 +65,8 @@ namespace NWheels.Testing.Entities.Impl
 
         public class TestDataRepositoryConvention : DataRepositoryConvention
         {
-            public TestDataRepositoryConvention(TypeMetadataCache metadataCache, EntityObjectFactory entityFactory)
-                : base(metadataCache, entityFactory)
+            public TestDataRepositoryConvention(TypeMetadataCache metadataCache, EntityObjectFactory entityFactory, IDomainObjectFactory domainObjectFactory)
+                : base(metadataCache, entityFactory, domainObjectFactory)
             {
                 base.RepositoryBaseType = typeof(TestDataRepositoryBase);
             }

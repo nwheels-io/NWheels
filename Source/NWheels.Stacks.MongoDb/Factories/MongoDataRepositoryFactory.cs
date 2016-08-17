@@ -126,7 +126,7 @@ namespace NWheels.Stacks.MongoDb.Factories
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
             return new IObjectFactoryConvention[] {
-                new MongoDataRepositoryConvention(_entityFactory, base.MetadataCache)
+                new MongoDataRepositoryConvention(_entityFactory, base.MetadataCache, _components.Resolve<IDomainObjectFactory>())
             };
         }
 
@@ -173,8 +173,8 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         public class MongoDataRepositoryConvention : ConnectedModelDataRepositoryConvention<MongoDatabase, object>
         {
-            public MongoDataRepositoryConvention(EntityObjectFactory entityFactory, TypeMetadataCache metadataCache)
-                : base(entityFactory, metadataCache)
+            public MongoDataRepositoryConvention(EntityObjectFactory entityFactory, TypeMetadataCache metadataCache, IDomainObjectFactory domainObjectFactory)
+                : base(entityFactory, metadataCache, domainObjectFactory)
             {
                 this.RepositoryBaseType = typeof(MongoDataRepositoryBase);
             }

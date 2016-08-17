@@ -76,7 +76,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
             return new IObjectFactoryConvention[] {
-                new EfDataRepositoryConvention(_entityFactory, base.MetadataCache)
+                new EfDataRepositoryConvention(_entityFactory, base.MetadataCache, _components.Resolve<IDomainObjectFactory>())
             };
         }
 
@@ -84,8 +84,8 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
         public class EfDataRepositoryConvention : ConnectedModelDataRepositoryConvention<DbConnection, DbCompiledModel>
         {
-            public EfDataRepositoryConvention(EntityObjectFactory entityFactory, TypeMetadataCache metadataCache)
-                : base(entityFactory, metadataCache)
+            public EfDataRepositoryConvention(EntityObjectFactory entityFactory, TypeMetadataCache metadataCache, IDomainObjectFactory domainObjectFactory)
+                : base(entityFactory, metadataCache, domainObjectFactory)
             {
                 this.RepositoryBaseType = typeof(EfDataRepositoryBase);
             }
@@ -110,6 +110,11 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
                     var entityConfigurationMethod = entity.ImplementationType.GetMethod("ConfigureEfModel", BindingFlags.Public | BindingFlags.Static);
                     Static.Void(entityConfigurationMethod, metadataCache, modelBuilderLocal);
+                }
+
+                foreach (var entity in base.EntitiesInRepository.OrderBy(EntityInheritanceDepth))
+                {
+                    entity.EnsureDomainObjectImplemented();
                 }
 
                 var modelLocal = m.Local(initialValue: modelBuilderLocal.Func<DbConnection, DbModel>(x => x.Build, connection));
