@@ -32,16 +32,17 @@ NWheels is aimed to have the following characteristics:
   - ready answers to common requirements and concerns, ranging from basic features like authorization, to advanced scenarios like elastic scalability
   - built-in support for DevOps procedures and easy integration with application lifecycle management
 - **Get more for doing less**. For instance: 
+  - scaffold an empty application - and get continuous integration and deployment procedures working right away, installing  and monitoring production-ready builds, where the only piece that is missing, is the unique features of your application.
   - code domain model, logic, and conceptual UI - and get whole layers such as UI apps, data persistence, and REST/backend APIs, automatically implemented by conventions.
-  - use Information Security building block domain - and get user account management, authentication, and common user stories like 'confirm email' and 'change password', out of the box.
+  - use Information Security building block domain - and get user account management, authentication, and common user stories such as  'confirm email' and 'change password', out of the box.
   - define access control rules for different user profiles - and have them transparently enforced through all application layers, including access to both operations and data.
-  - define semantic logging messages - and get automatic metric collection, thresholds, circuit breakers, and alerts
+  - define semantic logging messages - and get automatic metric collection, thresholds, circuit breakers, and alerts.
 - **Proven architectures, approaches, and patterns, for dramatically less effort on your side**. To name a few:
   - micro-services
   - hexagonal architecture 
   - domain-driven design 
 - **Innovative approaches**
-  - prefer convention over implementation - automatic implementation of abstractions by pluggable pipelines of conventions
+  - prefer convention over implementation - automatic implementation of abstractions by pipelines of pluggable conventions
   - layered customization - multiple reusable orthogonal adaptations, which extend or alter domain model, logic, and conceptual UI, are plugged into customer-specific configurations
   - late compilation - model-based components are late-compiled against customized models and concrete technology stacks
   - building block domains - adaptive and reusable models, logic, and conceptual UI parts for common domains, such as e-commerce, CRM, booking, accounting.
@@ -103,7 +104,7 @@ This milestone was mostly one-person project, with no community involved.
 
 The following was done:
 - minimal set of core features was developed, enough for a simple typical enterprise application 
-- a couple of real-world applications were built on top of the platform
+- two real-world applications were built on top of the platform
 - architectural concept and feasibility of implementation were proven
 - a lot of lessons learned
 
@@ -118,8 +119,8 @@ Targets:
 - proceed with development of the platform, targeting .NET Core
 
 The decision to start a new codebase was for these reasons:
-- take full benefits of lessons learned in Milestone I
-- write code clean from numerous deficiencies and technical debts found in Milestone I
+- take full benefits of lessons learned in Milestone Afra
+- write code clean from numerous deficiencies and technical debts found in Milestone Afra
 - use a more elegant and friendly library for implementation-by-convention and late-compilation 
 - target .NET Core
 - let the community build knowledge and take ownership of the entire codebase
