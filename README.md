@@ -27,31 +27,38 @@ NWheels has not yet delivered its platform for general availability. Nevertheles
 
 NWheels is aimed to have the following characteristics:
 
-- **A-to-Z response to common demands**
+#### A-to-Z response to common demand
   - one framework that covers all application layers and tiers: projects are not left to sweat over gluing multiple 3rd-party building blocks together
   - ready answers to common requirements and concerns, ranging from basic features like authorization, to advanced scenarios like elastic scalability
-  - built-in support for DevOps procedures and easy integration with application lifecycle management
-- **Get more for doing less**. For instance: 
-  - scaffold an empty application - and get continuous integration and deployment procedures working right away, installing  and monitoring production-ready builds, where the only piece that is missing, is the unique features of your application.
+  - built-in support for DevOps procedures, automation of clouds, and easy integration with application lifecycle 
+management
+
+#### Get significantly more for doing much less
+
+  - scaffold a new application - and have it automatically built, deployed, and monitored on cloud or on premises environments, where the only piece that is missing, is the unique features you are going to develop.
   - code domain model, logic, and conceptual UI - and get whole layers such as UI apps, data persistence, and REST/backend APIs, automatically implemented by conventions.
   - use Information Security building block domain - and get user account management, authentication, and common user stories such as  'confirm email' and 'change password', out of the box.
   - define access control rules for different user profiles - and have them transparently enforced through all application layers, including access to both operations and data.
   - define semantic logging messages - and get automatic metric collection, thresholds, circuit breakers, and alerts.
-- **Proven architectures, approaches, and patterns, for dramatically less effort on your side**. To name a few:
+
+#### Proven architectures, approaches, and patterns, for dramatically less effort on your side
   - micro-services
   - hexagonal architecture 
   - domain-driven design 
-- **Innovative approaches**
-  - prefer convention over implementation - automatic implementation of abstractions by pipelines of pluggable conventions
-  - layered customization - multiple reusable orthogonal adaptations, which extend or alter domain model, logic, and conceptual UI, are plugged into customer-specific configurations
+
+#### Innovative approaches
+  - convention over implementation - transparent implementation of abstractions by pipelines of pluggable conventions - an approach, which eliminates majority of repetitive mechanical code from your codebase.
+  - layered unobtrusive customization - multiple reusable orthogonal adaptations are stacked on top of white-label version. Plugged into customer-specific configurations, the adaptations extend and alter domain model, logic, and conceptual UI, while the white-label version remains unchanged. 
   - late compilation - model-based components are late-compiled against customized models and concrete technology stacks
   - building block domains - adaptive and reusable models, logic, and conceptual UI parts for common domains, such as e-commerce, CRM, booking, accounting.
-- **Platform at your service**
+
+#### Platform at your service
   - communication endpoints, backend APIs, messaging, workflows, scheduled jobs, and more
   - elastic on-demand scalability and failover redundancy
   - cloud, hybrid, and on-premise deployments
   - no need to depend on cloud vendor PaaS - no vendor lock-in
-- **Ready DevOps/ALM toolchain**
+
+#### Ready DevOps/ALM toolchain
   - automated deployment to dev boxes and test/prod environments on premise, hybrid, and on cloud
   - runtime health monitoring, metric collection, and tools for production intelligence
   - continuous deployment and continuous integration with optional developer git flow, personal builds, and gated commits
@@ -79,17 +86,17 @@ NWheels is primarily aimed to support enterprise applications, of any size and c
 - business-critical (9x5) and mission-critical (24x7)
 - low-latency and high-throughput processing, e.g. trading
   
-### Where it can run 
+### Where the applications can run 
 
 - Server side: the platform targets .NET Core, thus server-side components can run on Windows, Linux, or Mac servers.
-- Client side: can run on variety of presentation platforms mentioned earlier.
+- Client side: can run on variety of presentation platforms, as mentioned earlier.
  
 ### Read more
 
 - Project Wiki - comprehensive information for both consumers and contributors
 - Introduction
 - Motivation and goals
-- Feature explorer 
+- Feature explorer
 
 ## Milestones
 
