@@ -633,14 +633,26 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
     //-----------------------------------------------------------------------------------------------------------------
 
     function createInputContext(scopeModel, input) {
-        var inputContext = {
-            model: {
-                Data: scopeModel.Data,
-                State: scopeModel.State,
-                Input: input || scopeModel.Input,
-                appState: scopeModel.appState
-            }
-        };
+        var inputContext;
+		if (scopeModel) {
+			inputContext = {
+				model: {
+					Data: scopeModel.Data,
+					State: scopeModel.State,
+					Input: input || scopeModel.Input,
+					appState: scopeModel.appState
+				}
+			};
+		} else {
+			inputContext = {
+				model: {
+					Data: { },
+					State: { },
+					Input: input || { },
+					appState: { }
+				}
+			};
+		}
         return inputContext;
     };
     
@@ -2470,6 +2482,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         translate: translate,
         formatValue: formatValue,
         loadTemplateById: loadTemplateById,
+		createInputContext: createInputContext,
         selectValue: selectValue,
         readValueByNavigationPath: readValueByNavigationPath,
         writeValueByNavigationPath: writeValueByNavigationPath
@@ -2856,7 +2869,7 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
                     if ($scope.hasUidlModifier('DropDown') && !$scope.hasUidlModifier('TypeAhead')) {
                         $scope.entityService.queryEntity($scope.uidl.lookupEntityName, function(query) {
                             if ($scope.uidl.lookupQueryFilter) {
-                                var filterValueContext = createInputContext($scope.model, $scope.entity);
+                                var filterValueContext = $scope.uidlService.createInputContext($scope.model, $scope.entity);
                                 query.applyUidlFilters($scope.uidlService, $scope.uidl.lookupQueryFilter, filterValueContext);
                             }
                         }).then(function(data) {
