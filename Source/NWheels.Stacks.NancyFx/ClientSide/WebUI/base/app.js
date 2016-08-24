@@ -1479,6 +1479,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 return scope.entityService.checkAuthorization(scope.uidl.grid.entityName, optionalEntityId).then(
                     function(response) {
                         scope.entityAuth = response;
+						scope.originalEntity = (response.fullEntity ? angular.copy(response.fullEntity) : null);
                         return response;
                     },
                     function(fault) {
@@ -1710,7 +1711,9 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 //scope.$broadcast(':global:FormValidating', { isValud: true });
 
                 if (scope.uidl.mode !== 'Inline' || scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
-                    scope.entityService.storeEntity(entity).then(
+					var diff = (scope.originalEntity ? scope.entityService.getEntityDiff(entity, scope.originalEntity) : entity);
+					
+					scope.entityService.storeEntity(diff).then(
                         function() {
                             scope.$emit(scope.uidl.qualifiedName + ':StoreEntityCompleted');
                             scope.softRefresh();

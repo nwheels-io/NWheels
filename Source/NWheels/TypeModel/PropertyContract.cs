@@ -123,6 +123,8 @@ namespace NWheels.DataObjects
             public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
             {
                 property.IsCalculated = true;
+                property.Access |= PropertyAccess.Read;
+                property.Access &= ~PropertyAccess.Write;
             }
 
             #endregion

@@ -844,7 +844,7 @@ namespace NWheels.UI.Toolbox
         {
             var value = GetBasicDefaultModifiers(type);
 
-            if ( MetaProperty.Access == PropertyAccess.ReadOnly )
+            if ((MetaProperty.Access & PropertyAccess.Write) == 0)
             {
                 value |= FormFieldModifiers.ReadOnly;
             }

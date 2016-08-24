@@ -18,6 +18,7 @@ function ($http, $q, $timeout) {
         storeEntity: storeEntity,
         recalcEntity: recalcEntity,
         deleteEntity: deleteEntity,
+		getEntityDiff: getEntityDiff,
         trackRetrievedEntities: trackRetrievedEntities,
     };
 
@@ -183,6 +184,47 @@ function ($http, $q, $timeout) {
             entity['$state'] = 'RetrievedModified';
         }
     }
+	
+    //-----------------------------------------------------------------------------------------------------------------
+
+	function getEntityDiff(changed, original) {
+		if (!changed || !original) {
+			return changed;
+		}
+
+		var diff = { };
+		
+		for (var p in changed){
+            if (changed.hasOwnProperty(p) && p.length > 0) {
+				if (p.charAt(0) == '$') {
+					diff[p] = changed[p];
+					continue;
+				}
+
+				var originalValue = original[p];
+                var changedValue = changed[p];
+				
+				if (!originalValue && !changedValue) {
+					continue;
+				}
+				
+				if (!originalValue || !changedValue) {
+					diff[p] = changedValue;
+				} else if (typeof changedValue === 'object') {
+					if (changedValue.constructor === Array) {
+						diff[p] = changedValue; //TODO: implement array comparison
+					} else {
+						diff[p] = getEntityDiff(changedValue, originalValue);
+					}
+				} else if (changedValue !== originalValue) {
+					diff[p] = changedValue;
+				}
+            }
+        }
+
+		return diff;
+	}
+	
 }]);
 
 //---------------------------------------------------------------------------------------------------------------------
