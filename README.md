@@ -1,13 +1,13 @@
 Welcome to NWheels
 =======
 
-According to our observations, commonality in the needs of enterprise application projects is significantly higher than variability. We take this as an opportunity to cut project costs and timeframes, and reduce technical risks. 
+According to our observations, commonality in the needs of enterprise application projects is significantly higher than variability. We take this as an opportunity to slash project costs and timeframes, improve software quality, and reduce technical risks. 
 
 (see [Highlights](#highlights) below)
 
 ## What is NWheels
 
-NWheels is an infrastructural ecosystem and ongoing development effort, which is aimed to supply A-to-Z architectural recipes, runtime platform, and high productivity development framework for .NET-based enterprise applications. 
+NWheels is an infrastructural ecosystem and ongoing development effort, which is aimed to supply A-to-Z architectural recipes, runtime platform, and high productivity development framework for enterprise applications based on .NET Core platform.
 
 (see [Motivation and goals](https://github.com/felix-b/NWheels/wiki/Motivation-and-goals) in Wiki)
 
@@ -25,10 +25,11 @@ NWheels has not yet delivered its platform for general availability. Nevertheles
 
 ## Highlights
 
-NWheels is aimed to have the following characteristics:
+NWheels is aimed to exhibit the following characteristics:
 
 #### A-to-Z response to common demand
   - one framework that covers all application layers and tiers: projects are not left to sweat over gluing multiple 3rd-party building blocks together
+    - that is not to say a monolith, which tries to solve every problem: NWheels is a consistent interface for pluggable modules, where each module does best at its area of responsibility. 
   - ready answers to common requirements and concerns, ranging from basic features like authorization, to advanced scenarios like elastic scalability
   - built-in support for DevOps procedures, automation of clouds, and easy integration with application lifecycle 
 management
