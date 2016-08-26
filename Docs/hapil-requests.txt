@@ -1,9 +1,0 @@
-Hapil requests
-
-1. Implementation class writer: DependencyField is not sufficient, still needed to write constructor
-2. Property writer: .Throw<>() shortcut is not implemented
-3. Event writer: has no .Throw<>() shortcut 
-4. Event writer: probably(?) uses TT.TEventHandler instead of TT.TEventArgs
-5. (IGNORE - use MethodSignature) Method writer: is missing ArgumentCount property and enumerable of arguments (had to revert to ParameterInfo[] and their Position property is confusing, easily making Hapil-based code buggy)
-6. Method writer: Argument<T>(int) does not perform type check against method declaration - must shout loud in case of mismatch
-7. CastTo<T>() operation needs to perform type safety check if possible, to shout loud early
