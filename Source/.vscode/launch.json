@@ -6,7 +6,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceRoot}/bin/Debug/<target-framework>/<project-name.dll>",
+            "program": "${workspaceRoot}/NWheels.Cli/bin/Debug/netcoreapp1.0/NWheels.dll",
             "args": [],
             "cwd": "${workspaceRoot}",
             "externalConsole": false,

@@ -1,4 +1,4 @@
-namespace NWheels.Api.Hosting
+namespace NWheels.Api
 {
     public interface IProgramInfo
     {
