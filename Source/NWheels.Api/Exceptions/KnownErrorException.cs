@@ -1,27 +1,31 @@
 using System;
-using System.Linq;
 
-namespace NWheels.Api.Ddd
+namespace NWheels.Api.Exceptions
 {
-    public interface IEntityRepository<T>
-        where T : class
+    public abstract class KnownErrorException : Exception
     {
-        IQueryable<T> AsQueryable();
+        protected KnownErrorException(FaultParty faultParty, Type codeType, string codeString = null, string subCodeString = null)
+            : base()
+        {
+            this.TypeString = codeType.Name;
+            this.CodeString = codeString; 
+            this.SubCodeString = subCodeString;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void Insert(T entity);
+        public FaultParty FaultParty { get; private set; } 
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        T New(Action<T> initializer = null);
+        public string TypeString { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        TInheritor New<TInheritor>(Action<TInheritor> initializer = null) where TInheritor : T;
+        public string CodeString { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        T New(Type inheritorType, Action<T> initializer = null);
+        public string SubCodeString { get; private set; }
     }
 }

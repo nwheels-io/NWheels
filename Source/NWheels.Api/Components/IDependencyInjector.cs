@@ -10,4 +10,14 @@ namespace NWheels.Api.Components
         IEnumerable<T> GetAll<T>();
         IPipeline<T> GetPipeline<T>();
     }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface IDependencyInjector<T>
+    {
+        T Get();
+        T Get(string name);
+        IEnumerable<T> GetAll();
+        IPipeline<T> GetPipeline();
+    }
 }

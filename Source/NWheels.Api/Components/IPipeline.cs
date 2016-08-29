@@ -5,7 +5,7 @@ namespace NWheels.Api.Components
 {
     public interface IPipeline<T> : IEnumerable<T>
     {
-        T GetProxy();
+        T GetInvocationProxy();
         int Count { get; }
 
         T this[int index] { get; }

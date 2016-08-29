@@ -1,5 +1,5 @@
 using NWheels.Api.Ddd;
-using ExpenseTracker.Domain.Entities;
+using ExpenseTracker.Domain;
 using System.Linq;
 using System;
 
@@ -18,8 +18,7 @@ namespace ExpenseTracker.Domain
 
         public Guid InsertTransaction(DateTime date, decimal amount, string memo)
         {
-            var transaction =  new Transaction() {
-                Id = Guid.NewGuid(),
+            var transaction = new Transaction() {
                 Date = date,
                 Amount = amount,
                 Memo = memo
@@ -33,7 +32,5 @@ namespace ExpenseTracker.Domain
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected virtual IEntityRepository<Transaction> Transactions { get; set; }
-
-
     }
 }
