@@ -1,7 +1,7 @@
 using System;
 using NWheels.Api.Logging;
 
-namespace NWheels.Api.Threading
+namespace NWheels.Api.Concurrency
 {
     public interface ISyncLockHolderInfo
     {

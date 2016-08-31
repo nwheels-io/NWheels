@@ -1,4 +1,4 @@
-namespace NWheels.Api.Threading
+namespace NWheels.Api.Concurrency
 {
     public interface ISyncLock
     {

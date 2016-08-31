@@ -1,6 +1,6 @@
 using System;
 
-namespace NWheels.Api.Threading
+namespace NWheels.Api.Concurrency
 {
     /// <summary>
     /// 
