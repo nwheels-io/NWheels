@@ -1,6 +1,6 @@
 namespace NWheels.Api.Testing
 {
-    public abstract class UnitTestBase
+    public abstract class UnitTestBase : IClassFixture<>
     {
     }
 }

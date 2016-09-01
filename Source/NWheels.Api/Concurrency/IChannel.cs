@@ -4,30 +4,33 @@ namespace NWheels.Api.Concurrency
 {
     public interface IChannel
     {
+        string Name { get; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface IProducer<in T>
+    {
+        void Send(T item);
+        void Close();
+        IChannel Channel { get; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface IConsumer<out T>
+    {
+        T Receive();
+        T TryReceive(TimeSpan timeout, out bool received);
+        IChannel Channel { get; }
+        bool IsClosed { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public interface IChannel<T> : IChannel
     {
-        IProducerChannel<T> Producer { get; }
-        IConsumerChannel<T> Consumer { get; }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public interface IProducerChannel<in T>
-    {
-        void Send(T item);
-        void Close();
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public interface IConsumerChannel<out T>
-    {
-        T Receive();
-        T TryReceive(TimeSpan timeout, out bool received);
-        bool IsClosed { get; }
+        IProducer<T> Producer { get; }
+        IConsumer<T> Consumer { get; }
     }
 }

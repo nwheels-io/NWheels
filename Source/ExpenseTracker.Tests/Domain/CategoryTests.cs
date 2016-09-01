@@ -11,7 +11,7 @@ namespace ExpenseTracker.Tests.Domain
         [Fact]
         public void CategoryIsInitiallyAllZeroesAndOK()
         {
-            var category = 
+            //var category = g
         }
         
     }

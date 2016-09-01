@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using NWheels.Api.Concurrency;
@@ -11,14 +12,14 @@ namespace NWheels.Api.Tests.Concurrency
         {
             IFramework framework = null;
 
-            var channel1 = framework.MakeChannel<int>();
+            var channel1 = framework. MakeChannel<int>();
             var channel2 = framework.MakeChannel<string>();
             var quit = framework.MakeChannel<bool>();
 
             framework.Go(() => {
                 while (true)
                 {
-                    SelectResult result; 
+                    ISelectResult result; 
                     
                     switch (framework.Select(out result, channel1, channel2, quit))
                     {
@@ -37,19 +38,30 @@ namespace NWheels.Api.Tests.Concurrency
             for (int i = 0; i < 10 ; i++)
             {
                 channel1.Producer.Send(i);
-                channel2.Producer.Send("AAA");
+                channel2.Producer.Send((i * 2).ToString());
+                Thread.Sleep(100);
             }
-            Thread.Sleep(100);
-            channel1.Producer.Send(111);
-            Thread.Sleep(500);
-            channel2.Producer.Send("AAA");
+
+            quit.Producer.Send(true);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void PromiseExample()
         {
+            IFramework framework = null;
 
+            var channel1 = framework.MakeChannel<int>();
+            var channel2 = framework.MakeChannel<string>();
+            var quit = framework.MakeChannel<bool>();
+
+            framework.Defer(() => {
+                var m = new MemoryStream();
+                return m;
+            }).Then(
+                success: m => m.Length,
+                failure: err => Console.WriteLine(err.ToString())
+            );
         }
     }
 }
