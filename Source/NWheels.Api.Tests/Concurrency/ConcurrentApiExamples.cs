@@ -12,24 +12,28 @@ namespace NWheels.Api.Tests.Concurrency
         {
             IFramework framework = null;
 
-            var channel1 = framework. MakeChannel<int>();
-            var channel2 = framework.MakeChannel<string>();
-            var quit = framework.MakeChannel<bool>();
+            var channel1 = framework.Scheduler.NewChannel<int>("c1");
+            var channel2 = framework.Scheduler.NewChannel<string>("c2");
+            var quit = framework.Scheduler.NewChannel<bool>("q");
 
-            framework.Go(() => {
+            framework.Scheduler.Defer(() => {
                 while (true)
                 {
-                    ISelectResult result; 
+                    object value; 
                     
-                    switch (framework.Select(out result, channel1, channel2, quit))
+                    switch (framework.Scheduler.TrySelect(TimeSpan.FromSeconds(3), out value, channel1, channel2, quit))
                     {
                         case 0:
-                            Console.WriteLine($"received {result.As<int>()} <-0");
+                            Console.WriteLine($"received {value} <-c1");
                             break;
                         case 1:
-                            Console.WriteLine($"received {result.As<string>()} <-1");
+                            Console.WriteLine($"received {value} <-c2");
                             break;
-                        case 3:
+                        case 2:
+                            Console.WriteLine("received quit");
+                            return;
+                        default:
+                            Console.WriteLine("timed out!");
                             return;
                     }
                 }
@@ -51,7 +55,7 @@ namespace NWheels.Api.Tests.Concurrency
         {
             IFramework framework = null;
 
-            var channel1 = framework.MakeChannel<int>();
+            var channel1 = framework. MakeChannel<int>();
             var channel2 = framework.MakeChannel<string>();
             var quit = framework.MakeChannel<bool>();
 
@@ -61,7 +65,7 @@ namespace NWheels.Api.Tests.Concurrency
             }).Then(
                 success: m => m.Length,
                 failure: err => Console.WriteLine(err.ToString())
-            );
+            ).;
         }
     }
 }
