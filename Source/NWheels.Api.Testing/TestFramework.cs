@@ -14,7 +14,7 @@ namespace NWheels.Api.Testing
                 {
                     return new DateTime(PresetUtcNow.Value.Ticks, DateTimeKind.Utc);
                 }
-            
+
                 return DateTime.UtcNow;
             }
         }
@@ -23,39 +23,14 @@ namespace NWheels.Api.Testing
 
         public DateTime? PresetUtcNow { get; set; }
 
-        void IFramework.Go(Action routine)
+        public IScheduler Scheduler
         {
-            throw new NotImplementedException();
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
 
-        void IFramework.Go<T>(Func<T> routine)
-        {
-            throw new NotImplementedException();
-        }
-
-        IChannel<T> IFramework.MakeChannel<T>()
-        {
-            throw new NotImplementedException();
-        }
-
-        int IFramework.Select(out SelectResult result, params IChannel[] channels)
-        {
-            throw new NotImplementedException();
-        }
-
-        IPromise IFramework.Defer(Action routine)
-        {
-            throw new NotImplementedException();
-        }
-
-        IPromise<T> IFramework.Defer<T>(Func<T> routine)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IFramework.TrySelect(TimeSpan timeout, Func<ISelectCase, IEndSelect> cases)
-        {
-            throw new NotImplementedException();
-        }
     }
+
 }

@@ -1,4 +1,5 @@
 using System;
+using NWheels.Concurrency.Advanced;
 
 namespace NWheels.Api.Concurrency
 {
@@ -25,14 +26,16 @@ namespace NWheels.Api.Concurrency
     public interface IPromiseBuilder : IPromise
     {
         IPromiseBuilder Then(Action success = null, Action<Exception> failure = null, Action cancel = null, Action finish = null);
-        IPromiseBuilder<T> Then<T>(Func<T> success = null, Action<Exception> failure = null, Action cancel = null, Action finish = null);
+        IPromiseBuilder<T> Then<T>(Func<object, T> success = null, Action<Exception> failure = null, Action cancel = null, Action finish = null);
+        PromiseAwaiter<object> GetAwaiter();        
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
     public interface IPromiseBuilder<T> : IPromise
     {
+        IPromiseBuilder<T> Then(Action<T> success = null, Action<Exception> failure = null, Action<T> finish = null);
         IPromiseBuilder<T2> Then<T2>(Func<T, T2> success = null, Action<Exception> failure = null, Action<T> finish = null);
-        IPromise Then(Action<T> success = null, Action<Exception> failure = null, Action<T> finish = null);
+        PromiseAwaiter<T> GetAwaiter();        
     }
 }

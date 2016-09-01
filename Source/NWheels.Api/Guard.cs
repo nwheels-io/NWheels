@@ -56,5 +56,19 @@ namespace NWheels.Api
             {
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
+        public class FutureAttribute : System.Attribute
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
+        public class NotPastAttribute : System.Attribute
+        {
+        }
     }
 }

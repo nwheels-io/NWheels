@@ -1,4 +1,5 @@
 using System;
+using NWheels.Concurrency.Advanced;
 
 namespace NWheels.Api.Concurrency
 {
@@ -9,22 +10,40 @@ namespace NWheels.Api.Concurrency
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        T Receive<T>([Guard.NotNull] IConsumer<T> channel);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        bool TryReceive<T>(
+            [Guard.NotNegative] TimeSpan timeout,
+            [Guard.NotNull] IConsumer<T> channel, 
+            out T value);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [return: Guard.NotNull] 
-        int Select(
+        int ReceiveAny(
             out object value, 
             [Guard.NotEmpty] params IChannel[] channels);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [return: Guard.GreaterOrEqual(-1)] 
-        int Select<T>(
+        int ReceiveAny<T>(
             out T value, 
             [Guard.NotEmpty] params IConsumer<T>[] channels);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [return: Guard.GreaterOrEqual(-1)] 
-        int TrySelect(
+        int TryReceiveAny(
+            [Guard.NotNegative] TimeSpan timeout, 
+            out object value, 
+            [Guard.NotEmpty] params IChannel[] channels);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IPromiseBuilder<int> TryReceiveAnyAsync(
             [Guard.NotNegative] TimeSpan timeout, 
             out object value, 
             [Guard.NotEmpty] params IChannel[] channels);
@@ -32,7 +51,7 @@ namespace NWheels.Api.Concurrency
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [return: Guard.GreaterOrEqual(-1)] 
-        int TrySelect<T>(
+        int TryReceiveAny<T>(
             [Guard.NotNegative] TimeSpan timeout, 
             out T value, 
             [Guard.NotEmpty] params IConsumer<T>[] channels);
@@ -46,17 +65,16 @@ namespace NWheels.Api.Concurrency
 
         [return: Guard.NotNull] 
         IPromiseBuilder Defer(
-            [Guard.NotNull] Action routine,
-            [Guard.NotNegative, Guard.OrNull] TimeSpan? delayBy = null,
-            [Guard.NotNegative, Guard.OrNull] TimeSpan? deadlineDuration = null);
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [return: Guard.NotNull] 
-        IPromiseBuilder Defer(
-            [Guard.NotNull] Action routine,
-            [Guard.NotNull] DateTime? delayUntilUtc = null,
-            [Guard.NotNegative, Guard.OrNull] DateTime? deadlineUtc = null);
+            [Guard.NotNull] 
+            Action routine,
+            [Guard.NotNegative, Guard.OrNull] 
+            TimeSpan? delayBy = null,
+            [Guard.NotPast, Guard.OrNull] 
+            DateTime? delayUntilUtc = null,
+            [Guard.NotNegative, Guard.OrNull] 
+            TimeSpan? deadlineDuration = null,
+            [Guard.NotPast, Guard.OrNull] 
+            DateTime? deadlineUtc = null);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

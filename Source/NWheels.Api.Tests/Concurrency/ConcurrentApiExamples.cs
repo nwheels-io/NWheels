@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using NWheels.Api.Concurrency;
@@ -8,7 +9,7 @@ namespace NWheels.Api.Tests.Concurrency
 {
     public class ConcurrentApiExamples
     {
-        public void GoAndSelectExample()
+        public void DeferAndReceiveAnyExample()
         {
             IFramework framework = null;
 
@@ -16,12 +17,11 @@ namespace NWheels.Api.Tests.Concurrency
             var channel2 = framework.Scheduler.NewChannel<string>("c2");
             var quit = framework.Scheduler.NewChannel<bool>("q");
 
-            framework.Scheduler.Defer(() => {
+            framework.Scheduler.Defer(async () => {
                 while (true)
                 {
                     object value; 
-                    
-                    switch (framework.Scheduler.TrySelect(TimeSpan.FromSeconds(3), out value, channel1, channel2, quit))
+                    switch (await framework.Scheduler.TryReceiveAnyAsync(TimeSpan.FromSeconds(3), out value, channel1, channel2, quit))
                     {
                         case 0:
                             Console.WriteLine($"received {value} <-c1");
@@ -51,21 +51,34 @@ namespace NWheels.Api.Tests.Concurrency
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void PromiseExample()
+        public async void AsyncAwaitOnPromiseExample()
         {
             IFramework framework = null;
 
-            var channel1 = framework. MakeChannel<int>();
-            var channel2 = framework.MakeChannel<string>();
-            var quit = framework.MakeChannel<bool>();
+            int x = await framework.Scheduler.Defer<int>(() => {
+                return 123;
+            });
 
-            framework.Defer(() => {
-                var m = new MemoryStream();
-                return m;
-            }).Then(
-                success: m => m.Length,
-                failure: err => Console.WriteLine(err.ToString())
-            ).;
+            Console.WriteLine(x.ToString());            
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // public void PromiseExample()
+        // {
+        //     IFramework framework = null;
+
+        //     var channel1 = framework. MakeChannel<int>();
+        //     var channel2 = framework.MakeChannel<string>();
+        //     var quit = framework.MakeChannel<bool>();
+
+        //     framework.Defer(() => {
+        //         var m = new MemoryStream();
+        //         return m;
+        //     }).Then(
+        //         success: m => m.Length,
+        //         failure: err => Console.WriteLine(err.ToString())
+        //     );
+        // }
     }
 }
