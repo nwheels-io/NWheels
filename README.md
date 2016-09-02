@@ -7,17 +7,29 @@ According to our observations, commonality in the needs of enterprise applicatio
 
 ## What is NWheels
 
-NWheels is an infrastructural ecosystem and ongoing development effort, which is aimed to supply A-to-Z architectural recipes, runtime platform, and high productivity development framework for enterprise applications based on .NET Core platform.
+NWheels is an infrastructural ecosystem and ongoing development effort, which is aimed to supply A-to-Z architectural recipes, innovative runtime platform, and high productivity development framework for enterprise applications, based on .NET Core platform. 
 
 (see [Motivation and goals](https://github.com/felix-b/NWheels/wiki/Motivation-and-goals) in Wiki)
 
+## NWheels is Home
+
+It is aimed to become a place where collective expertise of enterprise application development is accumulated - in the form of reusable infrastructural modules, common domain models, example applications, guidance articles, and surrounding ecosystem of developer resources. 
+
+NWheels solves the problem of collaboration and expertise sharing by providing high productivity platform for development of reusable and adaptive building blocks.  
+
+## Open Source Software
+
+We believe that source sharing and collaboration, driven by enthusiasm for quality and for professionalism, have much better chances of delivering working and usable software, rather than an isolated team, which is driven by sales plan of a profit-oriented organization. 
+
+NWheels is released under the **MIT license**, and is aimed to stay **free forever**.
+
 ## Status
 
-NWheels has not yet delivered its platform for general availability. Nevertheless, initial incubated version is now stable and serves a basis for two proprietary real-world applications. 
+NWheels has not yet delivered its platform for general availability. By now, a proof-of-concept version was incubated, named **milestone Afra**. It is stable and serves a basis for two proprietary real-world applications. 
 
-#### August 2016
+#### September 2016
 
-- **Milestone Afra - completed** - an initial version with core set of platform components was developed, and two real-world applications were built on top of the platform, allowing validation of architectural concept. This was mostly one-person project. 
+- **Milestone Afra - completed** - a proof-of-concept version was developed, and two proprietary real-world applications were built on top of it. This allowed validation of architectural concepts. This version of the platform was mostly one-person project, with 2 more developers involved in development of the applications. 
 
 #### Next Step 
 
