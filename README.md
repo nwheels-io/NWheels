@@ -11,13 +11,17 @@ NWheels is an infrastructural ecosystem and ongoing development effort, which is
 
 (see [Motivation and goals](https://github.com/felix-b/NWheels/wiki/Motivation-and-goals) in Wiki)
 
-## NWheels is Home
+### NWheels is Interface
 
-It is aimed to become a place where collective expertise of enterprise application development is accumulated - in the form of reusable infrastructural modules, common domain models, example applications, guidance articles, and surrounding ecosystem of developer resources. 
+Rather than being a monolith which tries to solve every problem, NWheels solves exactly one problem, and it does that well. NWheels provides a common consistent interface for pluggable modules. It is pluggable modules that define application capabilities and technology choices.
 
-NWheels solves the problem of collaboration and expertise sharing by providing high productivity platform for development of reusable and adaptive building blocks.  
+### NWheels is Home
 
-## Open Source Software
+The common interface allows collaboration and expertise sharing though development of reusable and adaptive building blocks. 
+
+NWheels is aimed to become a place where collective expertise of enterprise application development is accumulated - in the form of reusable infrastructural modules, common domain models, example applications, and the surrounding ecosystem of developer resources. 
+
+### NWheels is Open Source Software
 
 We believe that source sharing and collaboration, driven by enthusiasm for quality and for professionalism, have much better chances of delivering working and usable software, rather than an isolated team, which is driven by sales plan of a profit-oriented organization. 
 
