@@ -7,25 +7,45 @@ According to our observations, commonality in the needs of enterprise applicatio
 
 ## What is NWheels
 
-NWheels is an infrastructural ecosystem and ongoing development effort, which is aimed to supply A-to-Z architectural recipes, innovative runtime platform, and high productivity development framework for enterprise applications, based on .NET Core platform. 
+NWheels is an infrastructural ecosystem and ongoing development effort, which is aimed to supply A-to-Z architectural recipes, innovative runtime platform, and high productivity development framework for enterprise applications, based on .NET Core platform.
 
-(see [Highlights](#highlights) below)
+It is also a place where collective expertise in enterprise application development is accumulated and shared, in the form of reusable NWheels modules and developer resources. 
+
+([Learn more](#more_about_nwheels) below)
+
+## License
 
 NWheels is released under the **MIT license**, and is aimed to stay **free forever**.
 
-#### NWheels is Recipe
+## Current Status
 
-NWheels implements architectural recipes that address the whole story of a typical enterprise application. Among various aspects, the architecture covers: data persistence and caching, several architectural flavors of business logic organization, user interface on multiple platforms/devices, B2B integrations, testability, extensibility and customization, scalability and resilience, and DevOps/ALM toolchain. 
+#### September 2016
 
-#### NWheels is Interface
+NWheels has not yet delivered its platform for general availability. Proof-of-concept version was incubated, named **milestone Afra**. It is now stable and serves a basis for two proprietary real-world applications. 
 
-Rather than being a monolith that attempts to solve every problem, NWheels only solves one problem, and it does it well. NWheels defines a consistent API, and supplies a set of core services to pluggable modules. It is then pluggable modules that define application capabilities, productivity frameworks for application development, and technology choices.
+## Next Step 
 
-#### NWheels is Generator
+**Milestone Boda** - starting with **new codebase** and switching to community-driven phase. It will be based on the lessons learned from milestone Afra, on well documented architecture and feature designs, and on feedback and contributions from community. 
 
-The amount of code that an application developer has to write is reduced down to declaration and implementation of unique features. Though great deal of reduction is gained from reuse of building block domains and technology stack adapters, there are still concrete application models, which have to be connected with generic infrastructure mechanisms. 
+## More about NWheels
 
-The latter is traditionally accomplished by layers of repetitive and mechanical code, considered integral part of application models. NWheels removes the burden of coding those layers, by generating code through pipelines of pluggable conventions.
+#### NWheels is a Recipe
+
+NWheels implements architectural recipes that address the whole story of a typical enterprise application. Among various aspects, the architecture covers: data persistence and caching, multiple flavors of business logic organization, user interface on multiple platforms/devices, B2B integrations, testability, extensibility and customization, scalability and resilience, and DevOps/ALM toolchain. 
+
+#### NWheels is an Interface
+
+Rather than being a monolith that attempts to solve every problem, NWheels only solves one problem, and it does it well. NWheels defines a consistent API, and supplies a set of core services to pluggable modules. It is then pluggable modules that define application capabilities, productivity frameworks, and technology choices.
+
+To reiterate, even application frameworks are actually pluggable modules. For instance, NWheels initially supplies DDD (domain-driven design), Workflow, and UIDL (user interface definition language) frameworks. Those can be replaced by, or combined with frameworks of different flavors, if the latter are a better fit for the problem at hand. 
+
+#### NWheels is a Generator
+
+NWheels reduces the amount of code that an application developer has to write, down to declaration and implementation of unique features. Though great deal of reduction is gained from reuse of building block domains and technology stack adapters, there are still concrete application models, which have to be mapped onto generic infrastructure mechanisms. 
+
+The latter is traditionally accomplished by layers of repetitive and mechanical code, considered integral part of application models. NWheels removes the burden of coding those layers, by generating code through pipelines of pluggable conventions. Such approach also wins better  decoupling of application code from underlying frameworks.
+
+It's worth mentioning that DDD approach, while recognized for its benefits, has the downside of being an expensive undertaking. NWheels generators remove great deal of effort required to implement DDD in code.   
 
 #### NWheels is Home
 
@@ -33,27 +53,14 @@ NWheels is aimed to become a place where collective expertise of enterprise appl
 
 #### NWheels is Open Source Software
 
-We believe that source sharing and collaboration, driven by enthusiasm for quality and for professionalism, have much better chances of delivering working and (re)usable software, rather than isolated teams driven by sales plans of profit-oriented organizations. 
+We believe that source sharing and collaboration, driven by enthusiasm for quality and for professionalism, have much better chances of delivering working and (re)usable software, rather than isolated development driven by sales plan of a profit-oriented organization. 
 
-## Current Status
-
-NWheels has not yet delivered its platform for general availability. By now, a proof-of-concept version was incubated, named **milestone Afra**. It is stable and serves a basis for two proprietary real-world applications. 
-
-#### September 2016
-
-- **Milestone Afra - completed** - a proof-of-concept version was developed, and two proprietary real-world applications were built on top of it. This allowed validation of architectural concepts. This version of the platform was mostly one-person project, with 2 more developers involved in development of the applications. 
-
-#### Next Step 
-
-- **Milestone Boda** - starting with **fresh new codebase** and switching to **community-driven phase**. It will be based on the lessons learned from milestone Afra, on well documented architecture and feature designs, and on contributions from community. 
-
-## Highlights
+## Feature Highlights
 
 NWheels is aimed to exhibit the following characteristics:
 
 #### A-to-Z response to common demand
   - one framework that covers all application layers and tiers: projects are not left to sweat over gluing multiple 3rd-party building blocks together
-    - that is not to say a monolith, which tries to solve every problem: NWheels is a consistent interface for pluggable modules, where each module does best at its area of responsibility. 
   - ready answers to common requirements and concerns, ranging from basic features like authorization, to advanced scenarios like elastic scalability
   - built-in support for DevOps procedures, automation of clouds, and easy integration with application lifecycle 
 management
@@ -157,3 +164,7 @@ The decision to start a new codebase was for these reasons:
 - target .NET Core
 - let the community build knowledge and take ownership of the entire codebase
 
+
+#### Milestone Afra - completed
+
+Proof-of-concept version was developed, and two proprietary real-world applications were built on top of it. This allowed validation of architectural concepts. This version of the platform was mostly one-person project, with 2 more developers involved in development of the applications. 
