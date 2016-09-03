@@ -3,7 +3,7 @@ Welcome to NWheels
 
 According to our observations, commonality in the needs of enterprise application projects is significantly higher than variability. We take this as an opportunity to slash project costs and timeframes, improve software quality, and reduce technical risks. 
 
-(see [Motivation and goals](https://github.com/felix-b/NWheels/wiki/Motivation-and-goals) in Wiki)
+> Learn more: [Motivation and goals](https://github.com/felix-b/NWheels/wiki/Motivation-and-goals)
 
 ## What is NWheels
 
@@ -11,7 +11,7 @@ NWheels is an infrastructural ecosystem and ongoing development effort, which is
 
 It is also a place where collective expertise in enterprise application development is accumulated and shared, in the form of reusable NWheels modules and developer resources. 
 
-([Learn more](#more_about_nwheels) below)
+> Learn more: [Feature highlighs](#feature-highlights), [More about NWheels](#more-about-nwheels)
 
 ## License
 
@@ -27,33 +27,6 @@ NWheels has not yet delivered its platform for general availability. Proof-of-co
 
 **Milestone Boda** - starting with **new codebase** and switching to community-driven phase. It will be based on the lessons learned from milestone Afra, on well documented architecture and feature designs, and on feedback and contributions from community. 
 
-## More about NWheels
-
-#### NWheels is a Recipe
-
-NWheels implements architectural recipes that address the whole story of a typical enterprise application. Among various aspects, the architecture covers: data persistence and caching, multiple flavors of business logic organization, user interface on multiple platforms/devices, B2B integrations, testability, extensibility and customization, scalability and resilience, and DevOps/ALM toolchain. 
-
-#### NWheels is an Interface
-
-Rather than being a monolith that attempts to solve every problem, NWheels only solves one problem, and it does it well. NWheels defines a consistent API, and supplies a set of core services to pluggable modules. It is then pluggable modules that define application capabilities, productivity frameworks, and technology choices.
-
-To reiterate, even application frameworks are actually pluggable modules. For instance, NWheels initially supplies DDD (domain-driven design), Workflow, and UIDL (user interface definition language) frameworks. Those can be replaced by, or combined with frameworks of different flavors, if the latter are a better fit for the problem at hand. 
-
-#### NWheels is a Generator
-
-NWheels reduces the amount of code that an application developer has to write, down to declaration and implementation of unique features. Though great deal of reduction is gained from reuse of building block domains and technology stack adapters, there are still concrete application models, which have to be mapped onto generic infrastructure mechanisms. 
-
-The latter is traditionally accomplished by layers of repetitive and mechanical code, considered integral part of application models. NWheels removes the burden of coding those layers, by generating code through pipelines of pluggable conventions. Such approach also wins better  decoupling of application code from underlying frameworks.
-
-It's worth mentioning that DDD approach, while recognized for its benefits, has the downside of being an expensive undertaking. NWheels generators remove great deal of effort required to implement DDD in code.   
-
-#### NWheels is Home
-
-NWheels is aimed to become a place where collective expertise of enterprise application development is accumulated. Collaboration and expertise sharing is possible though development of reusable and adaptive NWheels modules, and by contribution to the surrounding ecosystem of developer resources.
-
-#### NWheels is Open Source Software
-
-We believe that source sharing and collaboration, driven by enthusiasm for quality and for professionalism, have much better chances of delivering working and (re)usable software, rather than isolated development driven by sales plan of a profit-oriented organization. 
 
 ## Feature Highlights
 
