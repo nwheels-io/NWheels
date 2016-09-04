@@ -1122,7 +1122,7 @@ HEAD, JS/CSS LINKS
                 columnsModel.push({ name: '$id', index: '$id', width: 1, hidden: true, key: true });
             }
             $scope.gridColumns.forEach(function (metaColumn, idx) {
-                if (!$scope.isUidlAuthorized(metaColumn)) {
+                if (metaColumn.columnType == 'Hidden' || !$scope.isUidlAuthorized(metaColumn)) {
                     return;
                 }
                 var colWidthPx = (
