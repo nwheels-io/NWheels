@@ -3,53 +3,95 @@ Welcome to NWheels
 
 According to our observations, commonality in the needs of enterprise application projects is significantly higher than variability. We take this as an opportunity to slash project costs and timeframes, improve software quality, and reduce technical risks. 
 
-> Learn more: [Motivation and goals](https://github.com/felix-b/NWheels/wiki/Motivation-and-goals)
+> Learn more: [Motivation and goals](https://github.com/felix-b/NWheels/wiki/Motivation-and-goals) in Wiki
 
 ## What is NWheels
 
-NWheels is an infrastructural ecosystem and ongoing development effort, which is aimed to supply A-to-Z architectural recipes, innovative runtime platform, and high productivity development framework for enterprise applications, based on .NET Core platform.
+NWheels is an infrastructural ecosystem and ongoing development effort, which is aimed to supply A-to-Z architectural recipes, innovative runtime platform, and high productivity development framework for enterprise applications based on the .NET Core platform.
 
-It is also a place where collective expertise in enterprise application development is accumulated and shared, in the form of reusable NWheels modules and developer resources. 
-
-> Learn more: [Feature highlighs](#feature-highlights), [More about NWheels](#more-about-nwheels)
+>**What applications it will be possible to build?** Typical client-server and N-tier micro-services, web sites and services, standalone desktop apps and CLI programs; serverless (FaaS) apps.
+>
+>**Where will they run?** Server-side will run on Linux, Windows, OS X; client side will run on web browsers, mobile devices, Windows/Linux/OS X desktops, Smart TV and IVR platforms.
+>
+>**Clouds?** Yes Sir. Any compatible IaaS will be supported. There will be no dependency on any specific vendor PaaS, thus as an example, a business will be able to run on Azure with disaster recovery on AWS and Google Cloud.
+>
+> **High-end SLA?** 24x7 availability, elastic scalability (on supported vendors), low-latency, high-throughput applications.
+>
+> Learn more: [Feature highlighs](#feature-highlights) below, [Aspects of NWheels](https://github.com/felix-b/NWheels/wiki/intro-aspects-of-nwheels) in Wiki 
 
 ## License
 
-NWheels is released under the **MIT license**, and is aimed to stay **free forever**.
+NWheels is available under the **MIT license**, and is aimed to stay **free forever**.
 
-## Current Status
+## Current Status 
 
-#### September 2016
+#### September 2016 - the concept is proven 
 
-NWheels has not yet delivered its platform for general availability. Proof-of-concept version was incubated, named **milestone Afra**. It is now stable and serves a basis for two proprietary real-world applications. 
+NWheels has not yet released its platform for general availability.
 
-## Next Step 
+The proof-of-concept version named **milestone Afra**, is now stable and serves a basis for two proprietary real-world applications.
 
-**Milestone Boda** - starting with **new codebase** and switching to community-driven phase. It will be based on the lessons learned from milestone Afra, on well documented architecture and feature designs, and on feedback and contributions from community. 
+> Development of two serious software systems, which we did on top of  NWheels milestone Afra framework, evidenced that it is possible to deliver and maintain a superior working product with less resources by an order of magnitude, compared to competing vendors of similar software.
 
+## Next Step
+
+**Milestone Boda** is now starting with **new greenfield codebase**. 
+
+Why new codebase:
+- Target .NET Core (milestone Afra targeted .NET Framework 4.5)
+- Fix major deficiencies of milestone Afra:
+  - simplify design, implementation, and exposed APIs
+  - keep technical debt very low
+  - do it TDD way
+- Implement improved architecture, based on lessons learned
+- Let contributors catch up early
+
+## Call for Contributors
+
+**NWheels makes promise to change the game of enterprise software development - [learn how](https://github.com/felix-b/NWheels/wiki/Motivation-and-goals)**.
+
+> What will it mean to different people? 
+>
+> - To developers - more accomplishments for much less effort, and it is fun
+> - To architects - more ready building blocks and capabilities, more experimentation for less re-work
+> - To software vendors - more competitiveness for less resources, time, and budget
+> - To entrepreneurs - more innovation for less investment and risk, shorter time to market
+> - To businesses - more reliability and availability of critical services for no cloud vendor lock-in  
+>    - e.g. run on Azure, recover on Amazon and Google
+> - To users - more cool apps and services available
+
+If NWheels holds its promise and reaches its goals, this would mean no less than revolution. It is doable - we did it (milestone Afra), and we want to do it again, this time for real.  
+
+#### Want to get involved? **[Please find instructions and guidelines here](https://github.com/felix-b/NWheels/wiki/community-contributors-guidelines)**.
+
+We believe that code sharing and collaboration, driven by enthusiasm for quality and professionalism, have much better chances of delivering working and (re)usable software, rather than isolated development effort, driven by sales plan of a profit-oriented organization. 
 
 ## Feature Highlights
 
 NWheels is aimed to exhibit the following characteristics:
 
 #### A-to-Z response to common demand
-  - one framework that covers all application layers and tiers: projects are not left to sweat over gluing multiple 3rd-party building blocks together
-  - ready answers to common requirements and concerns, ranging from basic features like authorization, to advanced scenarios like elastic scalability
-  - built-in support for DevOps procedures, automation of clouds, and easy integration with application lifecycle 
-management
 
-#### Get significantly more for doing much less
+  - implemented architectural recipes that cover all application layers and tiers: projects are not left to sweat over gluing multiple 3rd-party building blocks together
+  - ready answers to common requirements and concerns, ranging from basic features like authorization, to advanced scenarios like elastic scalability
+  - built-in support for DevOps procedures, automation of clouds, and easy integration with application lifecycle management
+
+#### Get significantly more for doing much less. For example:
 
   - scaffold a new application - and have it automatically built, deployed, and monitored on cloud or on premises environments, where the only piece that is missing, is the unique features you are going to develop.
-  - code domain model, logic, and conceptual UI - and get whole layers such as UI apps, data persistence, and REST/backend APIs, automatically implemented by conventions.
+  - code domain model, logic, and conceptual UI - and get whole layers of your system automatically implemented by conventions - including data persistence, CLI, and UI apps bound to the domain model, in-process or through invocations of REST/backend APIs.
   - use Information Security building block domain - and get user account management, authentication, and common user stories such as  'confirm email' and 'change password', out of the box.
   - define access control rules for different user profiles - and have them transparently enforced through all application layers, including access to both operations and data.
   - define semantic logging messages - and get automatic metric collection, thresholds, circuit breakers, and alerts.
 
-#### Proven architectures, approaches, and patterns, for dramatically less effort on your side
-  - micro-services
+#### Proven architectures, approaches, and patterns, for dramatically less effort on your side. To name a few:
+
   - hexagonal architecture 
-  - domain-driven design 
+  - micro-services
+  - domain-driven design
+  - command-line interface over application functions
+  - distributed consensus and service discovery
+  - containerization
 
 #### Innovative approaches
   - convention over implementation - transparent implementation of abstractions by pipelines of pluggable conventions - an approach, which eliminates majority of repetitive mechanical code from your codebase.
@@ -59,9 +101,9 @@ management
 
 #### Platform at your service
   - communication endpoints, backend APIs, messaging, workflows, scheduled jobs, and more
-  - elastic on-demand scalability and failover redundancy
+  - elastic on-demand scalability and automatic failover
   - cloud, hybrid, and on-premise deployments
-  - no need to depend on cloud vendor PaaS - no vendor lock-in
+  - no dependency on specific cloud vendor PaaS; run on any compatible IaaS - no vendor lock-in
 
 #### Ready DevOps/ALM toolchain
   - automated deployment to dev boxes and test/prod environments on premise, hybrid, and on cloud
@@ -70,74 +112,9 @@ management
   - product and agile process management
   - all of the above is cross-tracked for maximal visibility and decision support
 
-### What types of applications can be built
-
-NWheels is primarily aimed to support enterprise applications, of any size and complexity.
-
-#### Architectures
-
-- Typical N-tier applications, which consist of:
-  - application tier, composed of one or more micro-services that execute business logic
-  - communication endpoints, exposed by application tier for client UI apps and B2B integrations
-  - data tier, containing any number of databases, possibly of different vendors and technologies
-  - UI apps on various presentation platforms, such as web browser (single-page app), desktop GUI, native mobile apps, and less common ones like Smart TV and IVR. 
-- Serverless architecture is naturally achieved by:
-  - giving up explicit service boundaries
-  - letting domain models and logic be transparently hosted and scaled by the platform
-
-#### SLA categories
-  
-- non-business-critical
-- business-critical (9x5) and mission-critical (24x7)
-- low-latency and high-throughput processing, e.g. trading
-  
-### Where the applications can run 
-
-- Server side: the platform targets .NET Core, thus server-side components can run on Windows, Linux, or Mac servers.
-- Client side: can run on variety of presentation platforms, as mentioned earlier.
- 
-### Read more
+# Learn More - Resources
 
 - Project Wiki - comprehensive information for both consumers and contributors
 - Introduction
 - Motivation and goals
 - Feature explorer
-
-## Milestones
-
-#### Milestone Afra - completed
-
-[![Build status](https://ci.appveyor.com/api/projects/status/x0xcs9lfg4tee88s?svg=true)]
-(https://ci.appveyor.com/project/felix-b/nwheels)
-
-The first milestone was fundamental in that it included development of core components, and validation of architectural concept, through building several real-world applications on top of it.
-
-This milestone was mostly one-person project, with no community involved. 
-
-The following was done:
-- minimal set of core features was developed, enough for a simple typical enterprise application 
-- two real-world applications were built on top of the platform
-- architectural concept and feasibility of implementation were proven
-- a lot of lessons learned
-
-#### Milestone Boda - starting
-
-This milestone starts with a fresh new codebase. 
-
-Targets:
-- document overall architecture and details of the planned features
-- start building community of contributors
-- work with the community to refine architecture and feature designs
-- proceed with development of the platform, targeting .NET Core
-
-The decision to start a new codebase was for these reasons:
-- take full benefits of lessons learned in Milestone Afra
-- write code clean from numerous deficiencies and technical debts found in Milestone Afra
-- use a more elegant and friendly library for implementation-by-convention and late-compilation 
-- target .NET Core
-- let the community build knowledge and take ownership of the entire codebase
-
-
-#### Milestone Afra - completed
-
-Proof-of-concept version was developed, and two proprietary real-world applications were built on top of it. This allowed validation of architectural concepts. This version of the platform was mostly one-person project, with 2 more developers involved in development of the applications. 
