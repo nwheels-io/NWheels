@@ -203,6 +203,7 @@
     <Compile Include="Processing\Jobs\Core\IApplicationJobLogger.cs" />
     <Compile Include="Processing\Jobs\Core\IFrameworkApplicationJobConfig.cs" />
     <Compile Include="Processing\Jobs\Impl\SequentialBatchJobScheduler.cs" />
+    <Compile Include="Processing\Messages\Impl\ContentTemplateProviderBase.cs" />
     <Compile Include="Processing\Messages\Impl\SmtpOutgoingEmailActor.cs" />
     <Compile Include="Processing\Messages\MessageFromHeader.cs" />
     <Compile Include="Processing\Messages\MessageToHeader.cs" />

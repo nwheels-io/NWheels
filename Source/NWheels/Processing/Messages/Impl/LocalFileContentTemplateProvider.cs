@@ -13,7 +13,7 @@ using SmartFormat;
 
 namespace NWheels.Processing.Messages.Impl
 {
-    public class LocalFileContentTemplateProvider : IContentTemplateProvider
+    public class LocalFileContentTemplateProvider : ContentTemplateProviderBase
     {
         private readonly ILogger _logger;
         private readonly string _templateFolderPath;
@@ -32,16 +32,9 @@ namespace NWheels.Processing.Messages.Impl
 
         #region Implementation of IContentTemplateProvider
 
-        public string GetTemplate(object contentType)
+        public override string GetTemplate(object contentType)
         {
             return _templateByType.GetOrAdd(contentType, LoadContentTemplate);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public string Format(string template, object data)
-        {
-            return Smart.Format(template, data);
         }
 
         #endregion
