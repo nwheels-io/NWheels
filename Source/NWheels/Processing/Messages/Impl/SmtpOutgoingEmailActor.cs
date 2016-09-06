@@ -25,6 +25,8 @@ namespace NWheels.Processing.Messages.Impl
         {
             _configSection = configSection;
             _logger = logger;
+
+            GlobalInitialize(configSection);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -129,6 +131,27 @@ namespace NWheels.Processing.Messages.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static bool _s_globalInitialized;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void GlobalInitialize(IConfigSection configSection)
+        {
+            if (!_s_globalInitialized)
+            {
+                if (configSection.IgnoreCertificateErrors)
+                {
+                    ServicePointManager.ServerCertificateValidationCallback = (obj, cert, chain, errors) => {
+                        return true;
+                    };
+                }
+
+                _s_globalInitialized = true;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [ConfigurationSection(XmlName = "Framework.Smtp")]
         public interface IConfigSection : IConfigurationSection
         {
@@ -140,6 +163,9 @@ namespace NWheels.Processing.Messages.Impl
 
             [PropertyContract.DefaultValue(true)]
             bool UseSsl { get; set; }
+
+            [PropertyContract.DefaultValue(false)]
+            bool IgnoreCertificateErrors { get; set; }
 
             string UserName { get; set; }
 
