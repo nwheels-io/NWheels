@@ -48,11 +48,11 @@ Why new codebase:
 
 ## Call for Contributors
 
-Hi, my name is Felix and I am the inventor of NWheels. My drive to maximize throughput and quality of software development comes from understanding that software is going to rule the world. There will be programs involved in every aspect of our lives. A huge lot of programs will compete for survival.   
+Hi, my name is Felix and I am the inventor of NWheels. My drive to optimize software creation comes from understanding that, as software is going to rule the world, a huge lot of programs will compete for survival. Stable and quick-to-develop will live; unstable or slow-to-develop will die. The software development process itself needs optimization.
 
-Think of how the ways our programs are managed in production have fundamentally changed over the past decade. They have shifted towards extreme automation and speed, and this process is going to continue. Take a look at [DC/OS](https://dcos.io/), as a vivid example. Programs are now automatically managed by other programs. In DevOps, the Ops game has changed. 
+The ways our programs are managed in production have already fundamentally changed over the past decade. They have shifted towards extreme automation and speed, and this process is going to continue. Take a look at [DC/OS](https://dcos.io/), as a vivid example. Programs are now automatically managed by other programs. In DevOps, the Ops game has changed. 
 
-Now what about Dev? Will we follow the shift? Or will it be fast Ops, slow Dev? I believe that in the near future we will have no choice but to follow, if we want to survive the competition.  
+Now what about Dev? Will we follow the shift? I believe that in the near future we will have no choice but to follow, if we want to survive the competition. There has to be a Dev optimization engine - the one like NWheels.  
 
 **NWheels promises to change the game of enterprise software development similar to how the Ops game has changed**.
 
