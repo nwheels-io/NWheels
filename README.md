@@ -13,7 +13,7 @@ NWheels is an infrastructural ecosystem and ongoing development effort, which is
 
 - **Where will they run?** Server-side will run on Linux, Windows, OS X; client side will run on web browsers, mobile devices, Windows/Linux/OS X desktops, Smart TV and IVR platforms.
 
-- **Clouds?** Yes, any compatible IaaS will be supported. Unless explicitly specified, no dependencies on concrete vendor PaaS will be included. Thus for example, a mission-critical software system will be able to run on Azure with disaster recovery on AWS and Google Cloud.
+- **Clouds?** Yes, any compatible IaaS will be supported. NWheels comes with its own runtime platform, and unless explicitly specified, no dependencies on concrete vendor PaaS will be included. Thus for example, mission-critical software will be able to run on Azure with disaster recovery on AWS and Google Cloud. [Learn more: scalability & availability foundation](https://github.com/felix-b/NWheels/wiki/platform-scalability-overview).
 
 - **High-end SLA?** Yes, 24x7 availability, automatic failover, elastic scalability, low-latency, high-throughput applications will be supported.
 
@@ -48,13 +48,13 @@ Why new codebase:
 
 ## Call for Contributors
 
-Hi, my name is Felix and I am the inventor of NWheels. My drive to optimize software creation comes from understanding that, as software is going to rule the world, a huge lot of programs will compete for survival. Stable and quick-to-develop will live; unstable or slow-to-develop will die. The software development process itself needs optimization.
+Hi, my name is Felix and I am the inventor of NWheels. My drive to optimize software creation comes from understanding that, as software is going to rule the world, a huge lot of programs will compete for survival. Stable and quick-to-develop will live; unstable or slow-to-develop will die. The ways we create and maintain our software need performance boost and optimization. 
 
-The ways our programs are managed in production have already fundamentally changed over the past decade. They have shifted towards extreme automation and speed, and this process is going to continue. Take a look at [DC/OS](https://dcos.io/), as a vivid example. Programs are now automatically managed by other programs. In DevOps, the Ops game has changed. 
+Such optimization can already be seen in how fundamentally operations management has changed over the past decade. It has shifted towards extreme automation and speed, and this process is going to continue. Take a look at [DC/OS](https://dcos.io/), as a vivid example. Servers and programs are now automatically managed by other programs. In DevOps, the Ops game has changed. 
 
-Now what about Dev? Will we follow the shift? I believe that in the near future we will have no choice but to follow, if we want to survive the competition. There has to be a Dev optimization engine - the one like NWheels.  
+Now what about Dev? Will we follow this shift? I believe we have to. Those who will spend time re-inventing the wheels and coordinating mega-chaos of big concurrent teams, will lose. Small teams assembling ready building blocks together and quickly adding unique features on top, will be the winners. Now we need a platform, which will make it possible.
 
-**NWheels promises to change the game of enterprise software development similar to how the Ops game has changed**.
+**The game of enterprise software development has to change. It's time**.
 
 > What will it mean to different people? 
 >
@@ -65,7 +65,7 @@ Now what about Dev? Will we follow the shift? I believe that in the near future 
 > - To businesses - more reliability and availability of critical services for no cloud vendor lock-in
 > - To users - more cool apps and services available
 
-If NWheels holds its promise and reaches its goals, this would mean no less than revolution. It is doable - we did it (milestone Afra), and we want to do it again, this time for real.  
+If NWheels holds its promise and reaches its goals, the game will change. It is doable - we did it (milestone Afra), and we want to do it again, this time for real.  
 
 NWheels project would benefit from contributions by experienced professionals in many different areas.
 
@@ -107,10 +107,10 @@ NWheels is aimed to exhibit the following characteristics:
   - building block domains - adaptive and reusable models, logic, and conceptual UI parts for common domains, such as e-commerce, CRM, booking, accounting.
 
 #### Platform at your service
-  - communication endpoints, backend APIs, messaging, workflows, scheduled jobs, and more
+  - runs on premises and on any cloud with compatible IaaS; no dependency on specific cloud vendor PaaS - no vendor lock-in
+  - communication endpoints, backend APIs, messaging, workflows, rule engines, distributed cache, map/reduce, job scheduling, ... 
   - elastic on-demand scalability and automatic failover
   - cloud, hybrid, and on-premise deployments
-  - no dependency on specific cloud vendor PaaS; run on any compatible IaaS - no vendor lock-in
   - pluggable automation of underlying platforms, e.g. Docker, DC/OS, cloud vendor APIs
 
 #### Ready DevOps/ALM toolchain
