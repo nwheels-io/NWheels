@@ -34,6 +34,9 @@ namespace NWheels.Stacks.AspNet
         [LogWarning]
         void FailedToDecryptSessionCookie(CryptographicException error);
 
+        [LogActivity]
+        ILogActivity ApiControllerAction(string action, string route);
+
         [LogActivity(LogLevel.Audit)]
         ILogActivity StoreEntity(
             [Detail(IncludeInSingleLineText = true, Indexed = true)] string entityName,
