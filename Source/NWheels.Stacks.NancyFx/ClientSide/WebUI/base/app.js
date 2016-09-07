@@ -2690,7 +2690,7 @@ function (uidlService, entityService, commandService, $timeout, $http, $compile,
                     return true;
                 }
                 try {
-                    var userClaims = $scope.appScope.model.State.LoggedInUser.LoginResult.AllClaims;
+                    var userClaims = ($scope.appScope.model.State.LoggedInUser.AllClaims || $scope.appScope.model.State.LoggedInUser.LoginResult.AllClaims);
                     for (var i = 0 ; i < uidlElement.authorization.requiredClaims.length; i++) {
                         var claim = uidlElement.authorization.requiredClaims[i];
                         if (userClaims.indexOf(claim) >= 0) {
