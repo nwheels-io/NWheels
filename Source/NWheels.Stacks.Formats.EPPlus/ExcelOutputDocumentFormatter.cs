@@ -172,7 +172,7 @@ namespace NWheels.Stacks.Formats.EPPlus
             }
             else if (metaProperty.ClrType.IsAnyNumericType())
             {
-                return (metaProperty.ClrType.IsIntegerNumericType() ? "#,##0" : "#,##0.0000");
+                return (metaProperty.ClrType.IsIntegerNumericType() ? "#,##0" : "#,##0.00000");
             }
             else if (metaProperty.ClrType == typeof(DateTime) || metaProperty.ClrType == typeof(DateTimeOffset))
             {
