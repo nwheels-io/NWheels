@@ -45,11 +45,16 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public UidlCommand ChangePassword { get; set; }
+        public UidlCommand Logout { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [ViewModelContract]
         public interface IState
         {
             string UserId { get; set; }
-            string[] UserRoles { get; set; }
+            string UserType { get; set; }
             string PersonFullName { get; set; }
             string ProfilePhotoId { get; set; }
         }

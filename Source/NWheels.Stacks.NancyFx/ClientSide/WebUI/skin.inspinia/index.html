@@ -656,19 +656,22 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - PROFILE PHOTO
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/UserProfilePhoto">
-        <div class="dropdown profile-element"> <span>
-            <img ng-if="model.State.ProfilePhotoId" alt="image" class="img-circle" ng-src="entity/queryImage/{{uidl.entityName}}/{{model.State.ProfilePhotoId}}/{{uidl.imageTypeProperty}}/{{uidl.imageContentProperty}}">
-             </span>
+        <div class="dropdown profile-element"> 
+			<span>
+				<img ng-if="model.State.ProfilePhotoId" alt="image" class="img-circle" ng-src="entity/queryImage/{{uidl.entityName}}/{{model.State.ProfilePhotoId}}/{{uidl.imageTypeProperty}}/{{uidl.imageContentProperty}}">
+				<img ng-if="!model.State.ProfilePhotoId" alt="No profile photo" class="img-circle" src="app/skin/assets/img/default_profile_photo.png">
+            </span>
             <a data-toggle="dropdown" class="dropdown-toggle" href="#">
-            <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">{{model.State.PersonFullName}}</strong>
-             </span> <span class="text-muted text-xs block">{{model.State.UserRoles[0]}} <b class="caret"></b></span> </span> </a>
-            <!--ul class="dropdown-menu animated fadeInRight m-t-xs">
-                <li><a href="profile.html">Profile</a></li>
-                <li><a href="contacts.html">Contacts</a></li>
-                <li><a href="mailbox.html">Mailbox</a></li>
-                <li class="divider"></li>
-                <li><a href="login.html">Logout</a></li>
-            </ul-->
+				<span class="clear"> 
+					<span class="block m-t-xs">
+						<strong class="font-bold">{{model.State.PersonFullName}}</strong>
+					</span> 
+					<span class="text-muted text-xs block">{{model.State.UserType}}<b class="caret"></b></span> 
+				</span>
+			</a>
+            <ul class="dropdown-menu animated fadeIn m-t-xs">
+                <li ng-repeat="command in uidl.commands"><a ng-click="$emit(command.qualifiedName + ':Executing')">{{::translate(command.text)}}</a></li>
+            </ul>
         </div>    
     </script>
     
@@ -679,11 +682,8 @@ HEAD, JS/CSS LINKS
         <nav class="navbar-default navbar-static-side" role="navigation">
             <div class="sidebar-collapse">
                 <ul class="nav metismenu" id="side-menu">
-                    <li class="nav-header" style="padding-top:45px;padding-bottom:100px;">
+                    <li class="nav-header">
                         <uidl-widget uidl="uidl.profilePhoto"></uidl-widget>
-                        <div class="logo-element">
-                            IN+
-                        </div>
                     </li>
                     <li ng-repeat="item in uidl.mainMenu.items" ng-if="isUidlAuthorized(item)" ng-include="'app/uidl-element-template/ManagementConsole-menu-item'"></li>
                 </ul>
@@ -692,7 +692,7 @@ HEAD, JS/CSS LINKS
 
         <div id="page-wrapper" class="gray-bg">
             <div class="row border-bottom">
-                <nav class="navbar navbar-static-top gray-bg" role="navigation" style="margin-bottom: 0">
+                <nav class="navbar navbar-static-top gray-bg" role="navigation" style="margin-bottom: 0; height: 63px; padding-top:3px;">
                     <div class="navbar-header">
                         <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>
                         <form role="search" class="navbar-form-custom" action="search_results.html">
@@ -804,7 +804,7 @@ HEAD, JS/CSS LINKS
 							<button 
 								type="button"
 								class="btn btn-rounded"
-								style="margin-right:5px;"
+								style="margin-right:5px; margin-bottom:5px;"
 								ng-disabled="utilityCommandInProgress || !isUtilityCommandEnabled(command)"
 								ng-click="invokeUtilityCommand(command)"
 								ng-class="{'btn-default':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"

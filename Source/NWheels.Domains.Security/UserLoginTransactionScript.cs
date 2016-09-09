@@ -145,20 +145,29 @@ namespace NWheels.Domains.Security
                 var account = principal.Identity.GetUserAccount();
 
                 FullName = principal.PersonFullName;
-                UserType = metadataCache.GetTypeMetadata(account.As<IObject>().ContractType).QualifiedName;
                 UserId = account.As<IPersistableObject>().As<IEntityObject>().GetId().Value.ToString();
                 UserRoles = principal.GetUserRoles();
                 AllClaims = principal.Identity.Claims.Select(c => c.Value).ToArray();
                 LastLoginAtUtc = account.LastLoginAtUtc;
 
-                if ( endpoint != null )
+                if (account.AssociatedRoles.Count > 0)
+                {
+                    UserType = account.AssociatedRoles.First().Description;
+                }
+
+                if (string.IsNullOrEmpty(UserType))
+                {
+                    UserType = metadataCache.GetTypeMetadata(account.As<IObject>().ContractType).QualifiedName;
+                }
+
+                if (endpoint != null)
                 {
                     IdleSessionExpiryMinutes = (int)endpoint.SessionIdleTimeoutDefault.GetValueOrDefault(TimeSpan.Zero).TotalMinutes;
                 }
 
                 var accountWithProfilePhoto = account as IEntityPartUserAccountProfilePhoto;
 
-                if ( accountWithProfilePhoto != null && accountWithProfilePhoto.ProfilePhoto != null )
+                if (accountWithProfilePhoto != null && accountWithProfilePhoto.ProfilePhoto != null)
                 {
                     this.ProfilePhotoId = EntityId.ValueOf(accountWithProfilePhoto.ProfilePhoto).ToStringOrDefault();
                 }
