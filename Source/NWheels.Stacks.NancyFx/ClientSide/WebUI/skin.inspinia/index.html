@@ -658,7 +658,7 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="app/uidl-element-template/UserProfilePhoto">
         <div class="dropdown profile-element"> 
 			<span>
-				<img ng-if="model.State.ProfilePhotoId" alt="image" class="img-circle" ng-src="entity/queryImage/{{uidl.entityName}}/{{model.State.ProfilePhotoId}}/{{uidl.imageTypeProperty}}/{{uidl.imageContentProperty}}">
+				<img ng-if="model.State.ProfilePhotoId" alt="image" class="img-circle" ng-src="app/entity/queryImage/{{uidl.entityName}}/{{model.State.ProfilePhotoId}}/{{uidl.imageTypeProperty}}/{{uidl.imageContentProperty}}">
 				<img ng-if="!model.State.ProfilePhotoId" alt="No profile photo" class="img-circle" src="app/skin/assets/img/default_profile_photo.png">
             </span>
             <a data-toggle="dropdown" class="dropdown-toggle" href="#">

@@ -1,29 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using NWheels.Domains.Security;
 using NWheels.Domains.Security.Core;
 using NWheels.Entities;
 using NWheels.Extensions;
+using NWheels.Processing.Documents;
 using NWheels.Samples.MyHRApp.Authorization;
 using NWheels.Samples.MyHRApp.Domain;
+using NWheels.UI;
 using NWheels.Utilities;
 
 namespace NWheels.Samples.MyHRApp.Deployment
 {
     public class HRContextPopulator : DomainContextPopulatorBase<IHRContext>
     {
+        private readonly IFrameworkUIConfig _uiConfig;
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public HRContextPopulator(IFrameworkUIConfig uiConfig)
+        {
+            _uiConfig = uiConfig;
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Overrides of DomainContextPopulatorBase<IHRContext>
 
         protected override void OnPopulateContext(IHRContext context)
         {
-            var administratorAcl = AddUserDataRule<IHRAdminAccessControlLost>(context);
+            var administratorAcl = AddUserDataRule<IHRAdminAccessControlList>(context);
             var administratorRole = AddUserRole(context, "Administrator", HRClaims.UserRoleAdministrator, administratorAcl);
             var hrManagerRole = AddUserRole(context, "HR Manager", HRClaims.UserRoleHRManager, administratorAcl);
 
-            var administratorUser = AddUser<IUserAccountEntity>(context, "admin", "Administrator", administratorRole);
-            var helenBakerUser = AddUser<IUserAccountEntity>(context, "helen", "Helen Baker", hrManagerRole);
+            var administratorUser = AddUser<IHRUserAccountEntity>(context, "admin", "Administrator", administratorRole);
+
+            var helenBakerPhotoPath = PathUtility.HostBinPath(_uiConfig.WebContentRootPath, @"skin.inspinia\assets\img\a3_48.jpg");
+            var helenBakerUser = AddUser<IHRUserAccountEntity>(context, "helen", "Helen Baker", hrManagerRole, helenBakerPhotoPath);
 
             var devDepartment = context.Departments.New();
             devDepartment.Name = "Research & Development";
@@ -85,7 +101,7 @@ namespace NWheels.Samples.MyHRApp.Deployment
         #endregion
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static TUser AddUser<TUser>(IHRContext context, string loginName, string fullName, IUserRoleEntity role)
+        private static TUser AddUser<TUser>(IHRContext context, string loginName, string fullName, IUserRoleEntity role, string profilePhotoPath = null)
             where TUser : class, IUserAccountEntity
         {
             TUser user = context.AllUsers.AsQueryable().OfType<TUser>().FirstOrDefault(x => x.LoginName == loginName);
@@ -98,6 +114,13 @@ namespace NWheels.Samples.MyHRApp.Deployment
                 user.FullName = fullName;
                 user.AssociatedRoles.Add(role);
                 user.As<UserAccountEntity>().SetPassword(SecureStringUtility.ClearToSecure("11111"));
+
+                if (profilePhotoPath != null)
+                {
+                    var profilePhoto = AddProfilePhoto<TUser>(context, profilePhotoPath);
+                    user.As<IEntityPartUserAccountProfilePhoto>().ProfilePhoto = profilePhoto;
+                }
+
                 user.As<IActiveRecord>().Save();
             }
             else if (!user.AssociatedRoles.Contains(role))
@@ -107,6 +130,23 @@ namespace NWheels.Samples.MyHRApp.Deployment
                 user.As<IActiveRecord>().Save();
             }
             return user;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static IProfilePhotoEntity AddProfilePhoto<TUser>(IHRContext context, string profilePhotoPath) where TUser : class, IUserAccountEntity
+        {
+            var imageType = Path.GetExtension(profilePhotoPath).TrimStart('.').ToLower();
+            if (imageType == "jpg")
+            {
+                imageType = "jpeg";
+            }
+            var imageFormat = new DocumentFormat("IMAGE", "image/" + imageType, Path.GetExtension(profilePhotoPath), Path.GetFileName(profilePhotoPath));
+            var imageDocument = new FormattedDocument(new DocumentMetadata(imageFormat), File.ReadAllBytes(profilePhotoPath));
+            var profilePhoto = context.ProfilePhotos.New();
+            profilePhoto.ImportFormattedDocument(imageDocument);
+            context.ProfilePhotos.Insert(profilePhoto);
+            return profilePhoto;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -125,6 +165,7 @@ namespace NWheels.Samples.MyHRApp.Deployment
 
                 role.Name = title;
                 role.ClaimValue = claimValue;
+                role.Description = title;
 
                 foreach (var rule in entityAccessRules)
                 {

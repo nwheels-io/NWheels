@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.Domains.Security;
 using NWheels.Entities;
+using NWheels.Samples.MyHRApp.Authorization;
 using NWheels.Stacks.MongoDb;
 
 namespace NWheels.Samples.MyHRApp.Domain
@@ -13,5 +14,8 @@ namespace NWheels.Samples.MyHRApp.Domain
     {
         IEntityRepository<IDepartmentEntity> Departments { get; }
         IEntityRepository<IEmployeeEntity> Employees { get; }
+        
+        IHRUserAccountEntity NewHRUserAccount();
+        IHRAdminAccessControlList NewHRAdminAccessControlList();
     }
 }

@@ -5,6 +5,7 @@ using System.Web;
 using Autofac;
 using NWheels.Domains.Security;
 using NWheels.Extensions;
+using NWheels.Samples.MyHRApp.Authorization;
 using NWheels.Samples.MyHRApp.Deployment;
 using NWheels.Samples.MyHRApp.Domain;
 using NWheels.Samples.MyHRApp.UI;
@@ -23,7 +24,9 @@ namespace NWheels.Samples.MyHRApp
 
             builder.NWheelsFeatures().ObjectContracts().Concretize<IUserAccountDataRepository>().With<IHRContext>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<IAutoIncrementIdDataRepository>().With<IHRContext>();
-
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IHRAdminAccessControlList>().With<HRAdminAccessControlList>();
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IPersonName>().With<PersonName>();
+            
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<HRLoginTx>();
             builder.NWheelsFeatures().UI().RegisterApplication<HRApp>().WithWebEndpoint();
         }

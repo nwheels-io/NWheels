@@ -10,13 +10,13 @@ namespace NWheels.Samples.MyHRApp.Authorization
 {
     [EntityContract]
     [ClaimValue(HRClaims.AclAdministrator)]
-    public interface IHRAdminAccessControlLost : IEntityAccessRuleEntity
+    public interface IHRAdminAccessControlList : IEntityAccessRuleEntity
     {
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public abstract class HRAdminAccessControlList : EntityAccessRuleEntity, IHRAdminAccessControlLost
+    public abstract class HRAdminAccessControlList : EntityAccessRuleEntity, IHRAdminAccessControlList
     {
         #region Overrides of EntityAccessRuleEntity
 

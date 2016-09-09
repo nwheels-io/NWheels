@@ -89,6 +89,7 @@
     <Compile Include="Domain\IDepartmentEntity.cs" />
     <Compile Include="Domain\IEmployeeEntity.cs" />
     <Compile Include="Domain\IHRContext.cs" />
+    <Compile Include="Domain\IHRUserAccountEntity.cs" />
     <Compile Include="Domain\IPersonName.cs" />
     <Compile Include="Domain\IPostalAddress.cs" />
     <Compile Include="ModuleLoader.cs" />

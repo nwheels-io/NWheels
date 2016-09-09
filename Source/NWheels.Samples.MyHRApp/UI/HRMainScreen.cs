@@ -9,6 +9,7 @@ using NWheels.UI;
 using NWheels.UI.Toolbox;
 using NWheels.UI.Uidl;
 using NWheels.Domains.Security;
+using NWheels.Samples.MyHRApp.Authorization;
 
 namespace NWheels.Samples.MyHRApp.UI
 {
@@ -34,7 +35,8 @@ namespace NWheels.Samples.MyHRApp.UI
                     },
                     System = new {
                         @this = new {
-                            Icon = "gear"
+                            Icon = "gear",
+                            Authorization = new UidlAuthorization(HRClaims.UserRoleAdministrator)
                         },
                         UserAccounts = Goto(this.Users).Appearance(icon: "table"),
                         SystemLog = Popup(App.SystemLog),
@@ -47,6 +49,20 @@ namespace NWheels.Samples.MyHRApp.UI
             Console.ProfilePhoto.Bind(vm => vm.State.PersonFullName).ToGlobalAppState<HRApp.IState>(x => x.LoggedInUser.FullName);
             Console.ProfilePhoto.Bind(vm => vm.State.UserType).ToGlobalAppState<HRApp.IState>(x => x.LoggedInUser.UserType);
             Console.ProfilePhoto.Bind(vm => vm.State.UserId).ToGlobalAppState<HRApp.IState>(x => x.LoggedInUser.UserId);
+
+            Departments.Crud.Grid
+                .Column(x => x.Id, size: FieldSize.Small)
+                .Column(x => x.Name);
+            Departments.Crud.Form
+                .Field(x => x.Manager, setup: f => f.LookupDisplayProperty = "FullName")
+                .ShowFields(x => x.Id, x => x.Name, x => x.Manager);
+
+            Employees.Crud.Grid
+                .Column(x => x.Id, size: FieldSize.Small)
+                .Column(x => x.Name.FullName, title: "Name")
+                .Column(x => x.Email)
+                .Column(x => x.Phone)
+                .Column(x => x.Department.Name, title: "Department");
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -56,7 +72,7 @@ namespace NWheels.Samples.MyHRApp.UI
         public LoggedInUserWidget CurrentUser { get; set; }
         public CrudScreenPart<IDepartmentEntity> Departments { get; set; }
         public CrudScreenPart<IEmployeeEntity> Employees { get; set; }
-        public UserAccountCrudScreenPart Users { get; set; }
+        public UserAccountCrudScreenPart<IHRUserAccountEntity> Users { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

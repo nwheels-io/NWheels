@@ -807,7 +807,9 @@ namespace NWheels.Stacks.AspNet
                 var response = new HttpResponseMessage() {
                     Content = new ByteArrayContent(imageContents)
                 };
-                response.Content.Headers.ContentType = new MediaTypeHeaderValue("image/" + imageType);
+                
+                var imageContentType = (imageType.Contains("/") ? imageType : "image/" + imageType);
+                response.Content.Headers.ContentType = new MediaTypeHeaderValue(imageContentType);
 
                 return ResponseMessage(response);
             }
