@@ -170,5 +170,37 @@ namespace NWheels.UnitTests.Extensions
             chunks[2].ShouldBe(new[] { "CCC", null });
             chunks[3].ShouldBe(new[] { "DDD", null });
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [TestCase("One", "One")]
+        [TestCase("OneTwo", "One two")]
+        [TestCase("OneTwoThree", "One two three")]
+        [TestCase("HTTP", "HTTP")]
+        [TestCase("HTTPProtocol", "HTTP protocol")]
+        [TestCase("OneABBR", "One ABBR")]
+        [TestCase("OneABBRTwo", "One ABBR two")]
+        [TestCase("1234", "1234")]
+        [TestCase("One1234", "One 1234")]
+        [TestCase("One1234Two", "One 1234 two")]
+        [TestCase("OneABBR1234", "One ABBR 1234")]
+        [TestCase("OneABBR1234Two", "One ABBR 1234 two")]
+        [TestCase("ABBR1", "ABBR 1")]
+        [TestCase("One1", "One 1")]
+        [TestCase("1ABBR", "1 ABBR")]
+        [TestCase("1One", "1 one")]
+        [TestCase(" ", " ")]
+        [TestCase("", "")]
+        [TestCase(null, null)]
+        public void TestSplitPascalCase(string input, string expectedOutput)
+        {
+            //-- act
+
+            var actualOutput = input.SplitPascalCase();
+
+            //-- assert
+
+            Assert.That(actualOutput, Is.EqualTo(expectedOutput));
+        }
     }
 }

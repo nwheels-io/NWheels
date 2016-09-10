@@ -152,19 +152,46 @@ namespace NWheels.Extensions
 
         public static string SplitPascalCase(this string s, char delimiter = ' ')
         {
-            var output = new StringBuilder(s.Length * 2);
-
-            for ( int i = 0 ; i < s.Length ; i++ )
+            if (s == null)
             {
-                if ( i > 0 && (char.IsUpper(s[i]) || char.IsDigit(s[i]) != char.IsDigit(s[i-1])) )
+                return null;
+            }
+
+            var length = s.Length;
+
+            if (length <= 1)
+            {
+                return s;
+            }
+
+            var output = new StringBuilder(length * 2);
+
+            output.Append(s[0]);
+
+            for (int i = 1 ; i < s.Length ; i++)
+            {
+                if (char.IsDigit(s[i]))
                 {
-                    output.Append(delimiter);
-                    output.Append(char.ToLower(s[i]));
+                    var isNewWord = !char.IsDigit(s[i - 1]);
+
+                    if (isNewWord)
+                    {
+                        output.Append(delimiter);
+                    }
                 }
-                else
+                else if (char.IsUpper(s[i]))
                 {
-                    output.Append(s[i]);
+                    var isNewWord = (!char.IsUpper(s[i - 1]) || (i < s.Length - 1 && char.IsLower(s[i + 1])));
+
+                    if (isNewWord)
+                    {
+                        output.Append(delimiter);
+                        output.Append((i < s.Length - 1 && char.IsUpper(s[i + 1])) ? s[i] : char.ToLower(s[i]));
+                        continue;
+                    }
                 }
+
+                output.Append(s[i]);
             }
 
             return output.ToString();
