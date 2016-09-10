@@ -25,7 +25,10 @@ namespace NWheels.Samples.MyHRApp
             builder.NWheelsFeatures().ObjectContracts().Concretize<IUserAccountDataRepository>().With<IHRContext>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<IAutoIncrementIdDataRepository>().With<IHRContext>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<IHRAdminAccessControlList>().With<HRAdminAccessControlList>();
+
             builder.NWheelsFeatures().ObjectContracts().Concretize<IPersonName>().With<PersonName>();
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IEmployeeEntity>().With<EmployeeEntity>();
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IDepartmentEntity>().With<DepartmentEntity>();
             
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<HRLoginTx>();
             builder.NWheelsFeatures().UI().RegisterApplication<HRApp>().WithWebEndpoint();

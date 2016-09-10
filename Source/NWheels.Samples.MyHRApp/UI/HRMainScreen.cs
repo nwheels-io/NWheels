@@ -30,8 +30,11 @@ namespace NWheels.Samples.MyHRApp.UI
                 .StatusBarWidgets(CurrentUser)
                 .Navigation(new {
                     Management = new { 
-                        Departments = Goto(this.Departments).Appearance(icon: "table"),
-                        Employees = Goto(this.Employees).Appearance(icon: "table"),
+                        @this = new {
+                            Icon = "th-large"
+                        },
+                        Departments = Goto(this.Departments).Appearance(icon: "users"),
+                        Employees = Goto(this.Employees).Appearance(icon: "user"),
                     },
                     System = new {
                         @this = new {
@@ -52,17 +55,24 @@ namespace NWheels.Samples.MyHRApp.UI
 
             Departments.Crud.Grid
                 .Column(x => x.Id, size: FieldSize.Small)
-                .Column(x => x.Name);
+                .Column(x => x.Name)
+                .Column(x => x.ManagerName, title: "Manager");
             Departments.Crud.Form
                 .Field(x => x.Manager, setup: f => f.LookupDisplayProperty = "FullName")
                 .ShowFields(x => x.Id, x => x.Name, x => x.Manager);
 
             Employees.Crud.Grid
                 .Column(x => x.Id, size: FieldSize.Small)
-                .Column(x => x.Name.FullName, title: "Name")
+                .Column(x => x.FullName, title: "Name")
                 .Column(x => x.Email)
                 .Column(x => x.Phone)
-                .Column(x => x.Department.Name, title: "Department");
+                .Column(x => x.DepartmentName, title: "Department");
+            Employees.Crud.Form
+                .ShowFields(x => x.Id, x => x.FullName, x => x.Department, x => x.Email, x => x.Phone, x => x.Name, x => x.Address)
+                .Field(x => x.Name, setup: f => {
+                    var nameForm = (Form<IPersonName>)f.NestedWidget;
+                    nameForm.ShowFields(x => x.Title, x => x.FirstName, x => x.MiddleName, x => x.LastName);
+                });
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

@@ -44,6 +44,8 @@ namespace NWheels.Samples.MyHRApp.Deployment
             var devDepartment = context.Departments.New();
             devDepartment.Name = "Research & Development";
             devDepartment.Manager = context.Employees.New();
+            devDepartment.Manager.Id = "111111111";
+            devDepartment.Manager.Department = devDepartment;
             devDepartment.Manager.Name.FirstName = "James";
             devDepartment.Manager.Name.LastName = "Young";
             devDepartment.Manager.Email = "james.young@contoso.com";
@@ -58,6 +60,8 @@ namespace NWheels.Samples.MyHRApp.Deployment
             var qaDepartment = context.Departments.New();
             qaDepartment.Name = "Quality Assurance";
             qaDepartment.Manager = context.Employees.New();
+            qaDepartment.Manager.Department = qaDepartment;
+            qaDepartment.Manager.Id = "222222222";
             qaDepartment.Manager.Name.FirstName = "David";
             qaDepartment.Manager.Name.LastName = "King";
             qaDepartment.Manager.Email = "david.king@contoso.com";
@@ -72,6 +76,8 @@ namespace NWheels.Samples.MyHRApp.Deployment
             var opsDepartment = context.Departments.New();
             opsDepartment.Name = "Operations";
             opsDepartment.Manager = context.Employees.New();
+            opsDepartment.Manager.Department = opsDepartment;
+            opsDepartment.Manager.Id = "333333333";
             opsDepartment.Manager.Name.FirstName = "Roy";
             opsDepartment.Manager.Name.LastName = "Patterson";
             opsDepartment.Manager.Email = "roy.patterson@contoso.com";
@@ -86,6 +92,8 @@ namespace NWheels.Samples.MyHRApp.Deployment
             var marketingDepartment = context.Departments.New();
             marketingDepartment.Name = "Marketing";
             marketingDepartment.Manager = context.Employees.New();
+            marketingDepartment.Manager.Department = marketingDepartment;
+            marketingDepartment.Manager.Id = "444444444";
             marketingDepartment.Manager.Name.FirstName = "Linda";
             marketingDepartment.Manager.Name.LastName = "Wood";
             marketingDepartment.Manager.Email = "linda.wood@contoso.com";
