@@ -14,7 +14,8 @@ namespace NWheels.Samples.MyHRApp.Domain
     {
         IEntityRepository<IDepartmentEntity> Departments { get; }
         IEntityRepository<IEmployeeEntity> Employees { get; }
-        
+        IEntityRepository<IPositionEntity> Positions { get; }
+
         IHRUserAccountEntity NewHRUserAccount();
         IHRAdminAccessControlList NewHRAdminAccessControlList();
     }

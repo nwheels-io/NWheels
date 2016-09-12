@@ -33,7 +33,8 @@ namespace NWheels.Samples.MyHRApp.UI
                         @this = new {
                             Icon = "th-large"
                         },
-                        Departments = Goto(this.Departments).Appearance(icon: "users"),
+                        Departments = Goto(this.Departments).Appearance(icon: "sitemap"),
+                        Positions = Goto(this.Positions).Appearance(icon: "shield"),
                         Employees = Goto(this.Employees).Appearance(icon: "user"),
                     },
                     System = new {
@@ -41,8 +42,8 @@ namespace NWheels.Samples.MyHRApp.UI
                             Icon = "gear",
                             Authorization = new UidlAuthorization(HRClaims.UserRoleAdministrator)
                         },
-                        UserAccounts = Goto(this.Users).Appearance(icon: "table"),
-                        SystemLog = Popup(App.SystemLog),
+                        UserAccounts = Goto(this.Users).Appearance(icon: "lock"),
+                        SystemLog = Popup(App.SystemLog).Appearance(icon: "list"),
                     },
                     Logout = Menu.Action.InvokeCommand(CurrentUser.LogOut).Appearance(icon: "sign-out")
                 });
@@ -56,19 +57,49 @@ namespace NWheels.Samples.MyHRApp.UI
             Departments.Crud.Grid
                 .Column(x => x.Id, size: FieldSize.Small)
                 .Column(x => x.Name)
-                .Column(x => x.ManagerName, title: "Manager");
+                .Column(x => x.ManagerName, title: "Manager")
+                .Column(x => x.ListOfPositions, title: "Positions", size: FieldSize.ExtraLarge);
             Departments.Crud.Form
-                .Field(x => x.Manager, setup: f => f.LookupDisplayProperty = "FullName")
-                .ShowFields(x => x.Id, x => x.Name, x => x.Manager);
+                .Field(x => x.Manager, setup: f => {
+                    f.LookupDisplayProperty = "FullName";
+                    var lookupGrid = (DataGrid<IEmployeeEntity>)f.NestedWidget;
+                    lookupGrid
+                        .Column(x => x.Ssn, title: "SSN")
+                        .Column(x => x.FullName, title: "Name")
+                        .Column(x => x.Phone)
+                        .Column(x => x.Email, size: FieldSize.Large)
+                        .Column(x => x.DepartmentName, title: "Department")
+                        .Column(x => x.PositionName, title: "Position");
+                })
+                .Field(x => x.Positions, setup: f => {
+                    var positionGrid = (DataGrid<IPositionEntity>)f.NestedWidget;
+                    positionGrid
+                        .Column(x => x.Id, size: FieldSize.Small)
+                        .Column(x => x.Name);
+                })
+                .ShowFields(x => x.Id, x => x.Name, x => x.Manager, x => x.Positions);
+
+            Positions.Crud.Grid
+                .Column(x => x.Id, size: FieldSize.Small)
+                .Column(x => x.Name);
 
             Employees.Crud.Grid
-                .Column(x => x.Id, size: FieldSize.Small)
+                .Column(x => x.Ssn, size: FieldSize.Medium, title: "SSN")
                 .Column(x => x.FullName, title: "Name")
-                .Column(x => x.Email)
+                .Column(x => x.Email, size: FieldSize.Large)
                 .Column(x => x.Phone)
-                .Column(x => x.DepartmentName, title: "Department");
+                .Column(x => x.DepartmentName, title: "Department")
+                .Column(x => x.PositionName, title: "Position");
             Employees.Crud.Form
-                .ShowFields(x => x.Id, x => x.FullName, x => x.Department, x => x.Email, x => x.Phone, x => x.Name, x => x.Address)
+                .ShowFields(
+                    x => x.Ssn, 
+                    x => x.FullName, 
+                    x => x.Email, 
+                    x => x.Phone, 
+                    x => x.Name, 
+                    x => x.Address,
+                    x => x.Employment)
+                .Field(x => x.Ssn, label: "SSN")
                 .Field(x => x.Name, setup: f => {
                     var nameForm = (Form<IPersonName>)f.NestedWidget;
                     nameForm.ShowFields(x => x.Title, x => x.FirstName, x => x.MiddleName, x => x.LastName);
@@ -81,6 +112,7 @@ namespace NWheels.Samples.MyHRApp.UI
         public ManagementConsole Console { get; set; }
         public LoggedInUserWidget CurrentUser { get; set; }
         public CrudScreenPart<IDepartmentEntity> Departments { get; set; }
+        public CrudScreenPart<IPositionEntity> Positions { get; set; }
         public CrudScreenPart<IEmployeeEntity> Employees { get; set; }
         public UserAccountCrudScreenPart<IHRUserAccountEntity> Users { get; set; }
 

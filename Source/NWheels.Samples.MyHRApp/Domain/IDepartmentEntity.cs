@@ -20,9 +20,15 @@ namespace NWheels.Samples.MyHRApp.Domain
 
         [PropertyContract.Relation.Aggregation, PropertyContract.Relation.ManyToOne]
         IEmployeeEntity Manager { get; set; }
-        
+
+        [PropertyContract.Relation.Aggregation, PropertyContract.Relation.ManyToMany]
+        ICollection<IPositionEntity> Positions { get; }
+
         [PropertyContract.Calculated]
         string ManagerName { get; }
+
+        [PropertyContract.Calculated]
+        string ListOfPositions { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -34,6 +40,7 @@ namespace NWheels.Samples.MyHRApp.Domain
         public abstract int Id { get; }
         public abstract string Name { get; set; }
         public abstract IEmployeeEntity Manager { get; set; }
+        public abstract ICollection<IPositionEntity> Positions { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -42,6 +49,16 @@ namespace NWheels.Samples.MyHRApp.Domain
             get
             {
                 return Manager.Name.FullName;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string ListOfPositions
+        {
+            get
+            {
+                return string.Join(", ", Positions.Select(p => p.Name));
             }
         }
 

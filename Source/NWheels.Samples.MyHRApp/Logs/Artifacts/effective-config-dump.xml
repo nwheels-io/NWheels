@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-16"?>
+<CONFIGURATION>
+	<IF
+		node="WebApp"
+		instance-id=""
+		environment="Local"
+		environment-type="Dev">
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!-- Framework.Database                                                                                 -->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--Framework.Database from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (12,10)-->
+		<Framework.Database>
+			<Contexts>
+				<!--Context from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (14,18)-->
+				<!--Context.Contract = 'NWheels.Samples.MyHRApp.Domain.IHRContext, NWheels.Samples.MyHRApp' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (14,18)-->
+				<!--Context.ConnectionString = 'server=localhost;database=MyHRApp' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (14,18)-->
+				<!--Context.AutoCreateDatabase = 'true' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (14,18)-->
+				<!--Context.AutoMigrateDatabase = 'true' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (14,18)-->
+				<!--Context.Name = 'HR' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (14,18)-->
+				<Context
+					contract="NWheels.Samples.MyHRApp.Domain.IHRContext"
+					connectionString="server=localhost;database=MyHRApp"
+					isWildcard="False"
+					autoCreateDatabase="True"
+					autoMigrateDatabase="True"
+					name="HR" />
+			</Contexts>
+		</Framework.Database>
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!-- Framework.Endpoints                                                                                -->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<Framework.Endpoints />
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!-- Framework.Logging                                                                                  -->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--Framework.Logging from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (5,10)-->
+		<!--Framework.Logging.PlainLogFolder = '..\Logs\PlainLog' from Code#Default::-->
+		<!--Framework.Logging.ThreadLogFolder = '..\Logs\ThreadLog' from Code#Default::-->
+		<!--Framework.Logging.Level = 'Info' from Code#Default::-->
+		<!--Framework.Logging.Level = 'Debug' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (5,10)-->
+		<!--Framework.Logging.ThreadLogPersistenceLevel = 'StartupShutdownErrors' from Code#Default::-->
+		<!--Framework.Logging.ThreadLogPersistenceLevel = 'StartupShutdownErrors' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (5,10)-->
+		<!--Framework.Logging.ThreadLogDbConnectionString = 'server=localhost;database=MyHRApp_Logs' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (5,10)-->
+		<!--Framework.Logging.SuppressDynamicArtifacts = 'True' from Code#Default::-->
+		<!--Framework.Logging.SuppressDynamicArtifacts = 'false' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (5,10)-->
+		<Framework.Logging
+			plainLogFolder="..\Logs\PlainLog"
+			threadLogFolder="..\Logs\ThreadLog"
+			level="Debug"
+			threadLogPersistenceLevel="StartupShutdownErrors"
+			threadLogDbConnectionString="server=localhost;database=MyHRApp_Logs"
+			suppressDynamicArtifacts="False" />
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!-- Framework.UI                                                                                       -->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--Framework.UI from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (24,4)-->
+		<!--Framework.UI.WebContentRootPath = '..\..\..\..\NWheels\Source\NWheels.Stacks.NancyFx\ClientSide\WebUI' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (24,4)-->
+		<!--Framework.UI.EnableContentBundling = 'True' from Code#Default::-->
+		<!--Framework.UI.EnableContentBundling = 'false' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyHRApp\bin\myhrapp.config: (24,4)-->
+		<!--Framework.UI.EnableContentMinification = 'True' from Code#Default::-->
+		<Framework.UI
+			webContentRootPath="..\..\..\..\NWheels\Source\NWheels.Stacks.NancyFx\ClientSide\WebUI"
+			enableContentBundling="False"
+			enableContentMinification="True" />
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!-- LocalFileContentTemplateProvider                                                                   -->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--LocalFileContentTemplateProvider.TemplateFolderPath = 'ContentTemplates' from Code#Default::-->
+		<LocalFileContentTemplateProvider
+			templateFolderPath="ContentTemplates" />
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!-- MongoDb.ThreadLogs                                                                                 -->
+		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
+		<!--MongoDb.ThreadLogs.Enabled = 'True' from Code#Default::-->
+		<!--MongoDb.ThreadLogs.ThreadCount = '2' from Code#Default::-->
+		<!--MongoDb.ThreadLogs.BatchSize = '100' from Code#Default::-->
+		<!--MongoDb.ThreadLogs.BatchTimeout = '00:00:00.5000000' from Code#Default::-->
+		<!--MongoDb.ThreadLogs.MaxCollectionSizeMb = '2048' from Code#Default::-->
+		<!--MongoDb.ThreadLogs.MaxCollectionDocuments = '2000000' from Code#Default::-->
+		<MongoDb.ThreadLogs
+			enabled="True"
+			threadCount="2"
+			batchSize="100"
+			batchTimeout="00:00:00.5000000"
+			maxCollectionSizeMb="2048"
+			maxCollectionDocuments="2000000" />
+	</IF>
+</CONFIGURATION>

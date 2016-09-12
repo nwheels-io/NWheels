@@ -13,10 +13,7 @@ namespace NWheels.Samples.MyHRApp.Domain
     public interface IEmployeeEntity
     {
         [PropertyContract.EntityId]
-        string Id { get; set; }
-
-        [PropertyContract.Required, PropertyContract.Relation.AggregationParent]
-        IDepartmentEntity Department { get; set; }
+        string Ssn { get; set; }
 
         [PropertyContract.Required]
         IPersonName Name { get; }
@@ -29,11 +26,17 @@ namespace NWheels.Samples.MyHRApp.Domain
         [PropertyContract.Required, PropertyContract.Semantic.PhoneNumber]
         string Phone { get; set; }
 
+        [PropertyContract.Required, PropertyContract.Relation.Composition]
+        IEmploymentEntityPart Employment { get; }
+
         [PropertyContract.Calculated, PropertyContract.Semantic.DisplayName]
         string FullName { get; }
 
         [PropertyContract.Calculated]
         string DepartmentName { get; }
+
+        [PropertyContract.Calculated]
+        string PositionName { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -42,12 +45,12 @@ namespace NWheels.Samples.MyHRApp.Domain
     {
         #region Implementation of IEmployeeEntity
 
-        public abstract string Id { get; set; }
-        public abstract IDepartmentEntity Department { get; set; }
+        public abstract string Ssn { get; set; }
         public abstract IPersonName Name { get; }
-        public abstract IPostalAddress Address { get; }
         public abstract string Email { get; set; }
         public abstract string Phone { get; set; }
+        public abstract IPostalAddress Address { get; }
+        public abstract IEmploymentEntityPart Employment { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -64,7 +67,18 @@ namespace NWheels.Samples.MyHRApp.Domain
         {
             get
             {
-                return (Department != null ? Department.Name : null);
+                return (Employment.Department != null ? Employment.Department.Name : null);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [EntityImplementation.CalculatedProperty]
+        public string PositionName 
+        {
+            get
+            {
+                return (Employment.Position != null ? Employment.Position.Name : null);
             }
         }
 

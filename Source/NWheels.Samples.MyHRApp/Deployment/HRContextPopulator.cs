@@ -41,11 +41,40 @@ namespace NWheels.Samples.MyHRApp.Deployment
             var helenBakerPhotoPath = PathUtility.HostBinPath(_uiConfig.WebContentRootPath, @"skin.inspinia\assets\img\a3_48.jpg");
             var helenBakerUser = AddUser<IHRUserAccountEntity>(context, "helen", "Helen Baker", hrManagerRole, helenBakerPhotoPath);
 
+            var headOfDepartmentPosition = context.Positions.New();
+            headOfDepartmentPosition.Name = "Head of department";
+            context.Positions.Insert(headOfDepartmentPosition);
+
+            var qaEngineerPosition = context.Positions.New();
+            qaEngineerPosition.Name = "QA engineer";
+            context.Positions.Insert(qaEngineerPosition);
+
+            var devPosition = context.Positions.New();
+            devPosition.Name = "Software developer";
+            context.Positions.Insert(devPosition);
+
+            var devTeamLeadPosition = context.Positions.New();
+            devTeamLeadPosition.Name = "Developer team lead";
+            context.Positions.Insert(devTeamLeadPosition);
+
+            var salesRepPosition = context.Positions.New();
+            salesRepPosition.Name = "Sales representative";
+            context.Positions.Insert(salesRepPosition);
+
+            var productManagerPosition = context.Positions.New();
+            productManagerPosition.Name = "Product manager";
+            context.Positions.Insert(productManagerPosition);
+
+            var supportEngineerPosition = context.Positions.New();
+            supportEngineerPosition.Name = "Support engineer";
+            context.Positions.Insert(supportEngineerPosition);
+
             var devDepartment = context.Departments.New();
             devDepartment.Name = "Research & Development";
             devDepartment.Manager = context.Employees.New();
-            devDepartment.Manager.Id = "111111111";
-            devDepartment.Manager.Department = devDepartment;
+            devDepartment.Manager.Ssn = "545051234";
+            devDepartment.Manager.Employment.Department = devDepartment;
+            devDepartment.Manager.Employment.Position = headOfDepartmentPosition;
             devDepartment.Manager.Name.FirstName = "James";
             devDepartment.Manager.Name.LastName = "Young";
             devDepartment.Manager.Email = "james.young@contoso.com";
@@ -54,14 +83,18 @@ namespace NWheels.Samples.MyHRApp.Deployment
             devDepartment.Manager.Address.City = "Metropolis";
             devDepartment.Manager.Address.ZipCode = "98765-4321";
             devDepartment.Manager.Address.Country = "United States";
+            devDepartment.Positions.Add(headOfDepartmentPosition);
+            devDepartment.Positions.Add(devPosition);
+            devDepartment.Positions.Add(devTeamLeadPosition);
             context.Employees.Insert(devDepartment.Manager);
             context.Departments.Insert(devDepartment);
 
             var qaDepartment = context.Departments.New();
             qaDepartment.Name = "Quality Assurance";
             qaDepartment.Manager = context.Employees.New();
-            qaDepartment.Manager.Department = qaDepartment;
-            qaDepartment.Manager.Id = "222222222";
+            qaDepartment.Manager.Employment.Department = qaDepartment;
+            qaDepartment.Manager.Employment.Position = headOfDepartmentPosition;
+            qaDepartment.Manager.Ssn = "545062345";
             qaDepartment.Manager.Name.FirstName = "David";
             qaDepartment.Manager.Name.LastName = "King";
             qaDepartment.Manager.Email = "david.king@contoso.com";
@@ -70,14 +103,17 @@ namespace NWheels.Samples.MyHRApp.Deployment
             qaDepartment.Manager.Address.City = "Metropolis";
             qaDepartment.Manager.Address.ZipCode = "98765-4322";
             qaDepartment.Manager.Address.Country = "United States";
+            qaDepartment.Positions.Add(headOfDepartmentPosition);
+            qaDepartment.Positions.Add(qaEngineerPosition);
             context.Employees.Insert(qaDepartment.Manager);
             context.Departments.Insert(qaDepartment);
 
             var opsDepartment = context.Departments.New();
             opsDepartment.Name = "Operations";
             opsDepartment.Manager = context.Employees.New();
-            opsDepartment.Manager.Department = opsDepartment;
-            opsDepartment.Manager.Id = "333333333";
+            opsDepartment.Manager.Employment.Department = opsDepartment;
+            opsDepartment.Manager.Employment.Position = headOfDepartmentPosition;
+            opsDepartment.Manager.Ssn = "545073456";
             opsDepartment.Manager.Name.FirstName = "Roy";
             opsDepartment.Manager.Name.LastName = "Patterson";
             opsDepartment.Manager.Email = "roy.patterson@contoso.com";
@@ -86,14 +122,17 @@ namespace NWheels.Samples.MyHRApp.Deployment
             opsDepartment.Manager.Address.City = "Metropolis";
             opsDepartment.Manager.Address.ZipCode = "98765-4323";
             opsDepartment.Manager.Address.Country = "United States";
+            opsDepartment.Positions.Add(headOfDepartmentPosition);
+            opsDepartment.Positions.Add(supportEngineerPosition);
             context.Employees.Insert(opsDepartment.Manager);
             context.Departments.Insert(opsDepartment);
 
             var marketingDepartment = context.Departments.New();
             marketingDepartment.Name = "Marketing";
             marketingDepartment.Manager = context.Employees.New();
-            marketingDepartment.Manager.Department = marketingDepartment;
-            marketingDepartment.Manager.Id = "444444444";
+            marketingDepartment.Manager.Employment.Department = marketingDepartment;
+            marketingDepartment.Manager.Employment.Position = headOfDepartmentPosition;
+            marketingDepartment.Manager.Ssn = "545084567";
             marketingDepartment.Manager.Name.FirstName = "Linda";
             marketingDepartment.Manager.Name.LastName = "Wood";
             marketingDepartment.Manager.Email = "linda.wood@contoso.com";
@@ -102,6 +141,9 @@ namespace NWheels.Samples.MyHRApp.Deployment
             marketingDepartment.Manager.Address.City = "Metropolis";
             marketingDepartment.Manager.Address.ZipCode = "98765-4324";
             marketingDepartment.Manager.Address.Country = "United States";
+            marketingDepartment.Positions.Add(headOfDepartmentPosition);
+            marketingDepartment.Positions.Add(salesRepPosition);
+            marketingDepartment.Positions.Add(productManagerPosition);
             context.Employees.Insert(marketingDepartment.Manager);
             context.Departments.Insert(marketingDepartment);
         }

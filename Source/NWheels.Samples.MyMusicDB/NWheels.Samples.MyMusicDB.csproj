@@ -7,12 +7,12 @@
     <ProductVersion>
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{8BC0665A-B05B-4736-BCD0-6A156393D50F}</ProjectGuid>
+    <ProjectGuid>{5A650168-18B7-4993-873A-144DBF67A9BB}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NWheels.Samples.MyHRApp</RootNamespace>
-    <AssemblyName>NWheels.Samples.MyHRApp</AssemblyName>
+    <RootNamespace>NWheels.Samples.MyMusicDB</RootNamespace>
+    <AssemblyName>NWheels.Samples.MyMusicDB</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
@@ -63,10 +63,10 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="myhrapp.boot.config">
+    <Content Include="mymusicdb.boot.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="myhrapp.config">
+    <Content Include="mymusicdb.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="packages.config" />
@@ -82,23 +82,20 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Authorization\HRAdminAccessControlList.cs" />
-    <Compile Include="Authorization\HRClaims.cs" />
-    <Compile Include="Deployment\HRContextPopulator.cs" />
-    <Compile Include="Domain\HRLoginTx.cs" />
-    <Compile Include="Domain\IDepartmentEntity.cs" />
-    <Compile Include="Domain\IEmployeeEntity.cs" />
-    <Compile Include="Domain\IEmploymentEntityPart.cs" />
-    <Compile Include="Domain\IHRContext.cs" />
-    <Compile Include="Domain\IHRUserAccountEntity.cs" />
-    <Compile Include="Domain\IPersonName.cs" />
-    <Compile Include="Domain\IPositionEntity.cs" />
-    <Compile Include="Domain\IPostalAddress.cs" />
+    <Compile Include="Authorization\OperatorAcl.cs" />
+    <Compile Include="Authorization\AdministratorAcl.cs" />
+    <Compile Include="Authorization\MusicDBClaims.cs" />
+    <Compile Include="Deployment\DemoDataPopulator.cs" />
+    <Compile Include="Deployment\SecurityPopulator.cs" />
+    <Compile Include="Domain\DashboardQueryTx.cs" />
+    <Compile Include="Domain\InteractiveLoginTx.cs" />
+    <Compile Include="Domain\IMusicDBContext.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\HRApp.cs" />
-    <Compile Include="UI\HRLoginScreen.cs" />
-    <Compile Include="UI\HRMainScreen.cs" />
+    <Compile Include="UI\MusicDBApp.cs" />
+    <Compile Include="UI\MusicDBDashboardScreenPart.cs" />
+    <Compile Include="UI\MusicDBLoginScreen.cs" />
+    <Compile Include="UI\MusicDBMainScreen.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels.Domains.DevOps\NWheels.Domains.DevOps.csproj">
@@ -122,7 +119,6 @@
       <Name>NWheels</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -136,9 +132,9 @@
         <WebProjectProperties>
           <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>30980</DevelopmentServerPort>
+          <DevelopmentServerPort>50905</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:30980/</IISUrl>
+          <IISUrl>http://localhost:50905/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
