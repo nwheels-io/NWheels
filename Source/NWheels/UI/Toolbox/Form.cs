@@ -671,6 +671,11 @@ namespace NWheels.UI.Toolbox
                 this.StandardValuesExclusive = MetaProperty.SemanticType.StandardValuesExclusive;
             }
 
+            if (MetaProperty.SemanticType != null && MetaProperty.SemanticType.TimeUnits.HasValue)
+            {
+                this.Format = MetaProperty.SemanticType.TimeUnits.Value.ToString();
+            }
+
             if (MetaProperty.ClrType == typeof(System.Type) && MetaProperty.Validation != null && MetaProperty.Validation.AncestorClrType != null)
             {
                 ITypeMetadata ancestorMetaType;

@@ -540,6 +540,7 @@ HEAD, JS/CSS LINKS
             <h1 class="logo-name" style="text-align:center">{{::translate(uidl.text)}}</h1>
             <h2 class="logo-name" style="text-align:center;margin-bottom:40px;">{{::translate(uidl.helpText)}}</h2>
             <uidl-widget uidl="uidl.insideContent"></uidl-widget>
+            <p ng-if="uidl.poweredBy" class="m-t m-b text-center"><small>{{::translate(uidl.poweredBy)}}</small></p>
         </div>
     </script>
 
@@ -576,7 +577,6 @@ HEAD, JS/CSS LINKS
                        class="commandLink m-b">{{translate(model.State.Action)}}</a>
                 </p>
             </div>
-            <p class="m-t m-b"> <small>Powered by BitWize</small></p>
         </div>
     </script>
     
@@ -614,7 +614,6 @@ HEAD, JS/CSS LINKS
                     <button class="btn btn-primary block full-width m-b" ng-click="invokeCommand('ChangePassword')">Change Password</button>
                 </form>
             </div>                
-                <p class="m-t"> <small>Powered by BitWize</small> </p>
             <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
         </div>
     </script>
@@ -1938,12 +1937,17 @@ HEAD, JS/CSS LINKS
                     });
 
                     $scope.gridColumns.forEach(function (metaColumn, idx) {
+						var colWidthPx = (
+							metaColumn.size==='Jumbo' ? 1040 : (
+							metaColumn.size==='ExtraLarge' ? 720 : (
+							metaColumn.size==='Large' ? 360 : (
+							metaColumn.size==='Small' ? 90 : 180))));
                         columnsModel.push({
                             name: metaColumn.expression,
                             label: $scope.translate(metaColumn.title),
                             index: metaColumn.expression,
                             editable: false,
-                            width: 180,
+                            width: colWidthPx,
                             //sorttype: metaColumn.dataType,
                             search: true
                         });
@@ -2083,15 +2087,20 @@ HEAD, JS/CSS LINKS
                     <div class="modal-footer">
                         <button 
                             type="button"
+                            class="btn btn-w-m btn-success"
+                            ng-disabled="isSelectButtonDisabled()"
+                            ng-click="lookupObjectSelected(selectedLookupObject)"
+                        ><i class="fa fa-check">&nbsp;</i>Select</button>
+                        <button 
+                            type="button"
                             class="btn btn-w-m btn-warning"
                             ng-click="clearSelection()"
                         ><i class="fa fa-times">&nbsp;</i>Clear</button>
                         <button 
                             type="button"
-                            class="btn btn-w-m btn-success"
-                            ng-disabled="isSelectButtonDisabled()"
-                            ng-click="lookupObjectSelected(selectedLookupObject)"
-                        ><i class="fa fa-check">&nbsp;</i>Select</button>
+                            class="btn btn-w-m btn-default"
+                            ng-click="hideLookupSearchModal()"
+                        >Cancel</button>
                     </div>
                 </div>
             </div>
@@ -2200,7 +2209,6 @@ HEAD, JS/CSS LINKS
                 
                 <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
             </div>                
-            <p class="m-t"> <small>Powered by BitWize</small> </p>
             <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
         </div>
     </script>
@@ -2215,7 +2223,6 @@ HEAD, JS/CSS LINKS
                     <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
                 </div>
             </div>                
-            <p class="m-t"> <small>Powered by BitWize</small> </p>
             <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
         </div>
     </script>
@@ -2288,7 +2295,7 @@ HEAD, JS/CSS LINKS
         <form class="form-horizontal" id="{{::uidl.elementName}}">
             <fieldset ng-disabled="commandInProgress">
             <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
-            <div ng-if="plainFields.length <= 6" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields">
+            <div ng-if="plainFields.length <= 4" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields">
                 <label class="control-label"
                        ng-class="{'col-lg-2':!uidl.isModalPopup, 'col-lg-4':uidl.isModalPopup}"
                        for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.label)}}</label>
@@ -2301,7 +2308,7 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
             <!-- PLAIN FIELDS TWO-COLUMN LAYOUT -->
-            <div ng-if="plainFields.length > 6" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields | twoColumnRows">
+            <div ng-if="plainFields.length > 4" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields | twoColumnRows">
                 <label class="col-lg-2 control-label"
                        for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.label)}}</label>
                 <div class="col-lg-3">
@@ -2657,10 +2664,11 @@ HEAD, JS/CSS LINKS
             <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='DateTimePicker'"
                  class="input-group date"
                  ng-class="{'m-b': !uidl.$skin.zeroPadding}"
-                 ng-disabled="!editAuthorized">
+                 ng-disabled="!editAuthorized"
+				 ng-init="if (!parsedEntity) parsedEntity = { };">
                 <input type="text"
                        class="form-control"
-                       ng-model="entity[uidl.propertyName]"
+                       ng-model="parsedEntity[uidl.propertyName]"
                        ng-disabled="!editAuthorized"
                        id="{{::uniqueFieldId}}"
                        name="{{::uniqueFieldId}}">
@@ -3080,11 +3088,38 @@ HEAD, JS/CSS LINKS
                 }
             };
             if ($scope.uidl.modifiers === 'DateTimePicker') {
-                $('#' + $scope.uniqueFieldId).datetimepicker({
-                    format: 'YYYY-MM-DD HH:mm:ss',
-                    allowInputToggle: true
-                })
-                .on('dp.change', dateTimePickerValueChanged);
+				$scope.createDateTimePicker = function() {
+					if ($scope.dateTimePickerCreated) {
+						return;
+					}
+					var uidlFormat = ($scope.uidl.format || null);
+					var pickerFormat = null;
+					if (uidlFormat == null || uidlFormat.indexOf('Second') > -1) {
+						pickerFormat = 'YYYY-MM-DD HH:mm:ss';
+					} else if (uidlFormat.indexOf('Minute') > -1) {
+						pickerFormat = 'YYYY-MM-DD HH:mm';
+					} else {
+						pickerFormat = 'YYYY-MM-DD';
+					}
+					$('#' + $scope.uniqueFieldId).datetimepicker({
+						format: pickerFormat,
+						allowInputToggle: true
+					}).on('dp.change', dateTimePickerValueChanged);
+				};
+                $scope.updateViewFromModel = function() {
+					var value = moment($scope.entity[$scope.uidl.propertyName]);
+					var dateTimePicker = $('#' + $scope.uniqueFieldId).data("DateTimePicker");
+					dateTimePicker.date(value);
+                };
+                $scope.$watch('entity', function(newValue, oldValue) {
+                    if ($scope.entity) {
+                        $scope.createDateTimePicker();
+						$scope.updateViewFromModel();
+                        $scope.$watch('entity.' + $scope.uidl.propertyName, function() {
+                            $scope.updateViewFromModel();
+                        });
+                    }
+                });
             }
             if ($scope.hasUidlModifier('DateTimePicker') && $scope.hasUidlModifier('RangeStart')) {
                 $scope.timeRangePresets = null;
@@ -3803,7 +3838,6 @@ HEAD, JS/CSS LINKS
                     <!--p class="text-muted text-center"><small>Already have an account?</small></p>
                     <a class="btn btn-sm btn-white btn-block" href="login.html">Login</a-->
                 </form>
-                <p class="m-t"> <small>Powered by BitWize</small> </p>
             </div>
         </div>
     </script>

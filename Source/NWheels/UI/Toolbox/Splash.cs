@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using Hapil.Operands;
+using NWheels.Extensions;
+using NWheels.Globalization.Core;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 
@@ -22,6 +25,13 @@ namespace NWheels.UI.Toolbox
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
+        {
+            return base.GetTranslatables().ConcatOne(new LocaleEntryKey(this.PoweredBy, this, "PoweredBy"));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void DescribePresenter(PresenterBuilder<Splash, Empty.Data, Empty.State> presenter)
         {
@@ -36,5 +46,8 @@ namespace NWheels.UI.Toolbox
 
         [DataMember]
         public Container UtilityBar { get; set; }
+        
+        [DataMember]
+        public string PoweredBy { get; set; }
     }
 }
