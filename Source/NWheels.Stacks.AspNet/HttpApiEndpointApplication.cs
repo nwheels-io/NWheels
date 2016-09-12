@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Extensions.Compression.Core.Compressors;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -20,6 +21,7 @@ using System.Web.SessionState;
 using Autofac;
 using Autofac.Integration.WebApi;
 using Hapil;
+using Microsoft.AspNet.WebApi.Extensions.Compression.Server;
 using NWheels.Authorization;
 using NWheels.Authorization.Core;
 using NWheels.Endpoints.Core;
@@ -280,6 +282,12 @@ namespace NWheels.Stacks.AspNet
                         //    routeTemplate: "{controller}/{action}");
                         config.DependencyResolver = new AutofacWebApiDependencyResolver(_s_nodeHost.Components);
                         config.MapHttpAttributeRoutes();
+
+                        if (_s_nodeHost.Components.Resolve<IFrameworkUIConfig>().EnableContentCompression)
+                        {
+                            config.MessageHandlers.Insert(0, new ServerCompressionHandler(8192, new GZipCompressor(), new DeflateCompressor()));
+                        }
+
                         config.MessageHandlers.Add(new LoggingAndSessionHandler(
                             _s_nodeHost.Components.Resolve<ISessionManager>(),
                             _s_nodeHost.Components.Resolve<IWebApplicationLogger>()));

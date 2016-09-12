@@ -18,5 +18,8 @@ namespace NWheels.UI
 
         [PropertyContract.DefaultValue(true)]
         bool EnableContentMinification { get; set; }
+
+        [PropertyContract.DefaultValue(true)]
+        bool EnableContentCompression { get; set; }
     }
 }
