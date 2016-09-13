@@ -694,7 +694,7 @@ namespace NWheels.UI.Toolbox
 
             if ( shouldSetDefaults )
             {
-                this.Modifiers |= GetDefaultModifiers(this.FieldType);
+                this.Modifiers |= GetDefaultModifiers(this.FieldType, this.Modifiers);
             }
 
             this.OrderIndex = GetOrderIndex();
@@ -845,9 +845,9 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private FormFieldModifiers GetDefaultModifiers(FormFieldType type)
+        private FormFieldModifiers GetDefaultModifiers(FormFieldType type, FormFieldModifiers preset)
         {
-            var value = GetBasicDefaultModifiers(type);
+            var value = GetBasicDefaultModifiers(type, preset);
 
             if ((MetaProperty.Access & PropertyAccess.Write) == 0)
             {
@@ -859,7 +859,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private FormFieldModifiers GetBasicDefaultModifiers(FormFieldType type)
+        private FormFieldModifiers GetBasicDefaultModifiers(FormFieldType type, FormFieldModifiers preset)
         {
             switch ( type )
             {
@@ -891,6 +891,10 @@ namespace NWheels.UI.Toolbox
                 case FormFieldType.LookupMany:
                 case FormFieldType.InlineForm:
                 case FormFieldType.InlineGrid:
+                    if ((preset & (FormFieldModifiers.Section | FormFieldModifiers.Tab)) != 0)
+                    {
+                        return preset;
+                    }
                     return (_ownerForm.UseSectionsInsteadOfTabs ? FormFieldModifiers.Section : FormFieldModifiers.Tab);
                 default:
                     return FormFieldModifiers.None;
