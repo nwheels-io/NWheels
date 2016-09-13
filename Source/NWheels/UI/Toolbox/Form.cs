@@ -101,7 +101,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IUidlForm IUidlForm.Field<TDerivedEntity>(
+        IUidlForm IUidlForm.FieldOf<TDerivedEntity>(
             Expression<Func<TDerivedEntity, object>> propertySelector,
             string label,
             FormFieldType type,
@@ -971,7 +971,7 @@ namespace NWheels.UI.Toolbox
         void ShowFields(params string[] propertyNames);
         void HideFields(params string[] propertyNames);
         IUidlForm HideIdField();
-        IUidlForm Field<TEntity>(
+        IUidlForm FieldOf<TEntity>(
             Expression<Func<TEntity, object>> propertySelector,
             string label = null,
             FormFieldType type = FormFieldType.Default,
