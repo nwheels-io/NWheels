@@ -66,10 +66,13 @@
 		<!--Framework.UI.EnableContentBundling = 'True' from Code#Default::-->
 		<!--Framework.UI.EnableContentBundling = 'false' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyMusicDB\bin\mymusicdb.config: (24,4)-->
 		<!--Framework.UI.EnableContentMinification = 'True' from Code#Default::-->
+		<!--Framework.UI.EnableContentCompression = 'True' from Code#Default::-->
+		<!--Framework.UI.EnableContentCompression = 'false' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyMusicDB\bin\mymusicdb.config: (24,4)-->
 		<Framework.UI
 			webContentRootPath="..\..\..\..\NWheels\Source\NWheels.Stacks.NancyFx\ClientSide\WebUI"
 			enableContentBundling="False"
-			enableContentMinification="True" />
+			enableContentMinification="True"
+			enableContentCompression="False" />
 		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
 		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->
 		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->

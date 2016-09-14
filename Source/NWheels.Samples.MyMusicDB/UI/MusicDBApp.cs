@@ -1,13 +1,16 @@
-﻿using NWheels.Authorization.Core;
+﻿using System;
+using NWheels.Authorization.Core;
 using NWheels.Domains.DevOps.SystemLogs.Entities;
 using NWheels.Domains.DevOps.SystemLogs.UI.Screens;
 using NWheels.Domains.Security;
 using NWheels.Domains.Security.Core;
+using NWheels.Domains.Security.UI;
 using NWheels.Extensions;
 using NWheels.Globalization;
 using NWheels.Samples.MyMusicDB.Domain;
 using NWheels.UI;
 using NWheels.UI.Factories;
+using NWheels.UI.Toolbox;
 using NWheels.UI.Uidl;
 
 namespace NWheels.Samples.MyMusicDB.UI
@@ -20,14 +23,26 @@ namespace NWheels.Samples.MyMusicDB.UI
         {
             DefaultSkin = "inspinia";
 
+            base.SetInitialScreen(ifNotAuthenticated: Login, ifAuthenticated: MainScreen);
+
+            new[] { Login.Splash, ForgotPassword.Splash, PasswordExpired.Splash }.ForEach((splash, index) => {
+                splash.Text = "MusicDB";
+                splash.HelpText = "ExampleApplication";
+                splash.PoweredBy = "PoweredByNWHEELS";
+            });
+
+            Login.SetForgotPasswordScreen(ForgotPassword);
+            Login.SetPasswordExpiredScreen(PasswordExpired);
+            PasswordExpired.SetLoginScreen(Login);
+            PasswordExpired.SetForgotPasswordScreen(ForgotPassword);
+            ForgotPassword.SetLoginScreen(Login);
+
             presenter.On(RequestNotAuthorized)
                 .Navigate().ToScreen(Login)
                 .Then(b => b.UserAlertFrom<IAlerts>().ShowInline((x, vm) => x.LogInToAuthorizeRequestedOperation()));
 
             presenter.On(UserAlreadyAuthenticated)
                 .ActivateSessionTimeout();
-
-            base.SetInitialScreen(ifNotAuthenticated: Login, ifAuthenticated: MainScreen);
 
             presenter.On(Login.LoginForm.OutputReady)
                 .AlterModel(
@@ -50,7 +65,9 @@ namespace NWheels.Samples.MyMusicDB.UI
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MusicDBLoginScreen Login { get; set; }
+        public UserLoginScreen Login { get; set; }
+        public UserPasswordExpiredScreen PasswordExpired { get; set; }
+        public UserForgotPasswordScreen ForgotPassword { get; set; }
         public MusicDBMainScreen MainScreen { get; set; }
         public SystemLogScreen SystemLog { get; set; }
 

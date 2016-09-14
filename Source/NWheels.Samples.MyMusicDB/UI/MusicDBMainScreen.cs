@@ -52,6 +52,9 @@ namespace NWheels.Samples.MyMusicDB.UI
             Console.ProfilePhoto.Bind(vm => vm.State.UserType).ToGlobalAppState<MusicDBApp.IState>(x => x.LoggedInUser.UserType);
             Console.ProfilePhoto.Bind(vm => vm.State.UserId).ToGlobalAppState<MusicDBApp.IState>(x => x.LoggedInUser.UserId);
 
+            presenter.On(Console.ProfilePhoto.LogOut).InvokeCommand(CurrentUser.LogOut);
+            presenter.On(Console.ProfilePhoto.ChangePassword).Navigate().FromContainer(Console.MainContent).ToScreenPartNonTyped(ChangePassword);
+
             Genres.Crud.Grid
                 .Column(x => x.Id, size: FieldSize.Small)
                 .Column(x => x.Name);
@@ -101,57 +104,6 @@ namespace NWheels.Samples.MyMusicDB.UI
                 .Column(x => x.Description, size: FieldSize.ExtraLarge);
             Tracks.Crud.Form
                 .ShowFields(x => x.AlbumText, x => x.Name, x => x.Description, x => x.TrackNumber, x => x.Length);
-
-            //Departments.Crud.Grid
-            //    .Column(x => x.Id, size: FieldSize.Small)
-            //    .Column(x => x.Name)
-            //    .Column(x => x.ManagerName, title: "Manager")
-            //    .Column(x => x.ListOfPositions, title: "Positions", size: FieldSize.ExtraLarge);
-            //Departments.Crud.Form
-            //    .Field(x => x.Manager, setup: f => {
-            //        f.LookupDisplayProperty = "FullName";
-            //        var lookupGrid = (DataGrid<ITrackEntity>)f.NestedWidget;
-            //        lookupGrid
-            //            .Column(x => x.Ssn, title: "SSN")
-            //            .Column(x => x.FullName, title: "Name")
-            //            .Column(x => x.Phone)
-            //            .Column(x => x.Email, size: FieldSize.Large)
-            //            .Column(x => x.DepartmentName, title: "Department")
-            //            .Column(x => x.PositionName, title: "Position");
-            //    })
-            //    .Field(x => x.Positions, setup: f => {
-            //        var positionGrid = (DataGrid<IGenreEntity>)f.NestedWidget;
-            //        positionGrid
-            //            .Column(x => x.Id, size: FieldSize.Small)
-            //            .Column(x => x.Name);
-            //    })
-            //    .ShowFields(x => x.Id, x => x.Name, x => x.Manager, x => x.Positions);
-
-            //Positions.Crud.Grid
-            //    .Column(x => x.Id, size: FieldSize.Small)
-            //    .Column(x => x.Name);
-
-            //Employees.Crud.Grid
-            //    .Column(x => x.Ssn, size: FieldSize.Medium, title: "SSN")
-            //    .Column(x => x.FullName, title: "Name")
-            //    .Column(x => x.Email, size: FieldSize.Large)
-            //    .Column(x => x.Phone)
-            //    .Column(x => x.DepartmentName, title: "Department")
-            //    .Column(x => x.PositionName, title: "Position");
-            //Employees.Crud.Form
-            //    .ShowFields(
-            //        x => x.Ssn, 
-            //        x => x.FullName, 
-            //        x => x.Email, 
-            //        x => x.Phone, 
-            //        x => x.Name, 
-            //        x => x.Address,
-            //        x => x.Employment)
-            //    .Field(x => x.Ssn, label: "SSN")
-            //    .Field(x => x.Name, setup: f => {
-            //        var nameForm = (Form<IPersonName>)f.NestedWidget;
-            //        nameForm.ShowFields(x => x.Title, x => x.FirstName, x => x.MiddleName, x => x.LastName);
-            //    });
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -165,6 +117,7 @@ namespace NWheels.Samples.MyMusicDB.UI
         public CrudScreenPart<IAlbumEntity> Albums { get; set; }
         public CrudScreenPart<ITrackEntity> Tracks { get; set; }
         public UserAccountCrudScreenPart<IMusicDBUserAccountEntity> Users { get; set; }
+        public ChangePasswordScreenPart ChangePassword { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

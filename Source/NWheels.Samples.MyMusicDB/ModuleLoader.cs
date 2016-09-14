@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using Autofac;
 using NWheels.Domains.Security;
+using NWheels.Domains.Security.UI;
 using NWheels.Extensions;
 using NWheels.Samples.MyMusicDB.Authorization;
 using NWheels.Samples.MyMusicDB.Deployment;
