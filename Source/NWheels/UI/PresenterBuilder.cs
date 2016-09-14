@@ -355,11 +355,12 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public WhenOtherwiseBehaviorBuilder<TInput> When(Expression<Func<TData, TState, TInput, bool>> condition, Action<BehaviorBuilder<TInput>> onTrue)
+            public WhenOtherwiseBehaviorBuilder<TInput, TValue> Switch<TValue>(Expression<Func<ViewModel<TData, TState, TInput>, TValue>> valueSelector)
             {
                 var behavior = new UidlBranchByRuleBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
                 SetAndSubscribeBehavior(behavior);
-                return new WhenOtherwiseBehaviorBuilder<TInput>(_ownerNode, behavior, _uidl);
+                behavior.ValueExpression = valueSelector.ToNormalizedNavigationString("model");
+                return new WhenOtherwiseBehaviorBuilder<TInput, TValue>(_ownerNode, behavior, _uidl);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -671,6 +672,19 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public PromiseBuilder<TInput> ToScreenNonTyped(
+                UidlScreen screen,
+                NavigationType navigationType = NavigationType.LoadInline)
+            {
+                _behavior.TargetType = UidlNodeType.Screen;
+                _behavior.TargetQualifiedName = screen.QualifiedName;
+                _behavior.NavigationType = navigationType;
+
+                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public PromiseBuilder<TInput> ToScreen(
                 IScreenWithInput<Empty.Input> screen, 
                 NavigationType navigationType = NavigationType.LoadInline)
@@ -749,7 +763,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<TInput> ToScreenPart(UidlScreenPart screenPart)
+            public PromiseBuilder<TInput> ToScreenPartNonTyped(UidlScreenPart screenPart)
             {
                 _behavior.TargetType = UidlNodeType.ScreenPart;
                 _behavior.TargetQualifiedName = screenPart.QualifiedName;
@@ -1306,27 +1320,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class WhenBehaviorBuilder<TInput>
-        {
-            public WhenBehaviorBuilder(ControlledUidlNode ownerNode, UidlBuilder uidl)
-            {
-                this.OwnerNode = ownerNode;
-                this.Uidl = uidl;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public UidlBranchByRuleBehavior Behavior { get; set; }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            protected ControlledUidlNode OwnerNode { get; private set; }
-            protected UidlBuilder Uidl { get; set; }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class WhenOtherwiseBehaviorBuilder<TInput>
+        public class WhenOtherwiseBehaviorBuilder<TInput, TValue>
         {
             private readonly ControlledUidlNode _ownerNode;
             private readonly UidlBranchByRuleBehavior _behavior;
@@ -1344,23 +1338,41 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<TInput> EndWhen()
+            public PromiseBuilder<TInput> EndSwitch()
             {
                 return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public WhenOtherwiseBehaviorBuilder<TInput> When(
-                Expression<Func<TData, TState, TInput, bool>> condition,
-                Action<BehaviorBuilder<TInput>> onTrue)
+            public WhenOtherwiseBehaviorBuilder<TInput, TValue> When(
+                Expression<Func<ViewModel<TData, TState, TInput>, TValue>> valueSelector,
+                Action<BehaviorBuilder<TInput>> onMatch)
             {
                 var builder = new BehaviorBuilder<TInput>(_ownerNode, notification: null, uidl: _uidl);
-                onTrue(builder);
+                onMatch(builder);
 
                 var rule = new UidlBranchByRuleBehavior.BranchRule() {
-                    ConditionExpression = condition.ToString(),
-                    OnTrue = builder.Behavior
+                    ValueExpression = (valueSelector != null ? valueSelector.ToNormalizedNavigationString("model") : null),
+                    OnMatch = builder.Behavior
+                };
+
+                _behavior.BranchRules.Add(rule);
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public WhenOtherwiseBehaviorBuilder<TInput, TValue> When(
+                TValue valueConstant,
+                Action<BehaviorBuilder<TInput>> onMatch)
+            {
+                var builder = new BehaviorBuilder<TInput>(_ownerNode, notification: null, uidl: _uidl);
+                onMatch(builder);
+
+                var rule = new UidlBranchByRuleBehavior.BranchRule() {
+                    ValueConstant = (valueConstant != null ? valueConstant.ToString() : null),
+                    OnMatch = builder.Behavior
                 };
 
                 _behavior.BranchRules.Add(rule);

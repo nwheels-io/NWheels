@@ -14,7 +14,7 @@ namespace NWheels.Globalization.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EntityMethodForm<IApplicationLocaleEntity, IActivateDealInput> UpateEntriesMethod { get; set; }
+        public EntityMethodForm<IApplicationLocaleEntity, IUpdateEntriesInput> UpateEntriesMethod { get; set; }
         public UidlCommand UpdateEntries { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ namespace NWheels.Globalization.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ViewModelContract]
-        public interface IActivateDealInput
+        public interface IUpdateEntriesInput
         {
             [PropertyContract.ReadOnly]
             string Warning { get; set; }

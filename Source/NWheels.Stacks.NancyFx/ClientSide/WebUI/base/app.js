@@ -1040,6 +1040,39 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    m_behaviorImplementations['BranchByRule'] = {
+        returnsPromise: false,
+        execute: function (scope, behavior, input) {
+            console.log('run-behavior > switch', behavior.branchRules, input);
+
+			var inputContext = createInputContext(scope.model, input);
+            var leftSideValue = selectValue(inputContext, behavior.valueExpression);
+
+			console.log('run-behavior > switch > value', leftSideValue);
+
+            for (var i = 0; i < behavior.branchRules.length; i++) {
+				var rule = behavior.branchRules[i];
+                var rightSideValue = (
+                    rule.valueExpression ?
+                    selectValue(inputContext, rule.valueExpression) : 
+                    rule.valueConstant);
+				
+				if (leftSideValue === rightSideValue) {
+					console.log('run-behavior > switch > matched rule #', i);
+					implementBehavior(scope, rule.onMatch, input);
+					return;
+				}
+            }
+			
+			if (behavior.otherwise) {
+				console.log('run-behavior > switch > otherwise')
+				implementBehavior(scope, behavior.otherwise, input);
+			}
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     m_behaviorImplementations['QueryModel'] = {
         returnsPromise: true,
         execute: function (scope, behavior, input) {

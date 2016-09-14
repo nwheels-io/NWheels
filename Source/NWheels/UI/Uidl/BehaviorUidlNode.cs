@@ -178,6 +178,8 @@ namespace NWheels.UI.Uidl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
+        public string ValueExpression { get; set; }
+        [DataMember]
         public List<BranchRule> BranchRules { get; set; }
         [DataMember]
         public BehaviorUidlNode Otherwise { get; set; }
@@ -188,9 +190,11 @@ namespace NWheels.UI.Uidl
         public class BranchRule
         {
             [DataMember]
-            public string ConditionExpression { get; set; }
+            public string ValueConstant { get; set; }
             [DataMember]
-            public BehaviorUidlNode OnTrue { get; set; }
+            public string ValueExpression { get; set; }
+            [DataMember]
+            public BehaviorUidlNode OnMatch { get; set; }
         }
     }
 

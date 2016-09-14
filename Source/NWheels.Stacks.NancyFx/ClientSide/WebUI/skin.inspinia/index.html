@@ -2196,18 +2196,41 @@ HEAD, JS/CSS LINKS
                 <i ng-if="uidl.icon" class="fa fa-{{::uidl.icon}}"></i> {{::translate(uidl.text)}}
             </div>
             <div ng-if="uidl.inputForm" class="panel-body">
-                <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
+				<uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
             </div>
             <uidl-widget ng-if="uidl.inputFormTypeSelector" uidl="uidl.inputFormTypeSelector" parent-model="model.State"></uidl-widget>
         </div>
     </script>
+    <script type="text/ng-template" id="app/uidl-element-template/TransactionFormFlatStyle">
+		<div class="panel-body">
+			<div ng-if="uidl.inputForm">
+				<div ng-hide="model.State.Output">
+					<uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
+				</div>
+			</div>
+			<div ng-if="uidl.inputFormTypeSelector">
+				<div ng-hide="model.State.Output">
+					<uidl-widget uidl="uidl.inputFormTypeSelector" parent-model="model.State"></uidl-widget>
+				</div>
+			</div>
+			<div ng-if="uidl.outputForm">
+				<div ng-show="model.State.Output">
+					<uidl-widget uidl="uidl.outputForm" parent-model="model.State.Output"></uidl-widget>
+				</div>
+			</div>
+		</div>
+    </script>
     <script type="text/ng-template" id="app/uidl-element-template/TransactionFormLoginStyle">
         <div class="middle-box text-center loginscreen animated fadeInDown" style="padding-top:0;">
-            <div>
-                <h2>{{::translate(uidl.text)}}</h2>
+            <h2>{{::translate(uidl.text)}}</h2>
+            <div ng-hide="model.State.Output">
                 <p ng-if="uidl.helpText">{{::translate(uidl.helpText)}}</p>
-                
                 <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
+            </div>                
+            <div ng-if="uidl.outputForm">
+				<div ng-show="model.State.Output">
+					<uidl-widget uidl="uidl.outputForm" parent-model="model.State.Output"></uidl-widget>
+				</div>
             </div>                
             <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
         </div>
@@ -2228,8 +2251,9 @@ HEAD, JS/CSS LINKS
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/TransactionFormInline">
         <div>
-            <uidl-widget ng-if="uidl.inputForm" uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
-            <uidl-widget ng-if="uidl.inputFormTypeSelector" uidl="uidl.inputFormTypeSelector" parent-model="model.State"></uidl-widget>
+            <uidl-widget ng-if="uidl.inputForm" ng-hide="model.State.Output" uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
+            <uidl-widget ng-if="uidl.inputFormTypeSelector" ng-hide="model.State.Output" uidl="uidl.inputFormTypeSelector" parent-model="model.State"></uidl-widget>
+			<uidl-widget ng-if="uidl.outputForm" ng-show="model.State.Output" uidl="uidl.outputForm" parent-model="model.State.Output"></uidl-widget>
         </div>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/TransactionFormPopupMode">
@@ -2388,6 +2412,25 @@ HEAD, JS/CSS LINKS
             </div>
         </form>
     </script>
+    <script type="text/ng-template" id="app/uidl-element-template/FormAlertBig">
+        <form class="form-inline" id="{{::uidl.elementName}}">
+            <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
+            <div class="form-group" ng-repeat="field in plainFields" style="margin-bottom:0;display:block;">
+                <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" template-name="FormFieldAlertStyleBig" />
+            </div>
+			<div ng-repeat="command in uidl.commands" class="m-b">
+				<button ng-if="command.uiStyle != 'Link'"
+						class="btn block full-width m-b"
+						ng-class="{'btn-primary':command.severity!='None', 'btn-white':command.severity=='None'}"                    
+						ng-disabled="commandInProgress"
+						ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+				<a ng-if="command.uiStyle == 'Link'"
+				   ng-disabled="commandInProgress" 
+				   ng-click="invokeCommand(command)"
+				   class="commandLink"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</a>
+			</div>
+        </form>
+    </script>
     <script type="text/ng-template" id="app/uidl-element-template/FormInline">
         <form class="form-inline" id="{{::uidl.elementName}}" style="margin-bottom:5px;">
             <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
@@ -2464,7 +2507,7 @@ HEAD, JS/CSS LINKS
             <div class="form-group" ng-repeat="field in plainFields">
                 <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" template-name="FormFieldLoginStyle"></uidl-form-field>
             </div>
-            <div ng-repeat="command in uidl.commands">
+            <div ng-repeat="command in uidl.commands" class="m-b">
                 <button ng-if="command.uiStyle != 'Link'"
                         class="btn block full-width m-b"
                         ng-class="{'btn-primary':command.severity!='None', 'btn-white':command.severity=='None'}"                    
@@ -2915,6 +2958,35 @@ HEAD, JS/CSS LINKS
                 <div class="col-xs-11">
                     <span>{{entity[uidl.propertyName] || translate(uidl.label)}}</span>
                 </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/ng-template" id="app/uidl-element-template/FormFieldAlertStyleBig">
+        <div class="m-b">
+            <!-- ALERT -->
+            <div ng-if="uidl.fieldType==='Alert'"
+                 style="margin:0;padding:15px 10px 10px 0;max-width:300px;"
+				 class="m-b container"
+                 ng-class="{
+                    'alert-danger': uidl.alertType==='Error', 
+                    'alert-warning': uidl.alertType==='Warning',
+                    'alert-info': uidl.alertType==='Info',
+                    'alert-success': uidl.alertType==='Success'                   
+                 }"
+            >
+				<div class="row" style="margin:0;padding:0">
+					<div class="col-md-2" style="margin:0;">
+						<h3 style="font-weight:normal;"><i ng-if="uidl.alertType" class="fa fa-lg" ng-class="{
+							'fa-info':uidl.alertType==='Info',
+							'fa-check-square':uidl.alertType==='Success',
+							'fa-exclamation-triangle':uidl.alertType==='Warning',
+							'fa-times-circle':uidl.alertType==='Error'
+						}"></i></h3>
+					</div>
+					<div class="col-md-10" style="text-align:left;padding:0;margin:0;">
+						<h3 style="font-weight:normal;">{{entity[uidl.propertyName] || translate(uidl.label)}}</h3>
+					</div>
+				</div>
             </div>
         </div>
     </script>

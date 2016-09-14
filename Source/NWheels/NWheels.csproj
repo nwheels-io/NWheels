@@ -418,6 +418,7 @@
     <Compile Include="UI\Toolbox\JsonText.cs" />
     <Compile Include="UI\Toolbox\LanguageSelector.cs" />
     <Compile Include="UI\Toolbox\PropertyGrid.cs" />
+    <Compile Include="UI\Toolbox\TransactionScreenPart.cs" />
     <Compile Include="UI\Toolbox\TabbedScreenPartSet.cs" />
     <Compile Include="UI\Toolbox\TabSet.cs" />
     <Compile Include="UI\Toolbox\BadgeSet.cs" />
@@ -802,6 +803,7 @@
     <Compile Include="Utilities\Core\UtilityToolBase.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Globalization\Factories\" />
     <Folder Include="UI\Old2\" />
     <Folder Include="UI\OldToolbox\" />
     <Folder Include="UI\Old\" />
