@@ -531,10 +531,12 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         scope.formatValue = formatValue;
         scope.hasEnumFlag = hasEnumFlag;
         scope.appScope = $rootScope.appScope;
-        scope.model = {
-            Data: {},
-            State: {}
-        };
+		if (!scope.model) {
+			scope.model = {
+				Data: {},
+				State: {}
+			};
+		}
         if (scope.appScope.model) {
             scope.model.appState = scope.appScope.model.State;
         }
@@ -2552,6 +2554,20 @@ theApp.controller('appStart',
 ['$http', '$scope', '$rootScope', '$timeout', 'uidlService', 'entityService', 'commandService',
 function ($http, $scope, $rootScope, $timeout, uidlService, entityService, commandService) {
 
+	function completeInittialization() {
+		uidlService.implementController($scope);
+
+		$rootScope.currentScreen = uidlService.getCurrentScreen();
+		$rootScope.currentLocale = uidlService.getCurrentLocale();
+		$scope.pageTitle = $scope.translate($scope.app.text) + ' - ' + $scope.translate($scope.currentScreen.text);
+
+		$timeout(function() {
+			$rootScope.$broadcast($rootScope.currentScreen.qualifiedName + ':NavigatedHere', uidlService.getInitialScreenInput());
+		});
+
+        //commandService.startPollingMessages();
+	}
+
     $scope.pageTitle = 'LOADING . . .';
 
     $http.get('app/uidl.json').then(function (httpResult) {
@@ -2563,28 +2579,22 @@ function ($http, $scope, $rootScope, $timeout, uidlService, entityService, comma
 		$rootScope.uidlService = uidlService;
 		$rootScope.commandService = commandService;
 		$rootScope.appScope = $scope;
-
         $scope.uidl = $rootScope.app;
-		uidlService.implementController($scope);
-
-		$rootScope.currentScreen = uidlService.getCurrentScreen();
-		$rootScope.currentLocale = uidlService.getCurrentLocale();
-		$scope.pageTitle = $scope.translate($scope.app.text) + ' - ' + $scope.translate($scope.currentScreen.text);
 
         if ($scope.uidl.isUserAuthenticated===true) {
             $http.get('app/stateRestore').then(
                 function(response) {
-                    $scope.model.State = response.data;
+					$scope.model = { 
+						Data: { },
+						State: response.data
+					}
                     $scope.$emit($scope.uidl.qualifiedName + ':UserAlreadyAuthenticated');
+					completeInittialization();
                 }
             );
-        }
-        
-        $timeout(function() {
-            $rootScope.$broadcast($rootScope.currentScreen.qualifiedName + ':NavigatedHere', uidlService.getInitialScreenInput());
-        });
-        
-        //commandService.startPollingMessages();
+        } else {
+			completeInittialization();
+		}
     });
 
     /*
