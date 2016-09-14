@@ -51,6 +51,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -58,19 +59,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IUserAccountPolicySet.cs" />
+    <Compile Include="ResetPasswordTransactionScript.cs" />
+    <Compile Include="UI\AnonymousChangePasswordTx.cs" />
     <Compile Include="ChangePasswordTransactionScript.cs" />
     <Compile Include="Core\IAllowAllEntityAccessRuleEntity.cs" />
     <Compile Include="Core\UserAccountEntity.cs" />
     <Compile Include="Core\UserAccountPolicy.cs" />
-    <Compile Include="Core\UserAccountPolicySet.cs" />
+    <Compile Include="Core\DefaultUserAccountPolicySet.cs" />
     <Compile Include="Core\UserAccountPrincipal.cs" />
     <Compile Include="Core\VerifyUserAccountEmailTx.cs" />
     <Compile Include="IdentityInfoExtensions.cs" />
     <Compile Include="ISecurityDomainLogger.cs" />
     <Compile Include="LoggedInUserInfo.cs" />
+    <Compile Include="UI\AuthenticatedChangePasswordTx.cs" />
+    <Compile Include="UI\ChangePasswordScreenPart.cs" />
+    <Compile Include="UI\InteractiveForgotPasswordTx.cs" />
+    <Compile Include="UI\InteractiveLoginTx.cs" />
     <Compile Include="UI\JsonSerializationExtension.cs" />
+    <Compile Include="UI\UserLoginScreen.cs" />
     <Compile Include="UI\UserAccountCrudScreenPart.cs" />
+    <Compile Include="UI\UserForgotPasswordScreen.cs" />
+    <Compile Include="UI\UserPasswordExpiredScreen.cs" />
     <Compile Include="UI\ViewModels.cs" />
+    <Compile Include="UserEmailTemplateType.cs" />
     <Compile Include="UserLoginTransactionScript.cs" />
     <Compile Include="Entities.cs" />
     <Compile Include="Enums.cs" />

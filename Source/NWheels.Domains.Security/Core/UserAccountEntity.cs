@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Security;
 using NWheels.Authorization.Core;
 using NWheels.Exceptions;
 using NWheels.Domains.Security.Impl;
@@ -17,7 +18,7 @@ namespace NWheels.Domains.Security.Core
 {
     public abstract class UserAccountEntity : IUserAccountEntity, IActiveRecord
     {
-        public void SetPassword(SecureString passwordString)
+        public virtual void SetPassword(SecureString passwordString)
         {
             var policy = PolicySet.GetPolicy(this);
 
@@ -34,7 +35,31 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void SendEmail(object emailContentType, object data)
+        public virtual string SetTemporaryPassword()
+        {
+            var policy = PolicySet.GetPolicy(this);
+
+            DeactivateCurrentPassword();
+
+            var random = new Random();
+            var tempPasswordLength = random.Next(policy.PasswordMinLength, policy.PasswordMaxLength);
+            var tempPasswordMinNonAlphaChars = policy.PasswordMinDigitChars + policy.PasswordMinSpecialChars;
+            var tempPasswordClearText = Membership.GeneratePassword(tempPasswordLength, tempPasswordMinNonAlphaChars);
+
+            var password = Framework.NewDomainObject<IPasswordEntityPart>();
+            password.Hash = CryptoProvider.CalculateHash(SecureStringUtility.ClearToSecure(tempPasswordClearText), salt: this.LoginName);
+            password.ExpiresAtUtc = Framework.UtcNow.AddHours(policy.TemporaryPasswordExpiryHours);
+
+            this.Passwords.Add(password);
+            this.IsLockedOut = false;
+
+            Logger.UserTemporaryPasswordSet(LoginName, EntityId.ValueOf(this).ToString(), EmailAddress);
+            return tempPasswordClearText;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual void SendEmail(object emailContentType, object data)
         {
             var email = new OutgoingEmailMessage(Framework, TemplateProvider);
 
@@ -47,7 +72,7 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void SendEmailVerification(object emailContentType)
+        public virtual void SendEmailVerification(object emailContentType)
         {
             var policy = PolicySet.GetPolicy(this);
             var now = Framework.UtcNow;
@@ -61,7 +86,7 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void VerifyEmail(string linkUniqueId)
+        public virtual void VerifyEmail(string linkUniqueId)
         {
             var now = Framework.UtcNow;
 
@@ -83,29 +108,7 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string SetTemporaryPassword()
-        {
-            var policy = PolicySet.GetPolicy(this);
-
-            DeactivateCurrentPassword();
-
-            var password = Framework.NewDomainObject<IPasswordEntityPart>();
-            var passwordLength = new Random().Next(policy.PasswordMinLength, policy.PasswordMaxLength);
-            var clearText = GenerateTemporaryPassword(passwordLength);
-
-            password.Hash = CryptoProvider.CalculateHash(SecureStringUtility.ClearToSecure(clearText), salt: this.LoginName);
-            password.ExpiresAtUtc = Framework.UtcNow.AddDays(policy.TemporaryPasswordExpiryDays);
-            password.MustChange = true;
-
-            this.Passwords.Add(password);
-            this.Save();
-
-            return clearText;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void AutoGenerateLoginName(string baseText)
+        public virtual void AutoGenerateLoginName(string baseText)
         {
             this.LoginName = CreateLoginName(baseText);
         }
@@ -166,25 +169,33 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UserAccountPrincipal Authenticate(SecureString password)
+        public virtual UserAccountPrincipal Authenticate(SecureString password, bool passwordExpired = false)
         {
             var policy = PolicySet.GetPolicy(this);
 
             ValidateNotLockedOut();
-            var activePassword = ValidatePasswordExpiry();
+            
+            var activePassword = (
+                passwordExpired 
+                ? FindMostRecentExpiredPassword() 
+                : FindValidPassword());
+            
             ValidatePasswordMatch(password, activePassword, policy);
-            ValidatePasswordMustChange(activePassword);
+
+            if (!passwordExpired)
+            {
+                ValidatePasswordMustChange(activePassword);
+            }
 
             var principal = CreatePrincipal();
-
-            Logger.UserAuthenticated(LoginName);
             
+            Logger.UserAuthenticated(LoginName);
             return principal;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UserAccountPrincipal CreatePrincipal()
+        public virtual UserAccountPrincipal CreatePrincipal()
         {
             var claims = ClaimFactory.CreateClaimsFromContainerEntity(this).ToArray();
             var accessControlList = AccessControlCache.GetAccessControlList(claims);
@@ -223,7 +234,7 @@ namespace NWheels.Domains.Security.Core
         protected AccessControlListCache AccessControlCache { get; set; }
 
         [EntityImplementation.DependencyProperty]
-        protected UserAccountPolicySet PolicySet { get; set; }
+        protected IUserAccountPolicySet PolicySet { get; set; }
 
         [EntityImplementation.DependencyProperty]
         protected IContentTemplateProvider TemplateProvider { get; set; }
@@ -315,7 +326,7 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IPasswordEntityPart ValidatePasswordExpiry()
+        private IPasswordEntityPart FindValidPassword()
         {
             var activePassword = Passwords.FirstOrDefault(p => !p.IsExpired(Framework.UtcNow));
 
@@ -326,6 +337,27 @@ namespace NWheels.Domains.Security.Core
             }
 
             return activePassword;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IPasswordEntityPart FindMostRecentExpiredPassword()
+        {
+            var now = Framework.UtcNow;
+
+            if (Passwords.Any(p => !p.IsExpired(now)))
+            {
+                throw new SecurityException("Cannot use expired password because a valid password exists.");
+            }
+
+            var expiredPassword = Passwords.OrderByDescending(p => p.ExpiresAtUtc).FirstOrDefault();
+
+            if (expiredPassword == null)
+            {
+                throw new SecurityException("User account has no passwords.");
+            }
+
+            return expiredPassword;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

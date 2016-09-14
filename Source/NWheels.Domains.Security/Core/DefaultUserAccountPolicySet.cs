@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace NWheels.Domains.Security.Core
 {
-    public class UserAccountPolicySet
+    public class DefaultUserAccountPolicySet : IUserAccountPolicySet
     {
-        public UserAccountPolicy GetPolicy(UserAccountEntity userAccount)
+        public virtual UserAccountPolicy GetPolicy(IUserAccountEntity userAccount)
         {
             return new UserAccountPolicy(
                 loginMinLength: 5,
                 loginMaxLength: 20,
                 failedLoginAttemptsBeforeLockOut: 3,
                 passwordExpiryDays: 90,
-                temporaryPasswordExpiryDays: 7,
+                temporaryPasswordExpiryHours: 48,
                 passwordMinLength: 5,
                 passwordMaxLength: 10,
                 passwordMinAlphaChars: 1,

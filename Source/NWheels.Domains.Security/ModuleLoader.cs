@@ -29,11 +29,20 @@ namespace NWheels.Domains.Security
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<ChangePasswordTransactionScript>().InstancePerDependency();
 
             builder.RegisterType<JsonSerializationExtension>().As<IJsonSerializationExtension>();
-            builder.RegisterType<UserAccountPolicySet>();
+            builder.RegisterType<DefaultUserAccountPolicySet>().As<IUserAccountPolicySet>();
 
             builder.NWheelsFeatures().ObjectContracts().Concretize<IUserAccountEntity>().With<UserAccountEntity>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<IAllowAllEntityAccessRuleEntity>().With<AllowAllEntityAccessRuleEntity>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<IProfilePhotoEntity>().With<ProfilePhotoEntity>();
+
+            builder.NWheelsFeatures().Processing().RegisterTransactionScript<AnonymousChangePasswordTx>();
+            builder.NWheelsFeatures().Processing().RegisterTransactionScript<AuthenticatedChangePasswordTx>();
+            builder.NWheelsFeatures().Processing().RegisterTransactionScript<InteractiveForgotPasswordTx>();
+            builder.NWheelsFeatures().Processing().RegisterTransactionScript<InteractiveLoginTx>();
+
+            builder.NWheelsFeatures().Processing().RegisterTransactionScript<UserLoginTransactionScript>();
+            builder.NWheelsFeatures().Processing().RegisterTransactionScript<UserLogoutTransactionScript>();
+            builder.NWheelsFeatures().Processing().RegisterTransactionScript<ResetPasswordTransactionScript>();
         }
     }
 }

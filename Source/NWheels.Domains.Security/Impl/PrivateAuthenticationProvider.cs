@@ -28,9 +28,32 @@ namespace NWheels.Domains.Security.Impl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UserAccountPrincipal Authenticate(
+            IQueryable<IUserAccountEntity> userAccounts,
+            string loginName,
+            SecureString password,
+            out IUserAccountEntity userAccount)
+        {
+            return InternalAuthenticate(userAccounts, loginName, password, passwordExpired: false, userAccount: out userAccount);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UserAccountPrincipal AuthenticateByExpiredPassword(
+            IQueryable<IUserAccountEntity> userAccounts,
+            string loginName,
+            SecureString password,
+            out IUserAccountEntity userAccount)
+        {
+            return InternalAuthenticate(userAccounts, loginName, password, passwordExpired: true, userAccount: out userAccount);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private UserAccountPrincipal InternalAuthenticate(
             IQueryable<IUserAccountEntity> userAccounts, 
             string loginName, 
             SecureString password, 
+            bool passwordExpired,
             out IUserAccountEntity userAccount)
         {
             var lowercaseLoginName = loginName.ToLower();
@@ -42,7 +65,7 @@ namespace NWheels.Domains.Security.Impl
                 throw new DomainFaultException<LoginFault>(LoginFault.LoginIncorrect);
             }
 
-            var principal = userAccount.As<UserAccountEntity>().Authenticate(password);
+            var principal = userAccount.As<UserAccountEntity>().Authenticate(password, passwordExpired);
             return principal;
         }
     }

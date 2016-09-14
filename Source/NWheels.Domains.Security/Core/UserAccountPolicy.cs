@@ -13,7 +13,7 @@ namespace NWheels.Domains.Security.Core
             int loginMaxLength,
             int failedLoginAttemptsBeforeLockOut, 
             int passwordExpiryDays, 
-            int temporaryPasswordExpiryDays,
+            int temporaryPasswordExpiryHours,
             int passwordMinLength, 
             int passwordMaxLength, 
             int passwordMinAlphaChars, 
@@ -27,7 +27,7 @@ namespace NWheels.Domains.Security.Core
             LoginMaxLength = loginMaxLength;
             FailedLoginAttemptsBeforeLockOut = failedLoginAttemptsBeforeLockOut;
             PasswordExpiryDays = passwordExpiryDays;
-            TemporaryPasswordExpiryDays = temporaryPasswordExpiryDays;
+            TemporaryPasswordExpiryHours = temporaryPasswordExpiryHours;
             PasswordMinLength = passwordMinLength;
             PasswordMaxLength = passwordMaxLength;
             PasswordMinAlphaChars = passwordMinAlphaChars;
@@ -44,7 +44,7 @@ namespace NWheels.Domains.Security.Core
         public int LoginMaxLength { get; private set; }
         public int FailedLoginAttemptsBeforeLockOut { get; private set; }
         public int PasswordExpiryDays { get; private set; }
-        public int TemporaryPasswordExpiryDays { get; private set; }
+        public int TemporaryPasswordExpiryHours { get; private set; }
         public int PasswordMinLength { get; private set; }
         public int PasswordMaxLength { get; private set; }
         public int PasswordMinAlphaChars { get; private set; }

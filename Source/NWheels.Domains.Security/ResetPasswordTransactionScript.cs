@@ -16,29 +16,25 @@ using NWheels.Utilities;
 
 namespace NWheels.Domains.Security
 {
-    public class ChangePasswordTransactionScript : ITransactionScript
+    public class ResetPasswordTransactionScript : ITransactionScript
     {
         private readonly IFramework _framework;
-        private readonly IAuthenticationProvider _authenticationProvider;
+        private readonly ISecurityDomainLogger _logger;
         private readonly ISessionManager _sessionManager;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ChangePasswordTransactionScript(IFramework framework, IAuthenticationProvider authenticationProvider, ISessionManager sessionManager)
+        public ResetPasswordTransactionScript(IFramework framework, ISecurityDomainLogger logger, ISessionManager sessionManager)
         {
             _framework = framework;
-            _authenticationProvider = authenticationProvider;
+            _logger = logger;
             _sessionManager = sessionManager;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [SecurityCheck.AllowAnonymous]
-        public virtual void Execute(
-            string loginName,
-            string oldPassword,
-            string newPassword, 
-            bool passwordExpired)
+        public virtual void Execute([PropertyContract.Semantic.LoginName] string loginName)
         {
             using (_sessionManager.JoinGlobalSystem())
             {
@@ -48,32 +44,27 @@ namespace NWheels.Domains.Security
 
                 using (authenticationContext)
                 {
-                    IUserAccountEntity userAccount = null;
+                    var lowercaseLoginName = loginName.ToLower();
+                    var userAccount = (UserAccountEntity)userAccountQuery.FirstOrDefault(u => u.LoginName.ToLower() == lowercaseLoginName);
 
-                    try
+                    if (userAccount == null)
                     {
-                        if (!passwordExpired)
-                        {
-                            _authenticationProvider.Authenticate(
-                                userAccountQuery, loginName, SecureStringUtility.ClearToSecure(oldPassword), out userAccount);
-                        }
-                        else
-                        {
-                            _authenticationProvider.AuthenticateByExpiredPassword(
-                                userAccountQuery, loginName, SecureStringUtility.ClearToSecure(oldPassword), out userAccount);
-                        }
-                    }
-                    catch (DomainFaultException<LoginFault> error)
-                    {
-                        if (error.FaultCode != LoginFault.PasswordExpired)
-                        {
-                            throw;
-                        }
+                        _logger.ResetPasswordRequestDeclined(loginName);
+                        return;
                     }
 
-                    userAccount.As<UserAccountEntity>().SetPassword(SecureStringUtility.ClearToSecure(newPassword));
+
+                    var temporaryPassword = userAccount.As<UserAccountEntity>().SetTemporaryPassword();
                     UpdateUserAccount(authenticationContext, userAccount);
 
+                    userAccount.SendEmail(
+                        UserEmailTemplateType.ResetPassword,
+                        new {
+                            UserAccount = userAccount,
+                            TemporaryPassword = temporaryPassword
+                        });
+
+                    _logger.ResetPasswordRequestAccepted(loginName, EntityId.ValueOf(userAccount).ToString(), userAccount.EmailAddress);
                     authenticationContext.CommitChanges();
                 }
             }

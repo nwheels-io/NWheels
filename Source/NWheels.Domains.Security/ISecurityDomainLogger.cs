@@ -27,6 +27,28 @@ namespace NWheels.Domains.Security
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [LogInfo(ToAuditLog = true)]
+        void UserTemporaryPasswordSet(
+            [Detail(Indexed = true, IncludeInSingleLineText = true)] string loginName,
+            [Detail(Indexed = true)] string userId,
+            [Detail(Indexed = true)] string userEmail);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [LogInfo(ToAuditLog = true)]
+        void ResetPasswordRequestAccepted(
+            [Detail(Indexed = true, IncludeInSingleLineText = true)] string loginName,
+            [Detail(Indexed = true)] string userId,
+            [Detail(Indexed = true)] string userEmail);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [LogWarning(ToAuditLog = true)]
+        void ResetPasswordRequestDeclined(
+            [Detail(Indexed = true, IncludeInSingleLineText = true)] string loginName);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [LogError(ToAuditLog = true)]
         void UserLoginFailed(
             [Detail(Indexed = true, IncludeInSingleLineText = true)] string loginName,
@@ -49,5 +71,10 @@ namespace NWheels.Domains.Security
 
         [LogVerbose]
         void UserAuthenticated(string loginName);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        [LogError(ToAuditLog = true)]
+        void UserNotLoggedIn(string sessionId, Exception innerException);
     }
 }
