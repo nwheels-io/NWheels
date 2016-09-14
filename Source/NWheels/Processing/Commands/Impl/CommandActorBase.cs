@@ -1,4 +1,5 @@
 using System;
+using System.Security;
 using Autofac;
 using NWheels.Authorization;
 using NWheels.Exceptions;
@@ -133,7 +134,15 @@ namespace NWheels.Processing.Commands.Impl
 
         private void EnqueueFailedCommandResult(AbstractCommandMessage command, Exception error)
         {
+            var isAuthenticated = command.Session.UserIdentity.IsAuthenticated;
             var fault = error as IFaultException;
+
+            if (fault == null && (error is SecurityException || !isAuthenticated))
+            {
+                fault = new DomainFaultException<AuthorizationFault, AuthorizationFaultSubCode>(
+                    AuthorizationFault.AccessDenied, 
+                    (isAuthenticated ? AuthorizationFaultSubCode.None : AuthorizationFaultSubCode.NotAuthenticated));
+            }
 
             var resultMessage = new CommandResultMessage(
                 _framework, 

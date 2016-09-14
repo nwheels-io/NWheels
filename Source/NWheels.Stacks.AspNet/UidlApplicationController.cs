@@ -43,6 +43,7 @@ using NWheels.UI.Toolbox;
 namespace NWheels.Stacks.AspNet
 {
     [EnableCors(origins: "*", headers: "*", methods: "*")]
+    [UidlApplicationErrorHandler]
     public class UidlApplicationController : ApiController
     {
         private const string UploadSessionKey = "UPLOAD";

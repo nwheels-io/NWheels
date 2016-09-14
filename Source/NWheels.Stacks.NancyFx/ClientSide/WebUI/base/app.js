@@ -95,11 +95,12 @@ theApp.config(['$httpProvider', function($httpProvider) {
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.service('commandService',
-['$http', '$q', '$interval', '$timeout', '$rootScope',
-function ($http, $q, $interval, $timeout, $rootScope) {
+['$http', '$q', '$interval', '$timeout', '$rootScope', 'sessionService',
+function ($http, $q, $interval, $timeout, $rootScope, sessionService) {
 
     var m_pendingCommands = {};
     var m_pollTimer = null;
+	var m_sessionService = sessionService;
 
     //-----------------------------------------------------------------------------------------------------------------
 
@@ -176,19 +177,27 @@ function ($http, $q, $interval, $timeout, $rootScope) {
     //-----------------------------------------------------------------------------------------------------------------
     
     function createFaultInfo(httpResponse) {
+		var faultInfo = null;
+		
         if (httpResponse.data && httpResponse.data.faultCode) {
-            return httpResponse.data;
-        }
-        var faultInfo = {
-            success: false,
-            Success: false,
-            faultCode: httpResponse.status,
-            FaultCode: httpResponse.status,
-            faultReason: httpResponse.statusText,
-            FaultReason: httpResponse.statusText,
-            technicalInfo: httpResponse.data,
-            TechnicalInfo: httpResponse.data
-        };
+            faultInfo = httpResponse.data;
+        } else {
+			faultInfo = {
+				success: false,
+				Success: false,
+				faultCode: httpResponse.status,
+				FaultCode: httpResponse.status,
+				faultReason: httpResponse.statusText,
+				FaultReason: httpResponse.statusText,
+				technicalInfo: httpResponse.data,
+				TechnicalInfo: httpResponse.data
+			};
+		}
+		
+		if (faultInfo.faultType === 'AuthorizationFault' && faultInfo.faultCode === 'AccessDenied' && faultInfo.faultSubCode === 'NotAuthenticated') {
+			m_sessionService.notifySessionExpired();
+		}
+		
         return faultInfo;
     }
 
@@ -254,7 +263,8 @@ function ($timeout, $rootScope) {
     return {
         activateExpiry: activateExpiry,
         slideExpiry: slideExpiry,
-        deactivateExpiry: deactivateExpiry
+        deactivateExpiry: deactivateExpiry,
+		notifySessionExpired: notifySessionExpired
     };
 }]);
 

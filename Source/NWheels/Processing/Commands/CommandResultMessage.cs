@@ -83,6 +83,22 @@ namespace NWheels.Processing.Commands
 
         public class Snapshot
         {
+            public Snapshot(
+                string faultType,
+                string faultCode = null,
+                string faultSubCode = null,
+                string faultReason = null,
+                string technicalInfo = null)
+            {
+                this.FaultType = faultType;
+                this.FaultCode = faultCode;
+                this.FaultSubCode = faultSubCode;
+                this.FaultReason = faultReason;
+                this.TechnicalInfo = technicalInfo;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public Snapshot(CommandResultMessage source)
             {
                 this.Type = source.GetType().SimpleQualifiedName();
