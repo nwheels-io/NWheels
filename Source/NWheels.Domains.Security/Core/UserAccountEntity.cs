@@ -270,11 +270,31 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool IsPasswordExpired
+        {
+            get
+            {
+                return EmailVerification.EmailVerifiedAtUtc.HasValue;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public bool IsEmailVerified
         {
             get
             {
                 return EmailVerification.EmailVerifiedAtUtc.HasValue;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string UserRolesText
+        {
+            get
+            {
+                return string.Join(", ", this.AssociatedRoles.Select(r => r.Name));
             }
         }
 

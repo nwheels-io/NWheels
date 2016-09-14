@@ -83,6 +83,10 @@ namespace NWheels.Domains.Security
                 _sessionManager.As<ICoreSessionManager>().SetSessionUserInfo(session.Id, newCulture: currentSession.Culture);
                 _logger.UserLoggedIn(principal.LoginName, principal.UserId, principal.EmailAddress, session.Id);
 
+                ((UserAccountEntity)userAccount).LastLoginAtUtc = _framework.UtcNow;           
+                ((IActiveRecord)userAccount).Save();
+                authenticationContext.CommitChanges();
+
                 var result = new Result(principal, currentSession.Endpoint, _metadataCache);
                 return result;
             }
