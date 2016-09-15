@@ -1487,7 +1487,14 @@ HEAD, JS/CSS LINKS
                                 var filterObject = JSON.parse(postData.filters);
                                 for (var i = 0; i < filterObject.rules.length; i++) {
                                     var rule = filterObject.rules[i];
-                                    queryBuilder.where(rule.field, rule.data, rule.op);
+									var searchByPropertyName = null;
+									for (var j = 0 ; j < $scope.gridColumns.length; j++) {
+										if ($scope.gridColumns[j].expression === rule.field) {
+											searchByPropertyName = $scope.gridColumns[j].searchPropertyName;
+											break;
+										}
+									}
+                                    queryBuilder.where(searchByPropertyName || rule.field, rule.data, rule.op);
                                 }
                             }
                             queryBuilder.take(postData.rows);

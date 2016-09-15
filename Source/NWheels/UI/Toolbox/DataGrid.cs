@@ -297,6 +297,14 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public GridColumn SearchUsingPropertyOf<TDataRow>(Expression<Func<TDataRow, object>> searchProperty)
+            {
+                this.SearchPropertyName = searchProperty.GetPropertyInfo().Name;
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             [DataMember]
             public FieldSpecialName SpecialName { get; set; }
             [DataMember]
@@ -317,6 +325,8 @@ namespace NWheels.UI.Toolbox
             public string[] Navigations { get; set; }
             [DataMember]
             public string DeclaringTypeName { get; set; }
+            [DataMember]
+            public string SearchPropertyName { get; set; }
             [DataMember]
             public bool IncludeInTotal { get; set; }
             [DataMember]
