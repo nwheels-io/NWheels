@@ -656,18 +656,18 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/UserProfilePhoto">
         <div class="dropdown profile-element"> 
-			<span>
-				<img ng-if="model.State.ProfilePhotoId" alt="image" class="img-circle" ng-src="app/entity/queryImage/{{uidl.entityName}}/{{model.State.ProfilePhotoId}}/{{uidl.imageTypeProperty}}/{{uidl.imageContentProperty}}">
-				<img ng-if="!model.State.ProfilePhotoId" alt="No profile photo" class="img-circle" src="app/skin/assets/img/default_profile_photo.png">
+            <span>
+                <img ng-if="model.State.ProfilePhotoId" alt="image" class="img-circle" ng-src="app/entity/queryImage/{{uidl.entityName}}/{{model.State.ProfilePhotoId}}/{{uidl.imageTypeProperty}}/{{uidl.imageContentProperty}}">
+                <img ng-if="!model.State.ProfilePhotoId" alt="No profile photo" class="img-circle" src="app/skin/assets/img/default_profile_photo.png">
             </span>
             <a data-toggle="dropdown" class="dropdown-toggle" href="#">
-				<span class="clear"> 
-					<span class="block m-t-xs">
-						<strong class="font-bold">{{model.State.PersonFullName}}</strong>
-					</span> 
-					<span class="text-muted text-xs block">{{model.State.UserType}}<b class="caret"></b></span> 
-				</span>
-			</a>
+                <span class="clear"> 
+                    <span class="block m-t-xs">
+                        <strong class="font-bold">{{model.State.PersonFullName}}</strong>
+                    </span> 
+                    <span class="text-muted text-xs block">{{model.State.UserType}}<b class="caret"></b></span> 
+                </span>
+            </a>
             <ul class="dropdown-menu animated fadeIn m-t-xs">
                 <li ng-repeat="command in uidl.commands"><a ng-click="$emit(command.qualifiedName + ':Executing')">{{::translate(command.text)}}</a></li>
             </ul>
@@ -800,14 +800,14 @@ HEAD, JS/CSS LINKS
                             </ul>
                         </li-->                        
                         <li ng-repeat="command in uidl.utilityCommands">
-							<button 
-								type="button"
-								class="btn btn-rounded"
-								style="margin-right:5px; margin-bottom:5px;"
-								ng-disabled="utilityCommandInProgress || !isUtilityCommandEnabled(command)"
-								ng-click="invokeUtilityCommand(command)"
-								ng-class="{'btn-default':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
-							><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                            <button 
+                                type="button"
+                                class="btn btn-rounded"
+                                style="margin-right:5px; margin-bottom:5px;"
+                                ng-disabled="utilityCommandInProgress || !isUtilityCommandEnabled(command)"
+                                ng-click="invokeUtilityCommand(command)"
+                                ng-class="{'btn-default':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
+                            ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                         </li>
                         <li ng-repeat="widget in uidl.statusBar.containedWidgets" ng-class="{'dropdown': widget.border==='DropDown'}">
                             <uidl-widget uidl="widget"></uidl-widget>
@@ -1212,12 +1212,12 @@ HEAD, JS/CSS LINKS
                                         if (i > 0) {
                                             text += ', ';
                                         }
-										if (cellvalue[i]) {
-											text += cellvalue[i][metaColumn.itemDisplayAsExpression];
-										}
-										else {
-											text += '?';
-										}
+                                        if (cellvalue[i]) {
+                                            text += cellvalue[i][metaColumn.itemDisplayAsExpression];
+                                        }
+                                        else {
+                                            text += '?';
+                                        }
                                     }
                                     return text;
                                 }
@@ -1458,10 +1458,10 @@ HEAD, JS/CSS LINKS
                     $scope.totalsRowDisplayed = false;
                     var gridOptions = {
                         datatype: function(postData) {
-							if ($scope.dataGridQueryInProgress) {
-								return;
-							}
-							$scope.dataGridQueryInProgress = true;
+                            if ($scope.dataGridQueryInProgress) {
+                                return;
+                            }
+                            $scope.dataGridQueryInProgress = true;
                             var queryBuilder = ($scope.preparedRequest.query ? $scope.preparedRequest.query.clone() : new EntityQueryBuilder($scope.uidl.entityName, $scope.preparedRequest.url));
                             if (postData.sidx) {
                                 queryBuilder.orderBy(postData.sidx, postData.sord==='asc');
@@ -1487,13 +1487,13 @@ HEAD, JS/CSS LINKS
                                 var filterObject = JSON.parse(postData.filters);
                                 for (var i = 0; i < filterObject.rules.length; i++) {
                                     var rule = filterObject.rules[i];
-									var searchByPropertyName = null;
-									for (var j = 0 ; j < $scope.gridColumns.length; j++) {
-										if ($scope.gridColumns[j].expression === rule.field) {
-											searchByPropertyName = $scope.gridColumns[j].searchPropertyName;
-											break;
-										}
-									}
+                                    var searchByPropertyName = null;
+                                    for (var j = 0 ; j < $scope.gridColumns.length; j++) {
+                                        if ($scope.gridColumns[j].expression === rule.field) {
+                                            searchByPropertyName = $scope.gridColumns[j].searchPropertyName;
+                                            break;
+                                        }
+                                    }
                                     queryBuilder.where(searchByPropertyName || rule.field, rule.data, rule.op);
                                 }
                             }
@@ -1507,7 +1507,7 @@ HEAD, JS/CSS LINKS
                                 $scope.preparedRequest.data
                             ).then(
                                 function(response){
-									$scope.dataGridQueryInProgress = false;
+                                    $scope.dataGridQueryInProgress = false;
                                     if (grid[0].grid) {
                                         grid[0].grid.endReq();
                                     }
@@ -1547,7 +1547,7 @@ HEAD, JS/CSS LINKS
                                     }*/
                                 },
                                 function(faultResponse){
-									$scope.dataGridQueryInProgress = false;
+                                    $scope.dataGridQueryInProgress = false;
                                     if (grid[0].grid) {
                                         grid[0].grid.endReq();
                                     }
@@ -1606,10 +1606,10 @@ HEAD, JS/CSS LINKS
                                     var editedRowData = gridObj.getRowData(rowId);
                                     for (var i = 0; i < $scope.gridColumns.length ; i++) {
                                         var column = $scope.gridColumns[i];
-										if (column.isEditSupported===true) {
-											var value = editedRowData[column.expression];
-											$scope.uidlService.writeValueByNavigationPath(rowObject, column.navigations, value);
-										}
+                                        if (column.isEditSupported===true) {
+                                            var value = editedRowData[column.expression];
+                                            $scope.uidlService.writeValueByNavigationPath(rowObject, column.navigations, value);
+                                        }
                                     }
                                     */
                                     var rowData = $scope.getDataByRowId(rowId);
@@ -1944,11 +1944,11 @@ HEAD, JS/CSS LINKS
                     });
 
                     $scope.gridColumns.forEach(function (metaColumn, idx) {
-						var colWidthPx = (
-							metaColumn.size==='Jumbo' ? 1040 : (
-							metaColumn.size==='ExtraLarge' ? 720 : (
-							metaColumn.size==='Large' ? 360 : (
-							metaColumn.size==='Small' ? 90 : 180))));
+                        var colWidthPx = (
+                            metaColumn.size==='Jumbo' ? 1040 : (
+                            metaColumn.size==='ExtraLarge' ? 720 : (
+                            metaColumn.size==='Large' ? 360 : (
+                            metaColumn.size==='Small' ? 90 : 180))));
                         columnsModel.push({
                             name: metaColumn.expression,
                             label: $scope.translate(metaColumn.title),
@@ -2203,29 +2203,29 @@ HEAD, JS/CSS LINKS
                 <i ng-if="uidl.icon" class="fa fa-{{::uidl.icon}}"></i> {{::translate(uidl.text)}}
             </div>
             <div ng-if="uidl.inputForm" class="panel-body">
-				<uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
+                <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
             </div>
             <uidl-widget ng-if="uidl.inputFormTypeSelector" uidl="uidl.inputFormTypeSelector" parent-model="model.State"></uidl-widget>
         </div>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/TransactionFormFlatStyle">
-		<div class="panel-body">
-			<div ng-if="uidl.inputForm">
-				<div ng-hide="model.State.Output">
-					<uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
-				</div>
-			</div>
-			<div ng-if="uidl.inputFormTypeSelector">
-				<div ng-hide="model.State.Output">
-					<uidl-widget uidl="uidl.inputFormTypeSelector" parent-model="model.State"></uidl-widget>
-				</div>
-			</div>
-			<div ng-if="uidl.outputForm">
-				<div ng-show="model.State.Output">
-					<uidl-widget uidl="uidl.outputForm" parent-model="model.State.Output"></uidl-widget>
-				</div>
-			</div>
-		</div>
+        <div class="panel-body">
+            <div ng-if="uidl.inputForm">
+                <div ng-hide="model.State.Output">
+                    <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
+                </div>
+            </div>
+            <div ng-if="uidl.inputFormTypeSelector">
+                <div ng-hide="model.State.Output">
+                    <uidl-widget uidl="uidl.inputFormTypeSelector" parent-model="model.State"></uidl-widget>
+                </div>
+            </div>
+            <div ng-if="uidl.outputForm">
+                <div ng-show="model.State.Output">
+                    <uidl-widget uidl="uidl.outputForm" parent-model="model.State.Output"></uidl-widget>
+                </div>
+            </div>
+        </div>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/TransactionFormLoginStyle">
         <div class="middle-box text-center loginscreen animated fadeInDown" style="padding-top:0;">
@@ -2235,9 +2235,9 @@ HEAD, JS/CSS LINKS
                 <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
             </div>                
             <div ng-if="uidl.outputForm">
-				<div ng-show="model.State.Output">
-					<uidl-widget uidl="uidl.outputForm" parent-model="model.State.Output"></uidl-widget>
-				</div>
+                <div ng-show="model.State.Output">
+                    <uidl-widget uidl="uidl.outputForm" parent-model="model.State.Output"></uidl-widget>
+                </div>
             </div>                
             <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
         </div>
@@ -2260,7 +2260,7 @@ HEAD, JS/CSS LINKS
         <div>
             <uidl-widget ng-if="uidl.inputForm" ng-hide="model.State.Output" uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
             <uidl-widget ng-if="uidl.inputFormTypeSelector" ng-hide="model.State.Output" uidl="uidl.inputFormTypeSelector" parent-model="model.State"></uidl-widget>
-			<uidl-widget ng-if="uidl.outputForm" ng-show="model.State.Output" uidl="uidl.outputForm" parent-model="model.State.Output"></uidl-widget>
+            <uidl-widget ng-if="uidl.outputForm" ng-show="model.State.Output" uidl="uidl.outputForm" parent-model="model.State.Output"></uidl-widget>
         </div>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/TransactionFormPopupMode">
@@ -2425,17 +2425,17 @@ HEAD, JS/CSS LINKS
             <div class="form-group" ng-repeat="field in plainFields" style="margin-bottom:0;display:block;">
                 <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" template-name="FormFieldAlertStyleBig" />
             </div>
-			<div ng-repeat="command in uidl.commands" class="m-b">
-				<button ng-if="command.uiStyle != 'Link'"
-						class="btn block full-width m-b"
-						ng-class="{'btn-primary':command.severity!='None', 'btn-white':command.severity=='None'}"                    
-						ng-disabled="commandInProgress"
-						ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
-				<a ng-if="command.uiStyle == 'Link'"
-				   ng-disabled="commandInProgress" 
-				   ng-click="invokeCommand(command)"
-				   class="commandLink"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</a>
-			</div>
+            <div ng-repeat="command in uidl.commands" class="m-b">
+                <button ng-if="command.uiStyle != 'Link'"
+                        class="btn block full-width m-b"
+                        ng-class="{'btn-primary':command.severity!='None', 'btn-white':command.severity=='None'}"                    
+                        ng-disabled="commandInProgress"
+                        ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                <a ng-if="command.uiStyle == 'Link'"
+                   ng-disabled="commandInProgress" 
+                   ng-click="invokeCommand(command)"
+                   class="commandLink"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</a>
+            </div>
         </form>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/FormInline">
@@ -2715,7 +2715,7 @@ HEAD, JS/CSS LINKS
                  class="input-group date"
                  ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                  ng-disabled="!editAuthorized"
-				 ng-init="if (!parsedEntity) parsedEntity = { };">
+                 ng-init="if (!parsedEntity) parsedEntity = { };">
                 <input type="text"
                        class="form-control"
                        ng-model="parsedEntity[uidl.propertyName]"
@@ -2973,7 +2973,7 @@ HEAD, JS/CSS LINKS
             <!-- ALERT -->
             <div ng-if="uidl.fieldType==='Alert'"
                  style="margin:0;padding:15px 10px 10px 0;max-width:300px;"
-				 class="m-b container"
+                 class="m-b container"
                  ng-class="{
                     'alert-danger': uidl.alertType==='Error', 
                     'alert-warning': uidl.alertType==='Warning',
@@ -2981,19 +2981,19 @@ HEAD, JS/CSS LINKS
                     'alert-success': uidl.alertType==='Success'                   
                  }"
             >
-				<div class="row" style="margin:0;padding:0">
-					<div class="col-md-2" style="margin:0;">
-						<h3 style="font-weight:normal;"><i ng-if="uidl.alertType" class="fa fa-lg" ng-class="{
-							'fa-info':uidl.alertType==='Info',
-							'fa-check-square':uidl.alertType==='Success',
-							'fa-exclamation-triangle':uidl.alertType==='Warning',
-							'fa-times-circle':uidl.alertType==='Error'
-						}"></i></h3>
-					</div>
-					<div class="col-md-10" style="text-align:left;padding:0;margin:0;">
-						<h3 style="font-weight:normal;">{{entity[uidl.propertyName] || translate(uidl.label)}}</h3>
-					</div>
-				</div>
+                <div class="row" style="margin:0;padding:0">
+                    <div class="col-md-2" style="margin:0;">
+                        <h3 style="font-weight:normal;"><i ng-if="uidl.alertType" class="fa fa-lg" ng-class="{
+                            'fa-info':uidl.alertType==='Info',
+                            'fa-check-square':uidl.alertType==='Success',
+                            'fa-exclamation-triangle':uidl.alertType==='Warning',
+                            'fa-times-circle':uidl.alertType==='Error'
+                        }"></i></h3>
+                    </div>
+                    <div class="col-md-10" style="text-align:left;padding:0;margin:0;">
+                        <h3 style="font-weight:normal;">{{entity[uidl.propertyName] || translate(uidl.label)}}</h3>
+                    </div>
+                </div>
             </div>
         </div>
     </script>
@@ -3167,33 +3167,33 @@ HEAD, JS/CSS LINKS
                 }
             };
             if ($scope.uidl.modifiers === 'DateTimePicker') {
-				$scope.createDateTimePicker = function() {
-					if ($scope.dateTimePickerCreated) {
-						return;
-					}
-					var uidlFormat = ($scope.uidl.format || null);
-					var pickerFormat = null;
-					if (uidlFormat == null || uidlFormat.indexOf('Second') > -1) {
-						pickerFormat = 'YYYY-MM-DD HH:mm:ss';
-					} else if (uidlFormat.indexOf('Minute') > -1) {
-						pickerFormat = 'YYYY-MM-DD HH:mm';
-					} else {
-						pickerFormat = 'YYYY-MM-DD';
-					}
-					$('#' + $scope.uniqueFieldId).datetimepicker({
-						format: pickerFormat,
-						allowInputToggle: true
-					}).on('dp.change', dateTimePickerValueChanged);
-				};
+                $scope.createDateTimePicker = function() {
+                    if ($scope.dateTimePickerCreated) {
+                        return;
+                    }
+                    var uidlFormat = ($scope.uidl.format || null);
+                    var pickerFormat = null;
+                    if (uidlFormat == null || uidlFormat.indexOf('Second') > -1) {
+                        pickerFormat = 'YYYY-MM-DD HH:mm:ss';
+                    } else if (uidlFormat.indexOf('Minute') > -1) {
+                        pickerFormat = 'YYYY-MM-DD HH:mm';
+                    } else {
+                        pickerFormat = 'YYYY-MM-DD';
+                    }
+                    $('#' + $scope.uniqueFieldId).datetimepicker({
+                        format: pickerFormat,
+                        allowInputToggle: true
+                    }).on('dp.change', dateTimePickerValueChanged);
+                };
                 $scope.updateViewFromModel = function() {
-					var value = moment($scope.entity[$scope.uidl.propertyName]);
-					var dateTimePicker = $('#' + $scope.uniqueFieldId).data("DateTimePicker");
-					dateTimePicker.date(value);
+                    var value = moment($scope.entity[$scope.uidl.propertyName]);
+                    var dateTimePicker = $('#' + $scope.uniqueFieldId).data("DateTimePicker");
+                    dateTimePicker.date(value);
                 };
                 $scope.$watch('entity', function(newValue, oldValue) {
                     if ($scope.entity) {
                         $scope.createDateTimePicker();
-						$scope.updateViewFromModel();
+                        $scope.updateViewFromModel();
                         $scope.$watch('entity.' + $scope.uidl.propertyName, function() {
                             $scope.updateViewFromModel();
                         });
@@ -3204,20 +3204,20 @@ HEAD, JS/CSS LINKS
                 $scope.timeRangePresets = null;
                 $scope.dateTimeRangePickerCreated = false;
                 $scope.displayFormatString = 'YYYY-MM-DD';
-				$scope.createDefaultLocale = function() {
-					return {
-						"format": "YYYY-MM-DD",
-						"separator": " - ",
-						"applyLabel": "Apply",
-						"cancelLabel": "Cancel",
-						"fromLabel": "From",
-						"toLabel": "To",
-						"customRangeLabel": "Custom",
-						"daysOfWeek": [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"	],
-						"monthNames": [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ],
-						"firstDay": 0
-					}
-				};
+                $scope.createDefaultLocale = function() {
+                    return {
+                        "format": "YYYY-MM-DD",
+                        "separator": " - ",
+                        "applyLabel": "Apply",
+                        "cancelLabel": "Cancel",
+                        "fromLabel": "From",
+                        "toLabel": "To",
+                        "customRangeLabel": "Custom",
+                        "daysOfWeek": [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"    ],
+                        "monthNames": [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ],
+                        "firstDay": 0
+                    }
+                };
                 $scope.$http.get('app/timeRangePresets').then(function (response) {
                     var presetDictionary = { };
                     for (var i = 0; i < response.data.length ; i++) {
@@ -3270,9 +3270,9 @@ HEAD, JS/CSS LINKS
                         startDate: moment($scope.entity[$scope.uidl.propertyName], 'YYYY-MM-DD HH:mm:ss'),
                         endDate: moment($scope.entity[$scope.groupFields[0].propertyName], 'YYYY-MM-DD HH:mm:ss'),
                         ranges: $scope.timeRangePresets,
-						linkedCalendars: false,
-						showDropdowns: true,
-						locale: $scope.createDefaultLocale()
+                        linkedCalendars: false,
+                        showDropdowns: true,
+                        locale: $scope.createDefaultLocale()
                     };
                     if ($scope.shouldHaveTimePart) {
                         rangePickerOptions.timePicker = true;
@@ -3417,9 +3417,9 @@ HEAD, JS/CSS LINKS
             </div>
             <div class="ibox-content ui-widget-content" id="{{::uidl.elementName}}_container">
                 <div id="{{::uidl.elementName}}" 
-				     class="flot-chart-content" 
-					 style="padding:0px; position:relative;"
-					 ng-style="{ height: calculateHeight(100) }"></div>
+                     class="flot-chart-content" 
+                     style="padding:0px; position:relative;"
+                     ng-style="{ height: calculateHeight(100) }"></div>
                 <!--div class="m-t-md">
             <small class="pull-right">
                 <i class="fa fa-clock-o"> </i>
@@ -3483,11 +3483,11 @@ HEAD, JS/CSS LINKS
                 } else {
                     buildCategoryChart(elementId, serverData);
                 }
-				//$scope.$timeout(function() {
-				//	$('#' + $scope.uidl.elementName + ' a.chart-series-toggle').click(function() {
-				//		alert("Toggling series index " + $(this).data('series-index'));
-				//	});
-				//});
+                //$scope.$timeout(function() {
+                //  $('#' + $scope.uidl.elementName + ' a.chart-series-toggle').click(function() {
+                //      alert("Toggling series index " + $(this).data('series-index'));
+                //  });
+                //});
             }
             
             function buildCategoryChart(elementId, serverData) {
@@ -3561,7 +3561,7 @@ HEAD, JS/CSS LINKS
                                 '<span style="color:blue">' + (label && label.length > 0 ? label + ', ' : '') + tickLabel + '</span>: ' +
                                 '<strong><span style="color:green;font-size:1.1em">' + yval + '</span></strong>';
                             return tooltipHtml;
-						}
+                        }
                     }
                 };
                 for (var li = 0; li < serverData.Labels.length; li++) {
@@ -3601,7 +3601,7 @@ HEAD, JS/CSS LINKS
                         data: []
                     };
                     setupSeriesType(serverData.Series[si], series);
-					var pointArray = serverData.Series[si].Points;
+                    var pointArray = serverData.Series[si].Points;
                     for (var xi = 0; xi < pointArray.length - 1 ; xi += 2) {
                         series.data.push([pointArray[xi], pointArray[xi+1]]);
                     }
@@ -3653,8 +3653,8 @@ HEAD, JS/CSS LINKS
                     },
                     tooltipOpts: {
                         content: function(label, xval, yval, flotItem) {
-							return '<strong>' + label + '</strong>: <span style="color:blue">' + moment.utc(xval).format('HH:mm:ss.SSS') + '</span>, <span style="color:green">' + parseFloat(yval).formatMoney(5, '.', ',') + '</span>';
-						}
+                            return '<strong>' + label + '</strong>: <span style="color:blue">' + moment.utc(xval).format('HH:mm:ss.SSS') + '</span>, <span style="color:green">' + parseFloat(yval).formatMoney(5, '.', ',') + '</span>';
+                        }
                     },
                     selection: {
                         mode: "x"
@@ -3725,7 +3725,7 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
         </div>
-    </script>	
+    </script>   
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - TYPE SELECTOR WITH ACCORDION
@@ -3751,7 +3751,7 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
         </div>
-    </script>	
+    </script>   
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - TABBED SCREEN PART SET
@@ -3773,7 +3773,7 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
         </div>
-    </script>	
+    </script>   
     <script type="text/javascript">
         function initWidget_TabbedScreenPartSet($scope) {
             var tabSkinData = { deltaWindowHeight: 80, zeroPadding: true };
@@ -3814,7 +3814,7 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
         </div>
-    </script>	
+    </script>   
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - REPORT
