@@ -355,6 +355,8 @@ HEAD, JS/CSS LINKS
             border-radius: 5px;
             padding: 3px;
         }
+        
+        .jqgrow.ui-state
     </style>
 </head>
 <body 
@@ -1119,6 +1121,18 @@ HEAD, JS/CSS LINKS
             }
             if ($scope.uidl.expandableTreeMode) {
                 columnsModel.push({ name: '$id', index: '$id', width: 1, hidden: true, key: true });
+            }
+            if ($scope.uidl.isInlineEditEnabled===true) {
+                columnsModel.push({
+                    name:'act',
+                    index:'act',
+                    width:55,
+                    align:'center',
+                    sortable:false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        return '<i class="fa fa-pencil" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
+                    }
+                });
             }
             $scope.gridColumns.forEach(function (metaColumn, idx) {
                 if (metaColumn.columnType == 'Hidden' || !$scope.isUidlAuthorized(metaColumn)) {
