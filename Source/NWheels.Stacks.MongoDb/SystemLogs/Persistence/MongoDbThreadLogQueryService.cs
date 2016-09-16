@@ -72,6 +72,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             if (options != null)
             {
                 RefineDbQuery<DailySummaryRecord>(dbCriteria, options);
+                RefineDbQueryProperty<DailySummaryRecord>(dbCriteria, x => x.MessageId, TryTakePropertyFilter(options, _s_messageIdProperty));
             }
 
             var dbQuery = Query.And(dbCriteria);
@@ -401,6 +402,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             ExpressionUtility.GetPropertyInfoFrom<IBaseLogDimensionsEntity>(x => x.Instance);
         private static readonly PropertyInfo _s_queryReplicaProperty =
             ExpressionUtility.GetPropertyInfoFrom<IBaseLogDimensionsEntity>(x => x.Replica);
+        private static readonly PropertyInfo _s_messageIdProperty =
+            ExpressionUtility.GetPropertyInfoFrom<ILogMessageSummaryEntity>(x => x.MessageId);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
