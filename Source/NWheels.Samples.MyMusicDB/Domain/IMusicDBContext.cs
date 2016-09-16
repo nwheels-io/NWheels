@@ -17,6 +17,7 @@ namespace NWheels.Samples.MyMusicDB.Domain
         IEntityRepository<IArtistEntity> Artists { get; }
         IEntityRepository<IAlbumEntity> Albums { get; }
         IEntityRepository<ITrackEntity> Tracks { get; }
+        IEntityRepository<IEventCounterEntity> EventCounters { get; }
 
         IMusicDBUserAccountEntity NewUserAccount();
         IGenreRelation NewGenreRelation(IGenreEntity genre);
@@ -250,5 +251,16 @@ namespace NWheels.Samples.MyMusicDB.Domain
                 return (Genre != null ? Genre.Name : null);
             }
         }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityContract]
+    public interface IEventCounterEntity
+    {
+        [PropertyContract.EntityId]
+        string Id { get; set; }
+
+        long Value { get; }
     }
 }

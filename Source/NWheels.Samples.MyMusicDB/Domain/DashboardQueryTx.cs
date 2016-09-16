@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NWheels.DataObjects;
+using NWheels.Domains.DevOps.SystemLogs.Entities;
+using NWheels.Domains.DevOps.SystemLogs.Transactions;
 using NWheels.Domains.Security;
+using NWheels.Extensions;
 using NWheels.Processing;
 using NWheels.UI;
 using NWheels.UI.Factories;
@@ -12,13 +16,17 @@ namespace NWheels.Samples.MyMusicDB.Domain
     [TransactionScript(SupportsInitializeInput = false, SupportsPreview = false)]
     public class DashboardQueryTx : ITransactionScript<Empty.Context, Empty.Input, DashboardQueryTx.IOutput>
     {
+        private readonly IFramework _framework;
         private readonly IViewModelObjectFactory _viewModelFactory;
+        private readonly AbstractLogMessageSummaryTx _logSummaryTx;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DashboardQueryTx(IViewModelObjectFactory viewModelFactory)
+        public DashboardQueryTx(IFramework framework, IViewModelObjectFactory viewModelFactory, AbstractLogMessageSummaryTx logSummaryTx)
         {
+            _framework = framework;
             _viewModelFactory = viewModelFactory;
+            _logSummaryTx = logSummaryTx;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -43,42 +51,62 @@ namespace NWheels.Samples.MyMusicDB.Domain
         {
             var output = _viewModelFactory.NewEntity<IOutput>();
 
-            output.Genres = 15;
-            output.Artists = 2345;
-            output.Albums = 34562;
-            output.Tracks = 623542;
-            output.Users = 1036843;
-            output.ApiRequests = 76537263;
-
-            var series = new ChartData.TimeSeriesData() {
-                Label = "Requests",
-                Type = ChartSeriesType.Bar,
-                MillisecondStepSize = (int)TimeSpan.FromMinutes(30).TotalMilliseconds,
-                Points = new List<ChartData.TimeSeriesPoint>()
-            };
-
-            var now = DateTime.Now;
-            var t0 = new DateTime(now.Year, now.Month, now.Day, now.Hour, minute: 0, second: 0).AddDays(-2);
-            var rnd = new Random();
-
-            for (DateTime t = t0 ; t < now ; t = t.AddMinutes(30))
-            {
-                series.Points.Add(new ChartData.TimeSeriesPoint() {
-                    UtcTimestamp = t,
-                    Value = rnd.Next(1234, 3456)
-                });
-            }
-
-            output.ApiRequestsOverTime = new ChartData() {
-                Series = new List<ChartData.AbstractSeriesData>() {
-                    series
-                }
-            };
+            QueryApiRequestsOverLast48Hours(output);
+            QueryTotals(output);
 
             return output;
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void QueryTotals(IOutput output)
+        {
+            using (var context = _framework.NewUnitOfWork<IMusicDBContext>())
+            {
+                long apiRequests;
+                long uniqueUsers;
+                context.QueryEventCounters(out apiRequests, out uniqueUsers);
+
+                output.TotalApiRequests = apiRequests;
+                output.Users = uniqueUsers;
+                output.Genres = context.Genres.AsQueryable().Count();
+                output.Artists = context.Artists.AsQueryable().Count();
+                output.Albums = context.Albums.AsQueryable().Count();
+                output.Tracks = context.Tracks.AsQueryable().Count();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void QueryApiRequestsOverLast48Hours(IOutput output)
+        {
+            var now = _framework.UtcNow;
+
+            var logSummaryInput = _viewModelFactory.NewEntity<ILogTimeRangeCriteria>();
+            logSummaryInput.From = now.AddHours(-48);
+            logSummaryInput.Until = now;
+
+            var upstreamUiContext = UIOperationContext.Current;
+            var logSummaryQuery = new ApplicationEntityService.QueryOptions(
+                upstreamUiContext.EntityName,
+                new Dictionary<string, string> {
+                    { "MessageId", "ApiRequest.ApiRequestProcessed" }
+                });
+
+            using (new UIOperationContext(upstreamUiContext, logSummaryQuery))
+            {
+                var logSummaryOutput = _logSummaryTx.Execute(logSummaryInput).As<VisualizedQueryable<ILogMessageSummaryEntity>>();
+                output.ApiRequestsOverTime = logSummaryOutput.Visualization;
+                var summaryRecord = logSummaryOutput.FirstOrDefault();
+
+                if (summaryRecord != null)
+                {
+                    output.ApiRequestsInLast48Hours = summaryRecord.Count;
+                }
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -89,8 +117,9 @@ namespace NWheels.Samples.MyMusicDB.Domain
             int Artists { get; set; }
             int Albums { get; set; }
             int Tracks { get; set; }
-            int Users { get; set; }
-            int ApiRequests { get; set; }
+            long Users { get; set; }
+            long TotalApiRequests { get; set; }
+            int ApiRequestsInLast48Hours { get; set; }
             ChartData ApiRequestsOverTime { get; set; }
         }
     }

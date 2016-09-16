@@ -90,6 +90,9 @@ namespace NWheels.Samples.MyMusicDB.UI
                         .Column(x => x.Name)
                         .Column(x => x.Length, size: FieldSize.Small)
                         .Column(x => x.Description, size: FieldSize.ExtraLarge);
+                    trackCrud.Form
+                        .Field(x => x.AlbumText, label: "Album")
+                        .ShowFields(x => x.Id, x => x.AlbumText, x => x.Name, x => x.TrackNumber, x => x.Length, x => x.Description);
                 })
                 .Field(x => x.CoverImageUrl, label: "CoverImageURL")
                 .ShowFields(x => x.Id, x => x.Name, x => x.Description, x => x.Artist, x => x.CoverImageUrl, x => x.ReleaseYear, x => x.Description);
@@ -103,7 +106,8 @@ namespace NWheels.Samples.MyMusicDB.UI
                 .Column(x => x.Length, size: FieldSize.Small)
                 .Column(x => x.Description, size: FieldSize.ExtraLarge);
             Tracks.Crud.Form
-                .ShowFields(x => x.AlbumText, x => x.Name, x => x.Description, x => x.TrackNumber, x => x.Length);
+                .Field(x => x.AlbumText, label: "Album")
+                .ShowFields(x => x.Id, x => x.AlbumText, x => x.Name, x => x.TrackNumber, x => x.Length, x => x.Description);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

@@ -45,7 +45,7 @@ namespace NWheels.Samples.MyMusicDB.UI
             this.Albums.BindToModelSetter(DataReceived).Value(v => v.Data(property: x => x.Albums).Format("#,##0"));
             this.Tracks.BindToModelSetter(DataReceived).Value(v => v.Data(property: x => x.Tracks).Format("#,##0"));
             this.Users.BindToModelSetter(DataReceived).Value(v => v.Data(property: x => x.Users).Format("#,##0"));
-            this.ApiRequests.BindToModelSetter(DataReceived).Value(v => v.Data(property: x => x.ApiRequests).Format("#,##0"));
+            this.ApiRequests.BindToModelSetter(DataReceived).Value(v => v.Data(property: x => x.TotalApiRequests).Format("#,##0"));
             this.ApiRequests.Text = "APIRequests";
             this.ApiRequestsOverTime.BindToModelSetter(DataReceived, x => x.ApiRequestsOverTime);
             this.ApiRequestsOverTime.Height = WidgetSize.Medium;

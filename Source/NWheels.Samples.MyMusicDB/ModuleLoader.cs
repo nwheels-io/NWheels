@@ -36,6 +36,11 @@ namespace NWheels.Samples.MyMusicDB
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<DashboardQueryTx>();
             
             builder.NWheelsFeatures().UI().RegisterApplication<MusicDBApp>().WithWebEndpoint();
+            
+            builder.RegisterType<MuscDBApiEndpoint>();
+            builder.NWheelsFeatures().Api().RegisterContract<MuscDBApiEndpoint>().WithHttpApiEndpoint();
+            builder.NWheelsFeatures().Logging().RegisterLogger<IApiRequestLogger>();
+            builder.NWheelsFeatures().Authorizarion().RegisterAnonymousEntityAccessRule<AnonymousAcl>();
         }
 
         #endregion
