@@ -11,6 +11,28 @@ namespace NWheels.UI
 {
     public class UIOperationContext : IDisposable
     {
+        private readonly UIOperationContext _upstream;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UIOperationContext(
+            UIOperationContext source, 
+            ApplicationEntityService.QueryOptions query = null)
+            : this(
+                source.AppContext, 
+                source.ApiCallType, 
+                source.ApiResultType, 
+                source.ApiTargetType.ToString(),    
+                source.ContractName, 
+                source.OperationName, 
+                source.OutputFormatIdName, 
+                source.EntityName,
+                query ?? source.Query)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public UIOperationContext(
             IUidlApplicationContext appContext,
             ApiCallType callType,
@@ -22,11 +44,7 @@ namespace NWheels.UI
             string entity = null,
             ApplicationEntityService.QueryOptions query = null)
         {
-            //if (_s_current != null)
-            //{
-            //    throw new InvalidOperationException("Another UIOperationContext instance is already attached to the current thread.");
-            //}
-
+            _upstream = _s_current;
             _s_current = this;
 
             this.AppContext = appContext;
@@ -50,7 +68,7 @@ namespace NWheels.UI
 
         public void Dispose()
         {
-            _s_current = null;
+            _s_current = _upstream;
         }
 
         #endregion
