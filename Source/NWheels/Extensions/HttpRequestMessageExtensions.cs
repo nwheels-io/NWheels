@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace NWheels.Extensions
 {
@@ -14,6 +15,10 @@ namespace NWheels.Extensions
     /// </summary>
     public static class HttpRequestMessageExtensions
     {
+        private const string HttpContext = "MS_HttpContext";
+        private const string RemoteEndpointMessage = "System.ServiceModel.Channels.RemoteEndpointMessageProperty";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         /// <summary>
         /// Returns a dictionary of QueryStrings that's easier to work with 
@@ -87,9 +92,6 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private const string HttpContext = "MS_HttpContext";
-        private const string RemoteEndpointMessage = "System.ServiceModel.Channels.RemoteEndpointMessageProperty";
-
         public static string GetClientIpAddress(this HttpRequestMessage request)
         {
             if (request.Properties.ContainsKey(HttpContext))
@@ -113,5 +115,23 @@ namespace NWheels.Extensions
             return null;
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void SetCookie(this HttpResponseHeaders headers, Cookie cookie)
+        {
+            var cookieBuilder = new StringBuilder(HttpUtility.UrlEncode(cookie.Name) + "=" + HttpUtility.UrlEncode(cookie.Value));
+
+            if (cookie.HttpOnly)
+            {
+                cookieBuilder.Append("; HttpOnly");
+            }
+
+            if (cookie.Secure)
+            {
+                cookieBuilder.Append("; Secure");
+            }
+
+            headers.Add("Set-Cookie", cookieBuilder.ToString());
+        }
     }
 }
