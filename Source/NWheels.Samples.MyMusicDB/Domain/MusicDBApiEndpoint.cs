@@ -12,7 +12,8 @@ using NWheels.UI;
 
 namespace NWheels.Samples.MyMusicDB.Domain
 {
-    public class MuscDBApiEndpoint
+    [SecurityCheck.AllowAnonymous]
+    public class MusicDBApiEndpoint
     {
         public const string UserCookieName = "user";
 
@@ -23,7 +24,7 @@ namespace NWheels.Samples.MyMusicDB.Domain
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MuscDBApiEndpoint(IFramework framework, IApiRequestLogger logger)
+        public MusicDBApiEndpoint(IFramework framework, IApiRequestLogger logger)
         {
             _framework = framework;
             _logger = logger;
@@ -32,7 +33,7 @@ namespace NWheels.Samples.MyMusicDB.Domain
         //-----------------------------------------------------------------------------------------------------------------------------------------------------\
 
         [HttpOperation(Route = "api/query/{entity}", Verbs = HttpOperationVerbs.Get)]
-        public HttpResponseMessage ApiQuery(HttpRequestMessage request)
+        public virtual HttpResponseMessage ApiQuery(HttpRequestMessage request)
         {
             var entityName = request
                 .RequestUri
@@ -58,7 +59,7 @@ namespace NWheels.Samples.MyMusicDB.Domain
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void RecordRequest(HttpRequestMessage request)
+        protected virtual void RecordRequest(HttpRequestMessage request)
         {
             _logger.ApiRequestProcessed(request.RequestUri.PathAndQuery);
 

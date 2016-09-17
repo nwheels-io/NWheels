@@ -112,7 +112,7 @@
     <Compile Include="Deployment\SecurityPopulator.cs" />
     <Compile Include="Domain\EventCounterUtility.cs" />
     <Compile Include="Domain\IApiRequestLogger.cs" />
-    <Compile Include="Domain\MuscDBApiEndpoint.cs" />
+    <Compile Include="Domain\MusicDBApiEndpoint.cs" />
     <Compile Include="Domain\DashboardQueryTx.cs" />
     <Compile Include="Domain\IMusicDBContext.cs" />
     <Compile Include="ModuleLoader.cs" />
