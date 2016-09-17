@@ -13,6 +13,7 @@ using NWheels.Endpoints;
 using NWheels.Exceptions;
 using NWheels.Extensions;
 using System.Web.Http;
+using NWheels.Hosting.Factories;
 using NWheels.Logging;
 using TT = Hapil.TypeTemplate;
 
@@ -69,14 +70,16 @@ namespace NWheels.Stacks.AspNet
             {
                 var handlerOperationMethods = TypeMemberCache.Of(_handlerClassType).SelectAllMethods(IsHttpOperationMethod).ToArray();
 
+                writer.Attribute<SecurityCheck.AllowAnonymousAttribute>();
+
                 using ( TT.CreateScope<TT.TService>(_handlerClassType) )
                 {
                     var handlerField = writer.Field<TT.TService>("_handler");
                     var loggerField = writer.Field<IWebApplicationLogger>("_logger");
 
-                    writer.Constructor<TT.TService, IWebApplicationLogger>((cw, handler, logger) => {
+                    writer.Constructor<TT.TService, ComponentAspectFactory, IWebApplicationLogger>((cw, handler, aspectFactory, logger) => {
                         cw.Base();
-                        handlerField.Assign(handler);
+                        handlerField.Assign(aspectFactory.Func<Type, object>(x => x.CreateInheritor, cw.Const(_handlerClassType)).CastTo<TT.TService>());
                         loggerField.Assign(logger);
                     });
 
@@ -85,30 +88,32 @@ namespace NWheels.Stacks.AspNet
                         var handlerMethodCopy = handlerMethod;
                         var operationAttribute = handlerMethod.GetCustomAttribute<HttpOperationAttribute>();
 
-
                         writer.NewVirtualFunction<HttpResponseMessage>(handlerMethod.Name).Implement(
                             m => Attributes
                                 .Set<RouteAttribute>(values => values.Arg(operationAttribute.Route))
                                 .Set<HttpGetAttribute>()
                                 .Set<HttpPostAttribute>(),
                             w => {
-                                var activityLocal = w.Local<ILogActivity>();
-                                activityLocal.Assign(loggerField.Func<string, string, ILogActivity>(
-                                    x => x.ApiControllerAction,
-                                    w.Const(_handlerClassType.Name + "." + handlerMethodCopy.Name),
-                                    w.Const(operationAttribute.Route)
-                                ));
+                                //var activityLocal = w.Local<ILogActivity>(initialValue: w.Const<ILogActivity>(null));
+                                //activityLocal.Assign(loggerField.Func<string, string, ILogActivity>(
+                                //    x => x.ApiControllerAction,
+                                //    w.Const(_handlerClassType.Name + "." + handlerMethodCopy.Name),
+                                //    w.Const(operationAttribute.Route)
+                                //));
                                 var responseLocal = w.Local<HttpResponseMessage>();
-                                w.Using(activityLocal).Do(() => {
-                                    w.Try(() => {
-                                        responseLocal.Assign(handlerField.Func<HttpRequestMessage, HttpResponseMessage>(
-                                            handlerMethod,
-                                            w.This<ApiController>().Prop(x => x.Request)));
-                                    }).Catch<Exception>(e => {
-                                        activityLocal.Void(x => x.Fail, e);
-                                        w.Throw();
-                                    });
-                                });
+                                //w.Using(activityLocal).Do(() => {
+                                //    w.Try(() => {
+                                //        responseLocal.Assign(handlerField.Func<HttpRequestMessage, HttpResponseMessage>(
+                                //            handlerMethod,
+                                //            w.This<ApiController>().Prop(x => x.Request)));
+                                //    }).Catch<Exception>(e => {
+                                //        activityLocal.Void(x => x.Fail, e);
+                                //        w.Throw();
+                                //    });
+                                //});
+                                responseLocal.Assign(handlerField.Func<HttpRequestMessage, HttpResponseMessage>(
+                                    handlerMethod,
+                                    w.This<ApiController>().Prop(x => x.Request)));
                                 w.Return(responseLocal);
                             });
                     }

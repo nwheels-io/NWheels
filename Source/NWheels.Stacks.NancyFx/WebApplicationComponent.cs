@@ -74,9 +74,10 @@ namespace NWheels.Stacks.NancyFx
                 components.Resolve<IQueryResultAggregatorObjectFactory>(),
                 components.Resolve<IEnumerable<IJsonSerializationExtension>>(),
                 components.Resolve<IDomainContextLogger>(), 
-                _application.RequiredDomainContexts,
+                //_application.RequiredDomainContexts,
                 components.ResolvePipeline<ApplicationEntityService.IEntityHandlerExtension>());
-            
+            _entityService.RegisterDomainObjects(_application.RequiredDomainContexts);
+
             _apiServicesByContractName = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
             _apiDispatchersByContractName = new Dictionary<string, WebApiDispatcherBase>(StringComparer.InvariantCultureIgnoreCase);
         }

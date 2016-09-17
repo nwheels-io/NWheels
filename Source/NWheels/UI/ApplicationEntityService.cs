@@ -35,6 +35,7 @@ using NWheels.Utilities;
 
 namespace NWheels.UI
 {
+    [SecurityCheck.AllowAnonymous]
     public class ApplicationEntityService
     {
         private readonly IFramework _framework;
@@ -57,7 +58,7 @@ namespace NWheels.UI
             IQueryResultAggregatorObjectFactory aggregatorFactory,
             IEnumerable<IJsonSerializationExtension> jsonExtensions,
             IDomainContextLogger domainContextLogger,
-            IEnumerable<Type> domainContextTypes,
+            //IEnumerable<Type> domainContextTypes,
             Pipeline<IEntityHandlerExtension> entityHandlerExtensions)
         {
             _framework = framework;
@@ -69,7 +70,7 @@ namespace NWheels.UI
             _jsonExtensions = jsonExtensions.ToArray();
             _entityHandlerExtensions = entityHandlerExtensions.ToArray();
 
-            RegisterDomainObjects(domainContextTypes);
+            //RegisterDomainObjects(domainContextTypes);
 
             _serializerSettingsCache = new ConcurrentDictionary<string, JsonSerializerSettings>();
             _defaultSerializerSettings = CreateSerializerSettings(queryOptions: null);
@@ -77,21 +78,21 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool IsEntityNameRegistered(string entityName)
+        public virtual bool IsEntityNameRegistered(string entityName)
         {
             return _handlerByEntityName.ContainsKey(entityName);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EntityHandler GetEntityHandler(string entityName)
+        public virtual EntityHandler GetEntityHandler(string entityName)
         {
             return _handlerByEntityName[entityName];
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public AuthorizationCheckResults CheckEntityAuthorization(string entityName, string entityId = null)
+        public virtual AuthorizationCheckResults CheckEntityAuthorization(string entityName, string entityId = null)
         {
             var handler = _handlerByEntityName[entityName];
             var checkResults = handler.CheckAuthorization(entityId);
@@ -100,7 +101,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IUnitOfWork NewUnitOfWork(string entityName, object txViewModel = null, bool debugPerformStaleCheck = false)
+        public virtual IUnitOfWork NewUnitOfWork(string entityName, object txViewModel = null, bool debugPerformStaleCheck = false)
         {
             var handler = _handlerByEntityName[entityName];
             return handler.NewUnitOfWork(txViewModel, debugPerformStaleCheck);
@@ -108,7 +109,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string NewEntityJson(string entityName)
+        public virtual string NewEntityJson(string entityName)
         {
             var handler = _handlerByEntityName[entityName];
             string json;
@@ -124,14 +125,14 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public QueryOptions ParseQueryOptions(string entityName, IDictionary<string, string> parameters)
+        public virtual QueryOptions ParseQueryOptions(string entityName, IDictionary<string, string> parameters)
         {
             return new QueryOptions(entityName, parameters);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string QueryEntityJson(string entityName, QueryOptions options)
+        public virtual string QueryEntityJson(string entityName, QueryOptions options)
         {
             var handler = _handlerByEntityName[entityName];
             string json;
@@ -150,7 +151,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string QueryEntityJson(string entityName, IQueryable query, QueryOptions options, object txViewModel = null)
+        public virtual string QueryEntityJson(string entityName, IQueryable query, QueryOptions options, object txViewModel = null)
         {
             var handler = _handlerByEntityName[entityName];
             string json;
@@ -169,7 +170,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void ProcessEntityCursor(string entityName, IQueryable query, QueryOptions options, Action<EntityCursor> action, object txViewModel = null)
+        public virtual void ProcessEntityCursor(string entityName, IQueryable query, QueryOptions options, Action<EntityCursor> action, object txViewModel = null)
         {
             var handler = _handlerByEntityName[entityName];
 
@@ -185,7 +186,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IEntityId ParseEntityId(string entityName, string entityId, out Type domainContextType)
+        public virtual IEntityId ParseEntityId(string entityName, string entityId, out Type domainContextType)
         {
             var handler = _handlerByEntityName[entityName];
             domainContextType = handler.DomainContextType;
@@ -194,7 +195,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IDomainObject GetEntityObjectById(string entityName, string entityId)
+        public virtual IDomainObject GetEntityObjectById(string entityName, string entityId)
         {
             var handler = _handlerByEntityName[entityName];
             return handler.GetById(entityId);
@@ -202,7 +203,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool TryGetEntityObjectById(string entityName, string entityId, out IDomainObject entity)
+        public virtual bool TryGetEntityObjectById(string entityName, string entityId, out IDomainObject entity)
         {
             var handler = _handlerByEntityName[entityName];
             return handler.TryGetById(entityId, out entity);
@@ -210,7 +211,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string StoreEntityJson(string entityName, EntityState entityState, string entityId, string json)
+        public virtual string StoreEntityJson(string entityName, EntityState entityState, string entityId, string json)
         {
             var handler = _handlerByEntityName[entityName];
             IDomainObject domainObject = null;
@@ -262,7 +263,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string RecalculateEntityJson(string entityName, EntityState entityState, string entityId, string json)
+        public virtual string RecalculateEntityJson(string entityName, EntityState entityState, string entityId, string json)
         {
             var handler = _handlerByEntityName[entityName];
             IDomainObject domainObject = null;
@@ -293,7 +294,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void DeleteEntity(string entityName, string entityId)
+        public virtual void DeleteEntity(string entityName, string entityId)
         {
             var handler = _handlerByEntityName[entityName];
 
@@ -306,7 +307,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ITypeMetadata GetEntityMetadata(string entityName)
+        public virtual ITypeMetadata GetEntityMetadata(string entityName)
         {
             var handler = _handlerByEntityName[entityName];
             return handler.MetaType;
@@ -314,14 +315,14 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void StoreEntityBatchJson(string json)
+        public virtual void StoreEntityBatchJson(string json)
         {
             throw new NotImplementedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public JsonSerializerSettings CreateSerializerSettings()
+        public virtual JsonSerializerSettings CreateSerializerSettings()
         {
             return CreateSerializerSettings(queryOptions: null);
         }
@@ -363,7 +364,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void RegisterDomainObjects(IEnumerable<Type> domainContextTypes)
+        public virtual void RegisterDomainObjects(IEnumerable<Type> domainContextTypes)
         {
             foreach ( var contextType in domainContextTypes )
             {

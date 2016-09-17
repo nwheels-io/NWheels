@@ -41,12 +41,18 @@ namespace NWheels.Logging
         {
             public string BuildSingleLineText()
             {
-                var messageIdParts = this.MessageId.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-                var messageIdDisplayPart = (messageIdParts.Length == 2 ? messageIdParts[1] : this.MessageId);
-
                 var text = new StringBuilder();
 
-                text.Append(messageIdDisplayPart.SplitPascalCase());
+                if (this.MessageId.StartsWith("!"))
+                {
+                    text.Append(this.MessageId.TrimStart('!'));
+                }
+                else
+                {
+                    var messageIdParts = this.MessageId.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+                    var messageIdDisplayPart = (messageIdParts.Length == 2 ? messageIdParts[1] : this.MessageId);
+                    text.Append(messageIdDisplayPart.SplitPascalCase());
+                }
 
                 if (this.NameValuePairs != null)
                 {

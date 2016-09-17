@@ -36,7 +36,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             _treeNodeIndex = (++treeNodeIndex);
     
             this.Id = threadRecord.LogId + "#" + _treeNodeIndex;
-            this.MessageId = logRecord.MessageId;
+            this.MessageId = logRecord.MessageId.TrimStart('!');
             this.Timestamp = threadRecord.Timestamp.AddMilliseconds(logRecord.MicrosecondsTimestamp / 1000);
             this.Level = logRecord.Level;
             this.NodeType = GetNodeType(logRecord.Level, logRecord.IsActivity);

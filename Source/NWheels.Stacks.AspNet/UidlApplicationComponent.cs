@@ -11,6 +11,7 @@ using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.Globalization;
 using NWheels.Hosting;
+using NWheels.Hosting.Factories;
 using NWheels.UI;
 using NWheels.UI.Core;
 using NWheels.UI.Factories;
@@ -26,6 +27,7 @@ namespace NWheels.Stacks.AspNet
         private readonly ITypeMetadataCache _metadataCache;
         private readonly ILocalizationProvider _localizationProvider;
         private readonly ISessionManager _sessionManager;
+        private readonly ComponentAspectFactory _aspectFactory;
         private readonly IWebApplicationLogger _logger;
         private readonly IFrameworkUIConfig _frameworkUIConfig;
         private readonly UidlApplication _application;
@@ -42,6 +44,7 @@ namespace NWheels.Stacks.AspNet
             ITypeMetadataCache metadataCache,
             ILocalizationProvider localizationProvider,
             ISessionManager sessionManager,
+            ComponentAspectFactory aspectFactory,
             IWebApplicationLogger logger,
             IFrameworkUIConfig frameworkUIConfig)
         {
@@ -52,20 +55,24 @@ namespace NWheels.Stacks.AspNet
             _metadataCache = metadataCache;
             _localizationProvider = localizationProvider;
             _sessionManager = sessionManager;
+            _aspectFactory = aspectFactory;
             _logger = logger;
             _frameworkUIConfig = frameworkUIConfig;
             _contentRootPath = PathUtility.GetAbsolutePath(frameworkUIConfig.WebContentRootPath, relativeTo: PathUtility.HostBinPath());
 
             _application = (UidlApplication)components.Resolve(endpointRegistration.Contract);
-            _entityService = new ApplicationEntityService(
-                components.Resolve<IFramework>(),
-                components.Resolve<ITypeMetadataCache>(),
-                components.Resolve<IViewModelObjectFactory>(),
-                components.Resolve<IQueryResultAggregatorObjectFactory>(),
-                components.Resolve<IEnumerable<IJsonSerializationExtension>>(),
-                components.Resolve<IDomainContextLogger>(),
-                _application.RequiredDomainContexts,
-                components.ResolvePipeline<ApplicationEntityService.IEntityHandlerExtension>());
+            _entityService = (ApplicationEntityService)_aspectFactory.CreateInheritor(typeof(ApplicationEntityService));
+            //_entityService = new ApplicationEntityService(
+            //    components.Resolve<IFramework>(),
+            //    components.Resolve<ITypeMetadataCache>(),
+            //    components.Resolve<IViewModelObjectFactory>(),
+            //    components.Resolve<IQueryResultAggregatorObjectFactory>(),
+            //    components.Resolve<IEnumerable<IJsonSerializationExtension>>(),
+            //    components.Resolve<IDomainContextLogger>(),
+            //    //_application.RequiredDomainContexts,
+            //    components.ResolvePipeline<ApplicationEntityService.IEntityHandlerExtension>());
+            
+            _entityService.RegisterDomainObjects(_application.RequiredDomainContexts);
 
             _apiServicesByContractName = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
         }

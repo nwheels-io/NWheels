@@ -62,6 +62,34 @@ namespace NWheels.Hosting.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Type GetProxyType(Type componentType, Type[] interfaceTypes = null)
+        {
+            var key = new AspectTypeKey(
+                ImplementationMode.Wrapper,
+                targetType: componentType,
+                baseType: null,
+                interfaceTypes: interfaceTypes ?? componentType.GetInterfaces());
+
+            var typeEntry = base.GetOrBuildType(key);
+            return typeEntry.DynamicType;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Type GetInheritorType(Type componentType)
+        {
+            var key = new AspectTypeKey(
+                ImplementationMode.Inheritor,
+                targetType: null,
+                baseType: componentType,
+                interfaceTypes: componentType.GetInterfaces());
+
+            var typeEntry = base.GetOrBuildType(key);
+            return typeEntry.DynamicType;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Overrides of ConventionObjectFactory
 
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
