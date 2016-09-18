@@ -72,7 +72,7 @@ namespace NWheels.Logging.Impl
             {
                 var result = usedCycles;
 
-                result *= 1000;
+                //result *= 1000;
                 result /= _s_cpuCyclesPerMillisecond;
 
                 return result;

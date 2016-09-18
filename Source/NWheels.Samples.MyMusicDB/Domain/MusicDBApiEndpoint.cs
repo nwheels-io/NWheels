@@ -72,9 +72,20 @@ namespace NWheels.Samples.MyMusicDB.Domain
 
             using (var context = _framework.NewUnitOfWork<IMusicDBContext>())
             {
-                context.IncrementEventCounters(
-                    deltaApiRequests: 1, 
-                    deltaUniqueUsers: (isNewUser ? 1 : 0));
+                using (var dbActivity = _logger.UpdatingApiStatsInDB())
+                {
+                    try
+                    {
+                        context.IncrementEventCounters(
+                            deltaApiRequests: 1, 
+                            deltaUniqueUsers: (isNewUser ? 1 : 0));
+                    }
+                    catch (Exception e)
+                    {
+                        dbActivity.Fail(e);
+                        throw;
+                    }
+                }
             }
         }
     }

@@ -48,6 +48,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             this.RootActivityText = threadLog.RootActivity.SingleLineText;
             this.ContentTypes = threadLog.RootActivity.ContentTypes;
             this.DurationMicroseconds = threadLog.RootActivity.MicrosecondsDuration;
+            this.DbDurationMicroseconds = threadLog.RootActivity.DbTotal.MicrosecondsDuration;
+            this.DbTimes = threadLog.RootActivity.DbTotal.Count;
 
             this.VolatileSnapshot = threadLog.TakeSnapshot();
         }
@@ -91,6 +93,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
         public string[] NameValuePairs { get; set; }
         public long CpuCycles { get; set; }
         public long CpuTime { get; set; }
+        public long DbTimes { get; set; }
+        public long DbDurationMicroseconds { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

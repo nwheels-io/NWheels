@@ -43,10 +43,20 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             this.Icon = GetNodeIcon(logRecord.Level, logRecord.IsActivity);
             this.Text = logRecord.BuildSingleLineText();
             this.TimeText = GetTimeText(threadRecord, logRecord);
-            this.DurationMilliseconds = logRecord.MicrosecondsDuration / 1000m;
-            this.CpuTimeMilliseconds = logRecord.MicrosecondsCpuTime / 1000m;
-            this.CpuCycles = logRecord.CpuCycles;
             this.Exception = logRecord.ExceptionDetails;
+
+            if (logRecord.IsActivity)
+            {
+                this.DurationMilliseconds = logRecord.MicrosecondsDuration / 1000m;
+                this.DbCount = logRecord.DbCount;
+                this.DbDurationMilliseconds = logRecord.MicrosecondsDbTime / 1000m;
+
+                if (logRecord.MicrosecondsCpuTime > 0 && logRecord.MicrosecondsCpuTime < logRecord.MicrosecondsDuration)
+                {
+                    this.CpuTimeMilliseconds = logRecord.MicrosecondsCpuTime / 1000m;
+                    this.CpuCycles = logRecord.CpuCycles;
+                }
+            }
 
             if (logRecord.NameValuePairs != null)
             {
@@ -80,17 +90,27 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
         public string Icon { get; private set; }
         public string Text { get; private set; }
         public string TimeText { get; private set; }
-        public decimal DurationMilliseconds { get; private set; }
-        public decimal DbDurationMilliseconds { get; private set; }
-        public long DbCount { get; private set; }
-        public decimal CpuTimeMilliseconds { get; private set; }
-        public long CpuCycles { get; private set; }
+        public decimal? DurationMilliseconds { get; private set; }
+        public decimal? DbDurationMilliseconds { get; private set; }
+        public long? DbCount { get; private set; }
+        public decimal? CpuTimeMilliseconds { get; private set; }
+        public long? CpuCycles { get; private set; }
         public string Exception { get; private set; }
         public string[] KeyValues { get; private set; }
         public string[] AdditionalDetails { get; private set; }
         public IList<IThreadLogUINodeEntity> SubNodes { get; private set; }
 
         #endregion
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [EntityImplementation.CalculatedProperty]
+        public decimal? WaitTimeMilliseconds 
+        {
+            get
+            {
+                return DurationMilliseconds - CpuTimeMilliseconds;
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

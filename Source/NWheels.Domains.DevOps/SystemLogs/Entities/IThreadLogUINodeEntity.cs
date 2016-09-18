@@ -39,19 +39,22 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
         string TimeText { get; }
 
         [PropertyContract.Calculated]
-        decimal DurationMilliseconds { get; }
+        decimal? DurationMilliseconds { get; }
 
         [PropertyContract.Calculated]
-        decimal DbDurationMilliseconds { get; }
+        decimal? DbDurationMilliseconds { get; }
 
         [PropertyContract.Calculated]
-        long DbCount { get; }
+        long? DbCount { get; }
 
         [PropertyContract.Calculated]
-        decimal CpuTimeMilliseconds { get; }
+        decimal? CpuTimeMilliseconds { get; }
 
         [PropertyContract.Calculated]
-        long CpuCycles { get; }
+        decimal? WaitTimeMilliseconds { get; }
+
+        [PropertyContract.Calculated]
+        long? CpuCycles { get; }
 
         [PropertyContract.Calculated]
         string[] KeyValues { get; }

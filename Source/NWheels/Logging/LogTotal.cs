@@ -8,29 +8,29 @@ namespace NWheels.Logging
 {
     public struct LogTotal
     {
-        public LogTotal(string messageId, int count, int durationMs) 
+        public LogTotal(string messageId, int count, long microsecondsDuration) 
             : this()
         {
             this.MessageId = messageId;
             this.Count = count;
-            this.DurationMs = durationMs;
+            this.MicrosecondsDuration = microsecondsDuration;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public LogTotal Increment(int count, int durationMs)
+        public LogTotal Increment(int count, long microsecondsDuration)
         {
             return new LogTotal(
                 this.MessageId,
                 this.Count + count,
-                this.DurationMs + durationMs);
+                this.MicrosecondsDuration + microsecondsDuration);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public readonly string MessageId;
         public readonly int Count;
-        public readonly int DurationMs;
+        public readonly long MicrosecondsDuration;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -38,7 +38,7 @@ namespace NWheels.Logging
         {
             if (source.Count > 0)
             {
-                destination = destination.Increment(source.Count, source.DurationMs);
+                destination = destination.Increment(source.Count, source.MicrosecondsDuration);
             }
         }
     }

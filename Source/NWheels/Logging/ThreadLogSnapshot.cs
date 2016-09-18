@@ -97,6 +97,10 @@ namespace NWheels.Logging
             public long CpuCycles { get; set; }
             [DataMember(Order = 2, EmitDefaultValue = false, IsRequired = false)]
             public long MicrosecondsCpuTime { get; set; }
+            [DataMember(Order = 3, EmitDefaultValue = false, IsRequired = false)]
+            public long MicrosecondsDbTime { get; set; }
+            [DataMember(Order = 3, EmitDefaultValue = false, IsRequired = false)]
+            public long DbCount { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

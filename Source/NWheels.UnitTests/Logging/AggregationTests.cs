@@ -59,11 +59,11 @@ namespace NWheels.UnitTests.Logging
             
             totals[0].MessageId.ShouldBe("M1");
             totals[0].Count.ShouldBe(2);
-            totals[0].DurationMs.ShouldBe(170);
+            totals[0].MicrosecondsDuration.ShouldBe(170 * 1000);
 
             totals[1].MessageId.ShouldBe("M2");
             totals[1].Count.ShouldBe(1);
-            totals[1].DurationMs.ShouldBe(30);
+            totals[1].MicrosecondsDuration.ShouldBe(30 * 1000);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -110,27 +110,27 @@ namespace NWheels.UnitTests.Logging
 
             rootTotals[0].MessageId.ShouldBe("M1");
             rootTotals[0].Count.ShouldBe(1);
-            rootTotals[0].DurationMs.ShouldBe(50);
+            rootTotals[0].MicrosecondsDuration.ShouldBe(50 * 1000);
 
             rootTotals[1].MessageId.ShouldBe("M2");
             rootTotals[1].Count.ShouldBe(2);
-            rootTotals[1].DurationMs.ShouldBe(70);
+            rootTotals[1].MicrosecondsDuration.ShouldBe(70 * 1000);
 
             parent1Totals.Length.ShouldBe(2);
 
             parent1Totals[0].MessageId.ShouldBe("M1");
             parent1Totals[0].Count.ShouldBe(1);
-            parent1Totals[0].DurationMs.ShouldBe(50);
+            parent1Totals[0].MicrosecondsDuration.ShouldBe(50 * 1000);
 
             parent1Totals[1].MessageId.ShouldBe("M2");
             parent1Totals[1].Count.ShouldBe(1);
-            parent1Totals[1].DurationMs.ShouldBe(30);
+            parent1Totals[1].MicrosecondsDuration.ShouldBe(30 * 1000);
 
             parent2Totals.Length.ShouldBe(1);
 
             parent2Totals[0].MessageId.ShouldBe("M2");
             parent2Totals[0].Count.ShouldBe(1);
-            parent2Totals[0].DurationMs.ShouldBe(40);
+            parent2Totals[0].MicrosecondsDuration.ShouldBe(40 * 1000);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -162,21 +162,21 @@ namespace NWheels.UnitTests.Logging
 
             rootTotals[0].MessageId.ShouldBe("M1");
             rootTotals[0].Count.ShouldBe(1);
-            rootTotals[0].DurationMs.ShouldBe(0);
+            rootTotals[0].MicrosecondsDuration.ShouldBe(0);
 
             rootTotals[1].MessageId.ShouldBe("M2");
             rootTotals[1].Count.ShouldBe(2);
-            rootTotals[1].DurationMs.ShouldBe(0);
+            rootTotals[1].MicrosecondsDuration.ShouldBe(0);
 
             parentTotals.Length.ShouldBe(2);
 
             parentTotals[0].MessageId.ShouldBe("M1");
             parentTotals[0].Count.ShouldBe(1);
-            parentTotals[0].DurationMs.ShouldBe(0);
+            parentTotals[0].MicrosecondsDuration.ShouldBe(0);
 
             parentTotals[1].MessageId.ShouldBe("M2");
             parentTotals[1].Count.ShouldBe(2);
-            parentTotals[1].DurationMs.ShouldBe(0);
+            parentTotals[1].MicrosecondsDuration.ShouldBe(0);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -189,17 +189,18 @@ namespace NWheels.UnitTests.Logging
             Clock.ElapsedMilliseconds = 100;
 
             ActivityLogNode parent1, parent2;
+            ActivityLogNode child1, child2, child3;
 
             //-- act
 
             using (parent1 = NewActivity(new NameValuePairActivityLogNode("P1", LogLevel.Verbose, LogOptions.None)))
             {
-                using (var child = NewActivity(new NameValuePairActivityLogNode("M1", LogLevel.Verbose, LogOptions.AggregateAsDbAccess)))
+                using (child1 = NewActivity(new NameValuePairActivityLogNode("M1", LogLevel.Verbose, LogOptions.AggregateAsDbAccess)))
                 {
                     Clock.ElapsedMilliseconds = 110; // 10 ms duraion
                 }
 
-                using (var child = NewActivity(new NameValuePairActivityLogNode("M2", LogLevel.Verbose, LogOptions.AggregateAsDbAccess)))
+                using (child2 = NewActivity(new NameValuePairActivityLogNode("M2", LogLevel.Verbose, LogOptions.AggregateAsDbAccess)))
                 {
                     Clock.ElapsedMilliseconds = 130; // 20 ms duraion
                 }
@@ -207,7 +208,7 @@ namespace NWheels.UnitTests.Logging
 
             using (parent2 = NewActivity(new NameValuePairActivityLogNode("P2", LogLevel.Verbose, LogOptions.None)))
             {
-                using (var child = NewActivity(new NameValuePairActivityLogNode("M2", LogLevel.Verbose, LogOptions.AggregateAsDbAccess)))
+                using (child3 = NewActivity(new NameValuePairActivityLogNode("M2", LogLevel.Verbose, LogOptions.AggregateAsDbAccess)))
                 {
                     Clock.ElapsedMilliseconds = 170; // 40 ms duraion
                 }
@@ -215,16 +216,25 @@ namespace NWheels.UnitTests.Logging
 
             //-- assert
 
+            child1.DbTotal.Count.ShouldBe(1);
+            child1.DbTotal.MicrosecondsDuration.ShouldBe(10 * 1000);
+
+            child2.DbTotal.Count.ShouldBe(1);
+            child2.DbTotal.MicrosecondsDuration.ShouldBe(20 * 1000);
+
             parent1.DbTotal.Count.ShouldBe(2);
-            parent1.DbTotal.DurationMs.ShouldBe(30);
+            parent1.DbTotal.MicrosecondsDuration.ShouldBe(30 * 1000);
 
             parent1.GetTotals(includeBuiltIn: false).ShouldBeNull();
             parent1.CommunicationTotal.Count.ShouldBe(0);
             parent1.LockWaitTotal.Count.ShouldBe(0);
             parent1.LockHoldTotal.Count.ShouldBe(0);
 
+            child3.DbTotal.Count.ShouldBe(1);
+            child3.DbTotal.MicrosecondsDuration.ShouldBe(40 * 1000);
+
             parent2.DbTotal.Count.ShouldBe(1);
-            parent2.DbTotal.DurationMs.ShouldBe(40);
+            parent2.DbTotal.MicrosecondsDuration.ShouldBe(40 * 1000);
 
             parent2.GetTotals(includeBuiltIn: false).ShouldBeNull();
             parent2.CommunicationTotal.Count.ShouldBe(0);
@@ -232,7 +242,7 @@ namespace NWheels.UnitTests.Logging
             parent2.LockHoldTotal.Count.ShouldBe(0);
 
             _rootActivity.DbTotal.Count.ShouldBe(3);
-            _rootActivity.DbTotal.DurationMs.ShouldBe(70);
+            _rootActivity.DbTotal.MicrosecondsDuration.ShouldBe(70 * 1000);
 
             _rootActivity.GetTotals(includeBuiltIn: false).ShouldBeNull();
             _rootActivity.CommunicationTotal.Count.ShouldBe(0);
@@ -277,7 +287,7 @@ namespace NWheels.UnitTests.Logging
             //-- assert
 
             parent1.CommunicationTotal.Count.ShouldBe(2);
-            parent1.CommunicationTotal.DurationMs.ShouldBe(30);
+            parent1.CommunicationTotal.MicrosecondsDuration.ShouldBe(30 * 1000);
 
             parent1.GetTotals(includeBuiltIn: false).ShouldBeNull();
             parent1.DbTotal.Count.ShouldBe(0);
@@ -285,7 +295,7 @@ namespace NWheels.UnitTests.Logging
             parent1.LockHoldTotal.Count.ShouldBe(0);
 
             parent2.CommunicationTotal.Count.ShouldBe(1);
-            parent2.CommunicationTotal.DurationMs.ShouldBe(40);
+            parent2.CommunicationTotal.MicrosecondsDuration.ShouldBe(40 * 1000);
 
             parent2.GetTotals(includeBuiltIn: false).ShouldBeNull();
             parent2.DbTotal.Count.ShouldBe(0);
@@ -293,7 +303,7 @@ namespace NWheels.UnitTests.Logging
             parent2.LockHoldTotal.Count.ShouldBe(0);
 
             _rootActivity.CommunicationTotal.Count.ShouldBe(3);
-            _rootActivity.CommunicationTotal.DurationMs.ShouldBe(70);
+            _rootActivity.CommunicationTotal.MicrosecondsDuration.ShouldBe(70 * 1000);
 
             _rootActivity.GetTotals(includeBuiltIn: false).ShouldBeNull();
             _rootActivity.DbTotal.Count.ShouldBe(0);
@@ -338,7 +348,7 @@ namespace NWheels.UnitTests.Logging
             //-- assert
 
             parent1.LockWaitTotal.Count.ShouldBe(2);
-            parent1.LockWaitTotal.DurationMs.ShouldBe(30);
+            parent1.LockWaitTotal.MicrosecondsDuration.ShouldBe(30 * 1000);
 
             parent1.GetTotals(includeBuiltIn: false).ShouldBeNull();
             parent1.DbTotal.Count.ShouldBe(0);
@@ -346,7 +356,7 @@ namespace NWheels.UnitTests.Logging
             parent1.LockHoldTotal.Count.ShouldBe(0);
 
             parent2.LockWaitTotal.Count.ShouldBe(1);
-            parent2.LockWaitTotal.DurationMs.ShouldBe(40);
+            parent2.LockWaitTotal.MicrosecondsDuration.ShouldBe(40 * 1000);
 
             parent2.GetTotals(includeBuiltIn: false).ShouldBeNull();
             parent2.DbTotal.Count.ShouldBe(0);
@@ -354,7 +364,7 @@ namespace NWheels.UnitTests.Logging
             parent2.LockHoldTotal.Count.ShouldBe(0);
 
             _rootActivity.LockWaitTotal.Count.ShouldBe(3);
-            _rootActivity.LockWaitTotal.DurationMs.ShouldBe(70);
+            _rootActivity.LockWaitTotal.MicrosecondsDuration.ShouldBe(70 * 1000);
 
             _rootActivity.GetTotals(includeBuiltIn: false).ShouldBeNull();
             _rootActivity.DbTotal.Count.ShouldBe(0);
@@ -399,7 +409,7 @@ namespace NWheels.UnitTests.Logging
             //-- assert
 
             parent1.LockHoldTotal.Count.ShouldBe(2);
-            parent1.LockHoldTotal.DurationMs.ShouldBe(30);
+            parent1.LockHoldTotal.MicrosecondsDuration.ShouldBe(30 * 1000);
 
             parent1.GetTotals(includeBuiltIn: false).ShouldBeNull();
             parent1.DbTotal.Count.ShouldBe(0);
@@ -407,7 +417,7 @@ namespace NWheels.UnitTests.Logging
             parent1.LockWaitTotal.Count.ShouldBe(0);
 
             parent2.LockHoldTotal.Count.ShouldBe(1);
-            parent2.LockHoldTotal.DurationMs.ShouldBe(40);
+            parent2.LockHoldTotal.MicrosecondsDuration.ShouldBe(40 * 1000);
 
             parent2.GetTotals(includeBuiltIn: false).ShouldBeNull();
             parent2.DbTotal.Count.ShouldBe(0);
@@ -415,7 +425,7 @@ namespace NWheels.UnitTests.Logging
             parent2.LockWaitTotal.Count.ShouldBe(0);
 
             _rootActivity.LockHoldTotal.Count.ShouldBe(3);
-            _rootActivity.LockHoldTotal.DurationMs.ShouldBe(70);
+            _rootActivity.LockHoldTotal.MicrosecondsDuration.ShouldBe(70 * 1000);
 
             _rootActivity.GetTotals(includeBuiltIn: false).ShouldBeNull();
             _rootActivity.DbTotal.Count.ShouldBe(0);

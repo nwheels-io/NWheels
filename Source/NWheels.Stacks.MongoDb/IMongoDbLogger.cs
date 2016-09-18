@@ -11,7 +11,7 @@ namespace NWheels.Stacks.MongoDb
 {
     public interface IMongoDbLogger : IApplicationEventLogger
     {
-        [LogActivity(LogLevel.Verbose, CollectStats = true)]
+        [LogActivity(LogLevel.Verbose, CollectStats = true, AggregateAsDbAccess = true)]
         ILogActivity Query(
             [Detail(StatsOption = LogStatsOption.GroupBy, IncludeInSingleLineText = true)] string entity, 
             [Detail(IncludeInSingleLineText = true)] string collection, 

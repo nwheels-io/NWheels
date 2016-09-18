@@ -1015,6 +1015,8 @@ namespace NWheels.Stacks.MongoDb
             {
                 try
                 {
+                    _logger.DisposingQueryResultEnumerator(rowsRead: _rowCount);
+
                     //TODO: below line is a hack; provide built-in ability to change a value of activity detail
                     ((NameValuePairActivityLogNode<string, string, int>)_enumerationActivity).Value3.Value = _rowCount;
 
@@ -1023,7 +1025,6 @@ namespace NWheels.Stacks.MongoDb
                 }
                 finally
                 {
-                    _logger.DisposingQueryResultEnumerator(rowsRead: _rowCount);
                 }
             }
 

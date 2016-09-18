@@ -21,7 +21,7 @@ namespace NWheels.Entities.Core
         [LogDebug]
         void EndOfRootUnitOfWork(string domainContext);
 
-        [LogActivity]
+        [LogActivity(AggregateAsDbAccess = true)]
         ILogActivity CommittingChanges(string domainContext);
 
         [LogActivity]

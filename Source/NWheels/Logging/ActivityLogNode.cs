@@ -29,6 +29,7 @@ namespace NWheels.Logging
         private long? _finalMicrosecondsDuration = null;
         private ulong? _finalCpuCycles = null;
         private Exception _exception = null;
+        private LogOptions _originalOptions;
         private LogTotal _dbTotal;
         private LogTotal _communicationTotal;
         private LogTotal _lockWaitTotal;
@@ -41,6 +42,7 @@ namespace NWheels.Logging
             : base(messageId, LogContentTypes.PerformanceStats, level, options)
         {
             _isCompactMode = ((options & LogOptions.CompactMode) != 0);
+            _originalOptions = options;
             _dbTotal = new LogTotal(DbTotalMessageId, 0, 0);
             _communicationTotal = new LogTotal(CommunicationTotalMessageId, 0, 0);
             _lockWaitTotal = new LogTotal(LockWaitTotalMessageId, 0, 0);
@@ -102,6 +104,10 @@ namespace NWheels.Logging
             snapshot.IsActivity = true;
             snapshot.MicrosecondsDuration = this.MicrosecondsDuration;
             snapshot.MicrosecondsCpuTime = (long)this.MicrosecondsCpuTime;
+
+            var dbTotal = this.DbTotal;
+            snapshot.MicrosecondsDbTime = dbTotal.MicrosecondsDuration;
+            snapshot.DbCount = dbTotal.Count;
 
             return snapshot;
         }
@@ -370,7 +376,7 @@ namespace NWheels.Logging
 
             if (subActivity.Options.HasAggregation())
             {
-                this.IncrementTotal(subActivity.MessageId, 1, (int)subActivity.MillisecondsDuration, subActivity.Options);
+                this.IncrementTotal(subActivity.MessageId, 1, subActivity.MicrosecondsDuration, subActivity.Options);
             }
 
             this.BubbleTotalsFrom(subActivity);
@@ -389,7 +395,7 @@ namespace NWheels.Logging
             {
                 foreach (var subTotal in subActivity._totalByMessageId.Values)
                 {
-                    IncrementTotal(subTotal.MessageId, subTotal.Count, subTotal.DurationMs);
+                    IncrementTotal(subTotal.MessageId, subTotal.Count, subTotal.MicrosecondsDuration);
                 }
             }
         }
@@ -434,7 +440,7 @@ namespace NWheels.Logging
 
             if (!isActivity && child.Options.HasAggregation())
             {
-                IncrementTotal(child.MessageId, count: 1, durationMs: 0, messageFlags: child.Options);
+                IncrementTotal(child.MessageId, count: 1, microsecondsDuration: 0, messageFlags: child.Options);
             }
 
             if (!clearFailure)
@@ -470,17 +476,22 @@ namespace NWheels.Logging
             _finalCpuCycles = ThreadLog.UsedThreadCpuCycles - base.CpuCyclesTimestamp;
             _isClosed = true;
 
-            if ( _parent != null )
+            if (_parent != null)
             {
                 _parent.BubbleActivityResultsFrom(this);
             }
 
-            if ( Closed != null )
+            if (_originalOptions.HasAggregateAs())
+            {
+                IncrementBuiltinTotal(_originalOptions.GetAggregateAsIndex(), count: 1, microsecondsDuration: _finalMicrosecondsDuration.Value);
+            }
+
+            if (Closed != null)
             {
                 Closed(this);
             }
 
-            if ( ThreadLog != null )
+            if (ThreadLog != null)
             {
                 ThreadLog.NotifyActivityClosed(this);
             }
@@ -488,21 +499,21 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal void IncrementBuiltinTotal(int asIndex, int count, int durationMs)
+        internal void IncrementBuiltinTotal(int asIndex, int count, long microsecondsDuration)
         {
             switch (asIndex)
             {
                 case LogOptionsExtensions.AggregateAsIndexDbAccess:
-                    _dbTotal = _dbTotal.Increment(count, durationMs);
+                    _dbTotal = _dbTotal.Increment(count, microsecondsDuration);
                     break;
                 case LogOptionsExtensions.AggregateAsIndexCommunication:
-                    _communicationTotal = _communicationTotal.Increment(count, durationMs);
+                    _communicationTotal = _communicationTotal.Increment(count, microsecondsDuration);
                     break;
                 case LogOptionsExtensions.AggregateAsIndexLockWait:
-                    _lockWaitTotal = _lockWaitTotal.Increment(count, durationMs);
+                    _lockWaitTotal = _lockWaitTotal.Increment(count, microsecondsDuration);
                     break;
                 case LogOptionsExtensions.AggregateAsIndexLockHold:
-                    _lockHoldTotal = _lockHoldTotal.Increment(count, durationMs);
+                    _lockHoldTotal = _lockHoldTotal.Increment(count, microsecondsDuration);
                     break;
             }
         }
@@ -519,11 +530,11 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void IncrementTotal(string messageId, int count, int durationMs, LogOptions messageFlags = LogOptions.None)
+        private void IncrementTotal(string messageId, int count, long microsecondsDuration, LogOptions messageFlags = LogOptions.None)
         {
             if (messageFlags.HasAggregateAs())
             {
-                IncrementBuiltinTotal(messageFlags.GetAggregateAsIndex(), count, durationMs);
+                IncrementBuiltinTotal(messageFlags.GetAggregateAsIndex(), count, microsecondsDuration);
             }
             else
             {
@@ -536,11 +547,11 @@ namespace NWheels.Logging
 
                 if (_totalByMessageId.TryGetValue(messageId, out existingTotal))
                 {
-                    _totalByMessageId[messageId] = existingTotal.Increment(count, durationMs);
+                    _totalByMessageId[messageId] = existingTotal.Increment(count, microsecondsDuration);
                 }
                 else
                 {
-                    _totalByMessageId[messageId] = new LogTotal(messageId, count, durationMs);
+                    _totalByMessageId[messageId] = new LogTotal(messageId, count, microsecondsDuration);
                 }
             }
         }

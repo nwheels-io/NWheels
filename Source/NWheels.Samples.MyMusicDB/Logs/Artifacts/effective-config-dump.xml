@@ -45,7 +45,7 @@
 		<!--Framework.Logging.Level = 'Info' from Code#Default::-->
 		<!--Framework.Logging.Level = 'Debug' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyMusicDB\bin\mymusicdb.config: (5,10)-->
 		<!--Framework.Logging.ThreadLogPersistenceLevel = 'StartupShutdownErrors' from Code#Default::-->
-		<!--Framework.Logging.ThreadLogPersistenceLevel = 'StartupShutdownErrors' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyMusicDB\bin\mymusicdb.config: (5,10)-->
+		<!--Framework.Logging.ThreadLogPersistenceLevel = 'All' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyMusicDB\bin\mymusicdb.config: (5,10)-->
 		<!--Framework.Logging.ThreadLogDbConnectionString = 'server=localhost;database=MyMusicDB_Logs' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyMusicDB\bin\mymusicdb.config: (5,10)-->
 		<!--Framework.Logging.SuppressDynamicArtifacts = 'True' from Code#Default::-->
 		<!--Framework.Logging.SuppressDynamicArtifacts = 'false' from Deployment#File:C:\Work\BitWize\Repo\NWheels\Source\NWheels.Samples.MyMusicDB\bin\mymusicdb.config: (5,10)-->
@@ -53,7 +53,7 @@
 			plainLogFolder="..\Logs\PlainLog"
 			threadLogFolder="..\Logs\ThreadLog"
 			level="Debug"
-			threadLogPersistenceLevel="StartupShutdownErrors"
+			threadLogPersistenceLevel="All"
 			threadLogDbConnectionString="server=localhost;database=MyMusicDB_Logs"
 			suppressDynamicArtifacts="False" />
 		<!--||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||-->

@@ -14,5 +14,8 @@ namespace NWheels.Samples.MyMusicDB.Domain
 
         [LogInfo(Aggregate = true)]
         void ApiUniqueUserDetected();
+
+        [LogActivity(AggregateAsDbAccess = true)]
+        ILogActivity UpdatingApiStatsInDB();
     }
 }
