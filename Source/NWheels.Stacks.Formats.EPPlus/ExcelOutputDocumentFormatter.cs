@@ -132,16 +132,43 @@ namespace NWheels.Stacks.Formats.EPPlus
             worksheet.View.FreezePanes(2, 1);
             
             int rowNumber = 2;
+            var metadataColumns = queryResults.Metadata.Columns;
 
             foreach (var row in queryResults)
             {
                 for (int i = 0; i < queryResults.ColumnCount; i++)
                 {
-                    worksheet.Cells[rowNumber, i + 1].Value = row[i] ?? "N/A";
+                    var cellValue = GetDefaultFormatCellValue(queryResults, row[i], metadataColumns[i]);
+                    worksheet.Cells[rowNumber, i + 1].Value = cellValue;
                 }
 
                 rowNumber++;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private object GetDefaultFormatCellValue(
+            ApplicationEntityService.EntityCursor queryResults, 
+            object dataValue, 
+            ApplicationEntityService.QuerySelectItem column)
+        {
+            if (dataValue == null)
+            {
+                return "N/A";
+            }
+            
+            if (dataValue is IDomainObject)
+            {
+                var relation = column.MetaProperty.Relation;
+
+                if (relation != null && relation.RelatedPartyType != null && relation.RelatedPartyType.EntityIdProperty != null)
+                {
+                    return relation.RelatedPartyType.EntityIdProperty.ReadValue(dataValue);
+                }
+            }
+
+            return dataValue;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -172,6 +199,10 @@ namespace NWheels.Stacks.Formats.EPPlus
             }
             else if (metaProperty.ClrType.IsAnyNumericType())
             {
+                if (metaProperty.Relation != null)
+                {
+                    return "0";
+                }
                 return (metaProperty.ClrType.IsIntegerNumericType() ? "#,##0" : "#,##0.00000");
             }
             else if (metaProperty.ClrType == typeof(DateTime) || metaProperty.ClrType == typeof(DateTimeOffset))
