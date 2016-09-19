@@ -322,20 +322,21 @@ HEAD, JS/CSS LINKS
             background-color: lghtgreen;
             color: blue;
         }
-        tr.jqg_rowstyle_ThreadSuccess > td { color: #323232; background-color: #ECECEC; font-weight: bold !important; }
+        tr.jqg_rowstyle_ThreadSuccess > td { color: #484848; background-color: #ECECEC; font-weight: bold !important; }
         tr.jqg_rowstyle_ThreadWarning > td { color: #CC6600; background-color: #ECECEC; font-weight: bold !important; }
         tr.jqg_rowstyle_ThreadError > td { color: #C90000; background-color: #ECECEC; font-weight: bold !important; }
         tr.jqg_rowstyle_ThreadCritical > td { color: #FF3300; background-color: #ECECEC; }
-        tr.jqg_rowstyle_ActivitySuccess > td  { color: #323232; background-color: #F8F8F8; }
+        tr.jqg_rowstyle_ActivitySuccess > td  { color: #484848; background-color: #F8F8F8; }
         tr.jqg_rowstyle_ActivityWarning > td { color: #CC6600; background-color: #F8F8F8; }
         tr.jqg_rowstyle_ActivityError > td { color:#C90000; background-color: #F8F8F8; }
         tr.jqg_rowstyle_ActivityCritical > td { color: #FF3300;background-color: #F8F8F8; }
         tr.jqg_rowstyle_LogDebug > td  { color: #A0A0A0; }  
         tr.jqg_rowstyle_LogVerbose > td  { color: #808080 ; }
-        tr.jqg_rowstyle_LogInfo > td { color: #000099; }
+        tr.jqg_rowstyle_LogInfo > td { color: #0000AF; font-weight: bold !important; }
         tr.jqg_rowstyle_LogWarning > td { color: #CC6600; font-weight: bold !important; }
         tr.jqg_rowstyle_LogError > td { color: #E00000; font-weight: bold !important; }
         tr.jqg_rowstyle_LogCritical > td { color: #FF3300; font-weight: bold !important; }
+        tr.jqgrow i.row-icon { margin-left: 5px; margin-right: 3px; }
         
         #global_div_dropdown_popup {
             position: absolute;
@@ -1742,7 +1743,7 @@ HEAD, JS/CSS LINKS
                                 if ($scope.uidl.rowIconPropertyName) {
                                     var rowData = $scope.getDataByRowId(rowObject.$id);
                                     var iconNameClass = (rowData[$scope.uidl.rowIconPropertyName] ? 'fa-' + rowData[$scope.uidl.rowIconPropertyName] : '');
-                                    iconHtml = '<i class="fa fa-fw ' + iconNameClass + '">&nbsp;</i>';
+                                    iconHtml = '<i class="fa fa-fw row-icon ' + iconNameClass + '">&nbsp;</i>';
                                 }
                                 return (
                                     iconHtml + 
@@ -3454,20 +3455,17 @@ HEAD, JS/CSS LINKS
     </script>
     <script type="text/javascript">
         function initWidget_Chart($scope) {
-            /*var demoServerData = {
-                "Labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                "Series": [{
-                    "Mode": 'Time',
-                    "Values": [[getDemoTime(123),10],[getDemoTime(131),20],[getDemoTime(138),15],[getDemoTime(149),25],[getDemoTime(152),30],[getDemoTime(154),40],[getDemoTime(159),20],[getDemoTime(167),10]],
-                    "Label": "Impressions"
-                },
-                {
-                    "Mode": 'Time',
-                    "Values": [[getDemoTime(123),5],[getDemoTime(129),19],[getDemoTime(148),10],[getDemoTime(150),22],[getDemoTime(154),27],[getDemoTime(156),20],[getDemoTime(161),15],[getDemoTime(170),5]],
-                    "Label": "Clicks"
-                }],
-                "Summaries": []
-            };*/
+            //                    Green        Blue       Red        brown     yellow    Pink       Dark Green  Purpel    Very dark   light blue
+            var seriesPalette = ["#00ff00", "#6666ff", "#ff0000", "#ff9900", "#e6e600", "#ff66ff", "#00b3150", "#9966ff", "#336600", "#66ffff"];
+            
+            switch ($scope.uidl.palette) {
+                case 'LogLevelSeries': 
+                    seriesPalette = ["#990000", "#ff0000", "#ff9900", "#009933", "#666699", "#c2c2d6"];
+                    break;
+                case 'PassFailSeries': 
+                    seriesPalette = ["#009933", "#ff0000"];
+                    break;
+            }
            
             if ($scope.parentModel) {
                 $scope.model.State.data = $scope.parentModel;
@@ -3497,11 +3495,6 @@ HEAD, JS/CSS LINKS
                 } else {
                     buildCategoryChart(elementId, serverData);
                 }
-                //$scope.$timeout(function() {
-                //  $('#' + $scope.uidl.elementName + ' a.chart-series-toggle').click(function() {
-                //      alert("Toggling series index " + $(this).data('series-index'));
-                //  });
-                //});
             }
             
             function buildCategoryChart(elementId, serverData) {
@@ -3583,7 +3576,6 @@ HEAD, JS/CSS LINKS
                 }
                 return options;
             }
-            
             function buildTimeChart(elementId, serverData) {
                 var options = buildTimeOptions(serverData);
                 var series = buildTimeSeries(serverData);
@@ -3601,11 +3593,23 @@ HEAD, JS/CSS LINKS
                     };
                     $scope.$emit($scope.uidl.qualifiedName + ':RangeSelected', selectionData);
                 });
+                $(elementId).bind("plotclick", function (event, pos, item) {
+                    if (item) { 
+                        var serverSeries = serverData.Series[item.seriesIndex];
+                        var t0 = serverSeries.Points[item.dataIndex * 2];
+                        var t1 = t0 + serverSeries.MillisecondStepSize;
+                        var selectionData = {
+                            From: moment.utc(t0).format('YYYY-MM-DD HH:mm:ss'),
+                            To: moment.utc(t1).format('YYYY-MM-DD HH:mm:ss'),
+                            SeriesIndex: item.seriesIndex
+                        };
+                        $scope.$emit($scope.uidl.qualifiedName + ':RangeSelected', selectionData);
+                    }
+                });
                 $scope.$on("$destroy", function() {
                     $(elementId).unbind();
                 });
             }
-            
             function buildTimeSeries(serverData) {
                 var chartSeries = [];
                 
@@ -3623,6 +3627,21 @@ HEAD, JS/CSS LINKS
                 }
                 
                 return chartSeries;
+            }
+            function getTimeTickFormatString(millisecondStepSize) {
+                if (millisecondStepSize < 1000) {
+                    return 'HH:mm:ss.SSS';
+                }
+                if (millisecondStepSize < 60000) {
+                    return 'HH:mm:ss';
+                }
+                if (millisecondStepSize < 3600000) {
+                    return 'HH:mm';
+                }
+                if (millisecondStepSize < 86400000) {
+                    return 'DD MMM HH:mm';
+                }
+                return 'DD MMM';
             }
             function buildTimeOptions(serverData) {
                 var options = {
@@ -3645,8 +3664,7 @@ HEAD, JS/CSS LINKS
                         tickDecimals: 0,
                         mode: "time",
                     },
-                    //        Green        Blue     Red        brown       yellow    Pink       Dark Green  Purpel      Very dark   light blue
-                    colors: ["#00ff00", "#6666ff", "#ff0000", "#ff9900", "#e6e600", "#ff66ff", "#00b3150", "#9966ff", "#336600", "#66ffff"],
+                    colors: seriesPalette,
                     grid: {
                         color: "#999999",
                         hoverable: true,
@@ -3667,6 +3685,14 @@ HEAD, JS/CSS LINKS
                     },
                     tooltipOpts: {
                         content: function(label, xval, yval, flotItem) {
+                            var series = serverData.Series[flotItem.seriesIndex];
+                            if (series && (series.Type==='Bar' || series.Type==='StackedBar')) {
+                                var formatString = getTimeTickFormatString(series.MillisecondStepSize);
+                                var t0 = moment.utc(xval).format(formatString);
+                                var t1 = moment.utc(xval + series.MillisecondStepSize).format(formatString);
+                                var v1 = $scope.uidlService.formatValue('#,##0', Math.abs(yval));
+                                return t0 + ' - ' + t1 + '<br/><strong><span style="color:' + flotItem.series.color +'">' + v1 + ' ' + label + '</span></strong>';
+                            }
                             return '<strong>' + label + '</strong>: <span style="color:blue">' + moment.utc(xval).format('HH:mm:ss.SSS') + '</span>, <span style="color:green">' + parseFloat(yval).formatMoney(5, '.', ',') + '</span>';
                         }
                     },
@@ -3674,18 +3700,107 @@ HEAD, JS/CSS LINKS
                         mode: "x"
                     }
                 };
+                if ($scope.uidl.logarithmicScale) {
+                    setupIntegerLogarithmicScale(options, serverData);
+                }
                 return options;
             }
             function setupSeriesType(serverObj, clientObj) {
                 switch (serverObj.Type) {
+                    case 'StackedBar': 
+                        clientObj.stack = true;
                     case 'Bar': 
-                        clientObj.bars = { show: true, align: 'left' };
-                        clientObj.lines = { show: false };
+                        clientObj.bars = { show: true, align: 'left', fill: 0.6, lineWidth: 0 };
+                        clientObj.lines = { show: false, lineWidth: 0 };
                         if (serverObj.MillisecondStepSize && serverObj.MillisecondStepSize > 0) {
-                            clientObj.bars.barWidth = serverObj.MillisecondStepSize;
+                            clientObj.bars.barWidth = serverObj.MillisecondStepSize * 0.95;
                         }
                         break;
                 }
+            }
+            function setupIntegerLogarithmicScale(options, serverData) {
+                var ticksArray = buildLog10TicksArray(serverData);//[[-10000, "10,000"],[-1000, "1,000"],[-100, "100"],[0, "0"],[100, "100"],[1000, "1,000"],[10000, "10,000"]];
+                //buildLog10TicksArray(serverData);
+                options.yaxis = {
+                    ticks: ticksArray, 
+                    transform: function(v) {
+                        var absv = Math.abs(v);
+                        var sign = (v < 0 ? -1 : 1);
+                        if (absv < 1) {
+                            return 0;
+                        }
+                        if (absv === 1) {
+                            return 0.2 * sign;
+                        }
+                        return Math.log10(absv) * sign;
+                    }, 
+                    inverseTransform: function (v) { 
+                        var absv = Math.abs(v);
+                        var sign = (v < 0 ? -1 : 1);
+                        if (absv < 0.2) {
+                            return 0;
+                        }
+                        if (absv < 0.3) {
+                            return 1 * sign;
+                        }
+                        return Math.pow(10, absv) * sign; 
+                    },
+                    tickDecimals: 0,
+                    //transform: function (v) { return Math.log(v); },
+                    //inverseTransform: function (v) { return Math.exp(v); }
+                };
+            }
+            function buildLog10TicksArray(serverData) {
+                var maxValue = 0;
+                var minValue = 0;
+                for (var si = 0 ; si < serverData.Series.length ; si++) {
+                    var series = serverData.Series[si];
+                    for (var pi = 1 ; pi < series.Points.length ; pi += 2) {
+                        var value = series.Points[pi];
+                        if (maxValue === 0 || value > maxValue) {
+                            maxValue = value;
+                        }
+                        if (minValue === 0 || value < minValue) {
+                            minValue = value;
+                        }
+                    }
+                }
+                var positiveTicks = [];
+                var negativeTicks = [];
+                var prevTickValue = 0;
+                for (var tick = 2 ; ; tick++) {
+                    var tickValue = Math.pow(10, tick);
+                    if (maxValue >= prevTickValue) {
+                        positiveTicks.push(tickValue);
+                    }
+                    if (minValue <= -prevTickValue) {
+                        negativeTicks.push(-tickValue);
+                    }
+                    if (tickValue >= maxValue && -tickValue <= -minValue) {
+                        break;
+                    }
+                    prevTickValue = tickValue;
+                }
+                var allTicks = [];
+                if (minValue < 0) {
+                    for (var i = negativeTicks.length - 1; i >= 0; i--) {
+                        allTicks.push([
+                            negativeTicks[i], 
+                            $scope.uidlService.formatValue('#,##0', Math.abs(negativeTicks[i]))
+                        ]);
+                    }
+                }
+                allTicks.push([0, '0']);
+                if (maxValue > 0) {
+                    for (var i = 0; i < positiveTicks.length; i++) {
+                        allTicks.push([
+                            positiveTicks[i], 
+                            $scope.uidlService.formatValue('#,##0', Math.abs(positiveTicks[i]))
+                        ]);
+                    }
+                }
+                return allTicks;
+                //[[-10000, "10,000"],[-1000, "1,000"],[-100, "100"],[0, "0"],[100, "100"],[1000, "1,000"],[10000, "10,000"]],//[-1000,-100,-10,0,10,100,1000,10000],
             }
         }
     </script>
@@ -4021,6 +4136,7 @@ HEAD, JS/CSS LINKS
     <script src="app/skin/assets/js/plugins/flot/jquery.flot.pie.min.js"></script>
     <script src="app/skin/assets/js/plugins/flot/jquery.flot.time.js"></script>
     <script src="app/skin/assets/js/plugins/flot/jquery.flot.selection.min.js"></script>
+    <script src="app/skin/assets/js/plugins/flot/jquery.flot.stack.min.js"></script>
 
     <!-- Multiselect -->
     <script src="app/skin/assets/js/plugins/isteven-multi-select/isteven-multi-select.js"></script>

@@ -56,6 +56,10 @@ namespace NWheels.UI.Toolbox
         public string ModelSetterQualifiedName { get; set; }
         [DataMember]
         public WidgetSize Height { get; set; }
+        [DataMember]
+        public ChartData.SeriesPalette? Palette { get; set; }
+        [DataMember]
+        public bool LogarithmicScale { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -74,9 +78,9 @@ namespace NWheels.UI.Toolbox
         {
             public object From { get; set; }
             public object To { get; set; }
+            public object SeriesIndex { get; set; }
         }
     }
-
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
@@ -192,6 +196,15 @@ namespace NWheels.UI.Toolbox
                     return (long)(timestamp.Ticks / 10000);                            
                 } 
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public enum SeriesPalette
+        {
+            DataSeries,
+            LogLevelSeries,
+            PassFailSeries
         }
     }
 
