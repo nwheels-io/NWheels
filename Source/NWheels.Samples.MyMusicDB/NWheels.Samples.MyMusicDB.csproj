@@ -87,9 +87,11 @@
   <ItemGroup>
     <Content Include="mymusicdb.boot.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="mymusicdb.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="packages.config" />
     <None Include="Web.Debug.config">
