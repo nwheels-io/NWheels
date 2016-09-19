@@ -99,7 +99,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class ChartBuilder : ChartBuilderBase<ThreadLogRecord, LogLevel>
+        private class ChartBuilder : ChartBuilderBase<ThreadLogRecord, SummaryLogLevel>
         {
             public ChartBuilder(ILogTimeRangeCriteria input)
                 : base(input)
@@ -108,20 +108,22 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected override IEnumerable<LogLevel> GetSeries()
-            {
-                yield return LogLevel.Info;
-                yield return LogLevel.Warning;
-                yield return LogLevel.Error;
-                yield return LogLevel.Critical;
-            }
+            //protected override IEnumerable<LogLevel> GetSeries()
+            //{
+            //    yield return LogLevel.Info;
+            //    yield return LogLevel.Warning;
+            //    yield return LogLevel.Error;
+            //    yield return LogLevel.Critical;
+            //}
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
             protected override void Accumulate(ThreadLogRecord record)
             {
-                var levelToIncrement = (record.Level > LogLevel.Info ? record.Level : LogLevel.Info);
-                IncrementSeriesTimebox(levelToIncrement, record.Timestamp, 1);
+                IncrementSeriesTimebox(
+                    record.Level.ToSummaryLogLevel(), 
+                    record.Timestamp, 
+                    count: 1 * record.Level.SignFactor());
             }
         }
     }

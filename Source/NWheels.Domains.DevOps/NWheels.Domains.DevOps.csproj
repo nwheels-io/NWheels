@@ -73,6 +73,7 @@
     <Compile Include="SystemLogs\Entities\ILogMessageEntity.cs" />
     <Compile Include="SystemLogs\Entities\IThreadLogEntity.cs" />
     <Compile Include="SystemLogs\Entities\IThreadLogUINodeEntity.cs" />
+    <Compile Include="SystemLogs\Entities\SummaryLogLevel.cs" />
     <Compile Include="SystemLogs\SystemLogFeatureLoader.cs" />
     <Compile Include="SystemLogs\Transactions\AbstractThreadLogUINodesTx.cs" />
     <Compile Include="SystemLogs\Transactions\AbstractThreadLogListTx.cs" />

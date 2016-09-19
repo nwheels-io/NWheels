@@ -230,7 +230,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             {
                 case LogLevel.Debug:
                 case LogLevel.Verbose:
-                    return (isActivity ? "check" : "angle-right");
+                    return (isActivity ? "check" : null/*"angle-right"*/);
                 case LogLevel.Info:
                     return (isActivity ? "check" : "info-circle");
                 case LogLevel.Warning:

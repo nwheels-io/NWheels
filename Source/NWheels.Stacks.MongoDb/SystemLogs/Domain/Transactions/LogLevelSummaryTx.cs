@@ -237,7 +237,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class ChartBuilder : ChartBuilderBase<DailySummaryRecord, LogLevel>
+        private class ChartBuilder : ChartBuilderBase<DailySummaryRecord, SummaryLogLevel>
         {
             public ChartBuilder(ILogTimeRangeCriteria input) 
                 : base(input)
@@ -246,13 +246,13 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected override IEnumerable<LogLevel> GetSeries()
-            {
-                yield return LogLevel.Info;
-                yield return LogLevel.Warning;
-                yield return LogLevel.Error;
-                yield return LogLevel.Critical;
-            }
+            //protected override IEnumerable<LogLevel> GetSeries()
+            //{
+            //    yield return LogLevel.Critical;
+            //    yield return LogLevel.Error;
+            //    yield return LogLevel.Warning;
+            //    yield return LogLevel.Info;
+            //}
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -267,7 +267,14 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
                     {
                         var minute = Int32.Parse(minuteKvp.Key);
                         var timestamp = hourTimestamp.Add(TimeSpan.FromMinutes(minute));
-                        IncrementSeriesTimebox(record.Level, timestamp, minuteKvp.Value);
+                        var summaryLevel = (record.Level < LogLevel.Warning ? SummaryLogLevel.Positive : SummaryLogLevel.Negative);
+
+                        //var testFactor = (record.Level > LogLevel.Info ? 10 : 1);
+
+                        IncrementSeriesTimebox(
+                            summaryLevel, 
+                            timestamp, 
+                            count: minuteKvp.Value * record.Level.SignFactor());
                     }
                 }
             }

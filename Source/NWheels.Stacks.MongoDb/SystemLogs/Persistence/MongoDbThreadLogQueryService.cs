@@ -62,7 +62,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             if (timeRange.From.Date != timeRange.Until.Date)
             {
                 dbCriteria.Add(Query<DailySummaryRecord>.GTE(x => x.Date, timeRange.From.Date));
-                dbCriteria.Add(Query<DailySummaryRecord>.LT(x => x.Date, timeRange.Until.Date));
+                dbCriteria.Add(Query<DailySummaryRecord>.LTE(x => x.Date, timeRange.Until.Date));
             }
             else
             {

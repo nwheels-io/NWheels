@@ -24,7 +24,9 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
             LogLevelSummary.AutoSubmitOnLoad = true;
             LogLevelSummary.EnableVisualization();
             LogLevelSummary.VisualizationChart.TemplateName = "ChartInline";
-            LogLevelSummary.VisualizationChart.Height = WidgetSize.MediumLarge;
+            LogLevelSummary.VisualizationChart.Height = WidgetSize.Large;
+            LogLevelSummary.VisualizationChart.Palette = ChartData.SeriesPalette.PassFailSeries;
+            LogLevelSummary.VisualizationChart.LogarithmicScale = true;
             LogLevelSummary.CriteriaForm.AutoSubmitOnChange = true;
             LogLevelSummary.CriteriaForm.TemplateName = "FormInline";
             LogLevelSummary.CriteriaForm.IsInlineStyle = true;
@@ -62,7 +64,8 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
             LogLevelSummary.EnableVisualRangeSelection(b => 
                 b.AlterModel(
                     alt => alt.Copy(vm => vm.Input.From).To(vm => vm.State.Criteria.From),
-                    alt => alt.Copy(vm => vm.Input.To).To(vm => vm.State.Criteria.Until)));
+                    alt => alt.Copy(vm => vm.Input.To).To(vm => vm.State.Criteria.Until),
+                    alt => alt.Copy(vm => vm.Input.SeriesIndex).To(vm => vm.State.Criteria.SeriesIndex)));
         }
 
         #endregion

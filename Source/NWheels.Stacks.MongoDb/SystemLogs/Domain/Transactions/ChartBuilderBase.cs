@@ -52,13 +52,17 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
             EnsureSeries();
 
             return new ChartData() {
-                Series = _seriesByDiesciminator.Values.Cast<ChartData.AbstractSeriesData>().ToList()
+                Series = _seriesByDiesciminator.Values.Cast<ChartData.AbstractSeriesData>().ToList(),
             };
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected abstract IEnumerable<TDiscriminator> GetSeries();
+        protected virtual IEnumerable<TDiscriminator> GetSeries()
+        {
+            yield return (TDiscriminator)(object)SummaryLogLevel.Positive;
+            yield return (TDiscriminator)(object)SummaryLogLevel.Negative;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -157,12 +161,16 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
         {
             if (_seriesByDiesciminator == null)
             {
-                _seriesByDiesciminator = GetSeries().ToDictionary(
-                    value => value, 
-                    value => VisualizationHelpers.CreateChartSeries(_timeboxSize, value.ToString()));
+                var discriminatorIndex = GetSeries().ToArray();
 
-                foreach (var series in _seriesByDiesciminator.Values)
+                _seriesByDiesciminator = discriminatorIndex.ToDictionary(
+                    discriminator => discriminator,
+                    discriminator => VisualizationHelpers.CreateChartSeries(_timeboxSize, label: discriminator.ToString()));
+
+                foreach (var discriminator in discriminatorIndex)
                 {
+                    var series = _seriesByDiesciminator[discriminator];
+
                     for (int i = 0 ; i < _timeboxGrid.Length ; i++)
                     {
                         series.Points.Add(new ChartData.TimeSeriesPoint() {

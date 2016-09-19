@@ -42,6 +42,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
                 .Column(x => x.CpuTimeMilliseconds, title: "CPU, ms", size: FieldSize.Small, format: "#,##0.00", setup: DisableSortingAndFiltering)
                 .Column(x => x.WaitTimeMilliseconds, title: "Wait, ms", size: FieldSize.Small, format: "#,##0.00", setup: DisableSortingAndFiltering)
                 .Column(x => x.NodeType, columnType: GridColumnType.Hidden)
+                .Column(x => x.Icon, columnType: GridColumnType.Hidden)
                 .Column(x => x.SubNodes, columnType: GridColumnType.Hidden);
                 //.Column<IRootThreadLogUINodeEntity, string>(x => x.LogId, setup: DisableSortingAndFiltering)
                 //.Column<IRootThreadLogUINodeEntity, string>(x => x.CorrelationId, setup: DisableSortingAndFiltering);

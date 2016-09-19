@@ -42,7 +42,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         public void Examine(IReadOnlyThreadLog threadLog)
         {
-            if (_persistenceShuttle != null)
+            if (_persistenceShuttle != null && _loggingConfig.ThreadLogPersistenceLevel != ThreadLogPersistenceLevel.None)
             {
                 _persistenceShuttle.Board(threadLog);
             }
@@ -188,7 +188,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         private MongoCollection GetOrCreateCappedCollection(string collectionName, long maxSize, long maxDocuments)
         {
-            if (!_database.CollectionExists(collectionName))
+            if (_database.Settings.ReadPreference != ReadPreference.Secondary && !_database.CollectionExists(collectionName))
             {
                 var options = CollectionOptions
                    .SetCapped(true)
@@ -211,11 +211,26 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         public static MongoDatabase ConnectToDatabase(IFrameworkLoggingConfiguration configuration)
         {
+            MongoClient client;
+            string databaseName;
+
             var connectionStringValue = (configuration.ThreadLogDbConnectionString ?? "server=localhost;database=" + DbNamingConvention.DefaultDatabaseName);
-            var connectionString = new MongoConnectionStringBuilder(connectionStringValue);
-            var client = new MongoClient(connectionString.ConnectionString);
+
+            if (connectionStringValue.StartsWithIgnoreCase("mongodb://"))
+            {
+                var uri = new Uri(connectionStringValue);
+                databaseName = uri.AbsolutePath.TrimLead("/").TrimTail("/");
+                client = new MongoClient(connectionStringValue);
+            }
+            else
+            {
+                var connectionString = new MongoConnectionStringBuilder(connectionStringValue);
+                databaseName = connectionString.DatabaseName;
+                client = new MongoClient(connectionString.ConnectionString);
+            }
+            
             var server = client.GetServer();
-            var database = server.GetDatabase(connectionString.DatabaseName);
+            var database = server.GetDatabase(databaseName);
             
             return database;
         }

@@ -24,7 +24,9 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
             Report.AutoSubmitOnLoad = true;
             Report.EnableVisualization();
             Report.VisualizationChart.TemplateName = "ChartInline";
-            Report.VisualizationChart.Height = WidgetSize.MediumLarge;
+            Report.VisualizationChart.Height = WidgetSize.Large;
+            Report.VisualizationChart.Palette = ChartData.SeriesPalette.PassFailSeries;
+            Report.VisualizationChart.LogarithmicScale = true;
             Report.CriteriaForm.AutoSubmitOnChange = true;
             Report.CriteriaForm.TemplateName = "FormInline";
             Report.CriteriaForm.IsInlineStyle = true;
@@ -53,7 +55,8 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
             Report.EnableVisualRangeSelection(b => 
                 b.AlterModel(
                     alt => alt.Copy(vm => vm.Input.From).To(vm => vm.State.Criteria.From),
-                    alt => alt.Copy(vm => vm.Input.To).To(vm => vm.State.Criteria.Until)));
+                    alt => alt.Copy(vm => vm.Input.To).To(vm => vm.State.Criteria.Until),
+                    alt => alt.Copy(vm => vm.Input.SeriesIndex).To(vm => vm.State.Criteria.SeriesIndex)));
 
             MessageJson.ExpandedByDefault = true;
         }

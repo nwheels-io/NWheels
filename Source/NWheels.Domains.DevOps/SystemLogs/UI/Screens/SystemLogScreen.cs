@@ -20,7 +20,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.Screens
 
             ContentRoot = TabSet;
             
-            TabSet.Tabs.Add(LogLevelSummary);
+            //TabSet.Tabs.Add(LogLevelSummary);
             TabSet.Tabs.Add(LogMessageSummary);
             TabSet.Tabs.Add(LogMessageList);
             TabSet.Tabs.Add(ThreadLogList);
@@ -33,7 +33,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.Screens
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
         
-        public LogLevelSummaryScreenPart LogLevelSummary { get; set; }
+        //public LogLevelSummaryScreenPart LogLevelSummary { get; set; }
         public LogMessageSummaryScreenPart LogMessageSummary { get; set; }
         public LogMessageListScreenPart LogMessageList { get; set; }
         public ThreadLogListScreenPart ThreadLogList { get; set; }
