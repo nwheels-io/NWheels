@@ -26,8 +26,8 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
             Report.CriteriaForm.TemplateName = "FormInline";
             Report.CriteriaForm.IsInlineStyle = true;
             Report.CriteriaForm
-                .Field(x => x.Id, setup: f => f.Size = WidgetSize.Large)
-                .Field(x => x.CorrelationId, setup: f => f.Size = WidgetSize.Large);
+                .Field(x => x.Id, setup: f => f.Size = WidgetSize.ExtraLarge)
+                .Field(x => x.CorrelationId, setup: f => f.Size = WidgetSize.ExtraLarge);
 
             Report.ResultTable
                 .Column(x => x.Text, size: FieldSize.Jumbo, title: "Activity", setup: DisableSortingAndFiltering)

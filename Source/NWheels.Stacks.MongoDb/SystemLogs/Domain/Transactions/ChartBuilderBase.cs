@@ -51,17 +51,24 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
         {
             EnsureSeries();
 
-            return new ChartData() {
+            var chart = new ChartData() {
                 Series = _seriesByDiesciminator.Values.Cast<ChartData.AbstractSeriesData>().ToList(),
             };
+
+            if (_input.SeriesIndex.HasValue)
+            {
+                chart.Series = chart.Series.Skip(_input.SeriesIndex.Value).Take(1).ToList();
+            }
+
+            return chart;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected virtual IEnumerable<TDiscriminator> GetSeries()
         {
-            yield return (TDiscriminator)(object)SummaryLogLevel.Positive;
-            yield return (TDiscriminator)(object)SummaryLogLevel.Negative;
+            yield return (TDiscriminator)(object)SummaryLogLevel.Success;
+            yield return (TDiscriminator)(object)SummaryLogLevel.Problems;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

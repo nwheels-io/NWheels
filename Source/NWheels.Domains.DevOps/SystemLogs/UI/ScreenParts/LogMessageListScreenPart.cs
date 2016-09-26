@@ -31,6 +31,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
             Report.CriteriaForm.TemplateName = "FormInline";
             Report.CriteriaForm.IsInlineStyle = true;
             Report.CriteriaForm.ConfigureLogTimeRange();
+            Report.CriteriaForm.HideFields(x => x.SeriesIndex);
 
             Report.ResultTable
                 .Column(x => x.Timestamp, setup: c => c.SortByDefault(ascending: false))

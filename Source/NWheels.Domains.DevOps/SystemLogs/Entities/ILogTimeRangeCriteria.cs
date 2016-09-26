@@ -8,6 +8,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
     {
         DateTime From { get; set; }
         DateTime Until { get; set; }
+        string MessageId { get; set; }
         int? SeriesIndex { get; set; }
     }
 }

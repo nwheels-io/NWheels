@@ -91,12 +91,12 @@
     <Compile Include="SystemLogs\UI\ScreenParts\LogMessageListScreenPart.cs" />
     <Compile Include="SystemLogs\UI\ScreenParts\SystemLogScreenPart.cs" />
     <Compile Include="SystemLogs\UI\ScreenParts\LogLevelSummaryScreenPart.cs" />
+    <Compile Include="SystemLogs\UI\Widgets\LogQueryChart.cs" />
     <Compile Include="UtilityTools\UnzipTool.cs" />
     <Compile Include="UtilityTools\ZipTool.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="SystemLogs\UI\Web\Templates\" />
-    <Folder Include="SystemLogs\UI\Widgets\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels\NWheels.csproj">

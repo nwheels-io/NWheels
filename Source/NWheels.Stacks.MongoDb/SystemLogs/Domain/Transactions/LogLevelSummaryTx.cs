@@ -267,7 +267,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
                     {
                         var minute = Int32.Parse(minuteKvp.Key);
                         var timestamp = hourTimestamp.Add(TimeSpan.FromMinutes(minute));
-                        var summaryLevel = (record.Level < LogLevel.Warning ? SummaryLogLevel.Positive : SummaryLogLevel.Negative);
+                        var summaryLevel = (record.Level < LogLevel.Warning ? SummaryLogLevel.Success : SummaryLogLevel.Problems);
 
                         //var testFactor = (record.Level > LogLevel.Info ? 10 : 1);
 

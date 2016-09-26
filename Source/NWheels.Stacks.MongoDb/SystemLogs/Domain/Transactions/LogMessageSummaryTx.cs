@@ -118,7 +118,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
 
         private class ChartBuilder : ChartBuilderBase<DailySummaryRecord, SummaryLogLevel>
         {
-            public ChartBuilder(ILogTimeRangeCriteria input) 
+            public ChartBuilder(ILogTimeRangeCriteria input)
                 : base(input)
             {
             }

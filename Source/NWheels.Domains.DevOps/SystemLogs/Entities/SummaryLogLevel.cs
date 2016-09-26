@@ -9,8 +9,8 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
 {
     public enum SummaryLogLevel
     {
-        Positive,
-        Negative
+        Success,
+        Problems
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -19,14 +19,14 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
     {
         public static SummaryLogLevel ToSummaryLogLevel(this LogLevel level)
         {
-            return (level >= LogLevel.Warning ? SummaryLogLevel.Negative : SummaryLogLevel.Positive);
+            return (level >= LogLevel.Warning ? SummaryLogLevel.Problems : SummaryLogLevel.Success);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static int SignFactor(this LogLevel level)
         {
-            return (level.ToSummaryLogLevel() == SummaryLogLevel.Positive ? 1 : -1);
+            return (level.ToSummaryLogLevel() == SummaryLogLevel.Success ? 1 : -1);
         }
     }
 }
