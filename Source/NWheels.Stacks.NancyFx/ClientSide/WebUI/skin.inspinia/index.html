@@ -1953,7 +1953,7 @@ HEAD, JS/CSS LINKS
                         name: "isChecked",
                         label: "Select",
                         formatter: "checkbox",
-                        formatoptions: { disabled: false },
+                        formatoptions: { disabled: !$scope.editAuthorized },
                         edittype: "checkbox",
                         width: 80
                     });
@@ -3776,7 +3776,7 @@ HEAD, JS/CSS LINKS
                     if (minValue <= -prevTickValue) {
                         negativeTicks.push(-tickValue);
                     }
-                    if (tickValue >= maxValue && -tickValue <= -minValue) {
+                    if (tickValue >= maxValue && -tickValue <= minValue) {
                         break;
                     }
                     prevTickValue = tickValue;
@@ -3795,7 +3795,7 @@ HEAD, JS/CSS LINKS
                     for (var i = 0; i < positiveTicks.length; i++) {
                         allTicks.push([
                             positiveTicks[i], 
-                            $scope.uidlService.formatValue('#,##0', Math.abs(positiveTicks[i]))
+                            $scope.uidlService.formatValue('#,##0', positiveTicks[i])
                         ]);
                     }
                 }

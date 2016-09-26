@@ -2363,6 +2363,10 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 scope.model = data;
                 scope.queryLookupRecords();
             });
+            
+            scope.$on(scope.uidl.qualifiedName + ':EditAuthorized', function(event, data) {
+                scope.editAuthorized = true;
+            });
         }
     };
 
