@@ -49,6 +49,7 @@ namespace NWheels.Samples.MyMusicDB.UI
             this.ApiRequests.Text = "APIRequests";
             this.ApiRequestsOverTime.BindToModelSetter(DataReceived, x => x.ApiRequestsOverTime);
             this.ApiRequestsOverTime.Height = WidgetSize.Medium;
+            this.ApiRequestsOverTime.Palette = ChartData.SeriesPalette.PassFailSeries;
 
             presenter.On(NavigatedHere)
                 .InvokeTransactionScript<DashboardQueryTx>()

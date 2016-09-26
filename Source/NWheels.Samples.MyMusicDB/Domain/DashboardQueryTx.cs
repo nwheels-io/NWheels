@@ -87,6 +87,7 @@ namespace NWheels.Samples.MyMusicDB.Domain
             var logSummaryInput = _viewModelFactory.NewEntity<ILogTimeRangeCriteria>();
             logSummaryInput.From = now.AddHours(-48);
             logSummaryInput.Until = now;
+            logSummaryInput.SeriesIndex = 0;
 
             var upstreamUiContext = UIOperationContext.Current;
             var logSummaryQuery = new ApplicationEntityService.QueryOptions(
@@ -99,6 +100,7 @@ namespace NWheels.Samples.MyMusicDB.Domain
             {
                 var logSummaryOutput = _logSummaryTx.Execute(logSummaryInput).As<VisualizedQueryable<ILogMessageSummaryEntity>>();
                 output.ApiRequestsOverTime = logSummaryOutput.Visualization;
+                output.ApiRequestsOverTime.Series[0].Label = "Requests";
                 var summaryRecord = logSummaryOutput.FirstOrDefault();
 
                 if (summaryRecord != null)
