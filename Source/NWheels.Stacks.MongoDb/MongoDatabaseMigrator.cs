@@ -99,8 +99,7 @@ namespace NWheels.Stacks.MongoDb
                 var resultValue = _db.Eval(args);
 
                 //TODO: should check resultValue for errors?
-                _migrationLogCollection.Insert(new MigrationLogEntry()
-                {
+                _migrationLogCollection.Insert(new MigrationLogEntry() {
                     Name = migration.GetType().Name,
                     Version = migration.SchemaVersion,
                     ExecutedAtUtc = DateTime.UtcNow
