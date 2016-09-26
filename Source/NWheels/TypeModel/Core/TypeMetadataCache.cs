@@ -189,6 +189,13 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IEnumerable<ITypeMetadata> GetAllMetaTypes()
+        {
+            return _metadataByContractType.ToArray().Select(kvp => (ITypeMetadata)kvp.Value);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public MetadataConventionSet Conventions
         {
             get { return _conventions; }

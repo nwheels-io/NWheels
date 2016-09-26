@@ -12,6 +12,7 @@ namespace NWheels.DataObjects
     {
         ITypeMetadata GetTypeMetadata(Type contract);
         ITypeMetadata GetTypeMetadata(string qualifiedName);
+        IEnumerable<ITypeMetadata> GetAllMetaTypes();
         ITypeMetadata GetMetaTypeByImplementation(Type implementationType);
         bool ContainsTypeMetadata(Type contract);
         bool TryGetTypeMetadata(Type contract, out ITypeMetadata metadata);

@@ -123,6 +123,7 @@
     <Compile Include="IntegrationTestWithoutNodeHosts.cs" />
     <Compile Include="TestTimeout.cs" />
     <Compile Include="TestUserIdentity.cs" />
+    <Compile Include="ReusedFrameworkUnitTestBase.cs" />
     <Compile Include="UnitTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

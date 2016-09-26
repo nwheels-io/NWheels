@@ -28,6 +28,8 @@ using NWheels.Endpoints;
 using NWheels.Entities.Core;
 using NWheels.Entities.Factories;
 using NWheels.Entities.Migrations;
+using NWheels.Hosting.Core;
+using NWheels.Hosting.Factories;
 using NWheels.Logging.Core;
 using NWheels.Processing.Commands.Factories;
 using NWheels.Processing.Messages;
@@ -40,6 +42,7 @@ namespace NWheels.Testing
     {
         private readonly IContainer _components;
         private readonly DynamicModule _dynamicModule;
+        private readonly Action<IComponentContext, ContainerBuilder> _registerModules;
         private readonly TestThreadLogAppender _logAppender;
         private readonly LoggerObjectFactory _loggerFactory;
         private readonly ConfigurationObjectFactory _configurationFactory;
@@ -55,7 +58,7 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TestFramework(DynamicModule dynamicModule)
+        public TestFramework(DynamicModule dynamicModule, Action<IComponentContext, ContainerBuilder> registerModules = null)
         {
             this.PresetGuids = new Queue<Guid>();
             this.PresetRandomInt32 = new Queue<int>();
@@ -70,6 +73,7 @@ namespace NWheels.Testing
 
             //_metadataCache = CreateMetadataCacheWithDefaultConventions();
             _dynamicModule = dynamicModule;
+            _registerModules = registerModules;
             _logAppender = new TestThreadLogAppender(this);
             
             var logAppenderPipeline = new Pipeline<IThreadLogAppender>(new IThreadLogAppender[] { _logAppender }, new PipelineObjectFactory(dynamicModule));
@@ -470,6 +474,9 @@ namespace NWheels.Testing
             builder.RegisterPipeline<AnonymousEntityAccessRule>();
             builder.RegisterType<AnonymousPrincipal>().SingleInstance();
             builder.RegisterType<SystemPrincipal>().SingleInstance();
+
+            builder.RegisterPipeline<IComponentAspectProvider>();
+            builder.RegisterType<ComponentAspectFactory>().SingleInstance();
             
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<IDomainContextLogger>();
@@ -482,8 +489,18 @@ namespace NWheels.Testing
 
             container = builder.Build();
 
+            if (_registerModules != null)
+            {
+                var container2 = container;
+                UpdateComponents(builder2 => _registerModules(container2, builder2));
+            }
+
             var metadataCache = CreateMetadataCacheWithDefaultConventions(_components);
-            UpdateComponents(builder2 => builder2.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>());
+
+            UpdateComponents(builder2 => {
+                builder2.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();
+                builder2.RegisterInstance(metadataCache.Conventions).As<MetadataConventionSet>();
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

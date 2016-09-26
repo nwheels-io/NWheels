@@ -34,7 +34,7 @@ namespace NWheels.Testing.Entities.Impl
             {
                 foreach ( var keyProperty in type.PrimaryKey.Properties )
                 {
-                    if ( keyProperty.DefaultValueGeneratorType == null && keyProperty.ClrType == typeof(int) )
+                    if ( /*keyProperty.DefaultValueGeneratorType == null && */ keyProperty.ClrType == typeof(int) )
                     {
                         keyProperty.DefaultValueGeneratorType = typeof(TestIntIdValueGenerator);
                     }

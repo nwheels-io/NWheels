@@ -1,26 +1,29 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
 using Hapil;
 using NUnit.Framework;
+using NWheels.DataObjects;
+using NWheels.Entities;
 
 namespace NWheels.Testing
 {
-    [TestFixture]
-    public abstract class TestFixtureWithoutNodeHosts : TestFixtureBase
+    [TestFixture, Category(TestCategory.Unit)]
+    public abstract class ReusedFrameworkUnitTestBase
     {
         private TestFramework _framework;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [SetUp]
-        public void BaseSetUp()
+        [TestFixtureSetUp]
+        public void BaseFixtureSetUp()
         {
             _framework = new TestFramework(CreateDynamicModule(), this.RegisterModules);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [TearDown]
-        public void BaseTearDown()
+        [TestFixtureTearDown]
+        public void BaseFixtureTearDown()
         {
             _framework = null;
         }
@@ -53,7 +56,7 @@ namespace NWheels.Testing
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-            
+
         protected TestFramework Framework
         {
             get
@@ -64,11 +67,11 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override TestFixtureBase.ITestFixtureBaseLogger Logger
+        protected TestFixtureBase.ITestFixtureBaseLogger Logger
         {
             get
             {
-                return _framework.Logger<ITestFixtureBaseLogger>();
+                return _framework.Logger<TestFixtureBase.ITestFixtureBaseLogger>();
             }
         }
     }
