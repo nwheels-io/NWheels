@@ -1017,7 +1017,9 @@ namespace NWheels.Hosting.Core
                 }
 
                 var loader = OwnerLifetime.LifetimeContainer.Resolve<XmlConfigurationLoader>();
-                var filePath = PathUtility.DynamicArtifactPath("effective-config-dump.xml");
+                var filePath = PathUtility.DynamicArtifactPath(
+                    OwnerLifetime.NodeConfig.InstanceId.OrDefaultIfNullOrEmpty("default") +
+                    "-effective-config-dump.xml");
                 
                 _logger.WritingEffectiveConfigurationToDisk(filePath);
 
