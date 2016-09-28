@@ -1859,6 +1859,10 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 }
             };
 
+            scope.$on(scope.uidl.qualifiedName + ':EditAuthorized', function(event, data) {
+                scope.requestAuthorization();
+            });
+
             scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function (event, data) {
                 scope.commandInProgress = false;
 
@@ -1866,10 +1870,16 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     scope.parentEntityId = data['$id'];
                     scope.refresh();
                 } else {
+                    var auth = scope.entityAuth;
                     scope.resetCrudState();
+                    scope.entityAuth = auth;
+
+                    if (!auth || !auth.update) {
+                        scope.uidl.disableAuthorizationChecks = true;
+                    }
+                    
                     scope.resultSet = data;
                     scope.selectedEntity = null;
-                    scope.requestAuthorization();
                     scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
                 }
             });
