@@ -687,7 +687,7 @@ HEAD, JS/CSS LINKS
                     <li class="nav-header">
                         <uidl-widget uidl="uidl.profilePhoto"></uidl-widget>
                     </li>
-                    <li ng-repeat="item in uidl.mainMenu.items" ng-if="isUidlAuthorized(item)" ng-include="'app/uidl-element-template/ManagementConsole-menu-item'"></li>
+                    <li ng-repeat="item in copyOfMainMenu.items" ng-if="isUidlAuthorized(item)" ng-include="'app/uidl-element-template/ManagementConsole-menu-item'"></li>
                 </ul>
             </div>
         </nav>

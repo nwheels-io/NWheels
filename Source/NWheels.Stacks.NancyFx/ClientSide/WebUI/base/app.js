@@ -1314,6 +1314,9 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 
     m_controllerImplementations['ManagementConsole'] = {
         implement: function (scope) {
+            
+            scope.copyOfMainMenu = angular.copy(scope.uidl.mainMenu);
+            
             function implementMenuItems(items) {
                 for (var i = 0; i < items.length; i++) {
                     var item = items[i];
@@ -1329,7 +1332,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 }
             }
 
-            implementMenuItems(scope.uidl.mainMenu.items);
+            implementMenuItems(scope.copyOfMainMenu.items);
 
             if (window.appInit) {
 			    window.appInit();
@@ -1355,6 +1358,11 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.$on(scope.uidl.qualifiedName + ':MainContent:ScreenPartLoaded', function (event, data) {
                 scope.mainContentScreenPart = data;
             });
+            
+            scope.$on("$destroy", function() {
+                console.log('uidlWidget::$destroy() - MANAGEMENT CONSOLE - ', scope.uniqueWidgetId);
+            }); 
+
         },
     };
 
@@ -3025,7 +3033,11 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
                 var initFuncName = 'initWidget_FormField';
                 var initFunc = window[initFuncName];
                 if (typeof initFunc === 'function') {
-                    initFunc($scope);
+                    try {
+                        initFunc($scope);
+                    } catch(e) {
+                        console.log('ERROR!', e);
+                    }
                 }
             });
         }
