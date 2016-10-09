@@ -60,6 +60,11 @@ namespace NWheels.UI
                 builder.DescribeNodePresenters(this.PopupContents.Cast<AbstractUidlNode>().ToArray());
             }
 
+            if (DescribingPresenter != null)
+            {
+                DescribingPresenter(presenter);
+            }
+
             PostDescribePresenter(presenter);
             base.ApplyExtensions(builder);
         }
@@ -70,6 +75,10 @@ namespace NWheels.UI
         {
             return new BindingSourceBuilder<TValue>(this, property);
         }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public event Action<PresenterBuilder<TWidget, TData, TState>> DescribingPresenter;
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
