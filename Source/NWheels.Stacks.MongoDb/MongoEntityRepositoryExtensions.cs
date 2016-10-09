@@ -14,5 +14,12 @@ namespace NWheels.Stacks.MongoDb
         {
             return ((IMongoEntityRepository)repository).GetMongoCollection();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static MongoCollection GetMongoCollection<TEntity, TPartition>(this IPartitionedRepository<TEntity, TPartition> partitioned, TPartition partition)
+        {
+            return ((IMongoEntityRepository)partitioned[partition]).GetMongoCollection();
+        }
     }
 }
