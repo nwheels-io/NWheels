@@ -3,21 +3,21 @@ Welcome to NWheels
 
 According to our observations, commonality in the needs of enterprise application projects is significantly higher than variability. We take this as an opportunity to slash project costs and timeframes, improve software quality, and reduce technical risks. 
 
-Learn more: [Motivation and goals](https://github.com/felix-b/NWheels/wiki/Motivation-and-goals) in Wiki
+Learn more: [Vision, Metaphor, Ecosystem](https://github.com/felix-b/NWheels/wiki/background-vision-metaphor-ecosystem), [Optimization opportunities](https://github.com/felix-b/NWheels/wiki/background-optimization-opportunities)
 
 ## What is NWheels
 
 NWheels is an infrastructural ecosystem and ongoing development effort, which is aimed to implement A-to-Z architectural recipes, supply innovative runtime platform, and provide super-high-productivity framework for development of enterprise applications based on the .NET Core platform.
 
-- **What types of applications will be supported?** Web sites, web services, application tiers implemented as micro-services or FaaS; native mobile and desktop apps; CLI programs; data stored in relational and No-SQL databases. Typical enterprise application includes all of the above. [Learn more: architecture overview](https://github.com/felix-b/NWheels/wiki/high-level-architecture).
+- **What types of applications will be supported?** Web sites, web services, application tiers implemented as micro-services or FaaS; native mobile and desktop apps; CLI programs; data stored in relational, No-SQL, and event-oriented databases. Typical enterprise application includes all of the above. [Learn more: architecture overview](https://github.com/felix-b/NWheels/wiki/architecture-high-level-overview).
 
 - **Where will they run?** Server-side will run on Linux, Windows, OS X; client side will run on web browsers, mobile devices, Windows/Linux/OS X desktops, Smart TV and IVR platforms.
 
-- **Clouds?** Yes, any compatible IaaS will be supported. NWheels comes with its own runtime platform, and unless explicitly specified, no dependencies on concrete vendor PaaS will be included. Thus for example, mission-critical software will be able to run on Azure with disaster recovery on AWS and Google Cloud. [Learn more: scalability & availability foundation](https://github.com/felix-b/NWheels/wiki/platform-scalability-overview).
+- **Clouds?** Yes, any compatible IaaS will be supported. NWheels comes with its own runtime platform, and unless explicitly specified, no dependencies on concrete vendor PaaS will be included. Thus for example, mission-critical software will be able to run on Azure with disaster recovery on AWS and Google Cloud. [Learn more: architecture overview](https://github.com/felix-b/NWheels/wiki/architecture-high-level-overview).
 
 - **High-end SLA?** Yes, 24x7 availability, automatic failover, elastic scalability, low-latency, high-throughput applications will be supported.
 
-Learn more: [Feature highlighs](#feature-highlights) below, [Aspects of NWheels](https://github.com/felix-b/NWheels/wiki/intro-aspects-of-nwheels) in Wiki 
+Learn more: [Feature highlighs](#feature-highlights) below, [Doing one thing well](https://github.com/felix-b/NWheels/wiki/architecture-doing-one-thing-well), [Architecture overview](https://github.com/felix-b/NWheels/wiki/architecture-high-level-overview) in Wiki 
 
 ## License
 
@@ -25,11 +25,11 @@ NWheels is available under the **MIT license**, and is aimed to stay **free fore
 
 ## Current Status 
 
-#### September 2016 - the concept is proven 
+#### September 2016 - the concept is proven
 
 NWheels has not yet released its platform for general availability.
 
-The proof-of-concept version named **milestone Afra**, is now stable and serves a basis for two proprietary real-world applications.
+The proof-of-concept version named **milestone Afra**, is now stable ([see the demo](https://github.com/felix-b/NWheels/wiki/afra-demo-application)), and serves a basis for two proprietary real-world applications.
 
 > Development of two serious software systems, which we did on top of  NWheels milestone Afra framework, evidenced that it is possible to deliver and maintain a superior working product with less resources by an order of magnitude, compared to competing vendors of similar software.
 
@@ -46,32 +46,36 @@ Why new codebase:
 - Implement improved architecture, based on lessons learned
 - Let contributors catch up early
 
+See also: [Roadmap](https://github.com/felix-b/NWheels/wiki/background-roadmap)
+
 ## Call for Contributors
 
 Hi, my name is Felix and I am the inventor of NWheels. My drive to optimize software creation comes from understanding that, as software is going to rule the world, a huge lot of programs will compete for survival. Stable and quick-to-develop will live; unstable or slow-to-develop will die. The ways we create and maintain our software need performance boost and optimization. 
 
 Such optimization can already be seen in how fundamentally operations management has changed over the past decade. It has shifted towards extreme automation and speed, and this process is going to continue. Take a look at [DC/OS](https://dcos.io/), as a vivid example. Servers and programs are now automatically managed by other programs. In DevOps, the Ops game has changed. 
 
-Now what about Dev? Will we follow this shift? I believe we have to. Those who will spend time re-inventing the wheels and coordinating mega-chaos of big concurrent teams, will lose. Small teams assembling ready building blocks together and quickly adding unique features on top, will be the winners. Now we need a platform, which will make it possible.
+Now what about Dev? Will we follow this shift? I believe we will have to. Those who will spend time re-inventing the wheels and coordinating mega-chaos of big concurrent teams, will lose. When it will come to holding a market share, small teams able to quickly assemble ready building blocks together, and add unique features on top, will be the winners. 
+
+Now we need a platform, which will make it possible.
 
 **The game of enterprise software development has to change. It's time**.
 
 > What will it mean to different people? 
 >
-> - To developers - more accomplishments for much less effort, and a framework it's fun to work with
+> - To developers - more accomplishments for much less effort, and a platform it's fun to work with
 > - To architects - more ready building blocks and capabilities, more experimentation for less re-work
 > - To software vendors - more competitiveness for less resources, time, and budget
 > - To entrepreneurs - more innovation for less investment and risk, shorter time to market
 > - To businesses - more reliability and availability of critical services for no cloud vendor lock-in
 > - To users - more cool apps and services available
 
-If NWheels holds its promise and reaches its goals, the game will change. It is doable - we did it (milestone Afra), and we want to do it again, this time for real.  
+We know for sure that it is doable, because we did it in milestone Afra. Now we want to do it again, this time for real.  
 
-NWheels project would benefit from contributions by experienced professionals in many different areas.
+The NWheels project would benefit from contributions by experienced professionals in many different areas.
 
-#### Feel like you would want to get involved? **[Please find guidelines and instructions here](https://github.com/felix-b/NWheels/wiki/community-contributors-guidelines)**.
+#### Feel like you would want to get involved? **[Guidelines and instructions link will be available soon]()**.
 
-We believe that code sharing and collaboration, driven by enthusiasm for quality and professionalism, have much better chances of delivering working and (re)usable software, rather than isolated development effort, driven by sales plan of a profit-oriented organization. 
+We believe that code sharing and collaboration, driven by enthusiasm for quality and professionalism, have much better chances of delivering working and (re)usable software, compared to isolated development effort driven by sales plan of a profit-oriented organization. 
 
 ## Feature Highlights
 
@@ -79,7 +83,7 @@ NWheels is aimed to exhibit the following characteristics:
 
 #### A-to-Z response to common demand
 
-  - architectural recipes that cover all application layers and tiers: projects are not left to sweat over gluing multiple 3rd-party building blocks together
+  - architectural recipes that cover all application layers and tiers: projects are not left to sweat over gluing multiple 3rd-party building blocks together, or re-inventing the wheels
   - ready answers to common requirements and concerns, ranging from basic features like authorization, to advanced scenarios like elastic scalability
   - built-in support for DevOps procedures, automation of clouds, and easy integration with application lifecycle management
 

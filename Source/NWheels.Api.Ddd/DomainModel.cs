@@ -14,6 +14,7 @@ namespace NWheels.Api.Ddd
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, Inherited = true, AllowMultiple = false)]
         public abstract class AbstractDomainObjectAttribute : System.Attribute
         {
+            public string DisplayFormat { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -78,6 +79,13 @@ namespace NWheels.Api.Ddd
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [AttributeUsage(AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
+        public class ValidateInvariantsAttribute : System.Attribute
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [AttributeUsage(AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
         public class DestructorAttribute : System.Attribute
         {
         }
@@ -93,6 +101,13 @@ namespace NWheels.Api.Ddd
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [AttributeUsage(AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
+        public class InvariantAttribute : System.Attribute
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static class Invariant
         {
             [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
@@ -104,6 +119,20 @@ namespace NWheels.Api.Ddd
 
             [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
             public class UniqueAttribute : System.Attribute
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
+            public class PositiveAttribute : System.Attribute
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
+            public class PastAttribute : System.Attribute
             {
             }
 
@@ -150,6 +179,30 @@ namespace NWheels.Api.Ddd
 
             [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
             public class AggregationParentAttribute : System.Attribute
+            {
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static class Semantic
+        {
+            [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
+            public class MultilineTextAttribute : System.Attribute
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
+            public class ImageUrlAttribute : System.Attribute
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
+            public class YearAttribute : System.Attribute
             {
             }
         }

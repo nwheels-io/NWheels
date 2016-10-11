@@ -1,0 +1,37 @@
+var dates = [ISODate("2016-09-16T00:00:00.000+0000"), ISODate("2016-09-17T00:00:00.000+0000"), ISODate("2016-09-18T00:00:00.000+0000"), ISODate("2016-09-19T00:00:00.000+0000"), ISODate("2016-09-20T00:00:00.000+0000")];
+
+for (var i = 0 ; i < dates.length ; i++) {
+    var mm = dates[i].getMonth() + 1; // getMonth() is zero-based
+    var dd = dates[i].getDate();
+    var yyyymmdd = [dates[i].getFullYear(), mm.length===2 ? '' : '0', mm, dd.length===2 ? '' : '0', dd].join('');
+    
+    var doc = {
+        "_id" : "20160916/G7M4J22/WebApp//Info/ApiRequest.ApiRequestProcessed/", 
+        "Date" : ISODate("2016-09-16T00:00:00.000+0000"), 
+        "ExceptionType" : null, 
+        "Level" : "Info", 
+        "Logger" : "ApiRequest", 
+        "MachineName" : "G7M4J22", 
+        "MessageId" : "ApiRequest.ApiRequestProcessed", 
+        "NodeInstance" : null, 
+        "NodeName" : "WebApp", 
+        "Hour" : { },
+        "Minute" : { }
+    };
+
+    for (var h = 0; h < 24 ; h++) {
+        var hvalue = 0;
+        var hm = { };
+       
+        for (var m = 0; m < 60 ; m++) {
+            var mvalue = NumberInt(Math.floor((Math.random() * 3000) + 100));
+            hvalue += mvalue;
+            hm['' + m] = mvalue;
+        }
+        
+        doc.Hour['' + h] = NumberInt(hvalue);
+        doc.Minute['' + h] = hm;
+    }
+    
+    printjson(doc);
+}
