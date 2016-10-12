@@ -7,11 +7,13 @@ Learn more: [Vision, Metaphor, Ecosystem](https://github.com/felix-b/NWheels/wik
 
 ## What is NWheels
 
-NWheels is an infrastructural ecosystem and ongoing development effort, which is aimed to implement A-to-Z architectural recipes, supply innovative runtime platform, and provide super-high-productivity framework for development of enterprise applications based on the .NET Core platform.
+NWheels is an infrastructural ecosystem and ongoing development effort, which is aimed to implement A-to-Z architectural recipes, supply innovative runtime platform, and provide super-high-productivity framework for development of enterprise applications based on the [.NET Core platform](https://docs.microsoft.com/en-us/dotnet/articles/core/).
 
-- **What types of applications will be supported?** Web sites, web services, application tiers implemented as micro-services or FaaS; native mobile and desktop apps; CLI programs; data stored in relational, No-SQL, and event-oriented databases. Typical enterprise application includes all of the above. [Learn more: architecture overview](https://github.com/felix-b/NWheels/wiki/architecture-high-level-overview).
+- **What is the problem NWheels solves that makes it an attractive choice for a project?** There are many. Through our experience, we identified a set of typical interrelated challenges and tasks that recur in enterprise software development. NWheels follows field-proven approaches to those, and provides a flexibly structured solution, which is easily adaptable to specific project requirements. [Learn more: optimization opportunities](https://github.com/felix-b/NWheels/wiki/background-optimization-opportunities).
 
-- **Where will they run?** Server-side will run on Linux, Windows, OS X; client side will run on web browsers, mobile devices, Windows/Linux/OS X desktops, Smart TV and IVR platforms.
+- **What types of applications will be supported?** Web sites, web services, application tiers implemented as micro-services or FaaS; native mobile and desktop apps; CLI programs; data stored in relational, No-SQL, and event-oriented databases. Typical enterprise application includes most of the above. [Learn more: architecture overview](https://github.com/felix-b/NWheels/wiki/architecture-high-level-overview).
+
+- **Where will they run?** Server-side will run on Linux, Windows, macOS; the client side will run as HTML5 apps on web browsers, as native apps on mobile devices, as desktop apps on Windows/Linux/macOS; the client side will also run on less common platforms like Smart TV and IVR.
 
 - **Clouds?** Yes, any compatible IaaS will be supported. NWheels comes with its own runtime platform, and unless explicitly specified, no dependencies on concrete vendor PaaS will be included. Thus for example, mission-critical software will be able to run on Azure with disaster recovery on AWS and Google Cloud. [Learn more: architecture overview](https://github.com/felix-b/NWheels/wiki/architecture-high-level-overview).
 
@@ -127,4 +129,4 @@ NWheels is aimed to exhibit the following characteristics:
 # Resources
 
 - [Project Wiki](https://github.com/felix-b/NWheels/wiki) - comprehensive documentation for contributors and consumers
-- [Mailing List](https://groups.google.com/d/forum/nwheels-project) - at Google Groups
+- [Mailing List](https://groups.google.com/d/forum/nwheels-project) - at Google Groups; this is where reviews and discussions of new ideas and approaches take place. 
