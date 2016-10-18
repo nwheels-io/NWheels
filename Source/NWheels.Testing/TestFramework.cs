@@ -33,6 +33,8 @@ using NWheels.Hosting.Factories;
 using NWheels.Logging.Core;
 using NWheels.Processing.Commands.Factories;
 using NWheels.Processing.Messages;
+using NWheels.Serialization;
+using NWheels.Serialization.Factories;
 using NWheels.Testing.Entities.Impl;
 using NWheels.Testing.Processing.Messages;
 
@@ -462,6 +464,11 @@ namespace NWheels.Testing
             builder.RegisterType<DomainObjectFactory>().As<IDomainObjectFactory>().SingleInstance();
             builder.RegisterType<PresentationObjectFactory>().As<IPresentationObjectFactory>().SingleInstance();
             builder.RegisterType<MethodCallObjectFactory>().As<IMethodCallObjectFactory>().SingleInstance();
+            
+            builder.RegisterType<CompactSerializer>().InstancePerDependency();
+            builder.RegisterType<CompactSerializerFactory>().SingleInstance();
+            builder.RegisterPipeline<ICompactSerializerExtension>().SingleInstance();
+            
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();
             builder.RegisterType<TestServiceBus>().As<IServiceBus>().SingleInstance();
             builder.RegisterType<VoidStorageInitializer>().As<IStorageInitializer>();

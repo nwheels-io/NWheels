@@ -439,12 +439,14 @@ namespace NWheels.DataObjects.Core
 
             using ( TT.CreateScope<TT.TContract, TT.TProperty>(DeclaringContract.ContractType, ClrType) )
             {
-                return compiler.CompileStaticFunction<object, object>(
+                var dynamicMethodDelegate = compiler.ForTemplatedDelegate<Func<object, object>>().CompileStaticFunction<object, object>(
                     string.Format("{0}_{1}_ReadValue", DeclaringContract.Name, this.Name),
                     (w, target) => {
                         w.Return(target.CastTo<TT.TContract>().Prop<TT.TProperty>(ContractPropertyInfo).CastTo<object>());
                     }
                 );
+
+                return (Func<object, object>)dynamicMethodDelegate;
             }
         }
 
@@ -456,12 +458,14 @@ namespace NWheels.DataObjects.Core
 
             using ( TT.CreateScope<TT.TContract, TT.TProperty>(DeclaringContract.ContractType, ClrType) )
             {
-                return compiler.CompileStaticVoidMethod<object, object>(
+                var dynamicMethodDelegate = compiler.ForTemplatedDelegate<Action<object, object>>().CompileStaticVoidMethod<object, object>(
                     string.Format("{0}_{1}_WriteValue", DeclaringContract.Name, this.Name),
                     (w, target, value) => {
                         target.CastTo<TT.TContract>().Prop<TT.TProperty>(ContractPropertyInfo).Assign(value.CastTo<TT.TProperty>());
                     }
                 );
+
+                return (Action<object, object>)dynamicMethodDelegate;
             }
         }
 

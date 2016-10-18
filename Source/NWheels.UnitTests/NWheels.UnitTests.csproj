@@ -93,6 +93,10 @@
     <Compile Include="Configuration\ConfigurationSectionConventionTests.cs" />
     <Compile Include="Configuration\XmlConfigurationLoaderTest.cs" />
     <Compile Include="DataObjects\Core\ContainedToContainerCollectionAdapterTests.cs" />
+    <Compile Include="Serialization\AssumptionTests.cs" />
+    <Compile Include="Serialization\CompactSerializerDictionaryTests.cs" />
+    <Compile Include="Serialization\CompactSerializerTests.cs" />
+    <Compile Include="Serialization\TestObjectRepository.cs" />
     <Compile Include="DataObjects\TestDataObjects.cs" />
     <Compile Include="DataObjects\TypeMetadataBuilderConstructorTests.cs" />
     <Compile Include="DataObjects\TypeMetadataCacheTests.cs" />

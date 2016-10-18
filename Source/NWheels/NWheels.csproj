@@ -136,6 +136,7 @@
     <Compile Include="Concurrency\IWriteOnlyCollection.cs" />
     <Compile Include="Concurrency\MapReduceTask.cs" />
     <Compile Include="Concurrency\PerContextResourceConsumerScope.cs" />
+    <Compile Include="Concurrency\PromiseStatus.cs" />
     <Compile Include="Concurrency\ShuttleService.cs" />
     <Compile Include="Configuration\ConfiguredComponentAttribute.cs" />
     <Compile Include="Configuration\Core\CommandLineConfigurationLoader.cs" />
@@ -147,6 +148,9 @@
     <Compile Include="Configuration\Impls\XmlFileConfigurationSource.cs" />
     <Compile Include="Conventions\Core\StaticStringDecorator.cs" />
     <Compile Include="Core\PipelineObjectFactory.cs" />
+    <Compile Include="Endpoints\Bases\INetworkApiDispatchRuntime.cs" />
+    <Compile Include="Endpoints\NetworkApiContract.cs" />
+    <Compile Include="Endpoints\NetworkApiContractAttribute.cs" />
     <Compile Include="Endpoints\HttpBot.cs" />
     <Compile Include="Endpoints\IHttpBotLogger.cs" />
     <Compile Include="Entities\Core\DatabaseInitializationCheckRegistration.cs" />
@@ -205,6 +209,9 @@
     <Compile Include="Processing\Jobs\Core\IApplicationJobLogger.cs" />
     <Compile Include="Processing\Jobs\Core\IFrameworkApplicationJobConfig.cs" />
     <Compile Include="Processing\Jobs\Impl\SequentialBatchJobScheduler.cs" />
+    <Compile Include="Serialization\CompactSerializerExtensionBase.cs" />
+    <Compile Include="Serialization\DynamicCompactSerializerDictionary.cs" />
+    <Compile Include="Serialization\StaticCompactSerializerDictionary.cs" />
     <Compile Include="Processing\Messages\Impl\ContentTemplateProviderBase.cs" />
     <Compile Include="Processing\Messages\Impl\SmtpOutgoingEmailActor.cs" />
     <Compile Include="Processing\Messages\MessageFromHeader.cs" />
@@ -215,6 +222,7 @@
     <Compile Include="TypeModel\Core\DomainContextMetadataCache.cs" />
     <Compile Include="TypeModel\Core\Factories\DebugEx.cs" />
     <Compile Include="TypeModel\Core\StorageTypes\DecimalAsInt64StorageType.cs" />
+    <Compile Include="Serialization\Factories\CompactSerializerFactory.cs" />
     <Compile Include="TypeModel\IDomainContextEntityMetadata.cs" />
     <Compile Include="Core\ICoreFramework.cs" />
     <Compile Include="Core\IDbConnectionStringResolver.cs" />
@@ -273,8 +281,12 @@
     <Compile Include="TypeModel\IMetadataMutation.cs" />
     <Compile Include="TypeModel\ITypeLogicMetadata.cs" />
     <Compile Include="TypeModel\PropertyStorageStyle.cs" />
-    <Compile Include="TypeModel\Serialization\BinarySerializer.cs" />
-    <Compile Include="TypeModel\Serialization\IObjectSerializer.cs" />
+    <Compile Include="Serialization\CompactSerializerException.cs" />
+    <Compile Include="Serialization\CompactDeserializationContext.cs" />
+    <Compile Include="Serialization\CompactSerializationContext.cs" />
+    <Compile Include="Serialization\ICompactSerializerExtension.cs" />
+    <Compile Include="Serialization\CompactSerializer.cs" />
+    <Compile Include="Serialization\IObjectSerializer.cs" />
     <Compile Include="Entities\Core\IDomainObject.cs" />
     <Compile Include="Entities\Core\IEntityObjectBase.cs" />
     <Compile Include="Entities\Core\IPersistableObject.cs" />
@@ -370,8 +382,8 @@
     <Compile Include="TypeModel\Core\DelegatingTransformingEnumerable.cs" />
     <Compile Include="TypeModel\Core\TransformingEnumerator.cs" />
     <Compile Include="TypeModel\Core\TypeMetadataVisitorBase.cs" />
-    <Compile Include="TypeModel\Serialization\CompactBinaryReader.cs" />
-    <Compile Include="TypeModel\Serialization\CompactBinaryWriter.cs" />
+    <Compile Include="Serialization\CompactBinaryReader.cs" />
+    <Compile Include="Serialization\CompactBinaryWriter.cs" />
     <Compile Include="Endpoints\HttpOperationAttribute.cs" />
     <Compile Include="Endpoints\HttpOperationVerbs.cs" />
     <Compile Include="Entities\Core\IDataRepositoryCallback.cs" />
@@ -397,8 +409,10 @@
     <Compile Include="Processing\Messages\IServiceBus.cs" />
     <Compile Include="Processing\Messages\MessageActionHeader.cs" />
     <Compile Include="Processing\Messages\MessageIdHeader.cs" />
-    <Compile Include="TypeModel\Serialization\IObjectSerializerConfigContainer.cs" />
-    <Compile Include="TypeModel\Serialization\JsonSerializationExtension.cs" />
+    <Compile Include="Serialization\IObjectSerializerConfigContainer.cs" />
+    <Compile Include="Serialization\JsonSerializationExtension.cs" />
+    <Compile Include="Serialization\CompactSerializerDictionary.cs" />
+    <Compile Include="Serialization\ObjectIndicatorByte.cs" />
     <Compile Include="TypeModel\TimeUnit.cs" />
     <Compile Include="TypeModel\WellKnownSemanticType.cs" />
     <Compile Include="UI\AuthorizationContract.cs" />
@@ -563,7 +577,6 @@
     <Compile Include="TypeModel\PropertyAccess.cs" />
     <Compile Include="TypeModel\PropertyRole.cs" />
     <Compile Include="Endpoints\AbstractEndpointRegistration.cs" />
-    <Compile Include="Endpoints\Core\Wcf\WcfEndpointComponent.cs" />
     <Compile Include="Endpoints\IFrameworkEndpointsConfig.cs" />
     <Compile Include="Entities\Core\DataRepositoryBase.cs" />
     <Compile Include="Entities\Core\PascalCaseRelationalMappingConvention.cs" />
@@ -805,6 +818,7 @@
     <Compile Include="Utilities\Core\UtilityToolBase.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Endpoints\Factories\" />
     <Folder Include="Globalization\Factories\" />
     <Folder Include="UI\Old2\" />
     <Folder Include="UI\OldToolbox\" />

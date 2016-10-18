@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Processing.Messages;
-using NWheels.TypeModel.Serialization;
+using NWheels.Serialization;
 
 namespace NWheels.Stacks.Network.AbstractConnectors
 {

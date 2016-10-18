@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace NWheels.TypeModel.Serialization
+namespace NWheels.Serialization
 {
     public class CompactBinaryReader : BinaryReader
     {
@@ -16,6 +16,20 @@ namespace NWheels.TypeModel.Serialization
         public CompactBinaryReader(Stream input, Encoding encoding)
             : base(input, encoding)
         {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string ReadStringOrNull()
+        {
+            var nullIndicator = ReadByte();
+
+            if (nullIndicator > 0)
+            {
+                return base.ReadString();
+            }
+
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -96,13 +110,19 @@ namespace NWheels.TypeModel.Serialization
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        public Guid ReadGuid()
+        {
+            return new Guid(ReadBytesArray());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public byte[] ReadBytesArray()
         {
             int count = Read7BitInt();
             return (count > 0 ? ReadBytes(count) : null);
         }
-
+        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         public static List<bool> ULong2BooleanList(ulong encodedBools, int numOfWantedBooleans)
         {

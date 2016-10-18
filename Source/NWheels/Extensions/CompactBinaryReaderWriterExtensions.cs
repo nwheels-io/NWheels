@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using NWheels.TypeModel.Serialization;
+using NWheels.Serialization;
 
 namespace NWheels.Extensions
 {
     public static class CompactBinaryReaderWriterExtensions
     {
-        public static string ReadString(this CompactBinaryReader br, object context)
+        public static string ReadString(CompactBinaryReader br, object context)
         {
-            return br.ReadString();
+            return br.ReadStringOrNull();
         }
 
-        public static void WriteString(this CompactBinaryWriter bw, string val, object context)
+        public static void WriteString(CompactBinaryWriter bw, string val, object context)
         {
-            bw.Write(val);
+            bw.WriteStringOrNull(val);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -92,12 +92,44 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void Write<T>(this CompactBinaryWriter bw, List<T> list, WriteDataDelegate<T> itemWriter, object context)
+        public static void WriteArray<T>(this CompactBinaryWriter bw, T[] arr, WriteDataDelegate<T> itemWriter, object context)
         {
-            if (list != null)
+            if (arr != null)
             {
-                bw.Write7BitInt(list.Count);
-                foreach (T item in list)
+                bw.Write7BitInt(arr.Length);
+                for (int i = 0 ; i < arr.Length ; i++)
+                {
+                    itemWriter(bw, arr[i], context);
+                }
+            }
+            else
+            {
+                bw.Write7BitInt(0);
+            }
+        }
+
+        public static T[] ReadArray<T>(this CompactBinaryReader br, ReadDataDelegate<T> itemReader, object context)
+        {
+            int length = br.Read7BitInt();
+            var arr = new T[length];
+            
+            for (int i = 0; i < length; i++)
+            {
+                T item = itemReader(br, context);
+                arr[i] = item;
+            }
+
+            return arr;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void WriteCollection<T>(this CompactBinaryWriter bw, ICollection<T> collection, WriteDataDelegate<T> itemWriter, object context)
+        {
+            if (collection != null)
+            {
+                bw.Write7BitInt(collection.Count);
+                foreach (T item in collection)
                 {
                     itemWriter(bw, item, context);
                 }
@@ -108,20 +140,21 @@ namespace NWheels.Extensions
             }
         }
 
-        public static void Read<T>(this CompactBinaryReader br, List<T> list, ReadDataDelegate<T> itemReader, object context)
+        public static void ReadCollection<T>(this CompactBinaryReader br, ICollection<T> collection, ReadDataDelegate<T> itemReader, object context)
         {
             //Clear the list before work starts. In case the list is null it will throw exception
-            list.Clear();
+            collection.Clear();
             int count = br.Read7BitInt();
             for (int i = 0; i < count; i++)
             {
                 T item = itemReader(br, context);
-                list.Add(item);
+                collection.Add(item);
             }
         }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void Write<TK, TV>(
+        public static void WriteDictionary<TK, TV>(
             this CompactBinaryWriter bw,
             IDictionary<TK, TV> map,
             WriteDataDelegate<TK> keyWriter, object keyContext,
@@ -135,7 +168,7 @@ namespace NWheels.Extensions
             }
         }
 
-        public static void Read<TK, TV>(
+        public static void ReadDictionary<TK, TV>(
             this CompactBinaryReader br,
             IDictionary<TK, TV> map,
             ReadDataDelegate<TK> keyReader, object keyContext,

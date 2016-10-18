@@ -50,6 +50,8 @@ using NWheels.Entities.Migrations;
 using NWheels.Hosting.Factories;
 using NWheels.Logging.Factories;
 using NWheels.Processing.Commands.Factories;
+using NWheels.Serialization;
+using NWheels.Serialization.Factories;
 using NWheels.TypeModel;
 using NWheels.UI.Impl;
 
@@ -338,6 +340,10 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<CallLoggingAspectConvention.AspectProvider>().As<IComponentAspectProvider>().AnchoredFirstInPipeline();
             builder.RegisterType<CallAuthorizationAspectConvention.AspectProvider>().As<IComponentAspectProvider>().AnchoredFirstInPipeline();
             builder.RegisterType<ComponentAspectFactory>().SingleInstance();
+			
+            builder.RegisterType<CompactSerializer>().InstancePerDependency();
+            builder.RegisterType<CompactSerializerFactory>().SingleInstance();
+            builder.RegisterPipeline<ICompactSerializerExtension>().SingleInstance();
 
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<RealTimeoutManager>().As<RealTimeoutManager>();
             builder.NWheelsFeatures().Logging().RegisterLogger<ITimeoutManagerLogger>();

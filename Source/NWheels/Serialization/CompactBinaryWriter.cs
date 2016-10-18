@@ -4,7 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace NWheels.TypeModel.Serialization
+namespace NWheels.Serialization
 {
     public class CompactBinaryWriter : BinaryWriter
     {
@@ -73,9 +73,17 @@ namespace NWheels.TypeModel.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public new void Write(string value)
+        public void WriteStringOrNull(string value)
         {
-            base.Write(value ?? "");
+            if (value != null)
+            {
+                base.Write((byte)1);
+                base.Write(value);
+            }
+            else
+            {
+                base.Write((byte)0);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -131,6 +139,13 @@ namespace NWheels.TypeModel.Serialization
         public void WriteTimeSpan(TimeSpan timeSpan)
         {
             Write7BitLong(timeSpan.Ticks);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void WriteGuid(Guid guid)
+        {
+            WriteBytesArray(guid.ToByteArray());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

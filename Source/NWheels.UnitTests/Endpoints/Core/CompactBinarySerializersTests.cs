@@ -2,8 +2,8 @@
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using NWheels.TypeModel.Serialization;
 using NWheels.Extensions;
+using NWheels.Serialization;
 
 namespace NWheels.UnitTests.Endpoints.Core
 {
@@ -147,6 +147,38 @@ namespace NWheels.UnitTests.Endpoints.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
+        public void TestReadWriteArray()
+        {
+            int[] intArray = new int[] { 3, 8, 56, 0, 9, 1, 1000, 45345 };
+            TestReadWriteArray(intArray, CompactBinaryReaderWriterExtensions.ReadInt, CompactBinaryReaderWriterExtensions.WriteInt);
+
+            decimal[] decimalArray = new decimal[] { 3.4353m, 8.23m, 564, 0, 4123, 11, 1, 45345.434m };
+            TestReadWriteArray(decimalArray, CompactBinaryReaderWriterExtensions.ReadCompactDecimal, CompactBinaryReaderWriterExtensions.WriteCompactDecimal);
+
+            string[] stringArray = new string[] { "", "  ", "Hi", "Hello world", null, "FF" };
+            TestReadWriteArray(stringArray, CompactBinaryReaderWriterExtensions.ReadString, CompactBinaryReaderWriterExtensions.WriteString);
+        }
+
+        private void TestReadWriteArray<T>(
+            T[] arr,
+            CompactBinaryReaderWriterExtensions.ReadDataDelegate<T> readDlgt,
+            CompactBinaryReaderWriterExtensions.WriteDataDelegate<T> writeDlgt)
+        {
+            MemoryStream msW = new MemoryStream();
+            CompactBinaryWriter bw = new CompactBinaryWriter(msW);
+            bw.WriteArray(arr, writeDlgt, null);
+            //-----------------------------
+            MemoryStream msR = new MemoryStream(msW.ToArray());
+            CompactBinaryReader br = new CompactBinaryReader(msR);
+            T[] parsedArray = br.ReadArray(readDlgt, null);
+
+            Assert.AreEqual(arr.Length, parsedArray.Length);
+            CollectionAssert.AreEqual(arr, parsedArray);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
         public void TestReadWriteList()
         {
             List<int> intList = new List<int> { 3, 8, 56, 0, 9, 1, 1000, 45345 };
@@ -166,12 +198,12 @@ namespace NWheels.UnitTests.Endpoints.Core
         {
             MemoryStream msW = new MemoryStream();
             CompactBinaryWriter bw = new CompactBinaryWriter(msW);
-            bw.Write(list, writeDlgt, null);
+            bw.WriteCollection(list, writeDlgt, null);
             //-----------------------------
             MemoryStream msR = new MemoryStream(msW.ToArray());
             CompactBinaryReader br = new CompactBinaryReader(msR);
             List<T> parsedList = new List<T>();
-            br.Read(parsedList, readDlgt, null);
+            br.ReadCollection(parsedList, readDlgt, null);
 
             Assert.AreEqual(list.Count, parsedList.Count);
             Assert.True(parsedList.TrueForAll( list.Contains));
@@ -208,12 +240,12 @@ namespace NWheels.UnitTests.Endpoints.Core
         {
             MemoryStream msW = new MemoryStream();
             CompactBinaryWriter bw = new CompactBinaryWriter(msW);
-            bw.Write(dict, writeKeyDlgt, null, writeValDlgt, null);
+            bw.WriteDictionary(dict, writeKeyDlgt, null, writeValDlgt, null);
             //-----------------------------
             MemoryStream msR = new MemoryStream(msW.ToArray());
             CompactBinaryReader br = new CompactBinaryReader(msR);
             Dictionary<TK,TV> parsedDict = new Dictionary<TK, TV>();
-            br.Read(parsedDict, readKeyDlgt, null, readValDlgt, null);
+            br.ReadDictionary(parsedDict, readKeyDlgt, null, readValDlgt, null);
 
             Assert.AreEqual(dict.Count, parsedDict.Count);
             Assert.True(parsedDict.Keys.ToList().TrueForAll(dict.ContainsKey));
