@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using Hapil.Operands;
 using NWheels.Extensions;
 using NWheels.Globalization.Core;
+using NWheels.Processing.Documents;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 
@@ -49,5 +50,8 @@ namespace NWheels.UI.Toolbox
         
         [DataMember]
         public string PoweredBy { get; set; }
+
+        [DataMember]
+        public FormattedDocument LogoImage { get; set; }
     }
 }

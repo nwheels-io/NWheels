@@ -540,7 +540,11 @@ HEAD, JS/CSS LINKS
             </ul>
          </div>
         <div>
-            <h1 class="logo-name" style="text-align:center">{{::translate(uidl.text)}}</h1>
+            <h1 class="logo-name" ng-if="!uidl.logoImage" style="text-align:center">{{::translate(uidl.text)}}</h1>
+            <h1 class="logo-name" ng-if="uidl.logoImage" style="text-align:center"><img 
+                ng-src="{{::uidl.logoImage}}" 
+                alt="{{::translate(uidl.text)}}" 
+                title="{{::translate(uidl.text)}}"></img></h1>
             <h2 class="logo-name" style="text-align:center;margin-bottom:40px;">{{::translate(uidl.helpText)}}</h2>
             <uidl-widget uidl="uidl.insideContent"></uidl-widget>
             <p ng-if="uidl.poweredBy" class="m-t m-b text-center"><small>{{::translate(uidl.poweredBy)}}</small></p>
@@ -2832,16 +2836,14 @@ HEAD, JS/CSS LINKS
                 <a href="" ng-click="clearDropzone()" ng-disabled="!editAuthorized">Clear</a>
             </div>
             <!-- IMAGE + UPLOAD -->
-            <div ng-if="uidl.fieldType==='ImageUpload'" class="row">
-                <div class="col-sm-3">
-                    <img ng-show="entity[uidl.propertyName]" ng-src="{{entity[uidl.propertyName]}}" err-src="app/skin/assets/img/avatar_missing.jpg" class="img-circle circle-border m-b-md" width="128" height="128" alt="profile photo">
-                    <img ng-hide="entity[uidl.propertyName]" ng-src="app/skin/assets/img/avatar_missing.jpg" class="img-circle circle-border m-b-md" width="128" height="128" alt="profile photo missing">
-                </div>
-                <div class="col-sm-5 dropzone m-l" 
-                     id="{{::uniqueFieldId}}"
-                     style="border-radius:2px;border: 2px lightgray dotted;background-color:white;">
-                     <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
-                </div>
+            <div ng-if="uidl.fieldType==='ImageUpload'" 
+                 id="{{::uniqueFieldId}}"
+                 class="dropzone" 
+                 style="border-radius:2px;border: 2px lightgray dotted;background-color:white;">
+                 <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
+            </div>
+            <div ng-if="uidl.fieldType==='ImageUpload'" ng-class="{'m-b': !uidl.$skin.zeroPadding}">
+                <a href="" ng-click="clearDropzone()" ng-disabled="!editAuthorized">Clear</a>
             </div>
         </div>
     </script>

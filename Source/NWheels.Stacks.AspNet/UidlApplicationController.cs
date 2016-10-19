@@ -1335,6 +1335,7 @@ namespace NWheels.Stacks.AspNet
             };
 
             jsonSettings.Converters.Add(new StringEnumConverter());
+            jsonSettings.Converters.Add(new ApplicationEntityService.FormattedDocumentConverter());
 
             return jsonSettings;
         }
