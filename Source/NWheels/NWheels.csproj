@@ -149,6 +149,11 @@
     <Compile Include="Conventions\Core\StaticStringDecorator.cs" />
     <Compile Include="Core\PipelineObjectFactory.cs" />
     <Compile Include="Endpoints\Bases\INetworkApiDispatchRuntime.cs" />
+    <Compile Include="Endpoints\Core\CompactRpcProtocol.cs" />
+    <Compile Include="Endpoints\DuplexNetworkEndpointApiContext.cs" />
+    <Compile Include="Endpoints\Factories\DuplexNetworkApiProxyFactory.cs" />
+    <Compile Include="Endpoints\Factories\IDuplexNetworkApiProxyFactory.cs" />
+    <Compile Include="Endpoints\IDuplexNetworkEndpointApiProxy.cs" />
     <Compile Include="Endpoints\NetworkApiContract.cs" />
     <Compile Include="Endpoints\NetworkApiContractAttribute.cs" />
     <Compile Include="Endpoints\HttpBot.cs" />
@@ -230,7 +235,7 @@
     <Compile Include="Endpoints\Core\IEndpoint.cs" />
     <Compile Include="Endpoints\FrameworkSoapNames.cs" />
     <Compile Include="Entities\Core\IDomainContextLogger.cs" />
-    <Compile Include="Endpoints\INetworkEndpointTransport.cs" />
+    <Compile Include="Endpoints\IDuplexNetworkEndpointTransport.cs" />
     <Compile Include="Endpoints\IAbstractNetwrokTransportConfig.cs" />
     <Compile Include="Endpoints\INetworkProtocolConfigContainer.cs" />
     <Compile Include="Entities\Core\IPartitionedObject.cs" />
@@ -818,7 +823,6 @@
     <Compile Include="Utilities\Core\UtilityToolBase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Endpoints\Factories\" />
     <Folder Include="Globalization\Factories\" />
     <Folder Include="UI\Old2\" />
     <Folder Include="UI\OldToolbox\" />

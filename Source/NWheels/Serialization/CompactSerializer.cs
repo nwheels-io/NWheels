@@ -71,6 +71,20 @@ namespace NWheels.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void PopulateObject(Stream input, CompactSerializerDictionary dictionary, object instance)
+        {
+            PopulateObject(new CompactBinaryReader(input), dictionary, instance);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void PopulateObject(CompactBinaryReader input, CompactSerializerDictionary dictionary, object instance)
+        {
+            PopulateObject(new CompactDeserializationContext(this, dictionary, input, _components), instance);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public byte[] GetBytes(Type declaredType, object obj, CompactSerializerDictionary dictionary)
         {
             byte[] serializedBytes;
@@ -96,6 +110,20 @@ namespace NWheels.Serialization
         public void WriteObject(Type declaredType, object obj, CompactBinaryWriter output, CompactSerializerDictionary dictionary)
         {
             WriteObject(declaredType, obj, new CompactSerializationContext(this, dictionary, output));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void WriteObjectContents(object obj, Stream output, CompactSerializerDictionary dictionary)
+        {
+            WriteObjectContents(obj, new CompactBinaryWriter(output), dictionary);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void WriteObjectContents(object obj, CompactBinaryWriter output, CompactSerializerDictionary dictionary)
+        {
+            WriteObjectContents(obj, new CompactSerializationContext(this, dictionary, output));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -168,10 +196,16 @@ namespace NWheels.Serialization
                 materializedInstance = creator(context);
             }
 
-            var reader = _readerWriterFactory.GetTypeReader(materializedInstance.GetType());
-            reader(context, materializedInstance);
-
+            PopulateObject(context, materializedInstance);
             return materializedInstance;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal void PopulateObject(CompactDeserializationContext context, object instance)
+        {
+            var reader = _readerWriterFactory.GetTypeReader(instance.GetType());
+            reader(context, instance);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -202,6 +236,13 @@ namespace NWheels.Serialization
                 output.Write(ObjectIndicatorByte.NotNull);
             }
 
+            WriteObjectContents(obj, context);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal void WriteObjectContents(object obj, CompactSerializationContext context)
+        {
             var writer = _readerWriterFactory.GetTypeWriter(obj.GetType());
             writer(context, obj);
         }

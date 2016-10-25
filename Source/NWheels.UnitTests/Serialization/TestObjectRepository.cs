@@ -191,10 +191,10 @@ namespace NWheels.UnitTests.Serialization
         {
             void VoidOperation();
             void VoidOperationWithParameters(int n, string s);
-            int NonVoidOperation();
-            TimeSpan NonVoidOperationWithParameters(int n, string s);
+            //int NonVoidOperation();
+            //TimeSpan NonVoidOperationWithParameters(int n, string s);
             void VoidOperationWithPolymorphicParameters(int n, BaseClass b, string s);
-            BaseClass NonVoidOperationWithPolymorphicParameters(int n, string s);
+            //BaseClass NonVoidOperationWithPolymorphicParameters(int n, string s);
             event EventHandler EventWithNoArgs;
             event EventHandler<BaseEventArgs> EventWithBaseArgs;
             event Action CustomDelegateEventWithNoArgs;
@@ -212,8 +212,8 @@ namespace NWheels.UnitTests.Serialization
 
         public class WithEntityObjects
         {
-            public IEntityA TheA { get; set; }
-            public List<IEntityB> TheB { get; set; }
+            public List<IEntityA> TheA { get; set; }
+            public IEntityB TheB { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

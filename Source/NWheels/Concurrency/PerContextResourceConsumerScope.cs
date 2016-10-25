@@ -20,6 +20,20 @@ namespace NWheels.Concurrency
 
         protected PerContextResourceConsumerScope(
             ContextAnchor<PerContextResourceConsumerScope<T>> anchor,
+            T resource,
+            bool externallyOwned)
+            : this(
+                anchor,
+                resourceFactory: h => resource, 
+                externallyOwned: externallyOwned,
+                forceNewResource: true)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected PerContextResourceConsumerScope(
+            ContextAnchor<PerContextResourceConsumerScope<T>> anchor,
             Func<IResourceConsumerScopeHandle, T> resourceFactory,
             bool externallyOwned,
             bool forceNewResource)
@@ -195,6 +209,13 @@ namespace NWheels.Concurrency
 
     public class CallContextResourceConsumerScope<T> : PerContextResourceConsumerScope<T>
     {
+        public CallContextResourceConsumerScope(T resource, bool externallyOwned = false)
+            : base(new LogicalCallContextAnchor<PerContextResourceConsumerScope<T>>(), resource, externallyOwned)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public CallContextResourceConsumerScope(Func<IResourceConsumerScopeHandle, T> resourceFactory, bool externallyOwned = false, bool forceNewResource = false)
             : base(new LogicalCallContextAnchor<PerContextResourceConsumerScope<T>>(), resourceFactory, externallyOwned, forceNewResource)
         {
@@ -231,6 +252,13 @@ namespace NWheels.Concurrency
 
     public class ThreadStaticResourceConsumerScope<T> : PerContextResourceConsumerScope<T>
     {
+        public ThreadStaticResourceConsumerScope(T resource, bool externallyOwned = false)
+            : base(new ThreadStaticAnchor<PerContextResourceConsumerScope<T>>(), resource, externallyOwned)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public ThreadStaticResourceConsumerScope(Func<IResourceConsumerScopeHandle, T> resourceFactory, bool externallyOwned = false, bool forceNewResource = false)
             : base(new ThreadStaticAnchor<PerContextResourceConsumerScope<T>>(), resourceFactory, externallyOwned, forceNewResource)
         {

@@ -93,6 +93,8 @@
     <Compile Include="Configuration\ConfigurationSectionConventionTests.cs" />
     <Compile Include="Configuration\XmlConfigurationLoaderTest.cs" />
     <Compile Include="DataObjects\Core\ContainedToContainerCollectionAdapterTests.cs" />
+    <Compile Include="Endpoints\Core\CompactRpcProtocolTests.cs" />
+    <Compile Include="Endpoints\Factories\DuplexNetworkApiProxyFactoryTests.cs" />
     <Compile Include="Serialization\AssumptionTests.cs" />
     <Compile Include="Serialization\CompactSerializerDictionaryTests.cs" />
     <Compile Include="Serialization\CompactSerializerTests.cs" />

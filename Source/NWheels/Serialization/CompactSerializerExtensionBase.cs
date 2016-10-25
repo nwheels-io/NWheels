@@ -33,7 +33,7 @@ namespace NWheels.Serialization
 
         public virtual object Materialize(Type declaredType, Type serializedType)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         #endregion

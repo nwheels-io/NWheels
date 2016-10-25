@@ -22,14 +22,14 @@ namespace NWheels.Endpoints
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [AttributeUsage(AttributeTargets.Event)]
+        [AttributeUsage(AttributeTargets.Method | AttributeTargets.Event)]
         public class ConnectedEventAttribute : Attribute
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [AttributeUsage(AttributeTargets.Event)]
+        [AttributeUsage(AttributeTargets.Method | AttributeTargets.Event)]
         public class ConnectDeclinedEventAttribute : Attribute
         {
         }

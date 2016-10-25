@@ -4,6 +4,7 @@ using System.IO;
 using Autofac;
 using NUnit.Framework;
 using NWheels.DataObjects;
+using NWheels.Extensions;
 using NWheels.Serialization;
 using NWheels.Serialization.Factories;
 using NWheels.Testing;
@@ -320,9 +321,8 @@ namespace NWheels.UnitTests.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-#if false
         [Test]
-        public void Roundtrip_PolymorphicObjectsWithTypeResolution()
+        public void Roundtrip_PolymorphicObjectsWithClientServerTypeResolution()
         {
             //-- arrange
 
@@ -331,65 +331,165 @@ namespace NWheels.UnitTests.Serialization
                 Resolve<ITypeMetadataCache>(),
                 Resolve<CompactSerializerFactory>(),
                 new ICompactSerializerExtension[] {
-                    
+                    new ServerEntityTypeResolver()
                 });
             var serverDictionary = new StaticCompactSerializerDictionary();
-            serverDictionary.RegisterType(typeof(Repo.DerivedClassOne));
-            serverDictionary.RegisterType(typeof(Repo.DerivedClassTwo));
+            serverDictionary.RegisterType(typeof(Repo.IEntityAOne));
+            serverDictionary.RegisterType(typeof(Repo.IEntityATwo));
+            serverDictionary.RegisterType(typeof(Repo.IEntityB));
             serverDictionary.MakeImmutable();
 
-            var original = new Repo.WithCollectionsOfPolymorphicObjects() {
-                FirstArray = new Repo.BaseClass[] {
-                    new Repo.DerivedClassOne() { StringValue = "One:First[0]", TimeSpanValue = TimeSpan.FromSeconds(123) },
-                    new Repo.DerivedClassTwo() { StringValue = "Two:First[1]", DateTimeValue = new DateTime(2016, 1, 2)  },
+            var clientSerializer = new CompactSerializer(
+                Resolve<IComponentContext>(),
+                Resolve<ITypeMetadataCache>(),
+                Resolve<CompactSerializerFactory>(),
+                new ICompactSerializerExtension[] {
+                    new ClientEntityTypeResolver()
+                });
+            var clientDictionary = new StaticCompactSerializerDictionary();
+            clientDictionary.RegisterType(typeof(Repo.IEntityAOne));
+            clientDictionary.RegisterType(typeof(Repo.IEntityATwo));
+            clientDictionary.RegisterType(typeof(Repo.IEntityB));
+            clientDictionary.MakeImmutable();
+
+            var originalOnServer = new Repo.WithEntityObjects() {
+                TheA = new List<Repo.IEntityA> {
+                    new Repo.ServerEntityAOne() {
+                        Id = 123,
+                        Name = "ABC",
+                        IntValue = 112233,
+                        TimeValue = TimeSpan.FromDays(123)
+                    },
+                    new Repo.ServerEntityATwo() {
+                        Id = 456,
+                        Name = "DEF",
+                        DateValue = new DateTime(2456, 1, 1)
+                    }
                 },
-                SecondList = new List<Repo.BaseClass>() {
-                    new Repo.DerivedClassTwo() { StringValue = "Two:Second[0]", DateTimeValue = new DateTime(2016, 3, 4) },
-                    new Repo.DerivedClassOne() { StringValue = "One:Second[1]", TimeSpanValue = TimeSpan.FromSeconds(456) },
-                },
-                ThirdDictionary = new Dictionary<string, Repo.BaseClass>() {
-                    { "AAA", new Repo.DerivedClassOne() { StringValue = "One:Third[AAA]", TimeSpanValue = TimeSpan.FromSeconds(789) } },
-                    { "BBB", new Repo.DerivedClassTwo() { StringValue = "Two:Third[BBB]", DateTimeValue = new DateTime(2016, 5, 6)  } },
+                TheB = new Repo.ServerEntityB() {
+                    Id = "XYZ",
+                    TheA = new Repo.ServerEntityATwo() {
+                        Id = 789,
+                        Name = "GHI",
+                        DateValue = new DateTime(2789, 1, 1)
+                    }
                 }
             };
 
             //-- act
 
-            var serializedBytes = serializer.GetBytes(original, dictionary);
-            File.WriteAllBytes(@"C:\Temp\serialized1.bin", serializedBytes);
-            var deserialized = serializer.GetObject<Repo.WithCollectionsOfPolymorphicObjects>(serializedBytes, dictionary);
+            var serializedBytesOnServer = serverSerializer.GetBytes(originalOnServer, serverDictionary);
+            File.WriteAllBytes(@"C:\Temp\serialized1.bin", serializedBytesOnServer);
+            var deserializedOnClient = clientSerializer.GetObject<Repo.WithEntityObjects>(serializedBytesOnServer, clientDictionary);
+            //var serializedBytesOnClient = clientSerializer.GetBytes(deserializedOnClient, clientDictionary);
+            //File.WriteAllBytes(@"C:\Temp\serialized2.bin", serializedBytesOnClient);
+            //var deserializedOnServer = serverSerializer.GetObject<Repo.WithEntityObjects>(serializedBytesOnClient, serverDictionary);
 
             //-- assert
 
-            deserialized.ShouldNotBeNull();
+            deserializedOnClient.ShouldNotBeNull();
 
-            deserialized.FirstArray.ShouldNotBeNull();
-            deserialized.FirstArray.Length.ShouldBe(3);
-            deserialized.FirstArray[0].ShouldBeOfType<Repo.DerivedClassOne>();
-            deserialized.FirstArray[0].StringValue.ShouldBe("One:First[0]");
-            deserialized.FirstArray[1].ShouldBeOfType<Repo.DerivedClassTwo>();
-            deserialized.FirstArray[1].StringValue.ShouldBe("Two:First[1]");
-            deserialized.FirstArray[2].ShouldBeOfType<Repo.BaseClass>();
-            deserialized.FirstArray[2].StringValue.ShouldBe("Base:First[2]");
+            deserializedOnClient.TheA.ShouldNotBeNull();
+            deserializedOnClient.TheA.Count.ShouldBe(2);
+            deserializedOnClient.TheA[0].ShouldBeOfType<Repo.ClientEntityAOne>();
+            deserializedOnClient.TheA[0].As<Repo.ClientEntityAOne>().Id.ShouldBe(123);
+            deserializedOnClient.TheA[0].As<Repo.ClientEntityAOne>().Name.ShouldBe("ABC");
+            deserializedOnClient.TheA[0].As<Repo.ClientEntityAOne>().IntValue.ShouldBe(112233);
+            deserializedOnClient.TheA[0].As<Repo.ClientEntityAOne>().TimeValue.ShouldBe(TimeSpan.FromDays(123));
+            deserializedOnClient.TheA[1].ShouldBeOfType<Repo.ClientEntityATwo>();
+            deserializedOnClient.TheA[1].As<Repo.ClientEntityATwo>().Id.ShouldBe(456);
+            deserializedOnClient.TheA[1].As<Repo.ClientEntityATwo>().Name.ShouldBe("DEF");
+            deserializedOnClient.TheA[1].As<Repo.ClientEntityATwo>().DateValue.ShouldBe(new DateTime(2456, 1, 1));
 
-            deserialized.SecondList.ShouldNotBeNull();
-            deserialized.SecondList.Count.ShouldBe(3);
-            deserialized.SecondList[0].ShouldBeOfType<Repo.DerivedClassTwo>();
-            deserialized.SecondList[0].StringValue.ShouldBe("Two:Second[0]");
-            deserialized.SecondList[1].ShouldBeOfType<Repo.DerivedClassOne>();
-            deserialized.SecondList[1].StringValue.ShouldBe("One:Second[1]");
-            deserialized.SecondList[2].ShouldBeOfType<Repo.BaseClass>();
-            deserialized.SecondList[2].StringValue.ShouldBe("Base:Second[2]");
-
-            deserialized.ThirdDictionary.ShouldNotBeNull();
-            deserialized.ThirdDictionary.Count.ShouldBe(3);
-            deserialized.ThirdDictionary["AAA"].ShouldBeOfType<Repo.DerivedClassOne>();
-            deserialized.ThirdDictionary["AAA"].StringValue.ShouldBe("One:Third[AAA]");
-            deserialized.ThirdDictionary["BBB"].ShouldBeOfType<Repo.DerivedClassTwo>();
-            deserialized.ThirdDictionary["BBB"].StringValue.ShouldBe("Two:Third[BBB]");
-            deserialized.ThirdDictionary["CCC"].ShouldBeOfType<Repo.BaseClass>();
-            deserialized.ThirdDictionary["CCC"].StringValue.ShouldBe("Base:Third[CCC]");
+            deserializedOnClient.TheB.ShouldBeOfType<Repo.ClientEntityB>();
+            deserializedOnClient.TheB.Id.ShouldBe("XYZ");
+            deserializedOnClient.TheB.TheA.ShouldNotBeNull();
+            deserializedOnClient.TheB.TheA.ShouldBeOfType<Repo.ClientEntityATwo>();
+            deserializedOnClient.TheB.TheA.As<Repo.ClientEntityATwo>().Id.ShouldBe(789);
+            deserializedOnClient.TheB.TheA.As<Repo.ClientEntityATwo>().Name.ShouldBe("GHI");
+            deserializedOnClient.TheB.TheA.As<Repo.ClientEntityATwo>().DateValue.ShouldBe(new DateTime(2789, 1, 1));
         }
-#endif
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class ServerEntityTypeResolver : CompactSerializerExtensionBase
+        {
+            #region Overrides of CompactSerializerExtensionBase
+
+            public override Type GetSerializationType(Type declaredType, object obj)
+            {
+                if (obj is Repo.IEntityAOne)
+                {
+                    return typeof(Repo.IEntityAOne);
+                }
+                if (obj is Repo.IEntityATwo)
+                {
+                    return typeof(Repo.IEntityATwo);
+                }
+                if (obj is Repo.IEntityB)
+                {
+                    return typeof(Repo.IEntityB);
+                }
+
+                return obj.GetType();
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class ClientEntityTypeResolver : CompactSerializerExtensionBase
+        {
+            #region Overrides of CompactSerializerExtensionBase
+
+            public override Type GetMaterializationType(Type declaredType, Type serializedType)
+            {
+                if (serializedType == typeof(Repo.IEntityAOne))
+                {
+                    return typeof(Repo.ClientEntityAOne);
+                }
+                if (serializedType == typeof(Repo.IEntityATwo))
+                {
+                    return typeof(Repo.ClientEntityATwo);
+                }
+                if (serializedType == typeof(Repo.IEntityB))
+                {
+                    return typeof(Repo.ClientEntityB);
+                }
+                return serializedType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanMaterialize(Type declaredType, Type serializedType)
+            {
+                return (
+                    serializedType == typeof(Repo.IEntityAOne) || 
+                    serializedType == typeof(Repo.IEntityATwo) || 
+                    serializedType == typeof(Repo.IEntityB));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override object Materialize(Type declaredType, Type serializedType)
+            {
+                if (serializedType == typeof(Repo.IEntityAOne))
+                {
+                    return new Repo.ClientEntityAOne();
+                }
+                if (serializedType == typeof(Repo.IEntityATwo))
+                {
+                    return new Repo.ClientEntityATwo();
+                }
+                if (serializedType == typeof(Repo.IEntityB))
+                {
+                    return new Repo.ClientEntityB();
+                }
+                throw new ArgumentException("Test ClientEntityTypeResolver cannot materialized serialized type: " + serializedType.Name);
+            }
+
+            #endregion
+        }
     }
 }
