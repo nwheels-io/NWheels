@@ -5,7 +5,7 @@ using NWheels.Endpoints;
 
 namespace NWheels.Stacks.Network
 {
-    public abstract class NetConnectorsBinaryTransport : INetworkEndpointTransport
+    public abstract class NetConnectorsBinaryTransport
     {
         private int _nextConnectorId;
 
