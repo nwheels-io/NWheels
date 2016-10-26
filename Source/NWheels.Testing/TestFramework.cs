@@ -25,6 +25,7 @@ using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
 using NWheels.Endpoints;
+using NWheels.Endpoints.Factories;
 using NWheels.Entities.Core;
 using NWheels.Entities.Factories;
 using NWheels.Entities.Migrations;
@@ -484,6 +485,8 @@ namespace NWheels.Testing
 
             builder.RegisterPipeline<IComponentAspectProvider>();
             builder.RegisterType<ComponentAspectFactory>().SingleInstance();
+
+            builder.RegisterType<DuplexNetworkApiProxyFactory>().As<IDuplexNetworkApiProxyFactory>().SingleInstance();
             
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<IDomainContextLogger>();

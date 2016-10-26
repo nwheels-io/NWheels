@@ -8,6 +8,7 @@ using NUnit.Framework;
 using NWheels.Endpoints;
 using NWheels.Endpoints.Factories;
 using NWheels.Testing;
+using Shouldly;
 
 namespace NWheels.UnitTests.Endpoints.Factories
 {
@@ -19,16 +20,30 @@ namespace NWheels.UnitTests.Endpoints.Factories
         {
             //-- arrange
 
+            var network = new MemoryStream();
+            var serverTransport = new TestTransport(network);
+            var clientTransport = new TestTransport(network);
+
             var proxyFactory = Resolve<IDuplexNetworkApiProxyFactory>();
-            var transport = new TestTransport();
-            
-            var clientObject = new ClientApiImplementation();
-            var proxyUsedOnClient = proxyFactory.CreateProxyInstance<IServerApi, IClientApi>(transport, clientObject);
-
+            var clientObject = new ClientApiImplementation(clientTransport, proxyFactory);
             var serverObject = new ServerApiImplementation();
-            var proxyUsedOnServer = proxyFactory.CreateProxyInstance<IClientApi, IServerApi>(transport, serverObject);
 
+            var proxyUsedByListenerOnServer = proxyFactory.CreateProxyInstance<IClientApi, IServerApi>(serverTransport, serverObject);
 
+            //-- act
+
+            clientObject.TestPing("Hello from client");
+            serverTransport.TestReceiveFromNetwork();
+            clientTransport.TestReceiveFromNetwork();
+
+            //-- assert
+
+            serverObject.Log.ShouldBe(new[] {
+                "ServerApiImplementation.Ping(Hello from client)"
+            });
+            clientObject.Log.ShouldBe(new[] {
+                "ClientApiImplementation.Pong(YOU SENT [Hello from client])"
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -49,39 +64,80 @@ namespace NWheels.UnitTests.Endpoints.Factories
 
         private class ServerApiImplementation : IServerApi
         {
-            #region Implementation of IServerApi
-
-            public void Ping(string message)
+            public ServerApiImplementation()
             {
-                DuplexNetworkEndpointApiContext.GetRemotePartyAs<IClientApi>().Pong("YOU SENT: " + message);
+                this.Log = new List<string>();
             }
 
-            #endregion
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            void IServerApi.Ping(string message)
+            {
+                Log.Add("ServerApiImplementation.Ping(" + message + ")");
+                
+                var client = DuplexNetworkEndpointApiContext.GetRemotePartyAs<IClientApi>();
+                client.Pong("YOU SENT [" + message + "]");
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public List<string> Log { get; private set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private class ClientApiImplementation : IClientApi
         {
-            #region Implementation of IClientApi
+            private readonly IServerApi _server;
 
-            public void Pong(string message)
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ClientApiImplementation(IDuplexNetworkEndpointTransport transport, IDuplexNetworkApiProxyFactory proxyFactory)
             {
-                throw new NotImplementedException();
+                _server = proxyFactory.CreateProxyInstance<IServerApi, IClientApi>(transport, this);
+                this.Log = new List<string>();
             }
 
-            #endregion
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            void IClientApi.Pong(string message)
+            {
+                Log.Add("ClientApiImplementation.Pong(" + message + ")");
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void TestPing(string message)
+            {
+                _server.Ping(message);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public List<string> Log { get; private set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private class TestTransport : IDuplexNetworkEndpointTransport
         {
+            private readonly MemoryStream _network;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TestTransport(MemoryStream network)
+            {
+                _network = network;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             #region Implementation of IDuplexNetworkEndpointTransport
 
             public void SendBytes(byte[] bytes)
             {
-                //
+                _network.Write(bytes, 0, bytes.Length);
+                _network.Seek(-bytes.Length, SeekOrigin.End);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -94,17 +150,23 @@ namespace NWheels.UnitTests.Endpoints.Factories
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void TestReceiveBytes(byte[] bytes)
+            public void TestReceiveFromNetwork()
             {
-                if (BytesReceived != null)
+                var receivedBuffer = new MemoryStream();
+                _network.CopyTo(receivedBuffer);
+
+                if (receivedBuffer.Length > 0)
                 {
-                    BytesReceived(bytes);
+                    if (BytesReceived != null)
+                    {
+                        BytesReceived(receivedBuffer.ToArray());
+                    }
                 }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void TestSendFailure(Exception error)
+            public void TestSendFailed(Exception error)
             {
                 if (SendFailed != null)
                 {

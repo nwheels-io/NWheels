@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
@@ -9,6 +10,8 @@ using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.Endpoints.Core;
+using NWheels.Extensions;
+using NWheels.Processing.Commands;
 using NWheels.Processing.Commands.Factories;
 using NWheels.Serialization;
 using TT = Hapil.TypeTemplate;
@@ -140,6 +143,23 @@ namespace NWheels.Endpoints.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public void SendCall(IMethodCallObject call)
+            {
+                using (var buffer = new MemoryStream())
+                {
+                    using (var writer = new CompactBinaryWriter(buffer))
+                    {
+                        var context = new CompactSerializationContext(_serializer, _dictionary, writer);
+                        CompactRpcProtocol.WriteCall(call, context);
+                        writer.Flush();
+
+                        _transport.SendBytes(buffer.ToArray());
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             IDuplexNetworkEndpointTransport IDuplexNetworkEndpointApiProxy.Transport
             {
                 get { return _transport; }
@@ -176,7 +196,11 @@ namespace NWheels.Endpoints.Factories
                     {
                         var context = new CompactDeserializationContext(_serializer, _dictionary, reader, _components);
                         var call = CompactRpcProtocol.ReadCall(_callFactory, context);
-                        call.ExecuteOn(_localServer);
+
+                        using (DuplexNetworkEndpointApiContext.UseProxy(this))
+                        {
+                            call.ExecuteOn(_localServer);
+                        }
                     }
                 }
             }
@@ -234,7 +258,7 @@ namespace NWheels.Endpoints.Factories
                         .Method<CompactSerializerDictionary>(x => x.OnRegisteringApiContracts).Implement(WriteApiContractRegistrations);
 
                     writer.ImplementInterface<TT.TContract>()
-                        .VoidMethods().Implement(WriteRemoteContractMethod)
+                        .AllMethods(where: m => m.IsVoid()).Implement(WriteRemoteContractMethod)
                         .AllEvents().ImplementAutomatic();
                 }
             }
@@ -245,14 +269,32 @@ namespace NWheels.Endpoints.Factories
 
             private void WriteApiContractRegistrations(VoidMethodWriter writer, Argument<CompactSerializerDictionary> dictionary)
             {
-                //throw new NotImplementedException();
+                var contractsInAbcOrder = new[] { _remoteApiContract, _localApiContract }
+                    .OrderBy(c => c.AssemblyQualifiedNameNonVersioned())
+                    .ToArray();
+
+                for (int i = 0 ; i < contractsInAbcOrder.Length ; i++)
+                {
+                    dictionary.Void<Type>(x => x.RegisterApiContract, writer.Const(contractsInAbcOrder[i]));
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void WriteRemoteContractMethod(VoidMethodWriter writer)
+            private void WriteRemoteContractMethod(TemplateMethodWriter writer)
             {
-                //throw new NotImplementedException();
+                var callLocal = writer.Local<IMethodCallObject>();
+                
+                callLocal.Assign(
+                    _callFactoryField.Func<MethodInfo, IMethodCallObject>(x => x.NewMessageCallObject, 
+                        writer.Const(writer.OwnerMethod.MethodDeclaration)));
+
+                writer.ForEachArgument(
+                    (arg, index) => {
+                        callLocal.Void(x => x.SetParameterValue, writer.Const(index), arg.CastTo<object>());
+                    });
+
+                writer.This<ProxyBase<TT.TContract, TT.TContract2>>().Void(x => x.SendCall, callLocal);
             }
         }
     }
