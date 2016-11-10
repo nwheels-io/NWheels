@@ -22,22 +22,29 @@ namespace NWheels.Stacks.Nlog
 {
     public class NLogBasedPlainLog : LifecycleEventListenerBase, IPlainLog
     {
-        public const string BootTextLoggerName = "BootText";
-        public const string PlainTextLoggerName = "PlainText";
-        public const string NameValuePairLoggerName = "NameValuePairs";
-        public const string BootTextFileTargetName = "BootTextFile";
-        public const string BootErrorTextFileTargetName = "BootErrorTextFile";
-        public const string PlainTextFileTargetName = "PlainTextFile";
-        public const string PlainErrorTextFileTargetName = "PlainErrorTextFile";
-        public const string PlainTextConsoleTargetName = "PlainTextConsole";
-        public const string PlainTextEventLogTargetName = "PlainTextEventLog";
-        public const string NameValuePairFileTargetName = "NameValuePairsFile";
+        public static readonly string BootTextLoggerName = "BootText";
+        public static readonly string PlainTextLoggerName = "PlainText";
+        public static readonly string NameValuePairLoggerName = "NameValuePairs";
+        public static readonly string BootTextFileTargetName = "BootTextFile";
+        public static readonly string BootErrorTextFileTargetName = "BootErrorTextFile";
+        public static readonly string PlainTextFileTargetName = "PlainTextFile";
+        public static readonly string PlainErrorTextFileTargetName = "PlainErrorTextFile";
+        public static readonly string PlainTextConsoleTargetName = "PlainTextConsole";
+        public static readonly string PlainTextEventLogTargetName = "PlainTextEventLog";
+        public static readonly string NameValuePairFileTargetName = "NameValuePairsFile";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly string _s_activityStartPrefix = "<BEGAN>";
+        private static readonly string _s_activityEndPrefix = "<ENDED>";
+        private static readonly string _s_activityEndSuffixFormat = "[METRICS: duration={0:#,##0}ms ; db.roundtrips = {1} ; db.duration = {2:#,##0}ms]";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private readonly Guid _bootCorrelationId;
         private readonly string _bootLogFolder;
         private readonly Logger _bootTextLogger;
+        private readonly Action<ActivityLogNode> _printClosedActivityDelegate;
         private NWheelsLogLevel _currentLogLevel;
         private Logger _currentTextLogger;
         private INodeConfiguration _currentNode;
@@ -60,7 +67,8 @@ namespace NWheels.Stacks.Nlog
             _bootTextLogger = LogManager.GetLogger(BootTextLoggerName);
             _currentTextLogger = _bootTextLogger; // this will change in NodeConfigured()
             _currentLogLevel = NWheelsLogLevel.Debug;
-            
+
+            _printClosedActivityDelegate = this.PrintClosedActivity;
             //_nameValuePairLogger = LogManager.GetLogger(NameValuePairLoggerName);
         }
 
@@ -118,40 +126,47 @@ namespace NWheels.Stacks.Nlog
 
         public void LogNode(NWheels.Logging.LogNode node)
         {
+            LogNode(node, prefix: string.Empty, suffix: string.Empty);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void LogNode(NWheels.Logging.LogNode node, string prefix, string suffix)
+        {
             switch ( node.Level )
             {
                 case NWheelsLogLevel.Debug:
                 case NWheelsLogLevel.Verbose:
                     if (_currentLogLevel <= NWheelsLogLevel.Verbose)
                     {
-                        _currentTextLogger.Debug(node.SingleLineText);
+                        _currentTextLogger.Debug(prefix + node.SingleLineText + suffix);
                     }
                     break;
                 case NWheelsLogLevel.Info:
                     if (_currentLogLevel <= NWheelsLogLevel.Info)
                     {
-                        _currentTextLogger.Info(node.SingleLineText);
+                        _currentTextLogger.Info(prefix + node.SingleLineText + suffix);
                         //_nameValuePairLogger.Info(node.NameValuePairsText);
                     }
                     break;
                 case NWheelsLogLevel.Warning:
                     if (_currentLogLevel <= NWheelsLogLevel.Warning)
                     {
-                        _currentTextLogger.Warn(node.Exception, node.SingleLineText);
+                        _currentTextLogger.Warn(node.Exception, prefix + node.SingleLineText + suffix);
                         //_nameValuePairLogger.Warn(node.NameValuePairsText);
                     }
                     break;
                 case NWheelsLogLevel.Error:
                     if (_currentLogLevel <= NWheelsLogLevel.Error)
                     {
-                        _currentTextLogger.Error(node.Exception, node.SingleLineText);
+                        _currentTextLogger.Error(node.Exception, prefix + node.SingleLineText + suffix);
                         //_nameValuePairLogger.Error(node.NameValuePairsText);
                     }
                     break;
                 case NWheelsLogLevel.Critical:
                     if (_currentLogLevel <= NWheelsLogLevel.Critical)
                     {
-                        _currentTextLogger.Fatal(node.Exception, node.SingleLineText);
+                        _currentTextLogger.Fatal(node.Exception, prefix + node.SingleLineText + suffix);
                         //_nameValuePairLogger.Fatal(node.NameValuePairsText);
                     }
                     break;
@@ -162,13 +177,15 @@ namespace NWheels.Stacks.Nlog
 
         public void LogActivity(NWheels.Logging.ActivityLogNode activity)
         {
-            if ( activity.Parent != null )
-            {
-                _currentTextLogger.Trace(activity.SingleLineText);
-            }
-            else
+            if (activity.Parent == null)
             {
                 _currentTextLogger.Trace("[THREAD:{0}] {1}", activity.TaskType, activity.SingleLineText);
+            }
+            
+            if (activity.Level >= _currentLogLevel)
+            {
+                _currentTextLogger.Trace(_s_activityStartPrefix + activity.SingleLineText);
+                activity.Closed += _printClosedActivityDelegate;
             }
         }
 
@@ -325,6 +342,20 @@ namespace NWheels.Stacks.Nlog
 
             var plainTextFileRule2 = new LoggingRule(PlainTextLoggerName, LogLevel.Warn, target2);
             config.LoggingRules.Add(plainTextFileRule2);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void PrintClosedActivity(ActivityLogNode activity)
+        {
+            LogNode(
+                activity, 
+                prefix: _s_activityEndPrefix,
+                suffix: string.Format(
+                    _s_activityEndSuffixFormat,
+                    activity.MillisecondsDuration, activity.DbTotal.Count, activity.DbTotal.MicrosecondsDuration / 1000
+                )
+            );
         }
 
         ////-----------------------------------------------------------------------------------------------------------------------------------------------------

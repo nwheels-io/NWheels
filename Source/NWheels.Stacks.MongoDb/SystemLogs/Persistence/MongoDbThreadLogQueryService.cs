@@ -89,6 +89,24 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Task<IEnumerable<LogMessageRecord>> QueryLogMessagesAsync(
+            DateTime from,
+            DateTime until,
+            string messageIdOrNull,
+            ApplicationEntityService.QueryOptions options,
+            CancellationToken cancellation)
+        {
+            var criteria = new LogTimeRangeCriteria() {
+                From = from,
+                Until = until,
+                MessageId = messageIdOrNull
+            };
+            
+            return QueryLogMessagesAsync(criteria, options, cancellation);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Task<IEnumerable<LogMessageRecord>> QueryLogMessagesAsync(
             ILogTimeRangeCriteria timeRange,
             ApplicationEntityService.QueryOptions options,
             CancellationToken cancellation)
@@ -419,6 +437,20 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             {
                 timeRange.Until = new DateTime(timeRange.Until.Ticks, DateTimeKind.Utc);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class LogTimeRangeCriteria : ILogTimeRangeCriteria
+        {
+            #region Implementation of ILogTimeRangeCriteria
+
+            public DateTime From { get; set; }
+            public DateTime Until { get; set; }
+            public string MessageId { get; set; }
+            public int? SeriesIndex { get; set; }
+
+            #endregion
         }
     }
 }
