@@ -488,7 +488,13 @@ namespace NWheels.UI
 
             for ( int i = 0 ; i < pathSteps.Length ; i++ )
             {
-                var stepMetaProperty = stepMetaType.FindPropertyByNameIncludingDerivedTypes(pathSteps[i]);
+                IPropertyMetadata stepMetaProperty;
+
+                if (!TryResolveSpecialProperty(stepMetaType, pathSteps[i], out stepMetaProperty))
+                {
+                    stepMetaProperty = stepMetaType.FindPropertyByNameIncludingDerivedTypes(pathSteps[i]);
+                }
+
                 metaPropertyPath[i] = stepMetaProperty;
                 
                 if ( stepMetaProperty.Relation != null && stepMetaProperty.Relation.RelatedPartyType != null )
@@ -502,6 +508,20 @@ namespace NWheels.UI
             }
 
             return metaPropertyPath;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static bool TryResolveSpecialProperty(ITypeMetadata metaType, string propertyName, out IPropertyMetadata metaProperty)
+        {
+            if (propertyName.EqualsIgnoreCase(QueryOptions.IdPropertyName))
+            {
+                metaProperty = metaType.EntityIdProperty;
+                return (metaProperty != null);
+            }
+
+            metaProperty = null;
+            return false;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -988,6 +1008,7 @@ namespace NWheels.UI
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public const string PropertyAggregationSeparator = "!";
+            public const string SpecialPropertyPrefix = "$";
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 

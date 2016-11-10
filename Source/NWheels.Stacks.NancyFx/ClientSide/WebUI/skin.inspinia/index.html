@@ -357,7 +357,28 @@ HEAD, JS/CSS LINKS
             padding: 3px;
         }
         
-        .jqgrow.ui-state
+        a.clickable-cell {
+            font-weight:800;
+            padding: 3px;
+            border-bottom: 1px solid black;
+        }
+
+        a.clickable-cell:hover {
+            color:white;
+            background-color: red;
+            border-bottom: 1px solid white;
+            border-radius: 5px;        
+        }
+
+        .ui-state-highlight a.clickable-cell {
+            color: white;
+            border-bottom: 1px solid white;
+        }
+
+        .ui-state-highlight a.clickable-cell:hover {
+            background-color: #51abc3;
+            color:white;
+        }
     </style>
 </head>
 <body 
@@ -1253,9 +1274,16 @@ HEAD, JS/CSS LINKS
                         case 'Right': modelItem.align = 'right'; break;
                     }
                 }
-                if (metaColumn.clickable === true) {
+                if (metaColumn.clickable === true || metaColumn.clickablePropertyName) {
                     modelItem.formatter = function(cellvalue, options, rowObject) {
-                        return '<a href="javascript:void(0);" onclick="jqgrid_onRowCellClick()">' + cellvalue + '</a>';
+                        var isClickable = metaColumn.clickable;
+                        if (!isClickable) {
+                            isClickable = (rowObject[metaColumn.clickablePropertyName] === true);
+                        }
+                        if (isClickable) {
+                            return '<a href="javascript:void(0);" class="clickable-cell" onclick="jqgrid_onRowCellClick()">' + cellvalue + '</a>';
+                        }
+                        return cellvalue;
                     };
                 }
                 if (modelItem.editable) {

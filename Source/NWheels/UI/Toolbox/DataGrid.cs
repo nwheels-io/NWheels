@@ -305,6 +305,14 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public GridColumn BindClickableTo<TDataRow>(Expression<Func<TDataRow, bool>> clickableProperty)
+            {
+                this.ClickablePropertyName = clickableProperty.GetPropertyInfo().Name;
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             [DataMember]
             public FieldSpecialName SpecialName { get; set; }
             [DataMember]
@@ -349,6 +357,8 @@ namespace NWheels.UI.Toolbox
             public bool DefaultSortAscending { get; set; }
             [DataMember]
             public bool Clickable { get; set; }
+            [DataMember]
+            public string ClickablePropertyName { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
