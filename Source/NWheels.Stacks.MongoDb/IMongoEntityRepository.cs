@@ -4,7 +4,7 @@ using NWheels.Entities.Core;
 
 namespace NWheels.Stacks.MongoDb
 {
-    internal interface IMongoEntityRepository
+    public interface IMongoEntityRepository
     {
         TEntityContract GetById<TEntityContract>(object id);
         IEnumerable<TEntityContract> GetByIdList<TEntityContract>(System.Collections.IEnumerable idList);

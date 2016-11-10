@@ -207,7 +207,7 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal MongoDatabase Database
+        public MongoDatabase Database
         {
             get { return _database; }
         }
@@ -273,7 +273,7 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal static string GetMongoCollectionName(
+        public static string GetMongoCollectionName(
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
             object partitionValue, 
