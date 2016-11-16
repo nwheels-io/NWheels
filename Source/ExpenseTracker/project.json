@@ -5,7 +5,10 @@
         "NETStandard.Library": "1.6.0",
         "System.Linq.Queryable": "4.0.1",
         "NWheels.Api": "1.0.0-*",
-        "NWheels.Api.Ddd": "1.0.0-*"
+        "NWheels.Api.Ddd": "1.0.0-*",
+        "NWheels.Api.Uidl": "1.0.0-*",
+        "NWheels.Domains.InformationSecurity": "1.0.0-*",
+        "NWheels.Domains.DevOps": "1.0.0-*"
     },
 
     "frameworks": {

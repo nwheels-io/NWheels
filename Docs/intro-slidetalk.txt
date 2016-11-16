@@ -1,0 +1,70 @@
+Text Script 
+---
+SLIDE: INTRO
+---
+
+Year 2016. Software is getting close to totally ruling the world. Software is complex. Making software is hard. The schedules are long. The costs are high. Innovation is slowing. Energy is wasted reinventing the wheels. Too much resources are used up for too little gain.
+
+In the year 2016, making software has to be simple. It's time to simplify.
+
+---
+SLIDE: TITLE
+---
+
+NWheels. A step in evolution.
+
+---
+SLIDE: CONTENT #1
+---
+
+
+
+
+
+
+Title of the SlideTalk
+---
+NWheels. A step in evolution.
+
+SlideTalk Description
+---
+NWheels is a revolutionary software ecosystem for development of enterprise applications, which slashes costs and timeframes, improves quality, and helps avoid cloud vendor lock-in.
+
+Keywords
+---
+NWheels,Cloud,Enterprise,Software,RAD,Platform
+
+Name of narrating voice
+---
+English (USA), Rod
+
+Background Music
+---
+Cinematic: Warrior Strife
+
+SLIDE 1
+---
+@silence Year 2016. Software is getting close to @alt1 @s90 totally @alt3 ruling @s100 @alt3 the world. @breath @alt1 Software is complex. @alt3 Making software is @alt3 hard. @alt1 The schedules are @alt3 long. The @alt3 costs are @alt3 high. Innovation @alt3 is slowing. Energy is wasted reinventing the wheels. Too much resources are used up for too little gain. @pause
+
+SLIDE 2
+---
+@pause Year 2016. Software is getting close to @alt1 @s90 totally @alt3 ruling @s100 @alt3 the world. Software is @alt2 complex. Making software is @alt1 hard. The schedules are long. The costs are high. Innovation is slowing. Energy is wasted reinventing the wheels. Too much resources are used up for too little gain. @silence
+
+SLIDE 3
+---
+N-Wheels.
+
+SLIDE 4
+---
+@s80 A step in evolution.
+
+SLIDE 5
+---
+N-Wheels metaphor stands for the phenomenon of re-inventing the @alt3 wheel, which occurs so numerous times in so numerous software projects.
+@pause
+
+SLIDE 6
+---
+While @alt2 N-Wheels @alt2 re-invents the @alt2 wheels too, it does so with the purpose of creating an ecosystem, for community to develop and share the @alt3 "wheels". The wheels can belong to many different layers, ranging from infrastructural components and frameworks, to building blocks of business domain @alt3 models and user interface themes.
+
+

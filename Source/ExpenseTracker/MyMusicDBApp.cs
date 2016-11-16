@@ -1,9 +1,53 @@
 using System;
 using System.Collections.Generic;
 using NWheels.Api.Ddd;
+using NWheels.Api.Uidl;
+using NWheels.Api.Uidl.Toolbox;
+using NWheels.Domains.InformationSecurity.Identity.UI;
+using NWheels.Domains.DevOps.Logging.UI;
 
 namespace MyMusicDB
 {
+    public class MusicDBAdminApp
+    {
+        public class MainScreen
+        {
+            public void Configure()
+            {
+                Console.Configure().Navigation(new {
+                    Dashboard = Console.Configure().MenuItem(Gallery.Icon.Dashboard, Console.ActiveContent.NavigateTo(Dashboard)),
+                    MusicDB = new {
+                        Genres = Console.Configure().MenuItem(Gallery.Icon.Dashboard, Console.ActiveContent.NavigateTo(Genres)),
+                        Artists = Console.Configure().MenuItem(Gallery.Icon.Dashboard, Console.ActiveContent.NavigateTo(Artists)),
+                        Albums = Console.Configure().MenuItem(Gallery.Icon.Dashboard, Console.ActiveContent.NavigateTo(Albums)),
+                        Tracks = Console.Configure().MenuItem(Gallery.Icon.Dashboard, Console.ActiveContent.NavigateTo(Tracks)),
+                    },
+                    System = new {
+                        UserAccounts = Console.Configure().MenuItem(Gallery.Icon.Dashboard, Console.ActiveContent.NavigateTo(UserAccounts)),
+                        SystemLog = Console.Configure().MenuItem(Gallery.Icon.Dashboard, Console.ActiveContent.NavigateTo(SystemLog))
+                    },
+                    Logout = Console.Configure().MenuItem(Gallery.Icon.Dashboard, Session.Logout())
+                });
+            }
+
+            public ManagementConsole<Empty.ViewModel> Console { get; set; }
+            public DashboardUIPart Dashboard { get; set; }
+            public CrudUIPart<Genre> Genres { get; set; }
+            public CrudUIPart<Artist> Artists { get; set; }
+            public CrudUIPart<Album> Albums { get; set; }
+            public CrudUIPart<Track> Tracks { get; set; }
+            public UserAccountCrudUIPart UserAccounts { get; set; }
+            public SystemLogScreen SystemLog { get; set; }
+            public UISession Session { get; set; }
+        }
+
+        public class DashboardUIPart : UIPart<Empty.ViewModel>
+        {
+
+        }
+    }
+
+
     [DomainModel.BoundedContext]
     public class MusicDBContext
     {
