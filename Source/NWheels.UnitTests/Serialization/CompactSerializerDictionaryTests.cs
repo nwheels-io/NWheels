@@ -429,7 +429,7 @@ namespace NWheels.UnitTests.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test]
+        [Test, Ignore("Under development in another branch")]
         public void CanRegisterApiContract()
         {
             //-- arrange

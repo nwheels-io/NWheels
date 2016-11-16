@@ -251,7 +251,7 @@ namespace NWheels.UnitTests.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test]
+        [Test, Ignore("Under development in a separate branch")]
         public void Roundtrip_CollectionsOfPolymorphicObjects()
         {
             //-- arrange
@@ -321,7 +321,7 @@ namespace NWheels.UnitTests.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test]
+        [Test, Ignore("Under development in a separate branch")]
         public void Roundtrip_PolymorphicObjectsWithClientServerTypeResolution()
         {
             //-- arrange

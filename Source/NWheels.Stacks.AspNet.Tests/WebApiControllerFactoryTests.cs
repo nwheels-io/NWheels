@@ -10,28 +10,32 @@ using Autofac;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
 using NWheels.Endpoints;
+using NWheels.Extensions;
+using NWheels.Testing;
 
 namespace NWheels.Stacks.AspNet.Tests
 {
     [TestFixture]
-    public class WebApiControllerFactoryTests : NUnitEmittedTypesTestBase
+    public class WebApiControllerFactoryTests : DynamicTypeUnitTestBase
     {
         [Test]
         public void CanGenerateController()
         {
             //-- arrange
 
-            var factory = new WebApiControllerFactory(base.Module);
-            var containerBuilder = new ContainerBuilder();
-            containerBuilder.RegisterType<TestHandler>();
+            var factory = new WebApiControllerFactory(base.DyamicModule);
+            Type controllerType = null;
+
+            Framework.UpdateComponents(containerBuilder => {
+                containerBuilder.RegisterType<TestHandler>();
+                controllerType = factory.CreateControllerType(typeof(TestHandler));
+                containerBuilder.RegisterType(controllerType);
+                containerBuilder.NWheelsFeatures().Logging().RegisterLogger<IWebApplicationLogger>();
+            });
 
             //-- act
-
-            var controllerType = factory.CreateControllerType(typeof(TestHandler));
-            containerBuilder.RegisterType(controllerType);
             
-            var container = containerBuilder.Build();
-            dynamic controllerAsDynamic = container.Resolve(controllerType);
+            dynamic controllerAsDynamic = Framework.Components.Resolve(controllerType);
 
             var response1 = (HttpResponseMessage)controllerAsDynamic.FirstOperation();
             var response2 = (HttpResponseMessage)controllerAsDynamic.SecondOperation();

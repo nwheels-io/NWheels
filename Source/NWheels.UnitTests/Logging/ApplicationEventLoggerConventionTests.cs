@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
 using Hapil;
@@ -273,7 +274,7 @@ namespace NWheels.UnitTests.Logging
             //-- Assert
 
             Assert.That(_logAppender.GetLogStrings(), Is.EqualTo(new[] {
-                "Log message with formatted parameters: date1=2015-01-01, date2=\"" + date2.ToString("MMM dd yyyy") + "\"",
+                "Log message with formatted parameters: date1=2015-01-01, date2=\"" + date2.ToString("MMM dd yyyy", CultureInfo.InvariantCulture) + "\"",
             }));
         }
 
@@ -301,7 +302,7 @@ namespace NWheels.UnitTests.Logging
                 Environment.NewLine + "str=ABC"
             ));
             Assert.That(_logAppender.GetLog()[0].FullDetailsText.Contains(
-                Environment.NewLine + "dateTimeOffset=\"" + dateTimeOffset.ToString("MMM dd yyyy") + "\""
+                Environment.NewLine + "dateTimeOffset=\"" + dateTimeOffset.ToString("MMM dd yyyy", CultureInfo.InvariantCulture) + "\""
             ));
         }
 
