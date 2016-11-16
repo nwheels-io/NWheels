@@ -568,6 +568,7 @@ HEAD, JS/CSS LINKS
                 title="{{::translate(uidl.text)}}"></img></h1>
             <h2 class="logo-name" style="text-align:center;margin-bottom:40px;">{{::translate(uidl.helpText)}}</h2>
             <uidl-widget uidl="uidl.insideContent"></uidl-widget>
+            <p ng-if="uidl.footerText" class="m-t m-b text-center">{{::translate(uidl.footerText)}}</p>
             <p ng-if="uidl.poweredBy" class="m-t m-b text-center"><small>{{::translate(uidl.poweredBy)}}</small></p>
         </div>
     </script>
