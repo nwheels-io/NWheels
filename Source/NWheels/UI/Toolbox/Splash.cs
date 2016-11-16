@@ -29,7 +29,9 @@ namespace NWheels.UI.Toolbox
         
         public override IEnumerable<LocaleEntryKey> GetTranslatables()
         {
-            return base.GetTranslatables().ConcatOne(new LocaleEntryKey(this.PoweredBy, this, "PoweredBy"));
+            return base.GetTranslatables()
+                .ConcatOne(new LocaleEntryKey(this.PoweredBy, this, "PoweredBy"))
+                .ConcatOne(new LocaleEntryKey(this.FooterText, this, "FooterText"));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -53,5 +55,8 @@ namespace NWheels.UI.Toolbox
 
         [DataMember]
         public FormattedDocument LogoImage { get; set; }
+
+        [DataMember]
+        public string FooterText { get; set; }
     }
 }
