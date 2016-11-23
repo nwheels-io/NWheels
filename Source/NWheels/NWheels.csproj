@@ -211,6 +211,7 @@
     <Compile Include="Processing\IPushEvent.cs" />
     <Compile Include="Processing\IServerCommand.cs" />
     <Compile Include="Processing\Jobs\ApplicationJobAttribute.cs" />
+    <Compile Include="Processing\Jobs\ApplicationJobStatus.cs" />
     <Compile Include="Processing\Jobs\Core\IApplicationJobLogger.cs" />
     <Compile Include="Processing\Jobs\Core\IFrameworkApplicationJobConfig.cs" />
     <Compile Include="Processing\Jobs\Impl\SequentialBatchJobScheduler.cs" />
