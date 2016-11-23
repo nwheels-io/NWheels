@@ -1844,7 +1844,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.invokeCommand = function (command) {
                 scope.commandInProgress = true;
                 if (command.kind==='Submit') {
-                    var validationResult = { isValid: true };
+                    var validationResult = { isValid: false };
                     scope.$broadcast(':global:FormValidating', validationResult);
                     $timeout(function() {
                         if (validationResult.isValid===true) {
@@ -2093,7 +2093,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.invokeCommand = function (command) {
                 scope.commandInProgress = true;
                 if (command.kind==='Submit') {
-                    var validationResult = { isValid: true };
+                    var validationResult = { isValid: false };
                     scope.$broadcast(':global:FormValidating', validationResult);
                     $timeout(function() {
                         if (validationResult.isValid===true) {
@@ -2273,7 +2273,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.invokeCommand = function (command) {
                 if (command.kind==='Submit') {
                     scope.commandInProgress = true;
-                    var validationResult = { isValid: true };
+                    var validationResult = { isValid: false };
                     scope.$broadcast(':global:FormValidating', validationResult);
                     $timeout(function() {
                         if (validationResult.isValid===true) {  
@@ -2316,7 +2316,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.invokeCommand = function (command) {
                 if (command.kind==='Submit') {
                     scope.commandInProgress = true;
-                    var validationResult = { isValid: true };
+                    var validationResult = { isValid: false };
                     scope.$broadcast(':global:FormValidating', validationResult);
                     $timeout(function() {
                         if (validationResult.isValid===true) {  

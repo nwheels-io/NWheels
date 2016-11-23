@@ -87,7 +87,7 @@ HEAD, JS/CSS LINKS
         }
         .ibox-content .tabs-container {
             padding: 10px;
-            background-color: #EEEEEE;
+            background-color: #1e2f40;
             border-radius: 5px;            
         }
         .panel-heading i.fa {
@@ -339,9 +339,10 @@ HEAD, JS/CSS LINKS
         tr.jqgrow i.row-icon { margin-left: 5px; margin-right: 3px; }
         
         #global_div_dropdown_popup {
-            position: absolute;
-            z-index:2000;
-            background-color:red;
+              position: fixed;
+              z-index: 2000;
+              background-color: rgba(51, 51, 51, 0.56);
+              padding-top: 20%;
         }
         
         .grid-inline-edit-control {
@@ -351,10 +352,10 @@ HEAD, JS/CSS LINKS
         }
         
         .grid-inline-edit-dropdown-panel {
-            background-color: #C6F4DE;
-            border: 3px solid #C6F4DE;
-            border-radius: 5px;
-            padding: 3px;
+               background-color: #d2d2d2;
+                border: 7px solid #1e2f40;
+                border-radius: 7px;
+                padding: 15px;
         }
         
         a.clickable-cell {
@@ -1127,7 +1128,7 @@ HEAD, JS/CSS LINKS
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - DATA GRID
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <script type="text/ng-template" id="app/uidl-element-template/DataGrid">
+    <script type="text/ng-template" id="app/uidl-element-template/DataGrid">     
         <div id="rdtwrapper_{{uniqueWidgetId}}" 
              class="jqGrid_wrapper" 
              ng-class="{'flat-style': uidl.flatStyle===true, 'expandable-tree-mode': uidl.expandableTreeMode===true, 'ng-hide': uidl.hiddenMode===true}">
@@ -1136,6 +1137,32 @@ HEAD, JS/CSS LINKS
         </div>
     </script>
     <script type="text/javascript">
+        function saveRowGrid(cntrl) {
+            
+            setTimeout(function () {
+                var e = $.Event('keydown');                
+                e.keyCode = 13; // Character 'A'
+                
+                $(cntrl).parents("td").focus();
+                $(cntrl).parents("td").trigger(e);
+
+            //    alert("Hello");
+            }, 100);          
+        }
+
+        function cancelRowGrid(cntrl) {
+
+            setTimeout(function () {
+                var e = $.Event('keydown');
+                e.keyCode = 27; // Character 'A'
+
+                $(cntrl).parents("td").focus();
+                $(cntrl).parents("td").trigger(e);
+
+                //    alert("Hello");
+            }, 100);
+        }
+
         function initWidget_DataGrid($scope) {
             var columnsModel = [];
             var inlineEditorFields = null;
@@ -1149,17 +1176,17 @@ HEAD, JS/CSS LINKS
             if ($scope.uidl.expandableTreeMode) {
                 columnsModel.push({ name: '$id', index: '$id', width: 1, hidden: true, key: true });
             }
-            if ($scope.uidl.isInlineEditEnabled===true) {
+            if ($scope.uidl.isInlineEditEnabled === true) {
                 columnsModel.push({
-                    name:'act',
+                    name:'actions',
                     index:'act',
-                    width:55,
+                    width:100,
                     align:'center',
                     sortable:false,
                     formatter: function (cellvalue, options, rowObject) {
-                        return '<i class="fa fa-pencil" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
+                        return '<i onclick="saveRowGrid(this)" class="fa fa-floppy-o" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i><i onclick="cancelRowGrid(this)" class="fa fa-undo" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i> <i class="fa fa-pencil" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
                     }
-                });
+                });       
             }
             $scope.gridColumns.forEach(function (metaColumn, idx) {
                 if (metaColumn.columnType == 'Hidden' || !$scope.isUidlAuthorized(metaColumn)) {
@@ -1667,7 +1694,9 @@ HEAD, JS/CSS LINKS
                                 }); 
                             }
                         },
-                        ondblClickRow: function(rowId) {
+                        ondblClickRow: function (rowId) {
+                            
+                            $("#global_div_dropdown_popup").hide();
                             var rowObject = $scope.ResultSet[rowId - 1];
                             if ($scope.uidl.enableAutonomousQuery) {
                                 $scope.$emit($scope.uidl.qualifiedName + ':EditRequested', rowObject);
@@ -2077,11 +2106,23 @@ HEAD, JS/CSS LINKS
                 };
                 
                 $scope.includeSelected = function() {
-                    var addedIds = { };
+                    var addedIds = {};
+                    var isExists = false;
                     for (var i = 0 ; i < $scope.selection.include.length ; i++) {
                         var item = $scope.selection.include[i];
-                        $scope.model.push(item);
-                        addedIds[item['$id']] = true;
+
+                        angular.forEach($scope.model, function (value) {
+                            if (value.Id == item.Id)
+                            {
+                                isExists = true;
+                            }
+                        });
+
+                        if (isExists == false)
+                        {
+                            $scope.model.push(item);
+                            addedIds[item['$id']] = true;
+                        }
                     }
                     for (var i = 0 ; i < $scope.ResultSet.length ; ) {
                         var item = $scope.ResultSet[i];
@@ -2094,11 +2135,20 @@ HEAD, JS/CSS LINKS
                 };
                 
                 $scope.excludeSelected = function() {
-                    var removedIds = { };
+                    var removedIds = {};
+                    var isExists = false;
                     for (var i = 0 ; i < $scope.selection.exclude.length ; i++) {
                         var item = $scope.selection.exclude[i];
-                        $scope.ResultSet.push(item);
-                        removedIds[item['$id']] = true;
+                        angular.forEach($scope.ResultSet, function (value) {
+                            if (value.Id == item.Id) {
+                                isExists = true;
+                            }
+                        });
+
+                        if (isExists == false) {
+                            $scope.ResultSet.push(item);
+                            removedIds[item['$id']] = true;
+                        }
                     }
                     for (var i = 0 ; i < $scope.model.length ; ) {
                         var item = $scope.model[i];
@@ -2627,10 +2677,37 @@ HEAD, JS/CSS LINKS
                 }
             }
             $scope.$on(':global:FormValidating', function (event, data) {
+                data.isValid = true; //start with form vaild
                 var form = $('#' + $scope.uidl.elementName);
                 if (form.length && !form.valid()) {
                     data.isValid = false;
                 }
+                else if ($scope.plainFields.length > 0) {
+                    for (var i = 0; i < $scope.plainFields.length ; i++) {
+                        var field = $scope.plainFields[i];
+
+                        if (field.validation.isRequired)
+                        {
+                            var fieldElementId = $scope.uidl.elementName + '_' + field.propertyName;
+                            var fieldElement = document.getElementById(fieldElementId);
+                          
+                            if (field.fieldType.toLowerCase() == "edit") {                              
+                                if (fieldElement.value.length === 0) {
+                                    data.isValid = false;
+                                    var lbl = $("<label class='error' for='{labelValidInput}'> ").attr({ for: fieldElement.name }).text('This field is required.');
+                                    $(fieldElement).addClass("error");
+                                    $(fieldElement).parent().find("label").remove();
+                                    $(fieldElement).parent().append(lbl);
+                                }
+                                else {
+                                    $(fieldElement).removeClass("error");
+                                    data.isValid = true;
+                                }                               
+                            }
+                        }                       
+                    }
+                }
+
             });
             $scope.$on($scope.uidl.qualifiedName + ':StateResetter', function () {
                 if ($scope.jqueryFormValidator) {
@@ -3092,7 +3169,7 @@ HEAD, JS/CSS LINKS
                     name="{{::uniqueFieldId}}">
                     <div class="global-dropdown-toggle"><i class="fa fa-lg fa-caret-down"></i><span ng-if="entity[uidl.propertyName]">{{entity[uidl.propertyName].length || '0'}} items</span>
                 </div>
-                <div class="global-dropdown-content" style="display:none;">
+                <div class="global-dropdown-content" style="display:none;margin: 0 auto;width: 35%;margin: 0 auto;">
                     <div class="grid-inline-edit-dropdown-panel">
                         <uidl-widget uidl="uidl.nestedWidget" parent-uidl="uidl" parent-model="entity"></uidl-widget>
                     </div>
@@ -4196,6 +4273,7 @@ HEAD, JS/CSS LINKS
             var divGlobalDropdownPopup = $('#global_div_dropdown_popup');
             var divGlobalDropdownContent = null;
             var divGlobalDropdownContentParent = null;
+            var divGlobalDropdownEventFocus = null;
 
             function showGlobalDropdownContent(event) {
                 if (!isDivGlobalDropdownVisible) {
@@ -4205,15 +4283,16 @@ HEAD, JS/CSS LINKS
                     var toggleHeight = toggleQ.height();
                     var toggleWidth = toggleQ.width();
                     
+                    divGlobalDropdownEventFocus = toggleQ; 
                     divGlobalDropdownContent = toggleQ.next();
                     divGlobalDropdownContentParent = divGlobalDropdownContent.parent();
                     divGlobalDropdownContent.appendTo(divGlobalDropdownPopup);
                     divGlobalDropdownContent.css({display:'block'});
                     divGlobalDropdownPopup.css({
-                        top: (toggleOffset.top + toggleHeight) + 'px', 
-                        left: toggleOffset.left + 'px', 
-                        width: toggleWidth + 'px', 
-                        //height: '300px', 
+                        top: '1px', 
+                        left: '10%', 
+                        width: '100%', 
+                        height: '100%', 
                         display: 'block'
                     });
                     isDivGlobalDropdownVisible = true;
@@ -4234,6 +4313,8 @@ HEAD, JS/CSS LINKS
                     isDivGlobalDropdownVisible = false;
                     event.stopPropagation();
                     $('body').off('click', hideGlobalDropdownContent);
+
+                    divGlobalDropdownEventFocus.parents("tr").focus();
                 }
             }
 
