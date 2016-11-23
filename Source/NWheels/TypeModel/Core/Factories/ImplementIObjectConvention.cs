@@ -11,13 +11,15 @@ namespace NWheels.TypeModel.Core.Factories
 {
     public class ImplementIObjectConvention : ImplementationConvention
     {
+        private readonly bool _implementIsModifiedAsFalse;
         private Type _factoryType;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ImplementIObjectConvention()
+        public ImplementIObjectConvention(bool implementIsModifiedAsFalse = false)
             : base(Will.InspectDeclaration | Will.ImplementBaseClass)
         {
+            _implementIsModifiedAsFalse = implementIsModifiedAsFalse;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -34,8 +36,9 @@ namespace NWheels.TypeModel.Core.Factories
         protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
         {
             var objectContractType = writer.OwnerClass.Key.PrimaryInterface;
+            var explicitImpl = writer.ImplementInterfaceExplicitly<IObject>();
 
-            writer.ImplementInterfaceExplicitly<IObject>()
+            explicitImpl
                 .Property<Type>(x => x.ContractType).Implement(p => 
                     p.Get(w => 
                         w.Return(w.Const(objectContractType))
@@ -46,6 +49,17 @@ namespace NWheels.TypeModel.Core.Factories
                         w.Return(w.Const(_factoryType))
                     )
                 );
+
+            if (_implementIsModifiedAsFalse)
+            {
+                explicitImpl    
+                    .Property<bool>(x => x.IsModified).Implement(p => 
+                        p.Get(w => 
+                            w.Return(w.Const(false))
+                        )
+                    );
+
+            }
         }
 
         #endregion

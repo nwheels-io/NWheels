@@ -4,6 +4,7 @@ using Hapil;
 using NWheels.Configuration;
 using NWheels.Configuration.Core;
 using NWheels.DataObjects;
+using NWheels.TypeModel.Core.Factories;
 
 namespace NWheels.Conventions.Core
 {
@@ -16,7 +17,8 @@ namespace NWheels.Conventions.Core
 
         public ConfigurationObjectFactory(IComponentContext components, DynamicModule module, ITypeMetadataCache metadataCache)
             : base(module, ctx => new IObjectFactoryConvention[] {
-                new ConfigurationObjectConvention(metadataCache)
+                new ConfigurationObjectConvention(metadataCache),
+                new ImplementIObjectConvention(implementIsModifiedAsFalse: true), 
             })
         {
             _metadataCache = metadataCache;

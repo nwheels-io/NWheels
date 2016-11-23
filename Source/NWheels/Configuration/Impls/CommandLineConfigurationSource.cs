@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using NWheels.Configuration.Core;
+using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
+using NWheels.Extensions;
 
 namespace NWheels.Configuration.Impls
 {
@@ -88,6 +91,35 @@ namespace NWheels.Configuration.Impls
             value = argBody.Substring(equalsIndex + 1);
 
             return true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetCommandLineArgumentString(ITypeMetadataCache metadataCache, IConfigurationSection section)
+        {
+            var sectionXmlName = section.AsConfigurationObject().GetXmlName();
+            var contractType = section.As<IObject>().ContractType;
+            var metaType = metadataCache.GetTypeMetadata(contractType);
+            var argumentList = new List<string>();
+
+            foreach (var metaProperty in metaType.Properties.Where(p => p.Kind == PropertyKind.Scalar))
+            {
+                var value = metaProperty.ReadValue(section);
+
+                if (value != null)
+                {
+                    var argument = string.Format("/config:{0}.{1}={2}", sectionXmlName, metaProperty.Name, value);
+
+                    if (argument.Contains(" "))
+                    {
+                        argument = "\"" + argument + "\"";
+                    }
+
+                    argumentList.Add(argument);
+                }
+            }
+
+            return string.Join(" ", argumentList);
         }
     }
 }
