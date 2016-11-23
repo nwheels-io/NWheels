@@ -2041,6 +2041,13 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             function fieldHasModifier(field, modifier) {
                 return (field.modifiers && field.modifiers.indexOf(modifier) > -1);
             };
+
+            function fieldLabelDisplayText(field) {
+                if (fieldHasModifier(field, 'LabelHidden')) {
+                    return '';
+                }
+                return field.label;
+            };
             
             if (scope.uidl.$skin) {
                 for (var i = 0; i < scope.uidl.fields.length ; i++) {
@@ -2049,6 +2056,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             }
             
             scope.fieldHasModifier = fieldHasModifier;
+            scope.fieldLabelDisplayText = fieldLabelDisplayText;
             scope.metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
             scope.tabSetIndex = 0;
             scope.plainFields = Enumerable.From(scope.uidl.fields)

@@ -1138,6 +1138,7 @@ namespace NWheels.UI.Toolbox
         MaxSpace = 0x10000,
         Nullable = 0x20000,
         DualList = 0x40000,
+        LabelHidden = 0x80000,
         System = 0x40000000
     }
 

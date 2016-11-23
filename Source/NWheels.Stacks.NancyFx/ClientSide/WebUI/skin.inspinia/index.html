@@ -2377,7 +2377,7 @@ HEAD, JS/CSS LINKS
             <div ng-if="plainFields.length <= 4" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields">
                 <label class="control-label"
                        ng-class="{'col-lg-2':!uidl.isModalPopup, 'col-lg-4':uidl.isModalPopup}"
-                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.label)}}</label>
+                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(fieldLabelDisplayText(field))}}</label>
                 <div ng-class="{
                     'col-lg-3':!uidl.isModalPopup && field.fieldType!='Alert' && !fieldHasModifier(field, 'Memo') && !fieldHasModifier(field, 'FlatStyle'), 
                     'col-lg-6':uidl.isModalPopup || field.fieldType==='Alert' || fieldHasModifier(field, 'Memo') || fieldHasModifier(field, 'FlatStyle')}"
@@ -2389,14 +2389,14 @@ HEAD, JS/CSS LINKS
             <!-- PLAIN FIELDS TWO-COLUMN LAYOUT -->
             <div ng-if="plainFields.length > 4" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields | twoColumnRows">
                 <label class="col-lg-2 control-label"
-                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.label)}}</label>
+                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(fieldLabelDisplayText(field))}}</label>
                 <div class="col-lg-3">
                     <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>
                 <label ng-if="field['$nextCol']"
                        class="col-lg-2 control-label"
-                       for="{{::uidl.elementName + '_' + field['$nextCol'].propertyName}}">{{::translate(field['$nextCol'].label)}}</label>
+                       for="{{::uidl.elementName + '_' + field['$nextCol'].propertyName}}">{{::translate(fieldLabelDisplayText(field['$nextCol']))}}</label>
                 <div ng-if="field['$nextCol']" class="col-lg-3">
                     <uidl-form-field parent-uidl="uidl" uidl="field['$nextCol']" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
