@@ -128,6 +128,8 @@ namespace NWheels.UI.Toolbox
         public bool DisableToolBar { get; set; }
         [DataMember]
         public bool DisableForm { get; set; }
+        [DataMember]
+        public bool DisableGrid { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
