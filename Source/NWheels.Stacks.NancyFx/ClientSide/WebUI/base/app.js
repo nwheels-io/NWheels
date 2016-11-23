@@ -1781,7 +1781,13 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 					scope.entityService.storeEntity(diff).then(
                         function() {
                             scope.$emit(scope.uidl.qualifiedName + ':StoreEntityCompleted');
-                            scope.softRefresh();
+
+                            if (scope.uidl.disableGrid) {
+                                scope.commandInProgress = false;
+                                scope.editEntity(entity);
+                            } else {
+                                scope.softRefresh();
+                            }
                         },
                         function (fault) {
                             scope.$emit(scope.uidl.qualifiedName + ':StoreEntityFailed', commandService.createFaultInfo(fault));
@@ -2265,6 +2271,20 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
     m_controllerImplementations['TransactionForm'] = {
         implement: function (scope) {
             scope.model.State.Input = { };
+
+            scope.$on(scope.uidl.qualifiedName + ':Loaded', function (event, data){ 
+                var editAuthorizedData = {
+                    create: true,
+                    'delete': false,
+                    enabledOperations: null,
+                    fullEntity: null,
+                    isRestrictedEntry: false,
+                    restrictedEntryProperties: null,
+                    retrieve: true,
+                    update: true
+                };
+                scope.$broadcast(scope.uidl.inputForm.qualifiedName + ':EditAuthorized', editAuthorizedData);
+            });
 
             scope.$on(scope.uidl.qualifiedName + ':ShowModal', function(event, data) {
                 scope.commandInProgress = false;
@@ -3340,7 +3360,7 @@ function ($scope, $q, uidlService, entityService) {
                             var realItem = $.extend(true, { }, templateItem);
                             realItem.text = '' + (templateItem.repeaterQueryDisplayProperty ? 
                                 records[i][templateItem.repeaterQueryDisplayProperty] : 
-                                records[i]['$type']);
+                                templateItem.text /*records[i]['$type']*/);
                             realItem.value = '' + (templateItem.repeaterQueryValueProperty ? 
                                 records[i][templateItem.repeaterQueryValueProperty] : 
                                 records[i]['$id']);

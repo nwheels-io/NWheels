@@ -63,8 +63,9 @@ namespace NWheels.UI.Toolbox
                 if (ImportForm.OutputForm != null)
                 {
                     ImportForm.OutputForm.Field(
-                        x => x.ImportIssues, label: "MessagesAndIssues", type: FormFieldType.InlineGrid, modifiers: FormFieldModifiers.Tab | FormFieldModifiers.FlatStyle, 
-                        setup: f => {
+                        x => x.ImportIssues, label: "MessagesAndIssues", type: FormFieldType.InlineGrid, modifiers: FormFieldModifiers.Tab | FormFieldModifiers.FlatStyle,
+                        setup: f =>
+                        {
                             var issuesCrud = (Crud<IDocumentImportIssue>)f.NestedWidget;
                             issuesCrud.DisableAuthorizationChecks = true;
                             issuesCrud.DisableToolBar = true;
@@ -76,7 +77,7 @@ namespace NWheels.UI.Toolbox
                                 .Column(x => x.Location, size: FieldSize.Medium);
                         });
                 }
-                
+
                 ExportForm.AttachAsPopupTo(presenter, Export);
                 ExportForm.Execute.Text = "Export";
                 ExportForm.Reset.Text = "Cancel";
@@ -107,16 +108,50 @@ namespace NWheels.UI.Toolbox
                 }
             }
 
+
             var metaType = base.MetadataCache.GetTypeMetadata(typeof(TEntity));
             this.Text = metaType.Name + "Management";
 
             presenter.On(Crud.SelectedEntityChanged).AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Entity));
+
+            if (NavigateToGridDisabled)
+            {
+                Crud.DisableGrid = true;
+                Crud.Commands.Remove(Crud.Cancel);
+                //presenter.Defer(() => {
+                //    RemoveCancelCommand();
+                //});
+            }
+        }
+
+        private void RemoveCancelCommand()
+        {
+            Action<IUidlForm> removeCancel = form => {
+                Commands.Remove(Commands.FirstOrDefault(c => c.Kind == CommandKind.Reject));
+            };
+
+            if (Crud.Form != null)
+            {
+                removeCancel(Crud.Form);
+            }
+
+            if (Crud.FormTypeSelector != null)
+            {
+                Crud.FormTypeSelector.ForEachWidgetOfType<IUidlForm>(removeCancel);
+            }
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public bool ImportExportEnabled { get; set; }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
         public bool NavigateToFormEnabled { get; set; }
+
+        [DataMember]
+        public bool NavigateToGridDisabled { get; set; }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
