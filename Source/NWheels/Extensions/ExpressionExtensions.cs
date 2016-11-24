@@ -176,29 +176,29 @@ namespace NWheels.Extensions
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static string NormalizeKnownTokens(string s)
+        {
+            if (s == "True")
+            {
+                return "true";
+            }
+
+            if (s == "False")
+            {
+                return "false";
+            }
+
+            return s;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static void EnsureParameterName(ParameterExpression parameter, string name)
         {
             if ( parameter.Name != name )
             {
                 _s_parameterExpressionNameField.SetValue(parameter, name);
             }
-        }
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static string NormalizeKnownTokens(string s)
-        {
-            if ( s == "True" )
-            {
-                return "true";
-            }
-
-            if ( s == "False" )
-            {
-                return "false";
-            }
-
-            return s;
         }
     }
 }

@@ -1069,7 +1069,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     selectValue(inputContext, rule.valueExpression) : 
                     rule.valueConstant);
 				
-				if (leftSideValue === rightSideValue) {
+				if (('' + leftSideValue) == ('' + rightSideValue)) {
 					console.log('run-behavior > switch > matched rule #', i);
 					implementBehavior(scope, rule.onMatch, input);
 					return;

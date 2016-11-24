@@ -2284,7 +2284,13 @@ HEAD, JS/CSS LINKS
     <script type="text/javascript">
         function initWidget_EntityMethodForm($scope) {
             $scope.$on($scope.uidl.qualifiedName + ':ShowModal', function () {
-                $("#divModal_" + $scope.uidl.elementName).modal('show');
+                if ($scope.uidl.isNextDialog) {
+                    window.setTimeout(function() {
+                        $("#divModal_" + $scope.uidl.elementName).modal('show');
+                    }, 500);
+                } else {
+                    $("#divModal_" + $scope.uidl.elementName).modal('show');
+                }
             });
             $scope.$on($scope.uidl.qualifiedName + ':HideModal', function () {
                 $("#divModal_" + $scope.uidl.elementName).modal('hide');
@@ -2408,7 +2414,13 @@ HEAD, JS/CSS LINKS
                     if ($scope.model.State) {
                         $scope.model.State.Output = null;
                     }
-                    $("#divModal_" + $scope.uidl.elementName).modal('show');
+                    if ($scope.uidl.isNextDialog) {
+                        window.setTimeout(function() {
+                            $("#divModal_" + $scope.uidl.elementName).modal('show');
+                        }, 500);
+                    } else {
+                        $("#divModal_" + $scope.uidl.elementName).modal('show');
+                    }
                 });
                 $scope.$on($scope.uidl.qualifiedName + ':HideModal', function () {
                     $("#divModal_" + $scope.uidl.elementName).modal('hide');

@@ -70,6 +70,19 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void AttachAsPopupTo<TController, TControllerData, TControllerState>(
+            PresenterBuilder<TController, TControllerData, TControllerState> controller,
+            UidlNotification notification)
+            where TController : ControlledUidlNode
+            where TControllerData : class
+            where TControllerState : class
+        {
+            SetPopupMode();
+            controller.On(notification).Broadcast(this.ShowModal).TunnelDown();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void SetPopupMode()
         {
             this.TemplateName = "TransactionFormPopupMode";
@@ -130,6 +143,8 @@ namespace NWheels.UI.Toolbox
         public UserAlertDisplayMode UserAlertDisplayMode { get; set; }
         [DataMember, ManuallyAssigned]
         public Form<TOutput> OutputForm { get; set; }
+        [DataMember]
+        public bool IsNextDialog { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

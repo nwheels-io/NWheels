@@ -1093,6 +1093,7 @@ namespace NWheels.UI
         public interface IAlterModelDestinationSelector<TInput, TDestination>
         {
             void To(Expression<Func<ViewModel<TData, TState, TInput>, TDestination>> destination);
+            void ToAny(Expression<Func<ViewModel<TData, TState, TInput>, object>> destination);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1259,6 +1260,13 @@ namespace NWheels.UI
                     _ownerBuilder.FinalizeAlteration(destination);
                 }
 
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
+                public void ToAny(Expression<Func<ViewModel<TData, TState, TInput>, object>> destination)
+                {
+                    _ownerBuilder.FinalizeAlteration(destination);
+                }
+
                 #endregion
             }
 
@@ -1371,7 +1379,7 @@ namespace NWheels.UI
                 onMatch(builder);
 
                 var rule = new UidlBranchByRuleBehavior.BranchRule() {
-                    ValueConstant = (valueConstant != null ? valueConstant.ToString() : null),
+                    ValueConstant = (valueConstant != null ? ExpressionExtensions.NormalizeKnownTokens(valueConstant.ToString()) : null),
                     OnMatch = builder.Behavior
                 };
 

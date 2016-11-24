@@ -37,6 +37,8 @@ namespace NWheels.UI.Toolbox
         public Form<TInput> InputForm { get; set; }
         [DataMember]
         public bool QueryAsEntity { get; set; }
+        [DataMember]
+        public bool IsNextDialog { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
