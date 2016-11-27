@@ -4127,7 +4127,7 @@ HEAD, JS/CSS LINKS
                 <uidl-widget uidl="widget"></uidl-widget>
             </div>
         </div>
-        <div class="row" ng-repeat="widget in uidl.widgets" ng-if="widget.widgetType=='Chart' || widget.widgetType=='StaticTable'">
+        <div class="row" ng-repeat="widget in uidl.widgets" ng-if="widget.widgetType!='Gauge' && widget.widgetType!='TransactionForm'">
             <div class="col-lg-12" style="vertical-align:top;">
                 <uidl-widget uidl="widget"></uidl-widget>
             </div>
@@ -4143,7 +4143,25 @@ HEAD, JS/CSS LINKS
             <a ng-if="property.kind==='Relation'">Go to</a>
         </div>
     </script>
-        
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - TAB SET
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="app/uidl-element-template/TabSet">
+        <div class="tabs-container" ng-init="tabIndex=0">
+            <ul class="nav nav-tabs">
+                <li ng-class="{active: $index == tabIndex}" ng-repeat="tab in tabs"><a ng-click="tabIndex = $index">{{translate(tab.text)}}</a></li>
+            </ul>
+            <div class="tab-content">
+                <div ng-repeat="tab in tabs" ng-class="{'tab-pane': true, active: $index == tabIndex}" ng-show="$index == tabIndex">
+                    <div class="ibox-content nested">
+                        <uidl-widget uidl="tab" parent-uidl="uidl" parent-model="model.Data.entity"></uidl-widget>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    
     <!------ HARD CODED  -------->
     
     <script type="text/ng-template" id="app/uidl-element-template/AffiliateSignUpForm">
