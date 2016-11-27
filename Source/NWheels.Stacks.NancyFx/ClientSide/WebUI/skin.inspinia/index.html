@@ -830,7 +830,7 @@ HEAD, JS/CSS LINKS
                                 </li>
                             </ul>
                         </li-->                        
-                        <li ng-repeat="command in uidl.utilityCommands">
+                        <li ng-repeat="command in uidl.utilityCommands | authorized">
                             <button 
                                 type="button"
                                 class="btn btn-rounded"
@@ -1067,7 +1067,7 @@ HEAD, JS/CSS LINKS
                         <i class="fa fa-refresh"></i>
                     </button>
                     <button 
-                        ng-repeat="command in uidl.entityCommands"
+                        ng-repeat="command in uidl.entityCommands | authorized"
                         type="button"
                         class="btn btn-rounded"
                         style="margin-right:5px;"
@@ -1076,7 +1076,7 @@ HEAD, JS/CSS LINKS
                         ng-class="{'btn-default':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
                     ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                     <button 
-                        ng-repeat="command in uidl.staticCommands"
+                        ng-repeat="command in uidl.staticCommands | authorized"
                         type="button"
                         class="btn btn-rounded btn-outline"
                         style="margin-right:5px;"
@@ -1104,7 +1104,7 @@ HEAD, JS/CSS LINKS
                 </div>
                 <div class="ibox-content" style="padding-top:15px;">
                     <button 
-                        ng-repeat="command in uidl.commands"
+                        ng-repeat="command in uidl.commands | authorized"
                         type="button"
                         class="btn btn-rounded"
                         style="margin-right:5px;"
@@ -2510,7 +2510,7 @@ HEAD, JS/CSS LINKS
             <!-- COMMAND BUTTONS -->
             <div ng-if="uidl.commands.length && !uidl.autoSubmitOnChange" class="form-group">
                 <div class="col-lg-5 clearfix">
-                    <button ng-repeat="command in uidl.commands | reverse"
+                    <button ng-repeat="command in uidl.commands | authorized | reverse"
                             type="button"
                             class="btn btn-rounded btn-lg pull-right"
                             style="margin-right:5px;"
@@ -2561,7 +2561,7 @@ HEAD, JS/CSS LINKS
             </div>
             <!-- COMMAND BUTTONS -->
             <div ng-if="uidl.commands.length && !uidl.autoSubmitOnChange" class="form-group m-l" style="margin-top:5px;">
-                <button ng-repeat="command in uidl.commands | reverse"
+                <button ng-repeat="command in uidl.commands | authorized | reverse"
                         type="button"
                         class="btn btn-rounded btn-md pull-right"
                         style="margin-right:5px;"

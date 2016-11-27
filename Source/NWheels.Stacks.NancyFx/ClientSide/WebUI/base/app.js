@@ -454,6 +454,30 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
     }
     
     //-----------------------------------------------------------------------------------------------------------------
+
+    function isUidlAuthorized(uidlElement) {
+        if (!uidlElement.authorization || uidlElement.authorization.requiredClaims.length == 0) {
+            return true;
+        }
+        try {
+            var userClaims = (
+                $rootScope.appScope.model.State.LoggedInUser.AllClaims ||  // a hack; must be generalized
+                $rootScope.appScope.model.State.LoggedInUser.LoginResult.AllClaims);
+
+            for (var i = 0 ; i < uidlElement.authorization.requiredClaims.length; i++) {
+                var claim = uidlElement.authorization.requiredClaims[i];
+                if (userClaims.indexOf(claim) >= 0) {
+                    return true;
+                }
+            }
+        } catch(ex) { 
+            console.log('isUidlAuthorized failed!', uidlElement, ex);
+        }
+        
+        return false;
+    };
+           
+    //-----------------------------------------------------------------------------------------------------------------
     /*
     function executeNotification(scope, notification, direction) {
         if (direction.indexOf('BubbleUp') > -1) {
@@ -2599,6 +2623,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         getCurrentLocale: getCurrentLocale,
         getMetaType: getMetaType,
         getRelatedMetaType: getRelatedMetaType,
+        isUidlAuthorized: isUidlAuthorized,
         //takeMessagesFromServer: takeMessagesFromServer,
         implementController: implementController,
         translate: translate,
@@ -2808,29 +2833,13 @@ function (uidlService, entityService, commandService, $timeout, $http, $compile,
             $scope.uidlService = uidlService;
             $scope.entityService = entityService;
             $scope.commandService = commandService;
+            $scope.isUidlAuthorized = uidlService.isUidlAuthorized;
             $scope.inlineUserAlert = { current: null };
             
             $scope.parentFormFieldHasModifier = function(modifier) {
                 if ($scope.parentUidl && $scope.parentUidl.modifiers) {
                     return hasEnumFlag($scope.parentUidl.modifiers, modifier);
                 }
-                return false;
-            };
-            
-            $scope.isUidlAuthorized = function(uidlElement) {
-                if (!uidlElement.authorization || uidlElement.authorization.requiredClaims.length == 0) {
-                    return true;
-                }
-                try {
-                    var userClaims = ($scope.appScope.model.State.LoggedInUser.AllClaims || $scope.appScope.model.State.LoggedInUser.LoginResult.AllClaims);
-                    for (var i = 0 ; i < uidlElement.authorization.requiredClaims.length; i++) {
-                        var claim = uidlElement.authorization.requiredClaims[i];
-                        if (userClaims.indexOf(claim) >= 0) {
-                            return true;
-                        }
-                    }
-                } catch(ex) { }
-                
                 return false;
             };
             
@@ -3474,5 +3483,29 @@ theApp.filter('twoColumnRows', function () {
 theApp.filter('translated', ['uidlService', function(uidlService) {
     return function(s) {
         return uidlService.translate(s);
+    };
+}]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+theApp.filter('authorized', ['uidlService', function(uidlService) {
+    return function(uidlElementArray) {
+        var allAuthorized = true;
+        for (var i = 0 ; i < uidlElementArray.length ; i++) {
+            if (!uidlService.isUidlAuthorized(uidlElementArray[i])) {
+                allAuthorized = false;
+                break;
+            }
+        }
+        if (allAuthorized) {
+            return uidlElementArray;
+        }
+        var authorizedArray = [];
+        for (var i = 0 ; i < uidlElementArray.length ; i++) {
+            if (uidlService.isUidlAuthorized(uidlElementArray[i])) {
+                authorizedArray.push(uidlElementArray[i]);
+            }
+        }
+        return uidlService.authorizedArray;
     };
 }]);
