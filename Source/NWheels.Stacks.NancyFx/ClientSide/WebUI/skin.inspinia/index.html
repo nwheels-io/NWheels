@@ -412,6 +412,7 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-screen-part">
         <uidl-widget uidl="uidl.contentRoot"></uidl-widget>
+        <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
         <uidl-widget ng-repeat="popup in uidl.popupContents" uidl="popup"></uidl-widget>
     </script>
 
@@ -2369,7 +2370,7 @@ HEAD, JS/CSS LINKS
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/TransactionFormPopupMode">
         <div class="modal inmodal fade" id="divModal_{{uidl.elementName}}" tabindex="-1" role="dialog"  aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog" ng-class="{'modal-lg':uidl.size==='Large'}">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -2789,7 +2790,10 @@ HEAD, JS/CSS LINKS
                     'fa-exclamation-triangle':uidl.alertType==='Warning',
                     'fa-times-circle':uidl.alertType==='Error'
                 }"></i>
-                <span>{{entity[uidl.propertyName] || translate(uidl.label)}}</span>
+                <span ng-if="!alertMultilineText">{{entity[uidl.propertyName] || translate(uidl.label)}}</span>
+                <span ng-if="alertMultilineText">
+                    <p ng-repeat="line in alertMultilineText track by $index">{{line}}</p>
+                </span>
             </div>
             <!-- CHECKBOX -->
             <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Checkbox'" class="onoffswitch" ng-class="{'m-b': !uidl.$skin.zeroPadding}">
@@ -2852,7 +2856,7 @@ HEAD, JS/CSS LINKS
                  class="input-group date"
                  ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                  ng-disabled="!editAuthorized"
-                 ng-init="if (!parsedEntity) parsedEntity = { };">
+                 ng-init="parsedEntity = parsedEntity || { }">
                 <input type="text"
                        class="form-control"
                        ng-model="parsedEntity[uidl.propertyName]"
@@ -3088,6 +3092,7 @@ HEAD, JS/CSS LINKS
                     'alert-info': uidl.alertType==='Info',
                     'alert-success': uidl.alertType==='Success'                   
                  }"
+                 ng-init="displayTextLines=splitMultilineText(entity[uidl.propertyName] || translate(uidl.label))"
             >
                 <div class="col-xs-1" style="text-align:right">
                     <h2><i ng-if="uidl.alertType" class="fa" ng-class="{
@@ -3098,7 +3103,7 @@ HEAD, JS/CSS LINKS
                     }"></i></h2>
                 </div>
                 <div class="col-xs-11">
-                    <span>{{entity[uidl.propertyName] || translate(uidl.label)}}</span>
+                    <p style="font-weight:normal;" ng-repeat="line in displayTextLines">{{line}}</p>
                 </div>
             </div>
         </div>
@@ -3116,7 +3121,8 @@ HEAD, JS/CSS LINKS
                     'alert-success': uidl.alertType==='Success'                   
                  }"
             >
-                <div class="row" style="margin:0;padding:0">
+                <div class="row" style="margin:0;padding:0" 
+                    ng-init="displayTextLines=splitMultilineText(entity[uidl.propertyName] || translate(uidl.label))">
                     <div class="col-md-2" style="margin:0;">
                         <h3 style="font-weight:normal;"><i ng-if="uidl.alertType" class="fa fa-lg" ng-class="{
                             'fa-info':uidl.alertType==='Info',
@@ -3126,7 +3132,7 @@ HEAD, JS/CSS LINKS
                         }"></i></h3>
                     </div>
                     <div class="col-md-10" style="text-align:left;padding:0;margin:0;">
-                        <h3 style="font-weight:normal;">{{entity[uidl.propertyName] || translate(uidl.label)}}</h3>
+                        <h3 style="font-weight:normal;" ng-repeat="line in displayTextLines">{{line}}</h3>
                     </div>
                 </div>
             </div>

@@ -55,6 +55,31 @@ function cleanDom(node) {
 
 //-----------------------------------------------------------------------------------------------------------------
 
+function splitMultilineText(text) {
+    var lines = [];
+    var currentLine = '';
+    if (text) {
+        for (var i = 0 ; i < text.length ; i++) {
+            var c = text.charAt(i);
+            switch (c) {
+                case '\r': break;
+                case '\n': 
+                    lines.push(currentLine);
+                    currentLine = '';
+                    break;
+                default:
+                    currentLine += c;
+            }
+        }
+        if (currentLine.length > 0) {
+            lines.push(currentLine);
+        }
+    }
+    return lines;
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
 Number.prototype.formatMoney = function(c, d, t) {
     var n = this, 
         c = isNaN(c = Math.abs(c)) ? 2 : c, 
@@ -409,6 +434,8 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 return moment.utc(value, 'YYYY-MM-DD HH:mm:ss').format('L');
             case 'D':
                 return moment.utc(value, 'YYYY-MM-DD HH:mm:ss').format('LL');
+            case 'u':
+                return moment.utc(value, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
             case 'c':
                 return (value ? '$' + parseFloat(value).formatMoney(2, '.', ',') : '');
             case '#,##0':
@@ -2693,6 +2720,7 @@ theApp.directive('uidlScreen', ['uidlService', 'entityService', function (uidlSe
         controller: function ($scope) {
             $scope.uidlService = uidlService;
             $scope.entityService = entityService;
+            $scope.inlineUserAlert = { current: null };
             //console.log('uidlScreen::controller', $scope.uidl.qualifiedName);
             //uidlService.implementController($scope);
             $scope.$watch('uidl', function (newValue, oldValue) {
@@ -2729,6 +2757,7 @@ theApp.directive('uidlScreenPart', ['uidlService', 'entityService', function (ui
         controller: function ($scope) {
             $scope.uidlService = uidlService;
             $scope.entityService = entityService;
+            $scope.inlineUserAlert = { current: null };
             //console.log('uidlScreenPart::controller', $scope.uidl.qualifiedName);
             //uidlService.implementController($scope);
             $scope.$watch('uidl', function (newValue, oldValue) {
@@ -2909,7 +2938,14 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
             $scope.hasUidlModifier = function (modifier) {
                 return ($scope.uidl.modifiers && $scope.uidl.modifiers.indexOf(modifier) > -1);
             };
-            
+
+            $scope.splitMultilineText = function (text) {
+                if (text) {
+                    return text.split('\n');
+                }
+                return [];
+            };
+
             if ($scope.parentUidl.usePascalCase === false) {
                 $scope.uidl.propertyName = toCamelCase($scope.uidl.propertyName);
             }
@@ -3047,6 +3083,9 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
                 $scope.hiddenValues = { };
                 if ($scope.uidl.initialValue && data && !data[$scope.uidl.propertyName]) {
                     data[$scope.uidl.propertyName] = $scope.uidl.initialValue;
+                }
+                if ($scope.uidl.fieldType==='Alert' && $scope.hasUidlModifier('Memo')) {
+                    $scope.alertMultilineText = splitMultilineText(data[$scope.uidl.propertyName] || uidlService.translate($scope.uidl.label));
                 }
             });
             

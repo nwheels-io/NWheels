@@ -145,6 +145,8 @@ namespace NWheels.UI.Toolbox
         public Form<TOutput> OutputForm { get; set; }
         [DataMember]
         public bool IsNextDialog { get; set; }
+        [DataMember]
+        public WidgetSize Size { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
