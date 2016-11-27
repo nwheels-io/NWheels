@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -83,6 +84,86 @@ namespace NWheels.Extensions
         public static IEnumerable<IReadOnlyList<T>> TakeChunks<T>(this IEnumerable<T> source, int length)
         {
             return new ChunkingEnumerable<T>(source, length);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<string> ReadLines(this StreamReader input)
+        {
+            return new LineReadingEnumerable(input);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class LineReadingEnumerable : IEnumerable<string>
+        {
+            private readonly StreamReader _input;
+
+            public LineReadingEnumerable(StreamReader input)
+            {
+                _input = input;
+            }
+
+            #region Implementation of IEnumerable
+
+            public IEnumerator<string> GetEnumerator()
+            {
+                return new LineReadingEnumerator(_input);
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class LineReadingEnumerator : IEnumerator<string>
+        {
+            private readonly StreamReader _input;
+            private string _current;
+
+            public LineReadingEnumerator(StreamReader input)
+            {
+                _input = input;
+            }
+
+            #region Implementation of IDisposable
+
+            public void Dispose()
+            {
+                _input.Dispose();
+            }
+
+            #endregion
+
+            #region Implementation of IEnumerator
+
+            public bool MoveNext()
+            {
+                _current = _input.ReadLine();
+                return (_current != null);
+            }
+
+            public void Reset()
+            {
+                throw new NotSupportedException();
+            }
+
+            public string Current
+            {
+                get { return _current; }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return _current; }
+            }
+
+            #endregion
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
