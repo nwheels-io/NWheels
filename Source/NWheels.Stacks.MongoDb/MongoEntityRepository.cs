@@ -189,7 +189,7 @@ namespace NWheels.Stacks.MongoDb
 
         object[] IEntityRepository.GetByIdList(object[] idValues)
         {
-            var results = _ownerRepo.LazyLoadByIdList<TEntityContract, TEntityId>(idValues.Cast<TEntityId>()).ToArray();
+            var results = _ownerRepo.LazyLoadByIdList<TEntityContract, TEntityId>(idValues.Where(id => id != null).Cast<TEntityId>()).ToArray();
 
             return results
                 .Select(r => InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>((TEntityImpl)r, shouldTrack: true))

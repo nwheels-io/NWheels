@@ -1815,7 +1815,7 @@ namespace NWheels.UI
                         var rightSideId = rightSideIds[i];
 
                         IDomainObject rightSideValue;
-                        if (rightSideById.TryGetValue(rightSideId, out rightSideValue))
+                        if (rightSideId != null && rightSideById.TryGetValue(rightSideId, out rightSideValue))
                         {
                             _rightSideValueByLeftSideId[leftSideId] = rightSideValue;
                         }
