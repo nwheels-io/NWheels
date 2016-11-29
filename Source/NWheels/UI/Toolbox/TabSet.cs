@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Extensions;
+using NWheels.Globalization.Core;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 
@@ -31,6 +32,13 @@ namespace NWheels.UI.Toolbox
         public void AddTabs(params WidgetUidlNode[] tabContents)
         {
             this.Tabs.AddRange(tabContents);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
+        {
+            return Tabs;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

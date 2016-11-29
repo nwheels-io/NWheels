@@ -2313,7 +2313,23 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 return result;
             }
 
+            scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
+                scope.assignedModel = data;
+            });
+            
             //scope.formattedHtml = syntaxHighlight(scope.parentModel);
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_controllerImplementations['TabSet'] = {
+        implement: function (scope) {
+            scope.tabIndex = 0;
+            
+            scope.setTabIndex = function(index) {
+                scope.tabIndex = index;
+            }
         }
     };
 

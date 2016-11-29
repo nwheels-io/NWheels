@@ -4148,12 +4148,12 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - TAB SET
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/TabSet">
-        <div class="tabs-container" ng-init="tabIndex=0">
+        <div class="tabs-container">
             <ul class="nav nav-tabs">
-                <li ng-class="{active: $index == tabIndex}" ng-repeat="tab in tabs"><a ng-click="tabIndex = $index">{{translate(tab.text)}}</a></li>
+                <li ng-class="{active: $index == tabIndex}" ng-repeat="tab in uidl.tabs"><a ng-click="setTabIndex($index)">{{translate(tab.text)}}</a></li>
             </ul>
             <div class="tab-content">
-                <div ng-repeat="tab in tabs" ng-class="{'tab-pane': true, active: $index == tabIndex}" ng-show="$index == tabIndex">
+                <div ng-repeat="tab in uidl.tabs" ng-class="{'tab-pane': true, active: $index == tabIndex}" ng-show="$index == tabIndex">
                     <div class="ibox-content nested">
                         <uidl-widget uidl="tab" parent-uidl="uidl" parent-model="model.Data.entity"></uidl-widget>
                     </div>
@@ -4423,13 +4423,23 @@ HEAD, JS/CSS LINKS
             return {
                 link: function ($scope, elem, attrs, ctrl) {
                     $scope.$timeout(function() {
+                        if ($scope.parentModel) {
+                            $scope.createJSONView($scope.parentModel);
+                        } else {
+                            $scope.$watch('assignedModel', function (newValue, oldValue) {
+                                if ($scope.assignedModel) {
+                                    $scope.createJSONView($scope.assignedModel);
+                                }
+                            });                       
+                        }
+                    });
+                    $scope.createJSONView = function(obj) {
                         var options = { 
                             collapsed: !$scope.uidl.expandedByDefault,
                             nl2br: true
                         };
-                        var obj = $scope.parentModel;
                         elem.JSONView(obj, options);
-                    });
+                    }
                 }
             }
         }]);
