@@ -46,6 +46,7 @@ using NWheels.Authorization.Core;
 using NWheels.Authorization.Factories;
 using NWheels.Concurrency;
 using NWheels.Configuration.Impls;
+using NWheels.Endpoints.Factories;
 using NWheels.Entities.Migrations;
 using NWheels.Hosting.Factories;
 using NWheels.Logging.Factories;
@@ -347,6 +348,8 @@ namespace NWheels.Hosting.Core
 
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<RealTimeoutManager>().As<RealTimeoutManager>();
             builder.NWheelsFeatures().Logging().RegisterLogger<ITimeoutManagerLogger>();
+            builder.RegisterType<DuplexNetworkApiProxyFactory>().As<IDuplexNetworkApiProxyFactory>().SingleInstance();
+            builder.RegisterType<DuplexTcpServerFactory>().SingleInstance();
 
             builder.RegisterType<AccessControlListCache>().SingleInstance();
             builder.RegisterType<LocalTransientSessionManager>().As<ISessionManager, ICoreSessionManager>().SingleInstance();

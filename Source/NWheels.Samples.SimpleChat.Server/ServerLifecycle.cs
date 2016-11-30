@@ -30,7 +30,8 @@ namespace NWheels.Samples.SimpleChat.Server
             _tcpServer = _tcpServerFactory.CreateServer<IChatServerApi, IChatClientApi>(
                 listenPortNumber: 9797,
                 workerThreadCount: 1,
-                serverPingInterval: TimeSpan.FromSeconds(1));
+                serverPingInterval: TimeSpan.FromSeconds(1),
+                serverObjectFactory: (server, client) => new ChatServer(server, client));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

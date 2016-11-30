@@ -39,7 +39,8 @@ namespace NWheels.Endpoints
             int maxPendingConnections = Int32.MaxValue,
             int workerThreadCount = 1,
             TimeSpan? clientHeartbeatInterval = null,
-            TimeSpan? serverPingInterval = null)
+            TimeSpan? serverPingInterval = null,
+            Func<DuplexTcpServer<TServerApi, TClientApi>, TClientApi, TServerApi> serverObjectFactory = null)
             where TServerApi : class
             where TClientApi : class
         {
@@ -51,7 +52,8 @@ namespace NWheels.Endpoints
                 maxPendingConnections,
                 workerThreadCount,
                 clientHeartbeatInterval,
-                serverPingInterval);
+                serverPingInterval,
+                serverObjectFactory);
         }
     }
 }

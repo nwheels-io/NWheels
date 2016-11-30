@@ -27,7 +27,7 @@ namespace NWheels.Endpoints
         private readonly int _maxPendingConnections;
         private readonly TimeSpan? _clientHeartbeatInterval;
         private readonly TimeSpan? _serverPingInterval;
-        private readonly Func<TClientApi, TServerApi> _serverObjectFactory;
+        private readonly Func<DuplexTcpServer<TServerApi, TClientApi>, TClientApi, TServerApi> _serverObjectFactory;
         private readonly TcpListener _tcpListener;
         private readonly BlockingCollection<Tuple<Socket, Session>> _sessionManagerQueue; // session==null -> OPEN ; session!=null -> CLOSE
         private readonly Hashtable _sessionTaskBySessionObject; // single writer = sessionManagerThread; multiple readers
@@ -49,7 +49,7 @@ namespace NWheels.Endpoints
             int workerThreadCount = 1,
             TimeSpan? clientHeartbeatInterval = null,
             TimeSpan? serverPingInterval = null,
-            Func<TClientApi, TServerApi> serverObjectFactory = null)
+            Func<DuplexTcpServer<TServerApi, TClientApi>, TClientApi, TServerApi> serverObjectFactory = null)
         {
             _components = components;
             _proxyFactory = proxyFactory;
@@ -289,9 +289,11 @@ namespace NWheels.Endpoints
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private TServerApi ResolveServerObjectByDefault(TClientApi client)
+        private TServerApi ResolveServerObjectByDefault(DuplexTcpServer<TServerApi, TClientApi> tcpServer, TClientApi client)
         {
-            return _components.Resolve<TServerApi>();
+            return _components.Resolve<TServerApi>(
+                TypedParameter.From<DuplexTcpServer<TServerApi, TClientApi>>(tcpServer),
+                TypedParameter.From<TClientApi>(client));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
