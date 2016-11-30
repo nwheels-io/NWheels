@@ -75,7 +75,7 @@ namespace NWheels.UnitTests.Endpoints.Factories
             {
                 Log.Add("ServerApiImplementation.Ping(" + message + ")");
                 
-                var client = DuplexNetworkEndpointApiContext.GetRemotePartyAs<IClientApi>();
+                var client = DuplexNetworkApi.CurrentCall.GetRemotePartyAs<IClientApi>();
                 client.Pong("YOU SENT [" + message + "]");
             }
 

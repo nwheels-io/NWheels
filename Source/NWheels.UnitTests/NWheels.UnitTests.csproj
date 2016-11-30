@@ -171,6 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DataObjects\Conventions\" />
+    <Folder Include="Endpoints\Impl\" />
     <Folder Include="Processing\Rules\Core\" />
   </ItemGroup>
   <ItemGroup>

@@ -197,7 +197,7 @@ namespace NWheels.Endpoints.Factories
                         var context = new CompactDeserializationContext(_serializer, _dictionary, reader, _components);
                         var call = CompactRpcProtocol.ReadCall(_callFactory, context);
 
-                        using (DuplexNetworkEndpointApiContext.UseProxy(this))
+                        using (DuplexNetworkApi.CurrentCall.UseClientProxy(this))
                         {
                             call.ExecuteOn(_localServer);
                         }
