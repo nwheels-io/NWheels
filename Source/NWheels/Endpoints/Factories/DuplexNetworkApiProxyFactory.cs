@@ -139,6 +139,16 @@ namespace NWheels.Endpoints.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public void Dispose()
+            {
+                if (Disposing != null)
+                {
+                    Disposing();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public abstract void OnRegisteringApiContracts(CompactSerializerDictionary dictionary);
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -155,6 +165,18 @@ namespace NWheels.Endpoints.Factories
 
                         _transport.SendBytes(buffer.ToArray());
                     }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            void IDuplexNetworkEndpointApiProxy.NotifySessionClosed(SessionCloseReason reason)
+            {
+                var apiEvents = _localServer as IDuplexNetworkApiEvents;
+
+                if (apiEvents != null)
+                {
+                    apiEvents.OnSessionClosed(this, reason);
                 }
             }
 
@@ -185,6 +207,10 @@ namespace NWheels.Endpoints.Factories
             {
                 get { return _localServer; }
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public event Action Disposing;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 

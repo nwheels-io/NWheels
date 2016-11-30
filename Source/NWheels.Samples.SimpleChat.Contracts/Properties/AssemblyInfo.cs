@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("NWheels.Samples.SimpleChatApp")]
+[assembly: AssemblyTitle("NWheels.Samples.SimpleChat.Contracts")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("NWheels.Samples.SimpleChatApp")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyProduct("NWheels.Samples.SimpleChat.Contracts")]
+[assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("4b898c91-b6f8-4b2c-9fb7-b139ea419559")]
+[assembly: Guid("1f2b47d3-cb81-4d38-8f42-f5d80ad91d55")]
 
 // Version information for an assembly consists of the following four values:
 //

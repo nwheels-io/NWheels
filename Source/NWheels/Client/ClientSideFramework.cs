@@ -1,0 +1,671 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Autofac;
+using Hapil;
+using NWheels.Authorization;
+using NWheels.Authorization.Core;
+using NWheels.Authorization.Impl;
+using NWheels.Concurrency;
+using NWheels.Concurrency.Core;
+using NWheels.Configuration;
+using NWheels.Configuration.Core;
+using NWheels.Conventions;
+using NWheels.Conventions.Core;
+using NWheels.Core;
+using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
+using NWheels.DataObjects.Core.Conventions;
+using NWheels.Endpoints;
+using NWheels.Endpoints.Factories;
+using NWheels.Entities;
+using NWheels.Entities.Core;
+using NWheels.Entities.Factories;
+using NWheels.Entities.Migrations;
+using NWheels.Extensions;
+using NWheels.Hosting;
+using NWheels.Hosting.Core;
+using NWheels.Hosting.Factories;
+using NWheels.Logging;
+using NWheels.Logging.Core;
+using NWheels.Processing.Commands.Factories;
+using NWheels.Processing.Messages;
+using NWheels.Serialization;
+using NWheels.Serialization.Factories;
+
+namespace NWheels.Client
+{
+    public class ClientSideFramework : IFramework, ICoreFramework
+    {
+        private readonly IContainer _components;
+        private readonly DynamicModule _dynamicModule;
+        private readonly Action<IComponentContext, ContainerBuilder> _registerModules;
+        private readonly TestThreadLogAppender _logAppender;
+        private readonly LoggerObjectFactory _loggerFactory;
+        private readonly ConfigurationObjectFactory _configurationFactory;
+        private readonly UnitOfWorkFactory _unitOfWorkFactory;
+        //private readonly TypeMetadataCache _metadataCache;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ClientSideFramework()
+            : this(_s_defaultDynamicModule)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ClientSideFramework(DynamicModule dynamicModule, Action<IComponentContext, ContainerBuilder> registerModules = null)
+        {
+            this.PresetGuids = new Queue<Guid>();
+            this.PresetRandomInt32 = new Queue<int>();
+            this.PresetRandomInt64 = new Queue<long>();
+            this.NodeConfiguration = new BootConfiguration
+            {
+                ApplicationName = "CLIENT-APP",
+                NodeName = "CLIENT-NODE",
+                InstanceId = "CLIENT-INSTANCE",
+                EnvironmentName = "CLIENT-ENV",
+                EnvironmentType = "CLIENT-ENV-TYPE"
+            };
+
+            //_metadataCache = CreateMetadataCacheWithDefaultConventions();
+            _dynamicModule = dynamicModule;
+            _registerModules = registerModules;
+            _logAppender = new TestThreadLogAppender(this);
+
+            var logAppenderPipeline = new Pipeline<IThreadLogAppender>(new IThreadLogAppender[] { _logAppender }, new PipelineObjectFactory(dynamicModule));
+            _loggerFactory = new LoggerObjectFactory(_dynamicModule, logAppenderPipeline);
+
+            BuildComponentContainer(out _components);
+
+            _configurationFactory = _components.Resolve<ConfigurationObjectFactory>();
+            _unitOfWorkFactory = new UnitOfWorkFactory(_components);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public T NewDomainObject<T>() where T : class
+        {
+            var entityObjectFactory = _components.Resolve<IEntityObjectFactory>();
+            var persistableObject = entityObjectFactory.NewEntity<T>();
+            return _components.Resolve<IDomainObjectFactory>().CreateDomainObjectInstance<T>(persistableObject);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, UnitOfWorkScopeOption? scopeOption = null, string connectionString = null)
+            where TRepository : class, IApplicationDataRepository
+        {
+            return _unitOfWorkFactory.NewUnitOfWork<TRepository>(autoCommit, scopeOption, connectionString);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IApplicationDataRepository ICoreFramework.NewUnitOfWork(Type repositoryContractType, bool autoCommit, UnitOfWorkScopeOption? scopeOption, string connectionString)
+        {
+            return _unitOfWorkFactory.NewUnitOfWork(repositoryContractType, autoCommit, scopeOption, connectionString);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IDomainObject ICoreFramework.NewDomainObject(Type contractType)
+        {
+            var entityObjectFactory = _components.Resolve<IEntityObjectFactory>();
+            var persistableObject = (IPersistableObject)entityObjectFactory.NewEntity(contractType);
+            return _components.Resolve<IDomainObjectFactory>().CreateDomainObjectInstance(persistableObject);
+        }
+
+        public T NewDomainObject<T>(IComponentContext externalComponents) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IApplicationDataRepository NewUnitOfWorkForEntity(
+            Type entityContractType,
+            bool autoCommit = true,
+            UnitOfWorkScopeOption? scopeOption = null,
+            string connectionString = null)
+        {
+            var dataRepositoryFactory = _components.Resolve<IDataRepositoryFactory>();
+            var dataRepositoryContract = dataRepositoryFactory.GetDataRepositoryContract(entityContractType);
+
+            return _unitOfWorkFactory.NewUnitOfWork(dataRepositoryContract, autoCommit, scopeOption, connectionString);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IResourceLock NewLock(ResourceLockMode mode, string resourceNameFormat, params object[] formatArgs)
+        {
+            return new ResourceLock(mode, resourceNameFormat.FormatIf(formatArgs));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ITimeoutHandle NewTimer(
+            string timerName,
+            string timerInstanceId,
+            TimeSpan initialDueTime,
+            Action callback)
+        {
+            return new ClientSideTimeout<object>(
+                this,
+                timerName,
+                timerInstanceId,
+                initialDueTime,
+                callback: obj =>
+                {
+                    callback();
+                },
+                parameter: null);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ITimeoutHandle NewTimer<TParam>(
+            string timerName,
+            string timerInstanceId,
+            TimeSpan initialDueTime,
+            Action<TParam> callback,
+            TParam parameter)
+        {
+            return new ClientSideTimeout<TParam>(this, timerName, timerInstanceId, initialDueTime, callback, parameter);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Guid NewGuid()
+        {
+            return (PresetGuids.Count > 0 ? PresetGuids.Dequeue() : Guid.NewGuid());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public int NewRandomInt32()
+        {
+            return (PresetRandomInt32.Count > 0 ? PresetRandomInt32.Dequeue() : 123);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public long NewRandomInt64()
+        {
+            return (PresetRandomInt64.Count > 0 ? PresetRandomInt64.Dequeue() : 123);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public INodeConfiguration CurrentNode
+        {
+            get
+            {
+                return this.NodeConfiguration;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IIdentityInfo CurrentIdentity
+        {
+            get
+            {
+                return (
+                    PresetIdentity ??
+                    (Thread.CurrentPrincipal != null ? Thread.CurrentPrincipal.Identity as IIdentityInfo : null));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string CurrentSessionId
+        {
+            get
+            {
+                return PresetSessionId;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Guid CurrentCorrelationId
+        {
+            get
+            {
+                return PresetCorrelationId.GetValueOrDefault(Guid.Empty);
+            }
+            set
+            {
+                PresetCorrelationId = value;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DateTime UtcNow
+        {
+            get
+            {
+                return PresetUtcNow.GetValueOrDefault(DateTime.UtcNow);
+            }
+            set
+            {
+                PresetUtcNow = value;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DynamicModule DynamicModule
+        {
+            get { return _dynamicModule; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Thread CreateThread(Action threadCode, Func<ILogActivity> threadLogFactory, ThreadTaskType? taskType, string description)
+        {
+            return new Thread(() => RunThreadCode(threadCode, threadLogFactory, taskType, description));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RunThreadCode(Action threadCode, Func<ILogActivity> threadLogFactory, ThreadTaskType? taskType, string description)
+        {
+            using (var rootActivity = (threadLogFactory != null ? threadLogFactory() : null))
+            {
+                try
+                {
+                    threadCode();
+                }
+                catch (Exception e)
+                {
+                    if (rootActivity != null)
+                    {
+                        rootActivity.Fail(e);
+                    }
+
+                    throw;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IComponentContext Components
+        {
+            get
+            {
+                return _components;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IReadOnlyThreadLog CurrentThreadLog
+        {
+            get
+            {
+                return _logAppender.ThreadLog;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TLogger Logger<TLogger>() where TLogger : class, IApplicationEventLogger
+        {
+            return _loggerFactory.CreateService<TLogger>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Auto<TLogger> LoggerAuto<TLogger>() where TLogger : class, IApplicationEventLogger
+        {
+            return new Auto<TLogger>(_loggerFactory.CreateService<TLogger>());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TSection ConfigSection<TSection>() where TSection : class, IConfigurationSection
+        {
+            return _components.Resolve<TSection>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public LogNode[] GetLog()
+        {
+            return _logAppender.GetLog();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public LogNode[] TakeLog()
+        {
+            return _logAppender.TakeLog();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string[] GetLogStrings()
+        {
+            return _logAppender.GetLogStrings();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string[] TakeLogStrings()
+        {
+            return _logAppender.TakeLogStrings();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void UpdateComponents(Action<ContainerBuilder> onRegisterComponents)
+        {
+            var builder = new ContainerBuilder();
+            onRegisterComponents(builder);
+            builder.Update(_components.ComponentRegistry);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RegisterModuleLoader(Autofac.Module module)
+        {
+            UpdateComponents(
+                builder =>
+                {
+                    builder.RegisterModule(module);
+                });
+
+            RebuildMetadataCache();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RebuildMetadataCache(
+            IMetadataConvention[] customMetadataConventions = null,
+            MixinRegistration[] mixinRegistrations = null,
+            ConcretizationRegistration[] concretizationRegistrations = null,
+            IRelationalMappingConvention[] relationalMappingConventions = null)
+        {
+            var metadataCache = CreateMetadataCacheWithDefaultConventions(
+                _components,
+                _components.Resolve<IEnumerable<IMetadataConvention>>().ConcatIf(customMetadataConventions).ToArray(),
+                _components.Resolve<IEnumerable<MixinRegistration>>().ConcatIf(mixinRegistrations).ToArray());
+
+            UpdateComponents(builder => builder.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void OverrideEntityIdValueGenerator<TEntity, TGenerator>()
+            where TEntity : class
+            where TGenerator : IPropertyValueGenerator
+        {
+            ((PropertyMetadataBuilder)MetadataCache.GetTypeMetadata(typeof(TEntity)).EntityIdProperty).DefaultValueGeneratorType = typeof(TGenerator);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IIdentityInfo PresetIdentity { get; set; }
+        public string PresetSessionId { get; set; }
+        public Queue<Guid> PresetGuids { get; private set; }
+        public Queue<int> PresetRandomInt32 { get; private set; }
+        public Queue<long> PresetRandomInt64 { get; private set; }
+        public Guid? PresetCorrelationId { get; set; }
+        public DateTime? PresetUtcNow { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public BootConfiguration NodeConfiguration { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ITypeMetadataCache MetadataCache
+        {
+            get
+            {
+                return _components.Resolve<ITypeMetadataCache>() /*_metadataCache*/;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ClientSideServiceBus ServiceBus
+        {
+            get
+            {
+                return (ClientSideServiceBus)_components.Resolve<IServiceBus>();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void BuildComponentContainer(out IContainer container)
+        {
+            var builder = new ContainerBuilder();
+
+            builder.RegisterInstance(this).As<IFramework>();
+            builder.RegisterInstance(_dynamicModule).As<DynamicModule>();
+            builder.RegisterType<ThreadRegistry>().SingleInstance();
+            builder.RegisterGeneric(typeof(Auto<>)).SingleInstance();
+            builder.RegisterType<UniversalThreadLogAnchor>().As<IThreadLogAnchor>().SingleInstance();
+
+            builder.RegisterInstance(_loggerFactory).As<LoggerObjectFactory, IAutoObjectFactory>();
+            builder.RegisterType<PipelineObjectFactory>().SingleInstance();
+            builder.RegisterType<ConfigurationObjectFactory>().As<IAutoObjectFactory, IConfigurationObjectFactory, ConfigurationObjectFactory>().SingleInstance();
+            builder.RegisterPipeline<IConfigurationSource>();
+            builder.RegisterType<ClientEntityObjectFactory>().As<IEntityObjectFactory, EntityObjectFactory, ClientEntityObjectFactory>().SingleInstance();
+            builder.RegisterType<ClientDataRepositoryFactory>().As<ClientDataRepositoryFactory, IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
+            builder.RegisterType<DomainObjectFactory>().As<IDomainObjectFactory>().SingleInstance();
+            builder.RegisterType<PresentationObjectFactory>().As<IPresentationObjectFactory>().SingleInstance();
+            builder.RegisterType<MethodCallObjectFactory>().As<IMethodCallObjectFactory>().SingleInstance();
+
+            builder.RegisterType<CompactSerializer>().InstancePerDependency();
+            builder.RegisterType<CompactSerializerFactory>().SingleInstance();
+            builder.RegisterPipeline<ICompactSerializerExtension>().SingleInstance();
+
+            builder.RegisterType<ClientIdValueGenerator>().SingleInstance();
+            builder.RegisterType<ClientSideServiceBus>().As<IServiceBus>().SingleInstance();
+            builder.RegisterType<VoidStorageInitializer>().As<IStorageInitializer>();
+            builder.RegisterPipeline<IDomainContextPopulator>();
+
+            builder.RegisterType<AccessControlListCache>().SingleInstance();
+            builder.RegisterType<LocalTransientSessionManager>().As<ISessionManager, ICoreSessionManager>().SingleInstance();
+            builder.NWheelsFeatures().Logging().RegisterLogger<IAuthorizationLogger>();
+            builder.NWheelsFeatures().Logging().RegisterLogger<ISessionEventLogger>();
+            builder.RegisterPipeline<AnonymousEntityAccessRule>();
+            builder.RegisterType<AnonymousPrincipal>().SingleInstance();
+            builder.RegisterType<SystemPrincipal>().SingleInstance();
+            builder.RegisterType<DuplexTcpClientFactory>().SingleInstance();
+
+            builder.RegisterPipeline<IComponentAspectProvider>();
+            builder.RegisterType<ComponentAspectFactory>().SingleInstance();
+
+            builder.RegisterType<DuplexNetworkApiProxyFactory>().As<IDuplexNetworkApiProxyFactory>().SingleInstance();
+
+            builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
+            builder.NWheelsFeatures().Logging().RegisterLogger<IDomainContextLogger>();
+            builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkDatabaseConfig>();
+            builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkLoggingConfiguration>();
+            builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkEndpointsConfig>();
+            //builder.NWheelsFeatures().Entities().UseDefaultIdsOfType<int>();
+
+            builder.NWheelsFeatures().Logging().RegisterLogger<IShuttleServiceLogger>();
+
+            container = builder.Build();
+
+            if (_registerModules != null)
+            {
+                var container2 = container;
+                UpdateComponents(builder2 => _registerModules(container2, builder2));
+            }
+
+            var metadataCache = CreateMetadataCacheWithDefaultConventions(_components);
+
+            UpdateComponents(builder2 =>
+            {
+                builder2.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();
+                builder2.RegisterInstance(metadataCache.Conventions).As<MetadataConventionSet>();
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly DynamicModule _s_defaultDynamicModule = new DynamicModule(
+            simpleName: "UnitTestDynamicTypes." + Guid.NewGuid().ToString("N"),
+            allowSave: false);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ClientSideFramework CreateWithDefaultConfiguration(params Autofac.Module[] moduleLoaders)
+        {
+            var dynamicModule = new DynamicModule(
+                "NWheels.ClientRuntimeTypes", 
+                allowSave: true, 
+                saveDirectory: System.Environment.CurrentDirectory);
+            
+            var framework = new ClientSideFramework(
+                dynamicModule, 
+                registerModules: (components, builder) => {
+                    foreach (var module in moduleLoaders)
+                    {
+                        builder.RegisterModule(module);
+                    }
+                });
+
+            return framework;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal static TypeMetadataCache CreateMetadataCacheWithDefaultConventions(IComponentContext components, params MixinRegistration[] mixinRegistrations)
+        {
+            return CreateMetadataCacheWithDefaultConventions(
+                components,
+                new IMetadataConvention[] {
+                new DefaultIdMetadataConvention(typeof(int)), 
+                new IntIdGeneratorMetadataConvention()
+            },
+                mixinRegistrations);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal static TypeMetadataCache CreateMetadataCacheWithDefaultConventions(
+            IComponentContext components,
+            IMetadataConvention[] customMetadataConventions,
+            MixinRegistration[] mixinRegistrations = null,
+            ConcretizationRegistration[] concretizationRegistrations = null,
+            IRelationalMappingConvention[] relationalMappingConventions = null)
+        {
+            var metadataConventions =
+                new IMetadataConvention[] {
+                new ContractMetadataConvention(), 
+                new AttributeMetadataConvention(), 
+                new RelationMetadataConvention(), 
+            }
+                .Concat(customMetadataConventions)
+                .ToArray();
+
+            var effectiveRelationalMappingConventions = relationalMappingConventions ?? new IRelationalMappingConvention[] {
+            new PascalCaseRelationalMappingConvention(usePluralTableNames: true)
+        };
+
+            return CreateMetadataCache(
+                components,
+                metadataConventions,
+                effectiveRelationalMappingConventions,
+                mixinRegistrations ?? new MixinRegistration[0],
+                concretizationRegistrations ?? new ConcretizationRegistration[0]);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal static TypeMetadataCache CreateMetadataCache(
+            IComponentContext components,
+            IMetadataConvention[] metadataConventions,
+            IRelationalMappingConvention[] relationalMappingConventions,
+            MixinRegistration[] mixinRegistrations,
+            ConcretizationRegistration[] concretizationRegistrations)
+        {
+            var updater = new ContainerBuilder();
+
+            if (mixinRegistrations != null)
+            {
+                foreach (var mixin in mixinRegistrations)
+                {
+                    updater.RegisterInstance(mixin).As<MixinRegistration>();
+                }
+            }
+
+            if (mixinRegistrations != null)
+            {
+                foreach (var concretization in concretizationRegistrations)
+                {
+                    updater.RegisterInstance(concretization).As<ConcretizationRegistration>();
+                }
+            }
+
+            updater.Update(components.ComponentRegistry);
+
+            var conventionSet = new MetadataConventionSet(metadataConventions, relationalMappingConventions);
+            return new TypeMetadataCache(components, conventionSet);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal static DynamicModule DefaultDynamicModule
+        {
+            get
+            {
+                return _s_defaultDynamicModule;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class VoidStorageInitializer : IStorageInitializer
+        {
+            #region Implementation of IStorageInitializer
+
+            public string AlterConnectionString(string originalConnectionString, string newMachineName = null, string newDatabaseName = null)
+            {
+                throw new NotSupportedException();
+            }
+
+            public bool StorageSchemaExists(string connectionString)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void MigrateStorageSchema(string connectionString, DataRepositoryBase context, SchemaMigrationCollection migrations)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void CreateStorageSchema(string connectionString, int schemaVersion)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void DropStorageSchema(string connectionString)
+            {
+                throw new NotSupportedException();
+            }
+
+            public string[] ListStorageSchemas(string connectionString)
+            {
+                throw new NotSupportedException();
+            }
+
+            #endregion
+        }
+    }
+}
+

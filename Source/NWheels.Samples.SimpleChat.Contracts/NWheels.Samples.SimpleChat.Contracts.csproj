@@ -4,12 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1B4EF9C0-4D96-4B2A-A3FD-84D45A91B58A}</ProjectGuid>
+    <ProjectGuid>{9B3629E1-8199-4F3A-8DD4-EE1A13207B0D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NWheels.Samples.SimpleChatApp</RootNamespace>
-    <AssemblyName>NWheels.Samples.SimpleChatApp</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <RootNamespace>NWheels.Samples.SimpleChat.Contracts</RootNamespace>
+    <AssemblyName>NWheels.Samples.SimpleChat.Contracts</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -30,12 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac">
-      <HintPath>..\..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -43,24 +39,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChatMessages.cs" />
-    <Compile Include="ChatService.cs" />
-    <Compile Include="ChatSession.cs" />
-    <Compile Include="IChatService.cs" />
-    <Compile Include="IChatServiceLogger.cs" />
-    <Compile Include="ModuleLoader.cs" />
+    <Compile Include="IChatClientApi.cs" />
+    <Compile Include="IChatServerApi.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\NWheels.Domains.Security\NWheels.Domains.Security.csproj">
-      <Project>{76A8A84A-ED77-42D3-94FE-22C5B8634F98}</Project>
-      <Name>NWheels.Domains.Security</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\NWheels\NWheels.csproj">
+    <ProjectReference Include="..\NWheels\NWheels.csproj">
       <Project>{f0ecf554-bf54-4843-b62f-c67c4deb2764}</Project>
       <Name>NWheels</Name>
     </ProjectReference>

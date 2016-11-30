@@ -18,16 +18,16 @@ using NWheels.Serialization;
 
 namespace NWheels.Endpoints
 {
-    public class DuplexTcpServer<TServerApi, TClientApi> 
+    public class DuplexTcpServer<TServerApi, TClientApi> : IDisposable
         where TServerApi : class 
         where TClientApi : class
     {
         private readonly IComponentContext _components;
-        private readonly IMethodCallObjectFactory _callFactory;
         private readonly IDuplexNetworkApiProxyFactory _proxyFactory;
         private readonly int _maxPendingConnections;
         private readonly TimeSpan? _clientHeartbeatInterval;
         private readonly TimeSpan? _serverPingInterval;
+        private readonly Func<TClientApi, TServerApi> _serverObjectFactory;
         private readonly TcpListener _tcpListener;
         private readonly BlockingCollection<Tuple<Socket, Session>> _sessionManagerQueue; // session==null -> OPEN ; session!=null -> CLOSE
         private readonly Hashtable _sessionTaskBySessionObject; // single writer = sessionManagerThread; multiple readers
@@ -42,21 +42,21 @@ namespace NWheels.Endpoints
 
         public DuplexTcpServer(
             IComponentContext components,
-            IMethodCallObjectFactory callFactory,
             IDuplexNetworkApiProxyFactory proxyFactory,
             int listenPortNumber,
             int listenBacklog = Int32.MaxValue,
             int maxPendingConnections = Int32.MaxValue,
             int workerThreadCount = 1,
             TimeSpan? clientHeartbeatInterval = null,
-            TimeSpan? serverPingInterval = null)
+            TimeSpan? serverPingInterval = null,
+            Func<TClientApi, TServerApi> serverObjectFactory = null)
         {
             _components = components;
-            _callFactory = callFactory;
             _proxyFactory = proxyFactory;
             _maxPendingConnections = maxPendingConnections;
             _clientHeartbeatInterval = clientHeartbeatInterval;
             _serverPingInterval = serverPingInterval;
+            _serverObjectFactory = (serverObjectFactory ?? ResolveServerObjectByDefault);
             _sessionManagerQueue = new BlockingCollection<Tuple<Socket, Session>>();
             _sessionTaskBySessionObject = new Hashtable();
             _onSessionClosedDelegate = this.OnSessionClosed;
@@ -74,6 +74,46 @@ namespace NWheels.Endpoints
             for (int i = 0 ; i < _workerThreads.Length ; i++)
             {
                 _workerThreads[i] = Task.Factory.StartNew(RunWorkerThread);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void Dispose()
+        {
+            _cancellation.Cancel();
+            _tcpListener.Stop();
+
+            if (!Task.WaitAll(new[] { _incomingConnectionReceiver, _sessionManagerThread }, 10000))
+            {
+                //TODO: log warning
+            }
+
+            if (!Task.WaitAll(_workerThreads, 10000))
+            {
+                //TODO: log warning
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void Broadcast(Action<TClientApi> sender)
+        {
+            var currentSessions = _sessionTaskBySessionObject.Keys.Cast<Session>().ToArray();
+
+            for (int i = 0 ; i < currentSessions.Length ; i++)
+            {
+                if (!currentSessions[i].IsClosed)
+                {
+                    try
+                    {
+                        sender(currentSessions[i].ClientProxy);
+                    }
+                    catch //(Exception e)
+                    {
+                        //TODO: log error
+                    }
+                }
             }
         }
 
@@ -142,13 +182,17 @@ namespace NWheels.Endpoints
 
                 try
                 {
-                    if (session == null)
+                    if (session == null && socket != null) // OPEN SESSION request
                     {
-                        OpenSessionOrCloseSocket(socket);
+                        OpenSession(socket);
+                    }
+                    else if (session != null && socket == null) // CLOSE SESSION request
+                    {
+                        CloseSession(session);
                     }
                     else
                     {
-                        CloseSession(session);
+                        //TODO: log invalid request
                     }
                 }
                 catch //(Exception e)
@@ -200,7 +244,7 @@ namespace NWheels.Endpoints
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void OpenSessionOrCloseSocket(Socket socket)
+        private void OpenSession(Socket socket)
         {
             Session session;
             Task sessionTask;
@@ -245,6 +289,13 @@ namespace NWheels.Endpoints
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private TServerApi ResolveServerObjectByDefault(TClientApi client)
+        {
+            return _components.Resolve<TServerApi>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void OnSessionClosed(Session session)
         {
             _sessionManagerQueue.Add(new Tuple<Socket, Session>(null, session));
@@ -266,7 +317,7 @@ namespace NWheels.Endpoints
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class Session : IDuplexNetworkEndpointTransport
+        private class Session : IDisposable, IDuplexNetworkEndpointTransport
         {
             private readonly Socket _socket;
             private readonly BlockingCollection<Tuple<Session, byte[]>> _workerQueue;
@@ -291,8 +342,21 @@ namespace NWheels.Endpoints
                 _sessionCancellation = new CancellationTokenSource();
                 _clientProxy = proxyFactory.CreateProxyInstance<TClientApi, TServerApi>(this, serverObject);
 
-
                 //TODO: match session initiator method if one is defined and throw if not matched or failed 
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Dispose()
+            {
+                try
+                {
+                    _stream.Dispose();
+                }
+                finally
+                {
+                    SafeCloseSocket(_socket);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -365,6 +429,10 @@ namespace NWheels.Endpoints
                         if (await _stream.ReadAsync(headerBuffer, 0, headerBuffer.Length, sessionOrServerCancellation) != headerBuffer.Length)
                         {
                             //TODO: log warning + include circuit breaker
+                            if (ReceiveFailed != null)
+                            {
+                                ReceiveFailed(new ProtocolViolationException("Unexpected end of data (body-length header)"));
+                            }
                             break;
                         }
 
@@ -374,6 +442,10 @@ namespace NWheels.Endpoints
                         if (await _stream.ReadAsync(bodyBuffer, 0, bodyBuffer.Length, sessionOrServerCancellation) != bodyBuffer.Length)
                         {
                             //TODO: log warning + include circuit breaker
+                            if (ReceiveFailed != null)
+                            {
+                                ReceiveFailed(new ProtocolViolationException("Unexpected end of data (message-body)"));
+                            }
                             break;
                         }
 
@@ -387,11 +459,47 @@ namespace NWheels.Endpoints
                     {
                         break;
                     }
+                    catch (Exception e)
+                    {
+                        //TODO: log error + include circuit breaker
+
+                        if (ReceiveFailed != null)
+                        {
+                            ReceiveFailed(e);
+                        }
+                    }
                 }
 
-                if (Closed != null)
+                FinalizeAndCleanup();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TClientApi ClientProxy
+            {
+                get { return _clientProxy; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool IsClosed { get; private set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void FinalizeAndCleanup()
+            {
+                IsClosed = true;
+
+                try
                 {
-                    Closed(this);
+                    if (Closed != null)
+                    {
+                        Closed(this);
+                    }
+                }
+                finally
+                {
+                    Dispose();
                 }
             }
         }
