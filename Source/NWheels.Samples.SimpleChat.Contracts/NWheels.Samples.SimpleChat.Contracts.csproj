@@ -40,7 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IChatClientApi.cs" />
-    <Compile Include="IChatServerApi.cs" />
+    <Compile Include="IChatServiceApi.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

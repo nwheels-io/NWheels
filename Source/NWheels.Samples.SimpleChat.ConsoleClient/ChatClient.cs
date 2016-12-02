@@ -20,6 +20,6 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IChatServerApi Server { get; set; }
+        public IChatServiceApi Server { get; set; }
     }
 }

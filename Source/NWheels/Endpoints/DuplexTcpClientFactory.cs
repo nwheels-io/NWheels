@@ -180,7 +180,9 @@ namespace NWheels.Endpoints
                 {
                     try
                     {
-                        if (await _stream.ReadAsync(headerBuffer, 0, headerBuffer.Length, cancellation) != headerBuffer.Length)
+                        int bytesRead;
+                        bytesRead = await _stream.ReadAsync(headerBuffer, 0, headerBuffer.Length, cancellation);
+                        if (bytesRead != headerBuffer.Length)
                         {
                             //TODO: log error + include circuit breaker
                             if (ReceiveFailed != null)
@@ -194,7 +196,8 @@ namespace NWheels.Endpoints
                         var bodyLength = BitConverter.ToInt32(headerBuffer, startIndex: 0);
                         var bodyBuffer = new byte[bodyLength];
 
-                        if (await _stream.ReadAsync(bodyBuffer, 0, bodyBuffer.Length, cancellation) != bodyBuffer.Length)
+                        bytesRead = await _stream.ReadAsync(bodyBuffer, 0, bodyBuffer.Length, cancellation);
+                        if (bytesRead != bodyBuffer.Length)
                         {
                             //TODO: log error + include circuit breaker
                             if (ReceiveFailed != null)

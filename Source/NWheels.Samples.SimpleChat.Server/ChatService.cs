@@ -9,15 +9,15 @@ using NWheels.Samples.SimpleChat.Contracts;
 
 namespace NWheels.Samples.SimpleChat.Server
 {
-    public class ChatServer : IChatServerApi, IDuplexNetworkApiEvents
+    public class ChatService : IChatServiceApi, IDuplexNetworkApiEvents
     {
-        private readonly DuplexTcpServer<IChatServerApi, IChatClientApi> _tcpServer;
+        private readonly DuplexTcpServer<IChatServiceApi, IChatClientApi> _tcpServer;
         private readonly IChatClientApi _myClient;
         private string _myName;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ChatServer(DuplexTcpServer<IChatServerApi, IChatClientApi> tcpServer, IChatClientApi myClient)
+        public ChatService(DuplexTcpServer<IChatServiceApi, IChatClientApi> tcpServer, IChatClientApi myClient)
         {
             _tcpServer = tcpServer;
             _myClient = myClient;

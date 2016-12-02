@@ -25,7 +25,7 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
             Console.WriteLine("HELP > while in chat, type your message and hit ENTER to send.");
             Console.WriteLine("HELP > to leave, type Q and hit ENTER.");
 
-            client.Server = clientFactory.CreateServerProxy<IChatServerApi, IChatClientApi>(
+            client.Server = clientFactory.CreateServerProxy<IChatServiceApi, IChatClientApi>(
                 new ChatClient(),
                 serverHostname: "localhost",
                 serverPort: 9797,

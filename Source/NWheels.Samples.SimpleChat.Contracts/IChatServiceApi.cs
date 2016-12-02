@@ -7,7 +7,7 @@ using NWheels.Endpoints;
 
 namespace NWheels.Samples.SimpleChat.Contracts
 {
-    public interface IChatServerApi
+    public interface IChatServiceApi
     {
         [NetworkApiContract.ConnectCommand]
         void Hello(string myName);

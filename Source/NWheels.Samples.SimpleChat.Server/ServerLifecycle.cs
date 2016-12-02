@@ -12,7 +12,7 @@ namespace NWheels.Samples.SimpleChat.Server
     public class ServerLifecycle : LifecycleEventListenerBase
     {
         private readonly DuplexTcpServerFactory _tcpServerFactory;
-        private DuplexTcpServer<IChatServerApi, IChatClientApi> _tcpServer;
+        private DuplexTcpServer<IChatServiceApi, IChatClientApi> _tcpServer;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -27,11 +27,11 @@ namespace NWheels.Samples.SimpleChat.Server
 
         public override void Activate()
         {
-            _tcpServer = _tcpServerFactory.CreateServer<IChatServerApi, IChatClientApi>(
+            _tcpServer = _tcpServerFactory.CreateServer<IChatServiceApi, IChatClientApi>(
                 listenPortNumber: 9797,
                 workerThreadCount: 1,
                 serverPingInterval: TimeSpan.FromSeconds(1),
-                serverObjectFactory: (server, client) => new ChatServer(server, client));
+                serverObjectFactory: (tcp, client) => new ChatService(tcp, client));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
