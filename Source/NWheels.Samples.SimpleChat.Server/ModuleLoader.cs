@@ -8,6 +8,7 @@ using NWheels.Client;
 using NWheels.Endpoints;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
+using NWheels.Samples.SimpleChat.Contracts;
 
 namespace NWheels.Samples.SimpleChat.Server
 {
@@ -22,6 +23,8 @@ namespace NWheels.Samples.SimpleChat.Server
 
             // we have no DB
             builder.RegisterType<ClientSideFramework.VoidStorageInitializer>().As<IStorageInitializer>();
+            
+            builder.RegisterType<ChatService>().As<IChatServiceApi>().InstancePerDependency();
         }
 
         #endregion

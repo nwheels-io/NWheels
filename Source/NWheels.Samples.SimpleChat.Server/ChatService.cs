@@ -17,11 +17,18 @@ namespace NWheels.Samples.SimpleChat.Server
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ChatService(DuplexTcpServer<IChatServiceApi, IChatClientApi> tcpServer, IChatClientApi myClient)
+        public ChatService()
         {
-            _tcpServer = tcpServer;
-            _myClient = myClient;
+            _tcpServer = null;
+            _myClient = null;
         }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //public ChatService(DuplexTcpServer<IChatServiceApi, IChatClientApi> tcpServer, IChatClientApi myClient)
+        //{
+        //    _tcpServer = tcpServer;
+        //    _myClient = myClient;
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -31,7 +31,7 @@ namespace NWheels.Samples.SimpleChat.Server
                 listenPortNumber: 9797,
                 workerThreadCount: 1,
                 serverPingInterval: TimeSpan.FromSeconds(1),
-                serverObjectFactory: (tcp, client) => new ChatService(tcp, client));
+                serverObjectFactory: (tcp, client) => new ChatService(/*tcp, client*/));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

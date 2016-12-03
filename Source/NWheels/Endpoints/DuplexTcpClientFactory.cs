@@ -189,7 +189,7 @@ namespace NWheels.Endpoints
                             {
                                 ReceiveFailed(new ProtocolViolationException("Unexpected end of data (body-length header)"));
                             }
-                            _closeReason = SessionCloseReason.NetworkError;
+                            _closeReason = SessionCloseReason.ProtocolError;
                             break;
                         }
 
@@ -204,7 +204,7 @@ namespace NWheels.Endpoints
                             {
                                 ReceiveFailed(new ProtocolViolationException("Unexpected end of data (message-body)"));
                             }
-                            _closeReason = SessionCloseReason.NetworkError;
+                            _closeReason = SessionCloseReason.ProtocolError;
                             break;
                         }
 

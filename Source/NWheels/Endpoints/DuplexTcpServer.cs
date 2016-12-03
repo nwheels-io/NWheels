@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Autofac;
 using NWheels.Endpoints.Core;
 using NWheels.Endpoints.Factories;
+using NWheels.Extensions;
 using NWheels.Processing.Commands.Factories;
 using NWheels.Serialization;
 
@@ -428,7 +429,7 @@ namespace NWheels.Endpoints
                 {
                     try
                     {
-                        if (await _stream.ReadAsync(headerBuffer, 0, headerBuffer.Length, sessionOrServerCancellation) != headerBuffer.Length)
+                        if (!await _socket.ReadAsync(headerBuffer, 0, headerBuffer.Length, TimeSpan.FromSeconds(10))) // _stream.ReadAsync(headerBuffer, 0, headerBuffer.Length, sessionOrServerCancellation) != headerBuffer.Length)
                         {
                             //TODO: log warning + include circuit breaker
                             if (ReceiveFailed != null)
@@ -441,7 +442,7 @@ namespace NWheels.Endpoints
                         var bodyLength = BitConverter.ToInt32(headerBuffer, startIndex: 0);
                         var bodyBuffer = new byte[bodyLength];
 
-                        if (await _stream.ReadAsync(bodyBuffer, 0, bodyBuffer.Length, sessionOrServerCancellation) != bodyBuffer.Length)
+                        if (!await _socket.ReadAsync(bodyBuffer, 0, bodyBuffer.Length, TimeSpan.FromSeconds(10)))  //(await _stream.ReadAsync(bodyBuffer, 0, bodyBuffer.Length, sessionOrServerCancellation) != bodyBuffer.Length)
                         {
                             //TODO: log warning + include circuit breaker
                             if (ReceiveFailed != null)

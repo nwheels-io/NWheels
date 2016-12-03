@@ -24,6 +24,6 @@ namespace NWheels.Endpoints
         ByContract,
         LocalPartyShutDown,
         RemotePartyNotReachable,
-        NetworkError
+        ProtocolError
     }
 }
