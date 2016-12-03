@@ -161,10 +161,12 @@
     <Compile Include="Core\PipelineObjectFactory.cs" />
     <Compile Include="Endpoints\Bases\INetworkApiDispatchRuntime.cs" />
     <Compile Include="Endpoints\Core\CompactRpcProtocol.cs" />
+    <Compile Include="Endpoints\Core\Endpoint.cs" />
     <Compile Include="Endpoints\DuplexNetworkApi.cs" />
     <Compile Include="Endpoints\DuplexTcpServerFactory.cs" />
     <Compile Include="Endpoints\DuplexTcpClientFactory.cs" />
     <Compile Include="Endpoints\DuplexTcpServer.cs" />
+    <Compile Include="Endpoints\DuplexTcpTransport.cs" />
     <Compile Include="Endpoints\Factories\DuplexNetworkApiProxyFactory.cs" />
     <Compile Include="Endpoints\Factories\IDuplexNetworkApiProxyFactory.cs" />
     <Compile Include="Endpoints\IDuplexNetworkApiEvents.cs" />
