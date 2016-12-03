@@ -73,11 +73,13 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 
             TcpPoc.Server server = null;
             TcpPoc.Client client = null;
+            TcpPoc.Session serverSession = null;
 
             if (args.Contains("--run-server"))
             {
                 var serverIp = (Uri.CheckHostName(serverUri.Host) == UriHostNameType.IPv4 ? serverUri.Host : null);
                 server = new TcpPoc.Server(serverIp, serverUri.Port, onClientConnected: (session) => {
+                    serverSession = session;
                     session.MessageReceived += (session2, message) => {
                         Console.WriteLine(Encoding.UTF8.GetString(message));
                     };
@@ -87,7 +89,7 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
             if (args.Contains("--run-client"))
             {
                 client = new TcpPoc.Client(serverUri.Host, serverUri.Port);
-                Task.Factory.StartNew(client.RunScenario1);
+                Task.Factory.StartNew(() => TcpPoc.RunScenario2(client, serverSession));
             }
 
             Console.WriteLine("****** PoC is running. Hit ENTER to quit . . .");

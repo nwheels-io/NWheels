@@ -16,8 +16,12 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 {
     public static class TcpPoc
     {
-        private static DateTime _s_logStartTime;
-        private static Stopwatch _s_logClock;
+        private static readonly DateTime _s_logStartTime;
+        private static readonly Stopwatch _s_logClock;
+        private static string _s_expectedMessageOnServer;
+        private static string _s_expectedMessageOnClient;
+        private static ManualResetEvent _s_messageReceivedOnServer;
+        private static ManualResetEvent _s_messageReceivedOnClient;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -25,6 +29,114 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
         {
             _s_logStartTime = DateTime.Now;
             _s_logClock = Stopwatch.StartNew();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void RunScenario1(Client client)
+        {
+            PrintLog("SCENAR", "RunScenario1(): sleeping 10 sec");
+
+            Thread.Sleep(10000);
+
+            var message1 = Encoding.UTF8.GetBytes("Hello server");
+            PrintLog("SCENAR", "RunScenario1(): sending message of {0} bytes length", message1.Length);
+
+            client.SendMessage(message1);
+
+            PrintLog("SCENAR", "RunScenario1(): 1st message sent; sleeping 10 sec");
+
+            Thread.Sleep(10000);
+
+            var message2 = Encoding.UTF8.GetBytes("Goodbye server");
+
+            PrintLog("SCENAR", "RunScenario1(): sending message of {0} bytes length", message2.Length);
+
+            client.SendMessage(message2);
+
+            PrintLog("SCENAR", "RunScenario1(): all messages sent; DONE");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void RunScenario2(Client client, Session serverSession)
+        {
+            InitializeScenarioAssertions(client, serverSession);
+
+            PrintLog("SCENAR", "RunScenario2(): starting dialog");
+            
+            SendMessageFromClientToServer(client, "Hey server");
+            SendMessageFromServerToClient(serverSession, "Hello dear client");
+            SendMessageFromClientToServer(client, "How is your load today?");
+            SendMessageFromServerToClient(serverSession, "Not very high, thank you");
+            SendMessageFromClientToServer(client, "Good. See you later");
+            SendMessageFromServerToClient(serverSession, "Have a nice day");
+
+            PrintLog("SCENAR", "RunScenario2(): dialog finished; DONE");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void InitializeScenarioAssertions(Client client, Session serverSession)
+        {
+            _s_messageReceivedOnServer = new ManualResetEvent(false);
+            _s_messageReceivedOnClient = new ManualResetEvent(false);
+
+            serverSession.MessageReceived += (s, bytes) => {
+                var message = Encoding.UTF8.GetString(bytes);
+                if (message == _s_expectedMessageOnServer)
+                {
+                    PrintLog("SCENAR", "ASSERT: OK. server received expected message");
+                }
+                else
+                {
+                    PrintLog("SCENAR", "ASSERT: FAIL! server expected [{0}] but got [{1}]", _s_expectedMessageOnServer, message);
+                }
+                _s_messageReceivedOnServer.Set();
+            };
+
+            client.MessageReceived += (bytes) => {
+                var message = Encoding.UTF8.GetString(bytes);
+                if (message == _s_expectedMessageOnClient)
+                {
+                    PrintLog("SCENAR", "ASSERT: OK. client received expected message");
+                }
+                else
+                {
+                    PrintLog("SCENAR", "ASSERT: FAIL! client expected [{0}] but got [{1}]", _s_expectedMessageOnClient, message);
+                }
+                _s_messageReceivedOnClient.Set();
+            };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void SendMessageFromClientToServer(Client client, string message)
+        {
+            _s_messageReceivedOnServer.Reset();
+            _s_expectedMessageOnServer = message;
+            
+            client.SendMessage(Encoding.UTF8.GetBytes(message));
+
+            if (!_s_messageReceivedOnServer.WaitOne(5000))
+            {
+                PrintLog("SCENAR", "ASSERT: FAIL! client message not confirmed by server, timed out waiting.");
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void SendMessageFromServerToClient(Session serverSession, string message)
+        {
+            _s_messageReceivedOnClient.Reset();
+            _s_expectedMessageOnClient = message;
+
+            serverSession.SendMessage(Encoding.UTF8.GetBytes(message));
+
+            if (!_s_messageReceivedOnClient.WaitOne(5000))
+            {
+                PrintLog("SCENAR", "ASSERT: FAIL! server message not confirmed by client, timed out waiting.");
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -219,7 +331,8 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
         {
             private readonly TcpClient _tcpClient;
             private readonly NetworkStream _stream;
-            //private readonly Session _session;
+            private readonly Session _session;
+            private readonly Task _receiveTask;
             private readonly CancellationTokenSource _cancellation;
 
             public Client(
@@ -233,53 +346,90 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 
                 var effectiveServerHost = (serverHost ?? "localhost");
 
-                PrintLog("CLIENT", "ctor(): connecting to {0}:{1}", effectiveServerHost, serverPort);
+                PrintLog("CLIENT", "Client.ctor(): connecting to {0}:{1}", effectiveServerHost, serverPort);
 
                 _tcpClient.Connect(effectiveServerHost, serverPort);
                 _stream = _tcpClient.GetStream();
-                //_session = new Session(_tcpClient.Client, _tcpClient.GetStream(), _cancellation.Token, isClientSession: true);
-                //_session.
 
-                PrintLog("CLIENT", "ctor(): successfully conected!");
+                PrintLog("CLIENT", "Client.ctor(): successfully connected to server");
+
+                _session = new Session(_tcpClient.Client, _tcpClient.GetStream(), _cancellation.Token, isClientSession: true);
+
+                AttachSessionEventHandlers();
+
+                _receiveTask = _session.BeginReceiveMessages();
+
+                PrintLog("CLIENT", "Client.ctor(): ready!");
             }
 
             public void Dispose()
             {
+                PrintLog("CLIENT", "Client.Dispose(): stopping session");
+
                 _cancellation.Cancel();
+                _receiveTask.Wait(TimeSpan.FromSeconds(10));
+
+                PrintLog("CLIENT", "Client.Dispose(): closing socket");
+
                 _stream.Dispose();
                 _tcpClient.Close();
+
+                PrintLog("CLIENT", "Client.Dispose(): all resources released; DONE");
             }
 
-            //public event Action<byte[]> MessageReceived;
-            //public event Action<SessionCloseReason> Disconnected;
-            //public event Action<Exception> SendFailed;
-            //public event Action<Exception> ReceiveFailed;
-
-            public void RunScenario1()
+            public void SendMessage(byte[] message)
             {
-                PrintLog("CLIENT", "RunScenario1(): sleeping 10 sec");
+                PrintLog("CLIENT", "Client.SendMessage(): sending message of {0} bytes length", message.Length);
 
-                Thread.Sleep(10000);
+                try
+                {
+                    _session.SendMessage(message);
+                }
+                catch (Exception e)
+                {
+                    PrintLog("CLIENT", "Client.SendMessage(): exception! {0}", e.ToString());
 
-                var message1 = Encoding.UTF8.GetBytes("Hello server");
+                    if (ReceiveFailed != null)
+                    {
+                        ReceiveFailed(e);
+                    }
+                }
+            }
+            
+            public event Action<byte[]> MessageReceived;
+            public event Action<SessionCloseReason> Disconnected;
+            public event Action<Exception> SendFailed;
+            public event Action<Exception> ReceiveFailed;
 
-                PrintLog("CLIENT", "RunScenario1(): sending message of {0} bytes length", message1.Length);
+            private void AttachSessionEventHandlers()
+            {
+                _session.MessageReceived += (session, message) => {
+                    if (MessageReceived != null)
+                    {
+                        MessageReceived(message);
+                    }
+                };
 
-                _stream.Write(BitConverter.GetBytes(message1.Length), 0, 4);
-                _stream.Write(message1, 0, message1.Length);
+                _session.Closed += (session, reason) => {
+                    if (Disconnected != null)
+                    {
+                        Disconnected(reason);
+                    }
+                };
 
-                PrintLog("CLIENT", "RunScenario1(): 1st message sent; sleeping 10 sec");
-
-                Thread.Sleep(10000);
-
-                var message2 = Encoding.UTF8.GetBytes("Goodbye server");
-
-                PrintLog("CLIENT", "RunScenario1(): sending message of {0} bytes length", message2.Length);
+                _session.SendFailed += (session, error) => {
+                    if (SendFailed != null)
+                    {
+                        SendFailed(error);
+                    }
+                };
                 
-                _stream.Write(BitConverter.GetBytes(message2.Length), 0, 4);
-                _stream.Write(message2, 0, message2.Length);
-
-                PrintLog("CLIENT", "RunScenario1(): all messages sent; DONE");
+                _session.ReceiveFailed += (session, error) => {
+                    if (ReceiveFailed != null)
+                    {
+                        ReceiveFailed(error);
+                    }
+                };
             }
         }
 
