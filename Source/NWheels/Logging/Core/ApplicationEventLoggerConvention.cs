@@ -79,7 +79,7 @@ namespace NWheels.Logging.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ApplicationEventLoggerConvention(StaticStringsDecorator staticStrings)
-            : base(Will.ImplementPrimaryInterface)
+            : base(Will.ImplementBaseClass | Will.ImplementPrimaryInterface)
         {
             _staticStrings = staticStrings;
         }
@@ -93,8 +93,8 @@ namespace NWheels.Logging.Core
             writer.Constructor<Pipeline<IThreadLogAppender>>((w, appender) => {
                 _threadLogAppenderField.Assign(appender.Func<IThreadLogAppender>(x => x.AsService));
             });
-            
-            writer.AllMethods().Implement(ImplementLogMethod);
+
+            writer.AllMethods(where: IsLogMethod).Implement(ImplementLogMethod);
             
             writer.AllProperties().Implement(
                 p => p.Get(w => w.Throw<NotSupportedException>("Events are not supported")),
@@ -103,6 +103,18 @@ namespace NWheels.Logging.Core
             writer.AllEvents().Implement(
                 e => e.Add((w, args) => w.Throw<NotSupportedException>("Events are not supported")),  
                 e => e.Remove((w, args) => w.Throw<NotSupportedException>("Events are not supported")));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool IsLogMethod(MethodInfo method)
+        {
+            if (method.DeclaringType != null && method.DeclaringType.IsInterface)
+            {
+                return true;
+            }
+
+            return (method.IsAbstract && method.DeclaringType != typeof(object));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

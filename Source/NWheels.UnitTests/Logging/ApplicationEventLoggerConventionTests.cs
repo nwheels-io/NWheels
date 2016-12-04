@@ -1,5 +1,9 @@
-﻿using System;
+﻿#define LOGGING_TEST_DEFINED_SYMBOL
+#undef LOGGING_TEST_UNDEFINED_SYMBOL
+
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
@@ -48,7 +52,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Act
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
 
             //-- Assert
 
@@ -62,7 +66,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
 
             //-- Act
 
@@ -86,7 +90,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
 
             //-- Act
 
@@ -110,7 +114,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
             var exception = new DivideByZeroException();
 
             //-- Act
@@ -135,7 +139,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
 
             //-- Act
 
@@ -165,7 +169,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
 
             //-- Act
 
@@ -195,7 +199,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
 
             //-- Act
 
@@ -215,7 +219,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
 
             //-- Act
 
@@ -239,7 +243,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
             var date1 = new DateTime(2015, 1, 1);
             var date2 = new DateTimeOffset(new DateTime(2015, 2, 2), TimeSpan.FromHours(-7));
 
@@ -263,7 +267,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
             var date1 = new DateTime(2015, 1, 1);
             var date2 = new DateTimeOffset(new DateTime(2015, 2, 2), TimeSpan.FromHours(-7));
 
@@ -285,7 +289,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
             var dateTime = new DateTime(2015, 1, 1);
             var dateTimeOffset = new DateTimeOffset(new DateTime(2015, 2, 2), TimeSpan.FromHours(-7));
 
@@ -313,7 +317,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
             var messageXml = XElement.Parse("<Envelope><Header from='foo' to='bar' /><Body><Data value='12345' /></Body></Envelope>");
 
             //-- Act
@@ -341,7 +345,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
             var callCount = 0;
 
             //-- Act
@@ -367,7 +371,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
             var callCount = 0;
             string methodLog = null;
 
@@ -401,7 +405,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
             var callCount = 0;
 
             //-- Act
@@ -430,7 +434,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
             var callCount = 0;
             string methodLog = null;
 
@@ -466,7 +470,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
             var callCount = 0;
             TestErrorException thrownException = null;
 
@@ -502,7 +506,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
             var callCount = 0;
             TestErrorException thrownException = null;
 
@@ -538,7 +542,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
             var callCount = 0;
             TestErrorException thrownException = null;
 
@@ -574,7 +578,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var logger = CreateTestLogger();
+            var logger = CreateTestInterfaceLogger();
             var callCount = 0;
             TestErrorException thrownException = null;
             bool? returnValue = null;
@@ -607,9 +611,72 @@ namespace NWheels.UnitTests.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private ITestLogger CreateTestLogger()
+        [Test]
+        public void CanEmitLoggerDefinedAsAbstractClass()
+        {
+            //-- Act
+
+            var logger = CreateTestAbstractClassLogger();
+
+            //-- Assert
+
+            Assert.That(logger, Is.Not.Null);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanUseConditionalsWithUndefinedSymbol()
+        {
+            //-- Arrange
+
+            var logger = CreateTestAbstractClassLogger();
+
+            //-- Act
+
+            logger.ThisIsMyLowLevelDebugMessage(num: 123, str: "ABC");
+
+            //-- Assert
+
+            var log = _logAppender.TakeLog();
+
+            log.Length.ShouldBe(0);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanUseConditionalsWithDefinedSymbol()
+        {
+            //-- Arrange
+
+            var logger = CreateTestAbstractClassLogger();
+
+            //-- Act
+
+            logger.ThisIsMyDebugMessage(num: 999, str: "ZZZ");
+
+            //-- Assert
+
+            var log = _logAppender.TakeLog();
+
+            log.Length.ShouldBe(1);
+            log[0].SingleLineText.ShouldBe("This is my debug message: num=999, str=ZZZ");
+            log[0].Level.ShouldBe(LogLevel.Debug);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private ITestLogger CreateTestInterfaceLogger()
         {
             return _factory.CreateService<ITestLogger>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private TestAbstractClassLogger CreateTestAbstractClassLogger()
+        {
+            return _factory.CreateService<TestAbstractClassLogger>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -703,6 +770,29 @@ namespace NWheels.UnitTests.Logging
 
             [LogMethod(LogLevel.Info, throwOnFailure: false)]
             bool ThisIsMyFunctionThatDoesntThrow(Func<bool> method);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public abstract class TestAbstractClassLogger : IApplicationEventLogger
+        {
+            [LogDebug, Conditional("LOGGING_TEST_UNDEFINED_SYMBOL")]
+            public abstract void ThisIsMyLowLevelDebugMessage(int num, string str);
+
+            [LogDebug, Conditional("LOGGING_TEST_DEFINED_SYMBOL")]
+            public abstract void ThisIsMyDebugMessage(int num, string str);
+
+            [LogError]
+            public abstract TestErrorException ThisIsMyErrorMessageThatCreatesException();
+
+            [LogActivity]
+            public abstract ILogActivity ThisIsMyActivityWithParameters(int num, string str);
+
+            [LogMethod(LogLevel.Info)]
+            public abstract string ThisIsMyFunctionWithParameters(
+                Func<int, decimal, string> method,
+                int num,
+                [Detail, Format("#,##0.00")] decimal value);
         }
     
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

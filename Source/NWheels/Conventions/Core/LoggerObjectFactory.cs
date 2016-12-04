@@ -43,11 +43,32 @@ namespace NWheels.Conventions.Core
             var staticStrings = new StaticStringsDecorator();
 
             return new IObjectFactoryConvention[] {
+                new LoggerBaseTypeConvention(), 
                 staticStrings,
                 new ApplicationEventLoggerConvention(staticStrings)
             };
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class LoggerBaseTypeConvention : ImplementationConvention
+        {
+            public LoggerBaseTypeConvention()
+                : base(Will.InspectDeclaration)
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override void OnInspectDeclaration(ObjectFactoryContext context)
+            {
+                if (context.TypeKey.PrimaryInterface.IsClass)
+                {
+                    context.BaseType = context.TypeKey.PrimaryInterface;
+                }
+            }
+        }
     }
 }
