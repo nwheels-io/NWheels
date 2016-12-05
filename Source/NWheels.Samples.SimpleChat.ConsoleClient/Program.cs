@@ -25,21 +25,23 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
                 return;
             }
 
-            var framework = ClientSideFramework.CreateWithDefaultConfiguration();
-            var clientFactory = framework.Components.Resolve<DuplexTcpClientFactory>();
+            NWheels.Stacks.Nlog.NLogBasedPlainLog.Instance.ConfigureConsoleOutput(NLog.LogLevel.Debug);
+            var framework = ClientSideFramework.CreateWithDefaultConfiguration(
+                new NWheels.Stacks.Nlog.ModuleLoader()
+            );
+
+            var apiFactory = framework.Components.Resolve<DuplexTcpTransport.ApiFactory>();
             var client = new ChatClient();
+            apiFactory.CreateApiClient<IChatServiceApi, IChatClientApi>(
+                client,
+                serverHost: "localhost",
+                serverPort: 9797,
+                clientToServerHeartbeatInterval: TimeSpan.FromSeconds(1));
 
             Console.WriteLine("Now connecting to chat server.");
             Console.WriteLine("HELP > while in chat, type your message and hit ENTER to send.");
             Console.WriteLine("HELP > to leave, type Q and hit ENTER.");
 
-            client.Server = clientFactory.CreateServerProxy<IChatServiceApi, IChatClientApi>(
-                new ChatClient(),
-                serverHostname: "localhost",
-                serverPort: 9797,
-                serverPingInterval: TimeSpan.FromSeconds(1));
-
-            Thread.Sleep(20);
             client.Server.Hello(myName: "PID#" + Process.GetCurrentProcess().Id);
 
             while (true)
@@ -51,6 +53,8 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
                     client.Server.GoodBye();
                     break;
                 }
+
+                client.Server.SayToOthers(text);
             }
 
             Console.WriteLine("Shutting down.");
@@ -62,6 +66,9 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
         {
             Console.WriteLine("****** Starting PoC.");
 
+            NWheels.Stacks.Nlog.NLogBasedPlainLog.Instance.ConfigureConsoleOutput(NLog.LogLevel.Debug);
+            ClientSideFramework framework = ClientSideFramework.CreateWithDefaultConfiguration(new NWheels.Stacks.Nlog.ModuleLoader());
+
             var serverArgIndex = Array.IndexOf(args, "--server");
             if (serverArgIndex < 0 || serverArgIndex >= args.Length - 1)
             {
@@ -71,24 +78,36 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
             var serverAddress = args[serverArgIndex + 1];
             var serverUri = new Uri("tcp://" + serverAddress);
 
-            TcpPoc.Server server = null;
-            TcpPoc.Client client = null;
-            TcpPoc.Session serverSession = null;
+            DuplexTcpTransport.Server server = null;
+            DuplexTcpTransport.Client client = null;
+            DuplexTcpTransport.Connection serverSession = null;
 
             if (args.Contains("--run-server"))
             {
                 var serverIp = (Uri.CheckHostName(serverUri.Host) == UriHostNameType.IPv4 ? serverUri.Host : null);
-                server = new TcpPoc.Server(serverIp, serverUri.Port, onClientConnected: (session) => {
-                    serverSession = session;
-                    session.MessageReceived += (session2, message) => {
-                        Console.WriteLine(Encoding.UTF8.GetString(message));
-                    };
-                });
+                server = new DuplexTcpTransport.Server(
+                    framework.Logger<DuplexTcpTransport.Logger>(),
+                    serverIp, 
+                    serverUri.Port, 
+                    onClientConnected: (session) => {
+                        serverSession = session;
+                        session.MessageReceived += (session2, messageBytes) => {
+                            Console.WriteLine("CLIENT -> SERVER : {0}", Encoding.UTF8.GetString(messageBytes));
+                        };
+                    });
+                server.Start();
             }
 
             if (args.Contains("--run-client"))
             {
-                client = new TcpPoc.Client(serverUri.Host, serverUri.Port);
+                client = new DuplexTcpTransport.Client(
+                    framework.Logger<DuplexTcpTransport.Logger>(),
+                    serverUri.Host, 
+                    serverUri.Port, 
+                    onMessageReceived: (messageBytes) => {
+                        Console.WriteLine("SERVER -> CLIENT : {0}", Encoding.UTF8.GetString(messageBytes));
+                    });
+                client.Start();
                 Task.Factory.StartNew(() => TcpPoc.RunScenario2(client, serverSession));
             }
 

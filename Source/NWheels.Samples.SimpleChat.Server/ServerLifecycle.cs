@@ -11,14 +11,14 @@ namespace NWheels.Samples.SimpleChat.Server
 {
     public class ServerLifecycle : LifecycleEventListenerBase
     {
-        private readonly DuplexTcpServerFactory _tcpServerFactory;
-        private DuplexTcpServer<IChatServiceApi, IChatClientApi> _tcpServer;
+        private readonly DuplexTcpTransport.ApiFactory _tcpFactory;
+        private IDuplexNetworkApiEndpoint<IChatServiceApi, IChatClientApi> _endpoint;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ServerLifecycle(DuplexTcpServerFactory tcpServerFactory)
+        public ServerLifecycle(DuplexTcpTransport.ApiFactory tcpFactory)
         {
-            _tcpServerFactory = tcpServerFactory;
+            _tcpFactory = tcpFactory;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,18 +27,16 @@ namespace NWheels.Samples.SimpleChat.Server
 
         public override void Activate()
         {
-            _tcpServer = _tcpServerFactory.CreateServer<IChatServiceApi, IChatClientApi>(
-                listenPortNumber: 9797,
-                workerThreadCount: 1,
-                serverPingInterval: TimeSpan.FromSeconds(1),
-                serverObjectFactory: (tcp, client) => new ChatService(/*tcp, client*/));
+            _endpoint = _tcpFactory.CreateApiServer<IChatServiceApi, IChatClientApi>(
+                listenIpAddress: null,
+                listenPortNumber: 9797);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void Deactivate()
         {
-            _tcpServer.Dispose();
+            _endpoint.Dispose();
         }
 
         #endregion

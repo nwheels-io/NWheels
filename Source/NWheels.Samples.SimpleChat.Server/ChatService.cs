@@ -9,26 +9,38 @@ using NWheels.Samples.SimpleChat.Contracts;
 
 namespace NWheels.Samples.SimpleChat.Server
 {
-    public class ChatService : IChatServiceApi, IDuplexNetworkApiEvents
+    public class ChatService : IChatServiceApi, IDuplexNetworkApiTarget<IChatServiceApi, IChatClientApi>
     {
-        private readonly DuplexTcpServer<IChatServiceApi, IChatClientApi> _tcpServer;
-        private readonly IChatClientApi _myClient;
+        private IDuplexNetworkApiEndpoint<IChatServiceApi, IChatClientApi> _endpoint;
+        private IChatClientApi _myClient;
         private string _myName;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ChatService()
+        #region Implementation of IDuplexNetworkApiTarget<IChatServiceApi,IChatClientApi>
+
+        void IDuplexNetworkApiTarget<IChatServiceApi, IChatClientApi>.OnConnected(
+            IDuplexNetworkApiEndpoint<IChatServiceApi, IChatClientApi> endpoint, 
+            IChatClientApi remoteProxy)
         {
-            _tcpServer = null;
-            _myClient = null;
+            _endpoint = endpoint;
+            _myClient = remoteProxy;
         }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //public ChatService(DuplexTcpServer<IChatServiceApi, IChatClientApi> tcpServer, IChatClientApi myClient)
-        //{
-        //    _tcpServer = tcpServer;
-        //    _myClient = myClient;
-        //}
+        void IDuplexNetworkApiTarget<IChatServiceApi, IChatClientApi>.OnDisconnected(
+            IDuplexNetworkApiEndpoint<IChatServiceApi, IChatClientApi> endpoint, 
+            IChatClientApi remoteProxy, 
+            ConnectionCloseReason reason)
+        {
+            if (reason != ConnectionCloseReason.ByContract)
+            {
+                BroadcastToOthers("SERVER", _myName + " has gone silently....");
+            }
+        }
+
+        #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -57,22 +69,13 @@ namespace NWheels.Samples.SimpleChat.Server
         }
 
         #endregion
-        
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void IDuplexNetworkApiEvents.OnSessionClosed(IDuplexNetworkEndpointApiProxy proxy, SessionCloseReason reason)
-        {
-            if (reason != SessionCloseReason.ByContract)
-            {
-                BroadcastToOthers("SERVER", _myName + " has gone silently....");
-            }
-        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private void BroadcastToOthers(string who, string what)
         {
-            _tcpServer.Broadcast(client => {
+            _endpoint.Broadcast(client => {
                 if (client != _myClient)
                 {
                     client.SomeoneSaidSomething(who, what);

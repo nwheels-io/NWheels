@@ -33,7 +33,7 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void RunScenario1(Client client)
+        public static void RunScenario1(DuplexTcpTransport.Client client)
         {
             PrintLog("SCENAR", "RunScenario1(): sleeping 10 sec");
 
@@ -59,7 +59,7 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void RunScenario2(Client client, Session serverSession)
+        public static void RunScenario2(DuplexTcpTransport.Client client, DuplexTcpTransport.Connection serverSession)
         {
             InitializeScenarioAssertions(client, serverSession);
 
@@ -77,7 +77,7 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void InitializeScenarioAssertions(Client client, Session serverSession)
+        private static void InitializeScenarioAssertions(DuplexTcpTransport.Client client, DuplexTcpTransport.Connection serverSession)
         {
             _s_messageReceivedOnServer = new ManualResetEvent(false);
             _s_messageReceivedOnClient = new ManualResetEvent(false);
@@ -111,7 +111,7 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void SendMessageFromClientToServer(Client client, string message)
+        private static void SendMessageFromClientToServer(DuplexTcpTransport.Client client, string message)
         {
             _s_messageReceivedOnServer.Reset();
             _s_expectedMessageOnServer = message;
@@ -126,7 +126,7 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void SendMessageFromServerToClient(Session serverSession, string message)
+        private static void SendMessageFromServerToClient(DuplexTcpTransport.Connection serverSession, string message)
         {
             _s_messageReceivedOnClient.Reset();
             _s_expectedMessageOnClient = message;
@@ -167,6 +167,8 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #if false
 
         public class Server
         {
@@ -687,5 +689,7 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
                 }
             }
         }
+
+        #endif
     }
 }
