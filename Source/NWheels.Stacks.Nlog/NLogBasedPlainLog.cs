@@ -70,11 +70,20 @@ namespace NWheels.Stacks.Nlog
 
             _printClosedActivityDelegate = this.PrintClosedActivity;
             //_nameValuePairLogger = LogManager.GetLogger(NameValuePairLoggerName);
+
+            this.ConsoleLogLevel = LogLevel.Info;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void ConfigureConsoleOutput()
+        {
+            ConfigureConsoleOutput(ConsoleLogLevel);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void ConfigureConsoleOutput(LogLevel level)
         {
             var consoleTarget = new ColoredConsoleTarget();
 
@@ -98,8 +107,8 @@ namespace NWheels.Stacks.Nlog
 
             LogManager.Configuration.AddTarget(PlainTextConsoleTargetName, consoleTarget);
 
-            var consoleRule1 = new LoggingRule(PlainTextLoggerName, LogLevel.Info, consoleTarget);
-            var consoleRule2 = new LoggingRule(BootTextLoggerName, LogLevel.Info, consoleTarget);
+            var consoleRule1 = new LoggingRule(PlainTextLoggerName, level, consoleTarget);
+            var consoleRule2 = new LoggingRule(BootTextLoggerName, level, consoleTarget);
 
             LogManager.Configuration.LoggingRules.Add(consoleRule1);
             LogManager.Configuration.LoggingRules.Add(consoleRule2);
@@ -259,6 +268,10 @@ namespace NWheels.Stacks.Nlog
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public NLog.LogLevel ConsoleLogLevel { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void ConfigureBootLoggerTarget(LoggingConfiguration config)
         {
             if ( !Directory.Exists(_bootLogFolder) )
@@ -385,7 +398,18 @@ namespace NWheels.Stacks.Nlog
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private LogLevel ToNLogLevel(NWheelsLogLevel value)
+        private static readonly NLogBasedPlainLog _s_instance;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        static NLogBasedPlainLog()
+        {
+            _s_instance = new NLogBasedPlainLog();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static LogLevel ToNLogLevel(NWheelsLogLevel value)
         {
             switch (value)
             {
@@ -401,17 +425,6 @@ namespace NWheels.Stacks.Nlog
                 default:
                     return LogLevel.Info;
             }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static readonly NLogBasedPlainLog _s_instance;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        static NLogBasedPlainLog()
-        {
-            _s_instance = new NLogBasedPlainLog();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

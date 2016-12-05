@@ -23,6 +23,7 @@ namespace NWheels.Hosts.Console
         const string BootFileParamKey = "bootfile";
         const string BatchjobParamKey = "batchjob";
         const string ConfigParamKey = "config";
+        const string LogLevelParamKey = "loglevel";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -108,10 +109,14 @@ namespace NWheels.Hosts.Console
                 _s_programConfig.IsBatchJob = true;
             });
             
+            x.AddCommandLineDefinition(LogLevelParamKey, v => {
+                _s_programConfig.LogLevel = (NWheels.Logging.LogLevel)Enum.Parse(typeof(NWheels.Logging.LogLevel), v, ignoreCase: true);
+            });
+
             x.AddCommandLineDefinition(ConfigParamKey, v => {
                 _s_programConfig.CommandLineConfigValues.Add(v);
             });
-            
+
             x.ApplyCommandLine();
 
             if (string.IsNullOrEmpty(_s_programConfig.BootConfigFilePath))

@@ -38,6 +38,8 @@ namespace NWheels.Hosts.Console
         {
             _hostConfig = hostConfig;
             _hostConfig.BootConfig.InstanceId = hostConfig.HostSettings.InstanceName;
+
+            NLogBasedPlainLog.Instance.ConsoleLogLevel = NLogBasedPlainLog.ToNLogLevel(hostConfig.LogLevel);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
