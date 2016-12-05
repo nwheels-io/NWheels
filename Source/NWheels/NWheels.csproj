@@ -17,7 +17,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\Bin\Core\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;TCPDEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -157,12 +157,15 @@
     <Compile Include="Configuration\Impls\AppConfigConfigurationSource.cs" />
     <Compile Include="Configuration\Impls\CommandLineConfigurationSource.cs" />
     <Compile Include="Configuration\Impls\XmlFileConfigurationSource.cs" />
+    <Compile Include="Configuration\ProgrammaticConfiguration.cs" />
+    <Compile Include="Configuration\Impls\ProgrammaticConfigurationSource.cs" />
     <Compile Include="Conventions\Core\StaticStringDecorator.cs" />
     <Compile Include="Core\PipelineObjectFactory.cs" />
     <Compile Include="Endpoints\Bases\INetworkApiDispatchRuntime.cs" />
     <Compile Include="Endpoints\Core\CompactRpcProtocol.cs" />
     <Compile Include="Endpoints\Core\Endpoint.cs" />
     <Compile Include="Endpoints\DuplexNetworkApi.cs" />
+    <Compile Include="Endpoints\IDuplexNetworkApiEndpoint.cs" />
     <Compile Include="Endpoints\DuplexTcpServerFactory.cs" />
     <Compile Include="Endpoints\DuplexTcpClientFactory.cs" />
     <Compile Include="Endpoints\DuplexTcpServer.cs" />

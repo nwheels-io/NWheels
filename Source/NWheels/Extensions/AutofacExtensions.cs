@@ -413,6 +413,28 @@ namespace NWheels.Extensions
                 _builder.RegisterType<ConfigSectionRegistration<TSection>>().As<IConfigSectionRegistration>().InstancePerDependency();
                 _builder.Register(ctx => ctx.Resolve<ConfigurationObjectFactory>().CreateService<TSection>()).As<TSection>().SingleInstance();
             }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Programmatic(Action<IComponentContext> configure)
+            {
+                var configuration = new ProgrammaticConfiguration(configure);
+                _builder.RegisterInstance(configuration).LastInPipeline();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ProgrammaticSection<TSection>(Action<TSection> configure)
+                where TSection : class, IConfigurationSection
+            {
+                var configuration = new ProgrammaticConfiguration(
+                    components => {
+                        var section = components.Resolve<TSection>();
+                        configure(section);
+                    });
+
+                _builder.RegisterInstance(configuration).LastInPipeline();
+            }
         }
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------

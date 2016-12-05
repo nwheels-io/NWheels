@@ -328,6 +328,8 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<ConfigurationObjectFactory>().As<ConfigurationObjectFactory, IConfigurationObjectFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterPipeline<IConfigurationSource>();
             builder.Register(c => new XmlFileConfigurationSource(this, c.Resolve<IConfigurationLogger>())).As<IConfigurationSource>().LastInPipeline();
+            builder.RegisterPipeline<ProgrammaticConfiguration>();
+            builder.RegisterType<ProgrammaticConfigurationSource>().As<IConfigurationSource>().LastInPipeline();
             builder.RegisterType<XmlConfigurationLoader>().SingleInstance().InstancePerLifetimeScope();
             builder.RegisterAdapter<RelationalMappingConventionDefault, IRelationalMappingConvention>(RelationalMappingConventionBase.FromDefault).SingleInstance();
             builder.RegisterType<VoidDataRepositoryFactory>().As<IDataRepositoryFactory>();
@@ -349,7 +351,8 @@ namespace NWheels.Hosting.Core
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<RealTimeoutManager>().As<RealTimeoutManager>();
             builder.NWheelsFeatures().Logging().RegisterLogger<ITimeoutManagerLogger>();
             builder.RegisterType<DuplexNetworkApiProxyFactory>().As<IDuplexNetworkApiProxyFactory>().SingleInstance();
-            builder.RegisterType<DuplexTcpServerFactory>().SingleInstance();
+            builder.RegisterType<DuplexTcpTransport.ApiFactory>().SingleInstance();
+            builder.NWheelsFeatures().Logging().RegisterLogger<DuplexTcpTransport.Logger>();
 
             builder.RegisterType<AccessControlListCache>().SingleInstance();
             builder.RegisterType<LocalTransientSessionManager>().As<ISessionManager, ICoreSessionManager>().SingleInstance();
