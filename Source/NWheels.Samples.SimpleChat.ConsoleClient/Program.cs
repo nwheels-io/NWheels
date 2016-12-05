@@ -11,6 +11,8 @@ using Hapil;
 using NWheels.Client;
 using NWheels.Endpoints;
 using NWheels.Extensions;
+using NWheels.Logging;
+using NWheels.Logging.Core;
 using NWheels.Samples.SimpleChat.Contracts;
 
 namespace NWheels.Samples.SimpleChat.ConsoleClient
@@ -19,6 +21,8 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
     {
         static void Main(string[] args)
         {
+            CrashLog.RegisterUnhandledExceptionHandler(); 
+            
             if (args.Contains("--poc"))
             {
                 PocMain(args);
@@ -27,7 +31,15 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 
             NWheels.Stacks.Nlog.NLogBasedPlainLog.Instance.ConfigureConsoleOutput(NLog.LogLevel.Debug);
             var framework = ClientSideFramework.CreateWithDefaultConfiguration(
-                new NWheels.Stacks.Nlog.ModuleLoader()
+                registerComponents: (builder) => {
+                    builder.NWheelsFeatures().Configuration().ProgrammaticSection<IFrameworkLoggingConfiguration>(
+                        config => {
+                            config.Level = LogLevel.Debug;
+                        });  
+                },
+                moduleLoaders: new Autofac.Module[] {
+                    new NWheels.Stacks.Nlog.ModuleLoader()
+                }
             );
 
             var apiFactory = framework.Components.Resolve<DuplexTcpTransport.ApiFactory>();

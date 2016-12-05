@@ -13,6 +13,7 @@ using NWheels.Concurrency;
 using NWheels.Concurrency.Core;
 using NWheels.Configuration;
 using NWheels.Configuration.Core;
+using NWheels.Configuration.Impls;
 using NWheels.Conventions;
 using NWheels.Conventions.Core;
 using NWheels.Core;
@@ -43,7 +44,7 @@ namespace NWheels.Client
         private readonly IContainer _components;
         private readonly DynamicModule _dynamicModule;
         private readonly Action<IComponentContext, ContainerBuilder> _registerModules;
-        private readonly TestThreadLogAppender _logAppender;
+        private readonly IThreadLogAnchor _threadLogAnchor;
         private readonly LoggerObjectFactory _loggerFactory;
         private readonly ConfigurationObjectFactory _configurationFactory;
         private readonly UnitOfWorkFactory _unitOfWorkFactory;
@@ -63,8 +64,7 @@ namespace NWheels.Client
             this.PresetGuids = new Queue<Guid>();
             this.PresetRandomInt32 = new Queue<int>();
             this.PresetRandomInt64 = new Queue<long>();
-            this.NodeConfiguration = new BootConfiguration
-            {
+            this.NodeConfiguration = new BootConfiguration {
                 ApplicationName = "CLIENT-APP",
                 NodeName = "CLIENT-NODE",
                 InstanceId = "CLIENT-INSTANCE",
@@ -75,13 +75,15 @@ namespace NWheels.Client
             //_metadataCache = CreateMetadataCacheWithDefaultConventions();
             _dynamicModule = dynamicModule;
             _registerModules = registerModules;
-            _logAppender = new TestThreadLogAppender(this);
+            //_logAppender = new TestThreadLogAppender(this);
 
-            var logAppenderPipeline = new Pipeline<IThreadLogAppender>(new IThreadLogAppender[] { _logAppender }, new PipelineObjectFactory(dynamicModule));
-            _loggerFactory = new LoggerObjectFactory(_dynamicModule, logAppenderPipeline);
+            //var logAppenderPipeline = new Pipeline<IThreadLogAppender>(new IThreadLogAppender[] { _logAppender }, new PipelineObjectFactory(dynamicModule));
+            //_loggerFactory = new LoggerObjectFactory(_dynamicModule, logAppenderPipeline);
 
             BuildComponentContainer(out _components);
 
+            _threadLogAnchor = _components.Resolve<IThreadLogAnchor>();
+            _loggerFactory = _components.Resolve<LoggerObjectFactory>();
             _configurationFactory = _components.Resolve<ConfigurationObjectFactory>();
             _unitOfWorkFactory = new UnitOfWorkFactory(_components);
         }
@@ -310,7 +312,7 @@ namespace NWheels.Client
         {
             get
             {
-                return _logAppender.ThreadLog;
+                return _threadLogAnchor.CurrentThreadLog;
             }
         }
 
@@ -333,34 +335,6 @@ namespace NWheels.Client
         public TSection ConfigSection<TSection>() where TSection : class, IConfigurationSection
         {
             return _components.Resolve<TSection>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public LogNode[] GetLog()
-        {
-            return _logAppender.GetLog();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public LogNode[] TakeLog()
-        {
-            return _logAppender.TakeLog();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public string[] GetLogStrings()
-        {
-            return _logAppender.GetLogStrings();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public string[] TakeLogStrings()
-        {
-            return _logAppender.TakeLogStrings();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -452,14 +426,19 @@ namespace NWheels.Client
 
             builder.RegisterInstance(this).As<IFramework>();
             builder.RegisterInstance(_dynamicModule).As<DynamicModule>();
-            builder.RegisterType<ThreadRegistry>().SingleInstance();
+            builder.RegisterType<ThreadRegistry>().As<ThreadRegistry, IThreadRegistry>().SingleInstance();
             builder.RegisterGeneric(typeof(Auto<>)).SingleInstance();
             builder.RegisterType<UniversalThreadLogAnchor>().As<IThreadLogAnchor>().SingleInstance();
+            builder.RegisterPipeline<IThreadLogAppender>().SingleInstance();
+            builder.RegisterType<ThreadLogAppender>().As<IThreadLogAppender>().SingleInstance().LastInPipeline();
+            builder.RegisterPipeline<IThreadPostMortem>().SingleInstance();
 
-            builder.RegisterInstance(_loggerFactory).As<LoggerObjectFactory, IAutoObjectFactory>();
+            builder.RegisterType<LoggerObjectFactory>().As<LoggerObjectFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<PipelineObjectFactory>().SingleInstance();
             builder.RegisterType<ConfigurationObjectFactory>().As<IAutoObjectFactory, IConfigurationObjectFactory, ConfigurationObjectFactory>().SingleInstance();
             builder.RegisterPipeline<IConfigurationSource>();
+            builder.RegisterPipeline<ProgrammaticConfiguration>();
+            builder.RegisterType<ProgrammaticConfigurationSource>().As<IConfigurationSource>().LastInPipeline();
             builder.RegisterType<ClientEntityObjectFactory>().As<IEntityObjectFactory, EntityObjectFactory, ClientEntityObjectFactory>().SingleInstance();
             builder.RegisterType<ClientDataRepositoryFactory>().As<ClientDataRepositoryFactory, IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<DomainObjectFactory>().As<IDomainObjectFactory>().SingleInstance();
@@ -509,8 +488,7 @@ namespace NWheels.Client
 
             var metadataCache = CreateMetadataCacheWithDefaultConventions(_components);
 
-            UpdateComponents(builder2 =>
-            {
+            UpdateComponents(builder2 => {
                 builder2.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();
                 builder2.RegisterInstance(metadataCache.Conventions).As<MetadataConventionSet>();
             });
@@ -526,6 +504,17 @@ namespace NWheels.Client
 
         public static ClientSideFramework CreateWithDefaultConfiguration(params Autofac.Module[] moduleLoaders)
         {
+            return CreateWithDefaultConfiguration(
+                registerComponents: null,
+                moduleLoaders: moduleLoaders);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ClientSideFramework CreateWithDefaultConfiguration(
+            Action<ContainerBuilder> registerComponents = null, 
+            Autofac.Module[] moduleLoaders = null)
+        {
             var dynamicModule = new DynamicModule(
                 "NWheels.ClientRuntimeTypes", 
                 allowSave: true, 
@@ -534,9 +523,16 @@ namespace NWheels.Client
             var framework = new ClientSideFramework(
                 dynamicModule, 
                 registerModules: (components, builder) => {
-                    foreach (var module in moduleLoaders)
+                    if (registerComponents != null)
                     {
-                        builder.RegisterModule(module);
+                        registerComponents(builder);
+                    }
+                    if (moduleLoaders != null)
+                    {
+                        foreach (var module in moduleLoaders)
+                        {
+                            builder.RegisterModule(module);
+                        }
                     }
                 });
 
