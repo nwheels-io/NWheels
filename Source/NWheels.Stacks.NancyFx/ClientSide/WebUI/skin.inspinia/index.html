@@ -322,22 +322,83 @@ HEAD, JS/CSS LINKS
             background-color: lghtgreen;
             color: blue;
         }
-        tr.jqg_rowstyle_ThreadSuccess > td { color: #484848; background-color: #ECECEC; font-weight: bold !important; }
-        tr.jqg_rowstyle_ThreadWarning > td { color: #CC6600; background-color: #ECECEC; font-weight: bold !important; }
-        tr.jqg_rowstyle_ThreadError > td { color: #C90000; background-color: #ECECEC; font-weight: bold !important; }
-        tr.jqg_rowstyle_ThreadCritical > td { color: #FF3300; background-color: #ECECEC; }
-        tr.jqg_rowstyle_ActivitySuccess > td  { color: #484848; background-color: #F8F8F8; }
-        tr.jqg_rowstyle_ActivityWarning > td { color: #CC6600; background-color: #F8F8F8; }
-        tr.jqg_rowstyle_ActivityError > td { color:#C90000; background-color: #F8F8F8; }
-        tr.jqg_rowstyle_ActivityCritical > td { color: #FF3300;background-color: #F8F8F8; }
-        tr.jqg_rowstyle_LogDebug > td  { color: #A0A0A0; }  
-        tr.jqg_rowstyle_LogVerbose > td  { color: #808080 ; }
-        tr.jqg_rowstyle_LogInfo > td { color: #0000AF; font-weight: bold !important; }
-        tr.jqg_rowstyle_LogWarning > td { color: #CC6600; font-weight: bold !important; }
-        tr.jqg_rowstyle_LogError > td { color: #E00000; font-weight: bold !important; }
-        tr.jqg_rowstyle_LogCritical > td { color: #FF3300; font-weight: bold !important; }
-        tr.jqgrow i.row-icon { margin-left: 5px; margin-right: 3px; }
-        
+
+        tr.jqg_rowstyle_ThreadSuccess > td {
+            color: #484848;
+            background-color: #ECECEC;
+            font-weight: bold !important;
+        }
+
+        tr.jqg_rowstyle_ThreadWarning > td {
+            color: #CC6600;
+            background-color: #ECECEC;
+            font-weight: bold !important;
+        }
+
+        tr.jqg_rowstyle_ThreadError > td {
+            color: #C90000;
+            background-color: #ECECEC;
+            font-weight: bold !important;
+        }
+
+        tr.jqg_rowstyle_ThreadCritical > td {
+            color: #FF3300;
+            background-color: #ECECEC;
+        }
+
+        tr.jqg_rowstyle_ActivitySuccess > td {
+            color: #484848;
+            background-color: #F8F8F8;
+        }
+
+        tr.jqg_rowstyle_ActivityWarning > td {
+            color: #CC6600;
+            background-color: #F8F8F8;
+        }
+
+        tr.jqg_rowstyle_ActivityError > td {
+            color: #C90000;
+            background-color: #F8F8F8;
+        }
+
+        tr.jqg_rowstyle_ActivityCritical > td {
+            color: #FF3300;
+            background-color: #F8F8F8;
+        }
+
+        tr.jqg_rowstyle_LogDebug > td {
+            color: #A0A0A0;
+        }
+
+        tr.jqg_rowstyle_LogVerbose > td {
+            color: #808080;
+        }
+
+        tr.jqg_rowstyle_LogInfo > td {
+            color: #0000AF;
+            font-weight: bold !important;
+        }
+
+        tr.jqg_rowstyle_LogWarning > td {
+            color: #CC6600;
+            font-weight: bold !important;
+        }
+
+        tr.jqg_rowstyle_LogError > td {
+            color: #E00000;
+            font-weight: bold !important;
+        }
+
+        tr.jqg_rowstyle_LogCritical > td {
+            color: #FF3300;
+            font-weight: bold !important;
+        }
+
+        tr.jqgrow i.row-icon {
+            margin-left: 5px;
+            margin-right: 3px;
+        }
+
         #global_div_dropdown_popup {
               position: fixed;
               z-index: 2000;
@@ -348,7 +409,9 @@ HEAD, JS/CSS LINKS
         .grid-inline-edit-control {
             border: none;
             width: 100%;
-            background-color: #C6F4DE;        
+            background-color: #C6F4DE;
+            height: 21px;
+            line-height: 21px;
         }
         
         .grid-inline-edit-dropdown-panel {
@@ -1179,15 +1242,16 @@ HEAD, JS/CSS LINKS
             }
             if ($scope.uidl.isInlineEditEnabled === true) {
                 columnsModel.push({
-                    name:'actions',
-                    index:'act',
-                    width:100,
-                    align:'center',
-                    sortable:false,
+                    name: 'actions',
+                    index: 'act',
+                    width: 120,
+                    align: 'center',
+                    sortable: false,
                     formatter: function (cellvalue, options, rowObject) {
-                        return '<i onclick="saveRowGrid(this)" class="fa fa-floppy-o" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i><i onclick="cancelRowGrid(this)" class="fa fa-undo" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i> <i class="fa fa-pencil" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
+                        return '<i onclick="saveRowGrid(this)" class="fa fa-floppy-o fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i><i onclick="cancelRowGrid(this)" class="fa fa-undo fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>' +
+                            '<i class="fa fa-pencil fa-lg" edit-grid-event="true" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
                     }
-                });       
+                });
             }
             $scope.gridColumns.forEach(function (metaColumn, idx) {
                 if (metaColumn.columnType == 'Hidden' || !$scope.isUidlAuthorized(metaColumn)) {
@@ -1660,7 +1724,20 @@ HEAD, JS/CSS LINKS
                         //afterInsertRow: function(rowid, rowdata, rowelem) {
                         //    console.log('afterInsertRow! ', rowid, rowdata, rowelem);
                         //},
-                        beforeSelectRow: function(rowid, e) {
+                        beforeSelectRow: function (rowid, e) {
+
+                            if (eval($(e.target).attr('edit-grid-event')) != undefined) {
+                                if (!$("#global_div_dropdown_popup").is(":visible")) {
+
+                                    //   $("#global_div_dropdown_popup").hide();
+                                    var rowObject = $scope.ResultSet[rowid - 1];
+                                    if ($scope.uidl.enableAutonomousQuery) {
+                                        $scope.$emit($scope.uidl.qualifiedName + ':EditRequested', rowObject);
+                                    } else {
+                                        $scope.$emit($scope.uidl.qualifiedName + ':EditRequestedByIndex', rowid - 1);
+                                    }
+                                }
+                            }
                             return ($scope.uidl.selectionMode !== 'Disabled');
                         },
                         onSelectRow: function (rowId) {
@@ -1697,13 +1774,16 @@ HEAD, JS/CSS LINKS
                         },
                         ondblClickRow: function (rowId) {
                             
-                            $("#global_div_dropdown_popup").hide();
-                            var rowObject = $scope.ResultSet[rowId - 1];
-                            if ($scope.uidl.enableAutonomousQuery) {
-                                $scope.$emit($scope.uidl.qualifiedName + ':EditRequested', rowObject);
-                            } else {
-                                $scope.$emit($scope.uidl.qualifiedName + ':EditRequestedByIndex', rowId - 1);
+                            if ($scope.uidl.isInlineEditEnabled == undefined)
+                            {
+                                var rowObject = $scope.ResultSet[rowId - 1];
+                                if ($scope.uidl.enableAutonomousQuery) {
+                                    $scope.$emit($scope.uidl.qualifiedName + ':EditRequested', rowObject);
+                                } else {
+                                    $scope.$emit($scope.uidl.qualifiedName + ':EditRequestedByIndex', rowId - 1);
+                                }
                             }
+    
                         },
                         subGrid: ($scope.uidl.enableDetailPane===true),
                         subGridOptions: { expandOnLoad: ($scope.uidl.detailPaneExpanded===true) },
