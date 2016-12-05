@@ -77,11 +77,10 @@ namespace NWheels.Endpoints
             {
                 var client = new Client(_logger, serverHost, serverPort);
                 var apiConnection = ApiConnection<TClientApi, TServerApi>.CreateOnClient(this, client.Connection, localObject);
-                var servrerProxy = _proxyFactory.CreateProxyInstance<TServerApi, TClientApi>(apiConnection, localObject);
                 
                 client.Start();
                 
-                return servrerProxy;
+                return apiConnection.RemoteProxy;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
