@@ -3,30 +3,312 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac;
+using NWheels.Endpoints.Factories;
 using NWheels.Logging;
 
 namespace NWheels.Endpoints
 {
     public class DuplexTcpTransport
     {
+        public class ApiFactory
+        {
+            private readonly IComponentContext _components;
+            private readonly IDuplexNetworkApiProxyFactory _proxyFactory;
+            private readonly Logger _logger;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ApiFactory(IComponentContext components, IDuplexNetworkApiProxyFactory proxyFactory, Logger logger)
+            {
+                _components = components;
+                _proxyFactory = proxyFactory;
+                _logger = logger;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IDuplexNetworkApiEndpoint<TServerApi, TClientApi> CreateApiServer<TServerApi, TClientApi>(
+                string listenIpAddress,
+                int listenPortNumber,
+                int listenBacklog = 1000,
+                int maxPendingConnections = 1000,
+                int maxConcurrentConnections = 10000,
+                TimeSpan? clientToServerHeartbeatInterval = null,
+                TimeSpan? serverToClientHeartbeatInterval = null) where TServerApi : class where TClientApi : class
+            {
+                if (listenPortNumber == 0)
+                {
+                    listenPortNumber = new Random().Next(5000, 55000);
+                }
+
+                var server = new Server(
+                    _logger,
+                    listenIpAddress,
+                    listenPortNumber,
+                    listenBacklog,
+                    maxPendingConnections,
+                    maxConcurrentConnections,
+                    clientToServerHeartbeatInterval,
+                    serverToClientHeartbeatInterval);
+
+                server.Start();
+
+                return new ServerApiEndpoint<TServerApi, TClientApi>(server, this);
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TServerApi CreateApiClient<TServerApi, TClientApi>(
+                TClientApi localObject,
+                string serverHost,
+                int serverPort,
+                TimeSpan? clientToServerHeartbeatInterval = null,
+                TimeSpan? serverToClientHeartbeatInterval = null) 
+                where TServerApi : class 
+                where TClientApi : class
+            {
+                var client = new Client(_logger, serverHost, serverPort);
+                var apiConnection = ApiConnection<TClientApi, TServerApi>.CreateOnClient(this, client.Connection, localObject);
+                var servrerProxy = _proxyFactory.CreateProxyInstance<TServerApi, TClientApi>(apiConnection, localObject);
+                
+                client.Start();
+                
+                return servrerProxy;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal IComponentContext Components
+            {
+                get { return _components; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal IDuplexNetworkApiProxyFactory ProxyFactory
+            {
+                get { return _proxyFactory; }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void SafeCloseSocket(Socket socket)
+        {
+            try
+            {
+                socket.Shutdown(SocketShutdown.Both);
+            }
+            finally
+            {
+                socket.Close();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ServerApiEndpoint<TServerApi, TClientApi> : IDuplexNetworkApiEndpoint<TServerApi, TClientApi>
+            where TServerApi : class
+            where TClientApi : class
+        {
+            private readonly Server _server;
+            private readonly ApiFactory _factory;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ServerApiEndpoint(Server server, ApiFactory factory)
+            {
+                _server = server;
+                _factory = factory;
+
+                AttachServerEventHandlers();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Dispose()
+            {
+                _server.Dispose();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Broadcast(Action<TClientApi> actionPerClient)
+            {
+                _server.Broadcast(connection => {
+                    var apiConnection = ApiConnection<TServerApi, TClientApi>.From(connection);
+                    actionPerClient(apiConnection.RemoteProxy);
+                });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public int ActiveClientCount 
+            {
+                get { return _server.ActiveConnectionCount; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            private void AttachServerEventHandlers()
+            {
+                _server.ClientConnected += (connection) => {
+                    ApiConnection<TServerApi, TClientApi>.CreateOnServer(_factory, this, connection);
+                };
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ApiConnection<TLocalApi, TRemoteApi> : IDuplexNetworkEndpointTransport
+            where TLocalApi : class
+            where TRemoteApi : class
+        {
+            private readonly ServerApiEndpoint<TLocalApi, TRemoteApi> _server;
+            private readonly Connection _connection;
+            private readonly object _localObject;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ApiConnection(ServerApiEndpoint<TLocalApi, TRemoteApi> server, Connection connection, object localObject)
+            {
+                _server = server;
+                _connection = connection;
+                _localObject = localObject;
+
+                AttachConnectionEventHandlers();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void SendBytes(byte[] bytes)
+            {
+                _connection.SendMessage(bytes);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TRemoteApi RemoteProxy { get; private set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public event Action<byte[]> BytesReceived;
+            public event Action<Exception> SendFailed;
+            public event Action<Exception> ReceiveFailed;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            private void AttachConnectionEventHandlers()
+            {
+                _connection.MessageReceived += (connection, messageBytes) => {
+                    if (BytesReceived != null)
+                    {
+                        BytesReceived(messageBytes);
+                    }
+                };
+                
+                _connection.SendFailed += (connection, error) => {
+                    if (SendFailed != null)
+                    {
+                        SendFailed(error);
+                    }
+                };
+
+                _connection.ReceiveFailed += (connection, error) => {
+                    if (ReceiveFailed != null)
+                    {
+                        ReceiveFailed(error);
+                    }
+                };
+
+                _connection.Closed += (connection, reason) => {
+                    var apiService = _localObject as IDuplexNetworkApiTarget<TLocalApi, TRemoteApi>;
+                    if (apiService != null)
+                    {
+                        apiService.OnDisconnected(_server, RemoteProxy, reason);
+                    }
+                };
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static ApiConnection<TLocalApi, TRemoteApi> CreateOnServer(
+                ApiFactory factory,
+                ServerApiEndpoint<TLocalApi, TRemoteApi> endpoint, 
+                Connection connection)
+            {
+                return Create(factory, connection, localObject: null, endpoint: endpoint);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static ApiConnection<TLocalApi, TRemoteApi> CreateOnClient(
+                ApiFactory factory,
+                Connection connection, 
+                TLocalApi localObject)
+            {
+                return Create(factory, connection, localObject, endpoint: null);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static ApiConnection<TLocalApi, TRemoteApi> From(Connection connection)
+            {
+                return (ApiConnection<TLocalApi, TRemoteApi>)connection.UpperLayerTag;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static ApiConnection<TLocalApi, TRemoteApi> Create(
+                ApiFactory factory,
+                Connection connection,
+                TLocalApi localObject,
+                ServerApiEndpoint<TLocalApi, TRemoteApi> endpoint)
+            {
+                var effectiveLocalObject = (localObject ?? factory.Components.Resolve<TLocalApi>());
+                
+                var apiConnection = new ApiConnection<TLocalApi, TRemoteApi>(endpoint, connection, effectiveLocalObject);
+                connection.UpperLayerTag = apiConnection;
+
+                var remoteProxy = factory.ProxyFactory.CreateProxyInstance<TRemoteApi, TLocalApi>(apiConnection, effectiveLocalObject);
+                apiConnection.RemoteProxy = remoteProxy;
+
+                var apiService = effectiveLocalObject as IDuplexNetworkApiTarget<TLocalApi, TRemoteApi>;
+                if (apiService != null)
+                {
+                    apiService.OnConnected(endpoint, remoteProxy);
+                }
+
+                return apiConnection;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class Server
         {
             private readonly Logger _logger;
             private readonly string _ip;
             private readonly int _port;
+            private readonly int _listenBacklog;
+            private readonly int _maxPendingConnections;
+            private readonly int _maxConcurrentConnections;
             private readonly TcpListener _tcpListener;
             private readonly CancellationTokenSource _cancellation;
-            private readonly Hashtable _sessionTaskBySession;
-            private readonly BlockingCollection<object> _sessionManagerQueue;
-            private readonly Task _sessionManagerTask;
+            private readonly Hashtable _connectionTaskByConnection;
+            private readonly BlockingCollection<object> _connectionManagerQueue;
+            private readonly Task _connectionManagerTask;
             private readonly Task _acceptConnectionsTask;
-            private readonly Action<Session, SessionCloseReason> _onSessionClosedDelegate;
+            private readonly Action<Connection, ConnectionCloseReason> _onConnectionClosedDelegate;
+            private int _pendingConnectionCount;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -34,16 +316,25 @@ namespace NWheels.Endpoints
                 Logger logger,
                 string ip,
                 int port,
-                Action<Session> onClientConnected = null,
-                Action<Session, SessionCloseReason> onClientDisconnected = null)
+                int listenBacklog = 1000,
+                int maxPendingConnections = 1000,
+                int maxConcurrentConnections = 10000, 
+                TimeSpan? clientHeartbeatInterval = null,
+                TimeSpan? serverPingInterval = null,
+                Action<Connection> onClientConnected = null,
+                Action<Connection, ConnectionCloseReason> onClientDisconnected = null)
             {
                 _logger = logger;
                 _ip = ip;
                 _port = port;
+                _listenBacklog = listenBacklog;
+                _maxPendingConnections = maxPendingConnections;
+                _maxConcurrentConnections = maxConcurrentConnections;
                 _cancellation = new CancellationTokenSource();
-                _sessionTaskBySession = new Hashtable();
-                _sessionManagerQueue = new BlockingCollection<object>();
-                _onSessionClosedDelegate = this.OnSessionClosed;
+                _connectionTaskByConnection = new Hashtable();
+                _connectionManagerQueue = new BlockingCollection<object>();
+                _onConnectionClosedDelegate = this.OnConnectionClosed;
+                _pendingConnectionCount = 0;
 
                 if (onClientConnected != null)
                 {
@@ -58,11 +349,36 @@ namespace NWheels.Endpoints
                 _logger.ServerInitializing(ip, port);
 
                 _tcpListener = new TcpListener(IPAddress.Parse(_ip ?? "127.0.0.1"), _port);
-                _sessionManagerTask = Task.Factory.StartNew(ManageSessions, _cancellation.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                _connectionManagerTask = Task.Factory.StartNew(ManageConnections, _cancellation.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
                 _acceptConnectionsTask = AcceptConnections();
-                _tcpListener.Start(backlog: 1000);
 
                 _logger.ServerCtorCompleted(ip, port);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Start()
+            {
+                _tcpListener.Start(_listenBacklog);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Broadcast(Action<Connection> actionPerConnection)
+            {
+                var activeConnections = _connectionTaskByConnection.Keys.Cast<Connection>().ToArray();
+
+                for (int i = 0 ; i < activeConnections.Length ; i++)
+                {
+                    try
+                    {
+                        actionPerConnection(activeConnections[i]);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.ServerBroadcastFailedToConnection(_ip, _port, error: e);
+                    }
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -87,23 +403,37 @@ namespace NWheels.Endpoints
                 var acceptConnectionsStopped = _acceptConnectionsTask.Wait(TimeSpan.FromSeconds(10));
                 _logger.ServerShutdownAcceptConnectionsStopped(success: acceptConnectionsStopped);
 
-                var sessionManagerStopped = _sessionManagerTask.Wait(TimeSpan.FromSeconds(5));
-                _logger.ServerShutdownSessionManagerStopped(success: sessionManagerStopped);
+                var connectionManagerStopped = _connectionManagerTask.Wait(TimeSpan.FromSeconds(5));
+                _logger.ServerShutdownConnectionManagerStopped(success: connectionManagerStopped);
 
-                var allSessionTasks = _sessionTaskBySession.Values.Cast<Task>().ToArray();
-                var allSessionTasksStopped = Task.WaitAll(allSessionTasks, TimeSpan.FromSeconds(15));
-                _logger.ServerShutdownAllSessionTasksStopped(success: allSessionTasksStopped);
+                var allConnectionTasks = _connectionTaskByConnection.Values.Cast<Task>().ToArray();
+                var allConnectionTasksStopped = Task.WaitAll(allConnectionTasks, TimeSpan.FromSeconds(15));
+                _logger.ServerShutdownAllConnectionTasksStopped(success: allConnectionTasksStopped);
 
-                if (!acceptConnectionsStopped || !sessionManagerStopped || !allSessionTasksStopped)
+                if (!acceptConnectionsStopped || !connectionManagerStopped || !allConnectionTasksStopped)
                 {
-                    _logger.ServerShutdownSomeThreadsDidNotProperlyStop(_ip, _port, acceptConnectionsStopped, sessionManagerStopped, allSessionTasksStopped);
+                    _logger.ServerShutdownSomeThreadsDidNotProperlyStop(_ip, _port, acceptConnectionsStopped, connectionManagerStopped, allConnectionTasksStopped);
                 }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public event Action<Session> ClientConnected;
-            public event Action<Session, SessionCloseReason> ClientDisconnected;
+            public int PendingConnectionCount
+            {
+                get { return _pendingConnectionCount; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public int ActiveConnectionCount
+            {
+                get { return _connectionTaskByConnection.Count; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public event Action<Connection> ClientConnected;
+            public event Action<Connection, ConnectionCloseReason> ClientDisconnected;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -130,18 +460,28 @@ namespace NWheels.Endpoints
                         break;
                     }
 
-                    _logger.ServerTcpConnectionAccepted(socketHandle: socket.Handle);
-                    _sessionManagerQueue.Add(socket);
+                    if (Interlocked.Increment(ref _pendingConnectionCount) <= _maxPendingConnections)
+                    {
+                        _logger.ServerTcpConnectionAccepted(socket.Handle);
+                        _connectionManagerQueue.Add(socket);
+                    }
+                    else
+                    {
+                        // too busy
+                        Interlocked.Decrement(ref _pendingConnectionCount);
+                        SafeCloseSocket(socket);
+                        _logger.ServerTcpConnectionDeclinedTooBusy(_ip, _port, _pendingConnectionCount, _connectionTaskByConnection.Count);
+                    }
                 }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void ManageSessions()
+            private void ManageConnections()
             {
                 var cancellationToken = _cancellation.Token;
 
-                _logger.ServerSessionManagerStarted();
+                _logger.ServerConnectionManagerStarted();
 
                 while (!cancellationToken.IsCancellationRequested)
                 {
@@ -149,7 +489,7 @@ namespace NWheels.Endpoints
 
                     try
                     {
-                        request = _sessionManagerQueue.Take(cancellationToken);
+                        request = _connectionManagerQueue.Take(cancellationToken);
                     }
                     catch (TaskCanceledException)
                     {
@@ -160,57 +500,59 @@ namespace NWheels.Endpoints
                         break;
                     }
 
-                    HandleSessionManagerRequest(request);
+                    HandleConnectionManagerRequest(request);
                 }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void HandleSessionManagerRequest(object request)
+            private void HandleConnectionManagerRequest(object request)
             {
-                var openSessionRequest = request as Socket;
-                var closeSessionRequest = request as Session;
+                var openConnectionRequest = request as Socket;
+                var closeConnectionRequest = request as Connection;
 
-                if (openSessionRequest != null)
+                if (openConnectionRequest != null)
                 {
-                    _logger.ServerSessionManagerGotOpenRequest(socketHandle: openSessionRequest.Handle);
+                    Interlocked.Decrement(ref _pendingConnectionCount);
 
-                    var session = new Session(socket: openSessionRequest, upstreamCancellation: _cancellation.Token, logger: _logger);
-                    session.Closed += _onSessionClosedDelegate;
+                    _logger.ServerConnectionManagerGotOpenRequest(socketHandle: openConnectionRequest.Handle);
+
+                    var connection = new Connection(socket: openConnectionRequest, upstreamCancellation: _cancellation.Token, logger: _logger);
+                    connection.Closed += _onConnectionClosedDelegate;
 
                     if (ClientConnected != null)
                     {
-                        _logger.ServerSessionManagerFiringClientConnectedEvent();
-                        ClientConnected(session);
+                        _logger.ServerConnectionManagerFiringClientConnectedEvent();
+                        ClientConnected(connection);
                     }
 
-                    var sessionTask = session.BeginReceiveMessages();
-                    _sessionTaskBySession.Add(session, sessionTask);
+                    var connectionTask = connection.BeginReceiveMessages();
+                    _connectionTaskByConnection.Add(connection, connectionTask);
                 }
-                else if (closeSessionRequest != null)
+                else if (closeConnectionRequest != null)
                 {
-                    _logger.ServerSessionManagerGotCloseRequest(socketHandle: closeSessionRequest.SocketHandle, closeReason: closeSessionRequest.CloseReason);
-                    _sessionTaskBySession.Remove(closeSessionRequest);
+                    _logger.ServerConnectionManagerGotCloseRequest(socketHandle: closeConnectionRequest.SocketHandle, closeReason: closeConnectionRequest.CloseReason);
+                    _connectionTaskByConnection.Remove(closeConnectionRequest);
                 }
                 else
                 {
-                    _logger.ServerSessionManagerGotBadRequest();
+                    _logger.ServerConnectionManagerGotBadRequest();
                 }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void OnSessionClosed(Session session, SessionCloseReason reason)
+            private void OnConnectionClosed(Connection connection, ConnectionCloseReason reason)
             {
-                _logger.ServerSessionClosed(socketHandler: session.SocketHandle, closeReason: reason);
+                _logger.ServerConnectionClosed(socketHandler: connection.SocketHandle, closeReason: reason);
 
                 if (ClientDisconnected != null)
                 {
-                    _logger.ServerSessionClosedFiringClientDisconnected();
-                    ClientDisconnected(session, reason);
+                    _logger.ServerConnectionClosedFiringClientDisconnected();
+                    ClientDisconnected(connection, reason);
                 }
 
-                _sessionManagerQueue.Add(session);
+                _connectionManagerQueue.Add(connection);
             }
         }
 
@@ -221,9 +563,9 @@ namespace NWheels.Endpoints
             private readonly Logger _logger;
             private readonly TcpClient _tcpClient;
             private readonly NetworkStream _stream;
-            private readonly Session _session;
-            private readonly Task _receiveTask;
+            private readonly Connection _connection;
             private readonly CancellationTokenSource _cancellation;
+            private Task _receiveTask;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -232,7 +574,7 @@ namespace NWheels.Endpoints
                 string serverHost,
                 int serverPort,
                 Action<byte[]> onMessageReceived = null,
-                Action<SessionCloseReason> onDisconnected = null)
+                Action<ConnectionCloseReason> onDisconnected = null)
             {
                 _logger = logger;
                 _cancellation = new CancellationTokenSource();
@@ -247,23 +589,35 @@ namespace NWheels.Endpoints
 
                 _logger.ClientSuccessfullyConnectedToServer();
 
-                _session = new Session(_tcpClient.Client, _tcpClient.GetStream(), _cancellation.Token, isClientSession: true, logger: _logger);
+                _connection = new Connection(_tcpClient.Client, _tcpClient.GetStream(), _cancellation.Token, isClientConnection: true, logger: _logger);
 
-                AttachSessionEventHandlers();
-
-                _receiveTask = _session.BeginReceiveMessages();
+                AttachConnectionEventHandlers(onMessageReceived, onDisconnected);
 
                 _logger.ClientCtorCompleted();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public void Start()
+            {
+                if (_receiveTask == null)
+                {
+                    _receiveTask = _connection.BeginReceiveMessages();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public void Dispose()
             {
-                _logger.ClientDisposeStoppingSession();
+                _logger.ClientDisposeStoppingConnection();
 
                 _cancellation.Cancel();
-                _receiveTask.Wait(TimeSpan.FromSeconds(10));
+                
+                if (_receiveTask != null)
+                {
+                    _receiveTask.Wait(TimeSpan.FromSeconds(10));
+                }
 
                 _logger.ClientDisposeClosingSocket();
 
@@ -281,7 +635,7 @@ namespace NWheels.Endpoints
 
                 try
                 {
-                    _session.SendMessage(message);
+                    _connection.SendMessage(message);
                 }
                 catch (Exception e)
                 {
@@ -297,81 +651,102 @@ namespace NWheels.Endpoints
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public event Action<byte[]> MessageReceived;
-            public event Action<SessionCloseReason> Disconnected;
+            public event Action<ConnectionCloseReason> Disconnected;
             public event Action<Exception> SendFailed;
             public event Action<Exception> ReceiveFailed;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void AttachSessionEventHandlers()
+            internal Connection Connection
             {
-                _session.MessageReceived += (session, message) => {
+                get { return _connection; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void AttachConnectionEventHandlers(Action<byte[]> onMessageReceived, Action<ConnectionCloseReason> onDisconnected)
+            {
+                _connection.MessageReceived += (connection, message) => {
                     if (MessageReceived != null)
                     {
                         MessageReceived(message);
                     }
                 };
 
-                _session.Closed += (session, reason) => {
+                _connection.Closed += (connection, reason) => {
                     if (Disconnected != null)
                     {
                         Disconnected(reason);
                     }
                 };
 
-                _session.SendFailed += (session, error) => {
+                _connection.SendFailed += (connection, error) => {
                     if (SendFailed != null)
                     {
                         SendFailed(error);
                     }
                 };
 
-                _session.ReceiveFailed += (session, error) => {
+                _connection.ReceiveFailed += (connection, error) => {
                     if (ReceiveFailed != null)
                     {
                         ReceiveFailed(error);
                     }
                 };
+
+                if (onMessageReceived != null)
+                {
+                    _connection.MessageReceived += (connection, message) => {
+                        onMessageReceived(message);
+                    };
+                }
+
+                if (onDisconnected != null)
+                {
+                    _connection.Closed += (connection, reason) => {
+                        onDisconnected(reason);
+                    };
+                }
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class Session
+        public class Connection
         {
             private readonly Socket _socket;
             private readonly NetworkStream _stream;
             private readonly CancellationToken _upstreamCancellation;
             private readonly Logger _logger;
-            private readonly CancellationTokenSource _sessionCancellation;
+            private readonly CancellationTokenSource _connectionCancellation;
             private readonly CancellationToken _anyReasonCancellation;
             private readonly SocketAddress _remoteAddress;
             private readonly string _logPartyName;
             private Task _receiveTask;
-            private SessionCloseReason _closeReason;
+            private ConnectionCloseReason _closeReason;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public Session(Socket socket, CancellationToken upstreamCancellation, Logger logger)
+            public Connection(Socket socket, CancellationToken upstreamCancellation, Logger logger)
                 : this(socket, new NetworkStream(socket, ownsSocket: true), upstreamCancellation, logger)
             {
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public Session(Socket socket, NetworkStream stream, CancellationToken upstreamCancellation, Logger logger, bool isClientSession = false)
+            public Connection(Socket socket, NetworkStream stream, CancellationToken upstreamCancellation, Logger logger, bool isClientConnection = false)
             {
                 _socket = socket;
                 _stream = stream;
                 _upstreamCancellation = upstreamCancellation;
                 _logger = logger;
-                _sessionCancellation = new CancellationTokenSource();
-                _anyReasonCancellation = CancellationTokenSource.CreateLinkedTokenSource(_upstreamCancellation, _sessionCancellation.Token).Token;
+                _connectionCancellation = new CancellationTokenSource();
+                _anyReasonCancellation = CancellationTokenSource.CreateLinkedTokenSource(_upstreamCancellation, _connectionCancellation.Token).Token;
                 _remoteAddress = socket.RemoteEndPoint.Serialize();
-                _closeReason = SessionCloseReason.Unknown;
-                _logPartyName = (isClientSession ? "CLIENT" : "SERVER");
+                _closeReason = ConnectionCloseReason.Unknown;
+                _logPartyName = (isClientConnection ? "CLIENT" : "SERVER");
 
-                _logger.SessionInitialized(_logPartyName, _remoteAddress.ToString());
+                _logger.ConnectionInitialized(_logPartyName, _remoteAddress.ToString());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -380,12 +755,12 @@ namespace NWheels.Endpoints
             {
                 if (_receiveTask != null)
                 {
-                    throw _logger.SessionAlreadyReceivingMessages(_logPartyName);
+                    throw _logger.ConnectionAlreadyReceivingMessages(_logPartyName);
                 }
 
                 _receiveTask = ReceiveMessages();
 
-                _logger.SessionStartedReceiveMessagesTask(_logPartyName);
+                _logger.ConnectionStartedReceiveMessagesTask(_logPartyName);
 
                 return _receiveTask;
             }
@@ -398,29 +773,29 @@ namespace NWheels.Endpoints
                 {
                     Int32 length = (message != null ? message.Length : 0);
 
-                    _logger.SessionSendMessage(_logPartyName, length);
+                    _logger.ConnectionSendMessage(_logPartyName, length);
 
                     _stream.Write(BitConverter.GetBytes(length), 0, sizeof(Int32));
 
-                    _logger.SessionSendMessageHeaderWritten(_logPartyName);
+                    _logger.ConnectionSendMessageHeaderWritten(_logPartyName);
 
                     if (message != null)
                     {
                         _stream.Write(message, 0, message.Length);
-                        _logger.SessionSendMessageBodyWritten(_logPartyName);
+                        _logger.ConnectionSendMessageBodyWritten(_logPartyName);
                     }
 
                     _stream.Flush();
 
-                    _logger.SessionSendMessageStreamFlushedSent(_logPartyName);
+                    _logger.ConnectionSendMessageStreamFlushedSent(_logPartyName);
                 }
                 catch (Exception e)
                 {
-                    _logger.SessionSendingMessageError(_logPartyName, e);
+                    _logger.ConnectionSendingMessageError(_logPartyName, e);
 
                     if (SendFailed != null)
                     {
-                        _logger.SessionSendingMessageFiringSendFailedEvent(_logPartyName);
+                        _logger.ConnectionSendingMessageFiringSendFailedEvent(_logPartyName);
                         SendFailed(this, e);
                     }
                 }
@@ -435,17 +810,21 @@ namespace NWheels.Endpoints
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public SessionCloseReason CloseReason
+            public ConnectionCloseReason CloseReason
             {
                 get { return _closeReason; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public event Action<Session, byte[]> MessageReceived;
-            public event Action<Session, Exception> SendFailed;
-            public event Action<Session, Exception> ReceiveFailed;
-            public event Action<Session, SessionCloseReason> Closed;
+            public object UpperLayerTag { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public event Action<Connection, byte[]> MessageReceived;
+            public event Action<Connection, Exception> SendFailed;
+            public event Action<Connection, Exception> ReceiveFailed;
+            public event Action<Connection, ConnectionCloseReason> Closed;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -458,7 +837,7 @@ namespace NWheels.Endpoints
 
             private async Task ReceiveMessages()
             {
-                _logger.SessionReceiveMessagesStarted(_logPartyName, _remoteAddress.ToString());
+                _logger.ConnectionReceiveMessagesStarted(_logPartyName, _remoteAddress.ToString());
 
                 try
                 {
@@ -468,28 +847,28 @@ namespace NWheels.Endpoints
                     {
                         try
                         {
-                            _logger.SessionReceiveMessagesWaitingForHeader(_logPartyName);
+                            _logger.ConnectionReceiveMessagesWaitingForHeader(_logPartyName);
                             await ReceiveOneMessage(headerBuffer);
                         }
                         catch (TaskCanceledException)
                         {
-                            _logger.SessionReceiveMessagesTaskCanceledException(_logPartyName);
-                            _closeReason = SessionCloseReason.LocalPartyShutDown;
+                            _logger.ConnectionReceiveMessagesTaskCanceledException(_logPartyName);
+                            _closeReason = ConnectionCloseReason.LocalPartyShutDown;
                             break;
                         }
                         catch (ObjectDisposedException)
                         {
-                            _logger.SessionReceiveMessagesObjectDisposedException(_logPartyName);
-                            _closeReason = SessionCloseReason.LocalPartyShutDown;
+                            _logger.ConnectionReceiveMessagesObjectDisposedException(_logPartyName);
+                            _closeReason = ConnectionCloseReason.LocalPartyShutDown;
                             break;
                         }
                         catch (Exception e)
                         {
-                            _logger.SessionReceiveMessagesException(_logPartyName, e);
+                            _logger.ConnectionReceiveMessagesException(_logPartyName, e);
 
                             if (ReceiveFailed != null)
                             {
-                                _logger.SessionReceiveMessagesFiringReceiveFailed(_logPartyName);
+                                _logger.ConnectionReceiveMessagesFiringReceiveFailed(_logPartyName);
                                 ReceiveFailed(this, e);
                             }
                         }
@@ -505,11 +884,11 @@ namespace NWheels.Endpoints
 
             private async Task ReceiveOneMessage(byte[] headerBuffer)
             {
-                _logger.SessionReceiveOneMessagesWaitingForHeader(_logPartyName);
+                _logger.ConnectionReceiveOneMessagesWaitingForHeader(_logPartyName);
 
                 if (!await ReceiveBytes(headerBuffer, 0, headerBuffer.Length)) //TODO: include timeout
                 {
-                    _logger.SessionReceiveOneMessagesHeaderWasNotReceived(_logPartyName);
+                    _logger.ConnectionReceiveOneMessagesHeaderWasNotReceived(_logPartyName);
                     return;
                 }
 
@@ -518,15 +897,15 @@ namespace NWheels.Endpoints
 
                 if (!await ReceiveBytes(bodyBuffer, 0, bodyBuffer.Length)) //TODO: include timeout
                 {
-                    _logger.SessionReceiveOneMessagesBodyWasNotReceived(_logPartyName);
+                    _logger.ConnectionReceiveOneMessagesBodyWasNotReceived(_logPartyName);
                     return;
                 }
 
-                _logger.SessionReceiveOneMessagesSuccess(_logPartyName, bodyBuffer.Length);
+                _logger.ConnectionReceiveOneMessagesSuccess(_logPartyName, bodyBuffer.Length);
 
                 if (MessageReceived != null)
                 {
-                    _logger.SessionReceiveOneMessagesFiringMessageReceived(_logPartyName);
+                    _logger.ConnectionReceiveOneMessagesFiringMessageReceived(_logPartyName);
                     MessageReceived(this, bodyBuffer);
                 }
             }
@@ -541,43 +920,41 @@ namespace NWheels.Endpoints
 
                     while (totalBytesReceived < count)
                     {
-                        _logger.SessionReceiveBytesWaiting(_logPartyName, bytesToReceive: count - totalBytesReceived);
+                        _logger.ConnectionReceiveBytesWaiting(_logPartyName, bytesToReceive: count - totalBytesReceived);
 
-                        var chunkBytesReceived = await _stream.ReadAsync(
-                            buffer,
-                            offset + totalBytesReceived,
-                            count - totalBytesReceived,
-                            _anyReasonCancellation);
+                        var chunkBytesReceived =
+                            await _stream.ReadAsync(buffer, offset + totalBytesReceived, count - totalBytesReceived, _anyReasonCancellation);
 
-                        _logger.SessionReceiveBytesReceived(_logPartyName, numberOfBytes: chunkBytesReceived);
+                        _logger.ConnectionReceiveBytesReceived(_logPartyName, numberOfBytes: chunkBytesReceived);
 
                         if (chunkBytesReceived <= 0)
                         {
-                            _logger.SessionReceiveBytesRemotePartyNotReachableClosingSession(_logPartyName);
+                            _logger.ConnectionReceiveBytesRemotePartyNotReachableClosingConnection(_logPartyName);
 
-                            _closeReason = SessionCloseReason.RemotePartyNotReachable;
-                            _sessionCancellation.Cancel();
+                            _closeReason = ConnectionCloseReason.RemotePartyNotReachable;
+                            _connectionCancellation.Cancel();
                             return false;
                         }
 
                         totalBytesReceived += chunkBytesReceived;
                     }
 
-                    _logger.SessionReceiveBytesSuccess(_logPartyName, bytesReceived: totalBytesReceived);
-
+                    _logger.ConnectionReceiveBytesSuccess(_logPartyName, bytesReceived: totalBytesReceived);
                     return true;
                 }
                 catch (Exception e)
                 {
-                    _logger.SessionReceiveBytesFailed(_logPartyName, error: e);
+                    _logger.ConnectionReceiveBytesFailed(_logPartyName, error: e);
 
                     if (ReceiveFailed != null)
                     {
-                        _logger.SessionReceiveBytesFiringReceiveFailed(_logPartyName);
+                        _logger.ConnectionReceiveBytesFiringReceiveFailed(_logPartyName);
                         ReceiveFailed(this, e);
                     }
                 }
 
+                _closeReason = ConnectionCloseReason.RemotePartyNotReachable;
+                _connectionCancellation.Cancel();
                 return false;
             }
 
@@ -585,19 +962,19 @@ namespace NWheels.Endpoints
 
             private void FinalizeAndCleanup()
             {
-                _logger.SessionFinalizing(_logPartyName, _closeReason);
+                _logger.ConnectionFinalizing(_logPartyName, _closeReason);
 
                 try
                 {
                     if (_upstreamCancellation.IsCancellationRequested)
                     {
-                        _logger.SessionFinalizeSettingCloseReasonToLocalPartyShotDown(_logPartyName);
-                        _closeReason = SessionCloseReason.LocalPartyShutDown;
+                        _logger.ConnectionFinalizeSettingCloseReasonToLocalPartyShotDown(_logPartyName);
+                        _closeReason = ConnectionCloseReason.LocalPartyShutDown;
                     }
 
                     if (Closed != null)
                     {
-                        _logger.SessionFinalizeFiringClosedEvent(_logPartyName);
+                        _logger.ConnectionFinalizeFiringClosedEvent(_logPartyName);
                         Closed(this, _closeReason);
                     }
                 }
@@ -605,13 +982,13 @@ namespace NWheels.Endpoints
                 {
                     try
                     {
-                        _logger.SessionFinalizeClosingSocket(_logPartyName);
+                        _logger.ConnectionFinalizeClosingSocket(_logPartyName);
                         _stream.Close();
                         //necessary? SafeCloseSocket(_socket);
                     }
                     catch (Exception e)
                     {
-                        _logger.SessionFinalizeFailure(_logPartyName, error: e);
+                        _logger.ConnectionFinalizeFailure(_logPartyName, error: e);
                     }
                 }
             }
@@ -621,183 +998,189 @@ namespace NWheels.Endpoints
 
         public abstract class Logger : IApplicationEventLogger
         {
-            [LogInfo]
+            [LogInfo(ToPlainLog = true)]
             public abstract void ServerReadyToAcceptTcpConnections(string ip, int port);
-            
-            [LogInfo]
+
+            [LogWarning(ToPlainLog = true)] //TODO: include circuit breaker
+            public abstract void ServerTcpConnectionDeclinedTooBusy(string ip, int port, int pendingConnectionCount, int activeConnectionCount);
+
+            [LogInfo(ToPlainLog = true)]
             public abstract void ServerShuttingDown(string ip, int port);
 
-            [LogWarning]
+            [LogWarning(ToPlainLog = true)]
             public abstract void ServerShutdownSomeThreadsDidNotProperlyStop(
                 string ip, 
                 int port, 
                 bool acceptConnectionsStopped, 
-                bool sessionManagerStopped, 
-                bool allSessionTasksStopped);
+                bool connectionManagerStopped, 
+                bool allConnectionTasksStopped);
 
-            [LogVerbose]
-            public abstract void SessionInitialized(string party, string remoteAddress);
+            [LogVerbose(ToPlainLog = true)]
+            public abstract void ConnectionInitialized(string party, string remoteAddress);
 
-            [LogError]
-            public abstract InvalidOperationException SessionAlreadyReceivingMessages(string party);
+            [LogError(ToPlainLog = true)]
+            public abstract InvalidOperationException ConnectionAlreadyReceivingMessages(string party);
 
-            [LogError]
-            public abstract void SessionReceiveMessagesException(string party, Exception exception);
+            [LogError(ToPlainLog = true)]
+            public abstract void ConnectionReceiveMessagesException(string party, Exception exception);
 
-            [LogWarning]
-            public abstract void SessionReceiveOneMessagesHeaderWasNotReceived(string party);
+            [LogWarning(ToPlainLog = true)]
+            public abstract void ConnectionReceiveOneMessagesHeaderWasNotReceived(string party);
 
-            [LogWarning]
-            public abstract void SessionReceiveOneMessagesBodyWasNotReceived(string party);
+            [LogWarning(ToPlainLog = true)]
+            public abstract void ConnectionReceiveOneMessagesBodyWasNotReceived(string party);
 
-            [LogVerbose]
-            public abstract void SessionFinalizing(string party, SessionCloseReason closeReason);
+            [LogVerbose(ToPlainLog = true)]
+            public abstract void ConnectionFinalizing(string party, ConnectionCloseReason closeReason);
 
-            [LogError]
-            public abstract void SessionFinalizeFailure(string party, Exception error);
+            [LogError(ToPlainLog = true)]
+            public abstract void ConnectionFinalizeFailure(string party, Exception error);
 
-            [LogVerbose]
+            [LogError(ToPlainLog = true)]
+            public abstract void ServerBroadcastFailedToConnection(string ip, int port, Exception error);
+
+            [LogVerbose(ToPlainLog = true)]
             public abstract void ClientSuccessfullyConnectedToServer();
-            
-            [LogError]
+
+            [LogError(ToPlainLog = true)]
             public abstract void ClientSendMessageFailed(Exception error);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionStartedReceiveMessagesTask(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionStartedReceiveMessagesTask(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionSendMessage(string party, int length);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionSendMessage(string party, int length);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionSendMessageHeaderWritten(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionSendMessageHeaderWritten(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionSendMessageBodyWritten(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionSendMessageBodyWritten(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionSendMessageStreamFlushedSent(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionSendMessageStreamFlushedSent(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionSendingMessageError(string party, Exception exception);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionSendingMessageError(string party, Exception exception);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionSendingMessageFiringSendFailedEvent(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionSendingMessageFiringSendFailedEvent(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionReceiveMessagesStarted(string party, string toString);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionReceiveMessagesStarted(string party, string toString);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionReceiveMessagesWaitingForHeader(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionReceiveMessagesWaitingForHeader(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionReceiveMessagesTaskCanceledException(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionReceiveMessagesTaskCanceledException(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionReceiveMessagesObjectDisposedException(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionReceiveMessagesObjectDisposedException(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionReceiveMessagesFiringReceiveFailed(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionReceiveMessagesFiringReceiveFailed(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionReceiveOneMessagesWaitingForHeader(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionReceiveOneMessagesWaitingForHeader(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionReceiveOneMessagesSuccess(string party, int length);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionReceiveOneMessagesSuccess(string party, int length);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionReceiveOneMessagesFiringMessageReceived(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionReceiveOneMessagesFiringMessageReceived(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionReceiveBytesWaiting(string party, int bytesToReceive);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionReceiveBytesWaiting(string party, int bytesToReceive);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionReceiveBytesReceived(string party, int numberOfBytes);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionReceiveBytesReceived(string party, int numberOfBytes);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionReceiveBytesRemotePartyNotReachableClosingSession(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionReceiveBytesRemotePartyNotReachableClosingConnection(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionReceiveBytesSuccess(string party, int bytesReceived);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionReceiveBytesSuccess(string party, int bytesReceived);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionReceiveBytesFailed(string party, Exception error);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionReceiveBytesFailed(string party, Exception error);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionReceiveBytesFiringReceiveFailed(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionReceiveBytesFiringReceiveFailed(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionFinalizeSettingCloseReasonToLocalPartyShotDown(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionFinalizeSettingCloseReasonToLocalPartyShotDown(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionFinalizeFiringClosedEvent(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionFinalizeFiringClosedEvent(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void SessionFinalizeClosingSocket(string party);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ConnectionFinalizeClosingSocket(string party);
 
-            [LogDebug, Conditional("TCPDEBUG")]
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
             public abstract void ServerInitializing(string ip, int port);
 
-            [LogDebug, Conditional("TCPDEBUG")]
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
             public abstract void ServerCtorCompleted(string ip, int port);
 
-            [LogDebug, Conditional("TCPDEBUG")]
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
             public abstract void ServerTcpConnectionAccepted(IntPtr socketHandle);
 
-            [LogDebug, Conditional("TCPDEBUG")]
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
             public abstract void ServerShutdownClosingTcpListener();
 
-            [LogDebug, Conditional("TCPDEBUG")]
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
             public abstract void ServerShutdownCloseTcpListenerFailure(string ip, int port, Exception exception);
 
-            [LogDebug, Conditional("TCPDEBUG")]
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
             public abstract void ServerShutdownWaitingForThreadsToStop();
 
-            [LogDebug, Conditional("TCPDEBUG")]
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
             public abstract void ServerShutdownAcceptConnectionsStopped(bool success);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void ServerShutdownSessionManagerStopped(bool success);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ServerShutdownConnectionManagerStopped(bool success);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void ServerShutdownAllSessionTasksStopped(bool success);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ServerShutdownAllConnectionTasksStopped(bool success);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void ServerSessionManagerStarted();
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ServerConnectionManagerStarted();
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void ServerSessionManagerGotOpenRequest(IntPtr socketHandle);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ServerConnectionManagerGotOpenRequest(IntPtr socketHandle);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void ServerSessionManagerFiringClientConnectedEvent();
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ServerConnectionManagerFiringClientConnectedEvent();
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void ServerSessionManagerGotCloseRequest(IntPtr socketHandle, SessionCloseReason closeReason);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ServerConnectionManagerGotCloseRequest(IntPtr socketHandle, ConnectionCloseReason closeReason);
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void ServerSessionManagerGotBadRequest();
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ServerConnectionManagerGotBadRequest();
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void ServerSessionClosedFiringClientDisconnected();
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ServerConnectionClosedFiringClientDisconnected();
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void ServerSessionClosed(IntPtr socketHandler, SessionCloseReason closeReason);
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ServerConnectionClosed(IntPtr socketHandler, ConnectionCloseReason closeReason);
 
-            [LogDebug, Conditional("TCPDEBUG")]
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
             public abstract void ClientConnectingToServer(string host, int port);
 
-            [LogDebug, Conditional("TCPDEBUG")]
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
             public abstract void ClientCtorCompleted();
 
-            [LogDebug, Conditional("TCPDEBUG")]
-            public abstract void ClientDisposeStoppingSession();
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
+            public abstract void ClientDisposeStoppingConnection();
 
-            [LogDebug, Conditional("TCPDEBUG")]
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
             public abstract void ClientDisposeClosingSocket();
 
-            [LogDebug, Conditional("TCPDEBUG")]
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
             public abstract void ClientDisposeAllResourcesReleased();
 
-            [LogDebug, Conditional("TCPDEBUG")]
+            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
             public abstract void ClientSendMessage(int length);
         }
     }

@@ -482,7 +482,8 @@ namespace NWheels.Client
             builder.RegisterPipeline<AnonymousEntityAccessRule>();
             builder.RegisterType<AnonymousPrincipal>().SingleInstance();
             builder.RegisterType<SystemPrincipal>().SingleInstance();
-            builder.RegisterType<DuplexTcpClientFactory>().SingleInstance();
+            builder.RegisterType<DuplexTcpTransport.ApiFactory>().SingleInstance();
+            builder.NWheelsFeatures().Logging().RegisterLogger<DuplexTcpTransport.Logger>();
 
             builder.RegisterPipeline<IComponentAspectProvider>();
             builder.RegisterType<ComponentAspectFactory>().SingleInstance();

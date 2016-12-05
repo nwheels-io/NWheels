@@ -170,7 +170,7 @@ namespace NWheels.Endpoints.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            void IDuplexNetworkEndpointApiProxy.NotifySessionClosed(SessionCloseReason reason)
+            void IDuplexNetworkEndpointApiProxy.NotifySessionClosed(ConnectionCloseReason reason)
             {
                 var apiEvents = _localServer as IDuplexNetworkApiEvents;
 

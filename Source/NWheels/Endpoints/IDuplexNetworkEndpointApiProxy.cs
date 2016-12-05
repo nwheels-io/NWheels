@@ -8,7 +8,7 @@ namespace NWheels.Endpoints
 {
     public interface IDuplexNetworkEndpointApiProxy : IDisposable
     {
-        void NotifySessionClosed(SessionCloseReason reason);
+        void NotifySessionClosed(ConnectionCloseReason reason);
         IDuplexNetworkEndpointTransport Transport { get; }
         Type RemoteContract { get; }
         Type LocalContract { get; }
@@ -18,12 +18,13 @@ namespace NWheels.Endpoints
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public enum SessionCloseReason
+    public enum ConnectionCloseReason
     {
         Unknown,
         ByContract,
         LocalPartyShutDown,
         RemotePartyNotReachable,
-        ProtocolError
+        ProtocolError,
+        ServiceLevelAgreementNotMet
     }
 }

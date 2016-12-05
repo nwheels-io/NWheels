@@ -8,6 +8,6 @@ namespace NWheels.Endpoints
 {
     public interface IDuplexNetworkApiEvents
     {
-        void OnSessionClosed(IDuplexNetworkEndpointApiProxy proxy, SessionCloseReason reason);
+        void OnSessionClosed(IDuplexNetworkEndpointApiProxy proxy, ConnectionCloseReason reason);
     }
 }
