@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE html>
 <html ng-app="theApp" ng-controller="appStart">
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HEAD, JS/CSS LINKS
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <head>
@@ -11,7 +11,7 @@ HEAD, JS/CSS LINKS
     <base href="##BASE_URL##" />
 
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-    
+
     <link href="app/skin/assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="app/skin/assets/css/languages/languages.min.css" rel="stylesheet">
     <link href="app/skin/assets/font-awesome/css/font-awesome.css" rel="stylesheet">
@@ -20,9 +20,9 @@ HEAD, JS/CSS LINKS
 
     <!-- Toastr style -->
     <link href="app/skin/assets/css/plugins/toastr/toastr.min.css" rel="stylesheet">
-    
+
     <!--script src="assets/plugins/datajs-1.1.1/datajs-1.1.1.js"></script-->
-    
+
     <link href="app/skin/assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="app/skin/assets/font-awesome/css/font-awesome.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/iCheck/custom.css" rel="stylesheet">
@@ -57,68 +57,84 @@ HEAD, JS/CSS LINKS
                 float: right;
             }
         }
+
         .middle-box {
-            max-width:500px;
+            max-width: 500px;
         }
+
         .btn-md.btn-circle {
             width: 36px;
             height: 36px;
             border-radius: 23px;
         }
+
         .ibox-title.nested {
             border: none;
             padding: 15px 20px 0px 20px;
         }
+
         .ibox-content.standalone {
             border-top: 0;
             padding-top: 5px;
         }
+
         .ibox-content.nested {
             border: none;
             padding: 20px 20px 10px 20px;
         }
-        .ibox-content.nested .ibox-title {
-            border: 0;
-            padding: 0;
-        }
-        .ibox-content.nested .ibox-content {
-            border: 0;
-            padding: 0;
-        }
+
+            .ibox-content.nested .ibox-title {
+                border: 0;
+                padding: 0;
+            }
+
+            .ibox-content.nested .ibox-content {
+                border: 0;
+                padding: 0;
+            }
+
         .ibox-content .tabs-container {
             padding: 10px;
             background-color: #1e2f40;
-            border-radius: 5px;            
+            border-radius: 5px;
         }
+
         .panel-heading i.fa {
             margin-right: 3px;
         }
-        .alert .glyphicon{
-            display:table-cell;
+
+        .alert .glyphicon {
+            display: table-cell;
         }
+
         .alert div,
-        .alert span{
+        .alert span {
             padding-left: 10px;
-            display:table-cell;
+            display: table-cell;
         }
-        .alert span.moreInfo {
-            padding:0;
-            margin:0;
-            display: inline;
-        }
-        .alert span.techInfo {
-            display: block;
-            margin-top: 10px;
-            padding: 0;
-            font-size: 9pt;
-        }
+
+            .alert span.moreInfo {
+                padding: 0;
+                margin: 0;
+                display: inline;
+            }
+
+            .alert span.techInfo {
+                display: block;
+                margin-top: 10px;
+                padding: 0;
+                font-size: 9pt;
+            }
+
         .alert button {
             margin: 10px 5px 0 0;
         }
+
         .alert-dismissable .close {
             top: -10px;
             right: -30px;
-        }    
+        }
+
         .ibox-title h2 {
             display: inline-block;
             margin: 0 0 7px;
@@ -126,25 +142,31 @@ HEAD, JS/CSS LINKS
             text-overflow: ellipsis;
             float: left;
         }
+
         .ui-jqgrid .jqgrid-overlay {
             position: absolute;
             height: 100%;
             width: 100%;
-        }        
+        }
+
         .ui-state-highlight,
-        .ui-widget-content .ui-state-highlight,        
+        .ui-widget-content .ui-state-highlight,
         .ui-widget-header .ui-state-highlight {
             color: white;
             background: #47617A;
-        }        
-        .ui-state-highlight .editable {
-            color: black;
-            background-color: #C6F4DE;
-        }        
+        }
+
+            .ui-state-highlight .editable {
+                color: black;
+                background-color: #C6F4DE;
+                cursor: pointer;
+            }
+
         a.commandLink {
             font-weight: bold;
             text-decoration: underline;
         }
+
         h2.logo-name {
             color: #e0e0e0;
             font-size: 50px;
@@ -153,9 +175,11 @@ HEAD, JS/CSS LINKS
             margin-bottom: 0px;
             margin-top: -10px;
         }
+
         .loginscreen.middle-box.userAlertBoxContainer {
             width: 400px;
         }
+
         .userAlertBox {
             background-color: white;
             margin: 0;
@@ -164,233 +188,333 @@ HEAD, JS/CSS LINKS
             max-width: 400px;
             border-radius: 8px;
         }
+
         .userAlertBoxIcon {
             vertical-align: top;
             text-align: right;
             padding: 0;
             height: 100px;
         }
+
         .userAlertBoxContent {
             text-align: left;
             vertical-align: top;
         }
-        .userAlertBoxContent h2 {
-            padding-bottom: 10px;
-            border-bottom: 1px solid #F3F3F4;
-        }
+
+            .userAlertBoxContent h2 {
+                padding-bottom: 10px;
+                border-bottom: 1px solid #F3F3F4;
+            }
+
         i.alert-field-icon {
             float: left;
             padding-top: 4px;
         }
+
         div.alert-field-contents {
             padding: 10px 15px 10px 15px;
             margin: 0;
         }
+
         div.modal-body-alert {
-            padding:0;
+            padding: 0;
         }
+
         .modal-body-alert h2 {
-            padding:0;
-            margin:0;
+            padding: 0;
+            margin: 0;
         }
+
         .jsonText {
             background-color: #FDFDFD;
             padding: 5px;
         }
+
         .jsonview .prop {
             font-weight: normal;
             text-decoration: none;
             color: #808080;
         }
+
         .jsonview .prop {
             font-weight: normal;
             color: #808080;
         }
+
         .jsonview .string {
             color: #0C7963;
         }
+
         .full-height {
-            height:100vh;
+            height: 100vh;
         }
+
         .tabs-container.full-height > .nav-tabs > li > a {
             padding: 5px 10px 7px 10px;
-            border-radius:0;
+            border-radius: 0;
         }
+
         .tabs-container.full-height > .nav-tabs > li.active > a:hover {
             color: black;
         }
+
         .tabs-container.full-height > .nav-tabs > li > a:hover {
             color: white;
         }
+
         .compensateZeroPadding {
             padding: 5px 10px 5px 10px;
         }
+
         .form-control[readonly].fieldTypeEdit {
             background-color: white;
         }
+
         i.jqgDetailPaneIcon.expanded:before {
             content: "\f068";
-        }     
+        }
+
         div.jqgDetailPane {
             display: none;
         }
-        div.jqgDetailPane.expanded {
-            display: block;
-            margin-top: 5px;
-            margin-right: 0;
-            margin-bottom: 0;
-            padding: 0 0 0 5px;
-            border-left: 2px solid #DDDDDD;
-            /*background-color: lightgray;*/
-            color: gray;
-        }
-        div.jqgDetailPane > div.jqgDetailPaneScroll {
-            overflow-x: auto;
-            padding: 5px;
-        }
+
+            div.jqgDetailPane.expanded {
+                display: block;
+                margin-top: 5px;
+                margin-right: 0;
+                margin-bottom: 0;
+                padding: 0 0 0 5px;
+                border-left: 2px solid #DDDDDD;
+                /*background-color: lightgray;*/
+                color: gray;
+            }
+
+            div.jqgDetailPane > div.jqgDetailPaneScroll {
+                overflow-x: auto;
+                padding: 5px;
+            }
+
         table.prop-grid {
             border-spacing: 1px;
             border-collapse: separate;
         }
-        table.prop-grid td {
-            border: none !important;
-            font-size: 0.9em;
-        }
-        table.prop-grid td.prop-grid-section {
-            font-weight: bold;
-            font-size: 1.1em;
-            color: black; 
-        }
-        table.prop-grid td.prop-grid-label {
-            padding:2px 5px 2px 2px;
-            text-align:right;
-            color: gray; 
-            white-space: nowrap;
-        }
-        table.prop-grid td.prop-grid-value {
-            padding: 0;
-            font-family: monospace;
-            font-size: 1.1em;
-            white-space: nowrap;
-        }
-        table.prop-grid td.prop-grid-value pre {
-            margin:0;
-            padding: 2px;
-            font-family: monospace;
-            font-size: 1.0em;
-            white-space: pre;
-            border-radius: 2px;
-        }
+
+            table.prop-grid td {
+                border: none !important;
+                font-size: 0.9em;
+            }
+
+                table.prop-grid td.prop-grid-section {
+                    font-weight: bold;
+                    font-size: 1.1em;
+                    color: black;
+                }
+
+                table.prop-grid td.prop-grid-label {
+                    padding: 2px 5px 2px 2px;
+                    text-align: right;
+                    color: gray;
+                    white-space: nowrap;
+                }
+
+                table.prop-grid td.prop-grid-value {
+                    padding: 0;
+                    font-family: monospace;
+                    font-size: 1.1em;
+                    white-space: nowrap;
+                }
+
+                    table.prop-grid td.prop-grid-value pre {
+                        margin: 0;
+                        padding: 2px;
+                        font-family: monospace;
+                        font-size: 1.0em;
+                        white-space: pre;
+                        border-radius: 2px;
+                    }
+
         div.jqgDetailPane div.jsonText .jsonview,
         div.jqgDetailPane div.jsonText .jsonview li,
         div.jqgDetailPane div.jsonText .jsonview li a,
         div.jqgDetailPane div.jsonText .jsonview li span {
             white-space: nowrap !important;
         }
+
         .ui-jqgrid tr.jqgrow td {
             vertical-align: top !important;
         }
+
         .dropdown.editable .dropdown-cell {
             cursor: pointer;
         }
+
         .dropdown.editable i {
             margin: 5px;
         }
+
         .jqgrow .ui-icon {
             background-image: url("app/skin/assets/css/plugins/jQueryUI/images/ui-icons_222222_256x240_jqg.png");
         }
+
         .jqgrow.ui-state-highlight .ui-icon {
             background-image: url("app/skin/assets/css/plugins/jQueryUI/images/ui-icons_ffffff_256x240_jqg.png");
         }
+
         .jqGrid_wrapper.flat-style .gbox_grid {
             border: none !important;
         }
-        .jqGrid_wrapper.flat-style .ui-jqgrid tr.ui-row-ltr td { 
-            border-bottom-style: 1px solid black; 
+
+        .jqGrid_wrapper.flat-style .ui-jqgrid tr.ui-row-ltr td {
+            border-bottom-style: 1px solid black;
         }
+
         .jqGrid_wrapper.flat-style .jsonText {
             background-color: transparent;
         }
-        .jqGrid_wrapper.expandable-tree-mode tr.jqgrow:hover > td { 
-            border-bottom: 1px solid red !important; 
+
+        .jqGrid_wrapper.expandable-tree-mode tr.jqgrow:hover > td {
+            border-bottom: 1px solid red !important;
         }
+
         .threadlog-ThreadSuccess {
             background-color: green;
             color: white;
         }
+
         .threadlog-ActivitySuccess {
             background-color: lghtgreen;
             color: blue;
         }
-        tr.jqg_rowstyle_ThreadSuccess > td { color: #484848; background-color: #ECECEC; font-weight: bold !important; }
-        tr.jqg_rowstyle_ThreadWarning > td { color: #CC6600; background-color: #ECECEC; font-weight: bold !important; }
-        tr.jqg_rowstyle_ThreadError > td { color: #C90000; background-color: #ECECEC; font-weight: bold !important; }
-        tr.jqg_rowstyle_ThreadCritical > td { color: #FF3300; background-color: #ECECEC; }
-        tr.jqg_rowstyle_ActivitySuccess > td  { color: #484848; background-color: #F8F8F8; }
-        tr.jqg_rowstyle_ActivityWarning > td { color: #CC6600; background-color: #F8F8F8; }
-        tr.jqg_rowstyle_ActivityError > td { color:#C90000; background-color: #F8F8F8; }
-        tr.jqg_rowstyle_ActivityCritical > td { color: #FF3300;background-color: #F8F8F8; }
-        tr.jqg_rowstyle_LogDebug > td  { color: #A0A0A0; }  
-        tr.jqg_rowstyle_LogVerbose > td  { color: #808080 ; }
-        tr.jqg_rowstyle_LogInfo > td { color: #0000AF; font-weight: bold !important; }
-        tr.jqg_rowstyle_LogWarning > td { color: #CC6600; font-weight: bold !important; }
-        tr.jqg_rowstyle_LogError > td { color: #E00000; font-weight: bold !important; }
-        tr.jqg_rowstyle_LogCritical > td { color: #FF3300; font-weight: bold !important; }
-        tr.jqgrow i.row-icon { margin-left: 5px; margin-right: 3px; }
-        
-        #global_div_dropdown_popup {
-              position: fixed;
-              z-index: 2000;
-              background-color: rgba(51, 51, 51, 0.56);
-              padding-top: 20%;
+
+        tr.jqg_rowstyle_ThreadSuccess > td {
+            color: #484848;
+            background-color: #ECECEC;
+            font-weight: bold !important;
         }
-        
+
+        tr.jqg_rowstyle_ThreadWarning > td {
+            color: #CC6600;
+            background-color: #ECECEC;
+            font-weight: bold !important;
+        }
+
+        tr.jqg_rowstyle_ThreadError > td {
+            color: #C90000;
+            background-color: #ECECEC;
+            font-weight: bold !important;
+        }
+
+        tr.jqg_rowstyle_ThreadCritical > td {
+            color: #FF3300;
+            background-color: #ECECEC;
+        }
+
+        tr.jqg_rowstyle_ActivitySuccess > td {
+            color: #484848;
+            background-color: #F8F8F8;
+        }
+
+        tr.jqg_rowstyle_ActivityWarning > td {
+            color: #CC6600;
+            background-color: #F8F8F8;
+        }
+
+        tr.jqg_rowstyle_ActivityError > td {
+            color: #C90000;
+            background-color: #F8F8F8;
+        }
+
+        tr.jqg_rowstyle_ActivityCritical > td {
+            color: #FF3300;
+            background-color: #F8F8F8;
+        }
+
+        tr.jqg_rowstyle_LogDebug > td {
+            color: #A0A0A0;
+        }
+
+        tr.jqg_rowstyle_LogVerbose > td {
+            color: #808080;
+        }
+
+        tr.jqg_rowstyle_LogInfo > td {
+            color: #0000AF;
+            font-weight: bold !important;
+        }
+
+        tr.jqg_rowstyle_LogWarning > td {
+            color: #CC6600;
+            font-weight: bold !important;
+        }
+
+        tr.jqg_rowstyle_LogError > td {
+            color: #E00000;
+            font-weight: bold !important;
+        }
+
+        tr.jqg_rowstyle_LogCritical > td {
+            color: #FF3300;
+            font-weight: bold !important;
+        }
+
+        tr.jqgrow i.row-icon {
+            margin-left: 5px;
+            margin-right: 3px;
+        }
+
+        #global_div_dropdown_popup {
+            position: fixed;
+            z-index: 2000;
+            background-color: rgba(51, 51, 51, 0.56);
+            padding-top: 20%;
+        }
+
         .grid-inline-edit-control {
             border: none;
             width: 100%;
-            background-color: #C6F4DE;        
+            background-color: #C6F4DE;
+            height: 21px;
+            line-height: 21px;
         }
-        
+
         .grid-inline-edit-dropdown-panel {
-               background-color: #d2d2d2;
-                border: 7px solid #1e2f40;
-                border-radius: 7px;
-                padding: 15px;
+            background-color: #d2d2d2;
+            border: 7px solid #1e2f40;
+            border-radius: 7px;
+            padding: 15px;
         }
-        
+
         a.clickable-cell {
-            font-weight:800;
+            font-weight: 800;
             padding: 3px;
             border-bottom: 1px solid black;
         }
 
-        a.clickable-cell:hover {
-            color:white;
-            background-color: red;
-            border-bottom: 1px solid white;
-            border-radius: 5px;        
-        }
+            a.clickable-cell:hover {
+                color: white;
+                background-color: red;
+                border-bottom: 1px solid white;
+                border-radius: 5px;
+            }
 
         .ui-state-highlight a.clickable-cell {
             color: white;
             border-bottom: 1px solid white;
         }
 
-        .ui-state-highlight a.clickable-cell:hover {
-            background-color: #51abc3;
-            color:white;
-        }
+            .ui-state-highlight a.clickable-cell:hover {
+                background-color: #51abc3;
+                color: white;
+            }
     </style>
 </head>
-<body 
-    ng-class="{
+<body ng-class="{
         'pace-done': currentScreen && currentScreen.screenKind != 'SignInSignUp',
         'gray-bg': currentScreen && currentScreen.screenKind == 'SignInSignUp'
-    }" 
-    ng-style="{
-        'background-color': (currentScreen && currentScreen.screenKind == 'SignInSignUp' ? '#f3f3f4' : undefined)
     }"
->
+      ng-style="{
+        'background-color': (currentScreen && currentScreen.screenKind == 'SignInSignUp' ? '#f3f3f4' : undefined)
+    }">
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     PAGE BODY
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -439,7 +563,7 @@ HEAD, JS/CSS LINKS
             <span>
                 {{getDisplayText()}}
                 <span ng-if="alert.current.parameters.reason" class="moreInfo">
-                    <br/>{{alert.current.parameters.reason}}
+                    <br />{{alert.current.parameters.reason}}
                 </span>
                 <br ng-if="alert.current.uidl.resultChoices.length" />
                 <button ng-repeat="choice in alert.current.uidl.resultChoices"
@@ -459,7 +583,7 @@ HEAD, JS/CSS LINKS
             </span>
         </div>
     </script>
- 
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL USER ALERT - TECHNICAL INFO POPUP
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -480,7 +604,7 @@ HEAD, JS/CSS LINKS
             </div>
         </div>
     </div>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     IFRAME FOR 'BEGIN DOWNLOAD' BEHAVIOR
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -497,13 +621,13 @@ HEAD, JS/CSS LINKS
     UIDL USER ALERT - MODAL
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/ModalUserAlert">
-        <div class="modal inmodal fade" id="divModal_{{uidl.elementName}}" tabindex="-1" role="dialog"  aria-hidden="true" data-backdrop="static">
+        <div class="modal inmodal fade" id="divModal_{{uidl.elementName}}" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        <i  class="fa modal-icon pull-left" style="margin-top:-20px;"
-                            ng-class="{
+                        <i class="fa modal-icon pull-left" style="margin-top:-20px;"
+                           ng-class="{
                                'fa-info':alert.uidl.type==='Info',
                                'fa-check-square':alert.uidl.type==='Success',
                                'fa-exclamation-triangle':alert.uidl.type==='Warning',
@@ -517,17 +641,16 @@ HEAD, JS/CSS LINKS
                         {{translate(alert.uidl.text)}}
                     </div>
                     <div class="modal-footer">
-                        <button 
-                            ng-repeat="choice in alert.uidl.resultChoices"
-                            class="btn btn-w-m"
-                            style="margin-left:5px;"
-                            ng-class="{
+                        <button ng-repeat="choice in alert.uidl.resultChoices"
+                                class="btn btn-w-m"
+                                style="margin-left:5px;"
+                                ng-class="{
                                 'btn-info':alert.uidl.type==='Info',
                                 'btn-success':alert.uidl.type==='Success',
                                 'btn-warning':alert.uidl.type==='Warning',
                                 'btn-danger':alert.uidl.type==='Error'
                             }"
-                            ng-click="answerAlert(choice);">
+                                ng-click="answerAlert(choice);">
                             {{::translate(choice)}}
                         </button>
                     </div>
@@ -537,12 +660,12 @@ HEAD, JS/CSS LINKS
     </script>
     <script type="text/javascript">
         function initWidget_ModalUserAlert($scope) {
-            $("#divModal_" + $scope.uidl.elementName).modal({backdrop: 'static', keyboard: false});
+            $("#divModal_" + $scope.uidl.elementName).modal({ backdrop: 'static', keyboard: false });
             $("#divModal_" + $scope.uidl.elementName).on('hidden', function () {
                 answerAlert('Cancel');
             });
             $scope.$on($scope.uidl.qualifiedName + ':ShowModal', function () {
-                $("#divModal_" + $scope.uidl.elementName).modal('show', {backdrop: 'static', keyboard: false});
+                $("#divModal_" + $scope.uidl.elementName).modal('show', { backdrop: 'static', keyboard: false });
             });
             $scope.$on($scope.uidl.qualifiedName + ':HideModal', function () {
                 $("#divModal_" + $scope.uidl.elementName).modal('hide');
@@ -557,16 +680,17 @@ HEAD, JS/CSS LINKS
         <div ng-if="uidl.utilityBar" class="row border-bottom" style="padding:10px;border:none !important;">
             <ul class="nav navbar-top-links navbar-right">
                 <li class="dropdown" ng-repeat="widget in uidl.utilityBar.containedWidgets" style="margin-right:20px;">
-                    <uidl-widget uidl="widget" ></uidl-widget>
+                    <uidl-widget uidl="widget"></uidl-widget>
                 </li>
             </ul>
-         </div>
+        </div>
         <div>
             <h1 class="logo-name" ng-if="!uidl.logoImage" style="text-align:center">{{::translate(uidl.text)}}</h1>
-            <h1 class="logo-name" ng-if="uidl.logoImage" style="text-align:center"><img 
-                ng-src="{{::uidl.logoImage}}" 
-                alt="{{::translate(uidl.text)}}" 
-                title="{{::translate(uidl.text)}}"></img></h1>
+            <h1 class="logo-name" ng-if="uidl.logoImage" style="text-align:center">
+                <img ng-src="{{::uidl.logoImage}}"
+                     alt="{{::translate(uidl.text)}}"
+                     title="{{::translate(uidl.text)}}"></img>
+            </h1>
             <h2 class="logo-name" style="text-align:center;margin-bottom:40px;">{{::translate(uidl.helpText)}}</h2>
             <uidl-widget uidl="uidl.insideContent"></uidl-widget>
             <p ng-if="uidl.footerText" class="m-t m-b text-center">{{::translate(uidl.footerText)}}</p>
@@ -587,19 +711,21 @@ HEAD, JS/CSS LINKS
                            'text-info':model.State.Type==='Success',
                            'text-warning':model.State.Type==='Warning',
                            'text-danger':model.State.Type==='Error'
-                        }"><i class="fa fa-lg glyphicon" ng-class="{
+                        }">
+                            <i class="fa fa-lg glyphicon" ng-class="{
                            'fa-info-circle':model.State.Type==='Info',
                            'fa-check-square':model.State.Type==='Success',
                            'fa-exclamation-triangle':model.State.Type==='Warning',
                            'fa-times-circle':model.State.Type==='Error'
-                        }"></i></h2>
+                        }"></i>
+                        </h2>
                     </div>
                     <div class="userAlertBoxContent col-xs-11">
                         <h2>{{translate(model.State.Heading)}}</h2>
                         <div ng-if="model.State.Details">
                             <p ng-repeat="detail in model.State.Details" class="m-t m-b">{{translate(detail)}}</p>
                         </div>
-                    </div>                
+                    </div>
                 </div>
                 <p ng-if="model.State.Action" class="m-t m-b center">
                     <a ng-if="model.State.Action"
@@ -609,7 +735,7 @@ HEAD, JS/CSS LINKS
             </div>
         </div>
     </script>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - USER LOGIN FORM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -633,31 +759,31 @@ HEAD, JS/CSS LINKS
                 <p ng-if="model.State.LoginFault=='PasswordExpired'">Please change your password.</p>
                 <form class="m-t" role="form" ng-if="model.State.LoginFault=='PasswordExpired'" novalidate>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.Data.LoginName" >
+                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.Data.LoginName">
                     </div>
                     <div class="form-group">
-                        <input type="password" class="form-control" placeholder="Current Password" required="" ng-model="model.Data.Password" >
+                        <input type="password" class="form-control" placeholder="Current Password" required="" ng-model="model.Data.Password">
                     </div>
                     <div class="form-group">
-                        <input type="password" class="form-control" placeholder="New Password" required="" ng-model="model.Data.NewPassword" >
+                        <input type="password" class="form-control" placeholder="New Password" required="" ng-model="model.Data.NewPassword">
                     </div>
                     <button class="btn btn-primary block full-width m-b" ng-click="invokeCommand('ChangePassword')">Change Password</button>
                 </form>
-            </div>                
+            </div>
             <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
         </div>
     </script>
     <script type="text/javascript">
         function initWidget_UserLoginForm($scope) {
             $('#' + $scope.uidl.elementName).validate();
-            $scope.invokeCommand = function(commandName) {
-                if ($('#' + $scope.uidl.elementName).valid()===true) {
+            $scope.invokeCommand = function (commandName) {
+                if ($('#' + $scope.uidl.elementName).valid() === true) {
                     $scope.$emit($scope.uidl.qualifiedName + ':' + commandName + ':Executing');
                 }
             };
         }
     </script>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - CURRENT LOGGED-IN USER
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -680,30 +806,30 @@ HEAD, JS/CSS LINKS
             </ul>
         </div>
     </script>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - PROFILE PHOTO
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/UserProfilePhoto">
-        <div class="dropdown profile-element"> 
+        <div class="dropdown profile-element">
             <span>
                 <img ng-if="model.State.ProfilePhotoId" alt="image" class="img-circle" ng-src="app/entity/queryImage/{{uidl.entityName}}/{{model.State.ProfilePhotoId}}/{{uidl.imageTypeProperty}}/{{uidl.imageContentProperty}}">
                 <img ng-if="!model.State.ProfilePhotoId" alt="No profile photo" class="img-circle" src="app/skin/assets/img/default_profile_photo.png">
             </span>
             <a data-toggle="dropdown" class="dropdown-toggle" href="#">
-                <span class="clear"> 
+                <span class="clear">
                     <span class="block m-t-xs">
                         <strong class="font-bold">{{model.State.PersonFullName}}</strong>
-                    </span> 
-                    <span class="text-muted text-xs block">{{model.State.UserType}}<b class="caret"></b></span> 
+                    </span>
+                    <span class="text-muted text-xs block">{{model.State.UserType}}<b class="caret"></b></span>
                 </span>
             </a>
             <ul class="dropdown-menu animated fadeIn m-t-xs">
                 <li ng-repeat="command in uidl.commands"><a ng-click="$emit(command.qualifiedName + ':Executing')">{{::translate(command.text)}}</a></li>
             </ul>
-        </div>    
+        </div>
     </script>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - MANAGEMENT CONSOLE
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -828,22 +954,22 @@ HEAD, JS/CSS LINKS
                                     </div>
                                 </li>
                             </ul>
-                        </li-->                        
+                        </li-->
                         <li ng-repeat="command in uidl.utilityCommands">
-                            <button 
-                                type="button"
-                                class="btn btn-rounded"
-                                style="margin-right:5px; margin-bottom:5px;"
-                                ng-disabled="utilityCommandInProgress || !isUtilityCommandEnabled(command)"
-                                ng-click="invokeUtilityCommand(command)"
-                                ng-class="{'btn-default':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
-                            ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                            <button type="button"
+                                    class="btn btn-rounded"
+                                    style="margin-right:5px; margin-bottom:5px;"
+                                    ng-disabled="utilityCommandInProgress || !isUtilityCommandEnabled(command)"
+                                    ng-click="invokeUtilityCommand(command)"
+                                    ng-class="{'btn-default':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}">
+                                <i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}
+                            </button>
                         </li>
                         <li ng-repeat="widget in uidl.statusBar.containedWidgets" ng-class="{'dropdown': widget.border==='DropDown'}">
                             <uidl-widget uidl="widget"></uidl-widget>
                         </li>
-                     </ul>
-                </nav>  
+                    </ul>
+                </nav>
             </div>
             <div class="row wrapper border-bottom white-bg page-heading" style="padding-bottom:15px;margin-bottom:15px;">
                 <div class="col-lg-10">
@@ -853,7 +979,7 @@ HEAD, JS/CSS LINKS
                         <li class="active"><strong>{{translate(mainContentScreenPart.text)}}</strong></li>
                     </ol>
                 </div>
-            </div>            
+            </div>
             <div class="wrapper wrapper-content  animated fadeInRight">
                 <uidl-widget uidl="uidl.mainContent"></uidl-widget>
             </div>
@@ -861,8 +987,8 @@ HEAD, JS/CSS LINKS
         <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
     </script>
     <script type="text/javascript">
-        function initWidget_ManagementConsole($scope){
-            $scope.$timeout(function() {
+        function initWidget_ManagementConsole($scope) {
+            $scope.$timeout(function () {
                 $('#side-menu').metisMenu();
                 $('.navbar-minimalize').click(function () {
                     $("body").toggleClass("mini-navbar");
@@ -887,14 +1013,14 @@ HEAD, JS/CSS LINKS
         </ul>
     </script>
 
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - CONTAINER
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/Container">
         <uidl-widget ng-repeat="widget in uidl.containedWidgets" uidl="widget"></uidl-widget>
     </script>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - LAYOUT HORIZONTAL
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -926,7 +1052,7 @@ HEAD, JS/CSS LINKS
         <span ng-if="uidl.textSize==='Normal'">{{translate(model.State.Contents)}}</span>
         <small ng-if="uidl.textSize==='HugeHeader'">{{translate(model.State.Contents)}}</small>
     </script>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - JSON TEXT
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -959,7 +1085,7 @@ HEAD, JS/CSS LINKS
             </tbody>
         </table>
     </script>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - GAUGE
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -1005,7 +1131,7 @@ HEAD, JS/CSS LINKS
                         <i class="fa fa-times"></i>
                     </a>
                 </div>
-            </div>        
+            </div>
             <div class="ibox-content">
                 <div class="row">
                     <div class="col-lg-12">
@@ -1029,7 +1155,7 @@ HEAD, JS/CSS LINKS
                                     </td>
                                 </tr>
                             </tbody>
-                        </table>                    
+                        </table>
                     </div>
                 </div>
             </div>
@@ -1049,7 +1175,7 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="app/uidl-element-template/Crud">
         <div class="row">
             <div ng-hide="uiShowCrudForm" class="col-lg-12">
-                <div  ng-if="!uidl.disableToolBar" class="ibox-title" ng-class="{'standalone':uidl.mode==='Standalone', 'nested':uidl.mode!=='Standalone'}">
+                <div ng-if="!uidl.disableToolBar" class="ibox-title" ng-class="{'standalone':uidl.mode==='Standalone', 'nested':uidl.mode!=='Standalone'}">
                     <button class="btn btn-primary btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="newEntity();" ng-disabled="commandInProgress" ng-show="entityAuth.create" title="Add New">
                         <i class="fa fa-plus"></i>
                     </button>
@@ -1065,31 +1191,31 @@ HEAD, JS/CSS LINKS
                     <button class="btn btn-default btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="refresh()" ng-disabled="commandInProgress" title="Refresh">
                         <i class="fa fa-refresh"></i>
                     </button>
-                    <button 
-                        ng-repeat="command in uidl.entityCommands"
-                        type="button"
-                        class="btn btn-rounded"
-                        style="margin-right:5px;"
-                        ng-disabled="commandInProgress || !selectedEntity || !isEntityCommandEnabled(command)"
-                        ng-click="invokeEntityCommand(command)"
-                        ng-class="{'btn-default':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
-                    ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
-                    <button 
-                        ng-repeat="command in uidl.staticCommands"
-                        type="button"
-                        class="btn btn-rounded btn-outline"
-                        style="margin-right:5px;"
-                        ng-disabled="commandInProgress"
-                        ng-click="invokeStaticCommand(command)"
-                        ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
-                    ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                    <button ng-repeat="command in uidl.entityCommands"
+                            type="button"
+                            class="btn btn-rounded"
+                            style="margin-right:5px;"
+                            ng-disabled="commandInProgress || !selectedEntity || !isEntityCommandEnabled(command)"
+                            ng-click="invokeEntityCommand(command)"
+                            ng-class="{'btn-default':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}">
+                        <i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}
+                    </button>
+                    <button ng-repeat="command in uidl.staticCommands"
+                            type="button"
+                            class="btn btn-rounded btn-outline"
+                            style="margin-right:5px;"
+                            ng-disabled="commandInProgress"
+                            ng-click="invokeStaticCommand(command)"
+                            ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}">
+                        <i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}
+                    </button>
                 </div>
                 <div ng-if="!parentFormFieldHasModifier('FlatStyle')" class="ibox-content" ng-class="{'standalone':uidl.mode==='Standalone', 'nested':uidl.mode!=='Standalone'}">
                     <uidl-widget uidl="uidl.grid" parent-model="model"></uidl-widget>
                 </div>
                 <uidl-widget ng-if="parentFormFieldHasModifier('FlatStyle')" uidl="uidl.grid" parent-model="model"></uidl-widget>
             </div>
-            
+
             <div ng-if="uiShowCrudForm" class="col-lg-12">
                 <div class="ibox-title">
                     <h2 class="clearfix">
@@ -1102,16 +1228,16 @@ HEAD, JS/CSS LINKS
                     <uidl-widget ng-if="uidl.formTypeSelector" uidl="uidl.formTypeSelector" parent-model="model"></uidl-widget>
                 </div>
                 <div class="ibox-content" style="padding-top:15px;">
-                    <button 
-                        ng-repeat="command in uidl.commands"
-                        type="button"
-                        class="btn btn-rounded"
-                        style="margin-right:5px;"
-                        ng-show="isCommandAuthorized(command)"
-                        ng-disabled="commandInProgress"
-                        ng-click="invokeCommand(command)"
-                        ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
-                    ><i ng-if="command.icon" class="fa fa-{{commandInProgress ? 'spinner' : command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                    <button ng-repeat="command in uidl.commands"
+                            type="button"
+                            class="btn btn-rounded"
+                            style="margin-right:5px;"
+                            ng-show="isCommandAuthorized(command)"
+                            ng-disabled="commandInProgress"
+                            ng-click="invokeCommand(command)"
+                            ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}">
+                        <i ng-if="command.icon" class="fa fa-{{commandInProgress ? 'spinner' : command.icon}}">&nbsp;</i>{{::translate(command.text)}}
+                    </button>
                 </div>
             </div>
             <div ng-if="uidl.popupContents">
@@ -1128,9 +1254,9 @@ HEAD, JS/CSS LINKS
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - DATA GRID
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <script type="text/ng-template" id="app/uidl-element-template/DataGrid">     
-        <div id="rdtwrapper_{{uniqueWidgetId}}" 
-             class="jqGrid_wrapper" 
+    <script type="text/ng-template" id="app/uidl-element-template/DataGrid">
+        <div id="rdtwrapper_{{uniqueWidgetId}}"
+             class="jqGrid_wrapper"
              ng-class="{'flat-style': uidl.flatStyle===true, 'expandable-tree-mode': uidl.expandableTreeMode===true, 'ng-hide': uidl.hiddenMode===true}">
             <table id="rdt_{{uniqueWidgetId}}"></table>
             <div ng-if="uidl.enablePaging" id="rdtpager_{{uniqueWidgetId}}"></div>
@@ -1138,16 +1264,16 @@ HEAD, JS/CSS LINKS
     </script>
     <script type="text/javascript">
         function saveRowGrid(cntrl) {
-            
+
             setTimeout(function () {
-                var e = $.Event('keydown');                
+                var e = $.Event('keydown');
                 e.keyCode = 13; // Character 'A'
-                
+
                 $(cntrl).parents("td").focus();
                 $(cntrl).parents("td").trigger(e);
 
-            //    alert("Hello");
-            }, 100);          
+                //    alert("Hello");
+            }, 100);
         }
 
         function cancelRowGrid(cntrl) {
@@ -1168,7 +1294,7 @@ HEAD, JS/CSS LINKS
             var inlineEditorFields = null;
             if ($scope.uidl.inlineEditor) {
                 var fields = $scope.uidl.inlineEditor.fields;
-                inlineEditorFields = { };
+                inlineEditorFields = {};
                 for (var i = 0 ; i < fields.length ; i++) {
                     inlineEditorFields[fields[i].propertyName] = fields[i];
                 }
@@ -1178,38 +1304,39 @@ HEAD, JS/CSS LINKS
             }
             if ($scope.uidl.isInlineEditEnabled === true) {
                 columnsModel.push({
-                    name:'actions',
-                    index:'act',
-                    width:100,
-                    align:'center',
-                    sortable:false,
+                    name: 'actions',
+                    index: 'act',
+                    width: 120,
+                    align: 'center',
+                    sortable: false,
                     formatter: function (cellvalue, options, rowObject) {
-                        return '<i onclick="saveRowGrid(this)" class="fa fa-floppy-o" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i><i onclick="cancelRowGrid(this)" class="fa fa-undo" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i> <i class="fa fa-pencil" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
+                        return '<i onclick="saveRowGrid(this)" class="fa fa-floppy-o fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i><i onclick="cancelRowGrid(this)" class="fa fa-undo fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>' +
+                            '<i class="fa fa-pencil fa-lg" edit-grid-event="true" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
                     }
-                });       
+                });
             }
             $scope.gridColumns.forEach(function (metaColumn, idx) {
                 if (metaColumn.columnType == 'Hidden' || !$scope.isUidlAuthorized(metaColumn)) {
                     return;
                 }
                 var colWidthPx = (
-                    metaColumn.size==='Jumbo' ? 1040 : (
-                    metaColumn.size==='ExtraLarge' ? 720 : (
-                    metaColumn.size==='Large' ? 360 : (
-                    metaColumn.size==='Small' ? 90 : 180))));
+                    metaColumn.size === 'Jumbo' ? 1040 : (
+                    metaColumn.size === 'ExtraLarge' ? 720 : (
+                    metaColumn.size === 'Large' ? 360 : (
+                    metaColumn.size === 'Small' ? 90 : 180))));
                 var modelItem = {
                     name: metaColumn.expression,
                     label: $scope.translate(metaColumn.title),
                     index: metaColumn.expression,
-                    editable: ($scope.uidl.isInlineEditEnabled===true && metaColumn.isEditSupported===true),
+                    editable: ($scope.uidl.isInlineEditEnabled === true && metaColumn.isEditSupported === true),
                     width: colWidthPx,
-                    search: metaColumn.isFilterSupported===true,
-                    sortable: metaColumn.isSortSupported===true,
+                    search: metaColumn.isFilterSupported === true,
+                    sortable: metaColumn.isSortSupported === true,
                     //sorttype: column.dataType,
                 };
                 if (metaColumn.format) {
                     modelItem.formatter = function (cellvalue, options, rowObject) {
-                        if (cellvalue!='Total:') {
+                        if (cellvalue != 'Total:') {
                             return $scope.uidlService.formatValue(metaColumn.format, cellvalue);
                         } else {
                             return cellvalue;
@@ -1220,39 +1347,39 @@ HEAD, JS/CSS LINKS
                     case 'Number':
                     case 'Key':
                         modelItem.align = 'right';
-                        modelItem.searchoptions = {sopt: ['eq']};
+                        modelItem.searchoptions = { sopt: ['eq'] };
                         //modelItem.stype = 'select';
                         //modelItem.searchoptions = {
-                            //sopt: ['eq'],
-                            //value: ':Any;1:GCM - Forex;2:GCM - Asia'
-                            //dataInit: function(elem) {
-                            //    $(elem).autocomplete({
-                            //        source: ,
-                            //        delay:0,
-                            //        minLength:0
-                            //    });
-                            //}
+                        //sopt: ['eq'],
+                        //value: ':Any;1:GCM - Forex;2:GCM - Asia'
+                        //dataInit: function(elem) {
+                        //    $(elem).autocomplete({
+                        //        source: ,
+                        //        delay:0,
+                        //        minLength:0
+                        //    });
+                        //}
                         //};
                         break;
                     case 'Enum':
-                        modelItem.searchoptions = {sopt: ['cn']};
+                        modelItem.searchoptions = { sopt: ['cn'] };
                         break;
                     case 'Image':
-                        modelItem.searchoptions = {sopt: ['cn']};
-                        modelItem.formatter = function(cellvalue, options, rowObject) {
+                        modelItem.searchoptions = { sopt: ['cn'] };
+                        modelItem.formatter = function (cellvalue, options, rowObject) {
                             return '<img src="' + cellvalue + '" style="max-width:' + colWidthPx + 'px;">';
                         };
                         break;
                     case 'Link':
-                        modelItem.searchoptions = {sopt: ['cn']};
-                        modelItem.formatter = function(cellvalue, options, rowObject) {
+                        modelItem.searchoptions = { sopt: ['cn'] };
+                        modelItem.formatter = function (cellvalue, options, rowObject) {
                             return '<a target="_blank" href="' + cellvalue + '" style="text-decoration:underline;">' + cellvalue + '</a>';
                         };
                         break;
                     case 'Widget':
                         modelItem.editable = false;
                         modelItem.search = false;
-                        modelItem.formatter = function(cellvalue, options, rowObject) {
+                        modelItem.formatter = function (cellvalue, options, rowObject) {
                             return '<a target="_blank" href="' + cellvalue + '" style="text-decoration:underline;">' + cellvalue + '</a>';
                         };
                         break;
@@ -1264,16 +1391,16 @@ HEAD, JS/CSS LINKS
                                 optionString += ';' + metaType.derivedTypeNames[i] + ':' + metaType.derivedTypeNames[i];
                             }
                             modelItem.stype = 'select';
-                            modelItem.searchoptions = { 
+                            modelItem.searchoptions = {
                                 sopt: ['eq'],
-                                value: optionString, 
-                                defaultValue: '' 
+                                value: optionString,
+                                defaultValue: ''
                             };
                         }
                         break;
                     case 'LookupMany':
                         if (metaColumn.itemDisplayAsExpression) {
-                            modelItem.formatter = function(cellvalue, options, rowObject) {
+                            modelItem.formatter = function (cellvalue, options, rowObject) {
                                 if (Array.isArray(cellvalue)) {
                                     var text = '';
                                     for (var i = 0 ; i < cellvalue.length ; i++) {
@@ -1294,16 +1421,16 @@ HEAD, JS/CSS LINKS
                         }
                         break;
                     default:
-                        modelItem.searchoptions = {sopt: ['cn']};
+                        modelItem.searchoptions = { sopt: ['cn'] };
                 }
                 if (metaColumn.alignment) {
-                    switch(metaColumn.alignment) {
+                    switch (metaColumn.alignment) {
                         case 'Center': modelItem.align = 'center'; break;
                         case 'Right': modelItem.align = 'right'; break;
                     }
                 }
                 if (metaColumn.clickable === true || metaColumn.clickablePropertyName) {
-                    modelItem.formatter = function(cellvalue, options, rowObject) {
+                    modelItem.formatter = function (cellvalue, options, rowObject) {
                         var isClickable = metaColumn.clickable;
                         if (!isClickable) {
                             isClickable = (rowObject[metaColumn.clickablePropertyName] === true);
@@ -1323,13 +1450,13 @@ HEAD, JS/CSS LINKS
                                 var rowId = $scope.lastSelectedRowId;
                                 var rowData = $scope.getDataByRowId(rowId);
                                 var editEl = $(
-                                    '<div class="editable">' + 
+                                    '<div class="editable">' +
                                     '<uidl-form-field parent-uidl="formUidl" uidl="fieldUidl" entity="rowEntity" template-name="FormFieldGridInlineEditStyle" />' +
                                     '</div>'
                                 );
                                 var editorScope = $scope.compileEditorWidget(editorField, rowData, editEl);
                                 if (editorField.nestedWidget) {
-                                    $scope.$timeout(function() {
+                                    $scope.$timeout(function () {
                                         editorScope.$broadcast(editorField.nestedWidget.qualifiedName + ':ModelSetter', rowData[metaColumn.expression]);
                                     });
                                 }
@@ -1337,7 +1464,7 @@ HEAD, JS/CSS LINKS
                             },
                             custom_value: function ($elem, operation, value) {
                                 if (operation === "get") {
-                                    return $elem.val(); 
+                                    return $elem.val();
                                 }
                             },
                         };
@@ -1345,18 +1472,18 @@ HEAD, JS/CSS LINKS
                 }
                 columnsModel.push(modelItem);
             });
-            $scope.needSearchToolbar = (Enumerable.From(columnsModel).Any(function(col) { return (col.search || col.sortable); }));
-            
-            $scope.uidl.calculateHeight = function() {
+            $scope.needSearchToolbar = (Enumerable.From(columnsModel).Any(function (col) { return (col.search || col.sortable); }));
+
+            $scope.uidl.calculateHeight = function () {
                 if ($scope.uidl.mode !== 'Standalone') {
                     return '100%';
-                }      
+                }
                 if (!$scope.uidl.$skin.deltaWindowHeight) {
                     var height = document.documentElement.clientHeight - $('#' + $scope.tableElementId).offset().top - 140;
                     return height;
                 }
                 var windowClientHeight = document.documentElement.clientHeight;
-                var tableElement = $('#' + $scope.tableElementId); 
+                var tableElement = $('#' + $scope.tableElementId);
                 var tableOffset = tableElement.offset();
                 if (tableOffset.top > 0) {
                     var height = windowClientHeight - tableOffset.top - 2;
@@ -1378,13 +1505,13 @@ HEAD, JS/CSS LINKS
                 }
             };
 
-            $scope.defineElementIds = function() {
+            $scope.defineElementIds = function () {
                 $scope.tableElementId = 'rdt_' + $scope.uniqueWidgetId;
                 $scope.pagerElementId = 'rdtpager_' + $scope.uniqueWidgetId;
                 $scope.wrapperElementId = 'rdtwrapper_' + $scope.uniqueWidgetId;
             };
 
-            $scope.getDataByRowId = function(rowId) {
+            $scope.getDataByRowId = function (rowId) {
                 if ($.isNumeric(rowId)) {
                     var rowData = $scope.ResultSet[parseInt(rowId) - 1];
                     return rowData;
@@ -1395,14 +1522,14 @@ HEAD, JS/CSS LINKS
                     return rowData;
                 }
             }
-            
-            $scope.transformToAdjacentTreeModel = function(localResultSet, serverNode, parentServerNode, level) {
+
+            $scope.transformToAdjacentTreeModel = function (localResultSet, serverNode, parentServerNode, level) {
                 var serverSubNodes = serverNode[$scope.uidl.subTreePropertyName];
 
                 if ($scope.uidl.ignoreTreeNodeServerIds === true) {
                     serverNode['$id'] = '' + (localResultSet.length + 1);
                 }
-                
+
                 serverNode['$treeParentId'] = (parentServerNode ? parentServerNode['$id'] : null);
                 serverNode['$treeLevel'] = level;
                 serverNode['$treeLeaf'] = (serverSubNodes && serverSubNodes.length > 0 ? false : true);
@@ -1415,17 +1542,17 @@ HEAD, JS/CSS LINKS
                         $scope.transformToAdjacentTreeModel(localResultSet, serverSubNodes[i], serverNode, level + 1);
                     }
                 }
-                
+
                 serverNode[$scope.uidl.subTreePropertyName] = null;
             };
 
-            $scope.applyDataDrivenRowStyles = function(minIndex, maxIndex, minLevel, maxLevel) {
+            $scope.applyDataDrivenRowStyles = function (minIndex, maxIndex, minLevel, maxLevel) {
                 minIndex = minIndex || 0;
                 maxIndex = maxIndex || $scope.ResultSet.length;
                 minLevel = minLevel || 0;
                 maxLevel = maxLevel || 1000000;
                 var table = $('#' + $scope.tableElementId)[0];
-                var styleBackColors = { };
+                var styleBackColors = {};
                 for (var i = minIndex + 1; i <= maxIndex && i < table.rows.length; i++) {
                     var tr = table.rows[i];
                     var data = $scope.getDataByRowId(tr.id);
@@ -1444,7 +1571,7 @@ HEAD, JS/CSS LINKS
                         var td = $(tr.cells[1]);
                         td.addClass(cssClassName);
                         if (backColor !== 'transparent') {
-                            var indent = 18 * (data.$treeLevel + 1) + 4; 
+                            var indent = 18 * (data.$treeLevel + 1) + 4;
                             var backStyle = 'linear-gradient(90deg, transparent ' + indent + 'px, ' + backColor + ' ' + indent + 'px, ' + backColor + ')';
                             td.css('background-color', 'transparent');
                             td.css('background-image', backStyle);
@@ -1452,8 +1579,8 @@ HEAD, JS/CSS LINKS
                     }
                 }
             };
-            
-            $scope.compileDetailPane = function(rowData, element) {
+
+            $scope.compileDetailPane = function (rowData, element) {
                 var childScope = $scope.$rootScope.$new(true, $scope);
                 childScope.uidl = $scope.uidl.detailPaneWidget;
                 childScope.data = rowData;
@@ -1463,7 +1590,7 @@ HEAD, JS/CSS LINKS
                 $scope.$compile(element.contents())(childScope);
             };
 
-            $scope.compileEditorWidget = function(fieldUidl, rowData, element) {
+            $scope.compileEditorWidget = function (fieldUidl, rowData, element) {
                 var childScope = $scope.$rootScope.$new(true, $scope);
                 childScope.formUidl = $scope.uidl.inlineEditor;
                 childScope.fieldUidl = fieldUidl;
@@ -1476,11 +1603,11 @@ HEAD, JS/CSS LINKS
                 //fieldDirectiveEl.contents().filter(function() { return this.nodeType !== 1; /*Node.ELEMENT_NODE*/ }).remove();
                 //editEl.css({display: 'block'});
             };
-            
+
             $scope.onDataReceived = function (event, data) {
                 $scope.defineElementIds();
                 $scope.ResultSet = data;
-                for (var  i = 0; i < data.length; i++) {
+                for (var i = 0; i < data.length; i++) {
                     data[i]['$index'] = i;
                 }
                 $scope.$timeout(function () {
@@ -1488,7 +1615,7 @@ HEAD, JS/CSS LINKS
                     $('#' + $scope.tableElementId).jqGrid({
                         datatype: 'local',
                         localReader: {
-                           id: "$index",
+                            id: "$index",
                         },
                         data: data,
                         loadonce: true,
@@ -1518,7 +1645,7 @@ HEAD, JS/CSS LINKS
                     var grid = $('#' + $scope.tableElementId);
                     grid.parents('div.ui-jqgrid-bdiv').css('min-height', ($scope.uidl.mode === 'Standalone' ? '200px' : '100px'));
                     if ($scope.uidl.mode === 'Standalone') {
-                        grid.jqGrid('filterToolbar',{ searchOnEnter: false, defaultSearch: "cn" });
+                        grid.jqGrid('filterToolbar', { searchOnEnter: false, defaultSearch: "cn" });
                     }
                     //grid[0].addJSONData(data);
                 });
@@ -1532,14 +1659,14 @@ HEAD, JS/CSS LINKS
                     $scope.lastSelectedRowId = null;
                     $scope.totalsRowDisplayed = false;
                     var gridOptions = {
-                        datatype: function(postData) {
+                        datatype: function (postData) {
                             if ($scope.dataGridQueryInProgress) {
                                 return;
                             }
                             $scope.dataGridQueryInProgress = true;
                             var queryBuilder = ($scope.preparedRequest.query ? $scope.preparedRequest.query.clone() : new EntityQueryBuilder($scope.uidl.entityName, $scope.preparedRequest.url));
                             if (postData.sidx) {
-                                queryBuilder.orderBy(postData.sidx, postData.sord==='asc');
+                                queryBuilder.orderBy(postData.sidx, postData.sord === 'asc');
                             }
                             for (var i = 0; i < $scope.gridColumns.length; i++) {
                                 queryBuilder.select($scope.gridColumns[i].expression);
@@ -1581,14 +1708,14 @@ HEAD, JS/CSS LINKS
                                 requestUrl,
                                 $scope.preparedRequest.data
                             ).then(
-                                function(response){
+                                function (response) {
                                     $scope.dataGridQueryInProgress = false;
                                     if (grid[0].grid) {
                                         grid[0].grid.endReq();
                                     }
                                     $scope.ResultSet = response.data.ResultSet;
                                     if ($scope.uidl.expandableTreeMode) {
-                                        var adjacentModel = [ ];
+                                        var adjacentModel = [];
                                         for (var i = 0; i < $scope.ResultSet.length ; i++) {
                                             $scope.transformToAdjacentTreeModel(adjacentModel, $scope.ResultSet[i], null, 0);
                                         }
@@ -1599,7 +1726,7 @@ HEAD, JS/CSS LINKS
                                     var thegrid = $('#' + $scope.tableElementId);
                                     thegrid[0].addJSONData(response.data);
                                     $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data);
-                                    
+
                                     /*if ($scope.uidl.expandableTreeMode) {
                                         setTimeout(function() {
                                             console.log('REQUESTING ANOTHER THREAD LOG....');
@@ -1621,7 +1748,7 @@ HEAD, JS/CSS LINKS
                                         }, 5000);
                                     }*/
                                 },
-                                function(faultResponse){
+                                function (faultResponse) {
                                     $scope.dataGridQueryInProgress = false;
                                     if (grid[0].grid) {
                                         grid[0].grid.endReq();
@@ -1649,17 +1776,30 @@ HEAD, JS/CSS LINKS
                         colModel: columnsModel,
                         viewrecords: !$scope.uidl.expandableTreeMode,
                         rownumbers: !$scope.uidl.expandableTreeMode,
-                        footerrow: ($scope.uidl.enableTotalRow===true),
+                        footerrow: ($scope.uidl.enableTotalRow === true),
                         add: false,
                         edit: false,
                         hidegrid: false,
                         loadui: 'block',
                         ignoreCase: true,
-                        hoverrows: ($scope.uidl.expandableTreeMode!==true),
+                        hoverrows: ($scope.uidl.expandableTreeMode !== true),
                         //afterInsertRow: function(rowid, rowdata, rowelem) {
                         //    console.log('afterInsertRow! ', rowid, rowdata, rowelem);
                         //},
-                        beforeSelectRow: function(rowid, e) {
+                        beforeSelectRow: function (rowid, e) {
+
+                            if (eval($(e.target).attr('edit-grid-event')) != undefined) {
+                                if (!$("#global_div_dropdown_popup").is(":visible")) {
+
+                                    //   $("#global_div_dropdown_popup").hide();
+                                    var rowObject = $scope.ResultSet[rowid - 1];
+                                    if ($scope.uidl.enableAutonomousQuery) {
+                                        $scope.$emit($scope.uidl.qualifiedName + ':EditRequested', rowObject);
+                                    } else {
+                                        $scope.$emit($scope.uidl.qualifiedName + ':EditRequestedByIndex', rowid - 1);
+                                    }
+                                }
+                            }
                             return ($scope.uidl.selectionMode !== 'Disabled');
                         },
                         onSelectRow: function (rowId) {
@@ -1669,14 +1809,14 @@ HEAD, JS/CSS LINKS
                             } else {
                                 $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
                             }
-                            
+
                             if ($scope.uidl.isInlineEditEnabled) {
                                 var gridObj = $('#' + $scope.tableElementId);
-                                if (rowId && rowId!==$scope.lastSelectedRowId) { 
-                                    gridObj.restoreRow($scope.lastSelectedRowId); 
+                                if (rowId && rowId !== $scope.lastSelectedRowId) {
+                                    gridObj.restoreRow($scope.lastSelectedRowId);
                                 }
                                 $scope.lastSelectedRowId = rowId;
-                                gridObj.editRow(rowId, true, null, null, 'clientArray', null, function(saveRowId, saveIsOK) {
+                                gridObj.editRow(rowId, true, null, null, 'clientArray', null, function (saveRowId, saveIsOK) {
                                     /*
                                     var editedRowData = gridObj.getRowData(rowId);
                                     for (var i = 0; i < $scope.gridColumns.length ; i++) {
@@ -1688,54 +1828,57 @@ HEAD, JS/CSS LINKS
                                     }
                                     */
                                     var rowData = $scope.getDataByRowId(rowId);
-                                    $scope.$apply(function() {
+                                    $scope.$apply(function () {
                                         $scope.$emit($scope.uidl.qualifiedName + ':InlineSave:Executing', rowData);
                                     });
-                                }); 
+                                });
                             }
                         },
                         ondblClickRow: function (rowId) {
-                            
-                            $("#global_div_dropdown_popup").hide();
-                            var rowObject = $scope.ResultSet[rowId - 1];
-                            if ($scope.uidl.enableAutonomousQuery) {
-                                $scope.$emit($scope.uidl.qualifiedName + ':EditRequested', rowObject);
-                            } else {
-                                $scope.$emit($scope.uidl.qualifiedName + ':EditRequestedByIndex', rowId - 1);
+
+                            if ($scope.uidl.isInlineEditEnabled == undefined)
+                            {
+                                var rowObject = $scope.ResultSet[rowId - 1];
+                                if ($scope.uidl.enableAutonomousQuery) {
+                                    $scope.$emit($scope.uidl.qualifiedName + ':EditRequested', rowObject);
+                                } else {
+                                    $scope.$emit($scope.uidl.qualifiedName + ':EditRequestedByIndex', rowId - 1);
+                                }
                             }
+    
                         },
-                        subGrid: ($scope.uidl.enableDetailPane===true),
-                        subGridOptions: { expandOnLoad: ($scope.uidl.detailPaneExpanded===true) },
-                        subGridRowExpanded: function(subgrid_id, row_id) {
+                        subGrid: ($scope.uidl.enableDetailPane === true),
+                        subGridOptions: { expandOnLoad: ($scope.uidl.detailPaneExpanded === true) },
+                        subGridRowExpanded: function (subgrid_id, row_id) {
                             var rowData = $scope.ResultSet[row_id - 1];
                             var element = $("#" + subgrid_id);
-                            $scope.beginQueryDetailPaneData(rowData).then(function(details) {
+                            $scope.beginQueryDetailPaneData(rowData).then(function (details) {
                                 $scope.compileDetailPane(details, element);
                                 //if (!$scope.uidl.detailPaneExpanded) {
                                 //    $scope.$digest();
                                 //}
                             });
                         },
-                        subGridRowColapsed: function(subgrid_id, row_id) {
-                            return !($scope.uidl.detailPaneExpanded===true);
+                        subGridRowColapsed: function (subgrid_id, row_id) {
+                            return !($scope.uidl.detailPaneExpanded === true);
                         },
                         gridComplete: function () {
                             var grid = $('#' + $scope.tableElementId);
                             if ($scope.uidl.enableDetailPane && $scope.uidl.detailPaneExpanded) {
                                 var rowIds = $('#' + $scope.tableElementId).getDataIDs();
                                 $.each(rowIds, function (index, rowId) {
-                                    grid.expandSubGridRow(rowId); 
+                                    grid.expandSubGridRow(rowId);
                                 });
                             }
                             if ($scope.uidl.enableTotalRow && !$scope.totalsRowDisplayed) {
-                                var totalSpec = { };
+                                var totalSpec = {};
                                 var totalsQueryBuilder = (
-                                    $scope.preparedRequest.query ? 
-                                    $scope.preparedRequest.query.clone() : 
+                                    $scope.preparedRequest.query ?
+                                    $scope.preparedRequest.query.clone() :
                                     new EntityQueryBuilder($scope.uidl.entityName, $scope.preparedRequest.url));
-                                
+
                                 $scope.gridColumns.forEach(function (metaColumn, idx) {
-                                    if (idx===0) {
+                                    if (idx === 0) {
                                         totalSpec[metaColumn.expression] = 'Total:';
                                     } else if (metaColumn.includeInTotal) {
                                         totalSpec[metaColumn.expression] = '...';
@@ -1748,7 +1891,7 @@ HEAD, JS/CSS LINKS
                                     totalsRequestUrl,
                                     $scope.preparedRequest.data
                                 ).then(
-                                    function(response){
+                                    function (response) {
                                         $scope.gridColumns.forEach(function (metaColumn, idx) {
                                             if (metaColumn.includeInTotal) {
                                                 totalSpec[metaColumn.expression] = response.data.ResultSet[0][metaColumn.expression];
@@ -1757,43 +1900,42 @@ HEAD, JS/CSS LINKS
                                         grid.jqGrid("footerData", "set", totalSpec);
                                         $scope.totalsRowDisplayed = true;
                                     },
-                                    function(faultResponse){
+                                    function (faultResponse) {
                                         var faultInfo = $scope.commandService.createFaultInfo(faultResponse);
                                         $scope.$emit($scope.uidl.qualifiedName + ':QueryFailed', faultInfo);
                                     }
                                 );
-                                
+
                                 grid.jqGrid("footerData", "set", totalSpec);
                                 //if ($scope.uidl.totalRowOnTop) {
                                 //    var gview = grid.closest("ui-jqgrid-view"); // get div#gview_list
                                 //    $("div.ui-jqgrid-sdiv",gview[0]).after($("div.ui-jqgrid-bdiv",gview[0]));
                                 //}
                             }
-                            if ($(this).jqGrid('getGridParam', 'reccount') == 0)
-                            {         
-                                $(".jqgfirstrow").css("height","1px");
+                            if ($(this).jqGrid('getGridParam', 'reccount') == 0) {
+                                $(".jqgfirstrow").css("height", "1px");
                             }
                             if ($scope.uidl.rowStylePropertyName) {
                                 $scope.applyDataDrivenRowStyles(0, $scope.ResultSet.length - 1, 0, 1);
-                                setTimeout(function() {
+                                setTimeout(function () {
                                     $scope.applyDataDrivenRowStyles(1, $scope.ResultSet.length - 1, 2);
                                 }, 500);
                             }
                         }
                     };
-                    
+
                     if ($scope.defaultSortColumn) {
                         gridOptions.sortname = $scope.defaultSortColumn.expression;
                         gridOptions.sortorder = ($scope.defaultSortColumn.defaultSortAscending ? 'asc' : 'desc');
                     }
-                    
+
                     if ($scope.uidl.expandableTreeMode) {
                         gridOptions.ExpandColumn = $scope.gridColumns[0].expression;
                         gridOptions.treeGrid = true;
                         gridOptions.treeGridModel = 'adjacency';
                         gridOptions.treeReader = {
                             level_field: '$treeLevel',
-                            parent_id_field: '$treeParentId', 
+                            parent_id_field: '$treeParentId',
                             leaf_field: '$treeLeaf',
                             expanded_field: '$treeExpanded'
                         };
@@ -1808,16 +1950,16 @@ HEAD, JS/CSS LINKS
                                     iconHtml = '<i class="fa fa-fw row-icon ' + iconNameClass + '">&nbsp;</i>';
                                 }
                                 return (
-                                    iconHtml + 
-                                    cellValue + 
+                                    iconHtml +
+                                    cellValue +
                                     '<br/><div class="jqgDetailPane" style="margin-left:' + indentPixels + 'px;"><div class="jqgDetailPaneScroll"></div></div>'
                                 );
                             };
-                            gridOptions.colModel.splice(2, 0, { 
-                                name: '$expand', 
-                                index: '$expand', 
+                            gridOptions.colModel.splice(2, 0, {
+                                name: '$expand',
+                                index: '$expand',
                                 label: '...',
-                                width: 25, 
+                                width: 25,
                                 align: 'center',
                                 resizable: false,
                                 sortable: false,
@@ -1828,7 +1970,7 @@ HEAD, JS/CSS LINKS
                             });
                         }
                     }
-                    
+
                     /*if ($scope.uidl.rowStylePropertyName) {
                         for (var i = 0; i < gridOptions.colModel.length; i++) {
                             var col = gridOptions.colModel[i];
@@ -1840,26 +1982,26 @@ HEAD, JS/CSS LINKS
                                 var formattedValue = (oldFormatter ? oldFormatter(cellValue, options, rowObject) : cellValue);
                                 var rowData = $scope.getDataByRowId(rowObject.$id);
                                 var rowStyle = rowData[$scope.uidl.rowStylePropertyName];
-                                
+
                                 return '<div class="jqg_row_style ' + rowStyle + '">' + formattedValue + '</div>';
                             };
                         }
                     }*/
-                    
+
                     var grid = $('#' + $scope.tableElementId);
                     grid.jqGrid(gridOptions);
                     if ($scope.needSearchToolbar) {
                         grid.jqGrid('filterToolbar', { stringResult: true, searchOnEnter: false, defaultSearch: "cn" });
                     }
                     grid.parents('div.ui-jqgrid-bdiv').css('min-height', ($scope.uidl.mode === 'Standalone' ? '200px' : '100px'));
-                    
+
                     $scope.$on($scope.uidl.qualifiedName + ':PageRefreshRequested', function (event, data) {
                         grid.trigger('reloadGrid');
                     });
 
                     if ($scope.uidl.$skin.deltaWindowHeight && !$scope.resizeHandlerInitialized) {
                         $scope.resizeTimer = null;
-                        $scope.resizeTimerTickHandler = function() {
+                        $scope.resizeTimerTickHandler = function () {
                             var newHeight = $scope.uidl.calculateHeight();
                             if (newHeight) {
                                 $scope.lastCalculatedHeight = newHeight;
@@ -1868,7 +2010,7 @@ HEAD, JS/CSS LINKS
                                 $scope.resizeTimer = setTimeout($scope.resizeTimerTickHandler, 100);
                             }
                         };
-                        $scope.resizeHandler = function() {
+                        $scope.resizeHandler = function () {
                             if (!$('#' + $scope.tableElementId).is(':visible')) {
                                 return;
                             }
@@ -1883,7 +2025,7 @@ HEAD, JS/CSS LINKS
                             $scope.resizeTimer = setTimeout($scope.resizeTimerTickHandler, 100);
                         };
                         $(window).bind('resize', $scope.resizeHandler);
-                        $scope.$on("$destroy", function() {
+                        $scope.$on("$destroy", function () {
                             if ($scope.resizeTimer) {
                                 clearTimeout($scope.resizeTimer);
                             }
@@ -1891,7 +2033,7 @@ HEAD, JS/CSS LINKS
                         });
                         $scope.resizeHandlerInitialized = true;
                     }
-                    
+
                     $scope.$on($scope.uidl.qualifiedName + ':PageRefreshRequested', function (event, data) {
                         grid.trigger('reloadGrid');
                     });
@@ -1909,17 +2051,17 @@ HEAD, JS/CSS LINKS
             var widgetContainerDiv = paneDiv.children('div.jqgDetailPaneScroll');
             target.toggleClass('expanded');
             paneDiv.toggleClass('expanded');
-            
+
             if (target.hasClass('expanded')) {
                 var scopeEl = rowTr.closest('.ng-scope');
                 var scope = scopeEl.scope();
                 var rowId = rowTr[0].id;
                 var rowData = scope.getDataByRowId(rowId);
-                scope.beginQueryDetailPaneData(rowData).then(function(details) {
+                scope.beginQueryDetailPaneData(rowData).then(function (details) {
                     scope.compileDetailPane(details, widgetContainerDiv);
-                    scope.$timeout(function() {
+                    scope.$timeout(function () {
                         var ngInclude = widgetContainerDiv.children('ng-include');
-                        ngInclude.contents().filter(function() { return this.nodeType == 3; /*Node.TEXT_NODE*/ }).remove();
+                        ngInclude.contents().filter(function () { return this.nodeType == 3; /*Node.TEXT_NODE*/ }).remove();
                     });
                 });
             } else {
@@ -1939,10 +2081,10 @@ HEAD, JS/CSS LINKS
             var rowId = rowTr[0].id;
             var rowData = scope.getDataByRowId(rowId);
             var colIndex = rowTd.index();
-            if (scope.uidl.expandableTreeMode===true) {
+            if (scope.uidl.expandableTreeMode === true) {
                 colIndex--;
             }
-            if (scope.uidl.enableDetailPane===true) {
+            if (scope.uidl.enableDetailPane === true) {
                 colIndex--;
             }
             var cellClickInfo = {
@@ -1974,24 +2116,23 @@ HEAD, JS/CSS LINKS
             <tbody>
                 <tr>
                     <td width="50%">
-                        <select style="width: 100%;display:block;" size="10" 
-                            multiple
-                            ng-dblclick="excludeSelected()"
-                            ng-model="selection.exclude" 
-                            ng-options="item as item[parentUidl.lookupDisplayProperty] for item in model track by item['$id']">
+                        <select style="width: 100%;display:block;" size="10"
+                                multiple
+                                ng-dblclick="excludeSelected()"
+                                ng-model="selection.exclude"
+                                ng-options="item as item[parentUidl.lookupDisplayProperty] for item in model track by item['$id']">
                     </td>
                     <td style="padding:3px;">
                         <a ng-click="excludeSelected()"><i class="fa fa-lg fa-chevron-circle-right"></i></a>
-                        <br/>
+                        <br />
                         <a ng-click="includeSelected()"><i class="fa fa-lg fa-chevron-circle-left"></i></a>
                     </td>
                     <td width="50%">
-                        <select style="width: 100%;display:block;" size="10" 
-                            multiple
-                            ng-dblclick="includeSelected()"
-                            ng-model="selection.include" 
-                            ng-options="item as item[parentUidl.lookupDisplayProperty] for item in ResultSet track by item['$id']">
-                        </select>  
+                        <select style="width: 100%;display:block;" size="10"
+                                multiple
+                                ng-dblclick="includeSelected()"
+                                ng-model="selection.include"
+                                ng-options="item as item[parentUidl.lookupDisplayProperty] for item in ResultSet track by item['$id']"></select>
                     </td>
                 </tr>
                 <tr>
@@ -2004,7 +2145,7 @@ HEAD, JS/CSS LINKS
     </script>
     <script type="text/javascript">
         function initWidget_LookupGrid($scope) {
-        
+
             function initAsLookupGrid(data) {
                 $scope.$timeout(function () {
                     $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
@@ -2022,10 +2163,10 @@ HEAD, JS/CSS LINKS
 
                     $scope.gridColumns.forEach(function (metaColumn, idx) {
                         var colWidthPx = (
-                            metaColumn.size==='Jumbo' ? 1040 : (
-                            metaColumn.size==='ExtraLarge' ? 720 : (
-                            metaColumn.size==='Large' ? 360 : (
-                            metaColumn.size==='Small' ? 90 : 180))));
+                            metaColumn.size === 'Jumbo' ? 1040 : (
+                            metaColumn.size === 'ExtraLarge' ? 720 : (
+                            metaColumn.size === 'Large' ? 360 : (
+                            metaColumn.size === 'Small' ? 90 : 180))));
                         columnsModel.push({
                             name: metaColumn.expression,
                             label: $scope.translate(metaColumn.title),
@@ -2040,7 +2181,7 @@ HEAD, JS/CSS LINKS
                     $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
                         datatype: 'local',
                         localReader: {
-                           id: '$id',
+                            id: '$id',
                         },
                         data: data,
                         height: 150,
@@ -2070,9 +2211,9 @@ HEAD, JS/CSS LINKS
                     });
                 });
             }
-            
+
             function initAsDualList(data) {
-                $scope.ResultSet = $scope.ResultSet.filter(function(r) {
+                $scope.ResultSet = $scope.ResultSet.filter(function (r) {
                     var id = r['$id'];
                     var count = $scope.model.length;
                     for (var i = 0; i < count ; i++) {
@@ -2086,45 +2227,43 @@ HEAD, JS/CSS LINKS
                     include: [],
                     exclude: []
                 };
-                
-                $scope.includeAll = function() {
+
+                $scope.includeAll = function () {
                     for (var i = 0 ; i < $scope.ResultSet.length ; i++) {
                         $scope.model.push($scope.ResultSet[i]);
                     }
-                    $scope.ResultSet = [ ];
-                    $scope.selection.include = [ ];
-                    $scope.selection.exclude = [ ];
+                    $scope.ResultSet = [];
+                    $scope.selection.include = [];
+                    $scope.selection.exclude = [];
                 };
-                
-                $scope.excludeAll = function() {
+
+                $scope.excludeAll = function () {
                     for (var i = 0 ; i < $scope.model.length ; i++) {
                         $scope.ResultSet.push($scope.model[i]);
                     }
-                    $scope.model = [ ];
-                    $scope.selection.include = [ ];
-                    $scope.selection.exclude = [ ];
+                    $scope.model = [];
+                    $scope.selection.include = [];
+                    $scope.selection.exclude = [];
                 };
-                
-                $scope.includeSelected = function() {
+
+                $scope.includeSelected = function () {
                     var addedIds = {};
                     var isExists = false;
                     for (var i = 0 ; i < $scope.selection.include.length ; i++) {
                         var item = $scope.selection.include[i];
 
                         angular.forEach($scope.model, function (value) {
-                            if (value.Id == item.Id)
-                            {
+                            if (value.Id == item.Id) {
                                 isExists = true;
                             }
                         });
 
-                        if (isExists == false)
-                        {
+                        if (isExists == false) {
                             $scope.model.push(item);
                             addedIds[item['$id']] = true;
                         }
                     }
-                    for (var i = 0 ; i < $scope.ResultSet.length ; ) {
+                    for (var i = 0 ; i < $scope.ResultSet.length ;) {
                         var item = $scope.ResultSet[i];
                         if (addedIds[item['$id']]) {
                             $scope.ResultSet.splice(i, 1);
@@ -2133,8 +2272,8 @@ HEAD, JS/CSS LINKS
                         }
                     }
                 };
-                
-                $scope.excludeSelected = function() {
+
+                $scope.excludeSelected = function () {
                     var removedIds = {};
                     var isExists = false;
                     for (var i = 0 ; i < $scope.selection.exclude.length ; i++) {
@@ -2150,7 +2289,7 @@ HEAD, JS/CSS LINKS
                             removedIds[item['$id']] = true;
                         }
                     }
-                    for (var i = 0 ; i < $scope.model.length ; ) {
+                    for (var i = 0 ; i < $scope.model.length ;) {
                         var item = $scope.model[i];
                         if (removedIds[item['$id']]) {
                             $scope.model.splice(i, 1);
@@ -2160,7 +2299,7 @@ HEAD, JS/CSS LINKS
                     }
                 };
             }
-            
+
             $scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
                 $scope.ResultSet = data;
                 if ($scope.uidl.templateName === 'LookupGrid') {
@@ -2171,12 +2310,12 @@ HEAD, JS/CSS LINKS
             });
         }
     </script>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL ELLIPSIS LOOKUP - MODAL
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/EllipsisLookupSearchModal">
-        <div class="modal inmodal fade" id="divModal_EllipsisLookupSearchModal" tabindex="-1" role="dialog"  aria-hidden="true">
+        <div class="modal inmodal fade" id="divModal_EllipsisLookupSearchModal" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header" style="padding:15px">
@@ -2190,22 +2329,22 @@ HEAD, JS/CSS LINKS
                         <uidl-widget ng-if="lookupContext" uidl="lookupContext.dataGridUidl"></uidl-widget>
                     </div>
                     <div class="modal-footer">
-                        <button 
-                            type="button"
-                            class="btn btn-w-m btn-success"
-                            ng-disabled="isSelectButtonDisabled()"
-                            ng-click="lookupObjectSelected(selectedLookupObject)"
-                        ><i class="fa fa-check">&nbsp;</i>Select</button>
-                        <button 
-                            type="button"
-                            class="btn btn-w-m btn-warning"
-                            ng-click="clearSelection()"
-                        ><i class="fa fa-times">&nbsp;</i>Clear</button>
-                        <button 
-                            type="button"
-                            class="btn btn-w-m btn-default"
-                            ng-click="hideLookupSearchModal()"
-                        >Cancel</button>
+                        <button type="button"
+                                class="btn btn-w-m btn-success"
+                                ng-disabled="isSelectButtonDisabled()"
+                                ng-click="lookupObjectSelected(selectedLookupObject)">
+                            <i class="fa fa-check">&nbsp;</i>Select
+                        </button>
+                        <button type="button"
+                                class="btn btn-w-m btn-warning"
+                                ng-click="clearSelection()">
+                            <i class="fa fa-times">&nbsp;</i>Clear
+                        </button>
+                        <button type="button"
+                                class="btn btn-w-m btn-default"
+                                ng-click="hideLookupSearchModal()">
+                            Cancel
+                        </button>
                     </div>
                 </div>
             </div>
@@ -2216,31 +2355,31 @@ HEAD, JS/CSS LINKS
             $scope.unbindDataGridObjectSelected = null;
             $scope.selectedLookupObject = null;
 
-            $scope.showLookupSearchModal = function() {
-                $('#divModal_EllipsisLookupSearchModal').modal('show', {backdrop: 'static', keyboard: false});
+            $scope.showLookupSearchModal = function () {
+                $('#divModal_EllipsisLookupSearchModal').modal('show', { backdrop: 'static', keyboard: false });
             };
-            $scope.hideLookupSearchModal = function() {
+            $scope.hideLookupSearchModal = function () {
                 $('#divModal_EllipsisLookupSearchModal').modal('hide');
             };
-            $('#divModal_EllipsisLookupSearchModal').on('hidden.bs.modal', function() {
-                $scope.$timeout(function() {
+            $('#divModal_EllipsisLookupSearchModal').on('hidden.bs.modal', function () {
+                $scope.$timeout(function () {
                     $scope.lookupContext = null;
                 });
             });
-            $scope.isSelectButtonDisabled = function() {
-                return ($scope.selectedLookupObject===null);
+            $scope.isSelectButtonDisabled = function () {
+                return ($scope.selectedLookupObject === null);
             };
- 
-            $scope.$watch('lookupContext', function(newValue, oldValue) {
+
+            $scope.$watch('lookupContext', function (newValue, oldValue) {
                 $scope.selectedLookupObject = null;
-            
+
                 if ($scope.unbindDataGridObjectSelected) {
                     $scope.unbindDataGridObjectSelected();
                     $scope.unbindDataGridObjectSelected = null;
                 }
-                
+
                 if (newValue) {
-                    $scope.unbindDataGridObjectSelected = $scope.$on(newValue.dataGridUidl.qualifiedName + ':ObjectSelected', function(event, data) {
+                    $scope.unbindDataGridObjectSelected = $scope.$on(newValue.dataGridUidl.qualifiedName + ':ObjectSelected', function (event, data) {
                         $scope.selectedLookupObject = data;
                         $scope.$apply();
                     });
@@ -2253,7 +2392,7 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - ENTITY METHOD FORM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/EntityMethodForm">
-        <div class="modal inmodal fade" id="divModal_{{uidl.elementName}}" tabindex="-1" role="dialog"  aria-hidden="true">
+        <div class="modal inmodal fade" id="divModal_{{uidl.elementName}}" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -2267,15 +2406,15 @@ HEAD, JS/CSS LINKS
                         <uidl-widget uidl="uidl.inputForm"></uidl-widget>
                     </div>
                     <div class="modal-footer">
-                        <button 
-                            ng-repeat="command in uidl.commands"
-                            type="button"
-                            class="btn btn-w-m"
-                            style="margin-left:5px;"
-                            ng-disabled="commandInProgress"
-                            ng-click="invokeCommand(command)"
-                            ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
-                        ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                        <button ng-repeat="command in uidl.commands"
+                                type="button"
+                                class="btn btn-w-m"
+                                style="margin-left:5px;"
+                                ng-disabled="commandInProgress"
+                                ng-click="invokeCommand(command)"
+                                ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}">
+                            <i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -2291,7 +2430,7 @@ HEAD, JS/CSS LINKS
             });
         }
     </script>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - TRANSACTION FORM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -2331,26 +2470,26 @@ HEAD, JS/CSS LINKS
             <div ng-hide="model.State.Output">
                 <p ng-if="uidl.helpText">{{::translate(uidl.helpText)}}</p>
                 <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
-            </div>                
+            </div>
             <div ng-if="uidl.outputForm">
                 <div ng-show="model.State.Output">
                     <uidl-widget uidl="uidl.outputForm" parent-model="model.State.Output"></uidl-widget>
                 </div>
-            </div>                
+            </div>
             <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
         </div>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/TransactionFormSignUpStyle">
         <div class="middle-box text-center loginscreen animated fadeInDown" style="width:500px;padding-top:0px;">
             <div style="width:500px;">
-                <div class="ibox-title" style="text-align:center">    
+                <div class="ibox-title" style="text-align:center">
                     <h2>{{::translate(uidl.text)}}</h2>
                     <p ng-if="uidl.helpText" class="pull-right">{{::translate(uidl.helpText)}}</p>
                 </div>
                 <div class="ibox-content">
                     <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
                 </div>
-            </div>                
+            </div>
             <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
         </div>
     </script>
@@ -2362,7 +2501,7 @@ HEAD, JS/CSS LINKS
         </div>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/TransactionFormPopupMode">
-        <div class="modal inmodal fade" id="divModal_{{uidl.elementName}}" tabindex="-1" role="dialog"  aria-hidden="true">
+        <div class="modal inmodal fade" id="divModal_{{uidl.elementName}}" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -2376,26 +2515,26 @@ HEAD, JS/CSS LINKS
                         <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
                     </div>
                     <div class="modal-footer" ng-hide="model.State.Output">
-                        <button 
-                            ng-repeat="command in uidl.commands"
-                            type="button"
-                            class="btn btn-w-m"
-                            style="margin-left:5px;"
-                            ng-disabled="commandInProgress"
-                            ng-click="invokeCommand(command)"
-                            ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
-                        ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                        <button ng-repeat="command in uidl.commands"
+                                type="button"
+                                class="btn btn-w-m"
+                                style="margin-left:5px;"
+                                ng-disabled="commandInProgress"
+                                ng-click="invokeCommand(command)"
+                                ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}">
+                            <i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}
+                        </button>
                     </div>
                     <div class="modal-body" ng-if="uidl.outputForm" ng-show="model.State.Output">
                         <uidl-widget uidl="uidl.outputForm" parent-model="model.State.Output"></uidl-widget>
                     </div>
                     <div class="modal-footer" ng-if="uidl.outputForm" ng-show="model.State.Output">
-                        <button 
-                            type="button"
-                            class="btn btn-w-m btn-success btn-md"
-                            style="margin-left:5px;"
-                            ng-click="hideModal()"
-                        ><i class="fa fa-check">&nbsp;</i>{{::translate('Close')}}</button>
+                        <button type="button"
+                                class="btn btn-w-m btn-success btn-md"
+                                style="margin-left:5px;"
+                                ng-click="hideModal()">
+                            <i class="fa fa-check">&nbsp;</i>{{::translate('Close')}}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -2423,89 +2562,90 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="app/uidl-element-template/Form">
         <form class="form-horizontal" id="{{::uidl.elementName}}">
             <fieldset ng-disabled="commandInProgress">
-            <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
-            <div ng-if="plainFields.length <= 4" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields">
-                <label class="control-label"
-                       ng-class="{'col-lg-2':!uidl.isModalPopup, 'col-lg-4':uidl.isModalPopup}"
-                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(fieldLabelDisplayText(field))}}</label>
-                <div ng-class="{
-                    'col-lg-3':!uidl.isModalPopup && field.fieldType!='Alert' && !fieldHasModifier(field, 'Memo') && !fieldHasModifier(field, 'FlatStyle'), 
-                    'col-lg-6':uidl.isModalPopup || field.fieldType==='Alert' || fieldHasModifier(field, 'Memo') || fieldHasModifier(field, 'FlatStyle')}"
-                >
-                    <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
-                    <!--span class="help-block m-b-none">Example block-level help text here.</span-->
-                </div>
-            </div>
-            <!-- PLAIN FIELDS TWO-COLUMN LAYOUT -->
-            <div ng-if="plainFields.length > 4" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields | twoColumnRows">
-                <label class="col-lg-2 control-label"
-                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(fieldLabelDisplayText(field))}}</label>
-                <div class="col-lg-3">
-                    <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
-                    <!--span class="help-block m-b-none">Example block-level help text here.</span-->
-                </div>
-                <label ng-if="field['$nextCol']"
-                       class="col-lg-2 control-label"
-                       for="{{::uidl.elementName + '_' + field['$nextCol'].propertyName}}">{{::translate(fieldLabelDisplayText(field['$nextCol']))}}</label>
-                <div ng-if="field['$nextCol']" class="col-lg-3">
-                    <uidl-form-field parent-uidl="uidl" uidl="field['$nextCol']" entity="model.Data.entity" />
-                    <!--span class="help-block m-b-none">Example block-level help text here.</span-->
-                </div>
-            </div>
-            <!-- SECTIONS -->
-            <div ng-if="sectionFields.length" class="panel-group"  style="margin-top:20px;">
-                <div class="panel panel-default" ng-repeat="field in sectionFields" ng-controller="formNestedObject">
-                    <div class="panel-heading" ng-init="isExpanded=$first;">
-                        <h5 class="panel-title">
-                            <input type="checkbox" ng-if="isNullable" ng-model="nestedObjectExists" ng-model-options="{ getterSetter: true }" />
-                            <a data-toggle="collapse" 
-                               data-parent="#accordion" 
-                               href="{{::('#' + uidl.elementName + '_section' + $index)}}"
-                               ng-click="isExpanded=!isExpanded">{{::translate(field.label, { upperCase: true })}}</a>
-                        </h5>
+                <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
+                <div ng-if="plainFields.length <= 4" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields">
+                    <label class="control-label"
+                           ng-class="{'col-lg-2':!uidl.isModalPopup, 'col-lg-4':uidl.isModalPopup}"
+                           for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(fieldLabelDisplayText(field))}}</label>
+                    <div ng-class="{
+                    'col-lg-3':!uidl.isModalPopup && field.fieldType!='Alert' && !fieldHasModifier(field, 'Memo') && !fieldHasModifier(field, 'FlatStyle'),
+                    'col-lg-6':uidl.isModalPopup || field.fieldType==='Alert' || fieldHasModifier(field, 'Memo') || fieldHasModifier(field, 'FlatStyle')}">
+                        <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
+                        <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                     </div>
-                    <div id="{{::(uidl.elementName + '_section' + $index)}}" class="panel-collapse collapse" ng-class="{in: $first}">
-                        <div class="panel-body">
-                            <div ng-hide="nestedObjectExists()">
-                                Turned off. Toggle checkbox above to turn on.
+                </div>
+                <!-- PLAIN FIELDS TWO-COLUMN LAYOUT -->
+                <div ng-if="plainFields.length > 4" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields | twoColumnRows">
+                    <label class="col-lg-2 control-label"
+                           for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(fieldLabelDisplayText(field))}}</label>
+                    <div class="col-lg-3">
+                        <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
+                        <!--span class="help-block m-b-none">Example block-level help text here.</span-->
+                    </div>
+                    <label ng-if="field['$nextCol']"
+                           class="col-lg-2 control-label"
+                           for="{{::uidl.elementName + '_' + field['$nextCol'].propertyName}}">{{::translate(fieldLabelDisplayText(field['$nextCol']))}}</label>
+                    <div ng-if="field['$nextCol']" class="col-lg-3">
+                        <uidl-form-field parent-uidl="uidl" uidl="field['$nextCol']" entity="model.Data.entity" />
+                        <!--span class="help-block m-b-none">Example block-level help text here.</span-->
+                    </div>
+                </div>
+                <!-- SECTIONS -->
+                <div ng-if="sectionFields.length" class="panel-group" style="margin-top:20px;">
+                    <div class="panel panel-default" ng-repeat="field in sectionFields" ng-controller="formNestedObject">
+                        <div class="panel-heading" ng-init="isExpanded=$first;">
+                            <h5 class="panel-title">
+                                <input type="checkbox" ng-if="isNullable" ng-model="nestedObjectExists" ng-model-options="{ getterSetter: true }" />
+                                <a data-toggle="collapse"
+                                   data-parent="#accordion"
+                                   href="{{::('#' + uidl.elementName + '_section' + $index)}}"
+                                   ng-click="isExpanded=!isExpanded">{{::translate(field.label, { upperCase: true })}}</a>
+                            </h5>
+                        </div>
+                        <div id="{{::(uidl.elementName + '_section' + $index)}}" class="panel-collapse collapse" ng-class="{in: $first}">
+                            <div class="panel-body">
+                                <div ng-hide="nestedObjectExists()">
+                                    Turned off. Toggle checkbox above to turn on.
+                                </div>
+                                <div ng-show="nestedObjectExists()">
+                                    <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="model.Data.entity"></uidl-widget>
+                                </div>
                             </div>
-                            <div ng-show="nestedObjectExists()">
+                        </div>
+                    </div>
+                </div>
+                <!-- TABS -->
+                <div ng-if="tabSetFields.length && uidl.fields.length > 1" class="tabs-container" style="margin-top:20px;">
+                    <ul class="nav nav-tabs">
+                        <li ng-class="{active: $index == tabSetIndex}" ng-repeat="field in tabSetFields"><a ng-click="selectTab($index)">{{translate(field.label)}}</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div ng-repeat="field in tabSetFields" ng-class="{'tab-pane': true, active: $index == tabSetIndex}" ng-show="$index == tabSetIndex">
+                            <div class="ibox-content nested">
                                 <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="model.Data.entity"></uidl-widget>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- TABS -->
-            <div ng-if="tabSetFields.length && uidl.fields.length > 1" class="tabs-container" style="margin-top:20px;">
-                <ul class="nav nav-tabs">
-                    <li ng-class="{active: $index == tabSetIndex}" ng-repeat="field in tabSetFields"><a ng-click="selectTab($index)">{{translate(field.label)}}</a></li>
-                </ul>
-                <div class="tab-content">
-                    <div ng-repeat="field in tabSetFields" ng-class="{'tab-pane': true, active: $index == tabSetIndex}" ng-show="$index == tabSetIndex">
-                        <div class="ibox-content nested">
-                            <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="model.Data.entity"></uidl-widget>
-                        </div>
+                <!-- TAB FLATTENED (when it is the only field in the form) -->
+                <div ng-if="tabSetFields.length && uidl.fields.length == 1" ng-init="singleTabField=tabSetFields[0]">
+                    {{::translate(singleTabField.label)}}
+                    <uidl-widget ng-if="singleTabField.nestedWidget" uidl="singleTabField.nestedWidget" parent-uidl="singleTabField" parent-model="model.Data.entity"></uidl-widget>
+                </div>
+                <!-- COMMAND BUTTONS -->
+                <div ng-if="uidl.commands.length && !uidl.autoSubmitOnChange" class="form-group">
+                    <div class="col-lg-5 clearfix">
+                        <button ng-repeat="command in uidl.commands | reverse"
+                                type="button"
+                                class="btn btn-rounded btn-lg pull-right"
+                                style="margin-right:5px;"
+                                ng-disabled="commandInProgress"
+                                ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy'}"
+                                ng-click="invokeCommand(command)">
+                            <i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}
+                        </button>
                     </div>
                 </div>
-            </div>
-            <!-- TAB FLATTENED (when it is the only field in the form) -->
-            <div ng-if="tabSetFields.length && uidl.fields.length == 1" ng-init="singleTabField=tabSetFields[0]">
-                {{::translate(singleTabField.label)}}
-                <uidl-widget ng-if="singleTabField.nestedWidget" uidl="singleTabField.nestedWidget" parent-uidl="singleTabField" parent-model="model.Data.entity"></uidl-widget>
-            </div>
-            <!-- COMMAND BUTTONS -->
-            <div ng-if="uidl.commands.length && !uidl.autoSubmitOnChange" class="form-group">
-                <div class="col-lg-5 clearfix">
-                    <button ng-repeat="command in uidl.commands | reverse"
-                            type="button"
-                            class="btn btn-rounded btn-lg pull-right"
-                            style="margin-right:5px;"
-                            ng-disabled="commandInProgress"
-                            ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy'}"
-                            ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
-                </div>
-            </div>
             </fieldset>
         </form>
     </script>
@@ -2526,11 +2666,13 @@ HEAD, JS/CSS LINKS
             <div ng-repeat="command in uidl.commands" class="m-b">
                 <button ng-if="command.uiStyle != 'Link'"
                         class="btn block full-width m-b"
-                        ng-class="{'btn-primary':command.severity!='None', 'btn-white':command.severity=='None'}"                    
+                        ng-class="{'btn-primary':command.severity!='None', 'btn-white':command.severity=='None'}"
                         ng-disabled="commandInProgress"
-                        ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                        ng-click="invokeCommand(command)">
+                    <i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}
+                </button>
                 <a ng-if="command.uiStyle == 'Link'"
-                   ng-disabled="commandInProgress" 
+                   ng-disabled="commandInProgress"
                    ng-click="invokeCommand(command)"
                    class="commandLink"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</a>
             </div>
@@ -2540,7 +2682,7 @@ HEAD, JS/CSS LINKS
         <form class="form-inline" id="{{::uidl.elementName}}" style="margin-bottom:5px;">
             <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
             <div class="form-group" ng-repeat="field in plainFields" style="margin-bottom:0">
-                <label for="{{::uidl.elementName + '_' + field.propertyName}}" 
+                <label for="{{::uidl.elementName + '_' + field.propertyName}}"
                        style="position:relative;margin-right:5px;"
                        ng-class="{'m-l': !$first}"
                        ng-style="{top: (uidl.$skin.zeroPadding ? '3px' : '-5px')}">{{::translate(field.label, { upperCase: true })}}</label>
@@ -2554,7 +2696,9 @@ HEAD, JS/CSS LINKS
                         style="margin-right:5px;"
                         ng-disabled="commandInProgress"
                         ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy'}"
-                        ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                        ng-click="invokeCommand(command)">
+                    <i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}
+                </button>
             </div>
         </form>
     </script>
@@ -2576,7 +2720,9 @@ HEAD, JS/CSS LINKS
                             style="margin-right: 5px;"
                             ng-disabled="commandInProgress"
                             ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy', 'btn-white':command.severity=='None'}"
-                            ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                            ng-click="invokeCommand(command)">
+                        <i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}
+                    </button>
                 </div>
             </div>
         </form>
@@ -2602,7 +2748,9 @@ HEAD, JS/CSS LINKS
                             style="margin-right: 5px;"
                             ng-disabled="commandInProgress"
                             ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy', 'btn-white':command.severity=='None'}"
-                            ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                            ng-click="invokeCommand(command)">
+                        <i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}
+                    </button>
                 </div>
             </div>
         </form>
@@ -2615,11 +2763,13 @@ HEAD, JS/CSS LINKS
             <div ng-repeat="command in uidl.commands" class="m-b">
                 <button ng-if="command.uiStyle != 'Link'"
                         class="btn block full-width m-b"
-                        ng-class="{'btn-primary':command.severity!='None', 'btn-white':command.severity=='None'}"                    
+                        ng-class="{'btn-primary':command.severity!='None', 'btn-white':command.severity=='None'}"
                         ng-disabled="commandInProgress"
-                        ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                        ng-click="invokeCommand(command)">
+                    <i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}
+                </button>
                 <a ng-if="command.uiStyle == 'Link'"
-                   ng-disabled="commandInProgress" 
+                   ng-disabled="commandInProgress"
                    ng-click="invokeCommand(command)"
                    class="commandLink"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</a>
             </div>
@@ -2639,12 +2789,14 @@ HEAD, JS/CSS LINKS
                 <div class="col-sm-4">&nbsp;</div>
                 <div ng-if="command.uiStyle != 'Link'" class="col-sm-8" style="padding:0">
                     <button class="btn block full-width"
-                            ng-class="{'btn-primary':command.severity!='None', 'btn-white':command.severity=='None'}"                    
+                            ng-class="{'btn-primary':command.severity!='None', 'btn-white':command.severity=='None'}"
                             ng-disabled="commandInProgress"
-                            ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                            ng-click="invokeCommand(command)">
+                        <i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}
+                    </button>
                 </div>
                 <div ng-if="command.uiStyle == 'Link'" class="col-sm-8" style="padding:0;text-align:left">
-                    <a ng-disabled="commandInProgress" 
+                    <a ng-disabled="commandInProgress"
                        ng-click="invokeCommand(command)"
                        class="commandLink"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</a>
                 </div>
@@ -2653,20 +2805,20 @@ HEAD, JS/CSS LINKS
     </script>
     <script type="text/javascript">
         function initWidget_Form($scope) {
-            var validationRules = { };
+            var validationRules = {};
             for (var i = 0; i < $scope.plainFields.length ; i++) {
                 var field = $scope.plainFields[i];
                 var fieldElementId = $scope.uidl.elementName + '_' + field.propertyName;
-                var fieldRules = { 
-                    required: field.validation.isRequired===true,
-                    email: field.semantic==='EmailAddress',
+                var fieldRules = {
+                    required: field.validation.isRequired === true,
+                    email: field.semantic === 'EmailAddress',
                     //phoneUS: field.semantic==='PhoneNumber',
-                    url: field.semantic==='Url' || field.semantic==='ImageUrl'
+                    url: field.semantic === 'Url' || field.semantic === 'ImageUrl'
                 };
-                if (field.validation.minLength!==null) {
+                if (field.validation.minLength !== null) {
                     fieldRules.minlength = field.validation.minLength;
                 }
-                if (field.validation.maxLength!==null) {
+                if (field.validation.maxLength !== null) {
                     fieldRules.maxlength = field.validation.maxLength;
                 }
                 validationRules[fieldElementId] = fieldRules;
@@ -2686,12 +2838,11 @@ HEAD, JS/CSS LINKS
                     for (var i = 0; i < $scope.plainFields.length ; i++) {
                         var field = $scope.plainFields[i];
 
-                        if (field.validation.isRequired)
-                        {
+                        if (field.validation.isRequired) {
                             var fieldElementId = $scope.uidl.elementName + '_' + field.propertyName;
                             var fieldElement = document.getElementById(fieldElementId);
-                          
-                            if (field.fieldType.toLowerCase() == "edit") {                              
+
+                            if (field.fieldType.toLowerCase() == "edit") {
                                 if (fieldElement.value.length === 0) {
                                     data.isValid = false;
                                     var lbl = $("<label class='error' for='{labelValidInput}'> ").attr({ for: fieldElement.name }).text('This field is required.');
@@ -2702,9 +2853,9 @@ HEAD, JS/CSS LINKS
                                 else {
                                     $(fieldElement).removeClass("error");
                                     data.isValid = true;
-                                }                               
+                                }
                             }
-                        }                       
+                        }
                     }
                 }
 
@@ -2723,7 +2874,7 @@ HEAD, JS/CSS LINKS
                     form.find('.error').removeClass("error");
                 }
             });
-            $scope.$timeout(function() {
+            $scope.$timeout(function () {
                 $scope.jqueryFormValidator = $('#' + $scope.uidl.elementName).validate({
                     rules: validationRules
                 });
@@ -2737,26 +2888,26 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="app/uidl-element-template/FormField">
         <div ng-style="{display: parentUidl.isInlineStyle ? 'inline' : 'block'}">
             <!-- LABEL -->
-            <input ng-if="uidl.fieldType==='Label' && !hasUidlModifier('Memo') && !hasUidlModifier('FlatStyle')" 
-                   readonly="" 
-                   class="form-control" 
+            <input ng-if="uidl.fieldType==='Label' && !hasUidlModifier('Memo') && !hasUidlModifier('FlatStyle')"
+                   readonly=""
+                   class="form-control"
                    ng-class="{'m-b': !uidl.$skin.zeroPadding}"
-                   type="text" 
-                   ng-model="entity[uidl.propertyName]" 
-                   id="{{::uniqueFieldId}}" 
+                   type="text"
+                   ng-model="entity[uidl.propertyName]"
+                   id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}"
                    uidl-display-format>
-            <span  ng-if="uidl.fieldType==='Label' && !hasUidlModifier('Memo') && hasUidlModifier('FlatStyle')" 
-                   ng-class="{'m-b': !uidl.$skin.zeroPadding}"
-                   id="{{::uniqueFieldId}}" 
-                   ng-show="entity[uidl.propertyName] || !uidl.hiddenIfEmpty"
-                   name="{{::uniqueFieldId}}"><strong><i ng-if="uidl.icon" class="fa fa-{{::uidl.icon}}"></i>&nbsp;{{::entity[uidl.propertyName]}}</strong></span>
+            <span ng-if="uidl.fieldType==='Label' && !hasUidlModifier('Memo') && hasUidlModifier('FlatStyle')"
+                  ng-class="{'m-b': !uidl.$skin.zeroPadding}"
+                  id="{{::uniqueFieldId}}"
+                  ng-show="entity[uidl.propertyName] || !uidl.hiddenIfEmpty"
+                  name="{{::uniqueFieldId}}"><strong><i ng-if="uidl.icon" class="fa fa-{{::uidl.icon}}"></i>&nbsp;{{::entity[uidl.propertyName]}}</strong></span>
             <textarea ng-if="uidl.fieldType==='Label' && hasUidlModifier('Memo')"
-                      readonly="" 
-                      class="form-control" 
+                      readonly=""
+                      class="form-control"
                       ng-class="{'m-b': !uidl.$skin.zeroPadding}"
-                      ng-model="entity[uidl.propertyName]" 
-                      id="{{::uniqueFieldId}}" 
+                      ng-model="entity[uidl.propertyName]"
+                      id="{{::uniqueFieldId}}"
                       name="{{::uniqueFieldId}}"
                       style="width:100%;resize:vertical;font-family: Consolas, Courier New;font-size: 10pt;"
                       ng-style="{height: (hasUidlModifier('MaxSpace') ? '50vh' : '100px')}"></textarea>
@@ -2765,12 +2916,11 @@ HEAD, JS/CSS LINKS
                  ng-show="entity[uidl.propertyName] || uidl.label || !uidl.hiddenIfEmpty"
                  class="alert alert-field-contents clearfix"
                  ng-class="{
-                    'alert-danger': uidl.alertType==='Error', 
+                    'alert-danger': uidl.alertType==='Error',
                     'alert-warning': uidl.alertType==='Warning',
                     'alert-info': uidl.alertType==='Info',
-                    'alert-success': uidl.alertType==='Success'                   
-                 }"
-            >
+                    'alert-success': uidl.alertType==='Success'
+                 }">
                 <i ng-if="uidl.alertType" class="fa alert-field-icon" ng-class="{
                     'fa-info':uidl.alertType==='Info',
                     'fa-check-square':uidl.alertType==='Success',
@@ -2781,14 +2931,14 @@ HEAD, JS/CSS LINKS
             </div>
             <!-- CHECKBOX -->
             <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Checkbox'" class="onoffswitch" ng-class="{'m-b': !uidl.$skin.zeroPadding}">
-                <input type="checkbox" 
-                       class="onoffswitch-checkbox" 
-                       ng-model="entity[uidl.propertyName]" 
+                <input type="checkbox"
+                       class="onoffswitch-checkbox"
+                       ng-model="entity[uidl.propertyName]"
                        ng-disabled="!editAuthorized"
                        id="{{::uniqueFieldId}}"
                        name="{{::uniqueFieldId}}">
-                <label class="onoffswitch-label" 
-                       for="{{::uniqueFieldId}}" 
+                <label class="onoffswitch-label"
+                       for="{{::uniqueFieldId}}"
                        style="margin: 5px 0px 5px 0px;">
                     <span class="onoffswitch-inner" ng-disabled="!editAuthorized"></span>
                     <span class="onoffswitch-switch" ng-disabled="!editAuthorized"></span>
@@ -2804,11 +2954,11 @@ HEAD, JS/CSS LINKS
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}">
             <textarea ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Memo')"
-                      class="form-control fieldTypeEdit" 
+                      class="form-control fieldTypeEdit"
                       ng-readonly="hasUidlModifier('ReadOnly')"
                       ng-class="{'m-b': !uidl.$skin.zeroPadding}"
-                      ng-model="entity[uidl.propertyName]" 
-                      id="{{::uniqueFieldId}}" 
+                      ng-model="entity[uidl.propertyName]"
+                      id="{{::uniqueFieldId}}"
                       name="{{::uniqueFieldId}}"
                       style="width:100%;resize:vertical;font-family: Consolas, Courier New;font-size: 10pt;"
                       ng-style="{height: (hasUidlModifier('MaxSpace') ? '50vh' : '100px')}"></textarea>
@@ -2833,7 +2983,7 @@ HEAD, JS/CSS LINKS
                            ng-disabled="!editAuthorized"
                            id="{{::uniqueFieldId + '__confirm'}}"
                            name="{{::uniqueFieldId + '__confirm'}}">
-                 </div>
+                </div>
             </div>
             <!-- DATE-TIME PICKER -->
             <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='DateTimePicker'"
@@ -2866,26 +3016,26 @@ HEAD, JS/CSS LINKS
                  class="input-group"
                  ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                  ng-disabled="!editAuthorized">
-                 <span ng-show ="entity && entity[uidl.propertyName]" class="input-group-addon">{{entity[uidl.propertyName]}}</span>
-                 <input type="text" 
-                        class="form-control"
-                        ng-init="isNowFocused=false" 
-                        ng-focus="isNowFocused=!hasUidlModifier('ReadOnly')" 
-                        ng-blur="isNowFocused=false"                        
-                        ng-model="displayName"
-                        readonly
-                        id="{{::uniqueFieldId}}"
-                        name="{{::uniqueFieldId}}"> 
-                 <span class="input-group-btn"> 
-                     <button type="button" 
-                             class="btn" 
-                             ng-disabled="hasUidlModifier('ReadOnly') || !editAuthorized"
-                             ng-class="{'btn-primary':isNowFocused, 'btn-white':!isNowFocused}"
-                             ng-click="ellipsisClicked()">
+                <span ng-show="entity && entity[uidl.propertyName]" class="input-group-addon">{{entity[uidl.propertyName]}}</span>
+                <input type="text"
+                       class="form-control"
+                       ng-init="isNowFocused=false"
+                       ng-focus="isNowFocused=!hasUidlModifier('ReadOnly')"
+                       ng-blur="isNowFocused=false"
+                       ng-model="displayName"
+                       readonly
+                       id="{{::uniqueFieldId}}"
+                       name="{{::uniqueFieldId}}">
+                <span class="input-group-btn">
+                    <button type="button"
+                            class="btn"
+                            ng-disabled="hasUidlModifier('ReadOnly') || !editAuthorized"
+                            ng-class="{'btn-primary':isNowFocused, 'btn-white':!isNowFocused}"
+                            ng-click="ellipsisClicked()">
                         <i class="fa fa-search"></i>
-                     </button>
-                 </span>
-            </div>            
+                    </button>
+                </span>
+            </div>
             <!-- DROP DOWN -->
             <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown') && hasUidlModifier('LookupShowSelectAll')"
                     class="form-control"
@@ -2914,39 +3064,38 @@ HEAD, JS/CSS LINKS
                     ng-model="entity[lookupForeignKeyProperty]"
                     ng-disabled="!editAuthorized"
                     id="{{::uniqueFieldId}}"
-                    name="{{::uniqueFieldId}}">
-            </select>
+                    name="{{::uniqueFieldId}}"></select>
             <!-- TYPEAHEAD -->
             <input ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('TypeAhead')"
-                type="text" 
-                ng-model="entity[lookupForeignKeyProperty]" 
-                ng-disabled="!editAuthorized"
-                placeholder="None Selected" 
-                typeahead="item as item for item in loadTypeAhead($viewValue)" 
-                typeahead-input-formatter="formatTypeAheadItem($model)"
-                typeahead-loading="isLoadingTypeAhead" 
-                typeahead-no-results="isTypeAheadResultSetEmpty" 
-                typeahead-on-select="entity[lookupForeignKeyProperty]=$item['$id']"
-                class="form-control"
-                ng-class="{'m-b': !uidl.$skin.zeroPadding}"
-                id="{{::uniqueFieldId}}"
-                name="{{::uniqueFieldId}}">
+                   type="text"
+                   ng-model="entity[lookupForeignKeyProperty]"
+                   ng-disabled="!editAuthorized"
+                   placeholder="None Selected"
+                   typeahead="item as item for item in loadTypeAhead($viewValue)"
+                   typeahead-input-formatter="formatTypeAheadItem($model)"
+                   typeahead-loading="isLoadingTypeAhead"
+                   typeahead-no-results="isTypeAheadResultSetEmpty"
+                   typeahead-on-select="entity[lookupForeignKeyProperty]=$item['$id']"
+                   class="form-control"
+                   ng-class="{'m-b': !uidl.$skin.zeroPadding}"
+                   id="{{::uniqueFieldId}}"
+                   name="{{::uniqueFieldId}}">
             <!-- FILE UPLOAD -->
-            <div ng-if="uidl.fieldType==='FileUpload'" 
+            <div ng-if="uidl.fieldType==='FileUpload'"
                  id="{{::uniqueFieldId}}"
-                 class="dropzone" 
+                 class="dropzone"
                  style="border-radius:2px;border: 2px lightgray dotted;background-color:white;">
-                 <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
+                <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
             </div>
             <div ng-if="uidl.fieldType==='FileUpload'" ng-class="{'m-b': !uidl.$skin.zeroPadding}">
                 <a href="" ng-click="clearDropzone()" ng-disabled="!editAuthorized">Clear</a>
             </div>
             <!-- IMAGE + UPLOAD -->
-            <div ng-if="uidl.fieldType==='ImageUpload'" 
+            <div ng-if="uidl.fieldType==='ImageUpload'"
                  id="{{::uniqueFieldId}}"
-                 class="dropzone" 
+                 class="dropzone"
                  style="border-radius:2px;border: 2px lightgray dotted;background-color:white;">
-                 <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
+                <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
             </div>
             <div ng-if="uidl.fieldType==='ImageUpload'" ng-class="{'m-b': !uidl.$skin.zeroPadding}">
                 <a href="" ng-click="clearDropzone()" ng-disabled="!editAuthorized">Clear</a>
@@ -2995,17 +3144,17 @@ HEAD, JS/CSS LINKS
             </select>
             <!-- TYPEAHEAD -->
             <input ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('TypeAhead')"
-                type="text" 
-                ng-model="entity[lookupForeignKeyProperty]" 
-                placeholder="None Selected" 
-                typeahead="item in loadTypeAhead($viewValue)" 
-                typeahead-input-formatter="formatTypeAheadItem($model)"
-                typeahead-loading="isLoadingTypeAhead" 
-                typeahead-no-results="isTypeAheadResultSetEmpty" 
-                typeahead-on-select="entity[lookupForeignKeyProperty]=$item['$id']"
-                class="form-control m-b"
-                id="{{::uniqueFieldId}}"
-                name="{{::uniqueFieldId}}">
+                   type="text"
+                   ng-model="entity[lookupForeignKeyProperty]"
+                   placeholder="None Selected"
+                   typeahead="item in loadTypeAhead($viewValue)"
+                   typeahead-input-formatter="formatTypeAheadItem($model)"
+                   typeahead-loading="isLoadingTypeAhead"
+                   typeahead-no-results="isTypeAheadResultSetEmpty"
+                   typeahead-on-select="entity[lookupForeignKeyProperty]=$item['$id']"
+                   class="form-control m-b"
+                   id="{{::uniqueFieldId}}"
+                   name="{{::uniqueFieldId}}">
         </div>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/FormFieldSignUpStyle">
@@ -3051,17 +3200,17 @@ HEAD, JS/CSS LINKS
             </select>
             <!-- TYPEAHEAD -->
             <input ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('TypeAhead')"
-                type="text" 
-                ng-model="entity[lookupForeignKeyProperty]" 
-                placeholder="None Selected" 
-                typeahead="item in loadTypeAhead($viewValue)" 
-                typeahead-input-formatter="formatTypeAheadItem($model)"
-                typeahead-loading="isLoadingTypeAhead" 
-                typeahead-no-results="isTypeAheadResultSetEmpty" 
-                typeahead-on-select="entity[lookupForeignKeyProperty]=$item['$id']"
-                class="form-control m-b"
-                id="{{::uniqueFieldId}}"
-                name="{{::uniqueFieldId}}">
+                   type="text"
+                   ng-model="entity[lookupForeignKeyProperty]"
+                   placeholder="None Selected"
+                   typeahead="item in loadTypeAhead($viewValue)"
+                   typeahead-input-formatter="formatTypeAheadItem($model)"
+                   typeahead-loading="isLoadingTypeAhead"
+                   typeahead-no-results="isTypeAheadResultSetEmpty"
+                   typeahead-on-select="entity[lookupForeignKeyProperty]=$item['$id']"
+                   class="form-control m-b"
+                   id="{{::uniqueFieldId}}"
+                   name="{{::uniqueFieldId}}">
         </div>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/FormFieldAlertStyle">
@@ -3071,19 +3220,20 @@ HEAD, JS/CSS LINKS
                  class="row"
                  style="margin:0;padding:30px;"
                  ng-class="{
-                    'alert-danger': uidl.alertType==='Error', 
+                    'alert-danger': uidl.alertType==='Error',
                     'alert-warning': uidl.alertType==='Warning',
                     'alert-info': uidl.alertType==='Info',
-                    'alert-success': uidl.alertType==='Success'                   
-                 }"
-            >
+                    'alert-success': uidl.alertType==='Success'
+                 }">
                 <div class="col-xs-1" style="text-align:right">
-                    <h2><i ng-if="uidl.alertType" class="fa" ng-class="{
+                    <h2>
+                        <i ng-if="uidl.alertType" class="fa" ng-class="{
                         'fa-info':uidl.alertType==='Info',
                         'fa-check-square':uidl.alertType==='Success',
                         'fa-exclamation-triangle':uidl.alertType==='Warning',
                         'fa-times-circle':uidl.alertType==='Error'
-                    }"></i></h2>
+                    }"></i>
+                    </h2>
                 </div>
                 <div class="col-xs-11">
                     <span>{{entity[uidl.propertyName] || translate(uidl.label)}}</span>
@@ -3098,20 +3248,21 @@ HEAD, JS/CSS LINKS
                  style="margin:0;padding:15px 10px 10px 0;max-width:300px;"
                  class="m-b container"
                  ng-class="{
-                    'alert-danger': uidl.alertType==='Error', 
+                    'alert-danger': uidl.alertType==='Error',
                     'alert-warning': uidl.alertType==='Warning',
                     'alert-info': uidl.alertType==='Info',
-                    'alert-success': uidl.alertType==='Success'                   
-                 }"
-            >
+                    'alert-success': uidl.alertType==='Success'
+                 }">
                 <div class="row" style="margin:0;padding:0">
                     <div class="col-md-2" style="margin:0;">
-                        <h3 style="font-weight:normal;"><i ng-if="uidl.alertType" class="fa fa-lg" ng-class="{
+                        <h3 style="font-weight:normal;">
+                            <i ng-if="uidl.alertType" class="fa fa-lg" ng-class="{
                             'fa-info':uidl.alertType==='Info',
                             'fa-check-square':uidl.alertType==='Success',
                             'fa-exclamation-triangle':uidl.alertType==='Warning',
                             'fa-times-circle':uidl.alertType==='Error'
-                        }"></i></h3>
+                        }"></i>
+                        </h3>
                     </div>
                     <div class="col-md-10" style="text-align:left;padding:0;margin:0;">
                         <h3 style="font-weight:normal;">{{entity[uidl.propertyName] || translate(uidl.label)}}</h3>
@@ -3124,8 +3275,8 @@ HEAD, JS/CSS LINKS
         <div>
             <!-- CHECKBOX -->
             <input ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Checkbox'"
-                   type="checkbox" 
-                   ng-model="entity[uidl.propertyName]" 
+                   type="checkbox"
+                   ng-model="entity[uidl.propertyName]"
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}"
                    class="grid-inline-edit-control"
@@ -3160,14 +3311,14 @@ HEAD, JS/CSS LINKS
                     ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
                     ng-model="entity[lookupForeignKeyProperty]"
                     id="{{::uniqueFieldId}}"
-                    name="{{::uniqueFieldId}}">
-            </select>
+                    name="{{::uniqueFieldId}}"></select>
             <!-- LOOKUP MANY -->
             <div ng-if="uidl.fieldType==='LookupMany' && hasUidlModifier('DropDown') && hasUidlModifier('DualList')"
-                    class="grid-inline-edit-control"
-                    id="{{::uniqueFieldId}}"
-                    name="{{::uniqueFieldId}}">
-                    <div class="global-dropdown-toggle"><i class="fa fa-lg fa-caret-down"></i><span ng-if="entity[uidl.propertyName]">{{entity[uidl.propertyName].length || '0'}} items</span>
+                 class="grid-inline-edit-control"
+                 id="{{::uniqueFieldId}}"
+                 name="{{::uniqueFieldId}}">
+                <div class="global-dropdown-toggle">
+                    <i class="fa fa-lg fa-caret-down"></i><span ng-if="entity[uidl.propertyName]">{{entity[uidl.propertyName].length || '0'}} items</span>
                 </div>
                 <div class="global-dropdown-content" style="display:none;margin: 0 auto;width: 35%;margin: 0 auto;">
                     <div class="grid-inline-edit-dropdown-panel">
@@ -3205,47 +3356,47 @@ HEAD, JS/CSS LINKS
                  class="input-group"
                  ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                  ng-disabled="!editAuthorized">
-                 <span ng-show ="entity && entity[uidl.propertyName]" class="input-group-addon">{{entity[uidl.propertyName]}}</span>
-                 <input type="text" 
-                        class="form-control"
-                        ng-init="isNowFocused=false" 
-                        ng-focus="isNowFocused=!hasUidlModifier('ReadOnly')" 
-                        ng-blur="isNowFocused=false"                        
-                        ng-model="displayName"
-                        readonly
-                        id="{{::uniqueFieldId}}"
-                        name="{{::uniqueFieldId}}"> 
-                 <span class="input-group-btn"> 
-                     <button type="button" 
-                             class="btn" 
-                             ng-disabled="hasUidlModifier('ReadOnly') || !editAuthorized"
-                             ng-class="{'btn-primary':isNowFocused, 'btn-white':!isNowFocused}"
-                             ng-click="ellipsisClicked()">
+                <span ng-show="entity && entity[uidl.propertyName]" class="input-group-addon">{{entity[uidl.propertyName]}}</span>
+                <input type="text"
+                       class="form-control"
+                       ng-init="isNowFocused=false"
+                       ng-focus="isNowFocused=!hasUidlModifier('ReadOnly')"
+                       ng-blur="isNowFocused=false"
+                       ng-model="displayName"
+                       readonly
+                       id="{{::uniqueFieldId}}"
+                       name="{{::uniqueFieldId}}">
+                <span class="input-group-btn">
+                    <button type="button"
+                            class="btn"
+                            ng-disabled="hasUidlModifier('ReadOnly') || !editAuthorized"
+                            ng-class="{'btn-primary':isNowFocused, 'btn-white':!isNowFocused}"
+                            ng-click="ellipsisClicked()">
                         <i class="fa fa-search"></i>
-                     </button>
-                 </span>
-            </div>            
+                    </button>
+                </span>
+            </div>
             <!-- TYPEAHEAD -->
             <input ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('TypeAhead')"
-                type="text" 
-                ng-model="entity[lookupForeignKeyProperty]" 
-                ng-disabled="!editAuthorized"
-                placeholder="None Selected" 
-                typeahead="item as item for item in loadTypeAhead($viewValue)" 
-                typeahead-input-formatter="formatTypeAheadItem($model)"
-                typeahead-loading="isLoadingTypeAhead" 
-                typeahead-no-results="isTypeAheadResultSetEmpty" 
-                typeahead-on-select="entity[lookupForeignKeyProperty]=$item['$id']"
-                class="form-control"
-                ng-class="{'m-b': !uidl.$skin.zeroPadding}"
-                id="{{::uniqueFieldId}}"
-                name="{{::uniqueFieldId}}">
+                   type="text"
+                   ng-model="entity[lookupForeignKeyProperty]"
+                   ng-disabled="!editAuthorized"
+                   placeholder="None Selected"
+                   typeahead="item as item for item in loadTypeAhead($viewValue)"
+                   typeahead-input-formatter="formatTypeAheadItem($model)"
+                   typeahead-loading="isLoadingTypeAhead"
+                   typeahead-no-results="isTypeAheadResultSetEmpty"
+                   typeahead-on-select="entity[lookupForeignKeyProperty]=$item['$id']"
+                   class="form-control"
+                   ng-class="{'m-b': !uidl.$skin.zeroPadding}"
+                   id="{{::uniqueFieldId}}"
+                   name="{{::uniqueFieldId}}">
             <!-- FILE UPLOAD -->
-            <div ng-if="uidl.fieldType==='FileUpload'" 
+            <div ng-if="uidl.fieldType==='FileUpload'"
                  id="{{::uniqueFieldId}}"
-                 class="dropzone" 
+                 class="dropzone"
                  style="border-radius:2px;border: 2px lightgray dotted;background-color:white;">
-                 <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
+                <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
             </div>
             <div ng-if="uidl.fieldType==='FileUpload'" ng-class="{'m-b': !uidl.$skin.zeroPadding}">
                 <a href="" ng-click="clearDropzone()" ng-disabled="!editAuthorized">Clear</a>
@@ -3256,41 +3407,41 @@ HEAD, JS/CSS LINKS
                     <img ng-show="entity[uidl.propertyName]" ng-src="{{entity[uidl.propertyName]}}" err-src="app/skin/assets/img/avatar_missing.jpg" class="img-circle circle-border m-b-md" width="128" height="128" alt="profile photo">
                     <img ng-hide="entity[uidl.propertyName]" ng-src="app/skin/assets/img/avatar_missing.jpg" class="img-circle circle-border m-b-md" width="128" height="128" alt="profile photo missing">
                 </div>
-                <div ng-if="uidl.fieldType==='ImageUpload'" 
-                     class="col-sm-5 dropzone m-l" 
+                <div ng-if="uidl.fieldType==='ImageUpload'"
+                     class="col-sm-5 dropzone m-l"
                      id="{{::uniqueFieldId}}"
                      style="border-radius:2px;border: 2px lightgray dotted;background-color:white;">
-                     <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
+                    <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
                 </div>
             </div>
         </div>
     </script>
-    
-    
+
+
     <script type="text/javascript">
 
         /*
         '<div class="editable">' +
         '<div class="global-dropdown-toggle">' +
         '<i class="fa fa-lg fa-caret-down"></i>' +
-        '<span class="dropdown-cell-text">3 item(s)</span>' + 
+        '<span class="dropdown-cell-text">3 item(s)</span>' +
         '</div>' +
         '<div class="global-dropdown-content">' +
         '<uidl-widget uidl="uidl" parent-uidl="parentUidl" parent-model="data"></uidl-widget>' +
         '</div>' +
         '</div>'
         */
-    
+
         function initWidget_FormField($scope) {
-            var dateTimePickerValueChanged = function(e) {
-                if (e.date===false) {
+            var dateTimePickerValueChanged = function (e) {
+                if (e.date === false) {
                     $scope.entity[$scope.uidl.propertyName] = null;
                 } else {
                     $scope.entity[$scope.uidl.propertyName] = e.date.format('YYYY-MM-DD HH:mm:ss');
                 }
             };
             if ($scope.uidl.modifiers === 'DateTimePicker') {
-                $scope.createDateTimePicker = function() {
+                $scope.createDateTimePicker = function () {
                     if ($scope.dateTimePickerCreated) {
                         return;
                     }
@@ -3308,16 +3459,16 @@ HEAD, JS/CSS LINKS
                         allowInputToggle: true
                     }).on('dp.change', dateTimePickerValueChanged);
                 };
-                $scope.updateViewFromModel = function() {
+                $scope.updateViewFromModel = function () {
                     var value = moment($scope.entity[$scope.uidl.propertyName]);
                     var dateTimePicker = $('#' + $scope.uniqueFieldId).data("DateTimePicker");
                     dateTimePicker.date(value);
                 };
-                $scope.$watch('entity', function(newValue, oldValue) {
+                $scope.$watch('entity', function (newValue, oldValue) {
                     if ($scope.entity) {
                         $scope.createDateTimePicker();
                         $scope.updateViewFromModel();
-                        $scope.$watch('entity.' + $scope.uidl.propertyName, function() {
+                        $scope.$watch('entity.' + $scope.uidl.propertyName, function () {
                             $scope.updateViewFromModel();
                         });
                     }
@@ -3327,7 +3478,7 @@ HEAD, JS/CSS LINKS
                 $scope.timeRangePresets = null;
                 $scope.dateTimeRangePickerCreated = false;
                 $scope.displayFormatString = 'YYYY-MM-DD';
-                $scope.createDefaultLocale = function() {
+                $scope.createDefaultLocale = function () {
                     return {
                         "format": "YYYY-MM-DD",
                         "separator": " - ",
@@ -3336,13 +3487,13 @@ HEAD, JS/CSS LINKS
                         "fromLabel": "From",
                         "toLabel": "To",
                         "customRangeLabel": "Custom",
-                        "daysOfWeek": [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"    ],
-                        "monthNames": [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ],
+                        "daysOfWeek": ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+                        "monthNames": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
                         "firstDay": 0
                     }
                 };
                 $scope.$http.get('app/timeRangePresets').then(function (response) {
-                    var presetDictionary = { };
+                    var presetDictionary = {};
                     for (var i = 0; i < response.data.length ; i++) {
                         var preset = response.data[i];
                         if ($.inArray(preset.name, $scope.uidl.standardValues) >= 0) {
@@ -3355,7 +3506,7 @@ HEAD, JS/CSS LINKS
                     }
                     $scope.timeRangePresets = presetDictionary;
                 });
-                $scope.displayDateRange = function(start, end) {
+                $scope.displayDateRange = function (start, end) {
                     var label = $scope.tryFindRangePreset(start, end);
                     if (label) {
                         $('#' + $scope.uniqueFieldId + ' span').html(label);
@@ -3363,10 +3514,10 @@ HEAD, JS/CSS LINKS
                         $('#' + $scope.uniqueFieldId + ' span').html(start.format($scope.displayFormatString) + ' - ' + end.format($scope.displayFormatString));
                     }
                 };
-                $scope.tryFindRangePreset = function(start, end) {
+                $scope.tryFindRangePreset = function (start, end) {
                     var precision = ($scope.shouldHaveTimePart ? 'second' : 'day');
-                    for (var label in $scope.timeRangePresets){
-                        if ($scope.timeRangePresets.hasOwnProperty(label) && label.length > 0){
+                    for (var label in $scope.timeRangePresets) {
+                        if ($scope.timeRangePresets.hasOwnProperty(label) && label.length > 0) {
                             var range = $scope.timeRangePresets[label];
                             if (range[0].isSame(start, precision) && range[1].isSame(end, precision)) {
                                 return label;
@@ -3375,7 +3526,7 @@ HEAD, JS/CSS LINKS
                     }
                     return null;
                 };
-                $scope.updateViewFromModel = function() {
+                $scope.updateViewFromModel = function () {
                     var startValue = moment($scope.entity[$scope.uidl.propertyName]);
                     var endValue = moment($scope.entity[$scope.groupFields[0].propertyName]);
                     $scope.displayDateRange(startValue, endValue);
@@ -3385,7 +3536,7 @@ HEAD, JS/CSS LINKS
                         picker.setEndDate(endValue);
                     }
                 };
-                $scope.createDateTimeRangePicker = function() {
+                $scope.createDateTimeRangePicker = function () {
                     if ($scope.dateTimeRangePickerCreated || !$scope.entity || !$scope.entity[$scope.uidl.propertyName] || !$scope.timeRangePresets) {
                         return;
                     }
@@ -3404,33 +3555,33 @@ HEAD, JS/CSS LINKS
                         rangePickerOptions.timePickerIncrement = 1;
                         rangePickerOptions.locale.format = 'YYYY-MM-DD HH:mm:ss';
                     };
-                    $('#' + $scope.uniqueFieldId).daterangepicker(rangePickerOptions, function(start, end, label) {
+                    $('#' + $scope.uniqueFieldId).daterangepicker(rangePickerOptions, function (start, end, label) {
                         $scope.displayDateRange(start, end);
                         $scope.entity[$scope.uidl.propertyName] = start.format('YYYY-MM-DD HH:mm:ss');
                         $scope.entity[$scope.groupFields[0].propertyName] = end.format('YYYY-MM-DD HH:mm:ss');
                     });
-                    $('#' + $scope.uniqueFieldId).on('apply.daterangepicker', function(ev, picker) {
+                    $('#' + $scope.uniqueFieldId).on('apply.daterangepicker', function (ev, picker) {
                         $scope.$apply();
                     });
                     $scope.dateTimeRangePickerCreated = true;
                 };
-                $scope.$watch('entity', function(newValue, oldValue) {
+                $scope.$watch('entity', function (newValue, oldValue) {
                     if ($scope.entity) {
                         $scope.displayDateRange(moment($scope.entity[$scope.uidl.propertyName]), moment($scope.entity[$scope.groupFields[0].propertyName]));
                         $scope.createDateTimeRangePicker();
-                        $scope.$watch('entity.' + $scope.uidl.propertyName, function() {
+                        $scope.$watch('entity.' + $scope.uidl.propertyName, function () {
                             $scope.updateViewFromModel();
                         });
-                        $scope.$watch('entity.' + $scope.groupFields[0].propertyName, function() {
+                        $scope.$watch('entity.' + $scope.groupFields[0].propertyName, function () {
                             $scope.updateViewFromModel();
                         });
                     }
                 });
-                $scope.$watch('timeRangePresets', function(newValue, oldValue) {
+                $scope.$watch('timeRangePresets', function (newValue, oldValue) {
                     $scope.createDateTimeRangePicker();
                 });
             }
-            if ($scope.uidl.fieldType==='FileUpload' || $scope.uidl.fieldType==='ImageUpload') {
+            if ($scope.uidl.fieldType === 'FileUpload' || $scope.uidl.fieldType === 'ImageUpload') {
                 $scope.dropzone = new Dropzone('#' + $scope.uniqueFieldId, {
                     url: 'app/uploadContent',
                     maxFiles: 1,
@@ -3441,13 +3592,13 @@ HEAD, JS/CSS LINKS
                     addRemoveLinks: true,
                     dictDefaultMessage: 'Drop a file here, or click to choose',
                     dictResponseError: 'Upload failed',
-                    init: function() {
-                        this.on('error', function(file, response) {
+                    init: function () {
+                        this.on('error', function (file, response) {
                             //var errorMessage = response.errorMessage;
                             $(file.previewElement).find('.dz-error-message').text('Upload failed.');
                         });
                     },
-                    accept: function(file, done) {
+                    accept: function (file, done) {
                         done();
                         //if (file.type==='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
                         //    done();
@@ -3456,10 +3607,10 @@ HEAD, JS/CSS LINKS
                         //}
                     },
                 });
-                $scope.clearDropzone = function() {
+                $scope.clearDropzone = function () {
                     $scope.dropzone.removeAllFiles(true);
                 };
-                $scope.$watch('entity[uidl.propertyName]', function(newValue, oldValue) {
+                $scope.$watch('entity[uidl.propertyName]', function (newValue, oldValue) {
                     $scope.clearDropzone();
                 });
             }
@@ -3489,21 +3640,21 @@ HEAD, JS/CSS LINKS
         <a class="list-group-item">
             <h3 class="list-group-item-heading">{{::translate(uidl.text)}}</h3>
             <p class="list-group-item-text">{{::translate(uidl.description)}}</p>
-            <button 
-                ng-repeat="command in uidl.commands"
-                type="button"
-                class="btn"
-                ng-click="performTask(command);"
-                ng-class="{
+            <button ng-repeat="command in uidl.commands"
+                    type="button"
+                    class="btn"
+                    ng-click="performTask(command);"
+                    ng-class="{
                     'btn-success':command.severity=='Read',
                     'btn-primary':command.severity=='Change',
                     'btn-warning':command.severity=='Loose',
                     'btn-danger':command.severity=='Destroy'
-                }"
-            ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                }">
+                <i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}
+            </button>
         </a>
     </script>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - CHAT
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -3514,7 +3665,7 @@ HEAD, JS/CSS LINKS
         <textarea></textarea>
         <button>Send</button>
     </script>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - CHART
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -3526,38 +3677,39 @@ HEAD, JS/CSS LINKS
                 </h2>
                 <div class="ibox-tools">
                     <div class="btn-group" ng-repeat="command in uidl.commands" ng-if="command.nodeType==='CommandGroup'">
-                        <button 
-                            ng-repeat="item in command.items" 
-                            ng-click="invokeCommand(command, item)" 
-                            ng-class="{'btn-primary':item.isChecked===true, 'btn-white':item.isChecked!==true}"
-                            class="btn" 
-                            type="button">{{::translate(item.text)}}</button>
-                    </div>                
+                        <button ng-repeat="item in command.items"
+                                ng-click="invokeCommand(command, item)"
+                                ng-class="{'btn-primary':item.isChecked===true, 'btn-white':item.isChecked!==true}"
+                                class="btn"
+                                type="button">
+                            {{::translate(item.text)}}
+                        </button>
+                    </div>
                     <a class="collapse-link">
                         <i class="fa fa-chevron-up"></i>
                     </a>
-                </div>                
+                </div>
             </div>
             <div class="ibox-content ui-widget-content" id="{{::uidl.elementName}}_container">
-                <div id="{{::uidl.elementName}}" 
-                     class="flot-chart-content" 
+                <div id="{{::uidl.elementName}}"
+                     class="flot-chart-content"
                      style="padding:0px; position:relative;"
                      ng-style="{ height: calculateHeight(100) }"></div>
                 <!--div class="m-t-md">
-            <small class="pull-right">
-                <i class="fa fa-clock-o"> </i>
-                Update on 16.07.2015
-            </small>
-            <small>
-                <strong>Analysis of sales:</strong> The value has been changed over time, and last month reached a level over $50,000.
-            </small>
-        </div-->
+                    <small class="pull-right">
+                        <i class="fa fa-clock-o"> </i>
+                        Update on 16.07.2015
+                    </small>
+                    <small>
+                        <strong>Analysis of sales:</strong> The value has been changed over time, and last month reached a level over $50,000.
+                    </small>
+                </div-->
             </div>
         </div>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/ChartInline">
-        <div id="{{::uidl.elementName}}" 
-             class="flot-chart-content" 
+        <div id="{{::uidl.elementName}}"
+             class="flot-chart-content"
              style="padding:0px; position:relative;"
              ng-style="{ height: calculateHeight(80) }"></div>
     </script>
@@ -3565,27 +3717,27 @@ HEAD, JS/CSS LINKS
         function initWidget_Chart($scope) {
             //                    Green        Blue       Red        brown     yellow    Pink       Dark Green  Purpel    Very dark   light blue
             var seriesPalette = ["#00ff00", "#6666ff", "#ff0000", "#ff9900", "#e6e600", "#ff66ff", "#00b3150", "#9966ff", "#336600", "#66ffff"];
-            
+
             switch ($scope.uidl.palette) {
-                case 'LogLevelSeries': 
+                case 'LogLevelSeries':
                     seriesPalette = ["#990000", "#ff0000", "#ff9900", "#009933", "#666699", "#c2c2d6"];
                     break;
-                case 'PassFailSeries': 
+                case 'PassFailSeries':
                     seriesPalette = ["#009933", "#ff0000"];
                     break;
             }
-           
+
             if ($scope.parentModel) {
                 $scope.model.State.data = $scope.parentModel;
             }
 
-            $scope.$timeout(function() {
+            $scope.$timeout(function () {
                 if ($scope.model.State.data) {
                     buildChart('#' + $scope.uidl.elementName, $scope.model.State.data);
                     //$('#' + $scope.uidl.elementName).plot(buildChartSeries(/*demoServerData*/$scope.model.State.data), options);
                 }
                 else {
-                    $scope.$watch('model.State.data', function(newValue, oldValue) {
+                    $scope.$watch('model.State.data', function (newValue, oldValue) {
                         if (newValue) {
                             buildChart('#' + $scope.uidl.elementName, newValue);
                             //$('#' + $scope.uidl.elementName).plot(buildChartSeries(/*demoServerData*/$scope.model.State.data), options);
@@ -3598,26 +3750,26 @@ HEAD, JS/CSS LINKS
                 $(elementId).unbind();
                 $(elementId).empty();
 
-                if(serverData.Series[0].Mode==='Time') {
+                if (serverData.Series[0].Mode === 'Time') {
                     buildTimeChart(elementId, serverData);
                 } else {
                     buildCategoryChart(elementId, serverData);
                 }
             }
-            
+
             function buildCategoryChart(elementId, serverData) {
                 for (var li = 0 ; li < serverData.Labels.length ; li++) {
                     serverData.Labels[li] = (serverData.Labels[li] || '').replace(/(?:\r\n|\r|\n)/g, '<br />');
                 }
-                
+
                 var options = buildCategoryOptions(serverData);
                 var series = buildCategorySeries(serverData);
-                
+
                 $(elementId).plot(series, options);
             }
             function buildCategorySeries(serverData) {
                 var chartSeries = [];
-                
+
                 for (var si = 0; si < serverData.Series.length; si++) {
                     var series = {
                         label: (serverData.Series[si].Label || '').replace(/(?:\r\n|\r|\n)/g, '<br />'),
@@ -3628,7 +3780,7 @@ HEAD, JS/CSS LINKS
                     }
                     chartSeries.push(series);
                 }
-                
+
                 return chartSeries;
             }
             function buildCategoryOptions(serverData) {
@@ -3651,7 +3803,7 @@ HEAD, JS/CSS LINKS
                     xaxis: {
                         mode: "categories",
                         tickDecimals: 0,
-                        ticks: [], 
+                        ticks: [],
                     },
                     yaxis: {
                         min: 0,
@@ -3663,16 +3815,16 @@ HEAD, JS/CSS LINKS
                         hoverable: true,
                         clickable: true,
                         tickColor: "#D4D4D4",
-                        borderWidth:0
+                        borderWidth: 0
                     },
                     legend: {
                         show: true
                     },
                     tooltip: true,
                     tooltipOpts: {
-                        content: function(label, xval, yval, flotItem) {
+                        content: function (label, xval, yval, flotItem) {
                             var tickLabel = flotItem.series.xaxis.ticks[xval].label.replace(/<br\s*[\/]?>/gi, ' ');
-                            var tooltipHtml = 
+                            var tooltipHtml =
                                 '<span style="color:blue">' + (label && label.length > 0 ? label + ', ' : '') + tickLabel + '</span>: ' +
                                 '<strong><span style="color:green;font-size:1.1em">' + yval + '</span></strong>';
                             return tooltipHtml;
@@ -3702,7 +3854,7 @@ HEAD, JS/CSS LINKS
                     $scope.$emit($scope.uidl.qualifiedName + ':RangeSelected', selectionData);
                 });
                 $(elementId).bind("plotclick", function (event, pos, item) {
-                    if (item) { 
+                    if (item) {
                         var serverSeries = serverData.Series[item.seriesIndex];
                         var t0 = serverSeries.Points[item.dataIndex * 2];
                         var t1 = t0 + serverSeries.MillisecondStepSize;
@@ -3714,13 +3866,13 @@ HEAD, JS/CSS LINKS
                         $scope.$emit($scope.uidl.qualifiedName + ':RangeSelected', selectionData);
                     }
                 });
-                $scope.$on("$destroy", function() {
+                $scope.$on("$destroy", function () {
                     $(elementId).unbind();
                 });
             }
             function buildTimeSeries(serverData) {
                 var chartSeries = [];
-                
+
                 for (var si = 0; si < serverData.Series.length; si++) {
                     var series = {
                         label: serverData.Series[si].Label,
@@ -3729,11 +3881,11 @@ HEAD, JS/CSS LINKS
                     setupSeriesType(serverData.Series[si], series);
                     var pointArray = serverData.Series[si].Points;
                     for (var xi = 0; xi < pointArray.length - 1 ; xi += 2) {
-                        series.data.push([pointArray[xi], pointArray[xi+1]]);
+                        series.data.push([pointArray[xi], pointArray[xi + 1]]);
                     }
                     chartSeries.push(series);
                 }
-                
+
                 return chartSeries;
             }
             function getTimeTickFormatString(millisecondStepSize) {
@@ -3757,7 +3909,7 @@ HEAD, JS/CSS LINKS
                         lines: {
                             show: true,
                             lineWidth: 1,
-                            fill: serverData.Series[0].Type==='Area',
+                            fill: serverData.Series[0].Type === 'Area',
                             fillColor: {
                                 colors: [{
                                     opacity: 0.1
@@ -3778,28 +3930,28 @@ HEAD, JS/CSS LINKS
                         hoverable: true,
                         clickable: true,
                         tickColor: "#D4D4D4",
-                        borderWidth:0
+                        borderWidth: 0
                     },
                     legend: {
                         show: true,
                         position: "nw"
-                    //    labelFormatter: function(label, series){
-                    //        return '<a class="chart-series-toggle" href="#" data-series-index="'+series.idx+'">AAA:'+label+'</a>';
-                    //    }
+                        //    labelFormatter: function(label, series){
+                        //        return '<a class="chart-series-toggle" href="#" data-series-index="'+series.idx+'">AAA:'+label+'</a>';
+                        //    }
                     },
                     tooltip: {
                         show: true,
                         xDateFormat: "HH:mm:ss.SSS"
                     },
                     tooltipOpts: {
-                        content: function(label, xval, yval, flotItem) {
+                        content: function (label, xval, yval, flotItem) {
                             var series = serverData.Series[flotItem.seriesIndex];
-                            if (series && (series.Type==='Bar' || series.Type==='StackedBar')) {
+                            if (series && (series.Type === 'Bar' || series.Type === 'StackedBar')) {
                                 var formatString = getTimeTickFormatString(series.MillisecondStepSize);
                                 var t0 = moment.utc(xval).format(formatString);
                                 var t1 = moment.utc(xval + series.MillisecondStepSize).format(formatString);
                                 var v1 = $scope.uidlService.formatValue('#,##0', Math.abs(yval));
-                                return t0 + ' - ' + t1 + '<br/><strong><span style="color:' + flotItem.series.color +'">' + v1 + ' ' + label + '</span></strong>';
+                                return t0 + ' - ' + t1 + '<br/><strong><span style="color:' + flotItem.series.color + '">' + v1 + ' ' + label + '</span></strong>';
                             }
                             return '<strong>' + label + '</strong>: <span style="color:blue">' + moment.utc(xval).format('HH:mm:ss.SSS') + '</span>, <span style="color:green">' + parseFloat(yval).formatMoney(5, '.', ',') + '</span>';
                         }
@@ -3815,9 +3967,9 @@ HEAD, JS/CSS LINKS
             }
             function setupSeriesType(serverObj, clientObj) {
                 switch (serverObj.Type) {
-                    case 'StackedBar': 
+                    case 'StackedBar':
                         clientObj.stack = true;
-                    case 'Bar': 
+                    case 'Bar':
                         clientObj.bars = { show: true, align: 'left', fill: 0.6, lineWidth: 0 };
                         clientObj.lines = { show: false, lineWidth: 0 };
                         if (serverObj.MillisecondStepSize && serverObj.MillisecondStepSize > 0) {
@@ -3830,8 +3982,8 @@ HEAD, JS/CSS LINKS
                 var ticksArray = buildLog10TicksArray(serverData);//[[-10000, "10,000"],[-1000, "1,000"],[-100, "100"],[0, "0"],[100, "100"],[1000, "1,000"],[10000, "10,000"]];
                 //buildLog10TicksArray(serverData);
                 options.yaxis = {
-                    ticks: ticksArray, 
-                    transform: function(v) {
+                    ticks: ticksArray,
+                    transform: function (v) {
                         var absv = Math.abs(v);
                         var sign = (v < 0 ? -1 : 1);
                         if (absv < 1) {
@@ -3841,8 +3993,8 @@ HEAD, JS/CSS LINKS
                             return 0.2 * sign;
                         }
                         return Math.log10(absv) * sign;
-                    }, 
-                    inverseTransform: function (v) { 
+                    },
+                    inverseTransform: function (v) {
                         var absv = Math.abs(v);
                         var sign = (v < 0 ? -1 : 1);
                         if (absv < 0.2) {
@@ -3851,7 +4003,7 @@ HEAD, JS/CSS LINKS
                         if (absv < 0.3) {
                             return 1 * sign;
                         }
-                        return Math.pow(10, absv) * sign; 
+                        return Math.pow(10, absv) * sign;
                     },
                     tickDecimals: 0,
                     //transform: function (v) { return Math.log(v); },
@@ -3893,7 +4045,7 @@ HEAD, JS/CSS LINKS
                 if (minValue < 0) {
                     for (var i = negativeTicks.length - 1; i >= 0; i--) {
                         allTicks.push([
-                            negativeTicks[i], 
+                            negativeTicks[i],
                             $scope.uidlService.formatValue('#,##0', Math.abs(negativeTicks[i]))
                         ]);
                     }
@@ -3902,7 +4054,7 @@ HEAD, JS/CSS LINKS
                 if (maxValue > 0) {
                     for (var i = 0; i < positiveTicks.length; i++) {
                         allTicks.push([
-                            positiveTicks[i], 
+                            positiveTicks[i],
                             $scope.uidlService.formatValue('#,##0', positiveTicks[i])
                         ]);
                     }
@@ -3916,7 +4068,7 @@ HEAD, JS/CSS LINKS
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - POINT CHART
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <script type="text/ng-template" id="app/uidl-element-template/PointChart">   
+    <script type="text/ng-template" id="app/uidl-element-template/PointChart">
         <table ng-if="model.State.data" border="1" style="margin-top: 10px; background: white" cellpadding="3" cellspacing="1">
             <tr>
                 <td>&nbsp;</td>
@@ -3945,7 +4097,7 @@ HEAD, JS/CSS LINKS
         </form>
         <uidl-widget ng-repeat="selection in uidl.selections" ng-if="selectedType.name==selection.typeName" uidl="selection.widget" parent-model="model.entity"></uidl-widget>
     </script>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - TYPE SELECTOR WITH TABS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -3962,8 +4114,8 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
         </div>
-    </script>   
-    
+    </script>
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - TYPE SELECTOR WITH ACCORDION
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -3988,8 +4140,8 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
         </div>
-    </script>   
-    
+    </script>
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - TABBED SCREEN PART SET
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -3997,20 +4149,19 @@ HEAD, JS/CSS LINKS
         <div id="{{::uidl.elementName}}" class="full-height" style="padding:0">
             <div class="tabs-container full-height" style="padding:5px 0 0 0;">
                 <ul class="nav nav-tabs" style="padding:0 0 0 5px;">
-                    <li ng-class="{active: selectedTabIndex===$index}" 
-                        ng-repeat="tab in uidl.tabs"
-                        ><a ng-click="selectTabByIndex($index)">{{translate(tab.text)}}</a></li>
+                    <li ng-class="{active: selectedTabIndex===$index}"
+                        ng-repeat="tab in uidl.tabs"><a ng-click="selectTabByIndex($index)">{{translate(tab.text)}}</a></li>
                 </ul>
                 <div class="tab-content" style="position:absolute;top:37px;left:0;right:0;bottom:0;">
-                    <div ng-repeat="tab in uidl.tabs" ng-class="{active: selectedTabIndex===$index}" 
-                         class="tab-pane" 
+                    <div ng-repeat="tab in uidl.tabs" ng-class="{active: selectedTabIndex===$index}"
+                         class="tab-pane"
                          style="margin:0;padding:15px 0 0 0;position:absolute;top:0;left:0;right:0;bottom:0;background-color:white;">
-                         <uidl-screen-part uidl="tab"></uidl-screen-part>
+                        <uidl-screen-part uidl="tab"></uidl-screen-part>
                     </div>
                 </div>
             </div>
         </div>
-    </script>   
+    </script>
     <script type="text/javascript">
         function initWidget_TabbedScreenPartSet($scope) {
             var tabSkinData = { deltaWindowHeight: 80, zeroPadding: true };
@@ -4018,7 +4169,7 @@ HEAD, JS/CSS LINKS
                 $scope.uidl.tabs[i].$skin = tabSkinData;
             }
         }
-        /*         
+        /*
                  function resizeToWindow(elem) {
                         var h = $(window).height() - 30;
                         elem.css({ height: h + 'px' });
@@ -4031,9 +4182,9 @@ HEAD, JS/CSS LINKS
                         });
                     });
                 }
-        */        
+        */
     </script>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - FILTER FORM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -4051,7 +4202,7 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
         </div>
-    </script>   
+    </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - REPORT
@@ -4115,7 +4266,7 @@ HEAD, JS/CSS LINKS
             </div>
         </div>
     </script>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - GRID FIELD
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -4125,9 +4276,9 @@ HEAD, JS/CSS LINKS
             <a ng-if="property.kind==='Relation'">Go to</a>
         </div>
     </script>
-        
+
     <!------ HARD CODED  -------->
-    
+
     <script type="text/ng-template" id="app/uidl-element-template/AffiliateSignUpForm">
         <div class="middle-box text-center loginscreen   animated fadeInDown">
             <div>
@@ -4138,13 +4289,13 @@ HEAD, JS/CSS LINKS
                 <p>Apply for an affiliate account.</p>
                 <form class="m-t" role="form">
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.Data.FullName" >
+                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.Data.FullName">
                     </div>
                     <div class="form-group">
-                        <input type="email" class="form-control" placeholder="Email" required="" ng-model="model.Data.EmailAddress" >
+                        <input type="email" class="form-control" placeholder="Email" required="" ng-model="model.Data.EmailAddress">
                     </div>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Phone Number" required="" ng-model="model.Data.PhoneNumber" >
+                        <input type="text" class="form-control" placeholder="Phone Number" required="" ng-model="model.Data.PhoneNumber">
                     </div>
                     <!--div class="form-group">
                             <div class="checkbox i-checks"><label> <input type="checkbox"><i></i> Agree the terms and policy </label></div>
@@ -4157,7 +4308,7 @@ HEAD, JS/CSS LINKS
             </div>
         </div>
     </script>
-    
+
     <!-- Javascript frameworks -->
     <script src="app/skin/assets/js/jquery-2.1.1.js"></script>
     <script src="app/skin/assets/js/jquery-ui-1.10.4.min.js"></script>
@@ -4236,7 +4387,6 @@ HEAD, JS/CSS LINKS
     <!--script src="app/skin/assets/js/plugins/chartJs/Chart.min.js"></script-->
     <script src="app/skin/assets/js/plugins/ui-bootstrap-tpls-0.14.3.min.js"></script>
     <!--script src="app/skin/assets/js/plugins/jquery-ui/jquery-ui.min.js"></script-->
-
     <!-- Flot -->
     <script src="app/skin/assets/js/plugins/flot/jquery.flot.min.js"></script>
     <script src="app/skin/assets/js/plugins/flot/jquery.flot.tooltip.min.js"></script>
@@ -4259,16 +4409,16 @@ HEAD, JS/CSS LINKS
     <script src="app/skin/assets/app/chartjs/chart.js"></script>
 
     <script src="app/Application.js"></script>
-    
+
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             toastr.options = {
                 closeButton: true,
                 progressBar: true,
                 showMethod: 'slideDown',
                 timeOut: 4000
             };
-            
+
             var isDivGlobalDropdownVisible = false;
             var divGlobalDropdownPopup = $('#global_div_dropdown_popup');
             var divGlobalDropdownContent = null;
@@ -4282,17 +4432,17 @@ HEAD, JS/CSS LINKS
                     var toggleOffset = toggleQ.offset();
                     var toggleHeight = toggleQ.height();
                     var toggleWidth = toggleQ.width();
-                    
-                    divGlobalDropdownEventFocus = toggleQ; 
+
+                    divGlobalDropdownEventFocus = toggleQ;
                     divGlobalDropdownContent = toggleQ.next();
                     divGlobalDropdownContentParent = divGlobalDropdownContent.parent();
                     divGlobalDropdownContent.appendTo(divGlobalDropdownPopup);
-                    divGlobalDropdownContent.css({display:'block'});
+                    divGlobalDropdownContent.css({ display: 'block' });
                     divGlobalDropdownPopup.css({
-                        top: '1px', 
-                        left: '10%', 
-                        width: '100%', 
-                        height: '100%', 
+                        top: '1px',
+                        left: '10%',
+                        width: '100%',
+                        height: '100%',
                         display: 'block'
                     });
                     isDivGlobalDropdownVisible = true;
@@ -4300,15 +4450,15 @@ HEAD, JS/CSS LINKS
                     $('body').on('click', hideGlobalDropdownContent);
                 }
             }
-            
+
             function hideGlobalDropdownContent(event) {
                 if ($(event.target).parents('#global_div_dropdown_popup').length > 0) {
                     return;
                 }
-                
+
                 if (isDivGlobalDropdownVisible) {
-                    divGlobalDropdownPopup.css({display:'none'});
-                    divGlobalDropdownContent.css({display:'none'});
+                    divGlobalDropdownPopup.css({ display: 'none' });
+                    divGlobalDropdownContent.css({ display: 'none' });
                     divGlobalDropdownContent.appendTo(divGlobalDropdownContentParent);
                     isDivGlobalDropdownVisible = false;
                     event.stopPropagation();
@@ -4320,10 +4470,10 @@ HEAD, JS/CSS LINKS
 
             $('body').on('click', '.global-dropdown-toggle', showGlobalDropdownContent);
         });
-        
-        angular.module('theApp').run(['$rootScope', 'uidlService', 
-        function($rootScope, uidlService) {
-            $rootScope.showPopupAlert = function(alertHandle) {
+
+        angular.module('theApp').run(['$rootScope', 'uidlService',
+        function ($rootScope, uidlService) {
+            $rootScope.showPopupAlert = function (alertHandle) {
                 switch (alertHandle.uidl.type) {
                     case 'Info':
                         toastr.info(uidlService.translate(alertHandle.uidl.text));
@@ -4336,13 +4486,13 @@ HEAD, JS/CSS LINKS
                         break;
                     case 'Error':
                         toastr.error(
-                            '<a data-toggle="modal" data-target="#divModalTechnicalInfo"><i class="fa fa-xs fa-angle-double-right"></i>&nbsp;technical info</a>', 
+                            '<a data-toggle="modal" data-target="#divModalTechnicalInfo"><i class="fa fa-xs fa-angle-double-right"></i>&nbsp;technical info</a>',
                             uidlService.translate(alertHandle.uidl.text),
                             { timeOut: 5000 });
                         break;
                 }
             };
-            $rootScope.showModalAlert = function(alertHandle) {
+            $rootScope.showModalAlert = function (alertHandle) {
                 switch (alertHandle.uidl.type) {
                     case 'Info':
                         toastr.info(uidlService.translate(alertHandle.uidl.text));
@@ -4355,16 +4505,16 @@ HEAD, JS/CSS LINKS
                         break;
                     case 'Error':
                         toastr.error(
-                            '<a data-toggle="modal" data-target="#divModalTechnicalInfo"><i class="fa fa-xs fa-angle-double-right"></i>&nbsp;technical info</a>', 
+                            '<a data-toggle="modal" data-target="#divModalTechnicalInfo"><i class="fa fa-xs fa-angle-double-right"></i>&nbsp;technical info</a>',
                             uidlService.translate(alertHandle.uidl.text),
                             { timeOut: 5000 });
                         break;
                 }
             };
-            $rootScope.beginBrowserDownload = function(url) {
+            $rootScope.beginBrowserDownload = function (url) {
                 document.getElementById('global_iframe_content_download').src = url;
             };
-            $rootScope.$watch('uidl', function(newValue, oldValue) {
+            $rootScope.$watch('uidl', function (newValue, oldValue) {
                 if ($rootScope.uidl && !$rootScope.pageCodeSnippetsInserted) {
                     if ($rootScope.uidl.headerNativeSnippet) {
                         var snippetDom = $($rootScope.uidl.headerNativeSnippet);
@@ -4373,7 +4523,7 @@ HEAD, JS/CSS LINKS
                     if ($rootScope.uidl.nativeTriggeredSnippets) {
                         for (var i = 0 ; i < $rootScope.uidl.nativeTriggeredSnippets.length ; i++) {
                             var triggeredSnippet = $rootScope.uidl.nativeTriggeredSnippets[i];
-                            $rootScope.$on(triggeredSnippet.trigger, function(event, data) {
+                            $rootScope.$on(triggeredSnippet.trigger, function (event, data) {
                                 eval(triggeredSnippet.snippet);
                             });
                         }
@@ -4386,8 +4536,8 @@ HEAD, JS/CSS LINKS
         angular.module('theApp').directive('jsonView', ['$timeout', function ($timeout) {
             return {
                 link: function ($scope, elem, attrs, ctrl) {
-                    $scope.$timeout(function() {
-                        var options = { 
+                    $scope.$timeout(function () {
+                        var options = {
                             collapsed: !$scope.uidl.expandedByDefault,
                             nl2br: true
                         };
@@ -4402,8 +4552,8 @@ HEAD, JS/CSS LINKS
             var sheets = typeof sheet !== 'undefined' ? [sheet] : document.styleSheets;
             for (var i = 0, l = sheets.length; i < l; i++) {
                 var sheet = sheets[i];
-                if (!sheet.cssRules) { 
-                    continue; 
+                if (!sheet.cssRules) {
+                    continue;
                 }
                 for (var j = 0, k = sheet.cssRules.length; j < k; j++) {
                     var rule = sheet.cssRules[j];
@@ -4415,7 +4565,7 @@ HEAD, JS/CSS LINKS
             return null;
         }
 
-        
+
         /*
         function initWidget_Screen($scope) {
             if ($scope.uidl.nativeSnippetBefore) {
@@ -4425,15 +4575,15 @@ HEAD, JS/CSS LINKS
                     if ($scope.domNativeSnippetBefore) {
                         $scope.domNativeSnippetBefore.remove();
                     }
-                });            
+                });
             }
         }
         function initWidget_ScreenPart($scope) {
             alert('initWidget_ScreenPart : ' + $scope.uidl.qualifiedName);
         }
-        angular.module('theApp').service('skinService', ['$rootScope', '$q', 'uidlService', 
+        angular.module('theApp').service('skinService', ['$rootScope', '$q', 'uidlService',
         function($rootScope, $q, uidlService) {
-            
+
             function showPopupAlert(alertHandle) {
                 switch (alertHandle.uidl.type) {
                     case 'Info':
@@ -4447,7 +4597,7 @@ HEAD, JS/CSS LINKS
                         break;
                     case 'Error':
                         toastr.error(
-                            '<a data-toggle="modal" data-target="#divModalTechnicalInfo"><i class="fa fa-xs fa-angle-double-right"></i>&nbsp;technical info</a>', 
+                            '<a data-toggle="modal" data-target="#divModalTechnicalInfo"><i class="fa fa-xs fa-angle-double-right"></i>&nbsp;technical info</a>',
                             uidlService.translate(alertHandle.uidl.text),
                             { timeOut: 5000 });
                         break;
@@ -4457,7 +4607,7 @@ HEAD, JS/CSS LINKS
             function showModalAlert(alertHandle) {
                 return $q.reject('Not implemented');
             };
-            
+
             return {
                 showPopupAlert: showPopupAlert
                 showModalAlert: showModalAlert
