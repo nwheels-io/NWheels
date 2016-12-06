@@ -7,7 +7,7 @@ using NWheels.Endpoints.Core;
 
 namespace NWheels.Authorization.Core
 {
-    public class Session : ISession, IAccessControlContext, IScopedConsumptionResource
+    public class Session : ISession, ICoreSession, IAccessControlContext, IScopedConsumptionResource
     {
         private readonly IFramework _framework;
         private readonly IResourceLock _touchLock;
@@ -97,6 +97,14 @@ namespace NWheels.Authorization.Core
                 return (UserIdentity.IsGlobalSystem || UserIdentity.IsGlobalAnonymous);
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Implementation of ICoreSession
+
+        ITransportConnection ICoreSession.EndpointConnection { get; set; }
+
+        #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

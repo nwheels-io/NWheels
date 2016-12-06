@@ -17,4 +17,11 @@ namespace NWheels.Authorization
         DateTime? ExpiresAtUtc { get; }
         bool IsGlobalImmutable { get; }
     }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface ICoreSession
+    {
+        ITransportConnection EndpointConnection { get; set; }
+    }
 }
