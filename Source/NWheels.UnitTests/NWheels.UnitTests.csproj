@@ -90,6 +90,7 @@
     <Compile Include="Concurrency\PerContextResourceConsumerScopeTests.cs" />
     <Compile Include="Concurrency\RealTimeoutManagerTests.cs" />
     <Compile Include="Concurrency\ShuttleServiceTests.cs" />
+    <Compile Include="Concurrency\SingleProducerConsumerQueueTests.cs" />
     <Compile Include="Configuration\ConfigurationSectionConventionTests.cs" />
     <Compile Include="Configuration\XmlConfigurationLoaderTest.cs" />
     <Compile Include="DataObjects\Core\ContainedToContainerCollectionAdapterTests.cs" />
