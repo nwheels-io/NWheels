@@ -158,14 +158,6 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool SystemAlert
-        {
-            get { return GetLogOption(LogOptions.SystemAlert); }
-            set { SetLogOption(LogOptions.SystemAlert, value); }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         private bool GetLogOption(LogOptions flag)
         {
             return ((Options & flag) != 0);
