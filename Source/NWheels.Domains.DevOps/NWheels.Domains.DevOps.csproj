@@ -64,10 +64,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Alerts\Entities\IAlertEntity.cs" />
+    <Compile Include="Alerts\Entities\ISystemAlertConfigurationEntity.cs" />
     <Compile Include="Alerts\Entities\IEntityPartEmailAddressee.cs" />
     <Compile Include="Alerts\Entities\IEntityPartAlertAction.cs" />
     <Compile Include="Alerts\Entities\IEntityPartAlertByEmail.cs" />
+    <Compile Include="Alerts\Entities\ISystemAlertConfigurationContext.cs" />
     <Compile Include="Alerts\UI\ScreenParts\AlertsScreenPart.cs" />
     <Compile Include="SystemLogs\Entities\IBaseLogDimensionsEntity.cs" />
     <Compile Include="SystemLogs\Entities\IThreadLogSearchCriteria.cs" />

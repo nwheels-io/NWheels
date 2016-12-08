@@ -9,15 +9,8 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
         IEntityRepository<ILogMessageSummaryEntity> LogMessageDailySummaries { get; }
         IEntityRepository<ILogMessageEntity> LogMessages { get; }
         IEntityRepository<IThreadLogEntity> ThreadLogs { get; }
-        IEntityRepository<IAlertEntity> Alerts { get; }
 
         IThreadLogUINodeEntity NewThreadLogNode();
         IRootThreadLogUINodeEntity NewRootThreadLogNode();
-
-        IEntityPartAlertAction NewEntityPartAlertAction();
-        IEntityPartAlertByEmail NewEntityPartAlertByEmail();
-        IEntityPartEmailRecipient NewEntityPartEmailRecipient();
-        IEntityPartEmailAddressRecipient NewEntityPartEmailAddressRecipient();
-        IEntityPartUserAccountEmailRecipient NewEntityPartUserAccountEmailRecipient();
     }
 }

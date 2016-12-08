@@ -4,7 +4,7 @@ using NWheels.UI.Uidl;
 
 namespace NWheels.Domains.DevOps.Alerts.UI.ScreenParts
 {
-    public class AlertsScreenPart : CrudScreenPart<IAlertEntity>
+    public class AlertsScreenPart : CrudScreenPart<ISystemAlertConfigurationEntity>
     {
         public AlertsScreenPart(string idName, UidlApplication parent)
             : base(idName, parent)

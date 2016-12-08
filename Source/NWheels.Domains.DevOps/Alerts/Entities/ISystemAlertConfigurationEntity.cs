@@ -4,7 +4,7 @@ using NWheels.Entities;
 namespace NWheels.Domains.DevOps.Alerts.Entities
 {
     [EntityContract]
-    public interface IAlertEntity
+    public interface ISystemAlertConfigurationEntity
     {
         string Id { get; set; }
         string Description { get; set; }
