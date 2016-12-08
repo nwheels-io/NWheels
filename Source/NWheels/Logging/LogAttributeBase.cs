@@ -21,6 +21,7 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ThreadTaskType TaskType { get; set; }
+        public string SystemAlertId { get; set; }
         public LogLevel Level { get; private set; }
         public LogOptions Options { get; private set; }
         public bool IsActivity { get; private set; }
@@ -153,6 +154,14 @@ namespace NWheels.Logging
         {
             get { return GetLogOption(LogOptions.CompactMode); }
             set { SetLogOption(LogOptions.CompactMode, value); }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool SystemAlert
+        {
+            get { return GetLogOption(LogOptions.SystemAlert); }
+            set { SetLogOption(LogOptions.SystemAlert, value); }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
