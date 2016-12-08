@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace NWheels.Concurrency
 {
@@ -23,6 +25,9 @@ namespace NWheels.Concurrency
         // one instance is reused by all Dequeue operations
         private readonly Stopwatch _dequeueClock;
 
+        private readonly EnqueueAwaiter _enqueueAwaiter;
+        private readonly DequeueAwaiter _dequeueAwaiter;
+
         // position of last enqueued item, initially -1
         // it is ever-increasing: modulus capacity to determine actual index in buffer; 
         // this field is only mutated by a single producer thread
@@ -44,6 +49,9 @@ namespace NWheels.Concurrency
             _buffer = new T[capacity];
             _enqueueClock = Stopwatch.StartNew();
             _dequeueClock = Stopwatch.StartNew();
+            _enqueueAwaiter = new EnqueueAwaiter(this);
+            _dequeueAwaiter = new DequeueAwaiter(this);
+            _head = -1; // first enqueued item will be at position 0
             _head = -1; // first enqueued item will be at position 0
             _tail = -1; // first dequeued item will be at position 0
         }
@@ -76,6 +84,10 @@ namespace NWheels.Concurrency
                     // because of that, we check for timeout/cancellation once every 100 iterations
                     if ((spinCount % 100) == 0 && (cancel.IsCancellationRequested || (_dequeueClock.Elapsed.Subtract(startTime) >= timeout)))
                     {
+                        // we've either timed out or canceled.
+                        // notify dequeue awaiter, for the case an async dequeue was pending
+                        _dequeueAwaiter.Notify(cancel.IsCancellationRequested ? AsyncQueueStatus.Canceled : AsyncQueueStatus.TimedOut, default(T));
+                        
                         return false;
                     }
                 }
@@ -87,6 +99,9 @@ namespace NWheels.Concurrency
             // now it is safe to let Dequeue read the enqueued slot, so we increment the _head
             // there is no race condition in incrementing the _head; we use Interlocked to prevent instruction reordering optimizations
             Interlocked.Increment(ref _head);
+
+            // notify dequeue awaiter, for the case an async dequeue is pending
+            _dequeueAwaiter.Notify(AsyncQueueStatus.Completed, item);
 
             return true;
         }
@@ -119,6 +134,7 @@ namespace NWheels.Concurrency
                     // because of that, we check for timeout/cancellation once every 100 iterations
                     if ((spinCount % 100) == 0 && (cancel.IsCancellationRequested || (_dequeueClock.Elapsed.Subtract(startTime) >= timeout)))
                     {
+                        _enqueueAwaiter.Notify(cancel.IsCancellationRequested ? AsyncQueueStatus.Canceled : AsyncQueueStatus.TimedOut);
                         item = default(T);
                         return false;
                     }
@@ -134,5 +150,188 @@ namespace NWheels.Concurrency
 
             return true;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public EnqueueAwaiter EnqueueAsync(T item, TimeSpan fromMilliseconds, CancellationToken none)
+        {
+            // check if we have space in buffer for another item
+            if (_head - _tail < _capacity)
+            {
+                // we have space for the new item, write it
+                _buffer[(_head + 1) % _capacity] = item;
+
+                // now it is safe to let Dequeue read the enqueued slot, so we increment the _head
+                // there is no race condition in incrementing the _head; we use Interlocked to prevent instruction reordering optimizations
+                Interlocked.Increment(ref _head);
+
+                // setting our awaiter to completed state. this will allow calling async method to continue synchronously
+                //_enqueueAwaiter.Notify(AsyncQueueStatus.Completed);
+            }
+            else
+            {
+                // the buffer is full. the caller has to wait until the consumer dequeues at least one item
+                //_enqueueAwaiter.Reset();
+            }
+            
+            return _enqueueAwaiter;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DequeueAwaiter DequeueAsync(TimeSpan fromMilliseconds, CancellationToken none)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private interface IEnqueueAwaiter
+        {
+            void Reset();
+            void Notify(AsyncQueueStatus result);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private interface IDequeueAwaiter
+        {
+            void Reset();
+            void Notify(AsyncQueueStatus status, T item);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class EnqueueAwaiter : INotifyCompletion, IEnqueueAwaiter
+        {
+            private readonly SingleProducerConsumerQueue<T> _owner;
+            private AsyncQueueStatus _result;
+            private Action _continuation;
+
+            public EnqueueAwaiter(SingleProducerConsumerQueue<T> owner)
+            {
+                _owner = owner;
+            }
+
+            public void Reset()
+            {
+                _result = AsyncQueueStatus.Awaiting;
+                _continuation = null;
+            }
+
+            public void Notify(AsyncQueueStatus result)
+            {
+                _result = result;
+
+                if (_continuation != null)
+                {
+                    Task.Factory.StartNew(_continuation);
+                }
+            }
+
+            public EnqueueAwaiter GetAwaiter()
+            {
+                return this;
+            }
+
+            #region Implementation of INotifyCompletion
+
+            public void OnCompleted(Action continuation)
+            {
+                _continuation = continuation;
+            }
+
+            #endregion
+
+            public AsyncQueueStatus GetResult()
+            {
+                return _result;
+            }
+
+            public bool IsCompleted
+            {
+                get
+                {
+                    return (_result != AsyncQueueStatus.Awaiting);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class DequeueAwaiter : INotifyCompletion, IDequeueAwaiter
+        {
+            private readonly SingleProducerConsumerQueue<T> _owner;
+            private DequeueResult<T> _result;
+            private Action _continuation;
+
+            public DequeueAwaiter(SingleProducerConsumerQueue<T> owner)
+            {
+                _owner = owner;
+            }
+
+            public void Reset()
+            {
+                _continuation = null;
+                _result.Status = AsyncQueueStatus.Awaiting;
+                _result.Item = default(T);
+            }
+
+            public void Notify(AsyncQueueStatus status, T item)
+            {
+                _result.Status = status;
+                _result.Item = item;
+
+                if (_continuation != null)
+                {
+                    Task.Factory.StartNew(_continuation);
+                }
+            }
+
+            public DequeueAwaiter GetAwaiter()
+            {
+                return this;
+            }
+
+            #region Implementation of INotifyCompletion
+
+            public void OnCompleted(Action continuation)
+            {
+                _continuation = continuation;
+            }
+
+            #endregion
+
+            public DequeueResult<T> GetResult()
+            {
+                return _result;
+            }
+            
+            public bool IsCompleted
+            {
+                get
+                {
+                    return (_result.Status != AsyncQueueStatus.Awaiting);
+                }
+            }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum AsyncQueueStatus
+    {
+        Awaiting,
+        Completed,
+        TimedOut,
+        Canceled
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public struct DequeueResult<T>
+    {
+        public AsyncQueueStatus Status;
+        public T Item;
     }
 }
