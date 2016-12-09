@@ -294,44 +294,42 @@ namespace NWheels.UnitTests.Concurrency
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        /*
         [Test]
         public void CanProduceAndConsumeWithAsyncMethods()
         {
             //- arrange
 
-            const int itemCount = 10;//00000;
+            const int itemCount = 1000000;
 
-            var queue = new SingleProducerConsumerQueue<int>(capacity: 3);
+            var queue = new SingleProducerConsumerQueue<int>(capacity: 1000);
             var dequeuedValues = new List<int>();
 
-            Func<Task> producer = async () => {
+            Func<Task> producer = () => Task.Factory.StartNew(() => {
                 for (int i = 0; i < itemCount; i++)
                 {
-                    if (!await queue.EnqueueAsync(i, TimeSpan.FromMilliseconds(500), CancellationToken.None))
+                    if (!queue.TryEnqueue(i, TimeSpan.FromMilliseconds(500), CancellationToken.None))
                     {
                         throw new Exception("Could not enqueue item!");
                     }
-                    Thread.Sleep(20000);
                 }
-            };
+            });
 
             Func<Task> consumer = async () => {
                 for (int i = 0; i < itemCount; i++)
                 {
-                    int value;
-                    if (!await queue.DequeueAsync(out value, TimeSpan.FromMilliseconds(500), CancellationToken.None))
+                    var result = await queue.DequeueAsync(TimeSpan.FromMilliseconds(500), CancellationToken.None);
+                    if (result.Status != AsyncQueueStatus.Completed)
                     {
                         throw new Exception("Could not dequeue item!");
                     }
-                    dequeuedValues.Add(value);
+                    dequeuedValues.Add(result.Item);
                 }
             };
 
             //- act
 
-            var producerTask = producer();
             var consumerTask = consumer();
+            var producerTask = producer();
 
             Task.WaitAll(producerTask, consumerTask);
 
@@ -344,7 +342,5 @@ namespace NWheels.UnitTests.Concurrency
                 dequeuedValues[i].ShouldBe(i, "dequeuedValues[" + i + "]");
             }
         }
-         * 
-         */
     }
 }
