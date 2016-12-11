@@ -212,6 +212,7 @@
     <Compile Include="Logging\LogTotal.cs" />
     <Compile Include="Logging\SeverityLevel.cs" />
     <Compile Include="Logging\ThreadLogPersistenceLevel.cs" />
+    <Compile Include="Processing\BackgroundJobFeatureLoader.cs" />
     <Compile Include="Processing\BatchJobFeatureLoader.cs" />
     <Compile Include="Processing\Commands\IHaveMethodCall.cs" />
     <Compile Include="Processing\Commands\Impl\CommandActorBase.cs" />
@@ -237,6 +238,7 @@
     <Compile Include="Processing\Jobs\ApplicationJobStatus.cs" />
     <Compile Include="Processing\Jobs\Core\IApplicationJobLogger.cs" />
     <Compile Include="Processing\Jobs\Core\IFrameworkApplicationJobConfig.cs" />
+    <Compile Include="Processing\Jobs\Impl\SingleBackgroundJobScheduler.cs" />
     <Compile Include="Processing\Jobs\Impl\SequentialBatchJobScheduler.cs" />
     <Compile Include="Serialization\CompactSerializerExtensionBase.cs" />
     <Compile Include="Serialization\DynamicCompactSerializerDictionary.cs" />
