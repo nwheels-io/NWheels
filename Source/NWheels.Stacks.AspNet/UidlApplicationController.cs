@@ -578,6 +578,7 @@ namespace NWheels.Stacks.AspNet
 
                         if (download == null)
                         {
+                            var visualization = (IVisualizedQueryable)queryCommand.Result.Result;
                             var query = (IQueryable)queryCommand.Result.Result;
                             exportCommand = new DocumentFormatRequestMessage(
                                 _framework,
@@ -587,7 +588,7 @@ namespace NWheels.Stacks.AspNet
                                 reportCriteria: txViewModel,
                                 reportQuery: query,
                                 reportQueryOptions: options,
-                                documentDesign: null,
+                                documentDesign: (visualization != null ? visualization.DocumentDesign : null),
                                 outputFormatIdName: outputFormat);
 
                             _serviceBus.DispatchMessageOnCurrentThread(exportCommand);

@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Extensions;
+using NWheels.Processing.Documents;
 using NWheels.TypeModel;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
@@ -213,6 +214,7 @@ namespace NWheels.UI.Toolbox
     public interface IVisualizedQueryable : IQueryable
     {
         ChartData Visualization { get; }
+        DocumentDesign DocumentDesign { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -222,13 +224,22 @@ namespace NWheels.UI.Toolbox
     {
         private readonly IQueryable<TResultRow> _queryable;
         private readonly ChartData _visualization;
+        private readonly DocumentDesign _documentDesign;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public VisualizedQueryable(IQueryable<TResultRow> queryable, ChartData visualization)
+        public VisualizedQueryable(IQueryable<TResultRow> queryable, ChartData visualization) 
+            : this(queryable, visualization, documentDesign: null)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public VisualizedQueryable(IQueryable<TResultRow> queryable, ChartData visualization, DocumentDesign documentDesign)
         {
             _queryable = queryable;
             _visualization = visualization;
+            _documentDesign = documentDesign;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -279,6 +290,13 @@ namespace NWheels.UI.Toolbox
         public ChartData Visualization
         {
             get { return _visualization; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DocumentDesign DocumentDesign
+        {
+            get { return _documentDesign; }
         }
     }
 

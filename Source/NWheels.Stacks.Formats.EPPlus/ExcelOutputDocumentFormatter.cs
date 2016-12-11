@@ -81,6 +81,8 @@ namespace NWheels.Stacks.Formats.EPPlus
             var cursorColumnIndex = new int[table.Columns.Count];
 
             worksheet.Row(2).Style.Font.Bold = true;
+            worksheet.Row(2).Style.WrapText = true;
+            worksheet.Row(2).CustomHeight = false;
             worksheet.View.FreezePanes(3, 1);
 
             for (int i = 0; i < table.Columns.Count; i++)
