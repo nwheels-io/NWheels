@@ -69,6 +69,8 @@
     <Compile Include="Alerts\Entities\IEntityPartAlertAction.cs" />
     <Compile Include="Alerts\Entities\IEntityPartAlertByEmail.cs" />
     <Compile Include="Alerts\Entities\ISystemAlertConfigurationContext.cs" />
+    <Compile Include="Alerts\ISystemAlertConfigurationFeatureSection.cs" />
+    <Compile Include="Alerts\SystemAlertConfigurationFeatureLoader.cs" />
     <Compile Include="Alerts\Jobs\SystemAlertJob.cs" />
     <Compile Include="Alerts\UI\ScreenParts\AlertsScreenPart.cs" />
     <Compile Include="SystemLogs\Entities\IBaseLogDimensionsEntity.cs" />
