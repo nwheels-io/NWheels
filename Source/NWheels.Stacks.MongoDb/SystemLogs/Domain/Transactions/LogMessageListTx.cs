@@ -39,7 +39,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
         {
             MongoDbThreadLogQueryService.NormalizeTimeRange(input);
 
-            var query = (UIOperationContext.Current != null ? UIOperationContext.Current.Query : null);
+            var query = GetQueryOptions(input);
             var task = _queryService.QueryLogMessagesAsync(input, query, CancellationToken.None);
             task.Wait();
 
@@ -58,6 +58,27 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private ApplicationEntityService.QueryOptions GetQueryOptions(ILogTimeRangeCriteria input)
+        {
+            var extendedInput = (input as IExtendedLogTimeRangeCriteria);
+
+            if (extendedInput != null && extendedInput.Query != null)
+            {
+                return extendedInput.Query;
+            }
+
+            var uiContext = UIOperationContext.Current;
+
+            if (uiContext != null)
+            {
+                return uiContext.Query;
+            }
+
+            return null;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

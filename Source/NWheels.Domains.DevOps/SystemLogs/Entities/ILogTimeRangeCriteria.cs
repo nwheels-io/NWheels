@@ -11,4 +11,12 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
         string MessageId { get; set; }
         int? SeriesIndex { get; set; }
     }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    [ViewModelContract]
+    public interface IExtendedLogTimeRangeCriteria : ILogTimeRangeCriteria
+    {
+        ApplicationEntityService.QueryOptions Query { get; set; }
+    }
 }
