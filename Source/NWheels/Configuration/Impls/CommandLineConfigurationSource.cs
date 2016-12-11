@@ -108,13 +108,13 @@ namespace NWheels.Configuration.Impls
 
                 if (value != null)
                 {
-                    var argument = string.Format("/config:{0}.{1}={2}", sectionXmlName, metaProperty.Name, value);
+                    var valueString = (value is DateTime ? ((DateTime)value).ToString("yyyy-MM-dd") : value.ToString());
+                    var formatString = (
+                        valueString.Contains(" ") ?
+                        "/config:{0}.{1} \"{2}\"" :
+                        "/config:{0}.{1}={2}");
 
-                    if (argument.Contains(" "))
-                    {
-                        argument = "\"" + argument + "\"";
-                    }
-
+                    var argument = string.Format(formatString, sectionXmlName, metaProperty.Name, valueString);
                     argumentList.Add(argument);
                 }
             }
