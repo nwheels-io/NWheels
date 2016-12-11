@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using NWheels.Concurrency;
+using NWheels.Extensions;
 using Shouldly;
 
 namespace NWheels.UnitTests.Concurrency
@@ -254,7 +255,7 @@ namespace NWheels.UnitTests.Concurrency
 
             const int itemCount = 1000000;
 
-            var queue = new SingleProducerConsumerQueue<int>(capacity: 3);
+            var queue = new SingleProducerConsumerQueue<int>(capacity: 1000);
             
             //- act
             
@@ -304,25 +305,39 @@ namespace NWheels.UnitTests.Concurrency
             var queue = new SingleProducerConsumerQueue<int>(capacity: 1000);
             var dequeuedValues = new List<int>();
 
-            Func<Task> producer = () => Task.Factory.StartNew(() => {
-                for (int i = 0; i < itemCount; i++)
+            Func<Task> producer = async () => {
+                try
                 {
-                    if (!queue.TryEnqueue(i, TimeSpan.FromMilliseconds(500), CancellationToken.None))
+                    for (int i = 0 ; i < itemCount ; i++)
                     {
-                        throw new Exception("Could not enqueue item!");
+                        if (!await queue.EnqueueAsync(i, TimeSpan.FromMilliseconds(500), CancellationToken.None))
+                        {
+                            throw new Exception("Could not enqueue item!");
+                        }
                     }
                 }
-            });
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
+            };
 
             Func<Task> consumer = async () => {
-                for (int i = 0; i < itemCount; i++)
+                try
                 {
-                    var result = await queue.DequeueAsync(TimeSpan.FromMilliseconds(500), CancellationToken.None);
-                    if (result.Status != AsyncQueueStatus.Completed)
+                    for (int i = 0 ; i < itemCount ; i++)
                     {
-                        throw new Exception("Could not dequeue item!");
+                        var result = await queue.DequeueAsync(TimeSpan.FromMilliseconds(500), CancellationToken.None);
+                        if (result.Status != AsyncQueueStatus.Completed)
+                        {
+                            throw new Exception("Could not dequeue item!");
+                        }
+                        dequeuedValues.Add(result.Item);
                     }
-                    dequeuedValues.Add(result.Item);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
                 }
             };
 
@@ -331,7 +346,10 @@ namespace NWheels.UnitTests.Concurrency
             var consumerTask = consumer();
             var producerTask = producer();
 
-            Task.WaitAll(producerTask, consumerTask);
+            if (!Task.WaitAll(new[] { producerTask, consumerTask }, 30000))
+            {
+                throw new TimeoutException("Tasks timd out");
+            }
 
             //- assert
 
