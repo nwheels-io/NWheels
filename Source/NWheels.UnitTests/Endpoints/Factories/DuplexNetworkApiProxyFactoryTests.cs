@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using NWheels.Concurrency;
 using NWheels.Endpoints;
 using NWheels.Endpoints.Factories;
+using NWheels.Extensions;
 using NWheels.Testing;
 using Shouldly;
 
@@ -48,9 +51,69 @@ namespace NWheels.UnitTests.Endpoints.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test, Ignore("work in progress")]
+        public void AsyncReturnFromServer()
+        {
+            //-- arrange
+
+            var network = new MemoryStream();
+            var serverTransport = new TestTransport(network);
+            var clientTransport = new TestTransport(network);
+
+            var proxyFactory = Resolve<IDuplexNetworkApiProxyFactory>();
+            var clientObject = new ClientApiImplementation(clientTransport, proxyFactory);
+            var serverObject = new ServerApiImplementation();
+
+            var proxyUsedByListenerOnServer = proxyFactory.CreateProxyInstance<IClientApi, IServerApi>(serverTransport, serverObject);
+            var proxyUsedOnClient = proxyFactory.CreateProxyInstance<IServerApi, IClientApi>(clientTransport, clientObject);
+
+            string returnValue = null;
+            Func<Task> doEcho = async () => {
+                await Task.Delay(10);
+                returnValue = await proxyUsedOnClient.ReverseEcho("Hello world");
+            };
+
+            //-- act
+
+            var doEchoTask = doEcho();
+            
+            serverTransport.TestReceiveFromNetwork();
+            
+            var finishedTooEarly = doEchoTask.Wait(250);
+            var earlyClientLog = clientObject.Log.ToArray();
+            var earlyServerLog = serverObject.Log.ToArray();
+
+            clientTransport.TestReceiveFromNetwork();
+
+            var finishedAsExpected = doEchoTask.Wait(0);
+            var lateClientLog = clientObject.Log.ToArray();
+            var lateServerLog = serverObject.Log.ToArray();
+
+            //-- assert
+
+            finishedTooEarly.ShouldBe(false);
+            finishedAsExpected.ShouldBe(true);
+            returnValue.ShouldBe("dlrow olleH");
+
+            earlyServerLog.ShouldBe(new[] {
+                "ServerApiImplementation.ReverseEcho(Hello world)"
+            });
+            earlyClientLog.ShouldBeEmpty();
+
+            lateServerLog.ShouldBe(new[] {
+                "ServerApiImplementation.ReverseEcho(Hello world)"
+            });
+            lateClientLog.ShouldBe(new[] {
+                "???"
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public interface IServerApi
         {
             void Ping(string message);
+            Promise<string> ReverseEcho(string message);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,6 +121,7 @@ namespace NWheels.UnitTests.Endpoints.Factories
         public interface IClientApi
         {
             void Pong(string message);
+            Promise<string> IdentifyUserMachine();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -77,6 +141,13 @@ namespace NWheels.UnitTests.Endpoints.Factories
                 
                 var client = DuplexNetworkApi.CurrentCall.GetRemotePartyAs<IClientApi>();
                 client.Pong("YOU SENT [" + message + "]");
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            Promise<string> IServerApi.ReverseEcho(string message)
+            {
+                return new string(message.Reverse().ToArray(), 0, message.Length);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -103,6 +174,13 @@ namespace NWheels.UnitTests.Endpoints.Factories
             void IClientApi.Pong(string message)
             {
                 Log.Add("ClientApiImplementation.Pong(" + message + ")");
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            Promise<string> IClientApi.IdentifyUserMachine()
+            {
+                throw new NotImplementedException();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

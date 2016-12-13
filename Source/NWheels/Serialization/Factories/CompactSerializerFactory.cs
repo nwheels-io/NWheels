@@ -130,7 +130,12 @@ namespace NWheels.Serialization.Factories
 
         private static bool IsSerializableProperty(PropertyInfo property)
         {
-            return (property.CanRead && property.CanWrite && property.GetIndexParameters().Length == 0);
+            return (
+                property.CanRead && 
+                property.CanWrite && 
+                property.GetMethod.IsPublic && 
+                property.SetMethod.IsPublic && 
+                property.GetIndexParameters().Length == 0);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

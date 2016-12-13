@@ -138,6 +138,7 @@
     <Compile Include="Client\ClientThreadLogAppender.cs" />
     <Compile Include="Client\IntIdGeneratorMetadataConvention.cs" />
     <Compile Include="Concurrency\ContextAnchor.cs" />
+    <Compile Include="Concurrency\Core\Deferred.cs" />
     <Compile Include="Concurrency\Impl\ITimeoutManagerLogger.cs" />
     <Compile Include="Concurrency\Impl\TimeoutManager.cs" />
     <Compile Include="Concurrency\Impl\WriteOnlyCollectionWrapper.cs" />
@@ -147,6 +148,7 @@
     <Compile Include="Concurrency\IWriteOnlyCollection.cs" />
     <Compile Include="Concurrency\MapReduceTask.cs" />
     <Compile Include="Concurrency\PerContextResourceConsumerScope.cs" />
+    <Compile Include="Concurrency\Promise.cs" />
     <Compile Include="Concurrency\PromiseStatus.cs" />
     <Compile Include="Concurrency\ShuttleService.cs" />
     <Compile Include="Concurrency\SingleProducerConsumerQueue.cs" />

@@ -15,6 +15,7 @@ namespace NWheels.Processing.Commands
         void SetParameterValue(string name, object value);
         MethodInfo MethodInfo { get; }
         object Result { get; }
+        long CorrelationId { get; set; }
         [JsonExtensionData]
         Dictionary<string, JToken> ExtensionData { get; }
     }

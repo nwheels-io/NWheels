@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Autofac;
 using NUnit.Framework;
 using NWheels.Endpoints.Core;
+using NWheels.Processing.Commands;
 using NWheels.Processing.Commands.Factories;
 using NWheels.Serialization;
 using NWheels.Serialization.Factories;

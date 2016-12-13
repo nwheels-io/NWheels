@@ -9,6 +9,8 @@ using Autofac;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
+using NWheels.Concurrency;
+using NWheels.Concurrency.Core;
 using NWheels.Endpoints.Core;
 using NWheels.Extensions;
 using NWheels.Processing.Commands;
@@ -114,6 +116,7 @@ namespace NWheels.Endpoints.Factories
             private readonly IMethodCallObjectFactory _callFactory;
             private readonly object _localServer;
             private readonly CompactSerializerDictionary _dictionary;
+            private IDeferred _outstandingCall;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -134,6 +137,7 @@ namespace NWheels.Endpoints.Factories
                 // ReSharper disable once DoNotCallOverridableMethodsInConstructor
                 OnRegisteringApiContracts(_dictionary);
 
+                _outstandingCall = null;
                 _transport.BytesReceived += OnTransportBytesReceived;
             }
 
@@ -166,6 +170,21 @@ namespace NWheels.Endpoints.Factories
                         _transport.SendBytes(buffer.ToArray());
                     }
                 }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void SetOustandingCall(IDeferred deferred)
+            {
+                if (_outstandingCall != null)
+                {
+                    //TODO: add support for multiple concurrent promises per connection
+                    throw new InvalidOperationException("Only one concurrent promise is supported per connection.");
+                }
+
+                //var deferred = new Deferred<T>();
+                _outstandingCall = deferred;
+                //return new Promise<T>(deferred);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -284,12 +303,21 @@ namespace NWheels.Endpoints.Factories
                         .Method<CompactSerializerDictionary>(x => x.OnRegisteringApiContracts).Implement(WriteApiContractRegistrations);
 
                     writer.ImplementInterface<TT.TContract>()
-                        .AllMethods(where: m => m.IsVoid()).Implement(WriteRemoteContractMethod)
+                        .AllMethods(where: IsRemotableMethod).Implement(WriteRemoteContractMethod)
                         .AllEvents().ImplementAutomatic();
                 }
             }
 
             #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool IsRemotableMethod(MethodInfo method)
+            {
+                return (
+                    method.IsVoid() || 
+                    typeof(IPromise).IsAssignableFrom(method.ReturnType));
+            }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -321,6 +349,24 @@ namespace NWheels.Endpoints.Factories
                     });
 
                 writer.This<ProxyBase<TT.TContract, TT.TContract2>>().Void(x => x.SendCall, callLocal);
+
+                if (!writer.OwnerMethod.IsVoid && typeof(IPromise).IsAssignableFrom(writer.OwnerMethod.Signature.ReturnType))
+                {
+                    // we know that return type is Promise<T>
+                    var resultType = writer.OwnerMethod.Signature.ReturnType.GetGenericArguments()[0];
+
+                    using (TT.CreateScope<TT.TReturn, TT.TValue>(writer.OwnerMethod.Signature.ReturnType, resultType))
+                    {
+                        var deferredLocal = writer.Local<Deferred<TT.TValue>>(initialValue: writer.New<Deferred<TT.TValue>>());
+                        writer.This<ProxyBase<TT.TContract, TT.TContract2>>().Void(x => x.SetOustandingCall, deferredLocal);
+
+                        var promiseLocal = writer.Local<Promise<TT.TValue>>(initialValue: writer.New<Promise<TT.TValue>>(deferredLocal));
+
+                        writer.Return(promiseLocal.CastTo<TT.TReturn>());
+
+                        //writer.Return(writer.New<TT.TReturn>());
+                    }
+                }
             }
         }
     }

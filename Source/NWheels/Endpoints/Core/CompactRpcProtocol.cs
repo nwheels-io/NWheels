@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,21 +18,102 @@ namespace NWheels.Endpoints.Core
         public static void WriteCall(IMethodCallObject call, CompactSerializationContext context)
         {
             var memberKey = context.Dictionary.LookupMemberKeyOrThrow(call.MethodInfo);
+
+            context.Output.Write((byte)RpcMessageType.Call);
             context.Output.Write7BitInt(memberKey);
             context.Serializer.WriteObjectContents(call, context);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static void WriteReturn(IMethodCallObject call, CompactSerializationContext context)
+        {
+            var memberKey = context.Dictionary.LookupMemberKeyOrThrow(call.MethodInfo);
+
+            context.Output.Write((byte)RpcMessageType.Return);
+            context.Output.Write7BitInt(memberKey);
+            context.Output.Write(call.CorrelationId);
+            context.Serializer.WriteObject(call.MethodInfo.ReturnType, call.Result, context);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void WriteFault(IMethodCallObject call, CompactSerializationContext context, string faultCode)
+        {
+            var memberKey = context.Dictionary.LookupMemberKeyOrThrow(call.MethodInfo);
+
+            context.Output.Write((byte)RpcMessageType.Fault);
+            context.Output.Write7BitInt(memberKey);
+            context.Output.Write(call.CorrelationId);
+            context.Output.WriteStringOrNull(faultCode);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static IMethodCallObject ReadCall(IMethodCallObjectFactory callFactory, CompactDeserializationContext context)
         {
-            var memberKey = context.Input.Read7BitInt();
-            var method = (MethodInfo)context.Dictionary.LookupMemberOrThrow(memberKey);
-            
-            var call = callFactory.NewMessageCallObject(method);
-            context.Serializer.PopulateObject(context, call);
+            IMethodCallObject call;
+            object returnValue;
+            string faultCode;
+            long correlationId;
+
+            var messageType = ReadRpcMessage(callFactory, context, out call, out returnValue, out faultCode, out correlationId);
+
+            if (messageType != RpcMessageType.Call)
+            {
+                throw new ProtocolViolationException("Expected message of type Call, but got: " + messageType);
+            }
 
             return call;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static RpcMessageType ReadRpcMessage(
+            IMethodCallObjectFactory callFactory, 
+            CompactDeserializationContext context,
+            out IMethodCallObject call,
+            out object returnValue,
+            out string returnFaultCode,
+            out long returnCorrelationId)
+        {
+            call = null;
+            returnValue = null;
+            returnFaultCode = null;
+            returnCorrelationId = -1;
+
+            var messageType = (RpcMessageType)context.Input.ReadByte();
+            var memberKey = context.Input.Read7BitInt();
+            var method = (MethodInfo)context.Dictionary.LookupMemberOrThrow(memberKey);
+
+            switch (messageType)
+            {
+                case RpcMessageType.Call:
+                    call = callFactory.NewMessageCallObject(method);
+                    context.Serializer.PopulateObject(context, call);
+                    break;
+                case RpcMessageType.Return:
+                    returnCorrelationId = context.Input.ReadInt64();
+                    returnValue = context.Serializer.ReadObject(method.ReturnType, context);
+                    break;
+                case RpcMessageType.Fault:
+                    returnCorrelationId = context.Input.ReadInt64();
+                    returnFaultCode = context.Input.ReadStringOrNull();
+                    break;
+                default:
+                    throw new ProtocolViolationException("Unexpected message type code: " + messageType);
+            }
+
+            return messageType;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public enum RpcMessageType
+        {
+            Call = 0,
+            Return = 1,
+            Fault = 2
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

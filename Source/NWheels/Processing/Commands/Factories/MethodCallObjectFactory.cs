@@ -334,6 +334,7 @@ namespace NWheels.Processing.Commands.Factories
                                 }
                             })
                         )
+                        .Property(intf => intf.CorrelationId).ImplementAutomatic()
                         .Property(intf => intf.ExtensionData).Implement(
                             Attributes.Set<JsonExtensionDataAttribute>(),
                             p => p.Get(gw => {
