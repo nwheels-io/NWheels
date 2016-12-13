@@ -114,7 +114,7 @@ namespace NWheels.Configuration.Impls
                         "/config:{0}.{1} \"{2}\"" :
                         "/config:{0}.{1}={2}");
 
-                    var argument = string.Format(formatString, sectionXmlName, metaProperty.Name, valueString);
+                    var argument = string.Format(formatString, sectionXmlName, metaProperty.Name.ConvertToCamelCase(), valueString);
                     argumentList.Add(argument);
                 }
             }
