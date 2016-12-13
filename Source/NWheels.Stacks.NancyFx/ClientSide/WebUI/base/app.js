@@ -2350,7 +2350,14 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     retrieve: true,
                     update: true
                 };
-                scope.$broadcast(scope.uidl.inputForm.qualifiedName + ':EditAuthorized', editAuthorizedData);
+                
+                if (scope.uidl.inputFormTypeSelector) {
+                    for (var i = 0; i < scope.uidl.inputFormTypeSelector.selections.length ; i++) {
+                        scope.$broadcast(scope.uidl.inputFormTypeSelector.selections[i].widget.qualifiedName + ':EditAuthorized', editAuthorizedData);
+                    }
+                } else {
+                    scope.$broadcast(scope.uidl.inputForm.qualifiedName + ':EditAuthorized', editAuthorizedData);
+                }
             });
 
             scope.$on(scope.uidl.qualifiedName + ':ShowModal', function(event, data) {
