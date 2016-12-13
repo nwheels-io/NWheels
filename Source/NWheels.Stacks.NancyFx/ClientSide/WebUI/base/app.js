@@ -1588,7 +1588,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             };
             
             scope.requestAuthorization = function (optionalEntityId) {
-                if (scope.uidl.disableAuthorizationChecks) {
+                if (scope.isAuthorizationCheckDisabled()) {
                     return $q.when({ CanRetrieve: true, CanCreate: false, CanUpdate: false, CanDelete: false });
                 }
                 
@@ -1596,6 +1596,9 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     function(response) {
                         scope.entityAuth = response;
 						scope.originalEntity = (response.fullEntity ? angular.copy(response.fullEntity) : null);
+                        if (scope.overrideDisableAuthorizationChecks) {
+                            scope.overrideDisableAuthorizationChecks = false;
+                        }
                         return response;
                     },
                     function(fault) {
@@ -1605,6 +1608,10 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     }
                 );
             };
+            
+            scope.isAuthorizationCheckDisabled = function() {
+                return (scope.overrideDisableAuthorizationChecks === true || scope.uidl.disableAuthorizationChecks === true);
+            }
             
             scope.updateSelectedEntityCommands = function () {
                 if (scope.uidl.entityCommands && 
@@ -1940,7 +1947,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     scope.entityAuth = auth;
 
                     if (!auth || !auth.update) {
-                        scope.uidl.disableAuthorizationChecks = true;
+                        scope.overrideDisableAuthorizationChecks = true;
                     }
                     
                     scope.resultSet = data;
