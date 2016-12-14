@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using NWheels.Core;
+using NWheels.Concurrency;
 using NWheels.Hosting;
 using NWheels.Processing.Jobs.Core;
 
@@ -14,17 +10,18 @@ namespace NWheels.Processing.Jobs.Impl
     public class SingleBackgroundJobScheduler : LifecycleEventListenerBase
     {
         private readonly object _executionSyncRoot = new object();
-        private readonly ICoreFramework _framework;
+        private readonly IFramework _framework;
         private readonly IFrameworkApplicationJobConfig _configuration;
         private readonly IApplicationJobLogger _logger;
         private readonly ApplicationJobBase _job;
         private CancellationTokenSource _cancellationSource;
-        private Timer _timer;
+        private ITimeoutHandle _timeoutHandle;
+        private IFrameworkSingleJobConfig _jobConfig;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public SingleBackgroundJobScheduler(
-            ICoreFramework framework, 
+            IFramework framework, 
             IFrameworkApplicationJobConfig configuration, 
             IApplicationJobLogger logger, 
             ApplicationJobBase job)
@@ -43,8 +40,8 @@ namespace NWheels.Processing.Jobs.Impl
         {
             _cancellationSource = new CancellationTokenSource();
 
-            var jobConfig = _configuration.Jobs[_job.JobId];
-            _timer = new Timer(OnTimerTick, null, TimeSpan.FromSeconds(5), jobConfig.PeriodicInterval);
+            _jobConfig = _configuration.Jobs[_job.JobId];
+            _timeoutHandle = _framework.NewTimer(_job.JobId, string.Empty, TimeSpan.FromSeconds(5), ScheduledJobAction);
 
             _logger.BackgroundJobStarted(_job.JobId);
         }
@@ -53,8 +50,8 @@ namespace NWheels.Processing.Jobs.Impl
 
         public override void NodeDeactivating()
         {
-            _timer.Dispose();
             _cancellationSource.Cancel();
+            _timeoutHandle.CancelTimer();
 
             lock (_executionSyncRoot) // wait for current invocation to finish
             {
@@ -67,50 +64,44 @@ namespace NWheels.Processing.Jobs.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void OnTimerTick(object state)
+        private void ScheduledJobAction()
         {
-            _framework.RunThreadCode(
-                () => {
-                    if (_cancellationSource.IsCancellationRequested)
-                    {
-                        _logger.JobExecutionCanceled(_job.JobId);
-                        return;
-                    }
 
-                    if (!Monitor.TryEnter(_executionSyncRoot, 10000))
-                    {
-                        _logger.JobRunSkippedPreviousRunIsStillInProgress(_job.JobId);
-                        return;
-                    }
+            if (_cancellationSource.IsCancellationRequested)
+            {
+                _logger.JobExecutionCanceled(_job.JobId);
+                return;
+            }
 
-                    try
-                    {
-                        if (_cancellationSource.IsCancellationRequested)
-                        {
-                            _logger.JobExecutionCanceled(_job.JobId);
-                            return;
-                        }
+            var clock = Stopwatch.StartNew();
 
-                        var clock = Stopwatch.StartNew();
+            try
+            {
+                Monitor.Enter(_executionSyncRoot);
 
-                        try
-                        {
-                            _job.Execute(new ApplicationJobContext(_cancellationSource.Token, isDryRun: false));
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.JobExecutionFailed(_job.JobId, (long)clock.Elapsed.TotalMilliseconds, e);
-                            throw;
-                        }
-                    }
-                    finally
-                    {
-                        Monitor.Exit(_executionSyncRoot);
-                    }
-                },
-                () => _logger.ExecutingJob(_job.JobId));
+                if (!_cancellationSource.IsCancellationRequested)
+                {
+                    _logger.ExecutingJob(_job.JobId);
+                    _job.Execute(new ApplicationJobContext(_cancellationSource.Token, isDryRun: false));
+                }
+
+            }
+            catch (Exception e)
+            {
+                _logger.JobExecutionFailed(_job.JobId, (long)clock.Elapsed.TotalMilliseconds, e);
+                throw;
+            }
+            finally
+            {
+                if (!_cancellationSource.IsCancellationRequested)
+                {
+                    _timeoutHandle.ResetDueTime(_jobConfig.PeriodicInterval);
+                }
+
+                Monitor.Exit(_executionSyncRoot);
+            }
         }
-
+       
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private class ApplicationJobContext : IApplicationJobContext
