@@ -10,6 +10,8 @@ using Hapil.Toolbox;
 using Hapil.Writers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NWheels.Concurrency;
+using NWheels.Concurrency.Core;
 using NWheels.Extensions;
 using NWheels.Processing.Commands.Impl;
 using TT = Hapil.TypeTemplate;
@@ -52,6 +54,7 @@ namespace NWheels.Processing.Commands.Factories
             var conventionsContext = new MethodCallConventionsContext(((MethodCallTypeKey)context.TypeKey).Method);
 
             return new IObjectFactoryConvention[] {
+                new BaseTypeDeferredConvention(conventionsContext), 
                 new ClassNameConvention(conventionsContext),
                 new ConstructorConvention(conventionsContext),
                 new ParameterPropertiesConvention(conventionsContext),
@@ -71,6 +74,8 @@ namespace NWheels.Processing.Commands.Factories
                 this.TargetType = method.DeclaringType;
                 this.Parameters = method.GetParameters();
                 this.ParameterFields = new Field<TypeTemplate.TProperty>[this.Parameters.Length];
+
+                DeterminePromiseType();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -81,6 +86,41 @@ namespace NWheels.Processing.Commands.Factories
             public Field<TT.TProperty>[] ParameterFields { get; private set; }
             public Field<TT.TReturn> ReturnValueField { get; set; }
             public Field<Dictionary<string, JToken>> ExtensionDataField { get; set; }
+            public Type PromiseType { get; private set; }
+            public Type PromiseTypeDefinition { get; private set; }
+            public Type PromiseResultType { get; private set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            private void DeterminePromiseType()
+            {
+                if (Method.IsVoid())
+                {
+                    return;
+                }
+
+                if (Method.ReturnType == typeof(Promise) || Method.ReturnType == typeof(Task))
+                {
+                    PromiseType = Method.ReturnType;
+                    return;
+                }
+
+                if (!Method.ReturnType.IsGenericType)
+                {
+                    return;
+                }
+
+                var returnTypeDefinition = Method.ReturnType.GetGenericTypeDefinition();
+
+                if (returnTypeDefinition != typeof(Promise<>) && returnTypeDefinition != typeof(Task<>))
+                {
+                    return;
+                }
+
+                PromiseType = Method.ReturnType;
+                PromiseTypeDefinition = returnTypeDefinition;
+                PromiseResultType = PromiseType.GenericTypeArguments[0];
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -154,6 +194,39 @@ namespace NWheels.Processing.Commands.Factories
                     (currentNameParts.Length > 0 ? string.Join(".", currentNameParts.Take(currentNameParts.Length - 1)) + "." : ""),
                     _conventionContext.Method.DeclaringType.SimpleQualifiedName().Replace(".", "_"),
                     _conventionContext.Method.Name);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class BaseTypeDeferredConvention : ImplementationConvention
+        {
+            private readonly MethodCallConventionsContext _conventionContext;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public BaseTypeDeferredConvention(MethodCallConventionsContext conventionContext)
+                : base(Will.InspectDeclaration)
+            {
+                _conventionContext = conventionContext;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override void OnInspectDeclaration(ObjectFactoryContext context)
+            {
+                if (_conventionContext.PromiseResultType != null)
+                {
+                    context.BaseType = typeof(Deferred<>).MakeGenericType(_conventionContext.PromiseResultType);
+                }
+                else if (_conventionContext.PromiseType == null && !_conventionContext.Method.IsVoid())
+                {
+                    context.BaseType = typeof(Deferred<>).MakeGenericType(_conventionContext.Method.ReturnType);
+                }
+                else
+                {
+                    context.BaseType = typeof(Deferred);
+                }
             }
         }
 
@@ -330,7 +403,7 @@ namespace NWheels.Processing.Commands.Factories
                                 }
                                 else
                                 {
-                                    gw.Return(_context.ReturnValueField);
+                                    gw.Return(_context.ReturnValueField.CastTo<object>());
                                 }
                             })
                         )

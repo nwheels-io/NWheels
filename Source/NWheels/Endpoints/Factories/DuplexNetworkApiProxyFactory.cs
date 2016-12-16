@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Hapil;
@@ -12,6 +14,7 @@ using Hapil.Writers;
 using NWheels.Concurrency;
 using NWheels.Concurrency.Core;
 using NWheels.Endpoints.Core;
+using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Processing.Commands;
 using NWheels.Processing.Commands.Factories;
@@ -108,7 +111,63 @@ namespace NWheels.Endpoints.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public abstract class ProxyBase<TRemoteApi, TLocalApi> : IDuplexNetworkEndpointApiProxy
+        public abstract class ProxyBase
+        {
+            private long _lastCorrelationId;
+            private IAnyDeferred _outstandingCall;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Promise<T> RegisterOutstandingCall<T>(IMethodCallObject call)
+            {
+                var correlationId = Interlocked.Increment(ref _lastCorrelationId);
+                var deferred = new Deferred<T>();
+
+                _outstandingCall = deferred;
+                call.CorrelationId = correlationId;
+                
+                return new Promise<T>(deferred);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Promise RegisterOutstandingCall(IMethodCallObject call)
+            {
+                var correlationId = Interlocked.Increment(ref _lastCorrelationId);
+                var deferred = new Deferred();
+
+                _outstandingCall = deferred;
+                call.CorrelationId = correlationId;
+
+                return new Promise(deferred);
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
+            protected IMethodCallObject HandleReturnMessage(long correlationId, CompactDeserializationContext deserializationContext)
+            {
+                IMethodCallObject call = (IMethodCallObject)_outstandingCall;
+                
+                ((IMethodCallObjectSerialization)call).DeserializeOutput(deserializationContext);
+                _outstandingCall.Resolve(call.Result);
+                _outstandingCall = null;
+
+                return call;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected void HandleFaultMessage(long correlationId, string faultCode)
+            {
+                _outstandingCall.Fail(new RemotePartyFaultException(faultCode));
+                _outstandingCall = null;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public abstract class ProxyBase<TRemoteApi, TLocalApi> : ProxyBase, IDuplexNetworkEndpointApiProxy
         {
             private readonly IComponentContext _components;
             private readonly CompactSerializer _serializer;
@@ -116,7 +175,7 @@ namespace NWheels.Endpoints.Factories
             private readonly IMethodCallObjectFactory _callFactory;
             private readonly object _localServer;
             private readonly CompactSerializerDictionary _dictionary;
-            private IDeferred _outstandingCall;
+            private readonly CompactRpcProtocol.HandleReturnMessageCallback _handleReturnMessageCallback;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -133,11 +192,11 @@ namespace NWheels.Endpoints.Factories
                 _callFactory = callFactory;
                 _localServer = localServer;
                 _dictionary = new StaticCompactSerializerDictionary();
+                _handleReturnMessageCallback = this.HandleReturnMessage;
 
                 // ReSharper disable once DoNotCallOverridableMethodsInConstructor
                 OnRegisteringApiContracts(_dictionary);
 
-                _outstandingCall = null;
                 _transport.BytesReceived += OnTransportBytesReceived;
             }
 
@@ -174,17 +233,33 @@ namespace NWheels.Endpoints.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void SetOustandingCall(IDeferred deferred)
+            public void SendReply(IMethodCallObject call, Exception failure)
             {
-                if (_outstandingCall != null)
+                using (var buffer = new MemoryStream())
                 {
-                    //TODO: add support for multiple concurrent promises per connection
-                    throw new InvalidOperationException("Only one concurrent promise is supported per connection.");
-                }
+                    using (var writer = new CompactBinaryWriter(buffer))
+                    {
+                        var context = new CompactSerializationContext(_serializer, _dictionary, writer);
 
-                //var deferred = new Deferred<T>();
-                _outstandingCall = deferred;
-                //return new Promise<T>(deferred);
+                        if (failure == null)
+                        {
+                            CompactRpcProtocol.WriteReturn(call, context);
+                        }
+                        else
+                        {
+                            var fault = failure as IFaultException;
+                            var faultCode = (
+                                fault != null 
+                                ? fault.GetQualifiedFaultCode() 
+                                : CompactRpcProtocol.FaultCodeInternalError);
+
+                            CompactRpcProtocol.WriteFault(call, context, faultCode);
+                        }
+
+                        writer.Flush();
+                        _transport.SendBytes(buffer.ToArray());
+                    }
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -235,17 +310,78 @@ namespace NWheels.Endpoints.Factories
 
             private void OnTransportBytesReceived(byte[] bytes)
             {
+                IMethodCallObject call;
+                object returnValue;
+                string faultCode;
+                long correlationId;
+                var messageType = ReadRpcMessage(bytes, out call, out returnValue, out faultCode, out correlationId);
+
+                switch (messageType)
+                {
+                    case CompactRpcProtocol.RpcMessageType.Call:
+                        HandleCallMessage(call);
+                        break;
+                    case CompactRpcProtocol.RpcMessageType.Return:
+                        //HandleReturnMessage was already invoked from within ReadRpcMessage
+                        //HandleReturnMessage(correlationId, returnValue);
+                        break;
+                    case CompactRpcProtocol.RpcMessageType.Fault:
+                        HandleFaultMessage(correlationId, faultCode);
+                        break;
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void HandleCallMessage(IMethodCallObject call)
+            {
+                Exception failure = null;
+
+                try
+                {
+                    using (DuplexNetworkApi.CurrentCall.UseClientProxy(this))
+                    {
+                        call.ExecuteOn(_localServer);
+                    }
+                }
+                catch (Exception e)
+                {
+                    failure = e;
+                    throw;
+                }
+                finally
+                {
+                    if (call.CorrelationId != CompactRpcProtocol.NoCorrelationId)
+                    {
+                        SendReply(call, failure);
+                    }
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private CompactRpcProtocol.RpcMessageType ReadRpcMessage(
+                byte[] bytes, 
+                out IMethodCallObject call, 
+                out object returnValue, 
+                out string faultCode, 
+                out long correlationId)
+            {
                 using (var buffer = new MemoryStream(bytes))
                 {
                     using (var reader = new CompactBinaryReader(buffer))
                     {
                         var context = new CompactDeserializationContext(_serializer, _dictionary, reader, _components);
-                        var call = CompactRpcProtocol.ReadCall(_callFactory, context);
+                        var messageType = CompactRpcProtocol.ReadRpcMessage(
+                            _callFactory, 
+                            context, 
+                            _handleReturnMessageCallback,
+                            out call, 
+                            out returnValue, 
+                            out faultCode, 
+                            out correlationId);
 
-                        using (DuplexNetworkApi.CurrentCall.UseClientProxy(this))
-                        {
-                            call.ExecuteOn(_localServer);
-                        }
+                        return messageType;
                     }
                 }
             }
@@ -253,10 +389,12 @@ namespace NWheels.Endpoints.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class ProxyConvention : ImplementationConvention
+        internal class ProxyConvention : ImplementationConvention
         {
             private readonly Type _remoteApiContract;
             private readonly Type _localApiContract;
+            private readonly DuplexNetworkApi.ContractDescription _remoteApiDescription;
+            private readonly DuplexNetworkApi.ContractDescription _localApiDescription;
             private readonly Type _baseType;
             private Field<IDuplexNetworkEndpointTransport> _transportField;
             private Field<IMethodCallObjectFactory> _callFactoryField;
@@ -270,6 +408,9 @@ namespace NWheels.Endpoints.Factories
                 _remoteApiContract = typeKey.PrimaryInterface;
                 _localApiContract = typeKey.SecondaryInterfaces[0];
                 _baseType = typeof(ProxyBase<,>).MakeGenericType(_remoteApiContract, _localApiContract);
+
+                _remoteApiDescription = new DuplexNetworkApi.ContractDescription(_remoteApiContract);
+                _localApiDescription = new DuplexNetworkApi.ContractDescription(_localApiContract);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -303,21 +444,15 @@ namespace NWheels.Endpoints.Factories
                         .Method<CompactSerializerDictionary>(x => x.OnRegisteringApiContracts).Implement(WriteApiContractRegistrations);
 
                     writer.ImplementInterface<TT.TContract>()
-                        .AllMethods(where: IsRemotableMethod).Implement(WriteRemoteContractMethod)
-                        .AllEvents().ImplementAutomatic();
+                        .AllMethods(where: m => _remoteApiDescription.Methods.ContainsKey(m)).Implement(WriteRemoteContractMethod)
+                        .AllEvents(where: e => _remoteApiDescription.Events.ContainsKey(e)).ImplementAutomatic(); 
+                    
+                    //TODO: generate local contract event handlers; the handlers will send messages to the remote party.
+                    //TODO: raise remote contract events when corresponding messages arrive from the remote party
                 }
             }
 
             #endregion
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private bool IsRemotableMethod(MethodInfo method)
-            {
-                return (
-                    method.IsVoid() || 
-                    typeof(IPromise).IsAssignableFrom(method.ReturnType));
-            }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -337,6 +472,7 @@ namespace NWheels.Endpoints.Factories
 
             private void WriteRemoteContractMethod(TemplateMethodWriter writer)
             {
+                var description = _remoteApiDescription.Methods[writer.OwnerMethod.MethodDeclaration];
                 var callLocal = writer.Local<IMethodCallObject>();
                 
                 callLocal.Assign(
@@ -348,26 +484,62 @@ namespace NWheels.Endpoints.Factories
                         callLocal.Void(x => x.SetParameterValue, writer.Const(index), arg.CastTo<object>());
                     });
 
-                writer.This<ProxyBase<TT.TContract, TT.TContract2>>().Void(x => x.SendCall, callLocal);
-
-                if (!writer.OwnerMethod.IsVoid && typeof(IPromise).IsAssignableFrom(writer.OwnerMethod.Signature.ReturnType))
+                if (description.IsOneWay)
                 {
-                    // we know that return type is Promise<T>
-                    var resultType = writer.OwnerMethod.Signature.ReturnType.GetGenericArguments()[0];
+                    callLocal.Prop(x => x.CorrelationId).Assign(CompactRpcProtocol.NoCorrelationId);
+                }
+                else
+                {
+                    writer.ReturnValueLocal = writer.Local<TT.TReturn>();
 
-                    using (TT.CreateScope<TT.TReturn, TT.TValue>(writer.OwnerMethod.Signature.ReturnType, resultType))
+                    if (description.PromiseResultType != null)
                     {
-                        var deferredLocal = writer.Local<Deferred<TT.TValue>>(initialValue: writer.New<Deferred<TT.TValue>>());
-                        writer.This<ProxyBase<TT.TContract, TT.TContract2>>().Void(x => x.SetOustandingCall, deferredLocal);
-
-                        var promiseLocal = writer.Local<Promise<TT.TValue>>(initialValue: writer.New<Promise<TT.TValue>>(deferredLocal));
-
-                        writer.Return(promiseLocal.CastTo<TT.TReturn>());
-
-                        //writer.Return(writer.New<TT.TReturn>());
+                        using (TT.CreateScope<TT.TValue>(description.PromiseResultType))
+                        {
+                            writer.ReturnValueLocal.Assign(
+                                writer.This<ProxyBase>()
+                                    .Func<IMethodCallObject, Promise<TT.TValue>>(x => x.RegisterOutstandingCall<TT.TValue>, callLocal)
+                                    .CastTo<TT.TReturn>());
+                        }
+                    }
+                    else
+                    {
+                        writer.ReturnValueLocal.Assign(
+                            writer.This<ProxyBase>()
+                                .Func<IMethodCallObject, Promise>(x => x.RegisterOutstandingCall, callLocal)
+                                .CastTo<TT.TReturn>());
                     }
                 }
+
+                writer.This<ProxyBase<TT.TContract, TT.TContract2>>().Void(x => x.SendCall, callLocal);
+
+                if (!description.IsOneWay)
+                {
+                    writer.Return(writer.ReturnValueLocal);
+                }
+
+                //if (!writer.OwnerMethod.IsVoid && typeof(IAnyPromise).IsAssignableFrom(writer.OwnerMethod.Signature.ReturnType))
+                //{
+                //    // we know that return type is Promise<T>
+                //    var resultType = writer.OwnerMethod.Signature.ReturnType.GetGenericArguments()[0];
+
+                //    using (TT.CreateScope<TT.TReturn, TT.TValue>(writer.OwnerMethod.Signature.ReturnType, resultType))
+                //    {
+                //        var deferredLocal = writer.Local<Deferred<TT.TValue>>(initialValue: writer.New<Deferred<TT.TValue>>());
+                //        writer.This<ProxyBase<TT.TContract, TT.TContract2>>().Void(x => x.SetOustandingCall, deferredLocal);
+
+                //        var promiseLocal = writer.Local<Promise<TT.TValue>>(initialValue: writer.New<Promise<TT.TValue>>(deferredLocal));
+
+                //        writer.Return(promiseLocal.CastTo<TT.TReturn>());
+
+                //        //writer.Return(writer.New<TT.TReturn>());
+                //    }
+                //}
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+
         }
     }
 }

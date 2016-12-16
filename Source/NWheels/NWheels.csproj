@@ -191,6 +191,7 @@
     <Compile Include="Entities\UnitOfWorkScopeOption.cs" />
     <Compile Include="Exceptions\ConventionException.cs" />
     <Compile Include="Exceptions\InternalServerErrorFaultException.cs" />
+    <Compile Include="Exceptions\RemotePartyFaultException.cs" />
     <Compile Include="Extensions\NetworkStreamExtensions.cs" />
     <Compile Include="Extensions\SocketExtensions.cs" />
     <Compile Include="Extensions\QueryableExtensions.cs" />

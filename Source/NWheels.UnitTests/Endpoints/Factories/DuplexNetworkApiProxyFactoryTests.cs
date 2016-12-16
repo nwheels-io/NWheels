@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using NWheels.Concurrency;
 using NWheels.Endpoints;
 using NWheels.Endpoints.Factories;
 using NWheels.Extensions;
+using NWheels.Processing.Commands;
 using NWheels.Testing;
 using Shouldly;
 
@@ -51,7 +55,7 @@ namespace NWheels.UnitTests.Endpoints.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test, Ignore("work in progress")]
+        [Test]
         public void AsyncReturnFromServer()
         {
             //-- arrange
@@ -69,7 +73,6 @@ namespace NWheels.UnitTests.Endpoints.Factories
 
             string returnValue = null;
             Func<Task> doEcho = async () => {
-                await Task.Delay(10);
                 returnValue = await proxyUsedOnClient.ReverseEcho("Hello world");
             };
 
@@ -79,13 +82,13 @@ namespace NWheels.UnitTests.Endpoints.Factories
             
             serverTransport.TestReceiveFromNetwork();
             
-            var finishedTooEarly = doEchoTask.Wait(250);
+            var finishedTooEarly = doEchoTask.Wait(500);
             var earlyClientLog = clientObject.Log.ToArray();
             var earlyServerLog = serverObject.Log.ToArray();
 
             clientTransport.TestReceiveFromNetwork();
 
-            var finishedAsExpected = doEchoTask.Wait(0);
+            var finishedAsExpected = doEchoTask.Wait(10000);
             var lateClientLog = clientObject.Log.ToArray();
             var lateServerLog = serverObject.Log.ToArray();
 
@@ -263,4 +266,112 @@ namespace NWheels.UnitTests.Endpoints.Factories
             }
         }
     }
+
+public class Compiled_MethodCall_Factories_IServerApi_ReverseEcho : IMethodCallObject
+{
+    // Fields
+    private Dictionary<string, JToken> _extensionData = new Dictionary<string, JToken>();
+    private Promise<string> _returnValue;
+    private long m_CorrelationId;
+    private string m_Message;
+
+    // Methods
+    public static object FactoryMethod1()
+    {
+        return new Compiled_MethodCall_Factories_IServerApi_ReverseEcho();
+    }
+
+    void IMethodCallObject.ExecuteOn(object target)
+    {
+        this._returnValue = ((DuplexNetworkApiProxyFactoryTests.IServerApi) target).ReverseEcho(this.m_Message);
+    }
+
+    object IMethodCallObject.GetParameterValue(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                return this.m_Message;
+        }
+        throw new ArgumentOutOfRangeException("Argument index was out of range.");
+    }
+
+    object IMethodCallObject.GetParameterValue(string name)
+    {
+        if (!name.EqualsIgnoreCase("message"))
+        {
+            throw new ArgumentOutOfRangeException("Argument index was out of range.");
+        }
+        return this.m_Message;
+    }
+
+    void IMethodCallObject.SetParameterValue(int index, object value)
+    {
+        switch (index)
+        {
+            case 0:
+                this.m_Message = (string) value;
+                return;
+        }
+        throw new ArgumentOutOfRangeException("Argument index was out of range.");
+    }
+
+    void IMethodCallObject.SetParameterValue(string name, object value)
+    {
+        if (!name.EqualsIgnoreCase("message"))
+        {
+            throw new ArgumentOutOfRangeException("Argument index was out of range.");
+        }
+        this.m_Message = (string) value;
+    }
+
+    // Properties
+    long IMethodCallObject.CorrelationId
+    {
+        get
+        {
+            return this.m_CorrelationId;
+        }
+        set
+        {
+            this.m_CorrelationId = value;
+        }
+    }
+
+    [JsonExtensionData]
+    Dictionary<string, JToken> IMethodCallObject.ExtensionData
+    {
+        get
+        {
+            return this._extensionData;
+        }
+    }
+
+    MethodInfo IMethodCallObject.MethodInfo
+    {
+        get { return null; }
+    }
+
+    object IMethodCallObject.Result
+    {
+        get
+        {
+            return this._returnValue;
+        }
+    }
+
+    public virtual string Message
+    {
+        get
+        {
+            return this.m_Message;
+        }
+        set
+        {
+            this.m_Message = value;
+        }
+    }
+}
+
+
 }

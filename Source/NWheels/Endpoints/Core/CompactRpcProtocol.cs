@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -7,6 +9,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using Hapil;
+using NWheels.Concurrency;
 using NWheels.Processing.Commands;
 using NWheels.Processing.Commands.Factories;
 using NWheels.Serialization;
@@ -15,12 +19,22 @@ namespace NWheels.Endpoints.Core
 {
     public static class CompactRpcProtocol
     {
+        public const long NoCorrelationId = -1;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static readonly string FaultCodeInternalError = "InternalError";
+        public static readonly string FaultCodeRemoteParty = "RemotePartyFault";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static void WriteCall(IMethodCallObject call, CompactSerializationContext context)
         {
             var memberKey = context.Dictionary.LookupMemberKeyOrThrow(call.MethodInfo);
 
             context.Output.Write((byte)RpcMessageType.Call);
             context.Output.Write7BitInt(memberKey);
+            context.Output.Write(call.CorrelationId);
             context.Serializer.WriteObjectContents(call, context);
         }
 
@@ -33,7 +47,16 @@ namespace NWheels.Endpoints.Core
             context.Output.Write((byte)RpcMessageType.Return);
             context.Output.Write7BitInt(memberKey);
             context.Output.Write(call.CorrelationId);
-            context.Serializer.WriteObject(call.MethodInfo.ReturnType, call.Result, context);
+            
+            if (call.CorrelationId != CompactRpcProtocol.NoCorrelationId)
+            {
+                var promise = (IAnyPromise)call.Result;
+                Debug.Assert(promise.IsResolved);
+                if (promise.ResultType != null)
+                {
+                    context.Serializer.WriteObject(promise.ResultType, promise.GetResult(), context);
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,7 +80,16 @@ namespace NWheels.Endpoints.Core
             string faultCode;
             long correlationId;
 
-            var messageType = ReadRpcMessage(callFactory, context, out call, out returnValue, out faultCode, out correlationId);
+            var messageType = ReadRpcMessage(
+                callFactory, 
+                context,
+                (id, ctx) => {
+                    throw new NotSupportedException();
+                },
+                out call, 
+                out returnValue, 
+                out faultCode, 
+                out correlationId);
 
             if (messageType != RpcMessageType.Call)
             {
@@ -69,35 +101,41 @@ namespace NWheels.Endpoints.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
         public static RpcMessageType ReadRpcMessage(
             IMethodCallObjectFactory callFactory, 
             CompactDeserializationContext context,
+            HandleReturnMessageCallback returnMessageHandler,
             out IMethodCallObject call,
             out object returnValue,
             out string returnFaultCode,
-            out long returnCorrelationId)
+            out long correlationId)
         {
             call = null;
             returnValue = null;
             returnFaultCode = null;
-            returnCorrelationId = -1;
 
             var messageType = (RpcMessageType)context.Input.ReadByte();
             var memberKey = context.Input.Read7BitInt();
+            correlationId = context.Input.ReadInt64();
+            
             var method = (MethodInfo)context.Dictionary.LookupMemberOrThrow(memberKey);
 
             switch (messageType)
             {
                 case RpcMessageType.Call:
                     call = callFactory.NewMessageCallObject(method);
-                    context.Serializer.PopulateObject(context, call);
+                    ((IMethodCallObjectSerialization)call).DeserializeInput(context);
+                    //context.Serializer.PopulateObject(context, call);
                     break;
                 case RpcMessageType.Return:
-                    returnCorrelationId = context.Input.ReadInt64();
-                    returnValue = context.Serializer.ReadObject(method.ReturnType, context);
+                    call = returnMessageHandler(correlationId, context);
+                    //if (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition() == typeof(Promise<>))
+                    //{
+                    //    returnValue = context.Serializer.ReadObject(method.ReturnType, context);
+                    //}
                     break;
                 case RpcMessageType.Fault:
-                    returnCorrelationId = context.Input.ReadInt64();
                     returnFaultCode = context.Input.ReadStringOrNull();
                     break;
                 default:
@@ -115,6 +153,10 @@ namespace NWheels.Endpoints.Core
             Return = 1,
             Fault = 2
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public delegate IMethodCallObject HandleReturnMessageCallback(long correlationId, CompactDeserializationContext deserializationContext);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

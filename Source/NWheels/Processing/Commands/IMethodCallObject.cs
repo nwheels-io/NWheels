@@ -2,6 +2,7 @@
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NWheels.Serialization;
 
 namespace NWheels.Processing.Commands
 {
@@ -18,5 +19,15 @@ namespace NWheels.Processing.Commands
         long CorrelationId { get; set; }
         [JsonExtensionData]
         Dictionary<string, JToken> ExtensionData { get; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface IMethodCallObjectSerialization
+    {
+        void SerializeInput(CompactSerializationContext context);
+        void SerializeOutput(CompactSerializationContext context);
+        void DeserializeInput(CompactDeserializationContext context);
+        void DeserializeOutput(CompactDeserializationContext context);
     }
 }

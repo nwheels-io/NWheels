@@ -4,11 +4,16 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Exceptions;
 
 namespace NWheels.Extensions
 {
     public static class ExceptionExtensions
     {
+        public static readonly string FaultCodeUnknown = "Unknown";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static string GetMessageDeep(this Exception exception)
         {
             var text = new StringBuilder();
@@ -53,6 +58,53 @@ namespace NWheels.Extensions
             }
 
             return e;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetQualifiedFaultCode(this IFaultException fault)
+        {
+            var qualified = new StringBuilder(capacity: 64);
+            
+            var type = fault.FaultType;
+            var code = fault.FaultCode;
+            var subCode = fault.FaultSubCode;
+
+            var hasType = string.IsNullOrEmpty(type);
+            var hasCode = string.IsNullOrEmpty(code);
+            var hasSubCode = string.IsNullOrEmpty(subCode);
+
+            if (hasType)
+            {
+                qualified.Append(fault.FaultType);
+            }
+
+            if (hasCode)
+            {
+                if (qualified.Length > 0)
+                {
+                    qualified.Append('/');
+                }
+
+                qualified.Append(code);
+            }
+
+            if (hasSubCode)
+            {
+                if (qualified.Length > 0)
+                {
+                    qualified.Append('/');
+                }
+
+                qualified.Append(subCode);
+            }
+
+            if (qualified.Length > 0)
+            {
+                return qualified.ToString();
+            }
+
+            return FaultCodeUnknown;
         }
     }
 }

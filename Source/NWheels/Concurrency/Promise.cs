@@ -8,7 +8,108 @@ using System.Threading.Tasks;
 
 namespace NWheels.Concurrency
 {
-    public struct Promise<T> : IPromise
+    public struct Promise : IAnyPromise
+    {
+        private readonly IDeferred _deferred;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Promise(IDeferred deferred)
+        {
+            _deferred = deferred;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Promise Then(Action onSuccess, Action onFailure = null, Action onTimeout = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Promise ConfigureAwait(TimeSpan? timeout = null, CancellationToken? cancellation = null)
+        {
+            if (_deferred != null)
+            {
+                _deferred.Configure(timeout: timeout, cancellation: cancellation);
+            }
+
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public PromiseAwaiter GetAwaiter()
+        {
+            return new PromiseAwaiter(_deferred);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        object IAnyPromise.GetResult()
+        {
+            return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Type IAnyPromise.ResultType
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsResolved
+        {
+            get
+            {
+                if (_deferred != null)
+                {
+                    return _deferred.IsResolved;
+                }
+
+                return true;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Exception Error
+        {
+            get
+            {
+                if (_deferred != null)
+                {
+                    return _deferred.Error;
+                }
+
+                return null;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static Promise Resolved()
+        {
+            return new Promise();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static Promise<T> Resolved<T>(T value)
+        {
+            return new Promise<T>(value);
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public struct Promise<T> : IAnyPromise
     {
         private readonly IDeferred<T> _deferred;
         private readonly T _value;
@@ -57,9 +158,19 @@ namespace NWheels.Concurrency
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        object IPromise.GetValue()
+        object IAnyPromise.GetResult()
         {
             return this.Value;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Type IAnyPromise.ResultType
+        {
+            get
+            {
+                return typeof(T);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -109,41 +220,6 @@ namespace NWheels.Concurrency
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //public T Value
-        //{
-        //    get
-        //    {
-        //        if (!_resolved)
-        //        {
-        //            throw new InvalidOperationException("Cannot retrieve Value because current Promise is not yet resolved.");
-        //        }
-
-        //        if (_error != null)
-        //        {
-        //            throw _error;
-        //        }
-
-        //        return _value;
-        //    }
-        //}
-
-        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        //public Exception Error
-        //{
-        //    get
-        //    {
-        //        if (!_resolved)
-        //        {
-        //            throw new InvalidOperationException("Cannot retrieve Error because current Promise is not yet resolved.");
-        //        }
-
-        //        return _error;
-        //    }
-        //}
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public static implicit operator Promise<T>(T value)
         {
             return new Promise<T>();
@@ -152,9 +228,33 @@ namespace NWheels.Concurrency
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IPromise
+    public interface IAnyPromise
     {
-        object GetValue();
+        object GetResult();
+        Type ResultType { get; }
+        bool IsResolved { get; }
+        Exception Error { get; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface IAnyDeferred
+    {
+        void Resolve(object result);
+        void Fail(Exception error);
+        Type ResultType { get; }
+        object Result { get; }
+        bool IsResolved { get; }
+        Exception Error { get; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface IDeferred
+    {
+        void Resolve();
+        void Fail(Exception error);
+        void Configure(Action continuation = null, TimeSpan? timeout = null, CancellationToken? cancellation = null);
         bool IsResolved { get; }
         Exception Error { get; }
     }
@@ -173,13 +273,62 @@ namespace NWheels.Concurrency
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IDeferred
+    public struct PromiseAwaiter : INotifyCompletion
     {
-        void Resolve(object result);
-        void Fail(Exception error);
-        object Result { get; }
-        bool IsResolved { get; }
-        Exception Error { get; }
+        private readonly IDeferred _deferred;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public PromiseAwaiter(IDeferred deferred)
+        {
+            _deferred = deferred;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Implementation of INotifyCompletion
+
+        public void OnCompleted(Action continuation)
+        {
+            if (_deferred != null)
+            {
+                _deferred.Configure(continuation: continuation);
+            }
+            else
+            {
+                throw new InvalidOperationException("Current awaiter cannot be assigned continuation because it completed synchronously.");
+            }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void GetResult()
+        {
+            if (_deferred != null)
+            {
+                if (_deferred.Error != null)
+                {
+                    throw _deferred.Error;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsCompleted
+        {
+            get
+            {
+                if (_deferred != null)
+                {
+                    return _deferred.IsResolved;
+                }
+
+                return true;
+            }
+        }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

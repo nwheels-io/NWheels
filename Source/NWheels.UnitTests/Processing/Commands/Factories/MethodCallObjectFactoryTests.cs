@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using NWheels.Concurrency;
+using NWheels.Concurrency.Core;
 using NWheels.Extensions;
 using NWheels.Logging;
 using NWheels.Processing.Commands.Factories;
@@ -267,6 +269,82 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void VoidMethodCallObjectIsDeferred()
+        {
+            //-- arrange
+
+            var factoryUnderTest = new MethodCallObjectFactory(base.DyamicModule);
+            var methodThreeInfo = typeof(TestTarget).GetMethod("MethodOne");
+
+            //-- act 
+
+            var call = factoryUnderTest.NewMessageCallObject(methodThreeInfo);
+
+            //-- assert
+
+            call.ShouldBeAssignableTo<Deferred>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void NonVoidMethodCallObjectIsDeferredOfReturnType()
+        {
+            //-- arrange
+
+            var factoryUnderTest = new MethodCallObjectFactory(base.DyamicModule);
+            var methodTwoInfo = typeof(TestTarget).GetMethod("MethodTwo");
+
+            //-- act 
+
+            var call = factoryUnderTest.NewMessageCallObject(methodTwoInfo);
+
+            //-- assert
+
+            call.ShouldBeAssignableTo<Deferred<string>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void VoidPromiseMethodCallObjectIsDeferred()
+        {
+            //-- arrange
+
+            var factoryUnderTest = new MethodCallObjectFactory(base.DyamicModule);
+            var methodThreeInfo = typeof(TestAsyncTarget).GetMethod("MethodOne");
+
+            //-- act 
+
+            var call = factoryUnderTest.NewMessageCallObject(methodThreeInfo);
+
+            //-- assert
+
+            call.ShouldBeAssignableTo<Deferred>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void NonVoidPromiseMethodCallObjectIsDeferredOfReturnType()
+        {
+            //-- arrange
+
+            var factoryUnderTest = new MethodCallObjectFactory(base.DyamicModule);
+            var methodThreeInfo = typeof(TestAsyncTarget).GetMethod("MethodThree");
+
+            //-- act 
+
+            var call = factoryUnderTest.NewMessageCallObject(methodThreeInfo);
+
+            //-- assert
+
+            call.ShouldBeAssignableTo<Deferred<DateTime>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public interface ITestTargetLogger : IApplicationEventLogger
         {
             [LogInfo]
@@ -275,6 +353,8 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             void MethodTwo(int num);
             [LogInfo]
             void MethodThree(int num, string str);
+            [LogInfo]
+            void MethodFour(int num, string str);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -310,6 +390,65 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             public void MethodThree(int num, string str)
             {
                 _logger.MethodThree(num, str);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class TestAsyncTarget
+        {
+            private readonly ITestTargetLogger _logger;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TestAsyncTarget(ITestTargetLogger logger)
+            {
+                _logger = logger;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Promise MethodOne()
+            {
+                _logger.MethodOne();
+                return Promise.Resolved();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Promise<string> MethodTwo(int num)
+            {
+                _logger.MethodTwo(num);
+                return (num * 2).ToString();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Promise<DateTime> MethodThree(int num, string str)
+            {
+                _logger.MethodThree(num, str);
+                return new DateTime(2012, 11, 10, 0, 0, 0);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Promise<FourResult> MethodFour(int num, string str)
+            {
+                _logger.MethodFour(num, str);
+                return new FourResult() {
+                    Num = num,
+                    Str = str,
+                    Date = new DateTime(2013, 12, 11, 0, 0, 0)
+                };
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class FourResult
+            {
+                public int Num { get; set; }
+                public string Str { get; set; }
+                public DateTime Date { get; set; }
             }
         }
     }
