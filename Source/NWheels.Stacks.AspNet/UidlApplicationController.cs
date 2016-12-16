@@ -578,7 +578,7 @@ namespace NWheels.Stacks.AspNet
 
                         if (download == null)
                         {
-                            var visualization = (IVisualizedQueryable)queryCommand.Result.Result;
+                            var visualization = queryCommand.Result.Result as IVisualizedQueryable;
                             var query = (IQueryable)queryCommand.Result.Result;
                             exportCommand = new DocumentFormatRequestMessage(
                                 _framework,
