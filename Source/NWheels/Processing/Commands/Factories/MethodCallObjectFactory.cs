@@ -75,6 +75,42 @@ namespace NWheels.Processing.Commands.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static void DeterminePromiseType(MethodInfo method, out Type promiseType, out Type promiseTypeDefinition, out Type promiseResultType)
+        {
+            promiseType = null;
+            promiseTypeDefinition = null;
+            promiseResultType = null;
+
+            if (method.IsVoid())
+            {
+                return;
+            }
+
+            if (method.ReturnType == typeof(Promise) || method.ReturnType == typeof(Task))
+            {
+                promiseType = method.ReturnType;
+                return;
+            }
+
+            if (!method.ReturnType.IsGenericType)
+            {
+                return;
+            }
+
+            var returnTypeDefinition = method.ReturnType.GetGenericTypeDefinition();
+
+            if (returnTypeDefinition != typeof(Promise<>) && returnTypeDefinition != typeof(Task<>))
+            {
+                return;
+            }
+
+            promiseType = method.ReturnType;
+            promiseTypeDefinition = returnTypeDefinition;
+            promiseResultType = promiseType.GenericTypeArguments[0];
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class MethodCallConventionsContext
         {
             public MethodCallConventionsContext(MethodInfo method)
@@ -84,7 +120,7 @@ namespace NWheels.Processing.Commands.Factories
                 this.Parameters = method.GetParameters();
                 this.ParameterFields = new Field<TypeTemplate.TProperty>[this.Parameters.Length];
 
-                DeterminePromiseType();
+                SetPromiseType();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -115,34 +151,21 @@ namespace NWheels.Processing.Commands.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
             
-            private void DeterminePromiseType()
+            private void SetPromiseType()
             {
-                if (Method.IsVoid())
-                {
-                    return;
-                }
+                Type promise;
+                Type definition;
+                Type result;
+                
+                DeterminePromiseType(
+                    this.Method, 
+                    promiseType: out promise,
+                    promiseTypeDefinition: out definition,
+                    promiseResultType: out result);
 
-                if (Method.ReturnType == typeof(Promise) || Method.ReturnType == typeof(Task))
-                {
-                    PromiseType = Method.ReturnType;
-                    return;
-                }
-
-                if (!Method.ReturnType.IsGenericType)
-                {
-                    return;
-                }
-
-                var returnTypeDefinition = Method.ReturnType.GetGenericTypeDefinition();
-
-                if (returnTypeDefinition != typeof(Promise<>) && returnTypeDefinition != typeof(Task<>))
-                {
-                    return;
-                }
-
-                PromiseType = Method.ReturnType;
-                PromiseTypeDefinition = returnTypeDefinition;
-                PromiseResultType = PromiseType.GenericTypeArguments[0];
+                PromiseType = promise;
+                PromiseTypeDefinition = definition;
+                PromiseResultType = result;
             }
         }
 
@@ -284,6 +307,7 @@ namespace NWheels.Processing.Commands.Factories
                 _context.ExtensionDataField = writer.Field<Dictionary<string, JToken>>("$extensionData");
 
                 writer.DefaultConstructor(w => {
+                    w.Base();
                     _context.ExtensionDataField.Assign(w.New<Dictionary<string, JToken>>());
                 });
             }

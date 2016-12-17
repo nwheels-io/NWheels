@@ -23,6 +23,31 @@ namespace NWheels.UnitTests.Endpoints.Factories
     public class DuplexNetworkApiProxyFactoryTests : DynamicTypeUnitTestBase
     {
         [Test]
+        public void TestTaskCompletionSource()
+        {
+            //-- arrange
+
+            var producerCompletionSource = new TaskCompletionSource<string>();
+
+            string returnValue = null;
+            Func<Task> doConsume = async () => {
+                returnValue = await producerCompletionSource.Task;
+            };
+
+            //-- act & assert
+
+            var consumerTask = doConsume();
+            consumerTask.Wait(500).ShouldBe(false);
+
+            producerCompletionSource.SetResult("ABC");
+            consumerTask.Wait(0).ShouldBe(true);
+
+            returnValue.ShouldBe("ABC");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
         public void PingPong()
         {
             //-- arrange
@@ -56,7 +81,7 @@ namespace NWheels.UnitTests.Endpoints.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void AsyncReturnFromServer()
+        public void AsyncInvocationWithTask()
         {
             //-- arrange
 
@@ -69,20 +94,20 @@ namespace NWheels.UnitTests.Endpoints.Factories
             var serverObject = new ServerApiImplementation();
 
             var proxyUsedByListenerOnServer = proxyFactory.CreateProxyInstance<IClientApi, IServerApi>(serverTransport, serverObject);
-            var proxyUsedOnClient = proxyFactory.CreateProxyInstance<IServerApi, IClientApi>(clientTransport, clientObject);
+            //var proxyUsedOnClient = proxyFactory.CreateProxyInstance<IServerApi, IClientApi>(clientTransport, clientObject);
 
             string returnValue = null;
             Func<Task> doEcho = async () => {
-                returnValue = await proxyUsedOnClient.ReverseEcho("Hello world");
+                returnValue = await clientObject.Server.ReverseEcho("Hello world");
             };
 
             //-- act
 
-            var doEchoTask = doEcho();
+            var doEchoTask = doEcho(); // returns after it begins await for completion of the call to server
             
             serverTransport.TestReceiveFromNetwork();
             
-            var finishedTooEarly = doEchoTask.Wait(500);
+            var finishedTooEarly = doEchoTask.Wait(500); // should return false as the task is awaiting for server reply
             var earlyClientLog = clientObject.Log.ToArray();
             var earlyServerLog = serverObject.Log.ToArray();
 
@@ -106,9 +131,6 @@ namespace NWheels.UnitTests.Endpoints.Factories
             lateServerLog.ShouldBe(new[] {
                 "ServerApiImplementation.ReverseEcho(Hello world)"
             });
-            lateClientLog.ShouldBe(new[] {
-                "???"
-            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -116,7 +138,7 @@ namespace NWheels.UnitTests.Endpoints.Factories
         public interface IServerApi
         {
             void Ping(string message);
-            Promise<string> ReverseEcho(string message);
+            Task<string> ReverseEcho(string message);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -148,9 +170,12 @@ namespace NWheels.UnitTests.Endpoints.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            Promise<string> IServerApi.ReverseEcho(string message)
+            Task<string> IServerApi.ReverseEcho(string message)
             {
-                return new string(message.Reverse().ToArray(), 0, message.Length);
+                Log.Add("ServerApiImplementation.ReverseEcho(" + message + ")");
+
+                var result = new string(message.Reverse().ToArray(), 0, message.Length);
+                return Task.FromResult(result);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -191,6 +216,20 @@ namespace NWheels.UnitTests.Endpoints.Factories
             public void TestPing(string message)
             {
                 _server.Ping(message);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public async Task<string> TestReverseEcho(string message)
+            {
+                return await _server.ReverseEcho(message);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IServerApi Server
+            {
+                get { return _server; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -118,28 +119,50 @@ namespace NWheels.Endpoints.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public Promise<T> RegisterOutstandingCall<T>(IMethodCallObject call)
+            public Promise<T> RegisterOutstandingCallAsPromise<T>(IMethodCallObject call)
             {
                 var correlationId = Interlocked.Increment(ref _lastCorrelationId);
-                var deferred = new Deferred<T>();
-
-                _outstandingCall = deferred;
                 call.CorrelationId = correlationId;
+
+                _outstandingCall = (IAnyDeferred)call;
                 
-                return new Promise<T>(deferred);
+                return new Promise<T>((IDeferred<T>)call);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public Promise RegisterOutstandingCall(IMethodCallObject call)
+            public Promise RegisterOutstandingCallAsPromise(IMethodCallObject call)
             {
                 var correlationId = Interlocked.Increment(ref _lastCorrelationId);
-                var deferred = new Deferred();
-
-                _outstandingCall = deferred;
                 call.CorrelationId = correlationId;
 
-                return new Promise(deferred);
+                _outstandingCall = (IAnyDeferred)call;
+
+                return new Promise((IDeferred)call);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Task<T> RegisterOutstandingCallAsTask<T>(IMethodCallObject call)
+            {
+                var correlationId = Interlocked.Increment(ref _lastCorrelationId);
+                call.CorrelationId = correlationId;
+
+                _outstandingCall = (IAnyDeferred)call;
+
+                return ((TaskBasedDeferred<T>)call).Task;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Task RegisterOutstandingCallAsTask(IMethodCallObject call)
+            {
+                var correlationId = Interlocked.Increment(ref _lastCorrelationId);
+                call.CorrelationId = correlationId;
+
+                _outstandingCall = (IAnyDeferred)call;
+
+                return ((TaskBasedDeferred)call).Task;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -490,25 +513,7 @@ namespace NWheels.Endpoints.Factories
                 }
                 else
                 {
-                    writer.ReturnValueLocal = writer.Local<TT.TReturn>();
-
-                    if (description.PromiseResultType != null)
-                    {
-                        using (TT.CreateScope<TT.TValue>(description.PromiseResultType))
-                        {
-                            writer.ReturnValueLocal.Assign(
-                                writer.This<ProxyBase>()
-                                    .Func<IMethodCallObject, Promise<TT.TValue>>(x => x.RegisterOutstandingCall<TT.TValue>, callLocal)
-                                    .CastTo<TT.TReturn>());
-                        }
-                    }
-                    else
-                    {
-                        writer.ReturnValueLocal.Assign(
-                            writer.This<ProxyBase>()
-                                .Func<IMethodCallObject, Promise>(x => x.RegisterOutstandingCall, callLocal)
-                                .CastTo<TT.TReturn>());
-                    }
+                    WriteRegisterOutstandingCall(writer, description, callLocal);
                 }
 
                 writer.This<ProxyBase<TT.TContract, TT.TContract2>>().Void(x => x.SendCall, callLocal);
@@ -539,7 +544,51 @@ namespace NWheels.Endpoints.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            private void WriteRegisterOutstandingCall(
+                TemplateMethodWriter writer, 
+                DuplexNetworkApi.MemberDescription description, 
+                Local<IMethodCallObject> callLocal)
+            {
+                writer.ReturnValueLocal = writer.Local<TT.TReturn>();
 
+                if (description.PromiseResultType != null)
+                {
+                    using (TT.CreateScope<TT.TValue>(description.PromiseResultType))
+                    {
+                        if (description.PromiseTypeDefinition == typeof(Promise<>))
+                        {
+                            writer.ReturnValueLocal.Assign(
+                                writer.This<ProxyBase>()
+                                    .Func<IMethodCallObject, Promise<TT.TValue>>(x => x.RegisterOutstandingCallAsPromise<TT.TValue>, callLocal)
+                                    .CastTo<TT.TReturn>());
+                        }
+                        else if (description.PromiseTypeDefinition == typeof(Task<>))
+                        {
+                            writer.ReturnValueLocal.Assign(
+                                writer.This<ProxyBase>()
+                                    .Func<IMethodCallObject, Task<TT.TValue>>(x => x.RegisterOutstandingCallAsTask<TT.TValue>, callLocal)
+                                    .CastTo<TT.TReturn>());
+                        }
+                        else
+                        {
+                            Debug.Assert(false);
+                        }
+                    }
+                }
+                else
+                {
+                    if (description.PromiseType == typeof(Promise))
+                    {
+                        writer.ReturnValueLocal.Assign(
+                            writer.This<ProxyBase>().Func<IMethodCallObject, Promise>(x => x.RegisterOutstandingCallAsPromise, callLocal).CastTo<TT.TReturn>());
+                    }
+                    else if (description.PromiseType == typeof(Task))
+                    {
+                        writer.ReturnValueLocal.Assign(
+                            writer.This<ProxyBase>().Func<IMethodCallObject, Task>(x => x.RegisterOutstandingCallAsTask, callLocal).CastTo<TT.TReturn>());
+                    }
+                }
+            }
         }
     }
 }

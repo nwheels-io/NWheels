@@ -89,7 +89,16 @@ namespace NWheels.Concurrency.Core
 
         void IAnyDeferred.Resolve(object result)
         {
-            base.SetResult((T)result);
+            var resultAsTask = (result as Task<T>);
+
+            if (resultAsTask != null)
+            {
+                base.SetResult(resultAsTask.Result);
+            }
+            else
+            {
+                base.SetResult((T)result);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

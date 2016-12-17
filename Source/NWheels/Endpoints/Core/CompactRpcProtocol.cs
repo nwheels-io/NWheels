@@ -119,6 +119,7 @@ namespace NWheels.Endpoints.Core
             {
                 case RpcMessageType.Call:
                     call = callFactory.NewMessageCallObject(method);
+                    call.CorrelationId = correlationId;
                     call.Serializer.DeserializeInput(context);
                     break;
                 case RpcMessageType.Return:

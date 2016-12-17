@@ -9,6 +9,7 @@ using Hapil.Members;
 using NWheels.Concurrency;
 using NWheels.Endpoints.Factories;
 using NWheels.Exceptions;
+using NWheels.Processing.Commands.Factories;
 
 namespace NWheels.Endpoints
 {
@@ -169,11 +170,7 @@ namespace NWheels.Endpoints
                 this.EventInfo = null;
                 this.IsOneWay = member.IsVoid();
 
-                if (!member.IsVoid() && member.ReturnType.IsGenericType && member.ReturnType.GetGenericTypeDefinition() == typeof(Promise<>))
-                {
-                    this.PromiseResultType = member.ReturnType.GetGenericArguments()[0];
-                }
-
+                SetPromiseType();
                 DetermineSessionBehavior(member);
             }
 
@@ -190,6 +187,8 @@ namespace NWheels.Endpoints
             public ContractDescription DeclaringContract { get; private set; }
             public MethodInfo MethodInfo { get; private set; }
             public EventInfo EventInfo { get; private set; }
+            public Type PromiseType { get; private set; }
+            public Type PromiseTypeDefinition { get; private set; }
             public Type PromiseResultType { get; private set; }
             public bool IsOneWay { get; private set; }
             public bool IsSessionInitiator { get; private set; }
@@ -200,9 +199,11 @@ namespace NWheels.Endpoints
 
             private void ValidateRemotableMethod(MethodInfo methodInfo)
             {
-                if (!methodInfo.IsVoid() && !typeof(IAnyPromise).IsAssignableFrom(methodInfo.ReturnType))
+                if (!methodInfo.IsVoid() && 
+                    !typeof(IAnyPromise).IsAssignableFrom(methodInfo.ReturnType) && 
+                    !typeof(Task).IsAssignableFrom(methodInfo.ReturnType))
                 {
-                    throw NewContractConventionException(methodInfo, "Method must either be void or return a Promise");
+                    throw NewContractConventionException(methodInfo, "Method must either be void or return a Promise or Task");
                 }
 
                 if (methodInfo.GetParameters().Any(p => p.IsOut || p.ParameterType.IsByRef))
@@ -221,6 +222,25 @@ namespace NWheels.Endpoints
             private void ValidateRemotableEvent(EventInfo eventInfo)
             {
                 throw NewContractConventionException(eventInfo, "Events are not yet supported");
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void SetPromiseType()
+            {
+                Type promise;
+                Type definition;
+                Type result;
+
+                MethodCallObjectFactory.DeterminePromiseType(
+                    this.MethodInfo,
+                    promiseType: out promise,
+                    promiseTypeDefinition: out definition,
+                    promiseResultType: out result);
+
+                PromiseType = promise;
+                PromiseTypeDefinition = definition;
+                PromiseResultType = result;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

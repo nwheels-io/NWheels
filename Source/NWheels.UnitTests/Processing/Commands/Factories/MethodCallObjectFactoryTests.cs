@@ -365,6 +365,7 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             //-- assert
 
             call.ShouldBeAssignableTo<TaskBasedDeferred>();
+            ((TaskBasedDeferred)call).Task.ShouldNotBeNull();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -384,6 +385,7 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             //-- assert
 
             call.ShouldBeAssignableTo<TaskBasedDeferred<DateTime>>();
+            ((TaskBasedDeferred<DateTime>)call).Task.ShouldNotBeNull();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
