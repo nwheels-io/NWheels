@@ -15,6 +15,7 @@ namespace NWheels.Processing.Commands
         void SetParameterValue(int index, object value);
         void SetParameterValue(string name, object value);
         MethodInfo MethodInfo { get; }
+        IMethodCallSerializerObject Serializer { get; }
         object Result { get; }
         long CorrelationId { get; set; }
         [JsonExtensionData]
@@ -23,7 +24,7 @@ namespace NWheels.Processing.Commands
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IMethodCallObjectSerialization
+    public interface IMethodCallSerializerObject
     {
         void SerializeInput(CompactSerializationContext context);
         void SerializeOutput(CompactSerializationContext context);

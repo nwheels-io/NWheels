@@ -139,6 +139,7 @@
     <Compile Include="Client\IntIdGeneratorMetadataConvention.cs" />
     <Compile Include="Concurrency\ContextAnchor.cs" />
     <Compile Include="Concurrency\Core\Deferred.cs" />
+    <Compile Include="Concurrency\Core\TaskBasedDeferred.cs" />
     <Compile Include="Concurrency\Impl\ITimeoutManagerLogger.cs" />
     <Compile Include="Concurrency\Impl\TimeoutManager.cs" />
     <Compile Include="Concurrency\Impl\WriteOnlyCollectionWrapper.cs" />

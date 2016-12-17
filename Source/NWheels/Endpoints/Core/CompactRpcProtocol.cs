@@ -35,7 +35,7 @@ namespace NWheels.Endpoints.Core
             context.Output.Write((byte)RpcMessageType.Call);
             context.Output.Write7BitInt(memberKey);
             context.Output.Write(call.CorrelationId);
-            context.Serializer.WriteObjectContents(call, context);
+            call.Serializer.SerializeInput(context);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,12 +50,7 @@ namespace NWheels.Endpoints.Core
             
             if (call.CorrelationId != CompactRpcProtocol.NoCorrelationId)
             {
-                var promise = (IAnyPromise)call.Result;
-                Debug.Assert(promise.IsResolved);
-                if (promise.ResultType != null)
-                {
-                    context.Serializer.WriteObject(promise.ResultType, promise.GetResult(), context);
-                }
+                call.Serializer.SerializeOutput(context);
             }
         }
 
@@ -101,7 +96,6 @@ namespace NWheels.Endpoints.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
         public static RpcMessageType ReadRpcMessage(
             IMethodCallObjectFactory callFactory, 
             CompactDeserializationContext context,
@@ -125,15 +119,10 @@ namespace NWheels.Endpoints.Core
             {
                 case RpcMessageType.Call:
                     call = callFactory.NewMessageCallObject(method);
-                    ((IMethodCallObjectSerialization)call).DeserializeInput(context);
-                    //context.Serializer.PopulateObject(context, call);
+                    call.Serializer.DeserializeInput(context);
                     break;
                 case RpcMessageType.Return:
                     call = returnMessageHandler(correlationId, context);
-                    //if (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition() == typeof(Promise<>))
-                    //{
-                    //    returnValue = context.Serializer.ReadObject(method.ReturnType, context);
-                    //}
                     break;
                 case RpcMessageType.Fault:
                     returnFaultCode = context.Input.ReadStringOrNull();

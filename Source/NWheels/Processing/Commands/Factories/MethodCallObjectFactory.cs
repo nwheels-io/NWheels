@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -14,15 +15,22 @@ using NWheels.Concurrency;
 using NWheels.Concurrency.Core;
 using NWheels.Extensions;
 using NWheels.Processing.Commands.Impl;
+using NWheels.Serialization;
+using NWheels.Serialization.Factories;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Processing.Commands.Factories
 {
     public class MethodCallObjectFactory : ConventionObjectFactory, IMethodCallObjectFactory
     {
-        public MethodCallObjectFactory(DynamicModule module)
+        private readonly CompactSerializerFactory _serializerFactory;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MethodCallObjectFactory(DynamicModule module, CompactSerializerFactory serializerFactory)
             : base(module)
         {
+            _serializerFactory = serializerFactory;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,7 +66,8 @@ namespace NWheels.Processing.Commands.Factories
                 new ClassNameConvention(conventionsContext),
                 new ConstructorConvention(conventionsContext),
                 new ParameterPropertiesConvention(conventionsContext),
-                new ImplementIMethodCallObjectConvention(conventionsContext)
+                new ImplementIMethodCallObjectConvention(conventionsContext),
+                new ImplementIMethodCallSerializerObjectConvention(conventionsContext)
             };
         }
 
@@ -84,11 +93,25 @@ namespace NWheels.Processing.Commands.Factories
             public Type TargetType { get; private set; }
             public ParameterInfo[] Parameters { get; private set; }
             public Field<TT.TProperty>[] ParameterFields { get; private set; }
-            public Field<TT.TReturn> ReturnValueField { get; set; }
+            public Field<TT.TReply> ReturnValueField { get; set; }
             public Field<Dictionary<string, JToken>> ExtensionDataField { get; set; }
             public Type PromiseType { get; private set; }
             public Type PromiseTypeDefinition { get; private set; }
             public Type PromiseResultType { get; private set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool HasOutput
+            {
+                get
+                {
+                    var result = (
+                        !Method.IsVoid() &&
+                        (PromiseType == null || PromiseResultType != null));
+
+                    return result;
+                }
+            }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
             
@@ -215,7 +238,15 @@ namespace NWheels.Processing.Commands.Factories
 
             protected override void OnInspectDeclaration(ObjectFactoryContext context)
             {
-                if (_conventionContext.PromiseResultType != null)
+                if (_conventionContext.PromiseType == typeof(Task))
+                {
+                    context.BaseType = typeof(TaskBasedDeferred);
+                }
+                else if (_conventionContext.PromiseTypeDefinition == typeof(Task<>))
+                {
+                    context.BaseType = typeof(TaskBasedDeferred<>).MakeGenericType(_conventionContext.PromiseResultType);
+                }
+                else if (_conventionContext.PromiseResultType != null)
                 {
                     context.BaseType = typeof(Deferred<>).MakeGenericType(_conventionContext.PromiseResultType);
                 }
@@ -327,10 +358,10 @@ namespace NWheels.Processing.Commands.Factories
                             }
                             else
                             {
-                                using ( TT.CreateScope<TT.TReturn>(_context.Method.ReturnType) )
+                                using ( TT.CreateScope<TT.TReply>(_context.Method.ReturnType) )
                                 {
-                                    _context.ReturnValueField = writer.Field<TT.TReturn>("$returnValue");
-                                    _context.ReturnValueField.Assign(target.CastTo<TT.TService>().Func<TT.TReturn>(_context.Method, callArguments));
+                                    _context.ReturnValueField = writer.Field<TT.TReply>("$returnValue");
+                                    _context.ReturnValueField.Assign(target.CastTo<TT.TService>().Func<TT.TReply>(_context.Method, callArguments));
                                 }
                             }
                         })
@@ -395,6 +426,11 @@ namespace NWheels.Processing.Commands.Factories
                                 gw.Return(gw.Const<MethodInfo>(_context.Method));                        
                             })
                         )
+                        .Property(intf => intf.Serializer).Implement(p =>
+                            p.Get(gw => {
+                                gw.Return(gw.This<IMethodCallSerializerObject>());
+                            })
+                        )
                         .Property(intf => intf.Result).Implement(p => 
                             p.Get(gw => {
                                 if ( _context.Method.IsVoid() )
@@ -418,6 +454,204 @@ namespace NWheels.Processing.Commands.Factories
             }
 
             #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ImplementIMethodCallSerializerObjectConvention : ImplementationConvention
+        {
+            private readonly MethodCallConventionsContext _conventionContext;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ImplementIMethodCallSerializerObjectConvention(MethodCallConventionsContext conventionContext)
+                : base(Will.ImplementBaseClass)
+            {
+                _conventionContext = conventionContext;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of ImplementationConvention
+
+            protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
+            {
+                using (TT.CreateScope<TT.TReply, TT.TItem>(_conventionContext.Method.ReturnType, _conventionContext.PromiseResultType))
+                {
+                    var impl = writer.ImplementInterfaceExplicitly<IMethodCallSerializerObject>();
+
+                    impl.Method<CompactSerializationContext>(x => x.SerializeInput).Implement(WriteSerializeInput);
+                    impl.Method<CompactSerializationContext>(x => x.SerializeOutput).Implement(WriteSerializeOutput);
+                    impl.Method<CompactDeserializationContext>(x => x.DeserializeInput).Implement(WriteDeserializeInput);
+                    impl.Method<CompactDeserializationContext>(x => x.DeserializeOutput).Implement(WriteDeserializeOutput);
+                }
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            private void WriteSerializeInput(VoidMethodWriter writer, Argument<CompactSerializationContext> context)
+            {
+                foreach (var field in _conventionContext.ParameterFields)
+                {
+                    var parameterType = field.OperandType;
+                    var valueWriter = CompactSerializerFactory.GetValueWriter(parameterType);
+
+                    using (TT.CreateScope<TT.TProperty, TT.TItem>(parameterType, parameterType))
+                    {
+                        valueWriter(parameterType, writer, context, field.CastTo<TT.TItem>());
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void WriteSerializeOutput(VoidMethodWriter writer, Argument<CompactSerializationContext> context)
+            {
+                if (!_conventionContext.HasOutput)
+                {
+                    return;
+                }
+
+                if (_conventionContext.PromiseType == null)
+                {
+                    WriteSerializeResultValue(writer, context, _conventionContext.Method.ReturnType, _conventionContext.ReturnValueField);
+                }
+                else
+                {
+                    using (TT.CreateScope<TT.TItem>(_conventionContext.PromiseResultType))
+                    {
+                        Local<TT.TItem> promiseResultLocal = writer.Local<TT.TItem>();
+
+                        if (_conventionContext.PromiseTypeDefinition == typeof(Task<>))
+                        {
+                            promiseResultLocal.Assign(_conventionContext.ReturnValueField.CastTo<Task<TT.TItem>>().Prop(x => x.Result));
+                        }
+                        else if (_conventionContext.PromiseTypeDefinition == typeof(Promise<>))
+                        {
+                            promiseResultLocal.Assign(_conventionContext.ReturnValueField.CastTo<Promise<TT.TItem>>().Prop(x => x.Result));
+                        }
+                        else
+                        {
+                            Debug.Assert(false);
+                        }
+                        
+                        WriteSerializeResultValue(
+                            writer, 
+                            context, 
+                            _conventionContext.PromiseResultType,
+                            promiseResultLocal);
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void WriteSerializeResultValue(
+                VoidMethodWriter writer, 
+                Argument<CompactSerializationContext> context,
+                Type resultValueType,
+                IOperand resultValueOperand)
+            {
+                var valueWriter = CompactSerializerFactory.GetValueWriter(resultValueType);
+
+                using (TT.CreateScope<TT.TProperty, TT.TItem, TT.TReply>(resultValueType, resultValueType, resultValueType))
+                {
+                    valueWriter(resultValueType, writer, context, resultValueOperand.CastTo<TT.TItem>());
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void WriteDeserializeInput(VoidMethodWriter writer, Argument<CompactDeserializationContext> context)
+            {
+                foreach (var field in _conventionContext.ParameterFields)
+                {
+                    var parameterType = field.OperandType;
+                    var valueReader = CompactSerializerFactory.GetValueReader(parameterType);
+
+                    using (TT.CreateScope<TT.TProperty, TT.TItem>(parameterType, parameterType))
+                    {
+                        var tempLocal = writer.Local<TT.TItem>();
+                        valueReader(parameterType, writer, context, tempLocal);
+
+                        //TODO: Hapil - make ITransformType public, to avoid redundant local variable
+                        field.Assign(tempLocal.CastTo<TT.TProperty>());
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void WriteDeserializeOutput(VoidMethodWriter writer, Argument<CompactDeserializationContext> context)
+            {
+                if (!_conventionContext.HasOutput)
+                {
+                    if (_conventionContext.PromiseType == typeof(Task))
+                    {
+                        _conventionContext.ReturnValueField.Assign(Static.Func(Task.FromResult, writer.Const<bool>(true)).CastTo<TT.TReply>());
+                    }
+                    else if (_conventionContext.PromiseType == typeof(Promise))
+                    {
+                        _conventionContext.ReturnValueField.Assign(Static.Func(Promise.Resolved).CastTo<TT.TReply>());
+                    }
+
+                    return;
+                }
+
+                if (_conventionContext.PromiseType == null)
+                {
+                    var returnValueLocal = WriteDeserializeResultValue(writer, context, _conventionContext.Method.ReturnType);
+                    _conventionContext.ReturnValueField.Assign(returnValueLocal.CastTo<TT.TReply>());
+                }
+                else
+                {
+                    using (TT.CreateScope<TT.TItem>(_conventionContext.PromiseResultType))
+                    {
+                        Local<TT.TItem> promiseResultLocal = WriteDeserializeResultValue(
+                            writer,
+                            context,
+                            _conventionContext.PromiseResultType);
+
+                        if (_conventionContext.PromiseTypeDefinition == typeof(Task<>))
+                        {
+                            _conventionContext.ReturnValueField.Assign(
+                                Static.Func(
+                                    Task.FromResult,
+                                    promiseResultLocal).CastTo<TT.TReply>());
+                        }
+                        else if (_conventionContext.PromiseTypeDefinition == typeof(Promise<>))
+                        {
+                            _conventionContext.ReturnValueField.Assign(
+                                Static.Func(
+                                    Promise.Resolved,
+                                    promiseResultLocal).CastTo<TT.TReply>());
+                        }
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            private Local<TT.TItem> WriteDeserializeResultValue(
+                VoidMethodWriter writer,
+                Argument<CompactDeserializationContext> context,
+                Type resultValueType)
+            {
+                var valueReader = CompactSerializerFactory.GetValueReader(resultValueType);
+
+                using (TT.CreateScope<TT.TProperty, TT.TItem>(resultValueType, resultValueType))
+                {
+                    var resultValueLocal = writer.Local<TT.TItem>();
+                    valueReader(resultValueType, writer, context, resultValueLocal);
+
+                    return resultValueLocal;
+
+                    //TODO: Hapil - make ITransformType public, to avoid redundant local variable
+                    //resultValueOperand.Assign(tempLocal.CastTo<TTValue>());
+                }
+            }
         }
     }
 }

@@ -140,7 +140,7 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static ValueWriter GetValueWriter(Type type)
+        internal static ValueWriter GetValueWriter(Type type)
         {
             ValueWriter writer;
 
@@ -154,7 +154,7 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static ValueWriter GetValueWriter(PropertyInfo property)
+        internal static ValueWriter GetValueWriter(PropertyInfo property)
         {
             ValueWriter writer;
 
@@ -170,7 +170,7 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static ValueWriter GetValueWriter(FieldInfo field)
+        internal static ValueWriter GetValueWriter(FieldInfo field)
         {
             ValueWriter writer;
 
@@ -186,7 +186,7 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static bool TryGetValueWriter(Type type, out ValueWriter writer)
+        internal static bool TryGetValueWriter(Type type, out ValueWriter writer)
         {
             var key = GetValueReaderWriterKey(type);
             return _s_valueWriterByType.TryGetValue(key, out writer);
@@ -194,7 +194,7 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static ValueReader GetValueReader(Type type)
+        internal static ValueReader GetValueReader(Type type)
         {
             ValueReader reader;
 
@@ -208,7 +208,7 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static ValueReader GetValueReader(PropertyInfo property)
+        internal static ValueReader GetValueReader(PropertyInfo property)
         {
             ValueReader reader;
 
@@ -224,7 +224,7 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static ValueReader GetValueReader(FieldInfo field)
+        internal static ValueReader GetValueReader(FieldInfo field)
         {
             ValueReader reader;
 
@@ -240,7 +240,7 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static bool TryGetValueReader(Type type, out ValueReader reader)
+        internal static bool TryGetValueReader(Type type, out ValueReader reader)
         {
             var key = GetValueReaderWriterKey(type);
             return _s_valueReaderByType.TryGetValue(key, out reader);

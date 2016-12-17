@@ -28,6 +28,17 @@ namespace NWheels.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public StaticCompactSerializerDictionary(Type[] apiContracts)
+            : this()
+        {
+            for (int i = 0 ; i < apiContracts.Length ; i++)
+            {
+                RegisterApiContract(apiContracts[i]);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void MakeImmutable()
         {
             _immutable = true;

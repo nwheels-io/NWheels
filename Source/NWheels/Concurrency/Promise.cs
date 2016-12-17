@@ -112,22 +112,22 @@ namespace NWheels.Concurrency
     public struct Promise<T> : IAnyPromise
     {
         private readonly IDeferred<T> _deferred;
-        private readonly T _value;
+        private readonly T _result;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Promise(IDeferred<T> deferred)
         {
             _deferred = deferred;
-            _value = default(T);
+            _result = default(T);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Promise(T value)
+        public Promise(T result)
         {
             _deferred = null;
-            _value = value;
+            _result = result;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -153,14 +153,14 @@ namespace NWheels.Concurrency
 
         public PromiseAwaiter<T> GetAwaiter()
         {
-            return new PromiseAwaiter<T>(_value, _deferred);
+            return new PromiseAwaiter<T>(_result, _deferred);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         object IAnyPromise.GetResult()
         {
-            return this.Value;
+            return this.Result;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ namespace NWheels.Concurrency
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public T Value
+        public T Result
         {
             get
             {
@@ -199,7 +199,7 @@ namespace NWheels.Concurrency
                     return _deferred.Result;
                 }
 
-                return _value;
+                return _result;
             }
         }
 
@@ -220,9 +220,9 @@ namespace NWheels.Concurrency
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static implicit operator Promise<T>(T value)
+        public static implicit operator Promise<T>(T result)
         {
-            return new Promise<T>();
+            return new Promise<T>(result);
         }
     }
 

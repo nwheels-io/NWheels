@@ -144,12 +144,12 @@ namespace NWheels.Endpoints.Factories
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
             protected IMethodCallObject HandleReturnMessage(long correlationId, CompactDeserializationContext deserializationContext)
             {
                 IMethodCallObject call = (IMethodCallObject)_outstandingCall;
                 
-                ((IMethodCallObjectSerialization)call).DeserializeOutput(deserializationContext);
+                call.Serializer.DeserializeOutput(deserializationContext);
+                
                 _outstandingCall.Resolve(call.Result);
                 _outstandingCall = null;
 
