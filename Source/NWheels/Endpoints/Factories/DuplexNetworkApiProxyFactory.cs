@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -114,8 +115,10 @@ namespace NWheels.Endpoints.Factories
 
         public abstract class ProxyBase
         {
+            private readonly ConcurrentDictionary<long, IMethodCallObject> _outstandingCallsByCorrelationId =
+                new ConcurrentDictionary<long, IMethodCallObject>();
+            
             private long _lastCorrelationId;
-            private IAnyDeferred _outstandingCall;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -124,7 +127,8 @@ namespace NWheels.Endpoints.Factories
                 var correlationId = Interlocked.Increment(ref _lastCorrelationId);
                 call.CorrelationId = correlationId;
 
-                _outstandingCall = (IAnyDeferred)call;
+                var added = _outstandingCallsByCorrelationId.TryAdd(correlationId, call);
+                Debug.Assert(added);
                 
                 return new Promise<T>((IDeferred<T>)call);
             }
@@ -136,7 +140,8 @@ namespace NWheels.Endpoints.Factories
                 var correlationId = Interlocked.Increment(ref _lastCorrelationId);
                 call.CorrelationId = correlationId;
 
-                _outstandingCall = (IAnyDeferred)call;
+                var added = _outstandingCallsByCorrelationId.TryAdd(correlationId, call);
+                Debug.Assert(added);
 
                 return new Promise((IDeferred)call);
             }
@@ -148,7 +153,8 @@ namespace NWheels.Endpoints.Factories
                 var correlationId = Interlocked.Increment(ref _lastCorrelationId);
                 call.CorrelationId = correlationId;
 
-                _outstandingCall = (IAnyDeferred)call;
+                var added = _outstandingCallsByCorrelationId.TryAdd(correlationId, call);
+                Debug.Assert(added);
 
                 return ((TaskBasedDeferred<T>)call).Task;
             }
@@ -160,7 +166,8 @@ namespace NWheels.Endpoints.Factories
                 var correlationId = Interlocked.Increment(ref _lastCorrelationId);
                 call.CorrelationId = correlationId;
 
-                _outstandingCall = (IAnyDeferred)call;
+                var added = _outstandingCallsByCorrelationId.TryAdd(correlationId, call);
+                Debug.Assert(added);
 
                 return ((TaskBasedDeferred)call).Task;
             }
@@ -169,12 +176,13 @@ namespace NWheels.Endpoints.Factories
 
             protected IMethodCallObject HandleReturnMessage(long correlationId, CompactDeserializationContext deserializationContext)
             {
-                IMethodCallObject call = (IMethodCallObject)_outstandingCall;
+                IMethodCallObject call;
+                
+                var found = _outstandingCallsByCorrelationId.TryRemove(correlationId, out call);
+                Debug.Assert(found);
                 
                 call.Serializer.DeserializeOutput(deserializationContext);
-                
-                _outstandingCall.Resolve(call.Result);
-                _outstandingCall = null;
+                ((IAnyDeferred)call).Resolve(call.Result);
 
                 return call;
             }
@@ -183,8 +191,12 @@ namespace NWheels.Endpoints.Factories
 
             protected void HandleFaultMessage(long correlationId, string faultCode)
             {
-                _outstandingCall.Fail(new RemotePartyFaultException(faultCode));
-                _outstandingCall = null;
+                IMethodCallObject call;
+
+                var found = _outstandingCallsByCorrelationId.TryRemove(correlationId, out call);
+                Debug.Assert(found);
+
+                ((IAnyDeferred)call).Fail(new RemotePartyFaultException(faultCode));
             }
         }
 
