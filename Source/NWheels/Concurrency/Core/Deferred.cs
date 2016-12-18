@@ -114,7 +114,7 @@ namespace NWheels.Concurrency.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void IDeferred.Configure(Action continuation, TimeSpan? timeout, System.Threading.CancellationToken? cancellation)
+        public void Configure(Action continuation, TimeSpan? timeout, System.Threading.CancellationToken? cancellation)
         {
             base.Lock();
 
@@ -246,7 +246,7 @@ namespace NWheels.Concurrency.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void IDeferred<T>.Configure(Action continuation, TimeSpan? timeout, System.Threading.CancellationToken? cancellation)
+        public void Configure(Action continuation, TimeSpan? timeout, System.Threading.CancellationToken? cancellation)
         {
             base.Lock();
 

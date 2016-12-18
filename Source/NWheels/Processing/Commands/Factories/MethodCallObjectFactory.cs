@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Hapil;
+using Hapil.Decorators;
+using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Toolbox;
 using Hapil.Writers;
@@ -17,6 +20,7 @@ using NWheels.Extensions;
 using NWheels.Processing.Commands.Impl;
 using NWheels.Serialization;
 using NWheels.Serialization.Factories;
+using NWheels.Utilities;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Processing.Commands.Factories
@@ -67,11 +71,17 @@ namespace NWheels.Processing.Commands.Factories
                 new ConstructorConvention(conventionsContext),
                 new ParameterPropertiesConvention(conventionsContext),
                 new ImplementIMethodCallObjectConvention(conventionsContext),
-                new ImplementIMethodCallSerializerObjectConvention(conventionsContext)
+                new ImplementIMethodCallSerializerObjectConvention(conventionsContext),
+                new DeferredResolutionConvention(conventionsContext),
             };
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly MethodInfo _s_executeOnMethod =
+            ExpressionUtility.GetMethodInfo<Expression<Action<IMethodCallObject>>>(x => x.ExecuteOn(null));
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -676,6 +686,47 @@ namespace NWheels.Processing.Commands.Factories
                     //resultValueOperand.Assign(tempLocal.CastTo<TTValue>());
                 }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class DeferredResolutionConvention : DecorationConvention
+        {
+            private readonly MethodCallConventionsContext _conventionContext;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public DeferredResolutionConvention(MethodCallConventionsContext conventionContext)
+                : base(Will.DecorateMethods)
+            {
+                _conventionContext = conventionContext;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of DecorationConvention
+
+            protected override void OnMethod(MethodMember member, Func<MethodDecorationBuilder> decorate)
+            {
+                if (member.MemberDeclaration == _s_executeOnMethod)
+                {
+                    decorate()
+                        .OnReturnVoid(
+                            w => {
+                                w.This<IDeferred>().Void(x => x.Resolve);
+                            })
+                        .OnReturnValue(
+                            (w, retVal) => {
+                                w.This<IDeferred<TT.TReturn>>().Void(x => x.Resolve, retVal);
+                            })
+                        .OnException<Exception>(
+                            (w, ex) => {
+                                w.This<IAnyDeferred>().Void(x => x.Fail, ex);
+                            });
+                }
+            }
+
+            #endregion
         }
     }
 }

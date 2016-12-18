@@ -388,7 +388,17 @@ namespace NWheels.Endpoints.Factories
                 {
                     if (call.CorrelationId != CompactRpcProtocol.NoCorrelationId)
                     {
-                        SendReply(call, failure);
+                        var deferred = (IAnyDeferred)call;
+                        
+                        if (deferred.IsResolved)
+                        {
+                            SendReply(call, failure);
+                        }
+                        else
+                        {
+                            //TODO: change as necessary to avoid allocation of closure object
+                            deferred.Configure(continuation: () => SendReplyOnceCallCompleted(call));
+                        }
                     }
                 }
             }
@@ -419,6 +429,14 @@ namespace NWheels.Endpoints.Factories
                         return messageType;
                     }
                 }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void SendReplyOnceCallCompleted(IMethodCallObject call)
+            {
+                var error = ((IAnyDeferred)call).Error;
+                SendReply(call, error);
             }
         }
 

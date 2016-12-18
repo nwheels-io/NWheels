@@ -240,6 +240,7 @@ namespace NWheels.Concurrency
 
     public interface IAnyDeferred
     {
+        void Configure(Action continuation = null, TimeSpan? timeout = null, CancellationToken? cancellation = null);
         void Resolve(object result);
         void Fail(Exception error);
         Type ResultType { get; }
