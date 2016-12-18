@@ -50,16 +50,29 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
                 serverPort: 9797,
                 clientToServerHeartbeatInterval: TimeSpan.FromSeconds(1));
 
+            RunChatClient(client).Wait();
+
+            Console.WriteLine("Shutting down.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static async Task RunChatClient(ChatClient client)
+        {
             Console.WriteLine("Now connecting to chat server.");
             Console.WriteLine("HELP > while in chat, type your message and hit ENTER to send.");
             Console.WriteLine("HELP > to leave, type Q and hit ENTER.");
 
-            client.Server.Hello(myName: "PID#" + Process.GetCurrentProcess().Id);
+            var user = await client.Server.Hello(myName: "PID#" + Process.GetCurrentProcess().Id);
 
+            var saveColor = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("LOGGED IN > as {0} ({1}).", user.FullName, user.RoleName);
+            
             while (true)
             {
                 var text = Console.ReadLine();
-                
+
                 if (text == null || text.Trim().EqualsIgnoreCase("Q"))
                 {
                     client.Server.GoodBye();
@@ -68,8 +81,6 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 
                 client.Server.SayToOthers(text);
             }
-
-            Console.WriteLine("Shutting down.");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

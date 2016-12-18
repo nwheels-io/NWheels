@@ -10,7 +10,7 @@ namespace NWheels.Samples.SimpleChat.Contracts
     public interface IChatServiceApi
     {
         [NetworkApiContract.ConnectCommand]
-        void Hello(string myName);
+        Task<UserInfo> Hello(string myName);
 
         [NetworkApiContract.DisconnectCommand]
         void GoodBye();
