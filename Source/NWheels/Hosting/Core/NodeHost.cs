@@ -445,6 +445,10 @@ namespace NWheels.Hosting.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public delegate void PreInitializeComponentCallback(IComponentContext components);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private class StateMachineCodeBehind : IStateMachineCodeBehind<NodeState, NodeTrigger>
         {
             private readonly NodeHost _owner;
@@ -906,6 +910,7 @@ namespace NWheels.Hosting.Core
                 sequence.Once().OnRevert(WriteEffectiveMetadataJson);
                 sequence.Once().OnPerform(LoadConfiguration);
                 sequence.Once().OnPerform(WriteEffectiveConfigurationXml);
+                sequence.Once().OnPerform(PreInitializeComponents);
                 sequence.Once().OnPerform(InitializeDataAccessComponents);
                 sequence.Once().OnPerform(FindLifecycleComponents);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeConfigured);
@@ -927,6 +932,18 @@ namespace NWheels.Hosting.Core
                 _suppressDynamicArtifacts = loggingConfiguration.SuppressDynamicArtifacts;
 
                 Directory.CreateDirectory(PathUtility.DynamicArtifactPath());
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void PreInitializeComponents()
+            {
+                var preInitializers = OwnerLifetime.LifetimeContainer.Resolve<IEnumerable<PreInitializeComponentCallback>>();
+
+                foreach (var initializer in preInitializers)
+                {
+                    initializer(OwnerLifetime.LifetimeContainer);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

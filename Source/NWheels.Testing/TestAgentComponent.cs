@@ -8,6 +8,7 @@ using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.Hosting;
+using NWheels.Hosting.Core;
 using NWheels.Logging.Core;
 
 namespace NWheels.Testing
@@ -107,10 +108,15 @@ namespace NWheels.Testing
 
             protected override void Load(ContainerBuilder builder)
             {
-                builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<TestAgentComponent>();
+                builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<TestAgentComponent>().AsSelf();
                 builder.NWheelsFeatures().Logging().RegisterLogger<TestFixtureBase.ITestFixtureBaseLogger>();
                 
                 _testFixtureInstance.OnRegisteringModuleComponents(builder);
+
+                builder.RegisterInstance<NodeHost.PreInitializeComponentCallback>(
+                    components => {
+                        components.Resolve<TestAgentComponent>();
+                    });
             }
         }
     }

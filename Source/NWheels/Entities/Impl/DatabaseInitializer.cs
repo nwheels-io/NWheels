@@ -81,7 +81,11 @@ namespace NWheels.Entities.Impl
             var connectionConfig = _configuration.GetContextConnectionConfig(contextType);
             newDatabaseCreated = false;
 
-            if (connectionConfig == null) return;
+            if (connectionConfig == null)
+            {
+                _logger.ConnectionStringNotConfigured(contextType);
+                return;
+            }
 
             if (!connectionConfig.IsWildcard)
             {
