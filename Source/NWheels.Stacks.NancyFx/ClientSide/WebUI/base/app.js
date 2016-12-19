@@ -1584,6 +1584,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 scope.uiShowCrudForm = false;
                 scope.selectedEntity = null;
                 scope.entity = null;
+                scope.model.State.CurrentEntity = null;
                 scope.$broadcast(scope.uidl.grid.qualifiedName + ':PageRefreshRequested');
             };
             
@@ -1665,6 +1666,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 scope.selectedEntity = null;
                 scope.entity = null;
                 scope.entityAuth = null;
+                scope.model.State.CurrentEntity = null;
                 scope.commandInProgress = false;
             };
 
@@ -1735,12 +1737,16 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 }
 
                 scope.model.entity = entity;
+                scope.model.State.CurrentEntity = entity;
                 scope.model.isNew = false;
                 scope.entityAuth = null;
                 scope.uiShowCrudForm = true;
 
                 scope.requestAuthorization(entity['$id']).then(function(response) {
                     if (response.update===true) {
+                        if (response.fullEntity) {
+                            scope.model.State.CurrentEntity = response.fullEntity;
+                        }
                         if (scope.uidl.formTypeSelector) {
                             for (var i = 0; i < scope.uidl.formTypeSelector.selections.length ; i++) {
                                 scope.$broadcast(scope.uidl.formTypeSelector.selections[i].widget.qualifiedName + ':EditAuthorized', response);
@@ -1783,6 +1789,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             };
 
             scope.newEntityCreated = function(newObj) {
+                scope.$emit(scope.uidl.qualifiedName + ':NewDomainObjectCompleted', newObj);
                 scope.model.entity = newObj;
                 scope.model.isNew = true;
 
