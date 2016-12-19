@@ -29,6 +29,8 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
                 return;
             }
 
+            Thread.Sleep(10000); // for debugging 
+
             NWheels.Stacks.Nlog.NLogBasedPlainLog.Instance.ConfigureConsoleOutput(NLog.LogLevel.Debug);
             var framework = ClientSideFramework.CreateWithDefaultConfiguration(
                 registerComponents: (builder) => {

@@ -182,7 +182,9 @@ namespace NWheels.Endpoints.Factories
                 Debug.Assert(found);
                 
                 call.Serializer.DeserializeOutput(deserializationContext);
-                ((IAnyDeferred)call).Resolve(call.Result);
+
+                ThreadPool.UnsafeQueueUserWorkItem(_s_resolveDeferredCallOnCurrentThread, call);
+                //((IAnyDeferred)call).Resolve(call.Result);
 
                 return call;
             }
@@ -196,8 +198,46 @@ namespace NWheels.Endpoints.Factories
                 var found = _outstandingCallsByCorrelationId.TryRemove(correlationId, out call);
                 Debug.Assert(found);
 
-                ((IAnyDeferred)call).Fail(new RemotePartyFaultException(faultCode));
+                ThreadPool.UnsafeQueueUserWorkItem(
+                    _s_failDeferredCallOnCurrentThread, 
+                    new DeferredFault() {
+                        Call = call,
+                        FaultCode = faultCode
+                    }); 
+                    
+
+                //_faultCode = faultCode;
+                //((IAnyDeferred)call).Fail(new RemotePartyFaultException(faultCode));
             }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static readonly WaitCallback _s_resolveDeferredCallOnCurrentThread = ResolveDeferredCallOnCurrentThread;
+            private static readonly WaitCallback _s_failDeferredCallOnCurrentThread = FailDeferredCallOnCurrentThread;
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static void ResolveDeferredCallOnCurrentThread(object callObject)
+            {
+                IMethodCallObject call = (IMethodCallObject)callObject;
+                ((IAnyDeferred)call).Resolve(call.Result);
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static void FailDeferredCallOnCurrentThread(object deferredFaultObject)
+            {
+                DeferredFault fault = (DeferredFault)deferredFaultObject;
+                ((IAnyDeferred)fault.Call).Fail(new RemotePartyFaultException(fault.FaultCode));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private struct DeferredFault
+        {
+            public IMethodCallObject Call;
+            public string FaultCode;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -396,8 +436,20 @@ namespace NWheels.Endpoints.Factories
                         }
                         else
                         {
+                            var task = call.Result as Task;
+                            var promise = call.Result as IAnyPromise;
+
+                            if (task != null)
+                            {
+                                task.ContinueWith(t => SendReplyOnceCallCompleted(call));
+                            }
+                            else if (promise != null)
+                            {
+                                promise.Configure(continuation: () => SendReplyOnceCallCompleted(call));
+                            }
+
                             //TODO: change as necessary to avoid allocation of closure object
-                            deferred.Configure(continuation: () => SendReplyOnceCallCompleted(call));
+                            //deferred.Configure(continuation: () => SendReplyOnceCallCompleted(call));
                         }
                     }
                 }

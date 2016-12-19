@@ -51,22 +51,21 @@ namespace NWheels.Samples.SimpleChat.Server
         {
             _myName = myName;
 
-            //var password = await _myClient.RequestPassword();
+            var password = await _myClient.RequestPassword();
 
-            //if (password == "11111")
-            //{
-            //    _myClient.SomeoneSaidSomething(who: "SERVER", what: "Hey! Welcome to the chat, " + myName);
-            //    BroadcastToOthers("SERVER", myName + " has joined the chat");
+            if (password == "11111")
+            {
+                _myClient.SomeoneSaidSomething(who: "SERVER", what: "Hey! Welcome to the chat, " + myName);
+                BroadcastToOthers("SERVER", myName + " has joined the chat");
 
-            //}
+                return new UserInfo() {
+                    UserId = 123,
+                    FullName = myName,
+                    RoleName = "Regular chatter"
+                };
+            }
 
-            //throw new DomainFaultException<string>("LoginIncorrect");
-
-            return new UserInfo() {
-                UserId = 123,
-                FullName = myName,
-                RoleName = "Regular chatter"
-            };
+            throw new DomainFaultException<string>("LoginIncorrect");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

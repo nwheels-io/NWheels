@@ -47,6 +47,20 @@ namespace NWheels.Concurrency
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        void IAnyPromise.Configure(Action continuation, TimeSpan? timeout, CancellationToken? cancellation)
+        {
+            if (_deferred != null)
+            {
+                _deferred.Configure(continuation, timeout, cancellation);
+            }
+            else if (!cancellation.HasValue || !cancellation.Value.IsCancellationRequested)
+            {
+                continuation();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         object IAnyPromise.GetResult()
         {
             return null;
@@ -158,6 +172,20 @@ namespace NWheels.Concurrency
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        void IAnyPromise.Configure(Action continuation, TimeSpan? timeout, CancellationToken? cancellation)
+        {
+            if (_deferred != null)
+            {
+                _deferred.Configure(continuation, timeout, cancellation);
+            }
+            else if (!cancellation.HasValue || !cancellation.Value.IsCancellationRequested)
+            {
+                continuation();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         object IAnyPromise.GetResult()
         {
             return this.Result;
@@ -230,6 +258,7 @@ namespace NWheels.Concurrency
 
     public interface IAnyPromise
     {
+        void Configure(Action continuation = null, TimeSpan? timeout = null, CancellationToken? cancellation = null);
         object GetResult();
         Type ResultType { get; }
         bool IsResolved { get; }

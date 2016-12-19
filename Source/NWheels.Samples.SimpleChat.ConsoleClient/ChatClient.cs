@@ -42,7 +42,7 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 
         #region Implementation of IChatClientApi
 
-        public Task<string> RequestPassword()
+        public async Task<string> RequestPassword()
         {
             string password = null;
 
@@ -50,14 +50,14 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
             {
                 var saveColor = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("PASSWORD > ");
+                Console.Write("PASSWORD > ");
                 
-                password = Console.ReadLine();
+                password = await Task.Run(() => Console.ReadLine());
                 
                 Console.ForegroundColor = saveColor;
             }
 
-            return Task.FromResult(password);
+            return password;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

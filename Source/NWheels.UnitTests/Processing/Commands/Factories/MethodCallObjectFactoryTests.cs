@@ -19,6 +19,7 @@ using NWheels.Processing.Commands.Factories;
 using NWheels.Serialization;
 using NWheels.Serialization.Factories;
 using NWheels.Testing;
+using NWheels.Testing.Extensions;
 using NWheels.Utilities;
 using Shouldly;
 
@@ -73,6 +74,7 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
 
             Framework.TakeLog().ShouldHaveOne<ITestTargetLogger>(x => x.MethodOne());
             call.Result.ShouldBe(null);
+            call.ShouldHaveNoErrors();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -100,6 +102,7 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
 
             Framework.TakeLog().ShouldHaveOne<ITestTargetLogger>(x => x.MethodThree(123, "ABC"));
             call.Result.ShouldBe(null);
+            call.ShouldHaveNoErrors();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -126,6 +129,7 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
 
             Framework.TakeLog().ShouldHaveOne<ITestTargetLogger>(x => x.MethodTwo(123));
             call.Result.ShouldBe("246");
+            call.ShouldHaveNoErrors();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -480,6 +484,7 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             //-- assert
 
             senderCall.Result.ShouldBe("246");
+            receiverCall.ShouldHaveNoErrors();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -510,7 +515,7 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
 
             //-- assert
 
-            // it didn't fail
+            receiverCall.ShouldHaveNoErrors();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -540,6 +545,8 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             senderCall.Serializer.DeserializeOutput(deserializationContext);
 
             //-- assert
+
+            receiverCall.ShouldHaveNoErrors();
 
             wire.Length.ShouldBe(0);
             senderCall.Result.ShouldBeAssignableTo<Task>();
@@ -573,6 +580,8 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             senderCall.Serializer.DeserializeOutput(deserializationContext);
 
             //-- assert
+
+            receiverCall.ShouldHaveNoErrors();
 
             wire.Length.ShouldBeGreaterThan(0);
             senderCall.Result.ShouldBeOfType<Task<DateTime>>();
@@ -614,6 +623,8 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             senderCall.Serializer.DeserializeOutput(deserializationContext);
 
             //-- assert
+
+            receiverCall.ShouldHaveNoErrors();
 
             wire.Length.ShouldBeGreaterThan(0);
             senderCall.Result.ShouldBeOfType<Task<DtoFive>>();
@@ -661,6 +672,8 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             senderCall.Serializer.DeserializeOutput(deserializationContext);
 
             //-- assert
+
+            receiverCall.ShouldHaveNoErrors();
 
             wire.Length.ShouldBeGreaterThan(0);
             senderCall.Result.ShouldBeOfType<Task<IDtoSix>>();

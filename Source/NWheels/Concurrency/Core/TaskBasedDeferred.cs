@@ -2,12 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NWheels.Concurrency.Core
 {
     public class TaskBasedDeferred : TaskCompletionSource<bool>, IDeferred, IAnyDeferred
     {
+        private Action _continuation = null;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TaskBasedDeferred()
+        {
+            base.Task.ConfigureAwait(continueOnCapturedContext: false);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void Resolve()
         {
             base.SetResult(true);
@@ -50,14 +62,12 @@ namespace NWheels.Concurrency.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Configure(
-            Action continuation = null, 
-            TimeSpan? timeout = null, 
-            System.Threading.CancellationToken? cancellation = null)
+        public void Configure(Action continuation = null, TimeSpan? timeout = null, System.Threading.CancellationToken? cancellation = null)
         {
             if (continuation != null)
             {
-                base.Task.ContinueWith(t => continuation);
+                _continuation = continuation;
+                base.Task.ContinueWith(_s_onScheduleContinuationDelegate, this, cancellation.GetValueOrDefault(CancellationToken.None));
             }
         }
 
@@ -74,12 +84,44 @@ namespace NWheels.Concurrency.Core
         {
             get { return base.Task.Exception; }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly Action<Task<bool>, object> _s_onScheduleContinuationDelegate = OnScheduleContinuation;
+        private static readonly WaitCallback _s_onRunContinuationDelegate = OnRunContinuation;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void OnScheduleContinuation(Task<bool> task, object deferredObject)
+        {
+            var deferred = (TaskBasedDeferred)deferredObject;
+            ThreadPool.UnsafeQueueUserWorkItem(_s_onRunContinuationDelegate, deferred._continuation);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void OnRunContinuation(object continuationAction)
+        {
+            var action = (Action)continuationAction;
+            action();
+        }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public class TaskBasedDeferred<T> : TaskCompletionSource<T>, IDeferred<T>, IAnyDeferred
     {
+        private Action _continuation = null;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TaskBasedDeferred()
+        {
+            base.Task.ConfigureAwait(continueOnCapturedContext: false);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void Resolve(T result)
         {
             base.SetResult(result);
@@ -137,7 +179,8 @@ namespace NWheels.Concurrency.Core
         {
             if (continuation != null)
             {
-                base.Task.ContinueWith(t => continuation);
+                _continuation = continuation;
+                base.Task.ContinueWith(_s_onScheduleContinuationDelegate, this, cancellation.GetValueOrDefault(CancellationToken.None));
             }
         }
 
@@ -160,6 +203,27 @@ namespace NWheels.Concurrency.Core
         public Exception Error
         {
             get { return base.Task.Exception; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly Action<Task<T>, object> _s_onScheduleContinuationDelegate = OnScheduleContinuation;
+        private static readonly WaitCallback _s_onRunContinuationDelegate = OnRunContinuation;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void OnScheduleContinuation(Task<T> task, object deferredObject)
+        {
+            var deferred = (TaskBasedDeferred<T>)deferredObject;
+            ThreadPool.UnsafeQueueUserWorkItem(_s_onRunContinuationDelegate, deferred._continuation);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void OnRunContinuation(object continuationAction)
+        {
+            var action = (Action)continuationAction;
+            action();
         }
     }
 }

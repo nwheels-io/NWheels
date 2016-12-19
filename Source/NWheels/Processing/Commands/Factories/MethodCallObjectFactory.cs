@@ -72,7 +72,7 @@ namespace NWheels.Processing.Commands.Factories
                 new ParameterPropertiesConvention(conventionsContext),
                 new ImplementIMethodCallObjectConvention(conventionsContext),
                 new ImplementIMethodCallSerializerObjectConvention(conventionsContext),
-                new DeferredResolutionConvention(conventionsContext),
+                new SynchronousResolutionConvention(conventionsContext),
             };
         }
 
@@ -690,13 +690,13 @@ namespace NWheels.Processing.Commands.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class DeferredResolutionConvention : DecorationConvention
+        public class SynchronousResolutionConvention : DecorationConvention
         {
             private readonly MethodCallConventionsContext _conventionContext;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public DeferredResolutionConvention(MethodCallConventionsContext conventionContext)
+            public SynchronousResolutionConvention(MethodCallConventionsContext conventionContext)
                 : base(Will.DecorateMethods)
             {
                 _conventionContext = conventionContext;
@@ -713,11 +713,56 @@ namespace NWheels.Processing.Commands.Factories
                     decorate()
                         .OnReturnVoid(
                             w => {
-                                w.This<IDeferred>().Void(x => x.Resolve);
-                            })
-                        .OnReturnValue(
-                            (w, retVal) => {
-                                w.This<IDeferred<TT.TReturn>>().Void(x => x.Resolve, retVal);
+                                if (_conventionContext.PromiseType == null)
+                                {
+                                    if (_conventionContext.Method.IsVoid())
+                                    {
+                                        w.This<IDeferred>().Void(x => x.Resolve);
+                                    }
+                                    else
+                                    {
+                                        using (TT.CreateScope<TT.TReply>(_conventionContext.Method.ReturnType))
+                                        {
+                                            w.This<IDeferred<TT.TReply>>().Void(x => x.Resolve, _conventionContext.ReturnValueField);
+                                        }
+                                    }
+                                    return;
+                                }
+                                
+                                if (_conventionContext.PromiseType.IsAssignableFrom(typeof(Task)) && _conventionContext.PromiseResultType == null)
+                                {
+                                    w.If(_conventionContext.ReturnValueField.CastTo<Task>().Prop(x => x.IsCompleted)).Then(() => {
+                                        w.This<IDeferred>().Void(x => x.Resolve);
+                                    });
+                                }
+                                else if (_conventionContext.PromiseType == typeof(Promise) && _conventionContext.PromiseResultType == null)
+                                {
+                                    w.If(_conventionContext.ReturnValueField.CastTo<Promise>().Prop(x => x.IsResolved)).Then(() => {
+                                        w.This<IDeferred>().Void(x => x.Resolve);
+                                    });
+                                }
+                                else if (_conventionContext.PromiseTypeDefinition == typeof(Task<>) && _conventionContext.PromiseResultType != null)
+                                {
+                                    using (TT.CreateScope<TT.TValue>(_conventionContext.PromiseResultType))
+                                    {
+                                        w.If(_conventionContext.ReturnValueField.CastTo<Task>().Prop(x => x.IsCompleted)).Then(() => {
+                                            w.This<IDeferred<TT.TValue>>().Void(
+                                                x => x.Resolve, 
+                                                _conventionContext.ReturnValueField.CastTo<Task<TT.TValue>>().Prop(x => x.Result));
+                                        });
+                                    }
+                                }
+                                else if (_conventionContext.PromiseTypeDefinition == typeof(Promise<>) && _conventionContext.PromiseResultType != null)
+                                {
+                                    using (TT.CreateScope<TT.TValue>(_conventionContext.PromiseResultType))
+                                    {
+                                        w.If(_conventionContext.ReturnValueField.CastTo<Promise<TT.TValue>>().Prop(x => x.IsResolved)).Then(() => {
+                                            w.This<IDeferred<TT.TValue>>().Void(
+                                                x => x.Resolve, 
+                                                _conventionContext.ReturnValueField.CastTo<Promise<TT.TValue>>().Prop(x => x.Result));
+                                        });
+                                    }
+                                }
                             })
                         .OnException<Exception>(
                             (w, ex) => {
