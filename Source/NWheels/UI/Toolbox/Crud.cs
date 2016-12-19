@@ -141,6 +141,7 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlNotification<IPromiseFailureInfo> QueryEntityFailed { get; set; }
+        public UidlNotification<TEntity> NewDomainObjectCompleted { get; set; }
         public UidlNotification<IPromiseFailureInfo> NewDomainObjectFailed { get; set; }
         public UidlNotification DeleteEntityCompleted { get; set; }
         public UidlNotification<IPromiseFailureInfo> DeleteEntityFailed { get; set; }
