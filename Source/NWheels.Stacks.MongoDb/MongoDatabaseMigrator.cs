@@ -14,6 +14,7 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private readonly string _connectionString;
         private readonly MongoDatabase _db;
         private readonly SchemaMigrationCollection _migrations;
         private readonly IMongoDbLogger _logger;
@@ -21,8 +22,9 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MongoDatabaseMigrator(MongoDatabase db, SchemaMigrationCollection migrations, IMongoDbLogger logger)
+        public MongoDatabaseMigrator(string connectionString, MongoDatabase db, SchemaMigrationCollection migrations, IMongoDbLogger logger)
         {
+            _connectionString = connectionString;
             _db = db;
             _migrations = migrations;
             _logger = logger;
@@ -89,31 +91,13 @@ namespace NWheels.Stacks.MongoDb
 
         private void ExecuteMigration(MigrationBase migration)
         {
-            var scriptMigration = migration as StorageScriptMigration;
+            migration.Execute(_connectionString, connectionObject: _db);
 
-            if (scriptMigration != null)
-            {
-                var args = new EvalArgs();
-                args.Code = scriptMigration.Script;
-                
-                var resultValue = _db.Eval(args);
-
-                //TODO: should check resultValue for errors?
-                _migrationLogCollection.Insert(new MigrationLogEntry() {
-                    Name = migration.GetType().Name,
-                    Version = migration.SchemaVersion,
-                    ExecutedAtUtc = DateTime.UtcNow
-                });
-
-                //TODO: better understand result values from script execution
-                //if (resultValue.AsBoolean == true)
-                //{
-                //}
-                //else
-                //{
-                //    throw new Exception("Failure while executing migration script on the DB.");
-                //}
-            }
+            _migrationLogCollection.Insert(new MigrationLogEntry() {
+                Name = migration.GetType().Name,
+                Version = migration.SchemaVersion,
+                ExecutedAtUtc = DateTime.UtcNow
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

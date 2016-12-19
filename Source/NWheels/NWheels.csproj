@@ -184,6 +184,7 @@
     <Compile Include="Entities\Core\DatabaseInitializationCheckRegistration.cs" />
     <Compile Include="Authorization\IEntityMemberAccessControl.cs" />
     <Compile Include="Entities\IEntitySelfAccessControl.cs" />
+    <Compile Include="Entities\Migrations\CodeMigration.cs" />
     <Compile Include="Entities\Migrations\MigrationBase.cs" />
     <Compile Include="Entities\Migrations\StorageScriptMigration.cs" />
     <Compile Include="Entities\Migrations\SchemaVersionAttribute.cs" />

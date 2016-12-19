@@ -96,6 +96,7 @@
     <Compile Include="JsonSerializationExtension.cs" />
     <Compile Include="Messages\MongoDbMessageQueueFeatureLoader.cs" />
     <Compile Include="Messages\PollingMongoDbMessageQueueEndpoint.cs" />
+    <Compile Include="MongoScriptMigration.cs" />
     <Compile Include="SystemLogs\Domain\Entities\RootThreadLogUINodeEntity.cs" />
     <Compile Include="SystemLogs\Domain\Entities\ThreadLogEntity.cs" />
     <Compile Include="SystemLogs\Domain\Entities\LogMessageEntity.cs" />

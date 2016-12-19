@@ -69,7 +69,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             {
                 try
                 {
-                    var migrator = new MongoDatabaseMigrator(database, migrations, _logger);
+                    var migrator = new MongoDatabaseMigrator(connectionString, database, migrations, _logger);
                     migrator.ExecuteMigrations();
                 }
                 catch (Exception e)
@@ -85,7 +85,7 @@ namespace NWheels.Stacks.MongoDb.Factories
         public void CreateStorageSchema(string connectionString, int schemaVersion)
         {
             var database = ConnectToDatabase(connectionString);
-            var migrator = new MongoDatabaseMigrator(database, new EmptySchemaMigrationCollection(), _logger);
+            var migrator = new MongoDatabaseMigrator(connectionString, database, new EmptySchemaMigrationCollection(), _logger);
             migrator.InitializeMigrationLog(schemaVersion);
         }
 
