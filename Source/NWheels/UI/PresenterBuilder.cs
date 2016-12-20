@@ -1141,6 +1141,30 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public IAlterModelDestinationSelector<TInput, TValue> Clone<TValue>(TValue value)
+            {
+                CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
+                    Type = UidlAlterModelBehavior.AlterationType.Clone,
+                    SourceValue = value.ToString()
+                };
+
+                return new DestinationSelector<TValue>(this);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IAlterModelDestinationSelector<TInput, TValue> Clone<TValue>(Expression<Func<ViewModel<TData, TState, TInput>, TValue>> source)
+            {
+                CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
+                    Type = UidlAlterModelBehavior.AlterationType.Clone,
+                    SourceExpression = source.ToNormalizedNavigationString("model")
+                };
+
+                return new DestinationSelector<TValue>(this);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public IAlterModelDestinationSelector<TInput, ICollection<TValue>> InsertOne<TValue>(TValue value)
             {
                 CurrentAlteration = new UidlAlterModelBehavior.Alteration() {

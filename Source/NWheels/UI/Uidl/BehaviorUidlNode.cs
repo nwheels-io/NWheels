@@ -243,6 +243,7 @@ namespace NWheels.UI.Uidl
         public enum AlterationType
         {
             Copy = 10,
+            Clone = 15,
             InsertOne = 20,
             InsertMany = 30,
             RemoveOne = 40,

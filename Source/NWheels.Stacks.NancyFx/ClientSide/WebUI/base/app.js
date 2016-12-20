@@ -759,6 +759,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             var alteration = alterations[i];
             switch (alteration.type) {
                 case 'Copy':
+                case 'Clone':
                     var value = null;
                     if (alteration.sourceValue) {
                         value = alteration.sourceValue;
@@ -774,7 +775,11 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                         target = nextTarget;
                     }
                     var lastNavigation = alteration.destinationNavigations[alteration.destinationNavigations.length-1];
-                    target[lastNavigation] = value;
+                    if (alteration.type === 'Clone') {
+                        target[lastNavigation] = jQuery.extend(true, {}, value);
+                    } else {
+                        target[lastNavigation] = value;
+                    }
                     break;
             }
         }
@@ -1791,6 +1796,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.newEntityCreated = function(newObj) {
                 scope.$emit(scope.uidl.qualifiedName + ':NewDomainObjectCompleted', newObj);
                 scope.model.entity = newObj;
+                scope.model.State.CurrentEntity = newObj;
                 scope.model.isNew = true;
 
                 scope.uiShowCrudForm = true;
