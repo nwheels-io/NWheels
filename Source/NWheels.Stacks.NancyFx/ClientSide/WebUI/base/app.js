@@ -3543,6 +3543,6 @@ theApp.filter('authorized', ['uidlService', function(uidlService) {
                 authorizedArray.push(uidlElementArray[i]);
             }
         }
-        return uidlService.authorizedArray;
+        return authorizedArray;
     };
 }]);
