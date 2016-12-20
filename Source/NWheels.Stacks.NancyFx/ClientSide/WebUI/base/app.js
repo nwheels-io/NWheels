@@ -456,7 +456,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
     //-----------------------------------------------------------------------------------------------------------------
 
     function isUidlAuthorized(uidlElement) {
-        if (!uidlElement.authorization || uidlElement.authorization.requiredClaims.length == 0) {
+        if (!uidlElement || !uidlElement.authorization || !uidlElement.authorization.requiredClaims || uidlElement.authorization.requiredClaims.length == 0) {
             return true;
         }
         try {
