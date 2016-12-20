@@ -767,6 +767,7 @@ namespace NWheels.Processing.Commands.Factories
                         .OnException<Exception>(
                             (w, ex) => {
                                 w.This<IAnyDeferred>().Void(x => x.Fail, ex);
+                                w.Throw();
                             });
                 }
             }

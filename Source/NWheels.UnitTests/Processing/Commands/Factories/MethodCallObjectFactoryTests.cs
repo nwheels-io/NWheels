@@ -135,6 +135,37 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
+        public void CanPropagateExceptionThrownByTargetMethod()
+        {
+            //-- arrange
+
+            var factoryUnderTest = new MethodCallObjectFactory(DyamicModule, Resolve<CompactSerializerFactory>());
+            var methodTwoInfo = typeof(TestTarget).GetMethod("MethodTwo");
+
+            var call = factoryUnderTest.NewMessageCallObject(methodTwoInfo);
+            dynamic callAsDynamic = call;
+
+            //-- act
+
+            callAsDynamic.Num = -2;
+
+            var target = new TestTarget(Framework.Logger<ITestTargetLogger>());
+            var exception = Should.Throw<TestTargetException>(
+                () => {
+                    call.ExecuteOn(target);
+                });
+
+            //-- assert
+
+            Framework.TakeLog().ShouldHaveOne<ITestTargetLogger>(x => x.MethodTwo(-2));
+            call.Result.ShouldBeNull();
+            ((IAnyDeferred)call).Error.ShouldNotBeNull();
+            ((IAnyDeferred)call).Error.ShouldBeSameAs(exception);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
         public void CanGetCallArgumentsOfVoidMethod()
         {
             //-- arrange
@@ -731,6 +762,12 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public class TestTargetException : Exception
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class TestTarget
         {
             private readonly ITestTargetLogger _logger;
@@ -754,6 +791,12 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             public string MethodTwo(int num)
             {
                 _logger.MethodTwo(num);
+
+                if (num < -1)
+                {
+                    throw new TestTargetException();
+                }
+
                 return (num * 2).ToString();
             }
 
