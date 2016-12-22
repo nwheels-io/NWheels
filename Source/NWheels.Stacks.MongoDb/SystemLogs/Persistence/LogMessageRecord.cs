@@ -28,6 +28,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
             this.Level = node.Level;
             this.MessageId = node.MessageId;
+            this.AlertId = node.AlertId;
             this.ThreadLogId = node.ThreadLog.LogId.ToString("N");
             this.CorrelationId = node.ThreadLog.CorrelationId.ToString("N");
             this.ExceptionType = node.ExceptionTypeName;

@@ -187,6 +187,7 @@ namespace NWheels.Logging.Core
             private readonly MethodSignature _signature;
             private readonly ParameterInfo[] _parameters;
             private readonly string _messageId;
+            private readonly string _alertId;
             private readonly bool _mustCreateException;
             private readonly List<int> _exceptionArgumentIndex;
             private readonly string[] _valueArgumentFormat;
@@ -211,6 +212,7 @@ namespace NWheels.Logging.Core
                 _parameters = _declaration.GetParameters();
                 _messageId = GetMessageId(_declaration);
                 _attribute = _declaration.GetCustomAttribute<LogAttributeBase>();
+                _alertId = _attribute.SystemAlertId;
                 _mustCreateException = _declaration.ReturnType.IsExceptionType();
                 _exceptionArgumentIndex = new List<int>();
                 _isValueArgument = new bool[_signature.ArgumentCount];
@@ -479,6 +481,12 @@ namespace NWheels.Logging.Core
                         .Concat(_nameValuePairLocals).ToArray();
 
                     var nodeLocal = m.Local<TT.TItem>(initialValue: m.New<TT.TItem>(constructorArguments));
+
+                    if (!string.IsNullOrEmpty(_alertId))
+                    {
+                        nodeLocal.CastTo<LogNode>().Prop(x => x.AlertId).Assign(_staticStrings.GetStaticStringOperand(_alertId));
+                    }
+
                     _threadLogAppenderField.Void(x => x.AppendLogNode, nodeLocal.CastTo<LogNode>());
                 }
             }

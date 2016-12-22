@@ -195,6 +195,48 @@ namespace NWheels.UnitTests.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
+        public void CanAppendMessageWithSystemAlertId()
+        {
+            //-- Arrange
+
+            var logger = CreateTestInterfaceLogger();
+
+            //-- Act
+
+            logger.ThisIsMyCriticalMessage();
+
+            //-- Assert
+
+            var log = _logAppender.TakeLog();
+
+            Assert.That(log.Length, Is.EqualTo(1));
+            Assert.That(log[0].AlertId, Is.EqualTo("MY_CRITICAL_ALERT"));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void SystemAlertIdIsNullIfNotDefinedForMessage()
+        {
+            //-- Arrange
+
+            var logger = CreateTestInterfaceLogger();
+
+            //-- Act
+
+            logger.ThisIsMyEmptyErrorMessage();
+
+            //-- Assert
+
+            var log = _logAppender.TakeLog();
+
+            Assert.That(log.Length, Is.EqualTo(1));
+            Assert.That(log[0].AlertId, Is.Null);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
         public void RegularLogsAndActivitiesDoNotStartThreadLog()
         {
             //-- Arrange
@@ -704,7 +746,7 @@ namespace NWheels.UnitTests.Logging
             [LogError]
             TestErrorException ThisIsMyErrorMessageThatCreatesException();
             
-            [LogCritical]
+            [LogCritical(SystemAlertId = "MY_CRITICAL_ALERT")]
             void ThisIsMyCriticalMessage();
             
             [LogCritical]

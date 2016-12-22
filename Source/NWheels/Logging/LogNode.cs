@@ -294,6 +294,10 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string AlertId { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         internal virtual void AttachToThreadLog(IThreadLog thread, ActivityLogNode parent, int indexInLog)
         {
             _threadLog = thread;
