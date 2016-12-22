@@ -1,30 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.DataObjects;
 using NWheels.Domains.DevOps.Alerts.Entities;
 using NWheels.Domains.DevOps.SystemLogs.Entities;
 using NWheels.Domains.DevOps.SystemLogs.Transactions;
+using NWheels.Extensions;
 using NWheels.Processing.Jobs;
 using NWheels.Processing.Messages;
 using NWheels.Processing.Messages.Impl;
 using NWheels.UI;
+using NWheels.Utilities;
 
 namespace NWheels.Domains.DevOps.Alerts.Jobs
 {
     public class SystemAlertJob : ApplicationJobBase
     {
         private readonly IFramework _framework;
+        private readonly ITypeMetadataCache _metadataCache;
+        private readonly IContentTemplateProvider _templateProvider;
         private readonly ServiceBus _serviceBus;
         private readonly AbstractLogMessageListTx _messageListTx;
-        private ImmutableConfiguration _configuration;
+        private CrossInvocationJobState _crossInvocationState;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public SystemAlertJob(IFramework framework, ServiceBus serviceBus, AbstractLogMessageListTx messageListTx)
+        public SystemAlertJob(
+            IFramework framework, 
+            ITypeMetadataCache metadataCache, 
+            IContentTemplateProvider templateProvider,
+            ServiceBus serviceBus, 
+            AbstractLogMessageListTx messageListTx)
         {
             _framework = framework;
+            _metadataCache = metadataCache;
+            _templateProvider = templateProvider;
             _serviceBus = serviceBus;
             _messageListTx = messageListTx;
         }
@@ -35,12 +48,12 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
 
         public override void Execute(IApplicationJobContext context)
         {
-            if (_configuration == null)
+            if (_crossInvocationState == null)
             {
-                Refresh();
+                _crossInvocationState = new CrossInvocationJobState(this);
             }
 
-            var operation = new DetectAndNotifyOperation(_configuration, _framework, _serviceBus, _messageListTx);
+            var operation = new DetectAndNotifyOperation(_crossInvocationState);
             operation.ExecuteOnce();
         }
 
@@ -50,27 +63,53 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
 
         public void Refresh()
         {
-            using (var context = _framework.NewUnitOfWork<ISystemAlertConfigurationContext>())
-            {
-                var configuredAlerts = context.Alerts.AsQueryable().ToList();
-                _configuration = new ImmutableConfiguration(configuredAlerts);
-            }
+            _crossInvocationState.RefreshConfiguration();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private class ImmutableConfiguration
         {
+            private readonly Dictionary<string, IEntityPartEmailRecipient[]> _emailRecipientPerAlertMessageId;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public ImmutableConfiguration(IEnumerable<ISystemAlertConfigurationEntity> alerts)
             {
+                _emailRecipientPerAlertMessageId = new Dictionary<string, IEntityPartEmailRecipient[]>();
 
+                foreach (var alert in alerts)
+                {
+                    var recipients = alert
+                        .Actions
+                        .OfType<IEntityPartAlertByEmail>()
+                        .Select(action => action.Recipients)
+                        .SelectMany(x => x)
+                        .ToArray();
+
+                    _emailRecipientPerAlertMessageId[alert.Id] = recipients;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IEnumerable<string> GetConfiguredAlertIds()
+            {
+                return _emailRecipientPerAlertMessageId.Keys;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public IEnumerable<AlertMessageRecipientPair> MultiplyAlertMessageByRecipients(ILogMessageEntity message)
             {
-                throw new NotImplementedException();
+                IEntityPartEmailRecipient[] recipients;
+
+                if (message.AlertId == null || !_emailRecipientPerAlertMessageId.TryGetValue(message.AlertId, out recipients))
+                {
+                    return Enumerable.Empty<AlertMessageRecipientPair>();
+                }
+
+                return recipients.Select(r => new AlertMessageRecipientPair(message, r));
             }
         }
 
@@ -92,25 +131,99 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private class CrossInvocationJobState
+        {
+            private readonly SystemAlertJob _owner;
+            private DateTime _lastTimestamp;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public CrossInvocationJobState(SystemAlertJob owner)
+            {
+                _owner = owner;
+                _lastTimestamp = owner._framework.UtcNow.AddMinutes(-10);
+
+                this.LogMessageMetaType = owner._metadataCache.GetTypeMetadata(typeof(ILogMessageEntity));
+
+                RefreshConfiguration();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RefreshConfiguration()
+            {
+                using (var context = _owner._framework.NewUnitOfWork<ISystemAlertConfigurationContext>())
+                {
+                    var configuredAlerts = context.Alerts.AsQueryable().ToList();
+                    this.Configuration = new ImmutableConfiguration(configuredAlerts);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public DateTime TakeLastTimestamp()
+            {
+                var value = _lastTimestamp;
+                _lastTimestamp = _owner._framework.UtcNow;
+                return value;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ITypeMetadata LogMessageMetaType { get; private set; }
+            public ImmutableConfiguration Configuration { get; private set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IFramework Framework
+            {
+                get { return _owner._framework; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ServiceBus ServiceBus
+            {
+                get { return _owner._serviceBus; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public AbstractLogMessageListTx MessageListTx
+            {
+                get { return _owner._messageListTx; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IContentTemplateProvider TemplateProvider
+            {
+                get { return _owner._templateProvider; }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private class DetectAndNotifyOperation
         {
-            private readonly ImmutableConfiguration _configuration;
+            private static readonly PropertyInfo _s_alertIdPropertyInfo = 
+                ExpressionUtility.GetPropertyInfoFrom<ILogMessageEntity>(x => x.AlertId);
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private readonly CrossInvocationJobState _jobState;
             private readonly IFramework _framework;
             private readonly ServiceBus _serviceBus;
             private readonly AbstractLogMessageListTx _messageListTx;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public DetectAndNotifyOperation(
-                ImmutableConfiguration configuration, 
-                IFramework framework, 
-                ServiceBus serviceBus, 
-                AbstractLogMessageListTx messageListTx)
+            public DetectAndNotifyOperation(CrossInvocationJobState jobState)
             {
-                _configuration = configuration;
-                _framework = framework;
-                _serviceBus = serviceBus;
-                _messageListTx = messageListTx;
+                _jobState = jobState;
+                _framework = jobState.Framework;
+                _serviceBus = jobState.ServiceBus;
+                _messageListTx = jobState.MessageListTx;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -126,8 +239,17 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
 
             private IReadOnlyList<ILogMessageEntity> FindNewAlerts()
             {
+                var query = new ApplicationEntityService.QueryOptions(_jobState.LogMessageMetaType.Name, new Dictionary<string, string>());
+
+                query.Filter.Add(new ApplicationEntityService.QueryFilterItem(
+                    propertyName: _s_alertIdPropertyInfo.Name,
+                    @operator: ApplicationEntityService.QueryOptions.IsInOperator,
+                    stringValue: string.Join(",", _jobState.Configuration.GetConfiguredAlertIds())));
+
                 var criteria = new ExtendedLogTimeRangeCriteria() {
-                    //TODO: build the right query
+                    From = _jobState.TakeLastTimestamp(),
+                    Until = _framework.UtcNow.AddMinutes(1),
+                    Query = query
                 };
 
                 var results = _messageListTx.Execute(criteria).ToList();
@@ -140,7 +262,7 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
             private IReadOnlyList<OutgoingEmailMessage> GroupAlertsIntoEmails(IReadOnlyList<ILogMessageEntity> newAlerts)
             {
                 var emails = newAlerts
-                    .SelectMany(message => _configuration.MultiplyAlertMessageByRecipients(message))
+                    .SelectMany(message => _jobState.Configuration.MultiplyAlertMessageByRecipients(message))
                     .GroupBy(pair => pair.Recipient)
                     .Select(group => CreateEmailMessage(group.Key, group.Select(pair => pair.Alert)))
                     .ToList();
@@ -162,7 +284,24 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
 
             private OutgoingEmailMessage CreateEmailMessage(IEntityPartEmailRecipient recipient, IEnumerable<ILogMessageEntity> alerts)
             {
-                throw new NotImplementedException();
+                var message = new OutgoingEmailMessage(_framework, _jobState.TemplateProvider);
+                var messageRecipient = recipient.ToOutgoingEmailMessageRecipient();
+
+                message.To.Add(messageRecipient);
+                message.LoadTemplate(SystemAlertReportTemplate.TemplateType.AlertsGroupedPerRecipient, subjectAtFirstLine: true);
+
+                var reportData = new SystemAlertReportTemplate.AlertsGroupedPerRecipient() {
+                    Recipient = messageRecipient,
+                    Alerts = alerts.Select(a => new SystemAlertReportTemplate.AlertDetails() {
+                        AlertId = a.AlertId,
+                        Problem = a.MessageId.SplitPascalCase(),
+                        Explanation = "TODO: configure problem explanation text",
+                        RequiredAction = "TODO: configure required action text"
+                    }).ToList()
+                };
+                
+                message.TemplateData = reportData;
+                return message;
             }
         }
 
@@ -178,6 +317,8 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
             public int? SeriesIndex { get; set; }
 
             #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             #region Implementation of IExtendedLogTimeRangeCriteria
 

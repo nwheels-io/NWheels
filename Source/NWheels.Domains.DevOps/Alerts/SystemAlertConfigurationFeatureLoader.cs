@@ -1,15 +1,19 @@
 ﻿using Autofac;
+using NWheels.Domains.DevOps.Alerts.Entities;
 using NWheels.Extensions;
 
 namespace NWheels.Domains.DevOps.Alerts
 {
-    class SystemAlertConfigurationFeatureLoader : Module
+    public class SystemAlertConfigurationFeatureLoader : Module
     {
         #region Overrides of Module
 
         protected override void Load(ContainerBuilder builder)
         {
             builder.NWheelsFeatures().Configuration().RegisterSection<ISystemAlertConfigurationFeatureSection>();
+
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IEntityPartEmailAddressRecipient>().With<EntityPartEmailAddressRecipient>();
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IEntityPartUserAccountEmailRecipient>().With<EntityPartUserAccountEmailRecipient>();
         }
 
         #endregion

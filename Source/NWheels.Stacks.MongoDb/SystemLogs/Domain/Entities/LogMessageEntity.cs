@@ -56,6 +56,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
         public LogLevel Level { get; private set; }
         public string Logger { get; private set; }
         public string MessageId { get; private set; }
+        public string AlertId { get; private set; }
         public long? DurationMs { get; private set; }
         public string ExceptionType { get; private set; }
         public string ExceptionDetails { get; private set; }

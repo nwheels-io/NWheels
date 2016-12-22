@@ -72,6 +72,7 @@
     <Compile Include="Alerts\ISystemAlertConfigurationFeatureSection.cs" />
     <Compile Include="Alerts\SystemAlertConfigurationFeatureLoader.cs" />
     <Compile Include="Alerts\Jobs\SystemAlertJob.cs" />
+    <Compile Include="Alerts\SystemAlertReportTemplate.cs" />
     <Compile Include="Alerts\UI\ScreenParts\AlertsScreenPart.cs" />
     <Compile Include="SystemLogs\Entities\IBaseLogDimensionsEntity.cs" />
     <Compile Include="SystemLogs\Entities\IThreadLogSearchCriteria.cs" />

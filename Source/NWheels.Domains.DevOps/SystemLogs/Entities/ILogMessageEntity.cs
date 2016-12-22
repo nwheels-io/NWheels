@@ -19,7 +19,10 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
         
         [PropertyContract.Calculated]
         string MessageId { get; }
-        
+
+        [PropertyContract.Calculated]
+        string AlertId { get; }
+
         [PropertyContract.Calculated]
         long? DurationMs { get; }
         
