@@ -770,23 +770,26 @@ namespace NWheels.Endpoints
             {
                 try
                 {
-                    Int32 length = (message != null ? message.Length : 0);
-
-                    _logger.ConnectionSendMessage(_logPartyName, length);
-
-                    _stream.Write(BitConverter.GetBytes(length), 0, sizeof(Int32));
-
-                    _logger.ConnectionSendMessageHeaderWritten(_logPartyName);
-
-                    if (message != null)
+                    lock (_stream)
                     {
-                        _stream.Write(message, 0, message.Length);
-                        _logger.ConnectionSendMessageBodyWritten(_logPartyName);
+                        Int32 length = (message != null ? message.Length : 0);
+
+                        _logger.ConnectionSendMessage(_logPartyName, length);
+
+                        _stream.Write(BitConverter.GetBytes(length), 0, sizeof(Int32));
+
+                        _logger.ConnectionSendMessageHeaderWritten(_logPartyName);
+
+                        if (message != null)
+                        {
+                            _stream.Write(message, 0, message.Length);
+                            _logger.ConnectionSendMessageBodyWritten(_logPartyName);
+                        }
+
+                        _stream.Flush();
+
+                        _logger.ConnectionSendMessageStreamFlushedSent(_logPartyName);
                     }
-
-                    _stream.Flush();
-
-                    _logger.ConnectionSendMessageStreamFlushedSent(_logPartyName);
                 }
                 catch (Exception e)
                 {
