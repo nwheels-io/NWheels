@@ -132,6 +132,37 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public virtual string GetJsonFromObject(IDomainObject domainObject, QueryOptions options)
+        {
+            var contractType = domainObject.ContractType;
+            var metaType = _metadataCache.GetTypeMetadata(contractType);
+            var handler = _handlerByEntityName[metaType.Name];
+
+            using (handler.NewUnitOfWork())
+            {
+                var serializerSettings = (options != null ? GetCachedSerializerSettings(options) : _defaultSerializerSettings);
+                var json = JsonConvert.SerializeObject(domainObject, serializerSettings);
+                return json;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual IDomainObject GetObjectFromJson(Type contractType, string json)
+        {
+            var metaType = _metadataCache.GetTypeMetadata(contractType);
+            var handler = _handlerByEntityName[metaType.Name];
+
+            using (handler.NewUnitOfWork())
+            {
+                var obj = _framework.As<ICoreFramework>().NewDomainObject(contractType);
+                JsonConvert.PopulateObject(json, obj, _defaultSerializerSettings);
+                return obj;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public virtual string QueryEntityJson(string entityName, QueryOptions options)
         {
             var handler = _handlerByEntityName[entityName];

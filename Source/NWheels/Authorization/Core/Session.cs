@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Security.Principal;
 using System.Threading;
+using NWheels.Authorization.Impl;
 using NWheels.Concurrency;
 using NWheels.Endpoints.Core;
 
@@ -48,6 +50,63 @@ namespace NWheels.Authorization.Core
         public IDisposable Join()
         {
             return new CallContextResourceConsumerScope<Session>(handle => this, externallyOwned: true, forceNewResource: true);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void SetUserStorageItem(string key, string value)
+        {
+            ManipulateUserStorageItem(key, (context, item) => {
+                if (item != null)
+                {
+                    item.Value = value;
+                    context.UserStorageItems.Update(item);
+                }
+                else
+                {
+                    var newItem = context.UserStorageItems.New();
+                    newItem.UserId = Session.Current.UserIdentity.UserId;
+                    newItem.Key = key;
+                    newItem.Value = value;
+                    context.UserStorageItems.Save(newItem);
+                }
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public bool TryGetUserStorageItem(string key, out string value)
+        {
+            bool found = false;
+            string foundValue = null;
+            
+            ManipulateUserStorageItem(key, (context, item) => {
+                if (item != null)
+                {
+                    found = true;
+                    foundValue = item.Value;
+                }
+            });
+
+            value = foundValue;
+            return found;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool RemoveUserStorageItem(string key)
+        {
+            var result = false;
+
+            ManipulateUserStorageItem(key, (context, item) => {
+                if (item != null)
+                {
+                    context.UserStorageItems.Delete(item);
+                    result = true;
+                }
+            });
+
+            return result;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -193,6 +252,37 @@ namespace NWheels.Authorization.Core
         {
             this.UserPrincipal = userPrincipal;
             this.UserIdentity = (IIdentityInfo)userPrincipal.Identity;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ManipulateUserStorageItem(string key, Action<IUserStorageContext, IUserStorageItemEntity> manipulation)
+        {
+            ValidateMutableAuthenticated();
+
+            var userId = Session.Current.UserIdentity.UserId;
+
+            using (var context = _framework.NewUnitOfWork<IUserStorageContext>())
+            {
+                var existingItem = context.UserStorageItems
+                    .AsQueryable()
+                    .Where(item => item.UserId == userId && item.Key == key)
+                    .FirstOrDefault();
+
+                manipulation(context, existingItem);
+
+                context.CommitChanges();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ValidateMutableAuthenticated()
+        {
+            if (IsGlobalImmutable || !UserIdentity.IsAuthenticated)
+            {
+                throw new InvalidOperationException("Requested operation is only available for authenticated users");
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

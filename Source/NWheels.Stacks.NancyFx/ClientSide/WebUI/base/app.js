@@ -2233,13 +2233,13 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                             }
                         });
                     
-                    if (scope.uidl.autoSubmitOnChange || scope.uidl.autoRecalculateOnChange) {
+                    if (scope.uidl.autoSubmitOnChange || scope.uidl.autoRecalculateOnChange || scope.uidl.autoSaveOnChange) {
                         scope.$watch('model.Data.entity', function(newValue, oldValue) {
                             if (scope.suppressAutoSubmitOnce) {
                                 scope.suppressAutoSubmitOnce = false;
                             } else if (scope.uidl.autoSubmitOnChange) {
                                 scope.autoSubmitForm();
-                            } else if (scope.uidl.autoRecalculateOnChange) {
+                            } else if (scope.uidl.autoRecalculateOnChange || scope.uidl.autoSaveOnChange) {
                                 if (!scope.autoRecalculateTimer) {
                                     scope.autoRecalculateTimer = $timeout(function() {
                                         scope.autoRecalculateTimer = null;
@@ -2384,6 +2384,30 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 scope.commandInProgress = false;
             });
             
+            if (scope.uidl.autoSaveInputDraft) {
+                scope.inputAutoSaveStatus = 'NotSaved';
+                
+                if (scope.uidl.inputFormTypeSelector) {
+                    for (var i = 0; i < scope.uidl.inputFormTypeSelector.selections.length ; i++) {
+                        scope.$on(scope.uidl.inputFormTypeSelector.selections[i].widget.qualifiedName + ':Changed', function(event, data) {
+                            scope.inputAutoSaveStatus = 'Saving';
+                            scope.$emit(scope.uidl.qualifiedName + ':AutoSavingInputDraft', data);
+                        });
+                    }
+                } else {
+                    scope.$on(scope.uidl.inputForm.qualifiedName + ':Changed', function(event, data) {
+                        scope.inputAutoSaveStatus = 'Saving';
+                        scope.$emit(scope.uidl.qualifiedName + ':AutoSavingInputDraft', data);
+                    });
+                }
+                scope.$on(scope.uidl.qualifiedName + ':AutoSaveComplete', function(event, data) {
+                    scope.inputAutoSaveStatus = 'Saved';
+                });
+                scope.$on(scope.uidl.qualifiedName + ':AutoSaveFailed', function(event, data) {
+                    scope.inputAutoSaveStatus = 'FailedToSave';
+                });
+            }
+
             scope.invokeCommand = function (command) {
                 if (command.kind==='Submit') {
                     scope.commandInProgress = true;
@@ -2400,6 +2424,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                         }
                     });
                 } else {
+                    scope.$emit(command.qualifiedName + ':Executing');
                     scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
                 }
             };

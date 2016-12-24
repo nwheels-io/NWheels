@@ -46,6 +46,13 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal protected IEnumerable<LocaleEntryKey> GetEnumTypeTranslatables<TEnum>(string propertyName)
+        {
+            return Enum.GetNames(typeof(TEnum)).Select(v => new LocaleEntryKey(v, this, propertyName));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         internal protected bool IsPopupContent { get; protected set; }
     }
 }

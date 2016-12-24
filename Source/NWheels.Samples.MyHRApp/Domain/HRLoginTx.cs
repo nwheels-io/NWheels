@@ -45,6 +45,16 @@ namespace NWheels.Samples.MyHRApp.Domain
             return output;
         }
 
+        public void SaveInputDraft(IInput input)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DiscardInputDraft()
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

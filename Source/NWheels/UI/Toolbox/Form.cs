@@ -357,6 +357,8 @@ namespace NWheels.UI.Toolbox
         public bool AutoSubmitOnChange { get; set; }
         [DataMember]
         public bool AutoRecalculateOnChange { get; set; }
+        [DataMember]
+        public bool AutoSaveOnChange { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1012,6 +1014,17 @@ namespace NWheels.UI.Toolbox
         bool IsModalPopup { get; }
         bool NeedsInitialModel { get; set; }
         bool NeedsAuthorize { get; set; }
+        bool AutoSaveOnChange { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum FormAutoSaveStatus
+    {
+        NotSaved,
+        Saving,
+        Saved,
+        SaveFailed
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

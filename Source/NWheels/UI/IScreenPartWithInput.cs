@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public interface IScreenPartWithInput<TInput>
+    public interface IScreenPartWithInput<in TInput>
     {
         string QualifiedName { get; }
     }

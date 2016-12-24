@@ -2399,6 +2399,18 @@ HEAD, JS/CSS LINKS
                 <div ng-hide="model.State.Output">
                     <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
                 </div>
+                <div ng-if="uidl.inputForm.commands.length==0" ng-hide="model.State.Output" class="m-b m-t">
+                    <button 
+                        ng-repeat="command in uidl.commands"
+                        type="button"
+                        class="btn btn-w-m btn-lg btn-rounded"
+                        style="margin-left:5px;"
+                        ng-disabled="commandInProgress"
+                        ng-click="invokeCommand(command)"
+                        ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy'}"
+                    ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                    <span ng-if="uidl.autoSaveInputDraft" class="pull-right">{{translate(inputAutoSaveStatus)}}<i class="fa fa-save" style="margin-left:8px;"></i></span>
+                </div>
             </div>
             <div ng-if="uidl.inputFormTypeSelector">
                 <div ng-hide="model.State.Output">

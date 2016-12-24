@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Authorization.Impl;
 using NWheels.DataObjects;
 using NWheels.Domains.Security;
 using NWheels.Entities;
@@ -11,7 +12,11 @@ using NWheels.Stacks.MongoDb;
 
 namespace NWheels.Samples.MyMusicDB.Domain
 {
-    public interface IMusicDBContext : IApplicationDataRepository, IAutoIncrementIdDataRepository, IUserAccountDataRepository
+    public interface IMusicDBContext : 
+        IApplicationDataRepository, 
+        IAutoIncrementIdDataRepository, 
+        IUserAccountDataRepository, 
+        IUserStorageContext
     {
         IEntityRepository<IGenreEntity> Genres { get; }
         IEntityRepository<IArtistEntity> Artists { get; }
@@ -24,12 +29,24 @@ namespace NWheels.Samples.MyMusicDB.Domain
 
         IAdministratorAcl NewAdministratorAcl();
         IOperatorAcl NewOperatorAcl();
+
+        NewAlbumTx.INewAlbumModel NewAlbumModel();
+        NewAlbumTx.INewTrackModel NewTrackModel();
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityPartContract]
+    public interface IEntityPartUserAccountId
+    {
+        [PropertyContract.EntityId, PropertyContract.AutoGenerate(typeof(AutoIncrementIntegerIdGenerator))]
+        int Id { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface IMusicDBUserAccountEntity : IUserAccountEntity, IEntityPartUserAccountProfilePhoto
+    public interface IMusicDBUserAccountEntity : IUserAccountEntity, IEntityPartUserAccountId, IEntityPartUserAccountProfilePhoto
     {
     }
 

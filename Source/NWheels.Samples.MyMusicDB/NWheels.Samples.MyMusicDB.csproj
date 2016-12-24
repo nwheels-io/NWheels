@@ -112,6 +112,7 @@
     <Compile Include="Authorization\MusicDBClaims.cs" />
     <Compile Include="Deployment\DemoDataPopulator.cs" />
     <Compile Include="Deployment\SecurityPopulator.cs" />
+    <Compile Include="Domain\NewAlbumTx.cs" />
     <Compile Include="Domain\EventCounterUtility.cs" />
     <Compile Include="Domain\IApiRequestLogger.cs" />
     <Compile Include="Domain\MusicDBApiEndpoint.cs" />

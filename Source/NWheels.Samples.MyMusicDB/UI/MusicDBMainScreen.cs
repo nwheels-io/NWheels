@@ -30,6 +30,7 @@ namespace NWheels.Samples.MyMusicDB.UI
                         @this = new {
                             Icon = "database"
                         },
+                        NewAlbum = Goto(this.NewAlbum).Appearance(icon: "asterisk"),
                         Genres = Goto(this.Genres).Appearance(icon: "sitemap"),
                         Artists = Goto(this.Artists).Appearance(icon: "user"),
                         Albums = Goto(this.Albums).Appearance(icon: "headphones"),
@@ -54,6 +55,8 @@ namespace NWheels.Samples.MyMusicDB.UI
 
             presenter.On(Console.ProfilePhoto.LogOut).InvokeCommand(CurrentUser.LogOut);
             presenter.On(Console.ProfilePhoto.ChangePassword).Navigate().FromContainer(Console.MainContent).ToScreenPartNonTyped(ChangePassword);
+
+            NewAlbum.UseFlatStyle();
 
             Genres.Crud.Grid
                 .Column(x => x.Id, size: FieldSize.Small)
@@ -120,6 +123,7 @@ namespace NWheels.Samples.MyMusicDB.UI
         public CrudScreenPart<IArtistEntity> Artists { get; set; }
         public CrudScreenPart<IAlbumEntity> Albums { get; set; }
         public CrudScreenPart<ITrackEntity> Tracks { get; set; }
+        public TransactionScreenPart<Empty.Input, NewAlbumTx.INewAlbumModel, NewAlbumTx> NewAlbum { get; set; }
         public UserAccountCrudScreenPart<IMusicDBUserAccountEntity> Users { get; set; }
         public ChangePasswordScreenPart ChangePassword { get; set; }
 

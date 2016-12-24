@@ -5,7 +5,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Serialization;
 using NWheels.DataObjects;
+using NWheels.Exceptions;
 using NWheels.Extensions;
+using NWheels.Globalization.Core;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 using NWheels.Processing;
@@ -140,6 +142,8 @@ namespace NWheels.UI.Toolbox
         [DataMember, ManuallyAssigned]
         public TypeSelector InputFormTypeSelector { get; set; }
         [DataMember]
+        public bool AutoSaveInputDraft { get; set; }
+        [DataMember]
         public UserAlertDisplayMode UserAlertDisplayMode { get; set; }
         [DataMember, ManuallyAssigned]
         public Form<TOutput> OutputForm { get; set; }
@@ -157,6 +161,9 @@ namespace NWheels.UI.Toolbox
         public UidlCommand Execute { get; set; }
         public UidlCommand Reset { get; set; }
         public UidlNotification<TContext> ContextSetter { get; set; }
+        public UidlNotification<TInput> AutoSavingInputDraft { get; set; }
+        public UidlNotification AutoSaveComplete { get; set; }
+        public UidlNotification<IPromiseFailureInfo> AutoSaveFailed { get; set; }
         public UidlNotification<TOutput> OutputReady { get; set; }
         public UidlNotification<IPromiseFailureInfo> OperationFailed { get; set; }
 
@@ -196,7 +203,30 @@ namespace NWheels.UI.Toolbox
 
             var txAttribute = typeof(TScript).GetCustomAttribute<TransactionScriptAttribute>();
             var shouldInvokeInitializeInput = (txAttribute != null && txAttribute.SupportsInitializeInput);
+            var shouldSupportInputDraft = (txAttribute != null && txAttribute.SupportsInputDraft);
             var hasCustomContext = (typeof(TContext) != typeof(Empty.Context));
+
+            if (shouldSupportInputDraft)
+            {
+                Execute.Text = "Create";
+                Reset.Text = "Discard";
+                AutoSaveInputDraft = true;
+
+                presenter.On(AutoSavingInputDraft)
+                    .InvokeTransactionScript<TScript>()
+                    .WaitForCompletion((tx, vm) => tx.SaveInputDraft(vm.State.Input))
+                    .Then(
+                        onSuccess: b => b.Broadcast(AutoSaveComplete).BubbleUp(),
+                        onFailure: b => b.Broadcast(AutoSaveFailed).WithPayload(vm => vm.Input).BubbleUp());
+                presenter.On(Reset)
+                    .InvokeTransactionScript<TScript>()
+                    .WaitForCompletion((tx, vm) => tx.DiscardInputDraft())
+                    .Then(b => b
+                        .InvokeTransactionScript<TScript>(ContextEntityType, ApiCallResultType.Command)
+                        .WaitForReply((script, vm) => script.InitializeInput(vm.State.Context))
+                        .Then(b2 => b2.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Input))
+                        .Then(InvokeFormModelSetter)));
+            }
 
             if (InputForm != null)
             {
@@ -303,6 +333,24 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Overrides of WidgetUidlNode
+
+        public override IEnumerable<LocaleEntryKey> GetTranslatables()
+        {
+            if (!AutoSaveInputDraft)
+            {
+                return base.GetTranslatables();
+            }
+
+            return base
+                .GetTranslatables()
+                .Concat(GetEnumTypeTranslatables<FormAutoSaveStatus>(propertyName: "AutoSaveStatus"));
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void ConfigureInputForm(IUidlForm form, bool needsInitialModel)
         {
             form.UsePascalCase = true;
@@ -311,6 +359,11 @@ namespace NWheels.UI.Toolbox
             if (!form.IsModalPopup)
             {
                 form.Commands.AddRange(this.Commands);
+            }
+
+            if (AutoSaveInputDraft)
+            {
+                form.AutoSaveOnChange = true;
             }
         }
 

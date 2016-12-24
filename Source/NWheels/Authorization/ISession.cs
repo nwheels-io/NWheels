@@ -16,6 +16,9 @@ namespace NWheels.Authorization
         DateTime OpenedAtUtc { get; }
         DateTime? ExpiresAtUtc { get; }
         bool IsGlobalImmutable { get; }
+        void SetUserStorageItem(string key, string value);
+        bool TryGetUserStorageItem(string key, out string value);
+        bool RemoveUserStorageItem(string key);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using NWheels.Authorization;
+using NWheels.Authorization.Impl;
 using NWheels.Domains.Security;
 using NWheels.Entities;
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Autofac;
+using NWheels.Authorization.Impl;
 using NWheels.Domains.Security;
 using NWheels.Domains.Security.UI;
 using NWheels.Extensions;
@@ -26,14 +27,17 @@ namespace NWheels.Samples.MyMusicDB
 
             builder.NWheelsFeatures().ObjectContracts().Concretize<IUserAccountDataRepository>().With<IMusicDBContext>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<IAutoIncrementIdDataRepository>().With<IMusicDBContext>();
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IUserStorageContext>().With<IMusicDBContext>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<IAdministratorAcl>().With<AdministratorAcl>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<IOperatorAcl>().With<OperatorAcl>();
 
+            builder.NWheelsFeatures().ObjectContracts().Mix<IEntityPartUserAccountId>().Into<IUserAccountEntity>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<IGenreRelation>().With<GenreRelation>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<ITrackEntity>().With<TrackEntity>();
             
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<InteractiveLoginTx>();
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<DashboardQueryTx>();
+            builder.NWheelsFeatures().Processing().RegisterTransactionScript<NewAlbumTx>();
             
             builder.NWheelsFeatures().UI().RegisterApplication<MusicDBApp>().WithWebEndpoint();
             

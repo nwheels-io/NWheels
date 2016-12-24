@@ -105,6 +105,7 @@
     <Compile Include="Authorization\Core\IAccessControlList.cs" />
     <Compile Include="Authorization\Core\AccessControlListCache.cs" />
     <Compile Include="Authorization\Core\ICoreSessionManager.cs" />
+    <Compile Include="Authorization\Impl\IUserStorageContext.cs" />
     <Compile Include="Authorization\Factories\CallAuthorizationAspectConvention.cs" />
     <Compile Include="Authorization\IAuthorizationLogger.cs" />
     <Compile Include="Authorization\Impl\AccessControlList.cs" />
