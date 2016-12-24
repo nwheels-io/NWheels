@@ -83,6 +83,7 @@
     <Compile Include="Authorization\Factories\CallAuthorizationAspectConventionTests.cs" />
     <Compile Include="Authorization\Impl\AccessControlListTests.cs" />
     <Compile Include="Authorization\Impl\EntityAccessControlPipeTests.cs" />
+    <Compile Include="Authorization\Impl\NonTypedEntittyAccessControlTests.cs" />
     <Compile Include="Authorization\Impl\TypedEntityAccessControlTests.cs" />
     <Compile Include="Authorization\TestingSamples.cs" />
     <Compile Include="AutoTests.cs" />

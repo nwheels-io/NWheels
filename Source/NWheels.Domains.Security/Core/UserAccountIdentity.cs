@@ -175,7 +175,7 @@ namespace NWheels.Domains.Security.Core
 
         public bool IsGlobalAnonymous 
         {
-            get { return true; }
+            get { return false; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

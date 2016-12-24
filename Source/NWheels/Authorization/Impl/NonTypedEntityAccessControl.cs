@@ -128,12 +128,7 @@ namespace NWheels.Authorization.Impl
 
         public virtual bool? CanDelete(IAccessControlContext context, object entity)
         {
-            if ( !CanDelete(context).GetValueOrDefault(false) )
-            {
-                return false;
-            }
-
-            return null;
+            return CanDelete(context);
         }
 
         #endregion

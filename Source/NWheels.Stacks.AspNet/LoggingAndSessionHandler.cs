@@ -54,7 +54,7 @@ namespace NWheels.Stacks.AspNet
                     }
 
                     //_sessionManager.JoinSessionOrOpenAnonymous(sessionId, null); //TODO: bring back the using 
-                    //using ( _sessionManager.JoinSessionOrOpenAnonymous(sessionId, null) )
+                    //using ( _sessionManager.JoinSessionOrOpenAnonymous(sessionId, null) ) 
                     //{
                     var response = await base.SendAsync(request, cancellationToken);
 
