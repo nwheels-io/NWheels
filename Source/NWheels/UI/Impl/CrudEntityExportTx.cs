@@ -15,7 +15,7 @@ using NWheels.UI.Factories;
 namespace NWheels.UI.Impl
 {
     [TransactionScript(SupportsInitializeInput = true)]
-    public class CrudEntityExportTx : ITransactionScript<CrudEntityExportTx.IContext, CrudEntityExportTx.IInput, DocumentFormatReplyMessage>
+    public class CrudEntityExportTx : TransactionScript<CrudEntityExportTx.IContext, CrudEntityExportTx.IInput, DocumentFormatReplyMessage>
     {
         private readonly IFramework _framework;
         private readonly IViewModelObjectFactory _viewModelFactory;
@@ -38,7 +38,7 @@ namespace NWheels.UI.Impl
 
         #region Implementation of ITransactionScript<Context,IInput,Output>
 
-        public IInput InitializeInput(IContext context)
+        public override IInput InitializeInput(IContext context)
         {
             var availableFormats = _formatSet.GetAvailableFormats(UIOperationContext.Current, context.EntityName);
             var input = _viewModelFactory.NewEntity<IInput>();
@@ -50,14 +50,14 @@ namespace NWheels.UI.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DocumentFormatReplyMessage Preview(IInput input)
+        public override DocumentFormatReplyMessage Preview(IInput input)
         {
             throw new NotSupportedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DocumentFormatReplyMessage Execute(IInput input)
+        public override DocumentFormatReplyMessage Execute(IInput input)
         {
             IEntityExportFormat exportFormat;
 

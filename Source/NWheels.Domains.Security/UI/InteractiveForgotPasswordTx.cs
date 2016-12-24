@@ -7,7 +7,8 @@ using NWheels.UI.Factories;
 namespace NWheels.Domains.Security.UI
 {
     [TransactionScript(SupportsInitializeInput = false, SupportsPreview = false)]
-    public class InteractiveForgotPasswordTx : ITransactionScript<Empty.Context, InteractiveForgotPasswordTx.IInput, InteractiveForgotPasswordTx.IOutput>
+    [SecurityCheck.AllowAnonymous]
+    public class InteractiveForgotPasswordTx : TransactionScript<Empty.Context, InteractiveForgotPasswordTx.IInput, InteractiveForgotPasswordTx.IOutput>
     {
         private readonly ResetPasswordTransactionScript _resetPasswordTx;
         private readonly IViewModelObjectFactory _viewModelFactory;
@@ -24,21 +25,21 @@ namespace NWheels.Domains.Security.UI
 
         #region Implementation of ITransactionScript<Context,Input,Result>
 
-        public IInput InitializeInput(Empty.Context context)
+        public override IInput InitializeInput(Empty.Context context)
         {
             throw new NotSupportedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IOutput Preview(IInput input)
+        public override IOutput Preview(IInput input)
         {
             throw new NotSupportedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IOutput Execute(IInput input)
+        public override IOutput Execute(IInput input)
         {
             _resetPasswordTx.Execute(input.LoginName);
 

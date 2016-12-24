@@ -6,7 +6,8 @@ using NWheels.UI;
 namespace NWheels.Domains.Security.UI
 {
     [TransactionScript(SupportsInitializeInput = false, SupportsPreview = false)]
-    public class InteractiveLoginTx : ITransactionScript<Empty.Context, InteractiveLoginTx.IInput, UserLoginTransactionScript.Result>
+    [SecurityCheck.AllowAnonymous]
+    public class InteractiveLoginTx : TransactionScript<Empty.Context, InteractiveLoginTx.IInput, UserLoginTransactionScript.Result>
     {
         private readonly UserLoginTransactionScript _loginTx;
 
@@ -21,21 +22,21 @@ namespace NWheels.Domains.Security.UI
 
         #region Implementation of ITransactionScript<Context,Input,Result>
 
-        public IInput InitializeInput(Empty.Context context)
+        public override IInput InitializeInput(Empty.Context context)
         {
             throw new NotSupportedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UserLoginTransactionScript.Result Preview(IInput input)
+        public override UserLoginTransactionScript.Result Preview(IInput input)
         {
             throw new NotSupportedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UserLoginTransactionScript.Result Execute(IInput input)
+        public override UserLoginTransactionScript.Result Execute(IInput input)
         {
             var output = _loginTx.Execute(input.LoginName, input.Password);
             return output;

@@ -14,7 +14,7 @@ using NWheels.UI.Toolbox;
 namespace NWheels.Samples.MyMusicDB.Domain
 {
     [TransactionScript(SupportsInitializeInput = false, SupportsPreview = false)]
-    public class DashboardQueryTx : ITransactionScript<Empty.Context, Empty.Input, DashboardQueryTx.IOutput>
+    public class DashboardQueryTx : TransactionScript<Empty.Context, Empty.Input, DashboardQueryTx.IOutput>
     {
         private readonly IFramework _framework;
         private readonly IViewModelObjectFactory _viewModelFactory;
@@ -33,21 +33,21 @@ namespace NWheels.Samples.MyMusicDB.Domain
 
         #region Implementation of ITransactionScript<Context,Input,Result>
 
-        public Empty.Input InitializeInput(Empty.Context context)
+        public override Empty.Input InitializeInput(Empty.Context context)
         {
             throw new NotSupportedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IOutput Preview(Empty.Input input)
+        public override IOutput Preview(Empty.Input input)
         {
             throw new NotSupportedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IOutput Execute(Empty.Input input)
+        public override IOutput Execute(Empty.Input input)
         {
             var output = _viewModelFactory.NewEntity<IOutput>();
 
