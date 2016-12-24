@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NWheels.Logging;
 using NWheels.Logging.Core;
@@ -13,6 +14,7 @@ namespace NWheels.Testing
         private readonly List<LogNode> _logNodes = new List<LogNode>();
         private readonly TestFramework _framework;
         private readonly TestThreadLog _threadLog;
+        private SpinLock _lock;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -20,33 +22,64 @@ namespace NWheels.Testing
         {
             _framework = framework;
             _threadLog = new TestThreadLog(framework);
+            _lock = new SpinLock();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AppendLogNode(LogNode node)
         {
-            _logNodes.Add(node);
-            node.AttachToThreadLog(_threadLog, parent: null, indexInLog: 0);
+            bool locked = false;
+            _lock.Enter(ref locked);
+
+            try
+            {
+                _logNodes.Add(node);
+                node.AttachToThreadLog(_threadLog, parent: null, indexInLog: 0);
+            }
+            finally
+            {
+                _lock.Exit();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AppendActivityNode(ActivityLogNode activity)
         {
-            _logNodes.Add(activity);
-            activity.AttachToThreadLog(_threadLog, parent: null, indexInLog: 0);
+            bool locked = false;
+            _lock.Enter(ref locked);
+
+            try
+            {
+                _logNodes.Add(activity);
+                activity.AttachToThreadLog(_threadLog, parent: null, indexInLog: 0);
+            }
+            finally
+            {
+                _lock.Exit();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void StartThreadLog(ThreadTaskType taskType, ActivityLogNode rootActivity)
         {
-            this.StartedThreadLogIndex = _logNodes.Count;
-            this.StartedThreadTaskType = taskType;
+            bool locked = false;
+            _lock.Enter(ref locked);
 
-            _logNodes.Add(rootActivity);
-            rootActivity.AttachToThreadLog(_threadLog, parent: null, indexInLog: 0);
+            try
+            {
+                this.StartedThreadLogIndex = _logNodes.Count;
+                this.StartedThreadTaskType = taskType;
+
+                _logNodes.Add(rootActivity);
+                rootActivity.AttachToThreadLog(_threadLog, parent: null, indexInLog: 0);
+            }
+            finally
+            {
+                _lock.Exit();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

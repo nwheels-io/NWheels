@@ -292,7 +292,7 @@ namespace NWheels.Endpoints
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class Server
+        public class Server : IDisposable
         {
             private readonly Logger _logger;
             private readonly string _ip;
@@ -304,9 +304,9 @@ namespace NWheels.Endpoints
             private readonly CancellationTokenSource _cancellation;
             private readonly Hashtable _connectionTaskByConnection;
             private readonly BlockingCollection<object> _connectionManagerQueue;
-            private readonly Task _connectionManagerTask;
-            private readonly Task _acceptConnectionsTask;
             private readonly Action<Connection, ConnectionCloseReason> _onConnectionClosedDelegate;
+            private Task _connectionManagerTask;
+            private Task _acceptConnectionsTask;
             private int _pendingConnectionCount;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -348,8 +348,6 @@ namespace NWheels.Endpoints
                 _logger.ServerInitializing(ip, port);
 
                 _tcpListener = new TcpListener(IPAddress.Parse(_ip ?? "127.0.0.1"), _port);
-                _connectionManagerTask = Task.Factory.StartNew(ManageConnections, _cancellation.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-                _acceptConnectionsTask = AcceptConnections();
 
                 _logger.ServerCtorCompleted(ip, port);
             }
@@ -359,6 +357,8 @@ namespace NWheels.Endpoints
             public void Start()
             {
                 _tcpListener.Start(_listenBacklog);
+                _connectionManagerTask = Task.Factory.StartNew(ManageConnections, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                _acceptConnectionsTask = AcceptConnections();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -490,7 +490,7 @@ namespace NWheels.Endpoints
                     {
                         request = _connectionManagerQueue.Take(cancellationToken);
                     }
-                    catch (TaskCanceledException)
+                    catch (OperationCanceledException)
                     {
                         break;
                     }
@@ -557,7 +557,7 @@ namespace NWheels.Endpoints
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class Client
+        public class Client : IDisposable
         {
             private readonly Logger _logger;
             private readonly TcpClient _tcpClient;
@@ -588,7 +588,7 @@ namespace NWheels.Endpoints
 
                 _logger.ClientSuccessfullyConnectedToServer();
 
-                _connection = new Connection(_tcpClient.Client, _tcpClient.GetStream(), _cancellation.Token, isClientConnection: true, logger: _logger);
+                _connection = new Connection(_tcpClient.Client, _tcpClient.GetStream(), _cancellation.Token, logger: _logger, client: _tcpClient);
 
                 AttachConnectionEventHandlers(onMessageReceived, onDisconnected);
 
@@ -718,9 +718,9 @@ namespace NWheels.Endpoints
             private readonly CancellationToken _upstreamCancellation;
             private readonly Logger _logger;
             private readonly CancellationTokenSource _connectionCancellation;
-            private readonly CancellationToken _anyReasonCancellation;
             private readonly SocketAddress _remoteAddress;
             private readonly string _logPartyName;
+            private CancellationToken _anyReasonCancellation;
             private Task _receiveTask;
             private ConnectionCloseReason _closeReason;
 
@@ -733,7 +733,7 @@ namespace NWheels.Endpoints
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public Connection(Socket socket, NetworkStream stream, CancellationToken upstreamCancellation, Logger logger, bool isClientConnection = false)
+            public Connection(Socket socket, NetworkStream stream, CancellationToken upstreamCancellation, Logger logger, TcpClient client = null)
             {
                 _socket = socket;
                 _stream = stream;
@@ -743,14 +743,19 @@ namespace NWheels.Endpoints
                 _anyReasonCancellation = CancellationTokenSource.CreateLinkedTokenSource(_upstreamCancellation, _connectionCancellation.Token).Token;
                 _remoteAddress = socket.RemoteEndPoint.Serialize();
                 _closeReason = ConnectionCloseReason.Unknown;
-                _logPartyName = (isClientConnection ? "CLIENT" : "SERVER");
+                _logPartyName = (client != null ? "CLIENT" : "SERVER");
+
+                if (client != null)
+                {
+                    _anyReasonCancellation.Register(() => client.Close());
+                }
 
                 _logger.ConnectionInitialized(_logPartyName, _remoteAddress.ToString());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public Task BeginReceiveMessages()
+            internal Task BeginReceiveMessages()
             {
                 if (_receiveTask != null)
                 {
@@ -770,25 +775,23 @@ namespace NWheels.Endpoints
             {
                 try
                 {
-                    lock (_stream)
+                    if (message != null)
                     {
-                        Int32 length = (message != null ? message.Length : 0);
+                        var headerBytes = BitConverter.GetBytes(message.Length);
 
-                        _logger.ConnectionSendMessage(_logPartyName, length);
+                        _logger.ConnectionSendMessage(_logPartyName, message.Length);
 
-                        _stream.Write(BitConverter.GetBytes(length), 0, sizeof(Int32));
+                        _socket.Send(new[] {
+                            new ArraySegment<byte>(headerBytes), 
+                            new ArraySegment<byte>(message)
+                        });
 
-                        _logger.ConnectionSendMessageHeaderWritten(_logPartyName);
-
-                        if (message != null)
-                        {
-                            _stream.Write(message, 0, message.Length);
-                            _logger.ConnectionSendMessageBodyWritten(_logPartyName);
-                        }
-
-                        _stream.Flush();
-
-                        _logger.ConnectionSendMessageStreamFlushedSent(_logPartyName);
+                        _logger.ConnectionSendMessageSentToSocket(_logPartyName, message.Length);
+                    }
+                    else
+                    {
+                        _socket.Send(_s_nullMessageHeader);
+                        _logger.ConnectionSendMessageSentToSocket(_logPartyName, 0);
                     }
                 }
                 catch (Exception e)
@@ -852,7 +855,7 @@ namespace NWheels.Endpoints
                             _logger.ConnectionReceiveMessagesWaitingForHeader(_logPartyName);
                             await ReceiveOneMessage(headerBuffer);
                         }
-                        catch (TaskCanceledException)
+                        catch (OperationCanceledException)
                         {
                             _logger.ConnectionReceiveMessagesTaskCanceledException(_logPartyName);
                             _closeReason = ConnectionCloseReason.LocalPartyShutDown;
@@ -994,6 +997,10 @@ namespace NWheels.Endpoints
                     }
                 }
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static readonly byte[] _s_nullMessageHeader = BitConverter.GetBytes((Int32)0);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1054,13 +1061,7 @@ namespace NWheels.Endpoints
             public abstract void ConnectionSendMessage(string party, int length);
 
             [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
-            public abstract void ConnectionSendMessageHeaderWritten(string party);
-
-            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
-            public abstract void ConnectionSendMessageBodyWritten(string party);
-
-            [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
-            public abstract void ConnectionSendMessageStreamFlushedSent(string party);
+            public abstract void ConnectionSendMessageSentToSocket(string party, int length);
 
             [LogDebug(ToPlainLog = true), Conditional("TCPDEBUG")]
             public abstract void ConnectionSendingMessageError(string party, Exception exception);

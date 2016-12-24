@@ -21,6 +21,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -96,6 +97,7 @@
     <Compile Include="Configuration\XmlConfigurationLoaderTest.cs" />
     <Compile Include="DataObjects\Core\ContainedToContainerCollectionAdapterTests.cs" />
     <Compile Include="Endpoints\Core\CompactRpcProtocolTests.cs" />
+    <Compile Include="Endpoints\DuplexTcpTransportTests.cs" />
     <Compile Include="Endpoints\Factories\DuplexNetworkApiProxyFactoryTests.cs" />
     <Compile Include="Serialization\AssumptionTests.cs" />
     <Compile Include="Serialization\CompactSerializerDictionaryTests.cs" />
