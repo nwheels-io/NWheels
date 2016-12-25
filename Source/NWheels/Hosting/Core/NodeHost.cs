@@ -351,6 +351,7 @@ namespace NWheels.Hosting.Core
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<RealTimeoutManager>().As<RealTimeoutManager>();
             builder.NWheelsFeatures().Logging().RegisterLogger<ITimeoutManagerLogger>();
             builder.RegisterType<DuplexNetworkApiProxyFactory>().As<IDuplexNetworkApiProxyFactory>().SingleInstance();
+            builder.NWheelsFeatures().Logging().RegisterLogger<DuplexNetworkApiProxyFactory.IDuplexNetworkApiProxyLogger>();
             builder.RegisterType<DuplexTcpTransport.ApiFactory>().SingleInstance();
             builder.NWheelsFeatures().Logging().RegisterLogger<DuplexTcpTransport.Logger>();
 

@@ -29,7 +29,7 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
                 return;
             }
 
-            Thread.Sleep(10000); // for debugging 
+            //Thread.Sleep(10000); // for debugging 
 
             NWheels.Stacks.Nlog.NLogBasedPlainLog.Instance.ConfigureConsoleOutput(NLog.LogLevel.Debug);
             var framework = ClientSideFramework.CreateWithDefaultConfiguration(
@@ -61,15 +61,29 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 
         private static async Task RunChatClient(ChatClient client)
         {
-            Console.WriteLine("Now connecting to chat server.");
-            Console.WriteLine("HELP > while in chat, type your message and hit ENTER to send.");
-            Console.WriteLine("HELP > to leave, type Q and hit ENTER.");
+            ConsoleEx.WriteLine(ConsoleColor.Magenta, "Now connecting to chat server.");
+            ConsoleEx.WriteLine(ConsoleColor.Magenta, "HELP > while in chat, type your message and hit ENTER to send.");
+            ConsoleEx.WriteLine(ConsoleColor.Magenta, "HELP > to leave, type Q and hit ENTER.");
 
-            var user = await client.Server.Hello(myName: "PID#" + Process.GetCurrentProcess().Id);
+            client.Server.RequestServerInfo();
 
-            var saveColor = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("LOGGED IN > as {0} ({1}).", user.FullName, user.RoleName);
+            var loggedIn = false;
+            UserInfo user = null;
+
+            while (!loggedIn)
+            {
+                try
+                {
+                    user = await client.Server.Hello(myName: "PID#" + Process.GetCurrentProcess().Id);
+                    loggedIn = true;
+                }
+                catch (Exception e)
+                {
+                    ConsoleEx.WriteLine(ConsoleColor.Red, "SERVER > EXCEPTION {0} : {1}", e.GetType().FriendlyName(), e.Message);
+                }
+            }
+
+            ConsoleEx.WriteLine(ConsoleColor.Magenta, "LOGGED IN > as {0} ({1}).", user.FullName, user.RoleName);
             
             while (true)
             {

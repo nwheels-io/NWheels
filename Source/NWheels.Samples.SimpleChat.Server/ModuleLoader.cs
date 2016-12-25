@@ -28,6 +28,8 @@ namespace NWheels.Samples.SimpleChat.Server
             
             builder.RegisterType<ChatService>().As<IChatServiceApi>().InstancePerDependency();
 
+            builder.NWheelsFeatures().Logging().RegisterLogger<ChatService.ILogger>();
+
             builder.NWheelsFeatures().Configuration().ProgrammaticSection<IFrameworkLoggingConfiguration>(config => {
                 config.Level = LogLevel.Debug;
                 NLogBasedPlainLog.Instance.ConsoleLogLevel = NLog.LogLevel.Debug;

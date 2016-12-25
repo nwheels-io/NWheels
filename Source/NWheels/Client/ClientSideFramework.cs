@@ -468,6 +468,7 @@ namespace NWheels.Client
             builder.RegisterType<ComponentAspectFactory>().SingleInstance();
 
             builder.RegisterType<DuplexNetworkApiProxyFactory>().As<IDuplexNetworkApiProxyFactory>().SingleInstance();
+            builder.NWheelsFeatures().Logging().RegisterLogger<DuplexNetworkApiProxyFactory.IDuplexNetworkApiProxyLogger>();
 
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<IDomainContextLogger>();

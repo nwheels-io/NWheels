@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NWheels.Concurrency;
 using NWheels.Concurrency.Core;
+using NWheels.Conventions.Core;
 using NWheels.Extensions;
 using NWheels.Processing.Commands.Impl;
 using NWheels.Serialization;
@@ -63,12 +64,15 @@ namespace NWheels.Processing.Commands.Factories
 
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
-            var conventionsContext = new MethodCallConventionsContext(((MethodCallTypeKey)context.TypeKey).Method);
+            var staticStrings = new StaticStringsDecorator();
+            var conventionsContext = new MethodCallConventionsContext(((MethodCallTypeKey)context.TypeKey).Method, staticStrings);
 
             return new IObjectFactoryConvention[] {
                 new BaseTypeDeferredConvention(conventionsContext), 
                 new ClassNameConvention(conventionsContext),
                 new ConstructorConvention(conventionsContext),
+                staticStrings, 
+                new ToStringConvention(conventionsContext), 
                 new ParameterPropertiesConvention(conventionsContext),
                 new ImplementIMethodCallObjectConvention(conventionsContext),
                 new ImplementIMethodCallSerializerObjectConvention(conventionsContext),
@@ -123,12 +127,13 @@ namespace NWheels.Processing.Commands.Factories
 
         public class MethodCallConventionsContext
         {
-            public MethodCallConventionsContext(MethodInfo method)
+            public MethodCallConventionsContext(MethodInfo method, StaticStringsDecorator staticStrings)
             {
                 this.Method = method;
                 this.TargetType = method.DeclaringType;
                 this.Parameters = method.GetParameters();
                 this.ParameterFields = new Field<TypeTemplate.TProperty>[this.Parameters.Length];
+                this.StaticStrings = staticStrings;
 
                 SetPromiseType();
             }
@@ -144,6 +149,7 @@ namespace NWheels.Processing.Commands.Factories
             public Type PromiseType { get; private set; }
             public Type PromiseTypeDefinition { get; private set; }
             public Type PromiseResultType { get; private set; }
+            public StaticStringsDecorator StaticStrings { get; private set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -355,6 +361,37 @@ namespace NWheels.Processing.Commands.Factories
                         writer.NewVirtualWritableProperty<TT.TProperty>(parameterNameInPascalCase).ImplementAutomatic(_context.ParameterFields[i]);
                     }
                 }
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ToStringConvention : ImplementationConvention
+        {
+            private readonly MethodCallConventionsContext _context;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ToStringConvention(MethodCallConventionsContext context)
+                : base(Will.ImplementBaseClass)
+            {
+                _context = context;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of ImplementationConvention
+
+            protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
+            {
+                var toStringValue = _context.Method.DeclaringType.FriendlyName() + "." + _context.Method.Name;
+
+                writer.ImplementBase<object>().Method<string>(x => x.ToString).Implement(
+                    w => {
+                        w.Return(_context.StaticStrings.GetStaticStringOperand(toStringValue));
+                    });
             }
 
             #endregion

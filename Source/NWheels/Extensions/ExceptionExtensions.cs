@@ -70,9 +70,9 @@ namespace NWheels.Extensions
             var code = fault.FaultCode;
             var subCode = fault.FaultSubCode;
 
-            var hasType = string.IsNullOrEmpty(type);
-            var hasCode = string.IsNullOrEmpty(code);
-            var hasSubCode = string.IsNullOrEmpty(subCode);
+            var hasType = !string.IsNullOrEmpty(type);
+            var hasCode = !string.IsNullOrEmpty(code);
+            var hasSubCode = !string.IsNullOrEmpty(subCode);
 
             if (hasType)
             {

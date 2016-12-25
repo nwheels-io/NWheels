@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -12,6 +13,7 @@ using NUnit.Framework;
 using NWheels.Concurrency;
 using NWheels.Endpoints;
 using NWheels.Endpoints.Factories;
+using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Processing.Commands;
 using NWheels.Testing;
@@ -104,9 +106,9 @@ namespace NWheels.UnitTests.Endpoints.Factories
             //-- act
 
             var doEchoTask = doEcho(); // returns after it begins await for completion of the call to server
-            
+
             serverTransport.TestReceiveFromNetwork();
-            
+
             var finishedTooEarly = doEchoTask.Wait(500); // should return false as the task is awaiting for server reply
             var earlyClientLog = clientObject.Log.ToArray();
             var earlyServerLog = serverObject.Log.ToArray();
@@ -135,10 +137,109 @@ namespace NWheels.UnitTests.Endpoints.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void FaultOnServerSyncMethod()
+        {
+            //-- arrange
+
+            var network = new MemoryStream();
+            var serverTransport = new TestTransport(network);
+            var clientTransport = new TestTransport(network);
+
+            var proxyFactory = Resolve<IDuplexNetworkApiProxyFactory>();
+            var clientObject = new ClientApiImplementation(clientTransport, proxyFactory);
+            var serverObject = new ServerApiImplementation();
+
+            var proxyUsedByListenerOnServer = proxyFactory.CreateProxyInstance<IClientApi, IServerApi>(serverTransport, serverObject);
+
+            string returnValue = null;
+            Exception returnException = null;
+            
+            Func<Task> doEcho = async () => {
+                try
+                {
+                    returnValue = await clientObject.Server.ReverseEcho("FAULT");
+                }
+                catch (Exception e)
+                {
+                    returnException = e;
+                }
+            };
+
+            //-- act
+
+            var doEchoTask = doEcho(); // returns after it begins await for completion of the call to server
+
+            serverTransport.TestReceiveFromNetwork();
+            clientTransport.TestReceiveFromNetwork();
+
+            doEchoTask.Wait(10000).ShouldBeTrue("timed out waiting for call to complete");
+
+            //-- assert
+
+            returnValue.ShouldBeNull();
+            returnException.ShouldNotBeNull();
+            returnException.ShouldBeOfType<RemotePartyFaultException>();
+            ((RemotePartyFaultException)returnException).FaultCode.ShouldBe("String/TestFault");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void FaultOnServerAsyncMethod()
+        {
+            Framework.PrintLogToStandardOutput();
+
+            //-- arrange
+
+            var network = new MemoryStream();
+            var serverTransport = new TestTransport(network);
+            var clientTransport = new TestTransport(network);
+
+            var proxyFactory = Resolve<IDuplexNetworkApiProxyFactory>();
+            var clientObject = new ClientApiImplementation(clientTransport, proxyFactory);
+            var serverObject = new ServerApiImplementation();
+
+            var proxyUsedByListenerOnServer = proxyFactory.CreateProxyInstance<IClientApi, IServerApi>(serverTransport, serverObject);
+
+            string returnValue = null;
+            Exception returnException = null;
+
+            Func<Task> doWorkHard = async () => {
+                try
+                {
+                    returnValue = await clientObject.Server.WorkHard("FAULT");
+                }
+                catch (Exception e)
+                {
+                    returnException = e;
+                }
+            };
+
+            //-- act
+
+            var doWorkHardTask = doWorkHard(); // returns after it begins await for completion of the call to server
+
+            serverTransport.TestReceiveFromNetwork();
+            
+            clientTransport.WaitAndTestReceiveFromNetwork(10000).ShouldBeTrue("timed out waiting for reply on network");
+            doWorkHardTask.Wait(10000).ShouldBeTrue("timed out waiting for call to complete");
+
+            //-- assert
+
+            returnValue.ShouldBeNull();
+            returnException.ShouldNotBeNull();
+            returnException.ShouldBeOfType<RemotePartyFaultException>();
+            ((RemotePartyFaultException)returnException).FaultCode.ShouldBe("String/TestFault");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public interface IServerApi
         {
             void Ping(string message);
             Task<string> ReverseEcho(string message);
+            Task<string> WorkHard(string input);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -174,8 +275,27 @@ namespace NWheels.UnitTests.Endpoints.Factories
             {
                 Log.Add("ServerApiImplementation.ReverseEcho(" + message + ")");
 
+                if (message == "FAULT")
+                {
+                    throw new DomainFaultException<string>("TestFault");
+                }
+
                 var result = new string(message.Reverse().ToArray(), 0, message.Length);
                 return Task.FromResult(result);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public async Task<string> WorkHard(string input)
+            {
+                await Task.Delay(100);
+
+                if (input == "FAULT")
+                {
+                    throw new DomainFaultException<string>("TestFault");
+                }
+
+                return "OUTPUT";
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -241,6 +361,7 @@ namespace NWheels.UnitTests.Endpoints.Factories
 
         private class TestTransport : IDuplexNetworkEndpointTransport
         {
+            private readonly object _syncRoot = new object();
             private readonly MemoryStream _network;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -256,8 +377,11 @@ namespace NWheels.UnitTests.Endpoints.Factories
 
             public void SendBytes(byte[] bytes)
             {
-                _network.Write(bytes, 0, bytes.Length);
-                _network.Seek(-bytes.Length, SeekOrigin.End);
+                lock (_syncRoot)
+                {
+                    _network.Write(bytes, 0, bytes.Length);
+                    _network.Seek(-bytes.Length, SeekOrigin.End);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -273,13 +397,41 @@ namespace NWheels.UnitTests.Endpoints.Factories
             public void TestReceiveFromNetwork()
             {
                 var receivedBuffer = new MemoryStream();
-                _network.CopyTo(receivedBuffer);
+
+                lock (_syncRoot)
+                {
+                    _network.CopyTo(receivedBuffer);
+                }
 
                 if (receivedBuffer.Length > 0)
                 {
                     if (BytesReceived != null)
                     {
                         BytesReceived(receivedBuffer.ToArray());
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool WaitAndTestReceiveFromNetwork(int milliescondsTimeout)
+            {
+                var clock = Stopwatch.StartNew();
+
+                while (true)
+                {
+                    lock (_syncRoot)
+                    {
+                        if (_network.Position < _network.Length)
+                        {
+                            TestReceiveFromNetwork();
+                            return true;
+                        }
+                    }
+
+                    if (clock.ElapsedMilliseconds >= milliescondsTimeout)
+                    {
+                        return false;
                     }
                 }
             }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -18,6 +19,7 @@ using NWheels.Concurrency.Core;
 using NWheels.Endpoints.Core;
 using NWheels.Exceptions;
 using NWheels.Extensions;
+using NWheels.Logging;
 using NWheels.Processing.Commands;
 using NWheels.Processing.Commands.Factories;
 using NWheels.Serialization;
@@ -115,10 +117,17 @@ namespace NWheels.Endpoints.Factories
 
         public abstract class ProxyBase
         {
-            private readonly ConcurrentDictionary<long, IMethodCallObject> _outstandingCallsByCorrelationId =
-                new ConcurrentDictionary<long, IMethodCallObject>();
-            
+            private readonly IDuplexNetworkApiProxyLogger _logger;
+            private readonly ConcurrentDictionary<long, IMethodCallObject> _outstandingCallsByCorrelationId;
             private long _lastCorrelationId;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected ProxyBase(IDuplexNetworkApiProxyLogger logger)
+            {
+                _logger = logger;
+                _outstandingCallsByCorrelationId = new ConcurrentDictionary<long, IMethodCallObject>();
+            }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -126,6 +135,8 @@ namespace NWheels.Endpoints.Factories
             {
                 var correlationId = Interlocked.Increment(ref _lastCorrelationId);
                 call.CorrelationId = correlationId;
+
+                _logger.RegisteringOutstandingCall(call, correlationId);
 
                 var added = _outstandingCallsByCorrelationId.TryAdd(correlationId, call);
                 Debug.Assert(added);
@@ -140,6 +151,8 @@ namespace NWheels.Endpoints.Factories
                 var correlationId = Interlocked.Increment(ref _lastCorrelationId);
                 call.CorrelationId = correlationId;
 
+                _logger.RegisteringOutstandingCall(call, correlationId);
+
                 var added = _outstandingCallsByCorrelationId.TryAdd(correlationId, call);
                 Debug.Assert(added);
 
@@ -152,6 +165,8 @@ namespace NWheels.Endpoints.Factories
             {
                 var correlationId = Interlocked.Increment(ref _lastCorrelationId);
                 call.CorrelationId = correlationId;
+
+                _logger.RegisteringOutstandingCall(call, correlationId);
 
                 var added = _outstandingCallsByCorrelationId.TryAdd(correlationId, call);
                 Debug.Assert(added);
@@ -166,6 +181,8 @@ namespace NWheels.Endpoints.Factories
                 var correlationId = Interlocked.Increment(ref _lastCorrelationId);
                 call.CorrelationId = correlationId;
 
+                _logger.RegisteringOutstandingCall(call, correlationId);
+
                 var added = _outstandingCallsByCorrelationId.TryAdd(correlationId, call);
                 Debug.Assert(added);
 
@@ -177,10 +194,16 @@ namespace NWheels.Endpoints.Factories
             protected IMethodCallObject HandleReturnMessage(long correlationId, CompactDeserializationContext deserializationContext)
             {
                 IMethodCallObject call;
-                
                 var found = _outstandingCallsByCorrelationId.TryRemove(correlationId, out call);
-                Debug.Assert(found);
-                
+
+                if (!found)
+                {
+                    _logger.OutstandingCallNotFound(correlationId);
+                    return null;
+                }
+
+                _logger.ReceivedReply(call, correlationId);
+
                 call.Serializer.DeserializeOutput(deserializationContext);
 
                 ThreadPool.UnsafeQueueUserWorkItem(_s_resolveDeferredCallOnCurrentThread, call);
@@ -194,9 +217,15 @@ namespace NWheels.Endpoints.Factories
             protected void HandleFaultMessage(long correlationId, string faultCode)
             {
                 IMethodCallObject call;
-
                 var found = _outstandingCallsByCorrelationId.TryRemove(correlationId, out call);
-                Debug.Assert(found);
+
+                if (!found)
+                {
+                    _logger.OutstandingCallNotFound(correlationId);
+                    return;
+                }
+
+                _logger.ReceivedFault(call, correlationId, faultCode);
 
                 ThreadPool.UnsafeQueueUserWorkItem(
                     _s_failDeferredCallOnCurrentThread, 
@@ -208,6 +237,13 @@ namespace NWheels.Endpoints.Factories
 
                 //_faultCode = faultCode;
                 //((IAnyDeferred)call).Fail(new RemotePartyFaultException(faultCode));
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected IDuplexNetworkApiProxyLogger Logger
+            {
+                get { return _logger; }
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -260,6 +296,7 @@ namespace NWheels.Endpoints.Factories
                 IDuplexNetworkEndpointTransport transport, 
                 IMethodCallObjectFactory callFactory,
                 object localServer)
+                : base(components.Resolve<IDuplexNetworkApiProxyLogger>())
             {
                 _components = components;
                 _serializer = serializer;
@@ -297,6 +334,8 @@ namespace NWheels.Endpoints.Factories
                 {
                     using (var writer = new CompactBinaryWriter(buffer))
                     {
+                        base.Logger.SendingCall(call, call.CorrelationId);
+
                         var context = new CompactSerializationContext(_serializer, _dictionary, writer);
                         CompactRpcProtocol.WriteCall(call, context);
                         writer.Flush();
@@ -318,6 +357,7 @@ namespace NWheels.Endpoints.Factories
 
                         if (failure == null)
                         {
+                            base.Logger.SendingReply(call, call.CorrelationId);
                             CompactRpcProtocol.WriteReturn(call, context);
                         }
                         else
@@ -327,6 +367,8 @@ namespace NWheels.Endpoints.Factories
                                 fault != null 
                                 ? fault.GetQualifiedFaultCode() 
                                 : CompactRpcProtocol.FaultCodeInternalError);
+
+                            base.Logger.SendingFault(call, call.CorrelationId, faultCode);
 
                             CompactRpcProtocol.WriteFault(call, context, faultCode);
                         }
@@ -412,6 +454,8 @@ namespace NWheels.Endpoints.Factories
             {
                 Exception failure = null;
 
+                base.Logger.ReceivedCall(call, call.CorrelationId);
+
                 try
                 {
                     using (DuplexNetworkApi.CurrentCall.UseClientProxy(this))
@@ -422,7 +466,7 @@ namespace NWheels.Endpoints.Factories
                 catch (Exception e)
                 {
                     failure = e;
-                    throw;
+                    //throw;
                 }
                 finally
                 {
@@ -487,9 +531,77 @@ namespace NWheels.Endpoints.Factories
 
             private void SendReplyOnceCallCompleted(IMethodCallObject call)
             {
-                var error = ((IAnyDeferred)call).Error;
+                //var error = ((IAnyDeferred)call).Error;
+                var error = ExtractCallCompletionError(call);
                 SendReply(call, error);
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private Exception ExtractCallCompletionError(IMethodCallObject call)
+            {
+                var error = ((IAnyDeferred)call).Error;
+
+                if (error == null)
+                {
+                    var task = call.Result as Task;
+                    var promise = call.Result as IAnyPromise;
+
+                    if (task != null)
+                    {
+                        error = task.Exception;
+                    }
+                    else if (promise != null)
+                    {
+                        error = promise.Error;
+                    }
+                }
+
+                var aggregateException = (error as AggregateException);
+
+                if (aggregateException != null)
+                {
+                    error = aggregateException.Flatten().InnerExceptions.FirstOrDefault();
+                }
+
+                var targetInvocationException = (error as TargetInvocationException);
+
+                if (targetInvocationException != null)
+                {
+                    error = targetInvocationException.InnerException;
+                }
+
+                return error;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IDuplexNetworkApiProxyLogger : IApplicationEventLogger
+        {
+            [LogVerbose(ToPlainLog = true)]
+            void SendingCall(IMethodCallObject call, long correlationId);
+            
+            [LogVerbose(ToPlainLog = true)]
+            void SendingReply(IMethodCallObject call, long correlationId);
+            
+            [LogWarning(ToPlainLog = true)]
+            void SendingFault(IMethodCallObject call, long correlationId, string faultCode);
+            
+            [LogVerbose(ToPlainLog = true)]
+            void ReceivedCall(IMethodCallObject call, long correlationId);
+            
+            [LogVerbose(ToPlainLog = true)]
+            void ReceivedReply(IMethodCallObject call, long correlationId);
+            
+            [LogWarning(ToPlainLog = true)]
+            void ReceivedFault(IMethodCallObject call, long correlationId, string faultCode);
+            
+            [LogVerbose(ToPlainLog = true)]
+            void RegisteringOutstandingCall(IMethodCallObject call, long correlationId);
+            
+            [LogError(ToPlainLog = true)]
+            void OutstandingCallNotFound(long correlationId);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

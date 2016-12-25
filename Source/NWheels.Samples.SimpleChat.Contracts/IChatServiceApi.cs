@@ -9,6 +9,8 @@ namespace NWheels.Samples.SimpleChat.Contracts
 {
     public interface IChatServiceApi
     {
+        void RequestServerInfo();
+
         [NetworkApiContract.ConnectCommand]
         Task<UserInfo> Hello(string myName);
 

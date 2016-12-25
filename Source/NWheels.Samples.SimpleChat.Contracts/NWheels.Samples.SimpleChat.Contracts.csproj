@@ -42,6 +42,7 @@
     <Compile Include="IChatClientApi.cs" />
     <Compile Include="IChatServiceApi.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServerInfo.cs" />
     <Compile Include="UserInfo.cs" />
   </ItemGroup>
   <ItemGroup>

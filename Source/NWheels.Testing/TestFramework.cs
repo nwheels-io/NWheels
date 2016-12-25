@@ -338,6 +338,13 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void PrintLogToStandardOutput()
+        {
+            _logAppender.ShouldPrintToStandardOutput = true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public LogNode[] GetLog()
         {
             return _logAppender.GetLog();
@@ -487,6 +494,7 @@ namespace NWheels.Testing
             builder.RegisterType<ComponentAspectFactory>().SingleInstance();
 
             builder.RegisterType<DuplexNetworkApiProxyFactory>().As<IDuplexNetworkApiProxyFactory>().SingleInstance();
+            builder.NWheelsFeatures().Logging().RegisterLogger<DuplexNetworkApiProxyFactory.IDuplexNetworkApiProxyLogger>();
             
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<IDomainContextLogger>();

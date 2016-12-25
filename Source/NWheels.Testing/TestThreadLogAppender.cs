@@ -36,6 +36,11 @@ namespace NWheels.Testing
             {
                 _logNodes.Add(node);
                 node.AttachToThreadLog(_threadLog, parent: null, indexInLog: 0);
+
+                if (ShouldPrintToStandardOutput)
+                {
+                    Console.WriteLine(node.SingleLineText);
+                }
             }
             finally
             {
@@ -54,6 +59,11 @@ namespace NWheels.Testing
             {
                 _logNodes.Add(activity);
                 activity.AttachToThreadLog(_threadLog, parent: null, indexInLog: 0);
+
+                if (ShouldPrintToStandardOutput)
+                {
+                    Console.WriteLine(activity.SingleLineText);
+                }
             }
             finally
             {
@@ -120,6 +130,10 @@ namespace NWheels.Testing
 
         public int? StartedThreadLogIndex { get; private set; }
         public ThreadTaskType? StartedThreadTaskType { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool ShouldPrintToStandardOutput { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

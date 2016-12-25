@@ -48,13 +48,7 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 
             while (string.IsNullOrEmpty(password))
             {
-                var saveColor = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write("PASSWORD > ");
-                
-                password = await Task.Run(() => Console.ReadLine());
-                
-                Console.ForegroundColor = saveColor;
+                password = await ConsoleEx.ReadLineAsync(ConsoleColor.Yellow, "PASSWORD IS REQUIRED! Enter your password, then hit ENTER > ");
             }
 
             return password;
@@ -62,9 +56,16 @@ namespace NWheels.Samples.SimpleChat.ConsoleClient
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void IChatClientApi.SomeoneSaidSomething(string who, string what)
+        void IChatClientApi.PushServerInfo(ServerInfo info)
         {
-            Console.WriteLine("{0} > {1}", who, what);
+            ConsoleEx.WriteLine(ConsoleColor.Magenta, "SERVER INFO > {0}, version {1}", info.ServerProduct, info.ServerVersion);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IChatClientApi.PushMessage(string who, string what)
+        {
+            ConsoleEx.WriteLine(ConsoleColor.Cyan, "{0} > {1}", who, what);
         }
 
         #endregion

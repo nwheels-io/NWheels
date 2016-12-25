@@ -235,6 +235,26 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
+        public void ToStringReturnsTypeQualifiedMethodName()
+        {
+            //-- arrange
+
+            var factoryUnderTest = new MethodCallObjectFactory(DyamicModule, Resolve<CompactSerializerFactory>());
+            var methodTwoInfo = typeof(TestTarget).GetMethod("MethodTwo");
+            var call = factoryUnderTest.NewMessageCallObject(methodTwoInfo);
+
+            //-- act 
+
+            var toStringValue = call.ToString();
+
+            //-- assert
+
+            toStringValue.ShouldBe("TestTarget.MethodTwo");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
         public void CanStoreExtensionDataProperties()
         {
             //-- arrange

@@ -10,7 +10,8 @@ namespace NWheels.Samples.SimpleChat.Contracts
 {
     public interface IChatClientApi
     {
+        void PushServerInfo(ServerInfo info);
         Task<string> RequestPassword();
-        void SomeoneSaidSomething(string who, string what);
+        void PushMessage(string who, string what);
     }
 }
