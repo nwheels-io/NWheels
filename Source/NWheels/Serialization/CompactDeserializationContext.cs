@@ -33,6 +33,13 @@ namespace NWheels.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public T? ReadNullable<T>() where T : struct
+        {
+            return Serializer.ReadNullable<T>(this);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public CompactSerializer Serializer { get; private set; }
         public CompactSerializerDictionary Dictionary { get; private set; }
         public CompactBinaryReader Input { get; private set; }

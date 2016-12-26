@@ -117,6 +117,114 @@ namespace NWheels.UnitTests.Serialization
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
+        public void Roundtrip_ClassWithNullables_AllNotNulls()
+        {
+            //-- arrange
+
+            var serializer = Framework.Components.Resolve<CompactSerializer>();
+            var dictionary = new StaticCompactSerializerDictionary();
+
+            var original = new Repo.AClassWithNullables() {
+                IntValue = 987,
+                EnumValue = TestObjectRepository.AnAppEnum.Second,
+                AnotherValue = new Repo.AnotherPrimitiveStruct("ABC")
+            };
+
+            //-- act
+
+            var serializedBytes = serializer.GetBytes(original, dictionary);
+            var deserialized = serializer.GetObject<Repo.AClassWithNullables>(serializedBytes, dictionary);
+
+            //-- assert
+
+            deserialized.IntValue.HasValue.ShouldBe(true);
+            deserialized.IntValue.Value.ShouldBe(987);
+
+            deserialized.EnumValue.HasValue.ShouldBe(true);
+            deserialized.EnumValue.Value.ShouldBe(TestObjectRepository.AnAppEnum.Second);
+
+            deserialized.AnotherValue.HasValue.ShouldBe(true);
+            deserialized.AnotherValue.Value.StringValue.ShouldBe("ABC");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Roundtrip_ClassWithNullables_AllNulls()
+        {
+            //-- arrange
+
+            var serializer = Framework.Components.Resolve<CompactSerializer>();
+            var dictionary = new StaticCompactSerializerDictionary();
+
+            var original = new Repo.AClassWithNullables() {
+                IntValue = null,
+                EnumValue = null,
+                AnotherValue = null
+            };
+
+            //-- act
+
+            var serializedBytes = serializer.GetBytes(original, dictionary);
+            var deserialized = serializer.GetObject<Repo.AClassWithNullables>(serializedBytes, dictionary);
+
+            //-- assert
+
+            deserialized.IntValue.HasValue.ShouldBe(false);
+            deserialized.EnumValue.HasValue.ShouldBe(false);
+            deserialized.AnotherValue.HasValue.ShouldBe(false);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Roundtrip_ClassWithNullables_SomeNulls()
+        {
+            //-- arrange
+
+            var serializer = Framework.Components.Resolve<CompactSerializer>();
+            var dictionary = new StaticCompactSerializerDictionary();
+
+            var original1 = new Repo.AClassWithNullables() {
+                IntValue = null,
+                EnumValue = TestObjectRepository.AnAppEnum.Second,
+                AnotherValue = null
+            };
+
+            var original2 = new Repo.AClassWithNullables() {
+                IntValue = 987,
+                EnumValue = null,
+                AnotherValue = new Repo.AnotherPrimitiveStruct("ABC")
+            };
+
+            //-- act
+
+            var serializedBytes1 = serializer.GetBytes(original1, dictionary);
+            var serializedBytes2 = serializer.GetBytes(original2, dictionary);
+            var deserialized1 = serializer.GetObject<Repo.AClassWithNullables>(serializedBytes1, dictionary);
+            var deserialized2 = serializer.GetObject<Repo.AClassWithNullables>(serializedBytes2, dictionary);
+
+            //-- assert
+
+            deserialized1.IntValue.HasValue.ShouldBe(false);
+            
+            deserialized1.EnumValue.HasValue.ShouldBe(true);
+            deserialized1.EnumValue.Value.ShouldBe(TestObjectRepository.AnAppEnum.Second);
+            
+            deserialized1.AnotherValue.HasValue.ShouldBe(false);
+
+            deserialized2.IntValue.HasValue.ShouldBe(true);
+            deserialized2.IntValue.Value.ShouldBe(987);
+            
+            deserialized2.EnumValue.HasValue.ShouldBe(false);
+            
+            deserialized2.AnotherValue.HasValue.ShouldBe(true);
+            deserialized2.AnotherValue.Value.StringValue.ShouldBe("ABC");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
         public void Roundtrip_ClassWithNestedObjects()
         {
             //-- arrange

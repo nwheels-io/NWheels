@@ -279,6 +279,11 @@ namespace NWheels.Serialization.Factories
                 return typeof(object);
             }
 
+            if (valueType.IsNullableType())
+            {
+                return typeof(Nullable<>);
+            }
+
             if (!valueType.IsPrimitive && !_s_valueReaderByType.ContainsKey(valueType))
             {
                 return typeof(ValueType);
@@ -326,6 +331,23 @@ namespace NWheels.Serialization.Factories
                             x => x.WriteStruct<TT.TStruct>, 
                             value.CastTo<TT.TStruct>()
                         );
+                    }
+                }
+            },
+            {
+                typeof(Nullable<>),
+                (type, w, context, value) => {
+                    var underlyingValueType = type.GetNonNullableType();
+                    var underlyingValueWriter = GetValueWriter(underlyingValueType);
+
+                    using (TT.CreateScope<TT.TItem, TT.TStruct>(underlyingValueType, underlyingValueType))
+                    {
+                        var nullableLocal = w.Local<TT.TStruct?>(initialValue: value.CastTo<TT.TStruct?>());
+                        var hasValueLocal = w.Local<bool>(initialValue: nullableLocal.Prop(x => x.HasValue));
+                        context.Prop(x => x.Output).Void<bool>(x => x.Write, hasValueLocal);
+                        w.If(hasValueLocal).Then(() => {
+                            underlyingValueWriter(underlyingValueType, w, context, nullableLocal.Prop(x => x.Value).CastTo<TT.TItem>());
+                        });
                     }
                 }
             },
@@ -403,6 +425,31 @@ namespace NWheels.Serialization.Factories
                     {
                         assignTo.Assign(context.Func<TT.TStruct>(x => x.ReadStruct<TT.TStruct>).CastTo<TT.TItem>());
                     }
+                }
+            },
+            {
+                typeof(Nullable<>),
+                (type, w, context, assignTo) => {
+                    var underlyingValueType = type.GetNonNullableType();
+                    var underlyingValueReader = GetValueReader(underlyingValueType);
+                    IOperand nullableLocalOperand;
+
+                    using (TT.CreateScope<TT.TItem, TT.TStruct>(underlyingValueType, underlyingValueType))
+                    {
+                        var nullableLocal = w.Local<TT.TStruct?>();
+                        var hasValueLocal = w.Local<bool>(initialValue: context.Prop(x => x.Input).Func<bool>(x => x.ReadBoolean));
+                        
+                        w.If(hasValueLocal).Then(() => {
+                            var valueLocal = w.Local<TT.TItem>();
+                            underlyingValueReader(underlyingValueType, w, context, valueLocal);
+                            nullableLocal.Assign(w.New<TT.TStruct?>(valueLocal.CastTo<TT.TStruct>()));
+                        }).Else(() => {
+                            nullableLocal.Assign(w.Default<TT.TStruct?>());
+                        });
+
+                        nullableLocalOperand = nullableLocal;
+                    }
+                    assignTo.Assign(nullableLocalOperand.CastTo<TT.TItem>());
                 }
             },
             {

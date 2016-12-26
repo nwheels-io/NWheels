@@ -27,6 +27,13 @@ namespace NWheels.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void WriteNullable<T>(T? nullable) where T : struct
+        {
+            Serializer.WriteNullable<T>(ref nullable, this);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public CompactSerializer Serializer { get; private set; }
         public CompactSerializerDictionary Dictionary { get; private set; }
         public CompactBinaryWriter Output { get; private set; }

@@ -257,6 +257,20 @@ namespace NWheels.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal void WriteNullable<T>(ref T? nullable, CompactSerializationContext context) where T : struct
+        {
+            bool hasValue = nullable.HasValue;
+            context.Output.Write(hasValue);
+
+            if (hasValue)
+            {
+                var value = nullable.Value;
+                WriteStruct<T>(ref value, context);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         internal T ReadStruct<T>(CompactDeserializationContext context) where T : struct
         {
             var reader = _readerWriterFactory.GetStructTypeReader<T>();
@@ -264,6 +278,18 @@ namespace NWheels.Serialization
             T value = creator(context);
             reader(context, ref value);
             return value;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal T? ReadNullable<T>(CompactDeserializationContext context) where T : struct
+        {
+            if (context.Input.ReadBoolean())
+            {
+                return ReadStruct<T>(context);
+            }
+
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -77,6 +77,15 @@ namespace NWheels.UnitTests.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public class AClassWithNullables
+        {
+            public int? IntValue { get; set; }
+            public AnAppEnum? EnumValue { get; set; }
+            public AnotherPrimitiveStruct? AnotherValue { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public struct PrimitiveStruct
         {
             public PrimitiveStruct(
