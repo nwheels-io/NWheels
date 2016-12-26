@@ -429,7 +429,7 @@ namespace NWheels.UnitTests.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test, Ignore("Under development in another branch")]
+        [Test]
         public void CanRegisterApiContract()
         {
             //-- arrange
@@ -452,6 +452,27 @@ namespace NWheels.UnitTests.Serialization
                 dictionary.TryLookupMemberKey(member, out key).ShouldBeTrue("Member [" + member.Name + "] was expected to be registered, but it was not.");
                 distinctKeys.Add(key).ShouldBeTrue();
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanRegisterApiContractWithKnownTypes()
+        {
+            //-- arrange
+
+            var dictionary = new StaticCompactSerializerDictionary();
+
+            //-- act
+
+            dictionary.RegisterApiContract(typeof(Repo.IApiContractWithKnownTypes));
+
+            //-- assert
+
+            var derivedKey1 = dictionary.LookupTypeKeyOrThrow(typeof(TestObjectRepository.DerivedClassOne));
+            var derivedKey2 = dictionary.LookupTypeKeyOrThrow(typeof(TestObjectRepository.DerivedClassTwo));
+
+            derivedKey2.ShouldNotBe(derivedKey1);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

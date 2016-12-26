@@ -359,7 +359,7 @@ namespace NWheels.UnitTests.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test, Ignore("Under development in a separate branch")]
+        [Test]
         public void Roundtrip_CollectionsOfPolymorphicObjects()
         {
             //-- arrange
@@ -392,7 +392,7 @@ namespace NWheels.UnitTests.Serialization
             //-- act
 
             var serializedBytes = serializer.GetBytes(original, dictionary);
-            File.WriteAllBytes(@"C:\Temp\serialized1.bin", serializedBytes);
+            //File.WriteAllBytes(@"C:\Temp\serialized1.bin", serializedBytes);
             var deserialized = serializer.GetObject<Repo.WithCollectionsOfPolymorphicObjects>(serializedBytes, dictionary);
 
             //-- assert
@@ -429,7 +429,7 @@ namespace NWheels.UnitTests.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test, Ignore("Under development in a separate branch")]
+        [Test]
         public void Roundtrip_PolymorphicObjectsWithClientServerTypeResolution()
         {
             //-- arrange
@@ -487,11 +487,11 @@ namespace NWheels.UnitTests.Serialization
             //-- act
 
             var serializedBytesOnServer = serverSerializer.GetBytes(originalOnServer, serverDictionary);
-            File.WriteAllBytes(@"C:\Temp\serialized1.bin", serializedBytesOnServer);
+            //File.WriteAllBytes(@"C:\Temp\serialized1.bin", serializedBytesOnServer);
             var deserializedOnClient = clientSerializer.GetObject<Repo.WithEntityObjects>(serializedBytesOnServer, clientDictionary);
-            //var serializedBytesOnClient = clientSerializer.GetBytes(deserializedOnClient, clientDictionary);
+            var serializedBytesOnClient = clientSerializer.GetBytes(deserializedOnClient, clientDictionary);
             //File.WriteAllBytes(@"C:\Temp\serialized2.bin", serializedBytesOnClient);
-            //var deserializedOnServer = serverSerializer.GetObject<Repo.WithEntityObjects>(serializedBytesOnClient, serverDictionary);
+            var deserializedOnServer = serverSerializer.GetObject<Repo.WithEntityObjects>(serializedBytesOnClient, serverDictionary);
 
             //-- assert
 
@@ -516,6 +516,28 @@ namespace NWheels.UnitTests.Serialization
             deserializedOnClient.TheB.TheA.As<Repo.ClientEntityATwo>().Id.ShouldBe(789);
             deserializedOnClient.TheB.TheA.As<Repo.ClientEntityATwo>().Name.ShouldBe("GHI");
             deserializedOnClient.TheB.TheA.As<Repo.ClientEntityATwo>().DateValue.ShouldBe(new DateTime(2789, 1, 1));
+
+            deserializedOnServer.ShouldNotBeNull();
+
+            deserializedOnServer.TheA.ShouldNotBeNull();
+            deserializedOnServer.TheA.Count.ShouldBe(2);
+            deserializedOnServer.TheA[0].ShouldBeOfType<Repo.ServerEntityAOne>();
+            deserializedOnServer.TheA[0].As<Repo.ServerEntityAOne>().Id.ShouldBe(123);
+            deserializedOnServer.TheA[0].As<Repo.ServerEntityAOne>().Name.ShouldBe("ABC");
+            deserializedOnServer.TheA[0].As<Repo.ServerEntityAOne>().IntValue.ShouldBe(112233);
+            deserializedOnServer.TheA[0].As<Repo.ServerEntityAOne>().TimeValue.ShouldBe(TimeSpan.FromDays(123));
+            deserializedOnServer.TheA[1].ShouldBeOfType<Repo.ServerEntityATwo>();
+            deserializedOnServer.TheA[1].As<Repo.ServerEntityATwo>().Id.ShouldBe(456);
+            deserializedOnServer.TheA[1].As<Repo.ServerEntityATwo>().Name.ShouldBe("DEF");
+            deserializedOnServer.TheA[1].As<Repo.ServerEntityATwo>().DateValue.ShouldBe(new DateTime(2456, 1, 1));
+
+            deserializedOnServer.TheB.ShouldBeOfType<Repo.ServerEntityB>();
+            deserializedOnServer.TheB.Id.ShouldBe("XYZ");
+            deserializedOnServer.TheB.TheA.ShouldNotBeNull();
+            deserializedOnServer.TheB.TheA.ShouldBeOfType<Repo.ServerEntityATwo>();
+            deserializedOnServer.TheB.TheA.As<Repo.ServerEntityATwo>().Id.ShouldBe(789);
+            deserializedOnServer.TheB.TheA.As<Repo.ServerEntityATwo>().Name.ShouldBe("GHI");
+            deserializedOnServer.TheB.TheA.As<Repo.ServerEntityATwo>().DateValue.ShouldBe(new DateTime(2789, 1, 1));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -542,6 +564,55 @@ namespace NWheels.UnitTests.Serialization
                 return obj.GetType();
             }
 
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override Type GetMaterializationType(Type declaredType, Type serializedType)
+            {
+                if (serializedType == typeof(Repo.IEntityAOne))
+                {
+                    return typeof(Repo.ServerEntityAOne);
+                }
+                if (serializedType == typeof(Repo.IEntityATwo))
+                {
+                    return typeof(Repo.ServerEntityATwo);
+                }
+                if (serializedType == typeof(Repo.IEntityB))
+                {
+                    return typeof(Repo.ServerEntityB);
+                }
+                return serializedType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanMaterialize(Type declaredType, Type serializedType)
+            {
+                return (
+                    serializedType == typeof(Repo.IEntityAOne) ||
+                    serializedType == typeof(Repo.IEntityATwo) ||
+                    serializedType == typeof(Repo.IEntityB));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override object Materialize(Type declaredType, Type serializedType)
+            {
+                if (serializedType == typeof(Repo.IEntityAOne))
+                {
+                    return new Repo.ServerEntityAOne();
+                }
+                if (serializedType == typeof(Repo.IEntityATwo))
+                {
+                    return new Repo.ServerEntityATwo();
+                }
+                if (serializedType == typeof(Repo.IEntityB))
+                {
+                    return new Repo.ServerEntityB();
+                }
+                throw new ArgumentException("Test ServerEntityTypeResolver cannot materialized serialized type: " + serializedType.Name);
+            }
+
+
             #endregion
         }
 
@@ -550,6 +621,26 @@ namespace NWheels.UnitTests.Serialization
         private class ClientEntityTypeResolver : CompactSerializerExtensionBase
         {
             #region Overrides of CompactSerializerExtensionBase
+
+            public override Type GetSerializationType(Type declaredType, object obj)
+            {
+                if (obj is Repo.IEntityAOne)
+                {
+                    return typeof(Repo.IEntityAOne);
+                }
+                if (obj is Repo.IEntityATwo)
+                {
+                    return typeof(Repo.IEntityATwo);
+                }
+                if (obj is Repo.IEntityB)
+                {
+                    return typeof(Repo.IEntityB);
+                }
+
+                return obj.GetType();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override Type GetMaterializationType(Type declaredType, Type serializedType)
             {

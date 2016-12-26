@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Hapil;
+using NWheels.Endpoints;
 using NWheels.Extensions;
 
 namespace NWheels.Serialization
@@ -38,6 +39,16 @@ namespace NWheels.Serialization
 
         public void RegisterApiContract(Type type)
         {
+            var knownTypes = type.GetCustomAttribute<KnownTypesAttribute>();
+
+            if (knownTypes != null)
+            {
+                foreach (var knownType in knownTypes.Types)
+                {
+                    RegisterType(knownType);
+                }
+            }
+            
             foreach (var member in type.GetMembers().Where(IsProtocolMember))
             {
                 RegisterMember(member);

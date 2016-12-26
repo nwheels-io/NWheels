@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using NWheels.Endpoints;
 
 namespace NWheels.UnitTests.Serialization
 {
@@ -200,14 +201,23 @@ namespace NWheels.UnitTests.Serialization
         {
             void VoidOperation();
             void VoidOperationWithParameters(int n, string s);
-            //int NonVoidOperation();
-            //TimeSpan NonVoidOperationWithParameters(int n, string s);
+            int NonVoidOperation();
+            TimeSpan NonVoidOperationWithParameters(int n, string s);
             void VoidOperationWithPolymorphicParameters(int n, BaseClass b, string s);
-            //BaseClass NonVoidOperationWithPolymorphicParameters(int n, string s);
+            BaseClass NonVoidOperationWithPolymorphicParameters(int n, string s);
             event EventHandler EventWithNoArgs;
             event EventHandler<BaseEventArgs> EventWithBaseArgs;
             event Action CustomDelegateEventWithNoArgs;
             event Action<BaseEventArgs> CustomDelegateEventWithBaseArgs;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [KnownTypes(typeof(DerivedClassOne), typeof(DerivedClassTwo))]
+        public interface IApiContractWithKnownTypes
+        {
+            BaseClass OperationOne(WithPolymorphicObjects x);
+            WithPolymorphicObjects OperationTwo(BaseClass y);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

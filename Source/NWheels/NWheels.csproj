@@ -170,6 +170,7 @@
     <Compile Include="Endpoints\Core\CompactRpcProtocol.cs" />
     <Compile Include="Endpoints\DuplexNetworkApi.cs" />
     <Compile Include="Endpoints\IEndpointMessagePipeline.cs" />
+    <Compile Include="Endpoints\KnownTypesAttribute.cs" />
     <Compile Include="Endpoints\SessionfulEndpoint.cs" />
     <Compile Include="Endpoints\StatelessEndpoint.cs" />
     <Compile Include="Endpoints\IDuplexNetworkApiEndpoint.cs" />
