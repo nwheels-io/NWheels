@@ -288,7 +288,7 @@ namespace NWheels.UI.Toolbox
             var fieldProperty = metaType.GetPropertyByDeclaration(fieldSelector.GetPropertyInfo());
             var lookupSourceProperty = metaType.GetPropertyByDeclaration(lookupSourceSelector.GetPropertyInfo());
 
-            var field = FindOrAddField((Expression<Func<TEntity, object>>)metaType.MakePropertyAsObjectExpression(fieldProperty));
+            var field = FindOrAddFieldByAnyLambda(metaType.MakePropertyAsObjectExpression(fieldProperty));
             field.FieldType = FormFieldType.Lookup;
             field.Modifiers = FormFieldModifiers.DropDown | FormFieldModifiers.LookupShowSelectNone;
             field.LookupSourceProperty = lookupSourceProperty.Name;
@@ -297,6 +297,19 @@ namespace NWheels.UI.Toolbox
             {
                 _hiddenFields.Add(lookupSourceProperty.Name);
             }
+
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Form<TEntity> Suffix(Expression<Func<TEntity, object>> fieldSelector, Expression<Func<TEntity, object>> suffixFieldSelector)
+        {
+            var field = FindOrAddFieldByAnyLambda(fieldSelector);
+            var suffixField = FindOrAddFieldByAnyLambda(suffixFieldSelector);
+
+            field.SuffixFieldProperty = suffixField.PropertyName;
+            suffixField.Modifiers |= FormFieldModifiers.Suffix;
 
             return this;
         }
@@ -603,6 +616,8 @@ namespace NWheels.UI.Toolbox
         public string LookupDisplayProperty { get; set; }
         [DataMember]
         public List<LookupDataFilter> LookupQueryFilter { get; set; }
+        [DataMember]
+        public string SuffixFieldProperty { get; set; }
         [DataMember]
         public string ImageTypeProperty { get; set; }
         [DataMember]
@@ -1152,6 +1167,7 @@ namespace NWheels.UI.Toolbox
         Nullable = 0x20000,
         DualList = 0x40000,
         LabelHidden = 0x80000,
+        Suffix = 0x100000,
         System = 0x40000000
     }
 
