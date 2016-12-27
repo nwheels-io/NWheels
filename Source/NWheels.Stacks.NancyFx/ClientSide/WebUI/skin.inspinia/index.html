@@ -4057,6 +4057,24 @@ HEAD, JS/CSS LINKS
     </script>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - TYPE SELECTOR (DEFAULT - COMBO BOX) BIG FRONT END STYLE
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="app/uidl-element-template/TypeSelectorBigFrontEnd">
+        <form class="form-horizontal" style="margin-top:30px;margin-right:20px;">
+            <div class="form-group" style="margin-bottom:0">
+                <label class="col-sm-4 control-label">TYPE</label>
+                <div class="col-sm-8">
+                    <select ng-options="s.typeName as (s.text | translated) for s in uidl.selections" ng-model="selectedType.name" ng-change="selectedTypeChanged(selectedType.name)" class="form-control m-b"></select>
+                </div>
+            </div>
+            <div class="hr-line-dashed"></div>
+        </form>
+        <div ng-repeat="selection in uidl.selections" ng-if="selectedType.name==selection.typeName" style="padding-right:20px;">
+            <uidl-widget uidl="selection.widget" parent-model="model.entity"></uidl-widget>
+        </div>
+    </script>
+    
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - TYPE SELECTOR WITH TABS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/TypeSelectorWithTabs">

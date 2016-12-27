@@ -150,11 +150,14 @@ namespace NWheels.UI.Toolbox
         public string ParentInverseNavigationProperty { get; set; }
         [DataMember]
         public string EmptySelectionText { get; set; }
+        [DataMember]
+        public bool UseCustomSelectionInitializer { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlNotification ModelSetter { get; set; }
         public UidlNotification StateResetter { get; set; }
+        public UidlNotification<string> InitializingSelection { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -2543,31 +2543,39 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.parentModelProperty = scope.uidl.parentModelProperty; //toCamelCase(scope.uidl.parentModelProperty);
             
             scope.selectedTypeChanged = function (type) {
-                scope.entityService.newDomainObject(type).then(function (newObj) {
-                    scope.model = {
-                        entity: newObj
-                    };
-
-                    scope.selectedType.name = newObj['$type'];
-                    scope.selectTabByType(scope.selectedType.name);
-
-                    if (scope.parentModel) {
-                        if (scope.parentUidl) {
-                            // parent is FORM FIELD
-                            scope.parentModel[scope.parentUidl.propertyName] = newObj;
-                        } else {
-                            // parent is CRUD
-                            if (scope.uidl.parentInverseNavigationProperty) { // preserve foreign key value
-                                var foreignKeyValue = scope.parentModel[scope.parentModelProperty][scope.uidl.parentInverseNavigationProperty];
-                                newObj[scope.uidl.parentInverseNavigationProperty] = foreignKeyValue;
-                            }
-                            scope.parentModel[scope.parentModelProperty] = newObj;
-                        }
-                        scope.sendModelToSelectedWidget();
-                    }
-                });
+                if (!scope.uidl.useCustomSelectionInitializer) {
+                    scope.entityService.newDomainObject(type).then(function (newObj) {
+                        scope.selectionObjectInitialized(type, newObj);
+                    });
+                } else {
+                    scope.$emit(scope.uidl.qualifiedName + ':InitializingSelection', type);
+                }
             };
 
+            scope.selectionObjectInitialized = function(type, newObj) {
+                scope.model = {
+                    entity: newObj
+                };
+
+                scope.selectedType.name = newObj['$type'];
+                scope.selectTabByType(scope.selectedType.name);
+
+                if (scope.parentModel) {
+                    if (scope.parentUidl) {
+                        // parent is FORM FIELD
+                        scope.parentModel[scope.parentUidl.propertyName] = newObj;
+                    } else {
+                        // parent is CRUD
+                        if (scope.uidl.parentInverseNavigationProperty) { // preserve foreign key value
+                            var foreignKeyValue = scope.parentModel[scope.parentModelProperty][scope.uidl.parentInverseNavigationProperty];
+                            newObj[scope.uidl.parentInverseNavigationProperty] = foreignKeyValue;
+                        }
+                        scope.parentModel[scope.parentModelProperty] = newObj;
+                    }
+                    scope.sendModelToSelectedWidget();
+                }
+            }
+            
             scope.sendModelToSelectedWidget = function () {
                 if (!scope.selectedType || !scope.selectedType.name) {
                     return;
