@@ -326,6 +326,16 @@ namespace NWheels.DataObjects
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public class BirthDateAttribute : SemanticAttributeBase
+            {
+                public BirthDateAttribute(TimeUnits units = TimeUnits.YearMonthDay)
+                    : base(typeof(DateTime), WellKnownSemanticType.BirthDate, sem => sem.TimeUnits = units)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public class DurationAttribute : SemanticAttributeBase
             {
                 public DurationAttribute(TimeUnits units = TimeUnits.HourMinuteSecond)

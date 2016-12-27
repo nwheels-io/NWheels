@@ -14,6 +14,7 @@ namespace NWheels.TypeModel
         Currency,
         DataUpload,
         Date,
+        BirthDate,
         DisplayName,
         Duration,
         EmailAddress,

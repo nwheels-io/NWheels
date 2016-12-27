@@ -3308,6 +3308,7 @@ HEAD, JS/CSS LINKS
             </div>
             <!-- DATE-TIME PICKER -->
             <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='DateTimePicker'"
+                 id="dtp_{{::uniqueFieldId}}"
                  class="input-group date"
                  ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                  ng-disabled="!editAuthorized">
@@ -3434,10 +3435,14 @@ HEAD, JS/CSS LINKS
                     } else {
                         pickerFormat = 'YYYY-MM-DD';
                     }
-                    $('#' + $scope.uniqueFieldId).datetimepicker({
+                    var pickerOptions = {
                         format: pickerFormat,
                         allowInputToggle: true
-                    }).on('dp.change', dateTimePickerValueChanged);
+                    };
+                    if ($scope.uidl.semantic === 'BirthDate') {
+                        pickerOptions.viewMode = 'years';
+                    }
+                    $('#' + $scope.uniqueFieldId).datetimepicker(pickerOptions).on('dp.change', dateTimePickerValueChanged);
                 };
                 $scope.updateViewFromModel = function() {
                     var value = moment($scope.entity[$scope.uidl.propertyName]);
