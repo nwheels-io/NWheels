@@ -279,13 +279,26 @@ namespace NWheels.Stacks.MongoDb
             object partitionValue, 
             Func<object, string> partitionNameFunc)
         {
-            if ( metaType.BaseType != null )
+            bool baseNameValueWasSet = false;
+            string baseName = string.Empty;
+            var partitionValueDomainObject = partitionValue.AsOrNull<IDomainObject>();
+
+            if (metaType.RelationalMapping != null &&
+                !string.IsNullOrEmpty(metaType.RelationalMapping.PrimaryTableName) )
             {
-                return GetMongoCollectionName(metadataCache, metaType.BaseType, partitionValue, partitionNameFunc);
+                baseNameValueWasSet = true;
+                baseName = metaType.RelationalMapping.PrimaryTableName;
             }
 
-            var baseName = metaType.Name.TrimLead("Abstract");
-            var partitionValueDomainObject = partitionValue.AsOrNull<IDomainObject>();
+            if (!baseNameValueWasSet)
+            {
+                if ( metaType.BaseType != null)
+                {
+                    return GetMongoCollectionName(metadataCache, metaType.BaseType, partitionValue, partitionNameFunc);
+                }
+            
+                baseName = metaType.Name.TrimLead("Abstract");
+            }
 
             if (partitionValueDomainObject != null)
             {
