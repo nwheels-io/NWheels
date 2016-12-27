@@ -474,6 +474,10 @@ HEAD, JS/CSS LINKS
     UIDL SCREEN PART
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-screen-part">
+        <div ng-if="uidl.helpText && uidl.icon" class="alert alert-info">
+            <i class="fa fa-lg glyphicon fa-{{::uidl.icon}}"></i>
+            <span ng-bind="uidl.helpText"></span>
+        </div>
         <uidl-widget uidl="uidl.contentRoot"></uidl-widget>
         <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
         <uidl-widget ng-repeat="popup in uidl.popupContents" uidl="popup"></uidl-widget>
@@ -2540,21 +2544,30 @@ HEAD, JS/CSS LINKS
                     <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>
+                <div ng-if="field['$hasSuffix']" class="col-lg-3">
+                    <uidl-form-field parent-uidl="uidl" uidl="field['$suffix']" entity="model.Data.entity" />
+                </div>
             </div>
             <!-- PLAIN FIELDS TWO-COLUMN LAYOUT -->
             <div ng-if="plainFields.length > 4" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields | twoColumnRows">
                 <label class="col-lg-2 control-label"
                        for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(fieldLabelDisplayText(field))}}</label>
-                <div class="col-lg-3">
+                <div ng-class="{'col-lg-2':field['$hasSuffix'], 'col-lg-3':!field['$hasSuffix']}">
                     <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
+                </div>
+                <div ng-if="field['$suffix']" class="col-lg-1">
+                    <uidl-form-field parent-uidl="uidl" uidl="field['$suffix']" entity="model.Data.entity" />
                 </div>
                 <label ng-if="field['$nextCol']"
                        class="col-lg-2 control-label"
                        for="{{::uidl.elementName + '_' + field['$nextCol'].propertyName}}">{{::translate(fieldLabelDisplayText(field['$nextCol']))}}</label>
-                <div ng-if="field['$nextCol']" class="col-lg-3">
+                <div ng-if="field['$nextCol']" ng-class="{'col-lg-2':field['$nextColHasSuffix'], 'col-lg-3':!field['$nextColHasSuffix']}">
                     <uidl-form-field parent-uidl="uidl" uidl="field['$nextCol']" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
+                </div>
+                <div ng-if="field['$nextColHasSuffix']" class="col-lg-1" style="margin-left:-15px;">
+                    <uidl-form-field parent-uidl="uidl" uidl="field['$nextCol']['$suffix']" entity="model.Data.entity" />
                 </div>
             </div>
             <!-- SECTIONS -->
@@ -2669,7 +2682,12 @@ HEAD, JS/CSS LINKS
             <div class="form-group" ng-repeat-start="field in plainFields" style="margin-bottom:0">
                 <label class="control-label col-sm-4"
                        for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.label, { upperCase: true })}}</label>
-                <div class="col-sm-8"><uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" /></div>
+                <div ng-class="{'col-sm-5':field['$hasSuffix'], 'col-sm-8':!field['$hasSuffix']}">
+                    <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
+                </div>
+                <div ng-if="field['$hasSuffix']" class="col-sm-3">
+                    <uidl-form-field parent-uidl="uidl" uidl="field['$suffix']" entity="model.Data.entity" />
+                </div>
             </div>
             <div ng-repeat-end class="hr-line-dashed"></div>
             <!-- COMMAND BUTTONS -->
@@ -2840,7 +2858,10 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - FORM FIELD
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/FormField">
-        <div ng-style="{display: parentUidl.isInlineStyle ? 'inline' : 'block'}">
+        <div ng-style="{
+                display: parentUidl.isInlineStyle ? 'inline' : 'block',
+                'margin-left': hasUidlModifier('Suffix') ? '-15px' : '0'
+             }">
             <!-- LABEL -->
             <input ng-if="uidl.fieldType==='Label' && !hasUidlModifier('Memo') && !hasUidlModifier('FlatStyle')" 
                    readonly="" 

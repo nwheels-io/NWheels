@@ -2138,7 +2138,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.tabSetIndex = 0;
             scope.plainFields = Enumerable.From(scope.uidl.fields)
                 .Where(function(f) { return !fieldHasModifier(f, 'Tab') && !fieldHasModifier(f, 'Section'); })
-                .Where(function(f) { return !fieldHasModifier(f, 'RangeEnd'); })
+                .Where(function(f) { return !fieldHasModifier(f, 'RangeEnd') && !fieldHasModifier(f, 'Suffix'); })
                 .Where(function(f) { return scope.isUidlAuthorized(f); })
                 .ToArray();
             scope.sectionFields = Enumerable.From(scope.uidl.fields)
@@ -2152,6 +2152,17 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.calculatedFields = Enumerable.From(scope.uidl.fields)
                 .Where(function(f) { return f.isCalculated; })
                 .ToArray();
+                
+            for (var i = 0; i < scope.plainFields.length ; i++) {
+                if (scope.plainFields[i].suffixFieldProperty) {
+                    var suffixFieldProperty = scope.plainFields[i].suffixFieldProperty;
+                    scope.plainFields[i].$hasSuffix = true;
+                    scope.plainFields[i].$suffix = Enumerable
+                        .From(scope.uidl.fields)
+                        .Where(function(f) { return (f.propertyName === suffixFieldProperty); })
+                        .FirstOrDefault();
+                }
+            }
 
             scope.waitingForInitialModel = (scope.uidl.needsInitialModel ? true : false);
             scope.commandInProgress = scope.waitingForInitialModel;
@@ -3548,6 +3559,9 @@ theApp.filter('twoColumnRows', function () {
             rows.push(items[i]);
             if (rowCount + i < items.length) {
                 items[i]['$nextCol'] = items[rowCount + i];
+                if (items[i]['$nextCol']['$suffix']) {
+                    items[i]['$nextColHasSuffix'] = true;
+                }
             }
         }
         return rows;
