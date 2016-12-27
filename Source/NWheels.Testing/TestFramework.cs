@@ -38,6 +38,7 @@ using NWheels.Serialization;
 using NWheels.Serialization.Factories;
 using NWheels.Testing.Entities.Impl;
 using NWheels.Testing.Processing.Messages;
+using NWheels.UI.Factories;
 
 namespace NWheels.Testing
 {
@@ -471,6 +472,7 @@ namespace NWheels.Testing
             builder.RegisterType<TestDataRepositoryFactory>().As<TestDataRepositoryFactory, IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<DomainObjectFactory>().As<IDomainObjectFactory>().SingleInstance();
             builder.RegisterType<PresentationObjectFactory>().As<IPresentationObjectFactory>().SingleInstance();
+            builder.RegisterType<ViewModelObjectFactory>().As<IViewModelObjectFactory>().SingleInstance();
             builder.RegisterType<MethodCallObjectFactory>().As<IMethodCallObjectFactory>().SingleInstance();
             
             builder.RegisterType<CompactSerializer>().InstancePerDependency();

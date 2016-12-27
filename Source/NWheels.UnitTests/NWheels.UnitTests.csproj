@@ -103,6 +103,7 @@
     <Compile Include="Serialization\AssumptionTests.cs" />
     <Compile Include="Serialization\CompactSerializerDictionaryTests.cs" />
     <Compile Include="Serialization\CompactSerializerTests.cs" />
+    <Compile Include="Serialization\MetaTypedObjectExtensionTests.cs" />
     <Compile Include="Serialization\TestObjectRepository.cs" />
     <Compile Include="DataObjects\TestDataObjects.cs" />
     <Compile Include="DataObjects\TypeMetadataBuilderConstructorTests.cs" />

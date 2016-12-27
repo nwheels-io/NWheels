@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NWheels.Endpoints;
+using NWheels.Entities;
 
 namespace NWheels.UnitTests.Serialization
 {
@@ -237,6 +238,7 @@ namespace NWheels.UnitTests.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [EntityContract]
         public interface IEntityA
         {
             int Id { get; set; }

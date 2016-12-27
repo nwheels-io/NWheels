@@ -823,7 +823,11 @@ namespace NWheels.Serialization.Factories
                 //TODO: consider using FormatterServices.GetSafeUninitializedObject
                 if (constructor == null)
                 {
-                    throw new CompactSerializerException("Type '{0}' cannot be deserialized as it has no public constructors.", _forType.FullName);
+                    w.Throw<CompactSerializerException>(string.Format(
+                        "Type '{0}' cannot be deserialized because it has no public constructor, and no serializer extension could handle its materialization.", 
+                        _forType.FullName));
+                    return;
+                    //throw new CompactSerializerException("Type '{0}' cannot be deserialized as it has no public constructors.", _forType.FullName);
                 }
 
                 var parameters = constructor.GetParameters();

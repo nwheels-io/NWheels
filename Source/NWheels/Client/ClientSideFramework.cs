@@ -36,6 +36,7 @@ using NWheels.Processing.Commands.Factories;
 using NWheels.Processing.Messages;
 using NWheels.Serialization;
 using NWheels.Serialization.Factories;
+using NWheels.UI.Factories;
 
 namespace NWheels.Client
 {
@@ -443,6 +444,7 @@ namespace NWheels.Client
             builder.RegisterType<ClientDataRepositoryFactory>().As<ClientDataRepositoryFactory, IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<DomainObjectFactory>().As<IDomainObjectFactory>().SingleInstance();
             builder.RegisterType<PresentationObjectFactory>().As<IPresentationObjectFactory>().SingleInstance();
+            builder.RegisterType<ViewModelObjectFactory>().As<IViewModelObjectFactory>().SingleInstance();
             builder.RegisterType<MethodCallObjectFactory>().As<IMethodCallObjectFactory>().SingleInstance();
 
             builder.RegisterType<CompactSerializer>().InstancePerDependency();

@@ -249,6 +249,7 @@
     <Compile Include="Processing\Jobs\Impl\SequentialBatchJobScheduler.cs" />
     <Compile Include="Serialization\CompactSerializerExtensionBase.cs" />
     <Compile Include="Serialization\DynamicCompactSerializerDictionary.cs" />
+    <Compile Include="Serialization\MetaTypedObjectExtension.cs" />
     <Compile Include="Serialization\StaticCompactSerializerDictionary.cs" />
     <Compile Include="Processing\Messages\Impl\ContentTemplateProviderBase.cs" />
     <Compile Include="Processing\Messages\Impl\SmtpOutgoingEmailActor.cs" />
