@@ -81,7 +81,7 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
                 foreach (var alert in alerts)
                 {
                     var recipients = alert
-                        .Actions
+                        .AlertActions
                         .OfType<IEntityPartAlertByEmail>()
                         .Select(action => action.Recipients)
                         .SelectMany(x => x)
