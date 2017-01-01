@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Domains.DevOps.Alerts.Entities;
 using NWheels.Domains.DevOps.SystemLogs.Entities;
@@ -17,6 +16,7 @@ using NWheels.Utilities;
 
 namespace NWheels.Domains.DevOps.Alerts.Jobs
 {
+    [ApplicationJob("SystemAlertJob")]
     public class SystemAlertJob : ApplicationJobBase
     {
         private readonly IFramework _framework;
@@ -24,6 +24,7 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
         private readonly IContentTemplateProvider _templateProvider;
         private readonly ServiceBus _serviceBus;
         private readonly AbstractLogMessageListTx _messageListTx;
+        private readonly ISystemAlertConfigurationFeatureSection _systemAlertConfiguration;
         private CrossInvocationJobState _crossInvocationState;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,13 +34,15 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
             ITypeMetadataCache metadataCache, 
             IContentTemplateProvider templateProvider,
             ServiceBus serviceBus, 
-            AbstractLogMessageListTx messageListTx)
+            AbstractLogMessageListTx messageListTx,
+            ISystemAlertConfigurationFeatureSection systemAlertConfiguration)
         {
             _framework = framework;
             _metadataCache = metadataCache;
             _templateProvider = templateProvider;
             _serviceBus = serviceBus;
             _messageListTx = messageListTx;
+            _systemAlertConfiguration = systemAlertConfiguration;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -53,7 +56,7 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
                 _crossInvocationState = new CrossInvocationJobState(this);
             }
 
-            var operation = new DetectAndNotifyOperation(_crossInvocationState);
+            var operation = new DetectAndNotifyOperation(_crossInvocationState, _systemAlertConfiguration);
             operation.ExecuteOnce();
         }
 
@@ -212,15 +215,17 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private readonly CrossInvocationJobState _jobState;
+            private readonly ISystemAlertConfigurationFeatureSection _systemAlertConfiguration;
             private readonly IFramework _framework;
             private readonly ServiceBus _serviceBus;
             private readonly AbstractLogMessageListTx _messageListTx;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public DetectAndNotifyOperation(CrossInvocationJobState jobState)
+            public DetectAndNotifyOperation(CrossInvocationJobState jobState, ISystemAlertConfigurationFeatureSection systemAlertConfiguration)
             {
                 _jobState = jobState;
+                _systemAlertConfiguration = systemAlertConfiguration;
                 _framework = jobState.Framework;
                 _serviceBus = jobState.ServiceBus;
                 _messageListTx = jobState.MessageListTx;
@@ -288,19 +293,52 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
                 var messageRecipient = recipient.ToOutgoingEmailMessageRecipient();
 
                 message.To.Add(messageRecipient);
-                message.LoadTemplate(SystemAlertReportTemplate.TemplateType.AlertsGroupedPerRecipient, subjectAtFirstLine: true);
 
-                var reportData = new SystemAlertReportTemplate.AlertsGroupedPerRecipient() {
-                    Recipient = messageRecipient,
-                    Alerts = alerts.Select(a => new SystemAlertReportTemplate.AlertDetails() {
+                //message.LoadTemplate(SystemAlertReportTemplate.TemplateType.AlertsGroupedPerRecipient, subjectAtFirstLine: true);
+
+                /*var reportData = new SystemAlertReportTemplate.AlertsGroupedPerRecipient() {
+                    Recipient = messageRecipient
+                };
+
+                reportData.Alerts = alerts.Select(
+                    a => new SystemAlertReportTemplate.AlertDetails() {
                         AlertId = a.AlertId,
                         Problem = a.MessageId.SplitPascalCase(),
-                        Explanation = "TODO: configure problem explanation text",
+                        Description = "", //_systemAlertConfiguration,
                         RequiredAction = "TODO: configure required action text"
-                    }).ToList()
-                };
-                
-                message.TemplateData = reportData;
+                    }).ToList();
+                */
+                //message.TemplateData = reportData;
+
+                string subject;
+                int numOfAlerts = alerts.Count();
+                if (numOfAlerts == 1)
+                {
+                    subject = string.Format("MS Alert: {0}", alerts.First().MessageId.SplitPascalCase());
+                }
+                else
+                {
+                    subject = string.Format("MS Alerts: {0} different awainting for you", numOfAlerts);
+                }
+                message.Subject = subject;
+
+                message.BodyHtmlTemplate = string.Empty;
+
+                StringBuilder body = new StringBuilder();
+                foreach (var alert in alerts)
+                {
+                    var alertConfig = _systemAlertConfiguration.AlertList[alert.AlertId];
+
+                    body.AppendLine(string.Format("{0}", alert.AlertId));
+                    body.AppendLine();
+                    body.AppendLine(string.Format("Description: {0}", alertConfig.Description));
+                    body.AppendLine();
+                    body.AppendLine(string.Format("Possible reasons: {0}", alertConfig.PossibleReason));
+                    body.AppendLine();
+                    body.AppendLine(string.Format("Suggested Actions: {0}", alertConfig.SuggestedAction));
+                }
+
+                message.BodyHtmlTemplate = body.ToString();
                 return message;
             }
         }

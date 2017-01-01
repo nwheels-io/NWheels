@@ -20,7 +20,7 @@ namespace NWheels.Domains.DevOps.Alerts
         {
             public string AlertId { get; set; }
             public string Problem { get; set; }
-            public string Explanation { get; set; }
+            public string Description { get; set; }
             public string RequiredAction { get; set; }
         }
 

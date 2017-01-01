@@ -54,6 +54,7 @@ using NWheels.Processing.Commands.Factories;
 using NWheels.Serialization;
 using NWheels.Serialization.Factories;
 using NWheels.TypeModel;
+using NWheels.UI.Factories;
 using NWheels.UI.Impl;
 
 namespace NWheels.Hosting.Core
@@ -336,6 +337,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<EntityObjectFactory>().As<EntityObjectFactory, IEntityObjectFactory>().SingleInstance();
             builder.RegisterType<DomainObjectFactory>().As<IDomainObjectFactory, DomainObjectFactory>().SingleInstance();
             builder.RegisterType<PresentationObjectFactory>().As<IPresentationObjectFactory>().SingleInstance();
+            builder.RegisterType<ViewModelObjectFactory>().As<IViewModelObjectFactory>().SingleInstance();
             builder.RegisterType<MethodCallObjectFactory>().As<IMethodCallObjectFactory>().SingleInstance();
             builder.RegisterPipeline<IDomainContextPopulator>();
 

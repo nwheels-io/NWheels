@@ -81,8 +81,10 @@ namespace NWheels.Processing.Jobs.Impl
 
                 if (!_cancellationSource.IsCancellationRequested)
                 {
-                    _logger.ExecutingJob(_job.JobId);
-                    _job.Execute(new ApplicationJobContext(_cancellationSource.Token, isDryRun: false));
+                    using (var activity = _logger.ExecutingJob(_job.JobId))
+                    {
+                        _job.Execute(new ApplicationJobContext(_cancellationSource.Token, isDryRun: false));
+                    }
                 }
 
             }
