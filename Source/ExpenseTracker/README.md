@@ -1,3 +1,0 @@
-NWheels.Samples.FinanceTracker
-=====
-

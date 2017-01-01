@@ -1,11 +1,10 @@
-using System;
-using NWheels.Api.Concurrency;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace NWheels.Api
 {
     public interface IFramework
     {
-        DateTime UtcNow { get; }
-        IScheduler Scheduler { get; }
     }
 }
