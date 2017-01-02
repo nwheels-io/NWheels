@@ -94,9 +94,20 @@ namespace NWheels.Stacks.Formats.EPPlus
                     worksheet.Column(i + 1).Width = table.Columns[i].Width.Value;
                 }
 
-                if (table.Columns[i].Binding.Format != null)
+                if (!table.Columns[i].Binding.IsKey)
                 {
-                    worksheet.Column(i + 1).Style.Numberformat.Format = table.Columns[i].Binding.Format;
+                    if (table.Columns[i].Binding.Format != null)
+                    {
+                        worksheet.Column(i + 1).Style.Numberformat.Format = table.Columns[i].Binding.Format;
+                    }
+                    else if (cursorColumnIndex[i] >= 0)
+                    {
+                        var metaProperty = cursor.Columns[cursorColumnIndex[i]].MetaProperty;
+                        if (metaProperty != null)
+                        {
+                            worksheet.Column(i + 1).Style.Numberformat.Format = GetColumnDefaultFormat(metaProperty);
+                        }
+                    }
                 }
 
                 if (table.Columns[i].Binding.IsKey)
@@ -117,7 +128,12 @@ namespace NWheels.Stacks.Formats.EPPlus
             {
                 for (int col = 0; col < table.Columns.Count; col++)
                 {
-                    worksheet.Cells[rowNumber, col + 1].Value = table.Columns[col].Binding.ReadValueFromCursor(row, cursorColumnIndex[col], applyFormat: false);
+                    var value = table.Columns[col].Binding.ReadValueFromCursor(row, cursorColumnIndex[col], applyFormat: false);
+
+                    if (!default(DateTime).Equals(value))
+                    {
+                        worksheet.Cells[rowNumber, col + 1].Value = value;
+                    }
                 }
 
                 rowNumber++;
@@ -214,6 +230,7 @@ namespace NWheels.Stacks.Formats.EPPlus
                     switch (metaProperty.SemanticType.WellKnownSemantic)
                     {
                         case WellKnownSemanticType.Date:
+                        case WellKnownSemanticType.BirthDate:
                             return "dd MMM yyyy";
                         case WellKnownSemanticType.Time:
                             return "HH:mm:ss";

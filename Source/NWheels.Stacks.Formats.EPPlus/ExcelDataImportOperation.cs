@@ -29,6 +29,7 @@ namespace NWheels.Stacks.Formats.EPPlus
         private readonly ApplicationEntityService.EntityHandler _entityHandler;
         private IApplicationDataRepository _domainContext;
         private ApplicationEntityService.EntityCursorRow[] _cursorBuffer;
+        private Dictionary<string, ApplicationEntityService.EntityCursorRow> _existingEntityByKey;
         private ApplicationEntityService.EntityCursorMetadata _metaCursor;
         //private int[] _cursorColumnIndex;
         private ExcelPackage _package;
@@ -94,6 +95,7 @@ namespace NWheels.Stacks.Formats.EPPlus
                 using (_domainContext = (IApplicationDataRepository)_entityHandler.NewUnitOfWork())
                 {
                     RetrieveExistingEntities();
+                    BuildExistingEntityIndex();
                     ImportDataRows();
                     
                     _domainContext.CommitChanges();
@@ -119,6 +121,31 @@ namespace NWheels.Stacks.Formats.EPPlus
                 var cursor = _entityHandler.QueryCursor(queryOptions);
                 _metaCursor = cursor.Metadata;
                 _cursorBuffer = cursor.ToArray();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void BuildExistingEntityIndex()
+        {
+            var keyBuilder = new StringBuilder();
+            _existingEntityByKey = new Dictionary<string, ApplicationEntityService.EntityCursorRow>(capacity: _cursorBuffer.Length);
+
+            for (int i = 0 ; i < _cursorBuffer.Length ; i++)
+            {
+                var row = _cursorBuffer[i];
+                keyBuilder.Clear();
+
+                for (int keyCol = 0; keyCol < _keyColumnIndex.Length; keyCol++)
+                {
+                    var keyColIndex = _keyColumnIndex[keyCol];
+                    var keyColumn = _tableDesign.Columns[keyColIndex];
+
+                    keyBuilder.Append(keyColumn.Binding.ReadValueFromCursor(row, keyColIndex, applyFormat: false).ToStringOrDefault(string.Empty).Trim());
+                    keyBuilder.Append('\n');
+                }
+
+                _existingEntityByKey[keyBuilder.ToString()] = row;
             }
         }
 
@@ -167,24 +194,61 @@ namespace NWheels.Stacks.Formats.EPPlus
         {
             for (int i = 0 ; i < _tableDesign.Columns.Count ; i++)
             {
-                var column = _tableDesign.Columns[i];
+                var designColumn = _tableDesign.Columns[i];
+                var cusrorColumn = _metaCursor.Columns[i];
 
-                if (column.Binding.IsKey && !isNew)
+                if (designColumn.Binding.IsKey)
                 {
                     continue;
                 }
 
-                if (_metaCursor.Columns[i].PropertyPath.Count != 1)
+                PopulateEntityPropertyFromWorksheetCell(entity, cusrorColumn, _worksheet.Cells[rowNumber, i + 1]);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void PopulateEntityPropertyFromWorksheetCell(IDomainObject entity, ApplicationEntityService.QuerySelectItem cusrorColumn, ExcelRange cell)
+        {
+            var metaProperty = _metaCursor.EntityMetaType.GetPropertyByName(cusrorColumn.PropertyPath[0]);
+            object target = entity;
+
+            for (int nextStep = 1 ; nextStep < cusrorColumn.PropertyPath.Count ; nextStep++)
+            {
+                if (target == null || !metaProperty.DeclaringContract.ContractType.IsInstanceOfType(target))
                 {
-                    continue;
+                    return;
                 }
 
-                var metaProperty = _metaCursor.Columns[i].MetaProperty;
+                target = metaProperty.ReadValue(target);
 
-                var cellValueString = _worksheet.Cells[rowNumber, i + 1].Value.ToStringOrDefault();
-                var parsedValue = metaProperty.ParseStringValue(cellValueString);
-                
-                _metaCursor.Columns[i].MetaProperty.WriteValue(entity, parsedValue);
+                if (target == null || metaProperty.Relation == null)
+                {
+                    break;
+                }
+
+                metaProperty = metaProperty.Relation.RelatedPartyType.FindPropertyByNameIncludingDerivedTypes(cusrorColumn.PropertyPath[nextStep]);
+            }
+
+            if (target != null && metaProperty.DeclaringContract.ContractType.IsInstanceOfType(target))
+            {
+                object parsedValue = null;
+
+                if (metaProperty.ClrType.IsInstanceOfType(cell.Value))
+                {
+                    parsedValue = cell.Value;
+                }
+                else if (cell.Value != null)
+                {
+                    var cellValueString = cell.Value.ToStringOrDefault();
+                    parsedValue = metaProperty.ParseStringValue(cellValueString);
+                }
+                else
+                {
+                    parsedValue = metaProperty.ClrType.GetDefaultValue();
+                }
+
+                metaProperty.WriteValue(target, parsedValue);
             }
         }
 
@@ -192,46 +256,47 @@ namespace NWheels.Stacks.Formats.EPPlus
 
         private bool TryLocateExistingCursorRow(int rowNumber, out ApplicationEntityService.EntityCursorRow row)
         {
-            for (int cursorIndex = 0 ; cursorIndex < _cursorBuffer.Length ; cursorIndex++)
+            var keyBuilder = new StringBuilder();
+
+            for (int keyCol = 0; keyCol < _keyColumnIndex.Length; keyCol++)
             {
-                if (MatchRowsByKey(sheetRowNumber: rowNumber, cursorRow: _cursorBuffer[cursorIndex]))
-                {
-                    row = _cursorBuffer[cursorIndex];
-                    return true;
-                }
+                var keyColIndex = _keyColumnIndex[keyCol];
+                var cellValue = _worksheet.Cells[rowNumber, keyColIndex + 1].Value.ToStringOrDefault(string.Empty).Trim();
+                
+                keyBuilder.Append(cellValue);
+                keyBuilder.Append('\n');
             }
 
-            row = null;
-            return false;
+            return _existingEntityByKey.TryGetValue(keyBuilder.ToString(), out row);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private bool MatchRowsByKey(int sheetRowNumber, ApplicationEntityService.EntityCursorRow cursorRow)
-        {
-            for (int keyCol = 0 ; keyCol < _keyColumnIndex.Length ; keyCol++)
-            {
-                var keyColIndex = _keyColumnIndex[keyCol];
-                var keyColumn = _tableDesign.Columns[keyColIndex];
-                var sheetCell = _worksheet.Cells[sheetRowNumber, keyColIndex + 1];
-                var sheetCellValue = sheetCell.Value;
-                var cursorKeyValue = keyColumn.Binding.ReadValueFromCursor(cursorRow, keyColIndex, applyFormat: false);
+        //private bool MatchRowsByKey(int sheetRowNumber, ApplicationEntityService.EntityCursorRow cursorRow)
+        //{
+        //    for (int keyCol = 0 ; keyCol < _keyColumnIndex.Length ; keyCol++)
+        //    {
+        //        var keyColIndex = _keyColumnIndex[keyCol];
+        //        var keyColumn = _tableDesign.Columns[keyColIndex];
+        //        var sheetCell = _worksheet.Cells[sheetRowNumber, keyColIndex + 1];
+        //        var sheetCellValue = sheetCell.Value;
+        //        var cursorKeyValue = keyColumn.Binding.ReadValueFromCursor(cursorRow, keyColIndex, applyFormat: false);
 
-                if (cursorKeyValue == null)
-                {
-                    if (sheetCellValue != null)
-                    {
-                        return false;
-                    }
-                }
-                else if (!cursorKeyValue.Equals(sheetCellValue))
-                {
-                    return false;
-                }
-            }
+        //        if (cursorKeyValue == null)
+        //        {
+        //            if (sheetCellValue != null)
+        //            {
+        //                return false;
+        //            }
+        //        }
+        //        else if (!cursorKeyValue.Equals(sheetCellValue))
+        //        {
+        //            return false;
+        //        }
+        //    }
 
-            return true;
-        }
+        //    return true;
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

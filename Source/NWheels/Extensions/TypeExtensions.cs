@@ -308,6 +308,18 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static object GetDefaultValue(this Type type)
+        {
+            if (type.IsValueType)
+            {
+                return Activator.CreateInstance(type);
+            }
+
+            return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static bool IsSignificantNamespacePart(string part)
         {
             var comparer = StringComparer.InvariantCultureIgnoreCase;

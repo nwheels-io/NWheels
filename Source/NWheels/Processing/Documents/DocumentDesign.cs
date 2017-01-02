@@ -287,7 +287,7 @@ namespace NWheels.Processing.Documents
                     string.Join(".", pathWithinTargetEntityArray);
 
                 var column = new TableElement.Column(
-                    title.OrDefaultIfNullOrWhitespace(pathWithinTargetEntityArray.Last()),
+                    title.OrDefaultIfNullOrWhitespace(pathWithinTargetEntityArray.Last().SplitPascalCase()),
                     width,
                     new Binding(bindingExpression, format, fallback, isKey));
 
@@ -360,7 +360,7 @@ namespace NWheels.Processing.Documents
                     string.Join(".", pathWithinAncestorArray);
 
                 var column = new TableElement.Column(
-                    title.OrDefaultIfNullOrWhitespace(pathWithinAncestorArray.Last()),
+                    title.OrDefaultIfNullOrWhitespace(pathWithinAncestorArray.Last().SplitPascalCase()),
                     width,
                     new Binding(bindingExpression, format, fallback, isKey));
 
@@ -379,7 +379,7 @@ namespace NWheels.Processing.Documents
                 bool isKey = false)
             {
                 var column = new TableElement.Column(
-                    title.OrDefaultIfNullOrWhitespace("Type"),
+                    title.OrDefaultIfNullOrWhitespace("Type").SplitPascalCase(),
                     width,
                     new Binding(FieldSpecialName.Type, format, fallback, isKey));
 
@@ -397,7 +397,7 @@ namespace NWheels.Processing.Documents
                 string fallback = null)
             {
                 var column = new TableElement.Column(
-                    title.OrDefaultIfNullOrWhitespace("Id"),
+                    title.OrDefaultIfNullOrWhitespace("Id").SplitPascalCase(),
                     width,
                     new Binding(FieldSpecialName.Id, format, fallback, isKey: true));
 
@@ -420,7 +420,7 @@ namespace NWheels.Processing.Documents
                 var bindingExpression = _navigationPrefix + string.Join(".", normalizedNavigationArray);
 
                 var column = new TableElement.Column(
-                    title.OrDefaultIfNullOrWhitespace(normalizedNavigationArray.Last()),
+                    title.OrDefaultIfNullOrWhitespace(normalizedNavigationArray.Last().SplitPascalCase()),
                     width,
                     new Binding(bindingExpression, format, fallback, isKey));
 
