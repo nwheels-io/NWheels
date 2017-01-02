@@ -23,7 +23,9 @@ namespace NWheels.Testing.Entities.Stacks
                 InsertOrder1(repoFactory());
                 InsertOrder2(repoFactory());
                 InsertOrder3(repoFactory());
+                RetrieveOrdersByStatusBeforeUpdate(repoFactory());
                 UpdateStatusOfOrders(repoFactory());
+                RetrieveOrdersByStatusAfterUpdate(repoFactory());
                 RetrieveOrdersWithOrderLinesAndProducts(repoFactory());
 
                 //-- retrieving polymorphic entities in one query doesn't seem to be typically supported by ORM/ODMs
@@ -425,6 +427,48 @@ namespace NWheels.Testing.Entities.Stacks
                     var state = order1.As<IDomainObject>().State;
 
                     repo.CommitChanges();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static void RetrieveOrdersByStatusBeforeUpdate(Interfaces.Repository1.IOnlineStoreRepository repo)
+            {
+                using (repo)
+                {
+                    var foundOrders = repo.Orders.AsQueryable()
+                        .Where(x => x.Status == IR1.OrderStatus.New)
+                        .OrderBy(x => x.OrderNo)
+                        .ToList();
+
+                    var notFoundOrders = repo.Orders.AsQueryable()
+                        .Where(x => x.Status != IR1.OrderStatus.New)
+                        .OrderBy(x => x.OrderNo)
+                        .ToList();
+
+                    Assert.That(foundOrders.Select(o => o.OrderNo), Is.EqualTo(new[] { "ORD001", "ORD002", "ORD003" }));
+                    Assert.That(notFoundOrders.Select(o => o.OrderNo), Is.EqualTo(new string[0]));
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static void RetrieveOrdersByStatusAfterUpdate(Interfaces.Repository1.IOnlineStoreRepository repo)
+            {
+                using (repo)
+                {
+                    var paymentReceivedOrders = repo.Orders.AsQueryable()
+                        .Where(x => x.Status == IR1.OrderStatus.PaymentReceived)
+                        .OrderBy(x => x.OrderNo)
+                        .ToList();
+
+                    var otherOrders = repo.Orders.AsQueryable()
+                        .Where(x => x.Status != IR1.OrderStatus.PaymentReceived)
+                        .OrderBy(x => x.OrderNo)
+                        .ToList();
+
+                    Assert.That(paymentReceivedOrders.Select(o => o.OrderNo), Is.EqualTo(new[] { "ORD002" }));
+                    Assert.That(otherOrders.Select(o => o.OrderNo), Is.EqualTo(new[] { "ORD001", "ORD003" }));
                 }
             }
 

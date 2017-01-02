@@ -223,7 +223,7 @@ namespace NWheels.Stacks.MongoDb
                     return node;
                 }
 
-                return Expression.MakeUnary(node.NodeType, replacingOperand, replacingOperand.Type, null);
+                return Expression.MakeUnary(node.NodeType, replacingOperand, node.Type /*replacingOperand.Type*/, null);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
