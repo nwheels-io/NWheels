@@ -238,6 +238,10 @@ namespace NWheels.Stacks.Formats.EPPlus
                 {
                     parsedValue = cell.Value;
                 }
+                else if (cell.Value is double && metaProperty.ClrType == typeof(DateTime))
+                {
+                    parsedValue = new DateTime(1900, 1, 1).AddDays((double)cell.Value - 2);
+                }
                 else if (cell.Value != null)
                 {
                     var cellValueString = cell.Value.ToStringOrDefault();
