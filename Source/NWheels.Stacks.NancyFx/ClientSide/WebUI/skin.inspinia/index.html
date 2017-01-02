@@ -443,6 +443,16 @@ HEAD, JS/CSS LINKS
             background-color: #51abc3;
             color:white;
         }
+        
+        
+        .form-control.error {
+            background-color: #fff5f5;
+        }
+        
+        label.error {
+            position:relative;
+            top:-12px;
+        }
     </style>
 </head>
 <body 
@@ -2537,14 +2547,17 @@ HEAD, JS/CSS LINKS
                 <label class="control-label"
                        ng-class="{'col-lg-2':!uidl.isModalPopup, 'col-lg-4':uidl.isModalPopup}"
                        for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(fieldLabelDisplayText(field))}}</label>
-                <div ng-class="{
+                <div ng-if="!field['$hasSuffix']" ng-class="{
                     'col-lg-3':!uidl.isModalPopup && field.fieldType!='Alert' && !fieldHasModifier(field, 'Memo') && !fieldHasModifier(field, 'FlatStyle'), 
                     'col-lg-6':uidl.isModalPopup || field.fieldType==='Alert' || fieldHasModifier(field, 'Memo') || fieldHasModifier(field, 'FlatStyle')}"
                 >
                     <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>
-                <div ng-if="field['$hasSuffix']" class="col-lg-3">
+                <div ng-if="field['$hasSuffix']" class="col-lg-2">
+                    <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
+                </div>
+                <div ng-if="field['$hasSuffix']" class="col-lg-1">
                     <uidl-form-field parent-uidl="uidl" uidl="field['$suffix']" entity="model.Data.entity" />
                 </div>
             </div>
