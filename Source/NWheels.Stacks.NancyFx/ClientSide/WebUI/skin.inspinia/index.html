@@ -4263,6 +4263,17 @@ HEAD, JS/CSS LINKS
     </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - WIZARD
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="app/uidl-element-template/Wizard">
+        <div class="row">
+            <div class="col-lg-12" ng-repeat="page in uidl.pages" style="vertical-align:top;">
+                <uidl-widget uidl="page"></uidl-widget>
+            </div>
+        </div>
+    </script>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - DASHBOARD
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/Dashboard">
