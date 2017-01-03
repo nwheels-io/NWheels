@@ -1454,7 +1454,13 @@ namespace NWheels.UI
                 foreach ( var stepPropertyName in subsetOfPropertyPath )
                 {
                     var stepMetaTypeConstraint = (stepTarget is IObject ? ((IObject)stepTarget).ContractType : null);
-                    var stepMetaProperty = stepMetaType.FindPropertyByNameIncludingDerivedTypes(stepPropertyName, stepMetaTypeConstraint);
+                    IPropertyMetadata stepMetaProperty;
+                    
+                    if (!stepMetaType.TryFindPropertyByNameIncludingDerivedTypes(stepPropertyName, stepMetaTypeConstraint, out stepMetaProperty))
+                    {
+                        return null;
+                    }
+
                     value = stepMetaProperty.ReadValue(stepTarget);
 
                     if ( stepMetaProperty.Relation != null )

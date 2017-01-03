@@ -15,6 +15,7 @@ namespace NWheels.DataObjects
         bool TryGetPropertyByName(string name, out IPropertyMetadata property);
         bool TryGetPropertyByDeclaration(PropertyInfo declarationInContract, out IPropertyMetadata property);
         IPropertyMetadata FindPropertyByNameIncludingDerivedTypes(string propertyName, Type derivedTypeConstraint = null);
+        bool TryFindPropertyByNameIncludingDerivedTypes(string propertyName, Type derivedTypeConstraint, out IPropertyMetadata property);
         LambdaExpression MakePropertyExpression(IPropertyMetadata property);
         LambdaExpression MakePropertyAsObjectExpression(IPropertyMetadata property);
         IQueryable<TBase> MakeOfType<TBase>(IQueryable<TBase> query);
