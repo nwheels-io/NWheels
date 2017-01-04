@@ -31,7 +31,7 @@ namespace NWheels.Samples.MyMusicDB.Domain
         IOperatorAcl NewOperatorAcl();
 
         NewAlbumTx.INewAlbumModel NewAlbumModel();
-        NewAlbumTx.INewTrackModel NewTrackModel();
+        NewAlbumTrackTx.INewTrackModel NewTrackModel();
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

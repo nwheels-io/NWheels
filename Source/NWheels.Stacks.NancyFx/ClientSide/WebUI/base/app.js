@@ -1977,7 +1977,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.$on(scope.uidl.qualifiedName + ':Save:Executing', function (event) {
                 scope.saveChanges(scope.model.entity);
             });
-            scope.$on(scope.uidl.grid.qualifiedName + ':InlineSave:Executing', function (event, entity) {
+            scope.$on(scope.uidl.grid.qualifiedName + ':SavingInlineRowEdits', function (event, entity) {
 				if (scope.uidl.grid.inlineEditor) {
 					scope.$emit(scope.uidl.grid.inlineEditor.qualifiedName + ':Submitting', entity);
 					$timeout(function() {
@@ -2854,7 +2854,9 @@ theApp.directive('uidlScreen', ['uidlService', 'entityService', function (uidlSe
 
 //---------------------------------------------------------------------------------------------------------------------
 
-theApp.directive('uidlScreenPart', ['uidlService', 'entityService', function (uidlService, entityService) {
+theApp.directive('uidlScreenPart', 
+['uidlService', 'entityService', 
+function (uidlService, entityService) {
     return {
         scope: {
             uidl: '='

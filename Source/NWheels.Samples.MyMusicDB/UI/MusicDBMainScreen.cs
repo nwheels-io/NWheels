@@ -1,4 +1,5 @@
-﻿using NWheels.Domains.Security;
+﻿using System.Collections.Generic;
+using NWheels.Domains.Security;
 using NWheels.Domains.Security.UI;
 using NWheels.Extensions;
 using NWheels.Samples.MyMusicDB.Authorization;
@@ -56,7 +57,7 @@ namespace NWheels.Samples.MyMusicDB.UI
             presenter.On(Console.ProfilePhoto.LogOut).InvokeCommand(CurrentUser.LogOut);
             presenter.On(Console.ProfilePhoto.ChangePassword).Navigate().FromContainer(Console.MainContent).ToScreenPartNonTyped(ChangePassword);
 
-            NewAlbum.UseFlatStyle();
+            //NewAlbum.UseFlatStyle();
 
             Genres.Crud.Grid
                 .Column(x => x.Id, size: FieldSize.Small)
@@ -123,7 +124,8 @@ namespace NWheels.Samples.MyMusicDB.UI
         public CrudScreenPart<IArtistEntity> Artists { get; set; }
         public CrudScreenPart<IAlbumEntity> Albums { get; set; }
         public CrudScreenPart<ITrackEntity> Tracks { get; set; }
-        public TransactionScreenPart<Empty.Input, NewAlbumTx.INewAlbumModel, NewAlbumTx> NewAlbum { get; set; }
+        //public TransactionScreenPart<Empty.Input, NewAlbumTx.INewAlbumModel, NewAlbumTx, List<NewAlbumTrackTx.INewTrackModel>> NewAlbum { get; set; }
+        public NewAlbumScreenPart NewAlbum { get; set; }
         public UserAccountCrudScreenPart<IMusicDBUserAccountEntity> Users { get; set; }
         public ChangePasswordScreenPart ChangePassword { get; set; }
 

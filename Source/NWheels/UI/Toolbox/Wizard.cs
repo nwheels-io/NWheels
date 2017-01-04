@@ -19,12 +19,42 @@ namespace NWheels.UI.Toolbox
         public Wizard(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
+            this.Pages = new List<WidgetUidlNode>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void GoNext<TPgWidget, TPgData, TPgState, TPgInput>(
+            PresenterBuilder<TPgWidget, TPgData, TPgState>.BehaviorBuilder<TPgInput> behavior)
+            where TPgWidget : ControlledUidlNode
+            where TPgData : class
+            where TPgState : class
+        {
+            this.DescribingPresenter += (presenter) => {
+                behavior.Broadcast(this.Next).WithPayload(vm => vm.Input).TunnelDown();
+            };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void GoBack<TPgWidget, TPgData, TPgState, TPgInput>(
+            PresenterBuilder<TPgWidget, TPgData, TPgState>.BehaviorBuilder<TPgInput> behavior)
+            where TPgWidget : ControlledUidlNode
+            where TPgData : class
+            where TPgState : class
+        {
+            behavior.Broadcast(this.Back).TunnelDown();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
         public List<WidgetUidlNode> Pages { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UidlNotification<object> Next { get; set; }
+        public UidlNotification Back { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -43,7 +73,7 @@ namespace NWheels.UI.Toolbox
 
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
-            return base.GetNestedWidgets().Concat(Pages);
+            return base.GetNestedWidgets();//.Concat(Pages);
         }
     }
 }

@@ -488,7 +488,7 @@ HEAD, JS/CSS LINKS
             <i class="fa fa-lg glyphicon fa-{{::uidl.icon}}"></i>
             <span ng-bind="uidl.helpText"></span>
         </div>
-        <uidl-widget uidl="uidl.contentRoot"></uidl-widget>
+        <uidl-widget uidl="uidl.contentRoot" parent-model="model"></uidl-widget>
         <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
         <uidl-widget ng-repeat="popup in uidl.popupContents" uidl="popup"></uidl-widget>
     </script>
@@ -1602,6 +1602,22 @@ HEAD, JS/CSS LINKS
                     //grid[0].addJSONData(data);
                 });
             };
+            
+            $scope.onDataQueryCompleted = function (grid, response) {
+                $scope.ResultSet = response.data.ResultSet;
+                if ($scope.uidl.expandableTreeMode) {
+                    var adjacentModel = [ ];
+                    for (var i = 0; i < $scope.ResultSet.length ; i++) {
+                        $scope.transformToAdjacentTreeModel(adjacentModel, $scope.ResultSet[i], null, 0);
+                    }
+                    response.data.ResultSet = adjacentModel;
+                    $scope.ResultSet = adjacentModel;
+                }
+                $scope.entityService.trackRetrievedEntities(response.data.ResultSet);
+                grid[0].addJSONData(response.data);
+                $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data);
+            }
+            
             $scope.$on($scope.uidl.qualifiedName + ':DataReceived', $scope.onDataReceived);
             $scope.onRequestPrepared = function (event, request) {
                 $scope.defineElementIds();
@@ -1613,6 +1629,16 @@ HEAD, JS/CSS LINKS
                     var gridOptions = {
                         datatype: function(postData) {
                             if ($scope.dataGridQueryInProgress) {
+                                return;
+                            }
+                            var theGrid = $('#' + $scope.tableElementId);
+                            if ($scope.uidl.useParentModelInputAsDataSource) {
+                                var response = {
+                                    data: {
+                                        ResultSet: $scope.parentModel.Input
+                                    }
+                                };
+                                $scope.onDataQueryCompleted(theGrid, response);
                                 return;
                             }
                             $scope.dataGridQueryInProgress = true;
@@ -1654,17 +1680,18 @@ HEAD, JS/CSS LINKS
                             queryBuilder.take(postData.rows);
                             queryBuilder.page(postData.page);
                             var requestUrl = queryBuilder.getQueryUrl();
-                            var grid = $('#' + $scope.tableElementId);
-                            grid[0].grid.beginReq();
+                            theGrid[0].grid.beginReq();
                             $scope.$http.post(
                                 requestUrl,
                                 $scope.preparedRequest.data
                             ).then(
                                 function(response){
                                     $scope.dataGridQueryInProgress = false;
-                                    if (grid[0].grid) {
-                                        grid[0].grid.endReq();
+                                    if (theGrid[0].grid) {
+                                        theGrid[0].grid.endReq();
                                     }
+                                    $scope.onDataQueryCompleted(theGrid, response);
+                                    /*
                                     $scope.ResultSet = response.data.ResultSet;
                                     if ($scope.uidl.expandableTreeMode) {
                                         var adjacentModel = [ ];
@@ -1675,9 +1702,9 @@ HEAD, JS/CSS LINKS
                                         $scope.ResultSet = adjacentModel;
                                     }
                                     $scope.entityService.trackRetrievedEntities(response.data.ResultSet);
-                                    var thegrid = $('#' + $scope.tableElementId);
-                                    thegrid[0].addJSONData(response.data);
+                                    theGrid[0].addJSONData(response.data);
                                     $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data);
+                                    */
                                     
                                     /*if ($scope.uidl.expandableTreeMode) {
                                         setTimeout(function() {
@@ -1694,7 +1721,7 @@ HEAD, JS/CSS LINKS
                                                 for (var i = 0; i < newAdjacentModel.length ; i++) {
                                                     var r = newAdjacentModel[i];
                                                     $scope.ResultSet.push(r);
-                                                    thegrid.jqGrid('addChildNode', r.$id, r.$treeParentId, r);
+                                                    theGrid.jqGrid('addChildNode', r.$id, r.$treeParentId, r);
                                                 }
                                             });
                                         }, 5000);
@@ -1702,8 +1729,8 @@ HEAD, JS/CSS LINKS
                                 },
                                 function(faultResponse){
                                     $scope.dataGridQueryInProgress = false;
-                                    if (grid[0].grid) {
-                                        grid[0].grid.endReq();
+                                    if (theGrid[0].grid) {
+                                        theGrid[0].grid.endReq();
                                     }
                                     $scope.ResultSet = null;
                                     var faultInfo = $scope.commandService.createFaultInfo(faultResponse);
@@ -1781,7 +1808,7 @@ HEAD, JS/CSS LINKS
                                     */
                                     var rowData = $scope.getDataByRowId(rowId);
                                     $scope.$apply(function() {
-                                        $scope.$emit($scope.uidl.qualifiedName + ':InlineSave:Executing', rowData);
+                                        $scope.$emit($scope.uidl.qualifiedName + ':SavingInlineRowEdits', rowData);
                                     });
                                 }); 
                             }

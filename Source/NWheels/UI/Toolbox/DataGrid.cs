@@ -133,6 +133,9 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public bool HiddenMode { get; set; }
 
+        [DataMember]
+        public bool UseParentModelInputAsDataSource { get; set; }
+
         //[DataMember]
         //public string DetailPaneStaticTemplateName { get; set; }
 
@@ -731,6 +734,16 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        //public DataGrid<TDataRow> UseBackendTransactionScript<TTxContext>()
+        //{
+        //    this.IsInlineEditEnabled = true;
+        //    this.InlineEditor = new Form<TDataRow>("InlineEditor", this);
+
+        //    return this;
+        //}
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public DataGrid<TDataRow> PageSize(int defaultSize, int[] pageSizeOptions)
         {
             this.EnablePaging = true;
@@ -758,6 +771,7 @@ namespace NWheels.UI.Toolbox
         public UidlNotification<ApplicationEntityService.QueryResults> QueryCompleted { get; set; }
         public UidlNotification<IPromiseFailureInfo> QueryFailed { get; set; }
         public UidlNotification<ICellClickInfo> CellClicked { get; set; }
+        public UidlNotification<TDataRow> SavingInlineRowEdits { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
