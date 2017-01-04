@@ -134,7 +134,7 @@ namespace NWheels.UI.Toolbox
         public bool HiddenMode { get; set; }
 
         [DataMember]
-        public bool UseParentModelInputAsDataSource { get; set; }
+        public bool PassiveQueryMode { get; set; }
 
         //[DataMember]
         //public string DetailPaneStaticTemplateName { get; set; }

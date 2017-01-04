@@ -7,6 +7,7 @@ using Autofac;
 using Hapil;
 using NWheels.Authorization.Core;
 using NWheels.Core;
+using NWheels.DataObjects.Core;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.UI;
@@ -53,7 +54,7 @@ namespace NWheels.Processing
         public virtual void SaveInputDraft(TInput input)
         {
             var uiContext = GetUIContext();
-            var json = uiContext.EntityService.GetJsonFromObject(input.As<IDomainObject>(), uiContext.Query);
+            var json = uiContext.EntityService.GetJsonFromObject(input.As<IObject>(), uiContext.Query);
 
             Session.Current.SetUserStorageItem(this.GetType().FriendlyName(), json);
         }
@@ -81,7 +82,7 @@ namespace NWheels.Processing
         protected virtual bool TryLoadInputDraft(out TInput draft)
         {
             string json;
-            IDomainObject deserializedDraft = null;
+            IObject deserializedDraft = null;
 
             if (Session.Current.TryGetUserStorageItem(this.GetType().FriendlyName(), out json))
             {

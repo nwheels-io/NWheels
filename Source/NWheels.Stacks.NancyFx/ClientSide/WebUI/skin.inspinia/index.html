@@ -1556,7 +1556,7 @@ HEAD, JS/CSS LINKS
                 //editEl.css({display: 'block'});
             };
             
-            $scope.onDataReceived = function (event, data) {
+            $scope.onInlineGridDataReceived = function (event, data) {
                 $scope.defineElementIds();
                 $scope.ResultSet = data;
                 for (var  i = 0; i < data.length; i++) {
@@ -1603,7 +1603,7 @@ HEAD, JS/CSS LINKS
                 });
             };
             
-            $scope.onDataQueryCompleted = function (grid, response) {
+            $scope.onStandalongGridDataReceived = function (grid, response) {
                 $scope.ResultSet = response.data.ResultSet;
                 if ($scope.uidl.expandableTreeMode) {
                     var adjacentModel = [ ];
@@ -1618,8 +1618,7 @@ HEAD, JS/CSS LINKS
                 $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data);
             }
             
-            $scope.$on($scope.uidl.qualifiedName + ':DataReceived', $scope.onDataReceived);
-            $scope.onRequestPrepared = function (event, request) {
+            $scope.onStandaloneGridRequestPrepared = function (event, request) {
                 $scope.defineElementIds();
                 $scope.preparedRequest = request;
                 $scope.$timeout(function () {
@@ -1628,17 +1627,19 @@ HEAD, JS/CSS LINKS
                     $scope.totalsRowDisplayed = false;
                     var gridOptions = {
                         datatype: function(postData) {
+                            var theGrid = $('#' + $scope.tableElementId);
                             if ($scope.dataGridQueryInProgress) {
                                 return;
                             }
-                            var theGrid = $('#' + $scope.tableElementId);
-                            if ($scope.uidl.useParentModelInputAsDataSource) {
-                                var response = {
-                                    data: {
-                                        ResultSet: $scope.parentModel.Input
-                                    }
+                            if ($scope.uidl.passiveQueryMode) {
+                                if (request) {
+                                    var response = {
+                                        data: {
+                                            ResultSet: request
+                                        }
+                                    };
+                                    $scope.onStandalongGridDataReceived(theGrid, response);
                                 };
-                                $scope.onDataQueryCompleted(theGrid, response);
                                 return;
                             }
                             $scope.dataGridQueryInProgress = true;
@@ -1690,7 +1691,7 @@ HEAD, JS/CSS LINKS
                                     if (theGrid[0].grid) {
                                         theGrid[0].grid.endReq();
                                     }
-                                    $scope.onDataQueryCompleted(theGrid, response);
+                                    $scope.onStandalongGridDataReceived(theGrid, response);
                                     /*
                                     $scope.ResultSet = response.data.ResultSet;
                                     if ($scope.uidl.expandableTreeMode) {
@@ -2019,7 +2020,14 @@ HEAD, JS/CSS LINKS
                     });
                 });
             };
-            $scope.$on($scope.uidl.qualifiedName + ':RequestPrepared', $scope.onRequestPrepared);
+
+            $scope.$on($scope.uidl.qualifiedName + ':RequestPrepared', $scope.onStandaloneGridRequestPrepared);
+            
+            if ($scope.uidl.mode === 'Inline' && $scope.uidl.inlineStorageStyle !== 'InverseForeignKey') {
+                $scope.$on($scope.uidl.qualifiedName + ':DataReceived', $scope.onInlineGridDataReceived);
+            } else {
+                $scope.$on($scope.uidl.qualifiedName + ':DataReceived', $scope.onStandaloneGridDataReceived);
+            }
         }
         function jqgrid_onDetailPaneIconClick(event) {
             event = (event || window.event);
@@ -2437,7 +2445,7 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="app/uidl-element-template/TransactionFormFlatStyle">
         <div class="panel-body">
             <div ng-if="uidl.inputForm">
-                <div ng-hide="model.State.Output">
+                <div ng-hide="model.State.Output && !uidl.doNotHideInput" disable-all="model.State.Output">
                     <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
                 </div>
                 <div ng-if="uidl.inputForm.commands.length==0" ng-hide="model.State.Output" class="m-b m-t">

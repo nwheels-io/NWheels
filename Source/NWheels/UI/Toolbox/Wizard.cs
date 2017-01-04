@@ -73,7 +73,7 @@ namespace NWheels.UI.Toolbox
 
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
-            return base.GetNestedWidgets();//.Concat(Pages);
+            return base.GetNestedWidgets().Concat(Pages);
         }
     }
 }

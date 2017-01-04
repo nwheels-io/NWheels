@@ -39,7 +39,7 @@ namespace NWheels.Samples.MyMusicDB.Domain
                     return WorkAroundLazyLoad(existingDraft);
                 }
 
-                var newDraft = _framework.NewDomainObject<INewAlbumModel>();
+                var newDraft = _viewModelFactory.NewEntity<INewAlbumModel>();
                 return WorkAroundLazyLoad(newDraft);
             }
         }
@@ -57,6 +57,8 @@ namespace NWheels.Samples.MyMusicDB.Domain
                 album.ReleaseYear = input.ReleaseYear;
 
                 context.Albums.Insert(album);
+                
+                base.DiscardInputDraft();
                 context.CommitChanges();
 
                 var trackList = Enumerable
@@ -71,7 +73,6 @@ namespace NWheels.Samples.MyMusicDB.Domain
                     })
                     .ToList();
 
-                base.DiscardInputDraft();
                 return trackList;
             }
         }
@@ -86,7 +87,7 @@ namespace NWheels.Samples.MyMusicDB.Domain
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [EntityPartContract]
+        [ViewModelContract]
         public interface INewAlbumModel
         {
             [PropertyContract.Required]

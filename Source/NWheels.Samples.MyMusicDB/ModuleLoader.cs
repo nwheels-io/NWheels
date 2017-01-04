@@ -38,6 +38,7 @@ namespace NWheels.Samples.MyMusicDB
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<InteractiveLoginTx>();
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<DashboardQueryTx>();
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<NewAlbumTx>();
+            builder.NWheelsFeatures().Processing().RegisterTransactionScript<NewAlbumTrackTx>();
             
             builder.NWheelsFeatures().UI().RegisterApplication<MusicDBApp>().WithWebEndpoint();
             

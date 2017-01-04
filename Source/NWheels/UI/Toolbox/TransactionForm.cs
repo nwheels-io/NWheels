@@ -116,6 +116,15 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void UseFlatStyle()
+        {
+            TemplateName = "TransactionFormFlatStyle";
+            Execute.Icon = "check";
+            Reset.Icon = "trash";
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void UseOKCancelNotation(bool withIcons = false)
         {
             this.Execute.Text = "OK";
@@ -143,6 +152,8 @@ namespace NWheels.UI.Toolbox
         public TypeSelector InputFormTypeSelector { get; set; }
         [DataMember]
         public bool AutoSaveInputDraft { get; set; }
+        [DataMember]
+        public bool DoNotHideInput { get; set; }
         [DataMember]
         public UserAlertDisplayMode UserAlertDisplayMode { get; set; }
         [DataMember, ManuallyAssigned]

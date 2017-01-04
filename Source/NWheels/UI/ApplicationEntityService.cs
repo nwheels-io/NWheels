@@ -132,30 +132,48 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public virtual string GetJsonFromObject(IDomainObject domainObject, QueryOptions options)
+        public virtual string GetJsonFromObject(IObject obj, QueryOptions options)
         {
-            var contractType = domainObject.ContractType;
+            var contractType = obj.ContractType;
             var metaType = _metadataCache.GetTypeMetadata(contractType);
-            var handler = _handlerByEntityName[metaType.Name];
+            
+            EntityHandler handler;
 
-            using (handler.NewUnitOfWork())
+            if (_handlerByEntityName.TryGetValue(metaType.Name, out handler))
             {
-                var serializerSettings = (options != null ? GetCachedSerializerSettings(options) : _defaultSerializerSettings);
-                var json = JsonConvert.SerializeObject(domainObject, serializerSettings);
+                using (handler.NewUnitOfWork())
+                {
+                    var serializerSettings = (options != null ? GetCachedSerializerSettings(options) : _defaultSerializerSettings);
+                    var json = JsonConvert.SerializeObject(obj, serializerSettings);
+                    return json;
+                }
+            }
+            else
+            {
+                var json = JsonConvert.SerializeObject(obj, _defaultSerializerSettings);
                 return json;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public virtual IDomainObject GetObjectFromJson(Type contractType, string json)
+        public virtual IObject GetObjectFromJson(Type contractType, string json)
         {
             var metaType = _metadataCache.GetTypeMetadata(contractType);
-            var handler = _handlerByEntityName[metaType.Name];
+            EntityHandler handler;
 
-            using (handler.NewUnitOfWork())
+            if (_handlerByEntityName.TryGetValue(metaType.Name, out handler))
             {
-                var obj = _framework.As<ICoreFramework>().NewDomainObject(contractType);
+                using (handler.NewUnitOfWork())
+                {
+                    var obj = _framework.As<ICoreFramework>().NewDomainObject(contractType);
+                    JsonConvert.PopulateObject(json, obj, _defaultSerializerSettings);
+                    return obj;
+                }
+            }
+            else
+            {
+                var obj = (IObject)_viewModelFactory.NewEntity(contractType);
                 JsonConvert.PopulateObject(json, obj, _defaultSerializerSettings);
                 return obj;
             }

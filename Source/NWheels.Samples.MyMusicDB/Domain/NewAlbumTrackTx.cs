@@ -58,7 +58,7 @@ namespace NWheels.Samples.MyMusicDB.Domain
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [EntityPartContract]
+        [ViewModelContract]
         public interface INewTrackModel
         {
             [PropertyContract.Required, PropertyContract.Semantic.DisplayName]
