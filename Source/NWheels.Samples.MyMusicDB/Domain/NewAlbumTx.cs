@@ -69,6 +69,9 @@ namespace NWheels.Samples.MyMusicDB.Domain
                         track.Name = "Enter track name";
                         track.Description = "Enter track description";
                         track.Length = TimeSpan.FromMinutes(5);
+                        track.TemporaryKey = _framework.NewGuid();
+                        track.MoreInfoLinkText = "Find more info";
+                        track.MoreInfoQuery = input.Artist.Name + " " + album.Name;
                         return track;
                     })
                     .ToList();

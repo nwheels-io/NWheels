@@ -1256,14 +1256,19 @@ HEAD, JS/CSS LINKS
             }
             if ($scope.uidl.isInlineEditEnabled === true) {
                 columnsModel.push({
-                    name: 'actions',
+                    name: $scope.translate('Actions'),
                     index: 'act',
-                    width: 120,
+                    width: ($scope.uidl.isInlineEditOpenFormEnabled ? 120 : 80),
                     align: 'center',
                     sortable: false,
                     formatter: function (cellvalue, options, rowObject) {
-                        return '<i onclick="saveRowGrid(this)" class="fa fa-floppy-o fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i><i onclick="cancelRowGrid(this)" class="fa fa-undo fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>' +
-                            '<i class="fa fa-pencil fa-lg" edit-grid-event="true" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
+                        var actionsHtml =
+                            '<i onclick="saveRowGrid(this)" class="fa fa-floppy-o fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>' +
+                            '<i onclick="cancelRowGrid(this)" class="fa fa-undo fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
+                        if ($scope.uidl.isInlineEditOpenFormEnabled) {
+                            actionsHtml += '<i class="fa fa-pencil fa-lg" edit-grid-event="true" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
+                        }
+                        return actionsHtml;
                     }
                 });
             }
@@ -1280,10 +1285,10 @@ HEAD, JS/CSS LINKS
                     name: metaColumn.expression,
                     label: $scope.translate(metaColumn.title),
                     index: metaColumn.expression,
-                    editable: ($scope.uidl.isInlineEditEnabled===true && metaColumn.isEditSupported===true),
+                    editable: ($scope.uidl.isInlineEditEnabled===true && metaColumn.isEditSupported===true && !metaColumn.isReadOnly),
                     width: colWidthPx,
-                    search: metaColumn.isFilterSupported===true,
-                    sortable: metaColumn.isSortSupported===true,
+                    search: metaColumn.isFilterSupported===true && !metaColumn.isFilterDisabled && !$scope.uidl.disableFiltering,
+                    sortable: metaColumn.isSortSupported===true && !metaColumn.isSortDisabled && !$scope.uidl.disableSorting
                     //sorttype: column.dataType,
                 };
                 if (metaColumn.format) {
@@ -1808,6 +1813,9 @@ HEAD, JS/CSS LINKS
                                     }
                                     */
                                     var rowData = $scope.getDataByRowId(rowId);
+                                    //gridObj.clearGridData();
+                                    //gridObj.setGridParam({ data: $scope.ResultSet });
+                                    gridObj.trigger('reloadGrid');
                                     $scope.$apply(function() {
                                         $scope.$emit($scope.uidl.qualifiedName + ':SavingInlineRowEdits', rowData);
                                     });
@@ -2073,6 +2081,9 @@ HEAD, JS/CSS LINKS
                 colIndex--;
             }
             if (scope.uidl.enableDetailPane===true) {
+                colIndex--;
+            }
+            if (scope.uidl.isInlineEditEnabled===true) {
                 colIndex--;
             }
             var cellClickInfo = {

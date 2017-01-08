@@ -62,6 +62,8 @@ namespace NWheels.UI.Uidl
         public string TargetContainerQualifiedName { get; set; }
         [DataMember]
         public string InputExpression { get; set; }
+        [DataMember]
+        public string DestinationUrl { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -194,7 +196,19 @@ namespace NWheels.UI.Uidl
             [DataMember]
             public string ValueExpression { get; set; }
             [DataMember]
+            public MatchOperatorType Operator { get; set; }
+            [DataMember]
             public BehaviorUidlNode OnMatch { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public enum MatchOperatorType
+        {
+            Defined,
+            NotDefined,
+            Equal,
+            NotEqual
         }
     }
 

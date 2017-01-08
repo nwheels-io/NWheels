@@ -83,6 +83,15 @@ namespace NWheels.UI.Toolbox
         public bool IsInlineEditEnabled { get; set; }
 
         [DataMember]
+        public bool IsInlineEditOpenFormEnabled { get; set; }
+
+        [DataMember]
+        public bool DisableFiltering { get; set; }
+
+        [DataMember]
+        public bool DisableSorting { get; set; }
+
+        [DataMember]
         public bool EnableDetailPane { get; set; }
 
         [DataMember]
@@ -346,6 +355,12 @@ namespace NWheels.UI.Toolbox
             public bool IsFilterSupported { get; set; }
             [DataMember]
             public bool IsEditSupported { get; set; }
+            [DataMember]
+            public bool IsReadOnly { get; set; }
+            [DataMember]
+            public bool IsFilterDisabled { get; set; }
+            [DataMember]
+            public bool IsSortDisabled { get; set; }
             [DataMember]
             public string RelatedEntityName { get; set; }
             [DataMember, ManuallyAssigned]

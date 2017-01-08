@@ -820,17 +820,43 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         returnsPromise: false,
         execute: function (scope, behavior, input) {
             console.log('run-behavior > navigate', behavior.targetType, behavior.targetQualifiedName);
+            var inputContext = createInputContext(scope.model, input);
             
             if (input && behavior.inputExpression) {
-                var inputContext = createInputContext(scope.model, input);
                 input = selectValue(inputContext, behavior.inputExpression);
             }
             
-            if (behavior.navigationType == 'Popup' && behavior.targetType == 'Screen') {
-                var url = 
-                    $location.protocol() + '://' + 
-                    $location.host() + ':' + $location.port() + 
-                    '/#/?$sticky=1&$screen=' + behavior.targetQualifiedName;
+            if (behavior.navigationType == 'Popup' && (behavior.targetType == 'Screen' || behavior.targetType == 'Application')) {
+                var url = null;
+                
+                if (behavior.targetType == 'Application') {
+                    if (behavior.targetQualifiedNameExpression) {
+                        url = selectValue(inputContext, behavior.targetQualifiedNameExpression);
+                    } else {
+                        url = behavior.destinationUrl;
+                    }
+                    if (input) {
+                        var inputQuery = '';
+                        for (var p in input){
+                            if (input.hasOwnProperty(p) && p.length > 0 && p.charAt(0) != '$') {
+                                if (inputQuery.length > 0) {
+                                    inputQuery += '&';
+                                }
+                                inputQuery += encodeURIComponent(p) + '=' + encodeURIComponent(input[p]);
+                            }
+                        }
+                        if (inputQuery.length > 0) {
+                            var indexOfQuestionChar = url.indexOf('?');
+                            var inputQueryDelimiter = (indexOfQuestionChar < 0 ? '?' : (indexOfQuestionChar == url.length - 1 ? '' : '&'));
+                            url += inputQueryDelimiter + inputQuery;
+                        }
+                    }
+                } else {
+                    url = 
+                        $location.protocol() + '://' + 
+                        $location.host() + ':' + $location.port() + 
+                        '/#/?$sticky=1&$screen=' + behavior.targetQualifiedName;
+                }
                 
                 var h = parseInt(screen.height * 0.8);
                 var w = parseInt(screen.width * 0.9);
@@ -1125,7 +1151,16 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     selectValue(inputContext, rule.valueExpression) : 
                     rule.valueConstant);
 				
-				if (('' + leftSideValue) == ('' + rightSideValue)) {
+                var matched = false;
+                switch (rule.operator) {
+                    case 'Equal':
+                        matched = (('' + leftSideValue) == ('' + rightSideValue));
+                        break;
+                    case 'Defined':
+                        matched =  (rightSideValue ? true : false);
+                        break;
+                }
+                if (matched) {
 					console.log('run-behavior > switch > matched rule #', i);
 					implementBehavior(scope, rule.onMatch, input);
 					return;
@@ -2465,6 +2500,16 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             
             scope.invokeCommand = function (command) {
                 if (command.kind==='Submit') {
+                    var h = parseInt(screen.height * 0.8);
+                    var w = parseInt(screen.width * 0.9);
+                    var x = parseInt((screen.width - w) / 2);
+                    var y = parseInt((screen.height - h) / 4);
+                    var windowOptions = 
+                        'toolbar=no,titlebar=no,menubar=no,scrollbars=yes,resizable=yes,' +
+                        'top=' + y + ',left=' + x + ',width=' + w + ',height=' + h;
+                    var result = window.open('https://www.google.com', '_blank', windowOptions);
+                    console.log('window.open > ', result);
+
                     scope.commandInProgress = true;
                     var validationResult = { isValid: false };
                     scope.$broadcast(':global:FormValidating', validationResult);

@@ -125,6 +125,7 @@
     <Compile Include="UI\NewAlbumScreenPart.cs" />
     <Compile Include="UI\MusicDBDashboardScreenPart.cs" />
     <Compile Include="UI\MusicDBMainScreen.cs" />
+    <Compile Include="UI\TrackInfoScreen.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels.Domains.DevOps\NWheels.Domains.DevOps.csproj">

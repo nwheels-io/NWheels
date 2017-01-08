@@ -724,6 +724,20 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public PromiseBuilder<TInput> ToApplication<TAppInput>(
+                Expression<Func<ViewModel<TData, TState, TInput>, string>> uriSelector,
+                Expression<Func<ViewModel<TData, TState, TInput>, TAppInput>> inputSelector)
+            {
+                _behavior.TargetType = UidlNodeType.Application;
+                _behavior.TargetQualifiedNameExpression = uriSelector.ToNormalizedNavigationString("model");
+                _behavior.InputExpression = inputSelector.ToNormalizedNavigationString("model");
+                _behavior.NavigationType = NavigationType.Popup;
+
+                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public NavigateBehaviorScreenPartSelector<TInput> FromContainer(ScreenPartContainer container)
             {
                 _behavior.TargetType = UidlNodeType.ScreenPart;
@@ -1386,6 +1400,7 @@ namespace NWheels.UI
 
                 var rule = new UidlBranchByRuleBehavior.BranchRule() {
                     ValueExpression = (valueSelector != null ? valueSelector.ToNormalizedNavigationString("model") : null),
+                    Operator = UidlBranchByRuleBehavior.MatchOperatorType.Equal,
                     OnMatch = builder.Behavior
                 };
 
@@ -1404,6 +1419,24 @@ namespace NWheels.UI
 
                 var rule = new UidlBranchByRuleBehavior.BranchRule() {
                     ValueConstant = (valueConstant != null ? ExpressionExtensions.NormalizeKnownTokens(valueConstant.ToString()) : null),
+                    Operator = UidlBranchByRuleBehavior.MatchOperatorType.Equal,
+                    OnMatch = builder.Behavior
+                };
+
+                _behavior.BranchRules.Add(rule);
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public WhenOtherwiseBehaviorBuilder<TInput, TValue> WhenDefined(
+                Action<BehaviorBuilder<TInput>> onMatch)
+            {
+                var builder = new BehaviorBuilder<TInput>(_ownerNode, notification: null, uidl: _uidl);
+                onMatch(builder);
+
+                var rule = new UidlBranchByRuleBehavior.BranchRule() {
+                    Operator = UidlBranchByRuleBehavior.MatchOperatorType.Defined,
                     OnMatch = builder.Behavior
                 };
 

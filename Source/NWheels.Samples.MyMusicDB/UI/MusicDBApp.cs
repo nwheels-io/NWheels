@@ -69,6 +69,7 @@ namespace NWheels.Samples.MyMusicDB.UI
         public UserPasswordExpiredScreen PasswordExpired { get; set; }
         public UserForgotPasswordScreen ForgotPassword { get; set; }
         public MusicDBMainScreen MainScreen { get; set; }
+        public TrackInfoScreen TrackInfo { get; set; }
         public SystemLogScreen SystemLog { get; set; }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

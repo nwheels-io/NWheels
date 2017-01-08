@@ -32,6 +32,14 @@ namespace NWheels.Samples.MyMusicDB.UI
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+        // this property is injected automatically during composition of UIDL document.
+        // because it is of type derived from UidlApplication
+        // it refers to the application UIDL object
+        // this property allows us referring to other screens in the app - for instance, the Track Info screen
+        public MusicDBApp TheApp { get; set; }
+        
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
         [ContentRoot]
         public Wizard Wizard { get; set; }
 
@@ -57,6 +65,15 @@ namespace NWheels.Samples.MyMusicDB.UI
             NewTrackGrid.Mode = DataGridMode.Standalone;
             NewTrackGrid.PassiveQueryMode = true;
             NewTrackGrid.UseInlineEditor();
+            NewTrackGrid.DisableFiltering = true;
+            NewTrackGrid.DisableSorting = true;
+            NewTrackGrid
+                .Column(x => x.TrackNumber, size: FieldSize.Small)
+                .Column(x => x.Name, size: FieldSize.Large)
+                .Column(x => x.Length, size: FieldSize.Small)
+                .Column(x => x.Description, size: FieldSize.Large, setup: c => c.IsReadOnly = true)
+                .Column(x => x.MoreInfoLinkText, setup: c => c.Clickable = true)
+                .Column(x => x.TemporaryKey, columnType: GridColumnType.Hidden);
 
             Wizard.Pages.Add(NewAlbumForm);
             Wizard.Pages.Add(NewTrackGrid);
@@ -75,6 +92,14 @@ namespace NWheels.Samples.MyMusicDB.UI
                     onSuccess: b => b.UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.TrackSuccessfullySaved()),
                     onFailure: b => b.UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.FailedToSaveTrack(), faultInfo: vm => vm.Input)
                 );
+
+            presenter.On(NewTrackGrid.CellClicked)
+                .ProjectInputAs<TrackInfoScreen.IInput>(
+                    alt => alt.Copy(vm => vm.Input.Source.Data.MoreInfoQuery).To(vm => vm.Input.Target.ArtistAlbumText),
+                    alt => alt.Copy(vm => vm.Input.Source.Data.Name).To(vm => vm.Input.Target.TrackText))
+                .Then(b => b.Navigate()
+                    .ToScreen(TheApp.TrackInfo, NavigationType.Popup)
+                    .WithInput(vm => vm.Input.Target));
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

@@ -44,12 +44,17 @@ namespace NWheels.Samples.MyMusicDB.Domain
             using (var context = _framework.NewUnitOfWork<IMusicDBContext>())
             {
                 var track = context.Tracks.New();
+
                 //track.Album = album;
                 track.Name = input.Name;
                 track.TrackNumber = input.TrackNumber;
                 track.Length = input.Length;
                 track.Description = input.Description;
+
+                var temporaryKey = input.TemporaryKey; // example of hidden column
+                
                 context.Tracks.Insert(track);
+
             }
 
             base.DiscardInputDraft();
@@ -61,6 +66,9 @@ namespace NWheels.Samples.MyMusicDB.Domain
         [ViewModelContract]
         public interface INewTrackModel
         {
+            [PropertyContract.Presentation.Hidden]
+            Guid TemporaryKey { get; set; }
+
             [PropertyContract.Required, PropertyContract.Semantic.DisplayName]
             string Name { get; set; }
 
@@ -69,8 +77,13 @@ namespace NWheels.Samples.MyMusicDB.Domain
 
             TimeSpan Length { get; set; }
 
-            [PropertyContract.Semantic.MultilineText]
             string Description { get; set; }
+
+            [PropertyContract.ReadOnly]
+            string MoreInfoLinkText { get; set; }
+
+            [PropertyContract.Presentation.Hidden]
+            string MoreInfoQuery { get; set; }
         }
     }
 }
