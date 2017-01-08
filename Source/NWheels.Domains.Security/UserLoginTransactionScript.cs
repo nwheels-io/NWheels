@@ -47,7 +47,7 @@ namespace NWheels.Domains.Security
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public virtual Result Execute(string loginName, string password)
+        public virtual Result Execute(string loginName, string password, string signInToken = null)
         {
             IApplicationDataRepository authenticationContext;
             IQueryable<IUserAccountEntity> userAccountQuery;
@@ -66,7 +66,14 @@ namespace NWheels.Domains.Security
 
                 using ( _sessionManager.JoinGlobalSystem() )
                 {
-                    principal = _authenticationProvider.Authenticate(userAccountQuery, loginName, SecureStringUtility.ClearToSecure(password), out userAccount);
+                    if (string.IsNullOrEmpty(signInToken))
+                    {
+                        principal = _authenticationProvider.Authenticate(userAccountQuery, loginName, SecureStringUtility.ClearToSecure(password), out userAccount);
+                    }
+                    else
+                    {
+                        principal = _authenticationProvider.AuthenticateBySignInToken(userAccountQuery, signInToken, out userAccount);
+                    }
                 }
 
                 ExtendUserClaims(principal);

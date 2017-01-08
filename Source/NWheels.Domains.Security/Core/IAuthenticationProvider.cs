@@ -17,5 +17,10 @@ namespace NWheels.Domains.Security.Core
             string loginName, 
             SecureString password, 
             out IUserAccountEntity userAccount);
+
+        UserAccountPrincipal AuthenticateBySignInToken(
+            IQueryable<IUserAccountEntity> userAccounts,
+            string token,
+            out IUserAccountEntity userAccount);
     }
 }

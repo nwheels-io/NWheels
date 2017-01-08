@@ -35,6 +35,7 @@ namespace NWheels.Domains.Security
         void SendEmail(object emailContentType, object data);
         void SendEmailVerification(object emailContentType);
         void VerifyEmail(string linkUniqueId);
+        string GenerateSignInToken(TimeSpan expiresAfter);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -60,6 +61,10 @@ namespace NWheels.Domains.Security
 
         [PropertyContract.Required, PropertyContract.Relation.Composition]
         ICollection<IPasswordEntityPart> Passwords { get; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        ISignInTokenEntityPart SignInToken { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -132,6 +137,19 @@ namespace NWheels.Domains.Security
 
             return (utcNow >= password.ExpiresAtUtc.Value);
         }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityPartContract]
+    public interface ISignInTokenEntityPart
+    {
+        [PropertyContract.Required]
+        string Token { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        DateTime ExpiresAtUtc { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

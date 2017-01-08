@@ -49,6 +49,26 @@ namespace NWheels.Domains.Security.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public UserAccountPrincipal AuthenticateBySignInToken(
+            IQueryable<IUserAccountEntity> userAccounts, 
+            string token, 
+            out IUserAccountEntity userAccount)
+        {
+            var now = _framework.UtcNow;
+            userAccount = userAccounts.FirstOrDefault(u => u.SignInToken.Token == token && u.SignInToken.ExpiresAtUtc < now);
+
+            if (userAccount == null)
+            {
+                _logger.UserNotFoundByToken(token);
+                throw new DomainFaultException<LoginFault>(LoginFault.LoginIncorrect);
+            }
+
+            var principal = userAccount.As<UserAccountEntity>().AuthenticateBySignInToken(token);
+            return principal;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private UserAccountPrincipal InternalAuthenticate(
             IQueryable<IUserAccountEntity> userAccounts, 
             string loginName, 

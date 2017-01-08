@@ -108,6 +108,20 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string GenerateSignInToken(TimeSpan expiresAfter)
+        {
+            var tokenString = Framework.NewGuid().ToString("N");
+
+            var token = Framework.NewDomainObject<ISignInTokenEntityPart>();
+            token.Token = tokenString;
+            token.ExpiresAtUtc = Framework.UtcNow.Add(expiresAfter);
+            this.SignInToken = token;
+
+            return tokenString;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public virtual void AutoGenerateLoginName(string baseText)
         {
             this.LoginName = CreateLoginName(baseText);
@@ -195,6 +209,18 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public virtual UserAccountPrincipal AuthenticateBySignInToken(string token)
+        {
+            ValidateNotLockedOut();
+
+            var principal = CreatePrincipal();
+
+            Logger.UserAuthenticatedByToken(token, LoginName);
+            return principal;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public virtual UserAccountPrincipal CreatePrincipal()
         {
             var claims = ClaimFactory.CreateClaimsFromContainerEntity(this).ToArray();
@@ -263,6 +289,7 @@ namespace NWheels.Domains.Security.Core
         public abstract string EmailAddress { get; set; }
         public abstract IEmailVerificationEntityPart EmailVerification { get; }
         public abstract ICollection<IPasswordEntityPart> Passwords { get; protected set; }
+        public abstract ISignInTokenEntityPart SignInToken { get; set; }
         public abstract DateTime CreatedAtUtc { get; set; }
         public abstract DateTime? LastLoginAtUtc { get; set; }
         public abstract int FailedLoginCount { get; set; }
