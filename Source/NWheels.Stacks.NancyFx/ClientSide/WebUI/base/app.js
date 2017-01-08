@@ -2500,16 +2500,6 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             
             scope.invokeCommand = function (command) {
                 if (command.kind==='Submit') {
-                    var h = parseInt(screen.height * 0.8);
-                    var w = parseInt(screen.width * 0.9);
-                    var x = parseInt((screen.width - w) / 2);
-                    var y = parseInt((screen.height - h) / 4);
-                    var windowOptions = 
-                        'toolbar=no,titlebar=no,menubar=no,scrollbars=yes,resizable=yes,' +
-                        'top=' + y + ',left=' + x + ',width=' + w + ',height=' + h;
-                    var result = window.open('https://www.google.com', '_blank', windowOptions);
-                    console.log('window.open > ', result);
-
                     scope.commandInProgress = true;
                     var validationResult = { isValid: false };
                     scope.$broadcast(':global:FormValidating', validationResult);
