@@ -1133,6 +1133,7 @@ namespace NWheels.UI.Toolbox
         Label = 10,
         Alert = 15,
         Edit = 20,
+        HyperLink = 25,
         FileUpload = 30,
         ImageUpload = 35,
         Lookup = 40,
@@ -1168,6 +1169,7 @@ namespace NWheels.UI.Toolbox
         DualList = 0x40000,
         LabelHidden = 0x80000,
         Suffix = 0x100000,
+        MarkdownHyperlinks = 0x200000,
         System = 0x40000000
     }
 

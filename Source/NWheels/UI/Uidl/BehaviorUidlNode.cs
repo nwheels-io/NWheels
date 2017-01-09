@@ -205,10 +205,10 @@ namespace NWheels.UI.Uidl
 
         public enum MatchOperatorType
         {
-            Defined,
-            NotDefined,
-            Equal,
-            NotEqual
+            Equal = 10,
+            NotEqual = 20,
+            Defined = 30,
+            NotDefined = 40,
         }
     }
 

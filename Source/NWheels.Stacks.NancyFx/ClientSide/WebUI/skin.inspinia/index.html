@@ -119,6 +119,10 @@ HEAD, JS/CSS LINKS
             top: -10px;
             right: -30px;
         }    
+        p.alert_form_field a {
+            font-weight: bold;
+            text-decoration: underline;
+        }
         .ibox-title h2 {
             display: inline-block;
             margin: 0 0 7px;
@@ -2404,10 +2408,10 @@ HEAD, JS/CSS LINKS
                             {{translate(uidl.text)}}
                         </h6>
                     </div>
-                    <div ng-class="{'modal-body': uidl.inputForm.templateName!='FormAlert', 'modal-body-alert': uidl.inputForm.templateName==='FormAlert' }">
+                    <div ng-hide="model.State.Output" ng-class="{'modal-body': uidl.inputForm.templateName!='FormAlert', 'modal-body-alert': uidl.inputForm.templateName==='FormAlert' }">
                         <uidl-widget uidl="uidl.inputForm"></uidl-widget>
                     </div>
-                    <div class="modal-footer">
+                    <div ng-hide="model.State.Output" class="modal-footer">
                         <button 
                             ng-repeat="command in uidl.commands"
                             type="button"
@@ -2417,6 +2421,17 @@ HEAD, JS/CSS LINKS
                             ng-click="invokeCommand(command)"
                             ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
                         ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                    </div>
+                    <div ng-if="uidl.outputForm" ng-show="model.State.Output" ng-class="{'modal-body': uidl.outputForm.templateName!='FormAlert', 'modal-body-alert': uidl.outputForm.templateName==='FormAlert' }">
+                        <uidl-widget uidl="uidl.outputForm" parent-model="model.State.Output"></uidl-widget>
+                    </div>
+                    <div ng-if="uidl.outputForm" ng-show="model.State.Output" class="modal-footer">
+                        <button 
+                            type="button"
+                            class="btn btn-w-m btn-success btn-md"
+                            style="margin-left:5px;"
+                            ng-click="hideModal()"
+                        ><i class="fa fa-check">&nbsp;</i>{{::translate('Close')}}</button>
                     </div>
                 </div>
             </div>
@@ -2434,6 +2449,7 @@ HEAD, JS/CSS LINKS
                 }
             });
             $scope.$on($scope.uidl.qualifiedName + ':HideModal', function () {
+                $scope.model.State.Output = null;
                 $("#divModal_" + $scope.uidl.elementName).modal('hide');
             });
         }
@@ -2839,19 +2855,21 @@ HEAD, JS/CSS LINKS
             for (var i = 0; i < $scope.plainFields.length ; i++) {
                 var field = $scope.plainFields[i];
                 var fieldElementId = $scope.uidl.elementName + '_' + field.propertyName;
-                var fieldRules = { 
-                    required: field.validation.isRequired===true,
-                    email: field.semantic==='EmailAddress',
-                    //phoneUS: field.semantic==='PhoneNumber',
-                    url: field.semantic==='Url' || field.semantic==='ImageUrl'
-                };
-                if (field.validation.minLength!==null) {
-                    fieldRules.minlength = field.validation.minLength;
+                if (field.validation) {
+                    var fieldRules = { 
+                        required: field.validation.isRequired===true,
+                        email: field.semantic==='EmailAddress',
+                        //phoneUS: field.semantic==='PhoneNumber',
+                        url: field.semantic==='Url' || field.semantic==='ImageUrl'
+                    };
+                    if (field.validation.minLength!==null) {
+                        fieldRules.minlength = field.validation.minLength;
+                    }
+                    if (field.validation.maxLength!==null) {
+                        fieldRules.maxlength = field.validation.maxLength;
+                    }
+                    validationRules[fieldElementId] = fieldRules;
                 }
-                if (field.validation.maxLength!==null) {
-                    fieldRules.maxlength = field.validation.maxLength;
-                }
-                validationRules[fieldElementId] = fieldRules;
                 if (field.modifiers && field.modifiers.indexOf('Password') > -1 && field.modifiers.indexOf('Confirm') > -1) {
                     validationRules[fieldElementId + '__confirm'] = {
                         equalTo: '#' + fieldElementId
@@ -2867,8 +2885,7 @@ HEAD, JS/CSS LINKS
                 else if ($scope.plainFields.length > 0) {
                     for (var i = 0; i < $scope.plainFields.length ; i++) {
                         var field = $scope.plainFields[i];
-
-                        if (field.validation.isRequired)
+                        if (field.validation && field.validation.isRequired)
                         {
                             var fieldElementId = $scope.uidl.elementName + '_' + field.propertyName;
                             var fieldElement = document.getElementById(fieldElementId);
@@ -2937,7 +2954,7 @@ HEAD, JS/CSS LINKS
                    ng-show="entity[uidl.propertyName] || !uidl.hiddenIfEmpty"
                    name="{{::uniqueFieldId}}"><strong><i ng-if="uidl.icon" class="fa fa-{{::uidl.icon}}"></i>&nbsp;{{::entity[uidl.propertyName]}}</strong></span>
             <textarea ng-if="uidl.fieldType==='Label' && hasUidlModifier('Memo')"
-                      readonly="" 
+                      readonly="{{::entity[uidl.propertyName]}}" 
                       class="form-control" 
                       ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                       ng-model="entity[uidl.propertyName]" 
@@ -2945,6 +2962,10 @@ HEAD, JS/CSS LINKS
                       name="{{::uniqueFieldId}}"
                       style="width:100%;resize:vertical;font-family: Consolas, Courier New;font-size: 10pt;"
                       ng-style="{height: (hasUidlModifier('MaxSpace') ? '50vh' : '100px')}"></textarea>
+            <!-- HYPERLINK -->
+            <a ng-if="uidl.fieldType==='HyperLink'" 
+                 href="{{::entity[uidl.propertyName]}}"
+                 target="_blank">{{::translate(uidl.label)}}</a>
             <!-- ALERT -->
             <div ng-if="uidl.fieldType==='Alert'"
                  ng-show="entity[uidl.propertyName] || uidl.label || !uidl.hiddenIfEmpty"
@@ -2964,7 +2985,7 @@ HEAD, JS/CSS LINKS
                 }"></i>
                 <span ng-if="!alertMultilineText">{{entity[uidl.propertyName] || translate(uidl.label)}}</span>
                 <span ng-if="alertMultilineText">
-                    <p ng-repeat="line in alertMultilineText track by $index">{{line}}</p>
+                    <p class="alert_form_field" ng-repeat="line in alertMultilineText track by $index" ng-bind-html="line"></p>
                 </span>
             </div>
             <!-- CHECKBOX -->
@@ -3264,7 +3285,6 @@ HEAD, JS/CSS LINKS
                     'alert-info': uidl.alertType==='Info',
                     'alert-success': uidl.alertType==='Success'                   
                  }"
-                 ng-init="displayTextLines=splitMultilineText(entity[uidl.propertyName] || translate(uidl.label))"
             >
                 <div class="col-xs-1" style="text-align:right">
                     <h2><i ng-if="uidl.alertType" class="fa" ng-class="{
@@ -3275,8 +3295,14 @@ HEAD, JS/CSS LINKS
                     }"></i></h2>
                 </div>
                 <div class="col-xs-11">
-                    <p style="font-weight:normal;" ng-repeat="line in displayTextLines">{{line}}</p>
+                    <p class="alert_form_field" style="font-weight:normal;" ng-repeat="line in alertMultilineText" ng-bind-html="line"></p>
                 </div>
+            </div>
+            <!-- HYPERLINK -->
+            <div ng-if="uidl.fieldType==='HyperLink'"
+                 class="row"
+                 style="margin:0;padding:0 0 0 30px;">
+                <p style="font-weight:bold;">{{::translate(uidl.label)}}</p>
             </div>
         </div>
     </script>

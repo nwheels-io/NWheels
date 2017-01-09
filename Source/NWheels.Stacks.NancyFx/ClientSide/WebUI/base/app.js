@@ -455,6 +455,42 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
     
     //-----------------------------------------------------------------------------------------------------------------
 
+    function formatMarkdownHyperlinks(unformatted, data) {
+
+        function resolveDataExpression(s) {
+            if (s.length > 2 && s.charAt(0) == '{' && s.charAt(s.length - 1) == '}') {
+                var expression = s.substring(1, s.length - 1);
+                var steps = expression.split('.');
+                var value = data;
+                
+                for (var i = 0 ; i < steps.length && value ; i++) {
+                    value = value[steps[i]];
+                }
+                
+                return (value || '');
+            } else {
+                return (s || '');
+            }
+        }
+
+        var re = /\[([^\]]+)\]\(([^\)]+)\)/g;
+        var match = unformatted.match(re);
+        
+        var formatted = unformatted.replace(re, function(match, p1, p2) {
+            var text = translate(resolveDataExpression(p1));
+            var url = resolveDataExpression(p2);
+            var aTag = document.createElement('a');
+            aTag.setAttribute('href',url);
+            aTag.setAttribute('target','_blank');
+            aTag.appendChild(document.createTextNode(text));
+            return aTag.outerHTML;
+        });
+        
+        return formatted;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     function isUidlAuthorized(uidlElement) {
         if (!uidlElement || !uidlElement.authorization || !uidlElement.authorization.requiredClaims || uidlElement.authorization.requiredClaims.length == 0) {
             return true;
@@ -828,34 +864,33 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             
             if (behavior.navigationType == 'Popup' && (behavior.targetType == 'Screen' || behavior.targetType == 'Application')) {
                 var url = null;
-                
-                if (behavior.targetType == 'Application') {
-                    if (behavior.targetQualifiedNameExpression) {
-                        url = selectValue(inputContext, behavior.targetQualifiedNameExpression);
-                    } else {
-                        url = behavior.destinationUrl;
-                    }
-                    if (input) {
-                        var inputQuery = '';
-                        for (var p in input){
-                            if (input.hasOwnProperty(p) && p.length > 0 && p.charAt(0) != '$') {
-                                if (inputQuery.length > 0) {
-                                    inputQuery += '&';
-                                }
-                                inputQuery += encodeURIComponent(p) + '=' + encodeURIComponent(input[p]);
-                            }
-                        }
-                        if (inputQuery.length > 0) {
-                            var indexOfQuestionChar = url.indexOf('?');
-                            var inputQueryDelimiter = (indexOfQuestionChar < 0 ? '?' : (indexOfQuestionChar == url.length - 1 ? '' : '&'));
-                            url += inputQueryDelimiter + inputQuery;
-                        }
-                    }
-                } else {
+
+                if (behavior.targetType == 'Screen') {
                     url = 
                         $location.protocol() + '://' + 
                         $location.host() + ':' + $location.port() + 
                         '/#/?$sticky=1&$screen=' + behavior.targetQualifiedName;
+                } else if (behavior.targetQualifiedNameExpression) {
+                    url = selectValue(inputContext, behavior.targetQualifiedNameExpression);
+                } else {
+                    url = behavior.destinationUrl;
+                }
+
+                if (input) {
+                    var inputQuery = '';
+                    for (var p in input){
+                        if (input.hasOwnProperty(p) && p.length > 0 && p.charAt(0) != '$') {
+                            if (inputQuery.length > 0) {
+                                inputQuery += '&';
+                            }
+                            inputQuery += encodeURIComponent(p) + '=' + encodeURIComponent(input[p]);
+                        }
+                    }
+                    if (inputQuery.length > 0) {
+                        var indexOfQuestionChar = url.indexOf('?');
+                        var inputQueryDelimiter = (indexOfQuestionChar < 0 ? '?' : (indexOfQuestionChar == url.length - 1 ? '' : '&'));
+                        url += inputQueryDelimiter + inputQuery;
+                    }
                 }
                 
                 var h = parseInt(screen.height * 0.8);
@@ -1157,7 +1192,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                         matched = (('' + leftSideValue) == ('' + rightSideValue));
                         break;
                     case 'Defined':
-                        matched =  (rightSideValue ? true : false);
+                        matched =  (leftSideValue ? true : false);
                         break;
                 }
                 if (matched) {
@@ -2485,6 +2520,27 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 
     m_controllerImplementations['EntityMethodForm'] = {
         implement: function (scope) {
+            scope.$on(scope.uidl.qualifiedName + ':Loaded', function (event, data){ 
+                var editAuthorizedData = {
+                    create: true,
+                    'delete': false,
+                    enabledOperations: null,
+                    fullEntity: null,
+                    isRestrictedEntry: false,
+                    restrictedEntryProperties: null,
+                    retrieve: true,
+                    update: true
+                };
+                
+                if (scope.uidl.inputFormTypeSelector) {
+                    for (var i = 0; i < scope.uidl.inputFormTypeSelector.selections.length ; i++) {
+                        scope.$broadcast(scope.uidl.inputFormTypeSelector.selections[i].widget.qualifiedName + ':EditAuthorized', editAuthorizedData);
+                    }
+                } else {
+                    scope.$broadcast(scope.uidl.inputForm.qualifiedName + ':EditAuthorized', editAuthorizedData);
+                }
+            });
+
             scope.$on(scope.uidl.qualifiedName + ':ShowModal', function(event, data) {
                 scope.commandInProgress = false;
                 if (scope.model.State.Entity) {
@@ -2497,6 +2553,16 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     scope.$emit(scope.uidl.qualifiedName + ':NoEntityWasSelected');
                 }
             });
+
+            scope.$on(scope.uidl.inputForm.qualifiedName + ':EntitySetter', function(event, data) {
+                scope.commandInProgress = false;
+                scope.model.State.Output = null;
+            });
+
+            scope.$on(scope.uidl.qualifiedName + ':StateResetter', function(event, data) {
+                scope.commandInProgress = false;
+                scope.model.State.Output = null;
+            });
             
             scope.invokeCommand = function (command) {
                 if (command.kind==='Submit') {
@@ -2506,14 +2572,21 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     $timeout(function() {
                         if (validationResult.isValid===true) {  
                             scope.$emit(command.qualifiedName + ':Executing');
-                            scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
+                            if (!scope.uidl.outputForm) {
+                                scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
+                            }
                         } else {
                             scope.commandInProgress = false;
                         }
                     });
                 } else {
+                    scope.$emit(command.qualifiedName + ':Executing');
                     scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
                 }
+            };
+
+            scope.hideModal = function(command) {
+                scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
             };
         }
     };
@@ -2750,6 +2823,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         implementController: implementController,
         translate: translate,
         formatValue: formatValue,
+        formatMarkdownHyperlinks: formatMarkdownHyperlinks,
         loadTemplateById: loadTemplateById,
 		createInputContext: createInputContext,
         selectValue: selectValue,
@@ -3217,8 +3291,15 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
                 if ($scope.uidl.initialValue && data && !data[$scope.uidl.propertyName]) {
                     data[$scope.uidl.propertyName] = $scope.uidl.initialValue;
                 }
-                if ($scope.uidl.fieldType==='Alert' && $scope.hasUidlModifier('Memo')) {
-                    $scope.alertMultilineText = splitMultilineText(data[$scope.uidl.propertyName] || uidlService.translate($scope.uidl.label));
+                if ($scope.uidl.fieldType==='Alert'/* && $scope.hasUidlModifier('Memo')*/) {
+                    var unformatted = data[$scope.uidl.propertyName] || $scope.uidl.label;
+                    if ($scope.hasUidlModifier('MarkdownHyperlinks')) {
+                        unformatted = $scope.uidlService.formatMarkdownHyperlinks(unformatted, data);
+                    }
+                    $scope.alertMultilineText = splitMultilineText(unformatted);
+                    for (var i = 0 ; i < $scope.alertMultilineText.length ; i++) {
+                        $scope.alertMultilineText[i] = $scope.translate($scope.alertMultilineText[i]);
+                    }
                 }
             });
             

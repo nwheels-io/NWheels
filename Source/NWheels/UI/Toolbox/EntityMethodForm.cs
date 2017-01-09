@@ -39,6 +39,8 @@ namespace NWheels.UI.Toolbox
         public bool QueryAsEntity { get; set; }
         [DataMember]
         public bool IsNextDialog { get; set; }
+        [DataMember]
+        public bool SkipInputForm { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -53,6 +55,7 @@ namespace NWheels.UI.Toolbox
         public UidlNotification<TOutput> OperationCompleted { get; set; }
         public UidlNotification<IPromiseFailureInfo> OperationFailed { get; set; }
         public UidlNotification<TEntity> EntitySetter { get; set; }
+        public UidlNotification StateResetter { get; set; }
         public UidlNotification NoEntityWasSelected { get; set; }
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -60,7 +63,8 @@ namespace NWheels.UI.Toolbox
         public void AttachTo<TController, TControllerData, TControllerState>(
             PresenterBuilder<TController, TControllerData, TControllerState> controller, 
             UidlCommand command,
-            Expression<Action<TEntity, ViewModel<Empty.Data, IState, Empty.Payload>>> onExecute)
+            Expression<Action<TEntity, ViewModel<Empty.Data, IState, Empty.Payload>>> onExecute,
+            bool skipInputForm = false)
             where TController : ControlledUidlNode
             where TControllerData : class 
             where TControllerState : class
@@ -69,7 +73,18 @@ namespace NWheels.UI.Toolbox
             this.Icon = command.Icon;
             _methodCallExpression = onExecute;
             command.Authorization.OperationName = _methodCallExpression.GetMethodInfo().Name;
-            controller.On(command).Broadcast(this.ShowModal).TunnelDown();
+
+            if (!skipInputForm)
+            { 
+                controller.On(command)
+                    .Broadcast(this.StateResetter).TunnelDown()
+                    .Then(b => b.Broadcast(this.ShowModal).TunnelDown());
+            }
+            else
+            {
+                SkipInputForm = true;
+                controller.On(command).InvokeCommand(OK);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -77,7 +92,8 @@ namespace NWheels.UI.Toolbox
         public void AttachTo<TController, TControllerData, TControllerState, TMethodOut>(
             PresenterBuilder<TController, TControllerData, TControllerState> controller,
             UidlCommand command,
-            Expression<Func<TEntity, ViewModel<Empty.Data, IState, Empty.Payload>, TMethodOut>> onExecute)
+            Expression<Func<TEntity, ViewModel<Empty.Data, IState, Empty.Payload>, TMethodOut>> onExecute,
+            bool skipInputForm = false)
             where TController : ControlledUidlNode
             where TControllerData : class
             where TControllerState : class
@@ -86,7 +102,18 @@ namespace NWheels.UI.Toolbox
             this.Icon = command.Icon;
             _methodCallExpression = onExecute;
             command.Authorization.OperationName = _methodCallExpression.GetMethodInfo().Name;
-            controller.On(command).Broadcast(this.ShowModal).TunnelDown();
+
+            if (!skipInputForm)
+            {
+                controller.On(command)
+                    .Broadcast(this.StateResetter).TunnelDown()
+                    .Then(b => b.Broadcast(this.ShowModal).TunnelDown());
+            }
+            else
+            {
+                SkipInputForm = true;
+                controller.On(command).InvokeCommand(OK);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -124,11 +151,14 @@ namespace NWheels.UI.Toolbox
                 .Then(b => b.InvokeEntityMethod<TEntity>(TryGetQueryAsEntityType()).WaitForReplyOrCompletion<TOutput>(_methodCallExpression)
                 .Then(
                     onSuccess: 
-                        bb => bb.Broadcast(OperationCompleted).WithPayload(vm => vm.Input).BubbleUp()
-                        .Then(bbb => bbb.UserAlertFrom<IEntityMethodUserAlerts>().ShowPopup((alerts, vm) => alerts.RequestedOperationSuccessfullyCompleted())),
+                        b2 => b2.AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Output))
+                        .Then(b3 => b3.Broadcast(OperationCompleted).WithPayload(vm => vm.Input).BubbleUp()
+                        .Then(b4 => b4.Broadcast(InputForm.StateResetter).TunnelDown()
+                        .Then(b5 => b5.UserAlertFrom<IEntityMethodUserAlerts>().ShowPopup((alerts, vm) => alerts.RequestedOperationSuccessfullyCompleted())))),
                     onFailure:
-                        bb => bb.Broadcast(OperationFailed).WithPayload(vm => vm.Input).BubbleUp()
-                        .Then(bbb => bbb.UserAlertFrom<IEntityMethodUserAlerts>().ShowPopup((alerts, vm) => alerts.RequestedOperationHasFailed(), faultInfo: vm => vm.Input))
+                        b2 => b2.Broadcast(OperationFailed).WithPayload(vm => vm.Input).BubbleUp()
+                        .Then(b3 => b3.Broadcast(InputForm.StateResetter).TunnelDown()
+                        .Then(b4 => b4.UserAlertFrom<IEntityMethodUserAlerts>().ShowPopup((alerts, vm) => alerts.RequestedOperationHasFailed(), faultInfo: vm => vm.Input)))
                 ));
 
             presenter.On(NoEntityWasSelected).UserAlertFrom<IEntityMethodUserAlerts>().ShowPopup((alerts, vm) => alerts.NoEntityWasSelected());
@@ -175,6 +205,43 @@ namespace NWheels.UI.Toolbox
             }
 
             return null;
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [DataContract(Namespace = UidlDocument.DataContractNamespace)]
+    public class EntityMethodFormWithOutput<TEntity, TInput, TOutput> : EntityMethodForm<Empty.Context, TEntity, TInput, TOutput>
+        where TEntity : class
+        where TInput : class
+        where TOutput : class
+    {
+        public EntityMethodFormWithOutput(string idName, ControlledUidlNode parent)
+            : base(idName, parent)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
+        {
+            return base.GetNestedWidgets().ConcatOne(OutputForm);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public Form<TOutput> OutputForm { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void DescribePresenter(PresenterBuilder<EntityMethodForm<Empty.Context, TEntity, TInput, TOutput>, Empty.Data, IState> presenter)
+        {
+            base.DescribePresenter(presenter);
+            
+            presenter.On(OperationCompleted)
+                .Broadcast(OutputForm.ModelSetter).WithPayload(vm => vm.Input).TunnelDown()
+                .ThenIf(SkipInputForm, b => b.Broadcast(this.ShowModal).TunnelDown());
         }
     }
 
