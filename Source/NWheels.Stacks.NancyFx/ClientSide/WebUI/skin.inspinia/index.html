@@ -1219,32 +1219,6 @@ HEAD, JS/CSS LINKS
         </div>
     </script>
     <script type="text/javascript">
-        function saveRowGrid(cntrl) {
-            
-            setTimeout(function () {
-                var e = $.Event('keydown');                
-                e.keyCode = 13; // Character 'A'
-                
-                $(cntrl).parents("td").focus();
-                $(cntrl).parents("td").trigger(e);
-
-            //    alert("Hello");
-            }, 100);          
-        }
-
-        function cancelRowGrid(cntrl) {
-
-            setTimeout(function () {
-                var e = $.Event('keydown');
-                e.keyCode = 27; // Character 'A'
-
-                $(cntrl).parents("td").focus();
-                $(cntrl).parents("td").trigger(e);
-
-                //    alert("Hello");
-            }, 100);
-        }
-
         function initWidget_DataGrid($scope) {
             var columnsModel = [];
             var inlineEditorFields = null;
@@ -1267,8 +1241,8 @@ HEAD, JS/CSS LINKS
                     sortable: false,
                     formatter: function (cellvalue, options, rowObject) {
                         var actionsHtml =
-                            '<i onclick="saveRowGrid(this)" class="fa fa-floppy-o fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>' +
-                            '<i onclick="cancelRowGrid(this)" class="fa fa-undo fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
+                            '<i onclick="jqgrid_onSaveIconClick(event)" class="fa fa-floppy-o fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>' +
+                            '<i onclick="jqgrid_onRevertIconClick(event)" class="fa fa-undo fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
                         if ($scope.uidl.isInlineEditOpenFormEnabled) {
                             actionsHtml += '<i class="fa fa-pencil fa-lg" edit-grid-event="true" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
                         }
@@ -1803,27 +1777,34 @@ HEAD, JS/CSS LINKS
                                 var gridObj = $('#' + $scope.tableElementId);
                                 if (rowId && rowId!==$scope.lastSelectedRowId) { 
                                     gridObj.restoreRow($scope.lastSelectedRowId); 
+                                    if ($scope.rowObjectClonedBeforeInlineEdit) {
+                                        $scope.ResultSet[$scope.lastSelectedRowId - 1] = $scope.rowObjectClonedBeforeInlineEdit;
+                                    }
                                 }
                                 $scope.lastSelectedRowId = rowId;
-                                gridObj.editRow(rowId, true, null, null, 'clientArray', null, function(saveRowId, saveIsOK) {
-                                    /*
-                                    var editedRowData = gridObj.getRowData(rowId);
-                                    for (var i = 0; i < $scope.gridColumns.length ; i++) {
-                                        var column = $scope.gridColumns[i];
-                                        if (column.isEditSupported===true) {
-                                            var value = editedRowData[column.expression];
-                                            $scope.uidlService.writeValueByNavigationPath(rowObject, column.navigations, value);
+                                $scope.rowObjectClonedBeforeInlineEdit = jQuery.extend(true, {}, rowObject);
+                                gridObj.editRow(
+                                    rowId, 
+                                    true, 
+                                    null, 
+                                    null, 
+                                    'clientArray', 
+                                    null, 
+                                    function(saveRowId, saveIsOK) {
+                                        var editedRowObject = $scope.getDataByRowId(rowId);
+                                        $scope.$apply(function() {
+                                            $scope.$emit($scope.uidl.qualifiedName + ':SavingInlineRowEdits', editedRowObject);
+                                        });
+                                        $scope.rowObjectClonedBeforeInlineEdit = null;
+                                        gridObj.trigger('reloadGrid');
+                                    },
+                                    function(restoreRowId) {
+                                        if (restoreRowId === $scope.lastSelectedRowId && $scope.rowObjectClonedBeforeInlineEdit) {
+                                            $scope.ResultSet[restoreRowId - 1] = $scope.rowObjectClonedBeforeInlineEdit;
+                                            $scope.rowObjectClonedBeforeInlineEdit = null;
                                         }
                                     }
-                                    */
-                                    var rowData = $scope.getDataByRowId(rowId);
-                                    //gridObj.clearGridData();
-                                    //gridObj.setGridParam({ data: $scope.ResultSet });
-                                    gridObj.trigger('reloadGrid');
-                                    $scope.$apply(function() {
-                                        $scope.$emit($scope.uidl.qualifiedName + ':SavingInlineRowEdits', rowData);
-                                    });
-                                }); 
+                                );
                             }
                         },
                         ondblClickRow: function (rowId) {
@@ -2041,6 +2022,26 @@ HEAD, JS/CSS LINKS
                 $scope.$on($scope.uidl.qualifiedName + ':DataReceived', $scope.onStandaloneGridDataReceived);
             }
         }
+        function jqgrid_testRowDataClick(event) {
+            event = (event || window.event);
+            event.stopPropagation();
+            var target = $(event.target || event.srcElement);
+            var rowTd = target.closest('td');
+            var rowTr = rowTd.closest('tr');
+            var scopeEl = rowTr.closest('.ng-scope');
+            var scope = scopeEl.scope();
+            var rowId = rowTr[0].id;
+            var rowData = scope.getDataByRowId(rowId);
+            var gridq = $('#' + $scope.tableElementId);
+ 
+            return { 
+                scope: scope,
+                gridq: gridq,
+                rowId: rowId,
+                rowData: rowData,
+                colIndex: rowTd.index(),
+            };
+        }        
         function jqgrid_onDetailPaneIconClick(event) {
             event = (event || window.event);
             event.stopPropagation();
@@ -2071,16 +2072,11 @@ HEAD, JS/CSS LINKS
             }
         };
         function jqgrid_onRowCellClick(event) {
-            event = (event || window.event);
-            event.stopPropagation();
-            var target = $(event.target || event.srcElement);
-            var rowTd = target.closest('td');
-            var rowTr = rowTd.closest('tr');
-            var scopeEl = rowTr.closest('.ng-scope');
-            var scope = scopeEl.scope();
-            var rowId = rowTr[0].id;
-            var rowData = scope.getDataByRowId(rowId);
-            var colIndex = rowTd.index();
+            var clickTestResult = jqgrid_testRowDataClick(event);
+            var rowData = clickTestResult.rowData;
+            var colIndex = clickTestResult.colIndex;
+            var scope = clickTestResult.scope;
+            
             if (scope.uidl.expandableTreeMode===true) {
                 colIndex--;
             }
@@ -2096,6 +2092,63 @@ HEAD, JS/CSS LINKS
             };
             scope.$emit(scope.uidl.qualifiedName + ':CellClicked', cellClickInfo);
         };
+        
+        function jqgrid_onSaveIconClick(cntrl) {
+            var clickTestResult = jqgrid_testRowDataClick(event);
+            var scope = clickTestResult.scope;
+            var gridq = clickTestResult.gridq;
+            
+            clickTestResult.gridq[0].saveRow(  
+                clickTestResult.rowId,
+                null,
+                'clientarray',
+                null,
+                function(saveRowId, saveIsOK) {
+                    var editedRowObject = scope.getDataByRowId(rowId);
+                    scope.$apply(function() {
+                        $scope.$emit($scope.uidl.qualifiedName + ':SavingInlineRowEdits', editedRowObject);
+                    });
+                    $scope.rowObjectClonedBeforeInlineEdit = null;
+                    gridObj.trigger('reloadGrid');
+                },
+                function(restoreRowId) {
+                    if (restoreRowId === $scope.lastSelectedRowId && $scope.rowObjectClonedBeforeInlineEdit) {
+                        $scope.ResultSet[restoreRowId - 1] = $scope.rowObjectClonedBeforeInlineEdit;
+                        $scope.rowObjectClonedBeforeInlineEdit = null;
+                    }
+                }
+            );
+        }
+
+        function jqgrid_onRevertIconClick(cntrl) {
+            var clickTestResult = jqgrid_testRowDataClick(event);
+            var rowData = clickTestResult.rowData;
+            var colIndex = clickTestResult.colIndex;
+            var scope = clickTestResult.scope;
+            var gridq = clickTestResult.gridq;
+            
+            clickTestResult.gridq[0].saveRow(  
+                clickTestResult.rowId,
+                null,
+                'clientarray',
+                null,
+                function(saveRowId, saveIsOK) {
+                    var editedRowObject = $scope.getDataByRowId(rowId);
+                    $scope.$apply(function() {
+                        $scope.$emit($scope.uidl.qualifiedName + ':SavingInlineRowEdits', editedRowObject);
+                    });
+                    $scope.rowObjectClonedBeforeInlineEdit = null;
+                    gridObj.trigger('reloadGrid');
+                },
+                function(restoreRowId) {
+                    if (restoreRowId === $scope.lastSelectedRowId && $scope.rowObjectClonedBeforeInlineEdit) {
+                        $scope.ResultSet[restoreRowId - 1] = $scope.rowObjectClonedBeforeInlineEdit;
+                        $scope.rowObjectClonedBeforeInlineEdit = null;
+                    }
+                }
+            );
+        }
+        
     </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4394,6 +4447,59 @@ HEAD, JS/CSS LINKS
         </div>
     </script>
     
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - INTERNET SEARCH - CUSTOM GSE
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="app/uidl-element-template/InternetSearch">
+        <div class="ibox-content">
+            <div class="m-b">
+                <h4>SEARCHING FOR: {{searchString}}</h4>
+            </div>
+            <div class="hr-line-dashed"></div>
+            <div id="divInternetSearchResults">
+                <div class="row" ng-repeat="result in searchResults">
+                    <div class="col-lg-12">
+                        <div class="search-result m-b">
+                            <h3><a href="{{::result.link}}" target="_blank">{{::result.title}}</a></h3>
+                            <a href="{{::result.link}}" target="_blank" class="search-link">{{::result.formattedUrl}}</a>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/javascript">
+        function initWidget_InternetSearch($scope) {
+            $scope.$on($scope.uidl.qualifiedName + ':QuerySetter', function (event, data) {
+                $scope.searchString = data;
+                
+                var apiUri =
+                    'https://www.googleapis.com/customsearch/v1' + 
+                    '?key=' + $scope.uidl.apiKey + 
+                    '&cx=' + $scope.uidl.engineId + 
+                    '&q=' + encodeURIComponent(data) +
+                    '&callback=internetSearchCustomGSECallback';
+                var element = document.createElement('script');
+                element.setAttribute('type', 'text/javascript');
+                element.setAttribute('src', apiUri);
+                document.body.appendChild(element);
+            });
+        }
+        function internetSearchCustomGSECallback(results) {
+            if (results.error) {
+                //TODO: notify error occurred
+            }
+            if (results.items) {
+                var scopeEl = $('#divInternetSearchResults').closest('.ng-scope');
+                var scope = scopeEl.scope();
+                scope.$apply(function () {
+                    scope.searchResults = results.items;
+                });
+            }
+        }
+    </script>
+
     <!------ HARD CODED  -------->
     
     <script type="text/ng-template" id="app/uidl-element-template/AffiliateSignUpForm">

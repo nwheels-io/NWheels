@@ -113,5 +113,5 @@ namespace NWheels.Samples.MyMusicDB.UI
             [ErrorAlert]
             UidlUserAlert FailedToSaveTrack();
         }
-    }
+    }   
 }

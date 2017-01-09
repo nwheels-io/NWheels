@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Web;
 using NWheels.UI;
+using NWheels.UI.Toolbox;
 using NWheels.UI.Uidl;
 
 namespace NWheels.Samples.MyMusicDB.UI
@@ -20,9 +22,23 @@ namespace NWheels.Samples.MyMusicDB.UI
 
         protected override void DescribePresenter(PresenterBuilder<TrackInfoScreen, Empty.Data, Empty.State> presenter)
         {
+            this.ScreenKind = ScreenKind.DashboardAdmin;
+
+            TabSet.Tabs.Add(TrackInfoSearch);
+
+            presenter.On(NavigatedHere)
+                .Broadcast(TrackInfoSearch.NavigatedHere)
+                    .WithPayload(vm => vm.Input)
+                    .TunnelDown();
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ContentRoot]
+        public TabbedScreenPartSet TabSet { get; set; }
+        public TrackInfoSearchScreenPart TrackInfoSearch { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

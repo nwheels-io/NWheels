@@ -470,6 +470,7 @@
     <Compile Include="UI\Impl\EntityExportFormatSemanticsAttribute.cs" />
     <Compile Include="UI\Impl\EntityImportExportFault.cs" />
     <Compile Include="UI\Impl\EntityImportExportFormatSet.cs" />
+    <Compile Include="UI\Toolbox\InternetSearch.cs" />
     <Compile Include="UI\Toolbox\JsonText.cs" />
     <Compile Include="UI\Toolbox\LanguageSelector.cs" />
     <Compile Include="UI\Toolbox\PropertyGrid.cs" />
