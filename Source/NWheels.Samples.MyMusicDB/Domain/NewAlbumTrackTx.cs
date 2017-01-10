@@ -63,6 +63,53 @@ namespace NWheels.Samples.MyMusicDB.Domain
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Empty.Output Approve(INewTrackModel input)
+        {
+            using (var context = _framework.NewUnitOfWork<IMusicDBContext>())
+            {
+                var track = context.Tracks.New();
+
+                //track.Album = album;
+                track.Name = input.Name;
+                track.TrackNumber = input.TrackNumber;
+                track.Length = input.Length;
+                track.Description = input.Description;
+
+                var temporaryKey = input.TemporaryKey; // example of hidden column
+
+                context.Tracks.Insert(track);
+
+            }
+
+            base.DiscardInputDraft();
+            return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Empty.Output Reject(INewTrackModel input)
+        {
+            using (var context = _framework.NewUnitOfWork<IMusicDBContext>())
+            {
+                var track = context.Tracks.New();
+
+                //track.Album = album;
+                track.Name = input.Name;
+                track.TrackNumber = input.TrackNumber;
+                track.Length = input.Length;
+                track.Description = input.Description;
+
+                var temporaryKey = input.TemporaryKey; // example of hidden column
+
+                context.Tracks.Insert(track);
+            }
+
+            base.DiscardInputDraft();
+            return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [ViewModelContract]
         public interface INewTrackModel
         {

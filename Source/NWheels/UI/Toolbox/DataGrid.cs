@@ -83,7 +83,7 @@ namespace NWheels.UI.Toolbox
         public bool IsInlineEditEnabled { get; set; }
 
         [DataMember]
-        public bool IsInlineEditOpenFormEnabled { get; set; }
+        public DataGridRowActions InlineEditRowActions { get; set; }
 
         [DataMember]
         public bool DisableFiltering { get; set; }
@@ -742,6 +742,7 @@ namespace NWheels.UI.Toolbox
         public DataGrid<TDataRow> UseInlineEditor()
         {
             this.IsInlineEditEnabled = true;
+            this.InlineEditRowActions = DataGridRowActions.Save | DataGridRowActions.Revert | DataGridRowActions.Edit;
             this.InlineEditor = new Form<TDataRow>("InlineEditor", this);
 
             return this;
@@ -769,6 +770,26 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public DataGrid<TDataRow> UseRowCommands(params UidlCommand<TDataRow>[] commands)
+        {
+            if (RowCommands == null)
+            {
+                RowCommands = new List<UidlCommand<TDataRow>>();
+            }
+
+            foreach (var command in commands)
+            {
+                if (!RowCommands.Contains(command))
+                {
+                    RowCommands.Add(command);
+                }
+            }
+
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
             return base.GetNestedWidgets().ConcatIf(this.InlineEditor);
@@ -778,6 +799,11 @@ namespace NWheels.UI.Toolbox
 
         [DataMember, ManuallyAssigned]
         public Form<TDataRow> InlineEditor { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public List<UidlCommand<TDataRow>> RowCommands { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -943,5 +969,16 @@ namespace NWheels.UI.Toolbox
         Lookup = 90,
         LookupMany = 100,
         Hidden = 1000
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [Flags]
+    public enum DataGridRowActions
+    {
+        None = 0,
+        Save = 0x01,
+        Revert = 0x02,
+        Edit = 0x04,
     }
 }

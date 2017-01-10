@@ -1233,20 +1233,38 @@ HEAD, JS/CSS LINKS
                 columnsModel.push({ name: '$id', index: '$id', width: 1, hidden: true, key: true });
             }
             if ($scope.uidl.isInlineEditEnabled === true) {
+                var rowActionsHtml = '';
+                var rowActionsColumnWidth = 0;
+                if ($scope.uidl.inlineEditRowActions && $scope.uidl.inlineEditRowActions.indexOf('Save') > -1) {
+                    rowActionsHtml += '<i onclick="jqgrid_onSaveIconClick(event)" title="Save" class="fa fa-floppy-o fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
+                    rowActionsColumnWidth += 40;
+                }
+                if ($scope.uidl.inlineEditRowActions && $scope.uidl.inlineEditRowActions.indexOf('Revert') > -1) {
+                    rowActionsHtml += '<i onclick="jqgrid_onRevertIconClick(event)" title="Revert" class="fa fa-undo fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
+                    rowActionsColumnWidth += 40;
+                }
+                if ($scope.uidl.inlineEditRowActions && $scope.uidl.inlineEditRowActions.indexOf('Edit') > -1) {
+                    rowActionsHtml += '<i class="fa fa-pencil fa-lg" edit-grid-event="true" title="Edit" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
+                    rowActionsColumnWidth += 40;
+                }
+                if ($scope.uidl.rowCommands) {
+                    for (var i = 0 ; i < $scope.uidl.rowCommands.length ; i++) {
+                        var rowCommand = $scope.uidl.rowCommands[i];
+                        rowActionsHtml += 
+                            '<i onclick="jqgrid_onCommandIconClick(event)" row-action-command="' + rowCommand.qualifiedName + '" class="fa fa-' + rowCommand.icon + ' fa-lg"' +  
+                            ' style="padding:3px 8px 3px 8px;cursor:pointer;" title="' + rowCommand.text + '">&nbsp;</i>';
+                        rowActionsColumnWidth += 40;
+                    }
+                }
+                
                 columnsModel.push({
                     name: $scope.translate('Actions'),
                     index: 'act',
-                    width: ($scope.uidl.isInlineEditOpenFormEnabled ? 120 : 80),
+                    width: rowActionsColumnWidth,
                     align: 'center',
                     sortable: false,
                     formatter: function (cellvalue, options, rowObject) {
-                        var actionsHtml =
-                            '<i onclick="jqgrid_onSaveIconClick(event)" class="fa fa-floppy-o fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>' +
-                            '<i onclick="jqgrid_onRevertIconClick(event)" class="fa fa-undo fa-lg" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
-                        if ($scope.uidl.isInlineEditOpenFormEnabled) {
-                            actionsHtml += '<i class="fa fa-pencil fa-lg" edit-grid-event="true" style="padding:3px 8px 3px 8px;cursor:pointer;">&nbsp;</i>';
-                        }
-                        return actionsHtml;
+                        return rowActionsHtml;
                     }
                 });
             }
@@ -2040,6 +2058,7 @@ HEAD, JS/CSS LINKS
             var gridq = $('#' + scope.tableElementId);
  
             return { 
+                target: target,
                 scope: scope,
                 gridq: gridq,
                 rowTd: rowTd,
@@ -2099,32 +2118,23 @@ HEAD, JS/CSS LINKS
             scope.$emit(scope.uidl.qualifiedName + ':CellClicked', cellClickInfo);
         };
         
-        function jqgrid_onSaveIconClick(cntrl) {
+        function jqgrid_onSaveIconClick(event) {
             var clickTestResult = jqgrid_testRowDataClick(event);
             var scope = clickTestResult.scope;
             var gridq = clickTestResult.gridq;
 
-            setTimeout(function () {
-                var e = $.Event('keydown');
-                e.keyCode = 13; // ENTER key
-
-                clickTestResult.rowTd.focus();
-                clickTestResult.rowTd.trigger(e);
-            }, 100);
-            
-            /*
             clickTestResult.gridq.saveRow(  
                 clickTestResult.rowId,
                 null,
-                'clientarray',
+                'clientArray',
                 null,
                 function(saveRowId, saveIsOK) {
-                    var editedRowObject = scope.getDataByRowId(rowId);
+                    var editedRowObject = scope.getDataByRowId(clickTestResult.rowId);
                     scope.$apply(function() {
-                        scope.$emit(scope.uidl.qualifiedName + ':SavingInlineRowEdits', editedRowObject);
+                        scope.$emit(scope.uidl.qualifiedName + ':SavingInlineRowEdits', clickTestResult.rowData);
                     });
                     scope.rowObjectClonedBeforeInlineEdit = null;
-                    gridObj.trigger('reloadGrid');
+                    gridq.trigger('reloadGrid');
                 },
                 function(restoreRowId) {
                     if (restoreRowId === scope.lastSelectedRowId && scope.rowObjectClonedBeforeInlineEdit) {
@@ -2133,10 +2143,39 @@ HEAD, JS/CSS LINKS
                     }
                 }
             );
-            */
         }
 
-        function jqgrid_onRevertIconClick(cntrl) {
+        function jqgrid_onCommandIconClick(event) {
+            var clickTestResult = jqgrid_testRowDataClick(event);
+            var scope = clickTestResult.scope;
+            var gridq = clickTestResult.gridq;
+            var commandQualifiedName = clickTestResult.target.attr('row-action-command');
+
+            if (commandQualifiedName) {
+                clickTestResult.gridq.saveRow(  
+                    clickTestResult.rowId,
+                    null,
+                    'clientArray',
+                    null,
+                    function(saveRowId, saveIsOK) {
+                        var editedRowObject = scope.getDataByRowId(clickTestResult.rowId);
+                        scope.$apply(function() {
+                            scope.$emit(commandQualifiedName + ':Executing', editedRowObject);
+                        });
+                        scope.rowObjectClonedBeforeInlineEdit = null;
+                        gridq.trigger('reloadGrid');
+                    },
+                    function(restoreRowId) {
+                        if (restoreRowId === scope.lastSelectedRowId && scope.rowObjectClonedBeforeInlineEdit) {
+                            scope.ResultSet[restoreRowId - 1] = scope.rowObjectClonedBeforeInlineEdit;
+                            scope.rowObjectClonedBeforeInlineEdit = null;
+                        }
+                    }
+                );
+            }
+        }
+
+        function jqgrid_onRevertIconClick(event) {
             var clickTestResult = jqgrid_testRowDataClick(event);
             var rowData = clickTestResult.rowData;
             var colIndex = clickTestResult.colIndex;

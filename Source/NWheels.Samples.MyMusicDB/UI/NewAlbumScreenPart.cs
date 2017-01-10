@@ -57,6 +57,15 @@ namespace NWheels.Samples.MyMusicDB.UI
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public JsonText TrackDetailJson { get; set; }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UidlCommand<NewAlbumTrackTx.INewTrackModel> ApproveTrack { get; set; }
+        public UidlCommand<NewAlbumTrackTx.INewTrackModel> RejectTrack { get; set; }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void DescribePresenter(PresenterBuilder<NewAlbumScreenPart, Empty.Data, Empty.State> presenter)
         {
             NewAlbumForm.UseFlatStyle();
@@ -67,6 +76,9 @@ namespace NWheels.Samples.MyMusicDB.UI
             NewTrackGrid.UseInlineEditor();
             NewTrackGrid.DisableFiltering = true;
             NewTrackGrid.DisableSorting = true;
+            NewTrackGrid.UseDetailPane(TrackDetailJson);
+            NewTrackGrid.InlineEditRowActions = DataGridRowActions.Revert;
+            NewTrackGrid.UseRowCommands(ApproveTrack, RejectTrack);
             NewTrackGrid
                 .Column(x => x.TrackNumber, size: FieldSize.Small)
                 .Column(x => x.Name, size: FieldSize.Large)
@@ -74,6 +86,10 @@ namespace NWheels.Samples.MyMusicDB.UI
                 .Column(x => x.Description, size: FieldSize.Large, setup: c => c.IsReadOnly = true)
                 .Column(x => x.MoreInfoLinkText, setup: c => c.Clickable = true)
                 .Column(x => x.TemporaryKey, columnType: GridColumnType.Hidden);
+
+            TrackDetailJson.ExpandedByDefault = true;
+            ApproveTrack.Icon = "check";
+            RejectTrack.Icon = "times";
 
             Wizard.Pages.Add(NewAlbumForm);
             Wizard.Pages.Add(NewTrackGrid);
@@ -85,11 +101,27 @@ namespace NWheels.Samples.MyMusicDB.UI
                 .WithPayload(vm => vm.Input)
                 .TunnelDown();
 
-            presenter.On(NewTrackGrid.SavingInlineRowEdits)
+            //presenter.On(NewTrackGrid.SavingInlineRowEdits)
+            //    .InvokeTransactionScript<NewAlbumTrackTx>()
+            //    .WaitForReply((tx, vm) => tx.Execute(vm.Input))
+            //    .Then(
+            //        onSuccess: b => b.UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.TrackSuccessfullySaved()),
+            //        onFailure: b => b.UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.FailedToSaveTrack(), faultInfo: vm => vm.Input)
+            //    );
+
+            presenter.On(ApproveTrack)
                 .InvokeTransactionScript<NewAlbumTrackTx>()
-                .WaitForReply((tx, vm) => tx.Execute(vm.Input))
+                .WaitForReply((tx, vm) => tx.Approve(vm.Input))
                 .Then(
-                    onSuccess: b => b.UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.TrackSuccessfullySaved()),
+                    onSuccess: b => b.UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.TrackApproved()),
+                    onFailure: b => b.UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.FailedToSaveTrack(), faultInfo: vm => vm.Input)
+                );
+
+            presenter.On(RejectTrack)
+                .InvokeTransactionScript<NewAlbumTrackTx>()
+                .WaitForReply((tx, vm) => tx.Reject(vm.Input))
+                .Then(
+                    onSuccess: b => b.UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.TrackRejected()),
                     onFailure: b => b.UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.FailedToSaveTrack(), faultInfo: vm => vm.Input)
                 );
 
@@ -109,6 +141,12 @@ namespace NWheels.Samples.MyMusicDB.UI
         {
             [InfoAlert]
             UidlUserAlert TrackSuccessfullySaved();
+
+            [SuccessAlert]
+            UidlUserAlert TrackApproved();
+
+            [SuccessAlert]
+            UidlUserAlert TrackRejected();
 
             [ErrorAlert]
             UidlUserAlert FailedToSaveTrack();
