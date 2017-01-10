@@ -2030,13 +2030,19 @@ HEAD, JS/CSS LINKS
             var rowTr = rowTd.closest('tr');
             var scopeEl = rowTr.closest('.ng-scope');
             var scope = scopeEl.scope();
+
+            while (scope.$parent && !scope.uidl) {
+                scope = scope.$parent;
+            }
+
             var rowId = rowTr[0].id;
             var rowData = scope.getDataByRowId(rowId);
-            var gridq = $('#' + $scope.tableElementId);
+            var gridq = $('#' + scope.tableElementId);
  
             return { 
                 scope: scope,
                 gridq: gridq,
+                rowTd: rowTd,
                 rowId: rowId,
                 rowData: rowData,
                 colIndex: rowTd.index(),
@@ -2097,8 +2103,17 @@ HEAD, JS/CSS LINKS
             var clickTestResult = jqgrid_testRowDataClick(event);
             var scope = clickTestResult.scope;
             var gridq = clickTestResult.gridq;
+
+            setTimeout(function () {
+                var e = $.Event('keydown');
+                e.keyCode = 13; // ENTER key
+
+                clickTestResult.rowTd.focus();
+                clickTestResult.rowTd.trigger(e);
+            }, 100);
             
-            clickTestResult.gridq[0].saveRow(  
+            /*
+            clickTestResult.gridq.saveRow(  
                 clickTestResult.rowId,
                 null,
                 'clientarray',
@@ -2106,18 +2121,19 @@ HEAD, JS/CSS LINKS
                 function(saveRowId, saveIsOK) {
                     var editedRowObject = scope.getDataByRowId(rowId);
                     scope.$apply(function() {
-                        $scope.$emit($scope.uidl.qualifiedName + ':SavingInlineRowEdits', editedRowObject);
+                        scope.$emit(scope.uidl.qualifiedName + ':SavingInlineRowEdits', editedRowObject);
                     });
-                    $scope.rowObjectClonedBeforeInlineEdit = null;
+                    scope.rowObjectClonedBeforeInlineEdit = null;
                     gridObj.trigger('reloadGrid');
                 },
                 function(restoreRowId) {
-                    if (restoreRowId === $scope.lastSelectedRowId && $scope.rowObjectClonedBeforeInlineEdit) {
-                        $scope.ResultSet[restoreRowId - 1] = $scope.rowObjectClonedBeforeInlineEdit;
-                        $scope.rowObjectClonedBeforeInlineEdit = null;
+                    if (restoreRowId === scope.lastSelectedRowId && scope.rowObjectClonedBeforeInlineEdit) {
+                        scope.ResultSet[restoreRowId - 1] = scope.rowObjectClonedBeforeInlineEdit;
+                        scope.rowObjectClonedBeforeInlineEdit = null;
                     }
                 }
             );
+            */
         }
 
         function jqgrid_onRevertIconClick(cntrl) {
@@ -2127,23 +2143,12 @@ HEAD, JS/CSS LINKS
             var scope = clickTestResult.scope;
             var gridq = clickTestResult.gridq;
             
-            clickTestResult.gridq[0].saveRow(  
+            clickTestResult.gridq.restoreRow(  
                 clickTestResult.rowId,
-                null,
-                'clientarray',
-                null,
-                function(saveRowId, saveIsOK) {
-                    var editedRowObject = $scope.getDataByRowId(rowId);
-                    $scope.$apply(function() {
-                        $scope.$emit($scope.uidl.qualifiedName + ':SavingInlineRowEdits', editedRowObject);
-                    });
-                    $scope.rowObjectClonedBeforeInlineEdit = null;
-                    gridObj.trigger('reloadGrid');
-                },
                 function(restoreRowId) {
-                    if (restoreRowId === $scope.lastSelectedRowId && $scope.rowObjectClonedBeforeInlineEdit) {
-                        $scope.ResultSet[restoreRowId - 1] = $scope.rowObjectClonedBeforeInlineEdit;
-                        $scope.rowObjectClonedBeforeInlineEdit = null;
+                    if (restoreRowId === scope.lastSelectedRowId && scope.rowObjectClonedBeforeInlineEdit) {
+                        scope.ResultSet[restoreRowId - 1] = scope.rowObjectClonedBeforeInlineEdit;
+                        scope.rowObjectClonedBeforeInlineEdit = null;
                     }
                 }
             );
