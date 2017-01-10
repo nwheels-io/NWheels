@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NWheels.Microservices
+namespace NWheels.Compilation.Policy.Relaxed
 {
-    public interface IMicroservice
+    public class MethodWriter
     {
     }
 }

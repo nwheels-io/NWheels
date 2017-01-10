@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using NWheels.Api.Microservices;
+using NWheels.Microservices;
 
 namespace NWheels.Mechanism.Microservices
 {

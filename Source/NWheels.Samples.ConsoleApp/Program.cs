@@ -1,7 +1,7 @@
 ﻿using System;
 using NWheels.Mechanism;
 using NWheels.Api;
-using NWheels.Api.Microservices;
+using NWheels.Microservices;
 
 class Program
 {

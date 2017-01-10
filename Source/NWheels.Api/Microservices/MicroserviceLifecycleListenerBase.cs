@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NWheels.Api.Microservices
+namespace NWheels.Microservices
 {
     public abstract class MicroserviceLifecycleListenerBase : IMicroserviceLifecycleListener
     {

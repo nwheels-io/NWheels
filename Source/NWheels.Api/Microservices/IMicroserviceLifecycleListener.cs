@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NWheels.Api.Microservices
+namespace NWheels.Microservices
 {
     public interface IMicroserviceLifecycleListener
     {
