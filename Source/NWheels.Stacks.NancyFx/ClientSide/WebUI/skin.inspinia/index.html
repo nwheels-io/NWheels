@@ -1485,7 +1485,22 @@ HEAD, JS/CSS LINKS
                     return rowData;
                 }
             }
-            
+
+            $scope.getRowIdByData = function(rowData) {
+                if ($scope.lastSelectedRowId && $scope.lastSelectedRowId >= 0) {
+                    var currentRow = $scope.ResultSet[$scope.lastSelectedRowId - 1];
+                    if (currentRow && currentRow.$id == rowData.$id) {
+                        return $scope.lastSelectedRowId;
+                    }
+                }
+                for (var i = 0 ; i < $scope.ResultSet.length ; i++) {
+                    if ($scope.ResultSet[i].$id == rowData.$id) {
+                        return i + 1;
+                    }
+                }
+                return -1;
+            }
+
             $scope.transformToAdjacentTreeModel = function(localResultSet, serverNode, parentServerNode, level) {
                 var serverSubNodes = serverNode[$scope.uidl.subTreePropertyName];
 
@@ -1819,16 +1834,19 @@ HEAD, JS/CSS LINKS
                                     'clientArray', 
                                     null, 
                                     function(saveRowId, saveIsOK) {
-                                        var editedRowObject = $scope.getDataByRowId(rowId);
+                                        var editedRowObject = $scope.getDataByRowId(saveRowId);
+                                        $scope.ResultSet[saveRowId - 1] = editedRowObject;
+                                        $scope.lastSelectedRowId = -1;
+                                        $scope.rowObjectClonedBeforeInlineEdit = null;
+                                        gridObj.trigger('reloadGrid');
                                         $scope.$apply(function() {
                                             $scope.$emit($scope.uidl.qualifiedName + ':SavingInlineRowEdits', editedRowObject);
                                         });
-                                        $scope.rowObjectClonedBeforeInlineEdit = null;
-                                        gridObj.trigger('reloadGrid');
                                     },
                                     function(restoreRowId) {
                                         if (restoreRowId === $scope.lastSelectedRowId && $scope.rowObjectClonedBeforeInlineEdit) {
                                             $scope.ResultSet[restoreRowId - 1] = $scope.rowObjectClonedBeforeInlineEdit;
+                                            $scope.lastSelectedRowId = -1;
                                             $scope.rowObjectClonedBeforeInlineEdit = null;
                                         }
                                     }
@@ -1996,7 +2014,17 @@ HEAD, JS/CSS LINKS
                         grid.jqGrid('filterToolbar', { stringResult: true, searchOnEnter: false, defaultSearch: "cn" });
                     }
                     grid.parents('div.ui-jqgrid-bdiv').css('min-height', ($scope.uidl.mode === 'Standalone' ? '200px' : '100px'));
-                    
+
+                    $scope.$on($scope.uidl.qualifiedName + ':DataRowReceived', function (event, rowData) {
+                        var rowId = $scope.getRowIdByData(rowData);
+                        if (rowId >= 0) {
+                            grid.jqGrid('setRowData', rowId, rowData);
+                            $scope.ResultSet[rowId - 1] = rowData;
+                            $scope.lastSelectedRowId = -1;
+                            $scope.rowObjectClonedBeforeInlineEdit = null;
+                        }
+                    });
+
                     $scope.$on($scope.uidl.qualifiedName + ':PageRefreshRequested', function (event, data) {
                         grid.trigger('reloadGrid');
                     });
@@ -2139,16 +2167,19 @@ HEAD, JS/CSS LINKS
                 'clientArray',
                 null,
                 function(saveRowId, saveIsOK) {
-                    var editedRowObject = scope.getDataByRowId(clickTestResult.rowId);
-                    scope.$apply(function() {
-                        scope.$emit(scope.uidl.qualifiedName + ':SavingInlineRowEdits', clickTestResult.rowData);
-                    });
+                    var editedRowObject = scope.getDataByRowId(saveRowId);
+                    scope.ResultSet[saveRowId - 1] = editedRowObject;
+                    scope.lastSelectedRowId = -1;
                     scope.rowObjectClonedBeforeInlineEdit = null;
                     gridq.trigger('reloadGrid');
+                    scope.$apply(function() {
+                        scope.$emit(scope.uidl.qualifiedName + ':SavingInlineRowEdits', editedRowObject);
+                    });
                 },
                 function(restoreRowId) {
                     if (restoreRowId === scope.lastSelectedRowId && scope.rowObjectClonedBeforeInlineEdit) {
                         scope.ResultSet[restoreRowId - 1] = scope.rowObjectClonedBeforeInlineEdit;
+                        scope.lastSelectedRowId = -1;
                         scope.rowObjectClonedBeforeInlineEdit = null;
                     }
                 }
@@ -2168,16 +2199,19 @@ HEAD, JS/CSS LINKS
                     'clientArray',
                     null,
                     function(saveRowId, saveIsOK) {
-                        var editedRowObject = scope.getDataByRowId(clickTestResult.rowId);
+                        var editedRowObject = scope.getDataByRowId(saveRowId);
+                        scope.ResultSet[saveRowId - 1] = editedRowObject;
+                        scope.lastSelectedRowId = -1;
+                        scope.rowObjectClonedBeforeInlineEdit = null;
+                        gridq.trigger('reloadGrid');
                         scope.$apply(function() {
                             scope.$emit(commandQualifiedName + ':Executing', editedRowObject);
                         });
-                        scope.rowObjectClonedBeforeInlineEdit = null;
-                        gridq.trigger('reloadGrid');
                     },
                     function(restoreRowId) {
                         if (restoreRowId === scope.lastSelectedRowId && scope.rowObjectClonedBeforeInlineEdit) {
                             scope.ResultSet[restoreRowId - 1] = scope.rowObjectClonedBeforeInlineEdit;
+                            scope.lastSelectedRowId = -1;
                             scope.rowObjectClonedBeforeInlineEdit = null;
                         }
                     }
@@ -2197,6 +2231,7 @@ HEAD, JS/CSS LINKS
                 function(restoreRowId) {
                     if (restoreRowId === scope.lastSelectedRowId && scope.rowObjectClonedBeforeInlineEdit) {
                         scope.ResultSet[restoreRowId - 1] = scope.rowObjectClonedBeforeInlineEdit;
+                        scope.lastSelectedRowId = -1;
                         scope.rowObjectClonedBeforeInlineEdit = null;
                     }
                 }

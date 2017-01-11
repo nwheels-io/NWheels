@@ -31,6 +31,7 @@ namespace NWheels.Samples.MyMusicDB.Domain
         public override INewTrackModel InitializeInput(NewAlbumTx.INewAlbumModel context)
         {
             var newTrack = _viewModelFactory.NewEntity<INewTrackModel>();
+            newTrack.Id = _framework.NewGuid();
             newTrack.TrackNumber = 0;
             newTrack.Name = "Enter track name";
             newTrack.Description = "Enter track description";
@@ -63,7 +64,7 @@ namespace NWheels.Samples.MyMusicDB.Domain
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Empty.Output Approve(INewTrackModel input)
+        public INewTrackModel Approve(INewTrackModel input)
         {
             using (var context = _framework.NewUnitOfWork<IMusicDBContext>())
             {
@@ -82,12 +83,14 @@ namespace NWheels.Samples.MyMusicDB.Domain
             }
 
             base.DiscardInputDraft();
-            return null;
+
+            input.Description = "APPROVED!";
+            return input;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Empty.Output Reject(INewTrackModel input)
+        public INewTrackModel Reject(INewTrackModel input)
         {
             using (var context = _framework.NewUnitOfWork<IMusicDBContext>())
             {
@@ -105,7 +108,9 @@ namespace NWheels.Samples.MyMusicDB.Domain
             }
 
             base.DiscardInputDraft();
-            return null;
+
+            input.Description = "REJECTED!";
+            return input;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -113,6 +118,9 @@ namespace NWheels.Samples.MyMusicDB.Domain
         [ViewModelContract]
         public interface INewTrackModel
         {
+            [PropertyContract.EntityId]
+            Guid Id { get; set; }
+
             [PropertyContract.Presentation.Hidden]
             Guid TemporaryKey { get; set; }
 

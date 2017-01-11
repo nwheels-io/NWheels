@@ -115,7 +115,10 @@ namespace NWheels.Samples.MyMusicDB.UI
                 .InvokeTransactionScript<NewAlbumTrackTx>()
                 .WaitForReply((tx, vm) => tx.Approve(vm.Input))
                 .Then(
-                    onSuccess: b => b.UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.TrackApproved()),
+                    onSuccess: b1 => b1
+                        .Broadcast(NewTrackGrid.DataRowReceived).WithPayload(vm => vm.Input).TunnelDown()
+                        .Then(b2 => b2
+                            .UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.TrackApproved())),
                     onFailure: b => b.UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.FailedToSaveTrack(), faultInfo: vm => vm.Input)
                 );
 
@@ -123,7 +126,10 @@ namespace NWheels.Samples.MyMusicDB.UI
                 .InvokeTransactionScript<NewAlbumTrackTx>()
                 .WaitForReply((tx, vm) => tx.Reject(vm.Input))
                 .Then(
-                    onSuccess: b => b.UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.TrackRejected()),
+                    onSuccess: b1 => b1
+                        .Broadcast(NewTrackGrid.DataRowReceived).WithPayload(vm => vm.Input).TunnelDown()
+                        .Then(b2 => b2
+                            .UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.TrackApproved())),
                     onFailure: b => b.UserAlertFrom<IUserAlerts>().ShowPopup((ua, vm) => ua.FailedToSaveTrack(), faultInfo: vm => vm.Input)
                 );
 

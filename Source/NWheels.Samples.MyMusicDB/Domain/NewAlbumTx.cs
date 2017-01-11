@@ -65,6 +65,7 @@ namespace NWheels.Samples.MyMusicDB.Domain
                     .Range(1, 10)
                     .Select(num => {
                         var track = _viewModelFactory.NewEntity<NewAlbumTrackTx.INewTrackModel>();
+                        track.Id = _framework.NewGuid();
                         track.TrackNumber = num;
                         track.Name = "Enter track name";
                         track.Description = "Enter track description";

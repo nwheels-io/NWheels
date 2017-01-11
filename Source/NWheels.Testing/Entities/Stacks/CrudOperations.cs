@@ -341,6 +341,9 @@ namespace NWheels.Testing.Entities.Stacks
 
                     order.Customer = repo.Customers.AsQueryable().First(c => c.FullName == "John Smith");
 
+                    order.Remarks = "Some remarks";
+                    order.Remarks = "";
+
                     repo.Orders.Insert(order);
                     repo.CommitChanges();
                 }
@@ -495,6 +498,7 @@ namespace NWheels.Testing.Entities.Stacks
                     Assert.That(order1.OrderNo, Is.EqualTo("ORD001"));
                     Assert.That(order1.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 1, 12, 0, 0, DateTimeKind.Utc)));
                     Assert.That(order1.Status, Is.EqualTo(Interfaces.Repository1.OrderStatus.ProductsShipped));
+                    Assert.That(order1.Remarks, Is.EqualTo(""));
 
                     var order1Lines = order1.OrderLines.ToArray();
                     Assert.That(order1Lines.Length, Is.EqualTo(2));

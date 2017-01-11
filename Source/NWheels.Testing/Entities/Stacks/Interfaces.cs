@@ -133,6 +133,8 @@ namespace NWheels.Testing.Entities.Stacks
 
                 [PropertyContract.Relation.AggregationParent]
                 ICustomer Customer { get; set; }
+
+                string Remarks { get; set; }
             }
 
             [EntityContract(UseCodeNamespace = true)]

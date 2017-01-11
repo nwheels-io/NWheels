@@ -3186,15 +3186,19 @@ namespace NWheels.UI
 
             public object GetValue(object target)
             {
-                var domainObject = target as IDomainObject;
+                var obj = target as IObject;
 
-                if ( domainObject != null )
+                if (obj != null)
                 {
-                    var metaType = _metadataCache.GetTypeMetadata(domainObject.ContractType);
+                    var metaType = _metadataCache.GetTypeMetadata(obj.ContractType);
 
-                    if ( metaType.IsEntity )
+                    if (metaType.EntityIdProperty != null)
                     {
-                        return EntityId.Of(domainObject).Value.ToStringOrDefault();
+                        return metaType.EntityIdProperty.ReadValue(target).ToStringOrDefault();
+                    }
+                    else if (metaType.IsEntity) //TODO: is this fallback nacessary?
+                    {
+                        return EntityId.Of(obj).Value.ToStringOrDefault();
                     }
                 }
 
