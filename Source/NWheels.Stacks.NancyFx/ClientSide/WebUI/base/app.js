@@ -2465,6 +2465,18 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 scope.commandInProgress = false;
             });
             
+            scope.$on(scope.uidl.qualifiedName + ':InputSetter', function(event, data) {
+                scope.model.State.Input = data;
+            
+                if (scope.uidl.inputFormTypeSelector) {
+                    for (var i = 0; i < scope.uidl.inputFormTypeSelector.selections.length ; i++) {
+                        scope.$broadcast(scope.uidl.inputFormTypeSelector.selections[i].widget.qualifiedName + ':ModelSetter', data);
+                    }
+                } else {
+                    scope.$broadcast(scope.uidl.inputForm.qualifiedName + ':ModelSetter', data);
+                }
+            });
+            
             if (scope.uidl.autoSaveInputDraft) {
                 scope.inputAutoSaveStatus = 'NotSaved';
                 

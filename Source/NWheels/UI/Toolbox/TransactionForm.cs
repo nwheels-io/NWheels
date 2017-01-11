@@ -172,6 +172,7 @@ namespace NWheels.UI.Toolbox
         public UidlCommand Execute { get; set; }
         public UidlCommand Reset { get; set; }
         public UidlNotification<TContext> ContextSetter { get; set; }
+        public UidlNotification<TInput> InputSetter { get; set; }
         public UidlNotification<TInput> AutoSavingInputDraft { get; set; }
         public UidlNotification AutoSaveComplete { get; set; }
         public UidlNotification<IPromiseFailureInfo> AutoSaveFailed { get; set; }
