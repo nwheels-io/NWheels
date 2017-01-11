@@ -86,6 +86,9 @@ namespace NWheels.UI.Toolbox
         public DataGridRowActions InlineEditRowActions { get; set; }
 
         [DataMember]
+        public bool ShowActionsOnSelectedRowOnly { get; set; }
+
+        [DataMember]
         public bool DisableFiltering { get; set; }
 
         [DataMember]

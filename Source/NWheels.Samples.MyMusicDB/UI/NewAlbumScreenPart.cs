@@ -78,6 +78,7 @@ namespace NWheels.Samples.MyMusicDB.UI
             NewTrackGrid.DisableSorting = true;
             NewTrackGrid.UseDetailPane(TrackDetailJson);
             NewTrackGrid.InlineEditRowActions = DataGridRowActions.Revert;
+            NewTrackGrid.ShowActionsOnSelectedRowOnly = true;
             NewTrackGrid.UseRowCommands(ApproveTrack, RejectTrack);
             NewTrackGrid
                 .Column(x => x.TrackNumber, size: FieldSize.Small)

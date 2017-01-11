@@ -327,6 +327,13 @@ HEAD, JS/CSS LINKS
             color: blue;
         }
 
+        .jqgrow .jqg_row_actions {
+            display: none;
+        }
+        .jqgrow.ui-state-highlight .jqg_row_actions {
+            display: inline-block;
+        }
+        
         tr.jqg_rowstyle_ThreadSuccess > td {
             color: #484848;
             background-color: #ECECEC;
@@ -1255,6 +1262,9 @@ HEAD, JS/CSS LINKS
                             ' style="padding:3px 8px 3px 8px;cursor:pointer;" title="' + rowCommand.text + '">&nbsp;</i>';
                         rowActionsColumnWidth += 40;
                     }
+                }
+                if ($scope.uidl.showActionsOnSelectedRowOnly) {
+                    rowActionsHtml = '<span class="jqg_row_actions" style="width:' + (rowActionsColumnWidth-15) + 'px">' + rowActionsHtml + '</span>';
                 }
                 
                 columnsModel.push({
