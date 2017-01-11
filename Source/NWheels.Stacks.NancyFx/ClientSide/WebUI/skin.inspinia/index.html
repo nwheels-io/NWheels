@@ -3455,12 +3455,17 @@ HEAD, JS/CSS LINKS
                    ng-true-value="true"
                    ng-false-value="false">
             <!-- TEXT -->
-            <input ng-if="uidl.fieldType==='Edit' && (uidl.modifiers==='None' || !uidl.modifiers)"
+            <input ng-if="uidl.fieldType==='Edit' && !hasUidlModifier('Memo')"
                    type="text"
                    ng-model="entity[uidl.propertyName]"
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}"
                    class="grid-inline-edit-control">
+            <textarea ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Memo')"
+                      class="grid-inline-edit-control" style="height:63px;width:100%;resize:vertical;" 
+                      ng-model="entity[uidl.propertyName]" 
+                      id="{{::uniqueFieldId}}" 
+                      name="{{::uniqueFieldId}}"></textarea>
             <!-- LOOKUP -->
             <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown') && hasUidlModifier('LookupShowSelectAll')"
                     class="grid-inline-edit-control"

@@ -84,9 +84,10 @@ namespace NWheels.Samples.MyMusicDB.UI
                 .Column(x => x.TrackNumber, size: FieldSize.Small)
                 .Column(x => x.Name, size: FieldSize.Large)
                 .Column(x => x.Length, size: FieldSize.Small)
-                .Column(x => x.Description, size: FieldSize.Large, setup: c => c.IsReadOnly = true)
+                .Column(x => x.Description, size: FieldSize.Large)
                 .Column(x => x.MoreInfoLinkText, setup: c => c.Clickable = true)
                 .Column(x => x.TemporaryKey, columnType: GridColumnType.Hidden);
+            NewTrackGrid.InlineEditor.Field(x => x.Description, type: FormFieldType.Edit, modifiers: FormFieldModifiers.Memo);
 
             TrackDetailJson.ExpandedByDefault = true;
             ApproveTrack.Icon = "check";
