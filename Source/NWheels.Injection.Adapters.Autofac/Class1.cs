@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NWheels.Stacks.Injection.Autofac
+namespace NWheels.Injection.Adapters.Autofac
 {
     public class Class1
     {
