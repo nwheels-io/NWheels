@@ -57,7 +57,9 @@ namespace NWheels.Samples.MyMusicDB.UI
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TabSet TrackDetailTabs { get; set; }
         public JsonText TrackDetailJson { get; set; }
+        public StaticTable<NewAlbumTrackTx.INewTrackModelHistoryNote> TrackDetailHistory { get; set; }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -76,7 +78,7 @@ namespace NWheels.Samples.MyMusicDB.UI
             NewTrackGrid.UseInlineEditor();
             NewTrackGrid.DisableFiltering = true;
             NewTrackGrid.DisableSorting = true;
-            NewTrackGrid.UseDetailPane(TrackDetailJson);
+            NewTrackGrid.UseDetailPane(TrackDetailTabs);
             NewTrackGrid.InlineEditRowActions = DataGridRowActions.Revert;
             NewTrackGrid.ShowActionsOnSelectedRowOnly = true;
             NewTrackGrid.UseRowCommands(ApproveTrack, RejectTrack);
@@ -92,10 +94,28 @@ namespace NWheels.Samples.MyMusicDB.UI
                 .Column(x => x.Length, size: FieldSize.Small)
                 .Column(x => x.Description, size: FieldSize.Large)
                 .Column(x => x.MoreInfoLinkText, setup: c => c.Clickable = true)
+                .Column(x => x.History, columnType: GridColumnType.Hidden)
                 .Column(x => x.TemporaryKey, columnType: GridColumnType.Hidden);
             NewTrackGrid.InlineEditor.Field(x => x.Description, type: FormFieldType.Edit, modifiers: FormFieldModifiers.Memo);
 
-            TrackDetailJson.ExpandedByDefault = true;
+            TrackDetailTabs.TemplateName = "TabSetInlineStyle"; // or "TabSetInlineStyleBottom" to display tabs in the bottom
+            TrackDetailTabs.Tabs.Add(TrackDetailHistory);
+            TrackDetailTabs.Tabs.Add(TrackDetailJson);
+
+            TrackDetailJson.Text = "JSON";
+            TrackDetailJson.ExpandedByDefault = false;
+
+            TrackDetailHistory.Text = "History";
+            TrackDetailHistory.TemplateName = "StaticTableInlineStyle";
+            TrackDetailHistory.DescribingPresenter += (p) => p
+                .On(TrackDetailHistory.Loaded)
+                .QueryParentModelAs<NewAlbumTrackTx.INewTrackModel>()
+                .Then(b => b.Broadcast(TrackDetailHistory.DataReceived).WithPayload(vm => vm.Input.History).TunnelDown());
+            TrackDetailHistory
+                .Column(x => x.When)
+                .Column(x => x.Who)
+                .Column(x => x.What);
+            
             ApproveTrack.Icon = "check";
             RejectTrack.Icon = "times";
 

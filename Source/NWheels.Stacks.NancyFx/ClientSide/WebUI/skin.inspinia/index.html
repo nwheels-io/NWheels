@@ -505,6 +505,73 @@ HEAD, JS/CSS LINKS
             position:relative;
             top:-12px;
         }
+        
+        .tabset-inline-tabs-content {
+            padding: 8px;
+            background-color: #fdfdfd;
+        }
+        
+        .tabset-inline-tabs {
+            padding: 12px 5px 0 5px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #dddddd;
+            font-size: 13px;
+        }
+
+        .tabset-inline-bottom-tabs {
+            padding: 0 5px 12px 5px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #dddddd;
+            font-size: 13px;
+        }
+        
+        .tabset-inline-tabs span {
+            margin-left: 0;
+            margin-right: 0;
+            padding: 4px 10px 4px 10px;
+            color: #929496;            
+        }
+
+        .tabset-inline-bottom-tabs span {
+            margin-left: 0;
+            margin-right: 0;
+            padding: 8px 10px 0 10px;
+            color: #929496;            
+        }
+
+        .tabset-inline-tabs span a, 
+        .tabset-inline-tabs span a:hover,
+        .tabset-inline-bottom-tabs span a, 
+        .tabset-inline-bottom-tabs span a:hover {
+            color: inherit !important;
+        }
+
+        .tabset-inline-tabs span:hover,
+        .tabset-inline-bottom-tabs span:hover {
+            color: #222;
+        }
+        
+        .tabset-inline-tabs span.active {
+            color: #222;
+            border-left: 1px solid #dddddd;
+            border-right: 1px solid #dddddd;
+            border-top: 1px solid #dddddd;
+            border-radius: 3px 3px 0 0;
+            background-color: #fdfdfd;
+            position: relative;
+            top: -2px;
+        }
+
+        .tabset-inline-bottom-tabs span.active {
+            color: #222;
+            border-left: 1px solid #dddddd;
+            border-right: 1px solid #dddddd;
+            border-bottom: 1px solid #dddddd;
+            border-radius: 0 0 3px 3px;
+            background-color: #fdfdfd;
+            position: relative;
+            top: -2px;
+        }
     </style>
 </head>
 <body 
@@ -1165,6 +1232,33 @@ HEAD, JS/CSS LINKS
             </div>
         </div>
     </script>
+    <script type="text/ng-template" id="app/uidl-element-template/StaticTableInlineStyle">
+        <div class="row">
+            <div class="col-lg-12">
+                <table class="table table-hover margin bottom" ng-if="ResultSet">
+                    <thead>
+                        <tr>
+                            <th ng-repeat="column in ::uidl.displayColumns" ng-attr-width="{{column.nestedWidget ? '50%' : undefined}}">{{::translate(column.title)}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="row in ResultSet" ng-init="thisRowIndex=$index;">
+                            <td ng-repeat="column in ::uidl.displayColumns">
+                                <span ng-if="column.columnType==='Text'||column.columnType==='Enum'">{{::translate(row[column.expression])}}</span>
+                                <span ng-if="column.columnType==='Number'">{{::uidlService.formatValue(column.format, row[column.expression])}}</span>
+                                <!--span ng-if="column.columnType==='Number'"><strong>{{::row[column.expression]}}</strong></span-->
+                                <div ng-if="column.nestedWidget" ng-controller="cloneUidlWithUniqueId">
+                                    <div ng-init="cloneUidl(column.nestedWidget, thisRowIndex)">
+                                        <uidl-widget ng-if="thisUidl" uidl="thisUidl" parent-uidl="column" parent-model="(column.expression ? row[column.expression] : row)"></uidl-widget>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>                    
+            </div>
+        </div>
+    </script>
     <script type="text/javascript">
         function initWidget_StaticTable($scope) {
             $scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
@@ -1765,41 +1859,6 @@ HEAD, JS/CSS LINKS
                                         theGrid[0].grid.endReq();
                                     }
                                     $scope.onStandalongGridDataReceived(theGrid, response);
-                                    /*
-                                    $scope.ResultSet = response.data.ResultSet;
-                                    if ($scope.uidl.expandableTreeMode) {
-                                        var adjacentModel = [ ];
-                                        for (var i = 0; i < $scope.ResultSet.length ; i++) {
-                                            $scope.transformToAdjacentTreeModel(adjacentModel, $scope.ResultSet[i], null, 0);
-                                        }
-                                        response.data.ResultSet = adjacentModel;
-                                        $scope.ResultSet = adjacentModel;
-                                    }
-                                    $scope.entityService.trackRetrievedEntities(response.data.ResultSet);
-                                    theGrid[0].addJSONData(response.data);
-                                    $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data);
-                                    */
-                                    
-                                    /*if ($scope.uidl.expandableTreeMode) {
-                                        setTimeout(function() {
-                                            console.log('REQUESTING ANOTHER THREAD LOG....');
-                                            $scope.$http.post(
-                                                'http://localhost:9411/app/api/RequestReply/EntityQuery/RootThreadLogUINode/TransactionScript/Transactions.AbstractThreadLogUINodesTx/Execute?$select=Text,TimeText,Node,DurationMs,DbDurationMs,DbCount,CpuTimeMs,LogId,CorrelationId&$take=10000&$page=1',
-                                                {input: {Id: "6ffd600edb974a019f61b043d674c872", CorrelationId: null}}
-                                            ).then(function(response){
-                                                console.log('ADDING ANOTHER THREAD LOG....');
-                                                var newAdjacentModel = [ ];
-                                                for (var i = 0; i < response.data.ResultSet.length ; i++) {
-                                                    $scope.transformToAdjacentTreeModel(newAdjacentModel, response.data.ResultSet[i], null, 0);
-                                                }
-                                                for (var i = 0; i < newAdjacentModel.length ; i++) {
-                                                    var r = newAdjacentModel[i];
-                                                    $scope.ResultSet.push(r);
-                                                    theGrid.jqGrid('addChildNode', r.$id, r.$treeParentId, r);
-                                                }
-                                            });
-                                        }, 5000);
-                                    }*/
                                 },
                                 function(faultResponse){
                                     $scope.dataGridQueryInProgress = false;
@@ -4584,13 +4643,29 @@ HEAD, JS/CSS LINKS
             <div class="tab-content">
                 <div ng-repeat="tab in uidl.tabs" ng-class="{'tab-pane': true, active: $index == tabIndex}" ng-show="$index == tabIndex">
                     <div class="ibox-content nested">
-                        <uidl-widget uidl="tab" parent-uidl="uidl" parent-model="model.Data.entity"></uidl-widget>
+                        <uidl-widget uidl="tab" parent-uidl="uidl" parent-model="parentModel || model.Data.entity"></uidl-widget>
                     </div>
                 </div>
             </div>
         </div>
     </script>
-    
+    <script type="text/ng-template" id="app/uidl-element-template/TabSetInlineStyle">
+        <div class="tabset-inline-tabs">
+            <span ng-class="{active: $index == tabIndex}" ng-repeat="tab in uidl.tabs"><a ng-click="setTabIndex($index)">{{translate(tab.text)}}</a></span>
+        </div>
+        <div ng-repeat="tab in uidl.tabs" ng-class="{'tabset-inline-tabs-content': true, active: $index == tabIndex}" ng-show="$index == tabIndex">
+            <uidl-widget uidl="tab" parent-uidl="uidl" parent-model="parentModel || model.Data.entity"></uidl-widget>
+        </div>
+    </script>
+    <script type="text/ng-template" id="app/uidl-element-template/TabSetInlineStyleBottom">
+        <div ng-repeat="tab in uidl.tabs" ng-class="{'tabset-inline-bottom-tabs-content': true, active: $index == tabIndex}" ng-show="$index == tabIndex">
+            <uidl-widget uidl="tab" parent-uidl="uidl" parent-model="parentModel || model.Data.entity"></uidl-widget>
+        </div>
+        <div class="tabset-inline-bottom-tabs">
+            <span ng-class="{active: $index == tabIndex}" ng-repeat="tab in uidl.tabs"><a ng-click="setTabIndex($index)">{{translate(tab.text)}}</a></span>
+        </div>
+    </script>
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - INTERNET SEARCH - CUSTOM GSE
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

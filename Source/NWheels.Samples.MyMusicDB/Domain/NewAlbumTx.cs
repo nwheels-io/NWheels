@@ -73,6 +73,15 @@ namespace NWheels.Samples.MyMusicDB.Domain
                         track.TemporaryKey = _framework.NewGuid();
                         track.MoreInfoLinkText = "Find more info";
                         track.MoreInfoQuery = input.Artist.Name + " " + album.Name;
+
+                        var historyNote = _viewModelFactory.NewEntity<NewAlbumTrackTx.INewTrackModelHistoryNote>();
+                        historyNote.Who = Session.Current.GetUserAccountAs<IUserAccountEntity>().LoginName;
+                        historyNote.When = _framework.UtcNow;
+                        historyNote.What = "Initially created.";
+
+                        track.History = new List<NewAlbumTrackTx.INewTrackModelHistoryNote>();
+                        track.History.Add(historyNote);
+
                         return track;
                     })
                     .ToList();

@@ -55,7 +55,6 @@ namespace NWheels.Samples.MyMusicDB.Domain
                 var temporaryKey = input.TemporaryKey; // example of hidden column
                 
                 context.Tracks.Insert(track);
-
             }
 
             base.DiscardInputDraft();
@@ -85,7 +84,13 @@ namespace NWheels.Samples.MyMusicDB.Domain
             base.DiscardInputDraft();
 
             input.Status = NewAlbumTrackStatus.Approved;
-            input.Description = "APPROVED!";
+
+            var historyNote = _viewModelFactory.NewEntity<NewAlbumTrackTx.INewTrackModelHistoryNote>();
+            historyNote.Who = Session.Current.GetUserAccountAs<IUserAccountEntity>().LoginName;
+            historyNote.When = _framework.UtcNow;
+            historyNote.What = "The track was approved.";
+            input.History.Add(historyNote);
+
             return input;
         }
 
@@ -111,7 +116,13 @@ namespace NWheels.Samples.MyMusicDB.Domain
             base.DiscardInputDraft();
 
             input.Status = NewAlbumTrackStatus.Rejected;
-            input.Description = "REJECTED!";
+            
+            var historyNote = _viewModelFactory.NewEntity<NewAlbumTrackTx.INewTrackModelHistoryNote>();
+            historyNote.Who = Session.Current.GetUserAccountAs<IUserAccountEntity>().LoginName;
+            historyNote.When = _framework.UtcNow;
+            historyNote.What = "The track was rejected.";
+            input.History.Add(historyNote);
+
             return input;
         }
 
@@ -152,6 +163,19 @@ namespace NWheels.Samples.MyMusicDB.Domain
             string MoreInfoQuery { get; set; }
 
             NewAlbumTrackStatus Status { get; set; }
+
+            [PropertyContract.Relation.Composition]
+            ICollection<INewTrackModelHistoryNote> History { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ViewModelContract]
+        public interface INewTrackModelHistoryNote
+        {
+            DateTime When { get; set; }
+            string Who { get; set; }
+            string What { get; set; }
         }
     }
 }

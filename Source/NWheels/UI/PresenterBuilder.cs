@@ -258,6 +258,16 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public PromiseBuilder<TValue> QueryParentModelAs<TValue>()
+            {
+                var behavior = new UidlQueryModelBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
+                SetAndSubscribeBehavior(behavior);
+                behavior.SourceExpression = "parentModel";
+                return new PromiseBuilder<TValue>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public PromiseBuilder<TValue> QueryModelConstant<TValue>(TValue constantValue = default(TValue))
             {
                 var behavior = new UidlQueryModelBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);

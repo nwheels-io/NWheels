@@ -1217,7 +1217,8 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             console.log('run-behavior > queryModel', behavior.sourceExpression);
             scope.model.Input = input;
             var context = {
-                model: scope.model
+                model: scope.model,
+                parentModel: scope.parentModel
             };
             
             var value = (
@@ -2431,6 +2432,12 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.setTabIndex = function(index) {
                 scope.tabIndex = index;
             }
+            
+            scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
+                for (var i = 0; i < scope.uidl.tabs.length; i++) {
+                    scope.$broadcast(scope.uidl.tabs[i].qualifiedName + ':ModelSetter', data);
+                }
+            });
         }
     };
 
