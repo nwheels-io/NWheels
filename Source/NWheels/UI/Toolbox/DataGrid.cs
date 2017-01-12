@@ -140,6 +140,9 @@ namespace NWheels.UI.Toolbox
         public string RowStylePropertyName { get; set; }
 
         [DataMember]
+        public Dictionary<object, string> RowStylePropertyValueMap { get; set; }
+
+        [DataMember]
         public string RowIconPropertyName { get; set; }
 
         [DataMember]
@@ -692,9 +695,10 @@ namespace NWheels.UI.Toolbox
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DataGrid<TDataRow> BindRowStyleTo(Expression<Func<TDataRow, object>> styleProperty)
+        public DataGrid<TDataRow> BindRowStyleTo(Expression<Func<TDataRow, object>> styleProperty, Dictionary<object, string> valueMap = null)
         {
             this.RowStylePropertyName = styleProperty.GetPropertyInfo().Name;
+            this.RowStylePropertyValueMap = valueMap;
             return this;
         }
 

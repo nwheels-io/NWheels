@@ -80,9 +80,15 @@ namespace NWheels.Samples.MyMusicDB.UI
             NewTrackGrid.InlineEditRowActions = DataGridRowActions.Revert;
             NewTrackGrid.ShowActionsOnSelectedRowOnly = true;
             NewTrackGrid.UseRowCommands(ApproveTrack, RejectTrack);
+            NewTrackGrid.BindRowStyleTo(x => x.Status, valueMap: new Dictionary<object, string>() {
+                 { NewAlbumTrackTx.NewAlbumTrackStatus.Pending, "default" },
+                 { NewAlbumTrackTx.NewAlbumTrackStatus.Approved, "success" },
+                 { NewAlbumTrackTx.NewAlbumTrackStatus.Rejected, "danger" }
+            });
             NewTrackGrid
                 .Column(x => x.TrackNumber, size: FieldSize.Small)
                 .Column(x => x.Name, size: FieldSize.Large)
+                .Column(x => x.Status, size: FieldSize.Small)
                 .Column(x => x.Length, size: FieldSize.Small)
                 .Column(x => x.Description, size: FieldSize.Large)
                 .Column(x => x.MoreInfoLinkText, setup: c => c.Clickable = true)

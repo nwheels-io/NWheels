@@ -84,6 +84,7 @@ namespace NWheels.Samples.MyMusicDB.Domain
 
             base.DiscardInputDraft();
 
+            input.Status = NewAlbumTrackStatus.Approved;
             input.Description = "APPROVED!";
             return input;
         }
@@ -109,8 +110,18 @@ namespace NWheels.Samples.MyMusicDB.Domain
 
             base.DiscardInputDraft();
 
+            input.Status = NewAlbumTrackStatus.Rejected;
             input.Description = "REJECTED!";
             return input;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public enum NewAlbumTrackStatus
+        {
+            Pending,
+            Approved,
+            Rejected
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -139,6 +150,8 @@ namespace NWheels.Samples.MyMusicDB.Domain
 
             [PropertyContract.Presentation.Hidden]
             string MoreInfoQuery { get; set; }
+
+            NewAlbumTrackStatus Status { get; set; }
         }
     }
 }

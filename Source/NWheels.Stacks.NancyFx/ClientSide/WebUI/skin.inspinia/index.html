@@ -333,7 +333,48 @@ HEAD, JS/CSS LINKS
         .jqgrow.ui-state-highlight .jqg_row_actions {
             display: inline-block;
         }
-        
+
+        tr.jqg_rowstyle_default > td {
+            color: #343739;
+            background-color: white;
+        }
+        tr.jqg_rowstyle_default.ui-state-highlight > td {
+            color: white;
+            background-color: #47617A;
+        }
+        tr.jqg_rowstyle_primary > td {
+            color: #ffffff;
+            background-color: #5bb1d4;
+        }
+        tr.jqg_rowstyle_primary.ui-state-highlight > td {
+            color: white;
+            background-color: #47617A;
+        }
+        tr.jqg_rowstyle_success > td {
+            color: #ffffff;
+            background-color: #1ab394;
+        }
+        tr.jqg_rowstyle_success.ui-state-highlight > td {
+            color: white;
+            background-color: #47617A;
+        }
+        tr.jqg_rowstyle_warning > td {
+            color: #8e0000;
+            background-color: #fcffaf;
+        }
+        tr.jqg_rowstyle_warning.ui-state-highlight > td {
+            color: white;
+            background-color: #47617A;
+        }
+        tr.jqg_rowstyle_danger > td {
+            color: #5c0808;
+            background-color: #ff8f8f;
+        }
+        tr.jqg_rowstyle_danger.ui-state-highlight > td {
+            color: white;
+            background-color: #47617A;
+        }
+
         tr.jqg_rowstyle_ThreadSuccess > td {
             color: #484848;
             background-color: #ECECEC;
@@ -1539,8 +1580,14 @@ HEAD, JS/CSS LINKS
                             continue;
                         }
                     }
-                    var cssClassName = 'jqg_rowstyle_' + data[$scope.uidl.rowStylePropertyName];
-                    $(tr).addClass(cssClassName);
+                    var dataValue = '' + data[$scope.uidl.rowStylePropertyName];
+                    if (dataValue) {
+                        var rowStyleName = ($scope.uidl.rowStylePropertyValueMap ? $scope.uidl.rowStylePropertyValueMap[toCamelCase(dataValue)] : dataValue);
+                        if (rowStyleName) {
+                            var cssClassName ='jqg_rowstyle_' + rowStyleName;
+                            $(tr).addClass(cssClassName);
+                        }
+                    }
                     if ($scope.uidl.expandableTreeMode) {
                         if (!styleBackColors[cssClassName]) {
                             styleBackColors[cssClassName] = getCssRulePropertyValue('background-color', 'tr.' + cssClassName + ' > td');
@@ -1936,9 +1983,9 @@ HEAD, JS/CSS LINKS
                                 $(".jqgfirstrow").css("height","1px");
                             }
                             if ($scope.uidl.rowStylePropertyName) {
-                                $scope.applyDataDrivenRowStyles(0, $scope.ResultSet.length - 1, 0, 1);
+                                $scope.applyDataDrivenRowStyles(0, $scope.ResultSet.length, 0, 1);
                                 setTimeout(function() {
-                                    $scope.applyDataDrivenRowStyles(1, $scope.ResultSet.length - 1, 2);
+                                    $scope.applyDataDrivenRowStyles(1, $scope.ResultSet.length, 2);
                                 }, 500);
                             }
                         }
@@ -2022,6 +2069,9 @@ HEAD, JS/CSS LINKS
                             $scope.ResultSet[rowId - 1] = rowData;
                             $scope.lastSelectedRowId = -1;
                             $scope.rowObjectClonedBeforeInlineEdit = null;
+                            if ($scope.uidl.rowStylePropertyName) {
+                                $scope.applyDataDrivenRowStyles(rowId - 1, rowId, 0);
+                            }
                         }
                     });
 
