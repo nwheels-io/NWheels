@@ -1,6 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup Label="Configuration">
-    <RootNamespace>NWheels</RootNamespace>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
@@ -17,13 +16,7 @@
     <PackageReference Include="System.ValueTuple" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Injection\" />
-    <Folder Include="MetaTyping\" />
-    <Folder Include="Logging\" />
-    <Folder Include="Configuration\" />
-    <Folder Include="Authorization\" />
-    <Folder Include="Aspectization\" />
-    <Folder Include="Microservices\" />
-    <Folder Include="Serialization\" />
+    <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Core\NWheels.Core.csproj" />
   </ItemGroup>
 </Project>

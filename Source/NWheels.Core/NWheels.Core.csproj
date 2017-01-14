@@ -19,4 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Compilation\Policy\Reusable\" />
+  </ItemGroup>
 </Project>
