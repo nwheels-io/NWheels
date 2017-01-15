@@ -6,7 +6,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 {
     public interface ITypeGenerator
     {
-        IReadOnlyList<TypeMember> ImplementInterface(TypeMember interfaceType, bool isExplicit);
+        IReadOnlyList<AbstractMember> ImplementInterface(TypeMember interfaceType, bool isExplicit);
         TypeMember Product { get; }
     }
 }

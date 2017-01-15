@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Collections.Immutable;
+using System.Reflection;
 
 namespace NWheels.Compilation.Mechanism.Syntax.Members
 {
     public class TypeMember : AbstractMember
     {
-        private TypeMember()
+        public TypeMember()
         {
             this.Interfaces = new HashSet<TypeMember>();
             this.GenericTypeArguments = new List<TypeMember>();
@@ -20,6 +21,9 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
             : this()
         {
             this.Binding = compiledType;
+            this.Name = compiledType.Name;
+            this.Namespace = compiledType.Namespace;
+            this.AssemblyName = compiledType.GetTypeInfo().Assembly.FullName;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,10 +36,25 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TypeMember(MemberVisibility visibility, TypeMemberKind typeKind, string name, ITypeGenerator generator = null)
+            : this(generator)
+        {
+            this.Visibility = visibility;
+            this.TypeKind = typeKind;
+            this.Name = name;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public string FullName
         {
             get
             {
+                if (string.IsNullOrEmpty(Namespace))
+                {
+                    return Name;
+                }
+
                 return Namespace + "." + Name;
             }
         }
