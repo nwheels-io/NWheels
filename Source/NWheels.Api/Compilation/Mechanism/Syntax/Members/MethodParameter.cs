@@ -18,5 +18,9 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public TypeMember Type { get; set; }
         public ParameterModifier Modifier { get; set; }
         public List<AttributeInfo> Attributes { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static MethodParameter Void => null;
     }
 }

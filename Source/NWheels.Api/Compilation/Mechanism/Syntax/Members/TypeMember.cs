@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Collections.Immutable;
 using System.Reflection;
+using System.Linq;
 
 namespace NWheels.Compilation.Mechanism.Syntax.Members
 {
@@ -23,7 +24,17 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
             this.Binding = compiledType;
             this.Name = compiledType.Name;
             this.Namespace = compiledType.Namespace;
-            this.AssemblyName = compiledType.GetTypeInfo().Assembly.FullName;
+
+            var info = compiledType.GetTypeInfo();
+
+            this.AssemblyName = info.Assembly.FullName;
+            this.IsGenericType = info.IsGenericType;
+
+            if (IsGenericType)
+            {
+                this.GenericTypeArguments.AddRange(info.GenericTypeArguments.Select(t => new TypeMember(t)));
+                this.Name = this.Name.Substring(0, this.Name.IndexOf('`'));
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -36,12 +47,27 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeMember(MemberVisibility visibility, TypeMemberKind typeKind, string name, ITypeGenerator generator = null)
-            : this(generator)
+        public TypeMember(MemberVisibility visibility, TypeMemberKind typeKind, string name, params TypeMember[] genericTypeArguments)
+            : this()
         {
             this.Visibility = visibility;
             this.TypeKind = typeKind;
             this.Name = name;
+
+            if (genericTypeArguments != null)
+            {
+                this.GenericTypeArguments.AddRange(genericTypeArguments);
+            }
+
+            this.IsGenericType = (GenericTypeArguments.Count > 0);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TypeMember(string namespaceName, MemberVisibility visibility, TypeMemberKind typeKind, string name, params TypeMember[] genericTypeArguments)
+            : this(visibility, typeKind, name, genericTypeArguments)
+        {
+            this.Namespace = namespaceName;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -10,12 +10,14 @@ namespace NWheels.Compilation.Adapters.Roslyn
 {
     public class RoslynTypeFactoryBackend : ITypeFactoryBackend<IRuntimeTypeFactoryArtifact>
     {
+        private readonly ReferenceCache _referenceCache;
         private readonly List<Assembly> _compiledAssemblies;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public RoslynTypeFactoryBackend()
         {
+            _referenceCache = new ReferenceCache();
             _compiledAssemblies = new List<Assembly>();
         }
 

@@ -64,5 +64,28 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
             throw new NotSupportedException($"Literals of type {value.GetType().Name} are not supported");
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static NameSyntax GetTypeNameSyntax(TypeMember type)
+        {
+            if (!type.IsGenericType)
+            {
+                return ParseName(type.FullName);
+            }
+
+            var genericSyntax = GenericName(type.Name)
+                .WithTypeArgumentList(
+                    TypeArgumentList(
+                        SeparatedList<TypeSyntax>(
+                            type.GenericTypeArguments.Select(GetTypeNameSyntax))));
+
+            if (!string.IsNullOrEmpty(type.Namespace))
+            {
+                return QualifiedName(ParseName(type.Namespace), genericSyntax);
+            }
+
+            return genericSyntax;
+        }
     }
 }

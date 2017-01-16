@@ -7,7 +7,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 {
-    public class ClassSyntaxEmitter : MemberSyntaxEmitterBase<TypeMember, ClassDeclarationSyntax>
+    public class ClassSyntaxEmitter : TypeMemberSyntaxEmitterBase<TypeMember, ClassDeclarationSyntax>
     {
         public ClassSyntaxEmitter(TypeMember member) 
             : base(member)
@@ -19,21 +19,20 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
         public override ClassDeclarationSyntax EmitSyntax()
         {
             OutputSyntax = ClassDeclaration(Member.Name);
+
+            if (Member.Attributes.Count > 0)
+            {
+                OutputSyntax = OutputSyntax.WithAttributeLists(EmitAttributeLists());
+            }
+
             OutputSyntax = OutputSyntax.WithModifiers(EmitVisibilityModifiers());
 
-            if (Member.BaseType != null)
+            if (Member.BaseType != null || Member.Interfaces.Count > 0)
             {
-                OutputSyntax = OutputSyntax
-                    .WithBaseList(
-                        BaseList(
-                            SeparatedList<BaseTypeSyntax>(new BaseTypeSyntax[] {
-                                SimpleBaseType(
-                                    ParseTypeName(Member.BaseType.FullName)
-                                )
-                            })
-                        )
-                    );
+                OutputSyntax = OutputSyntax.WithBaseList(EmitBaseList());
             }
+
+            OutputSyntax = OutputSyntax.WithMembers(EmitMembers());
 
             return OutputSyntax;
         }

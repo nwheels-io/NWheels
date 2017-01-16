@@ -24,6 +24,7 @@
     <Folder Include="Authorization\" />
     <Folder Include="Aspectization\" />
     <Folder Include="Microservices\" />
+    <Folder Include="Extensions\" />
     <Folder Include="Serialization\" />
   </ItemGroup>
 </Project>

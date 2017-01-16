@@ -5,8 +5,17 @@ using System.Text;
 
 namespace NWheels.Compilation.Mechanism.Syntax.Members
 {
-    public abstract class MethodMember : MethodMemberBase
+    public class MethodMember : MethodMemberBase
     {
+        public MethodMember(MemberVisibility visibility, MethodParameter returnType, string Name, params MethodParameter[] parameters)
+        {
+            this.Visibility = visibility;
+            this.Name = Name;
+            this.Signature = new MethodSignature();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public MethodInfo Bidning { get; set; }
     }
 }

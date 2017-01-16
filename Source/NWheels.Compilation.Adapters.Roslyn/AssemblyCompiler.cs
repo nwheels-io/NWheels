@@ -13,7 +13,14 @@ namespace NWheels.Compilation.Adapters.Roslyn
 {
     internal class AssemblyCompiler
     {
-        private readonly ReferenceCache _referenceCache = new ReferenceCache();
+        private readonly ReferenceCache _referenceCache;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public AssemblyCompiler(ReferenceCache referenceCache)
+        {
+            _referenceCache = referenceCache;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

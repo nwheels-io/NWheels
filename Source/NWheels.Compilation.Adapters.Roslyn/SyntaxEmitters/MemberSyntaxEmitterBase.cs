@@ -13,7 +13,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 {
     public abstract class MemberSyntaxEmitterBase<TMember, TSyntax> : SyntaxEmitterBase<TSyntax>
         where TMember : AbstractMember
-        where TSyntax : BaseTypeDeclarationSyntax
+        where TSyntax : MemberDeclarationSyntax
     {
         protected MemberSyntaxEmitterBase(TMember member)
         {
@@ -40,10 +40,6 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
         {
             return TokenList(_s_visibilityKeywords[Member.Visibility].Select(Token));
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
