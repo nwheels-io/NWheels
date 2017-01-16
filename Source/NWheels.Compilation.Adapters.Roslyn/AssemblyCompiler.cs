@@ -8,10 +8,11 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NWheels.Compilation.Adapters.Roslyn
 {
-    internal class AssemblyCompiler
+    public class AssemblyCompiler
     {
         private readonly ReferenceCache _referenceCache;
 
@@ -25,23 +26,22 @@ namespace NWheels.Compilation.Adapters.Roslyn
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public bool CompileAssembly(
-            string assemblyName,
-            string sourceCode,
+            CompilationUnitSyntax code,
             string[] references,
             bool enableDebug,
+            string assemblyName,
             out byte[] dllBytes,
             out byte[] pdbBytes,
             out string[] errors)
         {
             var context = new CompilationContext {
                 AssemblyName = assemblyName,
-                SourceCode = sourceCode,
+                SourceCode = code,
                 ReferencePaths = references,
                 EnableDebug = enableDebug
             };
 
             LoadReferences(context);
-            ParseSourceCode(context);
             CreateCompilation(context);
             EmitAssembly(context);
 
@@ -63,13 +63,6 @@ namespace NWheels.Compilation.Adapters.Roslyn
             }
 
             context.LoadedReferences = references;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void ParseSourceCode(CompilationContext context)
-        {
-            context.ParsedSyntax = CSharpSyntaxTree.ParseText(context.SourceCode);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -119,10 +112,10 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         private class CompilationContext
         {
-            public string AssemblyName { get; set; }
-            public string SourceCode { get; set; }
+            public CompilationUnitSyntax SourceCode { get; set; }
             public string[] ReferencePaths { get; set; }
             public bool EnableDebug { get; set; }
+            public string AssemblyName { get; set; }
             public MetadataReference[] LoadedReferences { get; set; }
             public SyntaxTree ParsedSyntax { get; set; }
             public CSharpCompilation Compilation { get; set; }

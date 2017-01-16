@@ -23,15 +23,15 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeCompilationResult<IRuntimeTypeFactoryArtifact> CompileSingleType(TypeMember syntax)
+        public TypeCompilationResult<IRuntimeTypeFactoryArtifact> CompileSingleType(TypeMember type)
         {
-            var result = CompileMultipleTypes(new[] { syntax });
+            var result = CompileMultipleTypes(new[] { type });
             return result.Types.Single();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CompilationResult<IRuntimeTypeFactoryArtifact> CompileMultipleTypes(IEnumerable<TypeMember> syntaxes)
+        public CompilationResult<IRuntimeTypeFactoryArtifact> CompileMultipleTypes(IEnumerable<TypeMember> types)
         {
             throw new NotImplementedException();
         }

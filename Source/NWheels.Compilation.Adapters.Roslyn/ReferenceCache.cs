@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis;
 
 namespace NWheels.Compilation.Adapters.Roslyn
 {
-    internal class ReferenceCache
+    public class ReferenceCache
     {
         private readonly object _syncRoot = new object();
         private ImmutableDictionary<string, MetadataReference> _referenceByAssemblyName =
