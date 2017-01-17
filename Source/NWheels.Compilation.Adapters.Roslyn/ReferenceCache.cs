@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using System.IO;
 
 namespace NWheels.Compilation.Adapters.Roslyn
 {
@@ -34,6 +35,18 @@ namespace NWheels.Compilation.Adapters.Roslyn
             }
 
             return reference;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void IncludeSystemAssemblyReferences()
+        {
+            var systemObjectAssemblyLocation = typeof(object).GetTypeInfo().Assembly.Location;
+            var systemAssemblyFolder = Path.GetDirectoryName(systemObjectAssemblyLocation);
+
+            EnsureReferenceCached(systemObjectAssemblyLocation);
+            EnsureReferenceCached(Path.Combine(systemAssemblyFolder, "mscorlib.dll"));
+            EnsureReferenceCached(Path.Combine(systemAssemblyFolder, "System.Runtime.dll"));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

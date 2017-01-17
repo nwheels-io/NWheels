@@ -37,6 +37,7 @@ namespace NWheels.Compilation.Adapters.Roslyn
             var context = new CompilationContext {
                 AssemblyName = assemblyName,
                 SourceCode = code,
+                ParsedSyntax = code.SyntaxTree,
                 ReferencePaths = references,
                 EnableDebug = enableDebug
             };
@@ -62,7 +63,7 @@ namespace NWheels.Compilation.Adapters.Roslyn
                 references[i] = _referenceCache.EnsureReferenceCached(context.ReferencePaths[i]);
             }
 
-            context.LoadedReferences = references;
+            context.LoadedReferences = _referenceCache.GetAllCachedReferences().ToArray();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -84,7 +85,10 @@ namespace NWheels.Compilation.Adapters.Roslyn
                 using (var pdbStream = context.EnableDebug ? new MemoryStream() : null)
                 {
                     //var clock = Stopwatch.StartNew();
-                    EmitResult result = context.Compilation.Emit(dllStream, pdbStream);
+                    EmitResult result = context.Compilation.Emit(
+                        dllStream, 
+                        pdbStream, 
+                        options: new EmitOptions(debugInformationFormat: DebugInformationFormat.PortablePdb));
                     //Console.WriteLine(">> COMPILE TIME, ms = {0}", clock.ElapsedMilliseconds);
 
                     context.Success = result.Success;
