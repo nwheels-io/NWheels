@@ -1399,13 +1399,13 @@ HEAD, JS/CSS LINKS
                     }
                 }
                 if ($scope.uidl.showActionsOnSelectedRowOnly) {
-                    rowActionsHtml = '<span class="jqg_row_actions" style="width:' + (rowActionsColumnWidth-15) + 'px">' + rowActionsHtml + '</span>';
+                    rowActionsHtml = '<span class="jqg_row_actions" style="width:' + (rowActionsColumnWidth) + 'px;position:relative;left:-4px;">' + rowActionsHtml + '</span>';
                 }
                 
                 columnsModel.push({
                     name: $scope.translate('Actions'),
                     index: 'act',
-                    width: rowActionsColumnWidth,
+                    width: (rowActionsColumnWidth < 120 ? 120 : rowActionsColumnWidth),
                     align: 'center',
                     sortable: false,
                     formatter: function (cellvalue, options, rowObject) {
