@@ -3820,9 +3820,22 @@ namespace NWheels.UI
                     return null;
                 }
 
-                var target = _viewModelFactory.NewEntity(objectType);
+                var attribute = objectType.GetCustomAttribute<ViewModelContractAttribute>();
 
                 JObject jo = JObject.Load(reader);
+                object target;
+
+                if (!attribute.IsAbstract)
+                {
+                    target = _viewModelFactory.NewEntity(objectType);
+                }
+                else
+                {
+                    var typeName = jo["$type"].Value<string>();
+                    var metaType = _ownerService._metadataCache.GetTypeMetadata(typeName);
+                    target = _ownerService._viewModelFactory.NewEntity(metaType.ContractType);
+                }
+
                 JsonReader jObjectReader = jo.CreateReader();
                 jObjectReader.Culture = reader.Culture;
                 jObjectReader.DateParseHandling = reader.DateParseHandling;
