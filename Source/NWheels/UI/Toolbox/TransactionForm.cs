@@ -23,6 +23,9 @@ namespace NWheels.UI.Toolbox
         where TOutput : class
     {
         private UidlBuilder _builder;
+        private bool _usePolymorphicInputInitialization;
+        private Action<
+            PresenterBuilder<TypeSelector, Empty.Data, Empty.State>.AlterModelBehaviorBuilder<InputProjection<string, TContext>>> _onSetInputTypeInContext;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -139,6 +142,16 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void UsePolymorphicInputInitialization(Action<
+            PresenterBuilder<TypeSelector, Empty.Data, Empty.State>.AlterModelBehaviorBuilder<InputProjection<string, TContext>>> 
+            onSetInputTypeInContext)
+        {
+            _usePolymorphicInputInitialization = true;
+            _onSetInputTypeInContext = onSetInputTypeInContext;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
             return base.GetNestedWidgets().ConcatOneIf(InputForm).ConcatOneIf(InputFormTypeSelector).ConcatOneIf(OutputForm);
@@ -213,8 +226,12 @@ namespace NWheels.UI.Toolbox
             Reset.Kind = CommandKind.Reject;
             Reset.Severity = CommandSeverity.None;
 
+            //ITypeMetadata inputMetaType;
+            //MetadataCache.TryGetTypeMetadata(typeof(TInput), out inputMetaType);
+            //var isInputTypeAbstract = (inputMetaType != null && inputMetaType.IsAbstract);
+
             var txAttribute = typeof(TScript).GetCustomAttribute<TransactionScriptAttribute>();
-            var shouldInvokeInitializeInput = (txAttribute != null && txAttribute.SupportsInitializeInput);
+            var shouldInvokeInitializeInput = (txAttribute != null && txAttribute.SupportsInitializeInput && !_usePolymorphicInputInitialization);
             var shouldSupportInputDraft = (txAttribute != null && txAttribute.SupportsInputDraft);
             var hasCustomContext = (typeof(TContext) != typeof(Empty.Context));
 
@@ -248,6 +265,20 @@ namespace NWheels.UI.Toolbox
             {
                 InputFormTypeSelector.ParentModelProperty = "Input";
                 InputFormTypeSelector.ForEachWidgetOfType<IUidlForm>(form => ConfigureInputForm(form, shouldInvokeInitializeInput));
+
+                if (_usePolymorphicInputInitialization)
+                {
+                    InputFormTypeSelector.UseCustomSelectionInitializer = true;
+                    InputFormTypeSelector.DescribingPresenter += (p) => {
+                        p.On(InputFormTypeSelector.InitializingSelection)
+                            .ProjectInputAs<TContext>(_onSetInputTypeInContext)
+                            .Then(b => b
+                                .InvokeTransactionScript<TScript>()
+                                .WaitForReply((tx, vm) => tx.InitializeInput(vm.Input.Target))
+                                .Then(b2 => b2
+                                    .Broadcast(InputFormTypeSelector.ModelSetter).TunnelDown()));
+                    };
+                }
             }
 
             if (hasCustomContext)
