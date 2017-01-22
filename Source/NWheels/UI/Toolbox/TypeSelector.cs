@@ -215,7 +215,10 @@ namespace NWheels.UI.Toolbox
         {
             public Selection(ITypeMetadata metaType)
             {
-                this.Text = (metaType.BaseType != null ? metaType.Name.TrimTail(metaType.BaseType.Name.TrimLead("Abstract")) : metaType.Name);
+                this.Text = (
+                    metaType.BaseType != null 
+                    ? metaType.Name.TrimTail(metaType.BaseType.Name.TrimLead("Abstract").TrimTail("Base")) 
+                    : metaType.Name);
                 this.MetaType = metaType;
                 this.TypeName = metaType.QualifiedName;
             }
