@@ -13,6 +13,7 @@ namespace NWheels.Compilation.Mechanism.Factories
     }
 
     public interface ITypeFactoryContext<TKeyExtension, TContextExtension>
+        where TKeyExtension : ITypeKeyExtension, new()
     {
         ITypeKey<TKeyExtension> Key { get; }
         TContextExtension Extension { get; }

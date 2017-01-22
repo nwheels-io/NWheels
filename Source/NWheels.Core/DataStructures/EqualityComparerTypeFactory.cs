@@ -7,30 +7,40 @@ using System.Text;
 
 namespace NWheels.DataStructures
 {
-    public class EqualityComparerTypeFactory : TypeFactoryBase<IRuntimeTypeFactoryArtifact>, IEqualityComparerTypeFactory
+    public class EqualityComparerTypeFactory : 
+        TypeFactoryBase<IRuntimeTypeFactoryArtifact>, 
+        IEqualityComparerObjectFactory
     {
         public EqualityComparerTypeFactory(
-            ITypeFactoryMechanism<IRuntimeTypeFactoryArtifact> mechanism) : base(mechanism)
+            ITypeLibrary<IRuntimeTypeFactoryArtifact> library) : base(library)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IEqualityComparer<T> GetEqualityComparer<T>()
+        public void ImplementEqualityComparer(Type comparedType)
         {
-            var key = Mechanism.CreateKey<Empty.KeyExtension>(primaryContract: typeof(T));
-            var product = Mechanism.GetOrBuildProduct(key);
+            var key = Library.CreateKey<Empty.KeyExtension>(primaryContract: comparedType);
+            Library.GetOrBuildTypeMember(key);
+        }
 
-            var instance = product.Artifact.GetInstance<IEqualityComparer<T>>(singleton: true, constructorIndex: 0);
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IEqualityComparer<T> IEqualityComparerObjectFactory.GetEqualityComparer<T>()
+        {
+            var key = Library.CreateKey<Empty.KeyExtension>(primaryContract: typeof(T));
+            var product = Library.GetProduct(key);
+            var instance = product.Artifact.GetOrCreateSingleton<IEqualityComparer<T>>(constructorIndex: 0);
+
             return instance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Type GetEqualityComparerImplementation(Type comparedType)
+        Type IEqualityComparerObjectFactory.GetEqualityComparerImplementation(Type comparedType)
         {
-            var key = Mechanism.CreateKey<Empty.KeyExtension>(primaryContract: comparedType);
-            var product = Mechanism.GetOrBuildProduct(key);
+            var key = Library.CreateKey<Empty.KeyExtension>(primaryContract: comparedType);
+            var product = Library.GetProduct(key);
 
             return product.Artifact.RunTimeType;
         }

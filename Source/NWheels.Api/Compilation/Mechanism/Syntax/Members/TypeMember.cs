@@ -39,7 +39,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeMember(ITypeGenerator generator)
+        public TypeMember(TypeGeneratorInfo generator)
             : this()
         {
             this.Generator = generator;
@@ -103,6 +103,6 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public TypeMember UnderlyingType { get; set; }
         public Type Binding { get; set; }
         public List<AbstractMember> Members { get; private set; }
-        public ITypeGenerator Generator { get; private set; }
+        public TypeGeneratorInfo Generator { get; private set; }
     }
 }

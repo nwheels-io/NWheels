@@ -26,7 +26,7 @@ namespace NWheels.Compilation.Adapters.Roslyn
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public bool CompileAssembly(
-            CompilationUnitSyntax code,
+            SyntaxTree code,
             string[] references,
             bool enableDebug,
             string assemblyName,
@@ -37,7 +37,6 @@ namespace NWheels.Compilation.Adapters.Roslyn
             var context = new CompilationContext {
                 AssemblyName = assemblyName,
                 SourceCode = code,
-                ParsedSyntax = code.SyntaxTree,
                 ReferencePaths = references,
                 EnableDebug = enableDebug
             };
@@ -73,7 +72,7 @@ namespace NWheels.Compilation.Adapters.Roslyn
             context.Compilation = CSharpCompilation
                 .Create(context.AssemblyName, options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                 .AddReferences(context.LoadedReferences)
-                .AddSyntaxTrees(context.ParsedSyntax);
+                .AddSyntaxTrees(context.SourceCode);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -116,12 +115,11 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         private class CompilationContext
         {
-            public CompilationUnitSyntax SourceCode { get; set; }
+            public SyntaxTree SourceCode { get; set; }
             public string[] ReferencePaths { get; set; }
             public bool EnableDebug { get; set; }
             public string AssemblyName { get; set; }
             public MetadataReference[] LoadedReferences { get; set; }
-            public SyntaxTree ParsedSyntax { get; set; }
             public CSharpCompilation Compilation { get; set; }
             public byte[] DllBytes { get; set; }
             public byte[] PdbBytes { get; set; }

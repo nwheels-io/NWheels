@@ -13,6 +13,7 @@ namespace NWheels.Compilation.Mechanism.Factories
     }
 
     public interface ITypeKey<TExtension>
+        where TExtension : ITypeKeyExtension, new()
     {
         TypeMember PrimaryContract { get; }
         IReadOnlyList<TypeMember> SecondaryContracts { get; }

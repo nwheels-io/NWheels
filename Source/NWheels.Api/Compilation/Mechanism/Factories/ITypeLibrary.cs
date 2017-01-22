@@ -5,20 +5,20 @@ using System.Text;
 
 namespace NWheels.Compilation.Mechanism.Factories
 {
-    public interface ITypeFactoryMechanism<TArtifact>
+    public interface ITypeLibrary<TArtifact>
     {
         ITypeKey CreateKey<TKeyExtension>(Type primaryContract, Type[] secondaryContracts = null, TKeyExtension extension = default(TKeyExtension));
-        ITypeFactoryContext CreateContext<TContextExtension>(ITypeKey key, TContextExtension extension);
-        bool TryGetSiblingType(ITypeKey key, out TypeMember type);
-        ITypeFactoryProduct<TArtifact> GetOrBuildProduct(ITypeKey key);
-        event Action<BuildingNewTypeEventArgs> BuildingNewProduct;
+        ITypeFactoryContext CreateContext<TContextExtension>(ITypeKey key, TypeMember product, TContextExtension extension);
+        TypeMember GetOrBuildTypeMember(ITypeKey key);
+        ITypeFactoryProduct<TArtifact> GetProduct(ITypeKey key);
+        event Action<BuildingNewProductEventArgs> BuildingNewProduct;
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class BuildingNewTypeEventArgs : EventArgs
+    public class BuildingNewProductEventArgs : EventArgs
     {
-        public BuildingNewTypeEventArgs(ITypeKey key)
+        public BuildingNewProductEventArgs(ITypeKey key)
         {
             this.Key = key;
         }

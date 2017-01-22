@@ -78,7 +78,7 @@ namespace NWheels.Core.UnitTests.DataStructures
         private EqualityComparerTypeFactory CreateFactoryUnderTest()
         {
             var backend = new RoslynTypeFactoryBackend();
-            var mechanism = new TypeFactoryMechanism<IRuntimeTypeFactoryArtifact>(backend);
+            var mechanism = new TypeLibrary<IRuntimeTypeFactoryArtifact>(backend);
             var factoryUnderTest = new EqualityComparerTypeFactory(mechanism);
 
             return factoryUnderTest;

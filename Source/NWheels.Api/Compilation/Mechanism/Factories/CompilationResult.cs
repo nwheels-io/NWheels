@@ -8,6 +8,6 @@ namespace NWheels.Compilation.Mechanism.Factories
     {
         public bool Success { get; }
         public IReadOnlyList<TypeCompilationResult<TArtifact>> Types { get; }
-        public IReadOnlyList<CompilationIssue> Issues { get; }
+        public IReadOnlyList<TypeCompilationResult<TArtifact>> TypesWithIssues { get; }
     }
 }

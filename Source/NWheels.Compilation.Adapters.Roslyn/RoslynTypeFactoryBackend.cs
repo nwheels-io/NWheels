@@ -8,21 +8,40 @@ using System.Reflection;
 using System.IO;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis;
 
 namespace NWheels.Compilation.Adapters.Roslyn
 {
     public class RoslynTypeFactoryBackend : ITypeFactoryBackend<IRuntimeTypeFactoryArtifact>
     {
-        private readonly ReferenceCache _referenceCache;
+        private readonly bool _debugMode;
+        private readonly string _assemblyNamePrefix;
+        private readonly string _generatedSourceDirectory;
         private readonly string _compiledAssemblyDirectory;
+        private readonly ReferenceCache _referenceCache;
         private readonly List<Assembly> _compiledAssemblies;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public RoslynTypeFactoryBackend()
+            : this(
+                  debugMode: true, 
+                  assemblyNamePrefix: "RunTimeTypes",
+                  generatedSourceDirectory: GetDefaultArtifactDirectory(),
+                  compiledAssemblyDirectory: GetDefaultArtifactDirectory())
         {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public RoslynTypeFactoryBackend(bool debugMode, string assemblyNamePrefix, string generatedSourceDirectory, string compiledAssemblyDirectory)
+        {
+            _debugMode = debugMode;
+            _assemblyNamePrefix = assemblyNamePrefix;
+            _generatedSourceDirectory = generatedSourceDirectory;
+            _compiledAssemblyDirectory = compiledAssemblyDirectory;
+
             _referenceCache = new ReferenceCache();
-            _compiledAssemblyDirectory = Path.GetDirectoryName(System.Environment.GetCommandLineArgs()[0]);
             _compiledAssemblies = new List<Assembly>();
 
             _referenceCache.IncludeSystemAssemblyReferences();
@@ -30,22 +49,25 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeCompilationResult<IRuntimeTypeFactoryArtifact> CompileSingleType(TypeMember type)
-        {
-            var result = CompileMultipleTypes(new[] { type });
-            return result.Types.Single();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public CompilationResult<IRuntimeTypeFactoryArtifact> CompileMultipleTypes(IEnumerable<TypeMember> types)
+        public CompilationResult<IRuntimeTypeFactoryArtifact> Compile(IEnumerable<TypeMember> types)
         {
             var generator = new SourceCodeGenerator();
             var syntax = generator.GenerateSyntax(types);
 
-            var assembly = TryCompileNewAssembly(syntax);
+            var assembly = TryCompileNewAssembly(syntax.SyntaxTree);
 
+            //TODO: create real results
+            var results = types.Select(t => new TypeCompilationResult<IRuntimeTypeFactoryArtifact>()).ToArray();
+            //Compiled?.Invoke(results);
             return new CompilationResult<IRuntimeTypeFactoryArtifact>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void LoadPrecompiledAssembly(string filePath)
+        {
+            ArtifactsLoaded?.Invoke(null);
+            throw new NotImplementedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,15 +76,26 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private Assembly TryCompileNewAssembly(CompilationUnitSyntax syntax)
+        public event Action<IRuntimeTypeFactoryArtifact[]> ArtifactsLoaded;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Assembly TryCompileNewAssembly(SyntaxTree syntax)
         {
             var compiler = new AssemblyCompiler(_referenceCache);
-            var assemblyName = $"RunTimeTypes{_compiledAssemblies.Count + 1}";
+            var assemblyName = $"{_assemblyNamePrefix}{_compiledAssemblies.Count + 1}";
+
+            if (_debugMode)
+            {
+                var sourceFilePath = Path.Combine(_generatedSourceDirectory, assemblyName + ".cs");
+                File.WriteAllText(sourceFilePath, syntax.ToString());
+                syntax = syntax.WithFilePath(sourceFilePath);
+            }
 
             if (compiler.CompileAssembly(
                 syntax,
                 references: new string[0],
-                enableDebug: true,
+                enableDebug: _debugMode,
                 assemblyName: assemblyName,
                 dllBytes: out byte[] dllBytes,
                 pdbBytes: out byte[] pdbBytes,
@@ -81,6 +114,13 @@ namespace NWheels.Compilation.Adapters.Roslyn
             }
 
             return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static string GetDefaultArtifactDirectory()
+        {
+            return Path.GetDirectoryName(typeof(RoslynTypeFactoryBackend).GetTypeInfo().Assembly.Location);
         }
     }
 }

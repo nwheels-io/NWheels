@@ -7,7 +7,7 @@ namespace NWheels.Compilation.Mechanism.Factories
 {
     public interface ITypeFactoryBackend<TArtifact>
     {
-        TypeCompilationResult<TArtifact> CompileSingleType(TypeMember syntax);
-        CompilationResult<TArtifact> CompileMultipleTypes(IEnumerable<TypeMember> syntaxes);
+        CompilationResult<TArtifact> Compile(IEnumerable<TypeMember> types);
+        event Action<TArtifact[]> ArtifactsLoaded;
     }
 }

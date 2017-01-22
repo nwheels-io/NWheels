@@ -6,6 +6,7 @@ using System.Text;
 namespace NWheels.Compilation.Policy.Relaxed
 {
     public abstract class ConventionBase<TKeyExtension, TContextExtension> : ITypeFactoryConvention
+        where TKeyExtension : ITypeKeyExtension, new()
     {
         bool ITypeFactoryConvention.ShouldApply(ITypeFactoryContext context)
         {

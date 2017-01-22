@@ -1,21 +1,25 @@
 ﻿using NWheels.Compilation.Mechanism.Factories;
+using NWheels.Compilation.Mechanism.Syntax.Members;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 
-namespace NWheels.Compilation.Policy.Relaxed
+namespace NWheels.Compilation.Mechanism.Factories
 {
     public abstract class TypeFactoryBase<TKeyExtension, TContextExtension, TArtifact>
+        where TKeyExtension : ITypeKeyExtension, new()
     {
-        private readonly ITypeFactoryMechanism<TArtifact> _mechanism;
+        private readonly ITypeLibrary<TArtifact> _library;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected TypeFactoryBase(ITypeFactoryMechanism<TArtifact> mechanism)
+        protected TypeFactoryBase(ITypeLibrary<TArtifact> library)
         {
-            _mechanism = mechanism;
-            _mechanism.BuildingNewProduct += OnMechanismBuildingNewProduct;
+            _library = library;
+            _library.BuildingNewProduct += OnLibraryBuildingNewProduct;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,18 +31,44 @@ namespace NWheels.Compilation.Policy.Relaxed
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected ITypeFactoryMechanism<TArtifact> Mechanism => _mechanism;
+        protected ITypeLibrary<TArtifact> Library => _library;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void OnMechanismBuildingNewProduct(BuildingNewTypeEventArgs args)
+        private void OnLibraryBuildingNewProduct(BuildingNewProductEventArgs args)
         {
             OnBuildingNewProduct(
                 (ITypeKey<TKeyExtension>)args.Key,
                 args.Pipe,
                 out TContextExtension contextExtension);
 
-            args.Context = _mechanism.CreateContext(args.Key, contextExtension);
+            var product = new TypeMember(new TypeGeneratorInfo(this.GetType(), args.Key));
+            args.Context = _library.CreateContext<TContextExtension>(args.Key, product, contextExtension);
+
+            ExecuteConventionPipeline(args);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ExecuteConventionPipeline(BuildingNewProductEventArgs args)
+        {
+            var context = args.Context;
+            var effectivePipe = args.Pipe.Where(sink => sink.ShouldApply(context)).ToImmutableList();
+
+            foreach (var sink in effectivePipe)
+            {
+                sink.Validate(args.Context);
+            }
+
+            foreach (var sink in effectivePipe)
+            {
+                sink.Declare(args.Context);
+            }
+
+            foreach (var sink in effectivePipe)
+            {
+                sink.Implement(args.Context);
+            }
         }
     }
 
@@ -46,7 +76,7 @@ namespace NWheels.Compilation.Policy.Relaxed
 
     public abstract class TypeFactoryBase<TContextExtension ,TArtifact> : TypeFactoryBase<Empty.KeyExtension, TContextExtension, TArtifact>
     {
-        protected TypeFactoryBase(ITypeFactoryMechanism<TArtifact> mechanism)
+        protected TypeFactoryBase(ITypeLibrary<TArtifact> mechanism)
             : base(mechanism)
         {
         }
@@ -56,7 +86,7 @@ namespace NWheels.Compilation.Policy.Relaxed
 
     public abstract class TypeFactoryBase<TArtifact> : TypeFactoryBase<Empty.KeyExtension, Empty.ContextExtension, TArtifact>
     {
-        protected TypeFactoryBase(ITypeFactoryMechanism<TArtifact> mechanism)
+        protected TypeFactoryBase(ITypeLibrary<TArtifact> mechanism)
             : base(mechanism)
         {
         }

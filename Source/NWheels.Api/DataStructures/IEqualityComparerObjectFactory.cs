@@ -4,7 +4,7 @@ using System.Text;
 
 namespace NWheels.DataStructures
 {
-    public interface IEqualityComparerTypeFactory
+    public interface IEqualityComparerObjectFactory
     {
         IEqualityComparer<T> GetEqualityComparer<T>();
         Type GetEqualityComparerImplementation(Type comparedType);
