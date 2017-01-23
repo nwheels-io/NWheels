@@ -7,7 +7,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 {
     public struct TypeGeneratorInfo
     {
-        public TypeGeneratorInfo(Type factoryType, ITypeKey typeKey)
+        public TypeGeneratorInfo(Type factoryType, TypeKey typeKey)
         {
             this.FactoryType = factoryType;
             this.TypeKey = typeKey;
@@ -16,6 +16,6 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Type FactoryType { get; }
-        public ITypeKey TypeKey { get; }
+        public TypeKey TypeKey { get; }
     }
 }

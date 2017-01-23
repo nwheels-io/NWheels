@@ -17,11 +17,13 @@ namespace NWheels.Core.UnitTests.DataStructures
         {
             //-- arrange
 
-            var factoryUnderTest = CreateFactoryUnderTest();
+            var typeFactoryUnderTest = CreateFactoryUnderTest();
+            IEqualityComparerObjectFactory objectFactoryUnderTest = typeFactoryUnderTest;
 
             //-- act
 
-            IEqualityComparer<ASimplestClass> comparer = factoryUnderTest.GetEqualityComparer<ASimplestClass>();
+            typeFactoryUnderTest.ImplementEqualityComparer(typeof(ASimplestClass));
+            IEqualityComparer<ASimplestClass> comparer = objectFactoryUnderTest.GetEqualityComparer<ASimplestClass>();
 
             //-- assert
 
@@ -41,7 +43,11 @@ namespace NWheels.Core.UnitTests.DataStructures
         {
             //-- arrange
 
-            var comparer = CreateFactoryUnderTest().GetEqualityComparer<AFlatStructWithFields>();
+            var typeFactoryUnderTest = CreateFactoryUnderTest();
+            typeFactoryUnderTest.ImplementEqualityComparer(typeof(ASimplestClass));
+
+            IEqualityComparerObjectFactory objectFactoryUnderTest = typeFactoryUnderTest;
+            var comparer = objectFactoryUnderTest.GetEqualityComparer<AFlatStructWithFields>();
 
             var x = new AFlatStructWithFields {
                 Number = 123,

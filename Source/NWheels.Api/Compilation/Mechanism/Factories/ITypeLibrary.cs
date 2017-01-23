@@ -7,10 +7,10 @@ namespace NWheels.Compilation.Mechanism.Factories
 {
     public interface ITypeLibrary<TArtifact>
     {
-        ITypeKey CreateKey<TKeyExtension>(Type primaryContract, Type[] secondaryContracts = null, TKeyExtension extension = default(TKeyExtension));
-        ITypeFactoryContext CreateContext<TContextExtension>(ITypeKey key, TypeMember product, TContextExtension extension);
-        TypeMember GetOrBuildTypeMember(ITypeKey key);
-        ITypeFactoryProduct<TArtifact> GetProduct(ITypeKey key);
+        TypeKey CreateKey<TKeyExtension>(TypeMember primaryContract, TypeMember[] secondaryContracts = null, TKeyExtension extension = default(TKeyExtension));
+        ITypeFactoryContext CreateContext<TContextExtension>(TypeKey key, TypeMember product, TContextExtension extension);
+        TypeMember GetOrBuildTypeMember(TypeKey key);
+        ITypeFactoryProduct<TArtifact> GetProduct(TypeKey key);
         event Action<BuildingNewProductEventArgs> BuildingNewProduct;
     }
 
@@ -18,14 +18,14 @@ namespace NWheels.Compilation.Mechanism.Factories
 
     public class BuildingNewProductEventArgs : EventArgs
     {
-        public BuildingNewProductEventArgs(ITypeKey key)
+        public BuildingNewProductEventArgs(TypeKey key)
         {
             this.Key = key;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ITypeKey Key { get; }
+        public TypeKey Key { get; }
         public List<ITypeFactoryConvention> Pipe { get; } = new List<ITypeFactoryConvention>();
         public ITypeFactoryContext Context { get; set; }
     }

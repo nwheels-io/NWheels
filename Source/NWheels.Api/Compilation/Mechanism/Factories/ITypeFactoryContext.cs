@@ -7,7 +7,7 @@ namespace NWheels.Compilation.Mechanism.Factories
 {
     public interface ITypeFactoryContext
     {
-        ITypeKey Key { get; }
+        TypeKey Key { get; }
         object Extension { get; }
         TypeMember Product { get; }
     }
@@ -15,7 +15,7 @@ namespace NWheels.Compilation.Mechanism.Factories
     public interface ITypeFactoryContext<TKeyExtension, TContextExtension>
         where TKeyExtension : ITypeKeyExtension, new()
     {
-        ITypeKey<TKeyExtension> Key { get; }
+        TypeKey<TKeyExtension> Key { get; }
         TContextExtension Extension { get; }
         TypeMember Product { get; }
     }

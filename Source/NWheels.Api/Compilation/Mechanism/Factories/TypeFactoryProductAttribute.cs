@@ -43,5 +43,12 @@ namespace NWheels.Compilation.Mechanism.Factories
             extension.Deserialize(_extensionValues);
             return extension;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static object[] SerializeTypeKeyExtension(ITypeKeyExtension extension)
+        {
+            return extension?.Serialize();
+        }
     }
 }

@@ -19,14 +19,17 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ITypeKey CreateKey<TKeyExtension>(Type primaryContract, Type[] secondaryContracts = null, TKeyExtension extension = default(TKeyExtension))
+        public TypeKey CreateKey<TKeyExtension>(
+            TypeMember primaryContract, 
+            TypeMember[] secondaryContracts = null, 
+            TKeyExtension extension = default(TKeyExtension))
         {
             throw new NotImplementedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ITypeFactoryContext CreateContext<TContextExtension>(ITypeKey key, TypeMember product, TContextExtension extension)
+        public ITypeFactoryContext CreateContext<TContextExtension>(TypeKey key, TypeMember product, TContextExtension extension)
         {
             var keyInternals = (ITypeKeyInternals)key;
             return keyInternals.CreateContext<TContextExtension>(product, extension);
@@ -34,7 +37,7 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ITypeFactoryProduct<TArtifact> GetProduct(ITypeKey key)
+        public ITypeFactoryProduct<TArtifact> GetProduct(TypeKey key)
         {
             BuildingNewProduct?.Invoke(null);
             throw new NotImplementedException();
@@ -42,7 +45,7 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeMember GetOrBuildTypeMember(ITypeKey key)
+        public TypeMember GetOrBuildTypeMember(TypeKey key)
         {
             throw new NotImplementedException();
         }

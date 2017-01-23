@@ -9,7 +9,7 @@ namespace NWheels.Compilation.Mechanism.Factories
     public class TypeFactoryContext<TKeyExtension, TContextExtension> : ITypeFactoryContext<TKeyExtension, TContextExtension>, ITypeFactoryContext
         where TKeyExtension : ITypeKeyExtension, new()
     {
-        public TypeFactoryContext(ITypeKey<TKeyExtension> key, TypeMember product, TContextExtension extension)
+        public TypeFactoryContext(TypeKey<TKeyExtension> key, TypeMember product, TContextExtension extension)
         {
             this.Key = key;
             this.Product = product;
@@ -18,12 +18,12 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        ITypeKey ITypeFactoryContext.Key => (ITypeKey)this.Key;
+        TypeKey ITypeFactoryContext.Key => (TypeKey)this.Key;
         object ITypeFactoryContext.Extension => this.Extension;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ITypeKey<TKeyExtension> Key { get; }
+        public TypeKey<TKeyExtension> Key { get; }
         public TypeMember Product { get; }
         public TContextExtension Extension { get; }
     }

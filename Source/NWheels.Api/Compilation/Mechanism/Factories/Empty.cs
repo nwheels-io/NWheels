@@ -16,6 +16,14 @@ namespace NWheels.Compilation.Mechanism.Factories
             {
                 return null;
             }
+            public override bool Equals(object obj)
+            {
+                return (obj is KeyExtension);
+            }
+            public override int GetHashCode()
+            {
+                return 0;
+            }
         }
 
         public class ContextExtension

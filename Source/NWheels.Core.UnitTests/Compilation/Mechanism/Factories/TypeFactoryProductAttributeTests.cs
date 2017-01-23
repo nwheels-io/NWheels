@@ -54,6 +54,28 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Fact]
+        public void CanSerializeTypeKeyExtension()
+        {
+            //-- arrange & act
+
+            var extension = new TestTypeKeyExtension() {
+                IntValue = 987,
+                StringValue = "XYZ",
+                TypeValue = typeof(Decimal)
+            };
+
+            //-- act
+
+            var values = TypeFactoryProductAttribute.SerializeTypeKeyExtension(extension);
+
+            //-- assert
+
+            values.Should().Equal(987, "XYZ", typeof(Decimal));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [TypeFactoryProduct(
             factory: typeof(TestFactory), 
             primaryContract: typeof(TestContractOne),

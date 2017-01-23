@@ -25,7 +25,7 @@ namespace NWheels.Compilation.Mechanism.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected abstract void OnBuildingNewProduct(
-            ITypeKey<TKeyExtension> key,
+            TypeKey<TKeyExtension> key,
             List<ITypeFactoryConvention> pipe,
             out TContextExtension contextExtension);
 
@@ -38,7 +38,7 @@ namespace NWheels.Compilation.Mechanism.Factories
         private void OnLibraryBuildingNewProduct(BuildingNewProductEventArgs args)
         {
             OnBuildingNewProduct(
-                (ITypeKey<TKeyExtension>)args.Key,
+                (TypeKey<TKeyExtension>)args.Key,
                 args.Pipe,
                 out TContextExtension contextExtension);
 

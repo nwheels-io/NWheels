@@ -6,7 +6,7 @@ namespace NWheels.Compilation.Mechanism.Factories
 {
     public interface ITypeFactoryProduct
     {
-        ITypeKey Key { get; }
+        TypeKey Key { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

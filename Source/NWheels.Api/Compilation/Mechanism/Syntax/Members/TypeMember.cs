@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace NWheels.Compilation.Mechanism.Syntax.Members
 {
-    public class TypeMember : AbstractMember
+    public class TypeMember : AbstractMember, IEquatable<TypeMember>
     {
         public TypeMember()
         {
@@ -72,6 +72,54 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool Equals(TypeMember other)
+        {
+            if (ReferenceEquals(other, null))
+            {
+                return false;
+            }
+
+            if (this.Binding != null)
+            {
+                return (this.Binding == other.Binding);
+            }
+
+            return ReferenceEquals(this, other);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override bool Equals(object obj)
+        {
+            if (obj is TypeMember other)
+            {
+                return this.Equals(other);
+            }
+
+            return base.Equals(obj);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override int GetHashCode()
+        {
+            if (Binding != null)
+            {
+                return 127 ^ Binding.GetHashCode();
+            }
+
+            return 17 ^ base.GetHashCode();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string ToString()
+        {
+            return this.FullName;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public string FullName
         {
             get
@@ -104,5 +152,34 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public Type Binding { get; set; }
         public List<AbstractMember> Members { get; private set; }
         public TypeGeneratorInfo Generator { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static implicit operator TypeMember(Type compiledType)
+        {
+            //TODO: use CompiledTypeMemberCache
+            return new TypeMember(compiledType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool operator == (TypeMember member1, TypeMember member2)
+        {
+            if (!ReferenceEquals(member1, null))
+            {
+                return member1.Equals(member2);
+            }
+            else
+            {
+                return ReferenceEquals(member2, null);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool operator != (TypeMember member1, TypeMember member2)
+        {
+            return !(member1 == member2);
+        }
     }
 }

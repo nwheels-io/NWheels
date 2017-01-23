@@ -20,6 +20,7 @@
     <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Compilation\Mechanism\Syntax\Members\" />
     <Folder Include="Compilation\Policy\Reusable\" />
   </ItemGroup>
 </Project>
