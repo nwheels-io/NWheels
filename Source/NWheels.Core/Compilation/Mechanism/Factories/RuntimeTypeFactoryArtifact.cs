@@ -6,7 +6,12 @@ namespace NWheels.Compilation.Mechanism.Factories
 {
     public class RuntimeTypeFactoryArtifact : IRuntimeTypeFactoryArtifact
     {
-        public Type RunTimeType => throw new NotImplementedException();
+        public RuntimeTypeFactoryArtifact(Type runtimeType)
+        {
+            this.RunTimeType = runtimeType;
+        }
+
+        public Type RunTimeType { get; }
 
         public object SingletonInstance => throw new NotImplementedException();
 

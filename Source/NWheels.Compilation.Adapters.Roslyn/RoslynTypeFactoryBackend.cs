@@ -57,16 +57,25 @@ namespace NWheels.Compilation.Adapters.Roslyn
             var assembly = TryCompileNewAssembly(syntax.SyntaxTree);
 
             //TODO: create real results
-            var results = types.Select(t => new TypeCompilationResult<IRuntimeTypeFactoryArtifact>()).ToArray();
-            //Compiled?.Invoke(results);
-            return new CompilationResult<IRuntimeTypeFactoryArtifact>();
+            var result = new CompilationResult<IRuntimeTypeFactoryArtifact>(
+                success: true,
+                allTypes: types.Select(t => 
+                    new TypeCompilationResult<IRuntimeTypeFactoryArtifact>(
+                        t, 
+                        true, 
+                        new RuntimeTypeFactoryArtifact(null), new List<CompilationIssue>())).ToList(),
+                typesWithIssues: new List<TypeCompilationResult<IRuntimeTypeFactoryArtifact>>());
+
+            //TODO: raise ArtifactsLoaded event
+
+            return result;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void LoadPrecompiledAssembly(string filePath)
         {
-            ArtifactsLoaded?.Invoke(null);
+            ProductsLoaded?.Invoke(null);
             throw new NotImplementedException();
         }
 
@@ -76,7 +85,7 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public event Action<IRuntimeTypeFactoryArtifact[]> ArtifactsLoaded;
+        public event Action<TypeFactoryProduct<IRuntimeTypeFactoryArtifact>[]> ProductsLoaded;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

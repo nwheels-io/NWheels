@@ -8,6 +8,6 @@ namespace NWheels.Compilation.Mechanism.Factories
     public interface ITypeFactoryBackend<TArtifact>
     {
         CompilationResult<TArtifact> Compile(IEnumerable<TypeMember> types);
-        event Action<TArtifact[]> ArtifactsLoaded;
+        event Action<TypeFactoryProduct<TArtifact>[]> ProductsLoaded;
     }
 }

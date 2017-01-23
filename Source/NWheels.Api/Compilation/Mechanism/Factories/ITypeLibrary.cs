@@ -7,18 +7,30 @@ namespace NWheels.Compilation.Mechanism.Factories
 {
     public interface ITypeLibrary<TArtifact>
     {
-        TypeKey CreateKey<TKeyExtension>(TypeMember primaryContract, TypeMember[] secondaryContracts = null, TKeyExtension extension = default(TKeyExtension));
-        ITypeFactoryContext CreateContext<TContextExtension>(TypeKey key, TypeMember product, TContextExtension extension);
+        TypeKey<TKeyExtension> CreateKey<TKeyExtension>(
+            TypeMember primaryContract, 
+            TypeMember[] secondaryContracts = null, 
+            TKeyExtension extension = default(TKeyExtension))
+            where TKeyExtension : ITypeKeyExtension, new();
+
+        ITypeFactoryContext CreateFactoryContext<TContextExtension>(TypeKey key, TypeMember type, TContextExtension extension);
+
         TypeMember GetOrBuildTypeMember(TypeKey key);
-        ITypeFactoryProduct<TArtifact> GetProduct(TypeKey key);
-        event Action<BuildingNewProductEventArgs> BuildingNewProduct;
+
+        void DeclareTypeMember(TypeKey key, TypeMember type);
+
+        void CompilePendingTypeMembers();
+
+        TypeFactoryProduct<TArtifact> GetProduct(TypeKey key);
+
+        event Action<TypeMemberMissingEventArgs> TypeMemberMissing;
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class BuildingNewProductEventArgs : EventArgs
+    public class TypeMemberMissingEventArgs : EventArgs
     {
-        public BuildingNewProductEventArgs(TypeKey key)
+        public TypeMemberMissingEventArgs(TypeKey key)
         {
             this.Key = key;
         }
@@ -26,7 +38,6 @@ namespace NWheels.Compilation.Mechanism.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TypeKey Key { get; }
-        public List<ITypeFactoryConvention> Pipe { get; } = new List<ITypeFactoryConvention>();
-        public ITypeFactoryContext Context { get; set; }
+        public TypeMember Type { get; set; }
     }
 }

@@ -19,14 +19,14 @@ namespace NWheels.Compilation.Mechanism.Factories
         protected TypeFactoryBase(ITypeLibrary<TArtifact> library)
         {
             _library = library;
-            _library.BuildingNewProduct += OnLibraryBuildingNewProduct;
+            _library.TypeMemberMissing += OnLibraryTypeMemberMissing;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected abstract void OnBuildingNewProduct(
+        protected abstract void DefinePipelineAndExtendFactoryContext(
             TypeKey<TKeyExtension> key,
-            List<ITypeFactoryConvention> pipe,
+            List<ITypeFactoryConvention> pipeline,
             out TContextExtension contextExtension);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -35,39 +35,45 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void OnLibraryBuildingNewProduct(BuildingNewProductEventArgs args)
+        private void OnLibraryTypeMemberMissing(TypeMemberMissingEventArgs args)
         {
-            OnBuildingNewProduct(
-                (TypeKey<TKeyExtension>)args.Key,
-                args.Pipe,
+            var key = (TypeKey<TKeyExtension>)args.Key;
+            var type = new TypeMember(new TypeGeneratorInfo(this.GetType(), key));
+
+            _library.DeclareTypeMember(key, type);
+
+            var conventionPipeline = new List<ITypeFactoryConvention>();
+
+            DefinePipelineAndExtendFactoryContext(
+                key,
+                conventionPipeline,
                 out TContextExtension contextExtension);
 
-            var product = new TypeMember(new TypeGeneratorInfo(this.GetType(), args.Key));
-            args.Context = _library.CreateContext<TContextExtension>(args.Key, product, contextExtension);
+            var factoryContext = _library.CreateFactoryContext<TContextExtension>(key, type, contextExtension);
+            ExecuteConventionPipeline(conventionPipeline, factoryContext);
 
-            ExecuteConventionPipeline(args);
+            args.Type = type;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ExecuteConventionPipeline(BuildingNewProductEventArgs args)
+        private void ExecuteConventionPipeline(List<ITypeFactoryConvention> pipeline, ITypeFactoryContext factoryContext)
         {
-            var context = args.Context;
-            var effectivePipe = args.Pipe.Where(sink => sink.ShouldApply(context)).ToImmutableList();
+            var effectivePipeline = pipeline.Where(sink => sink.ShouldApply(factoryContext)).ToImmutableList();
 
-            foreach (var sink in effectivePipe)
+            foreach (var sink in effectivePipeline)
             {
-                sink.Validate(args.Context);
+                sink.Validate(factoryContext);
             }
 
-            foreach (var sink in effectivePipe)
+            foreach (var sink in effectivePipeline)
             {
-                sink.Declare(args.Context);
+                sink.Declare(factoryContext);
             }
 
-            foreach (var sink in effectivePipe)
+            foreach (var sink in effectivePipeline)
             {
-                sink.Implement(args.Context);
+                sink.Implement(factoryContext);
             }
         }
     }

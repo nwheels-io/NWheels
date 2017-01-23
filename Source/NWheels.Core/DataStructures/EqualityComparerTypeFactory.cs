@@ -47,7 +47,7 @@ namespace NWheels.DataStructures
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void OnBuildingNewProduct(
+        protected override void DefinePipelineAndExtendFactoryContext(
             TypeKey<Empty.KeyExtension> key, 
             List<ITypeFactoryConvention> pipe, 
             out Empty.ContextExtension contextExtension)
