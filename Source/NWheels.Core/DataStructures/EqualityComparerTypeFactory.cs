@@ -21,7 +21,7 @@ namespace NWheels.DataStructures
         public void ImplementEqualityComparer(Type comparedType)
         {
             var key = Library.CreateKey<Empty.KeyExtension>(primaryContract: comparedType);
-            Library.GetOrBuildTypeMember(key);
+            GetOrBuildTypeMember(key);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

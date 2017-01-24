@@ -73,6 +73,13 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TypeMember GetBoundTypeMember(TypeFactoryProduct<IRuntimeTypeFactoryArtifact> product)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void LoadPrecompiledAssembly(string filePath)
         {
             ProductsLoaded?.Invoke(null);

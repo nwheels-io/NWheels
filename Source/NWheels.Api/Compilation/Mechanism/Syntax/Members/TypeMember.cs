@@ -21,7 +21,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public TypeMember(Type compiledType)
             : this()
         {
-            this.Binding = compiledType;
+            this.ClrBinding = compiledType;
             this.Name = compiledType.Name;
             this.Namespace = compiledType.Namespace;
 
@@ -79,9 +79,9 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
                 return false;
             }
 
-            if (this.Binding != null)
+            if (this.ClrBinding != null)
             {
-                return (this.Binding == other.Binding);
+                return (this.ClrBinding == other.ClrBinding);
             }
 
             return ReferenceEquals(this, other);
@@ -103,9 +103,9 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         public override int GetHashCode()
         {
-            if (Binding != null)
+            if (ClrBinding != null)
             {
-                return 127 ^ Binding.GetHashCode();
+                return 127 ^ ClrBinding.GetHashCode();
             }
 
             return 17 ^ base.GetHashCode();
@@ -149,7 +149,8 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public TypeMember GenericTypeDefinition { get; set; }
         public List<TypeMember> GenericTypeArguments { get; private set; }
         public TypeMember UnderlyingType { get; set; }
-        public Type Binding { get; set; }
+        public Type ClrBinding { get; set; }
+        public object NonClrBinding { get; set; }
         public List<AbstractMember> Members { get; private set; }
         public TypeGeneratorInfo Generator { get; private set; }
 

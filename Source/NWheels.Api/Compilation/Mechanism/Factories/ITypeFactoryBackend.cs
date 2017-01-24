@@ -8,6 +8,7 @@ namespace NWheels.Compilation.Mechanism.Factories
     public interface ITypeFactoryBackend<TArtifact>
     {
         CompilationResult<TArtifact> Compile(IEnumerable<TypeMember> types);
+        TypeMember GetBoundTypeMember(TypeFactoryProduct<TArtifact> product);
         event Action<TypeFactoryProduct<TArtifact>[]> ProductsLoaded;
     }
 }

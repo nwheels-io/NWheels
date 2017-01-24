@@ -19,7 +19,6 @@ namespace NWheels.Compilation.Mechanism.Factories
         protected TypeFactoryBase(ITypeLibrary<TArtifact> library)
         {
             _library = library;
-            _library.TypeMemberMissing += OnLibraryTypeMemberMissing;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -31,13 +30,20 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected TypeMember GetOrBuildTypeMember(TypeKey key)
+        {
+            return _library.GetOrBuildTypeMember(key, BuildNewTypeMember);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected ITypeLibrary<TArtifact> Library => _library;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void OnLibraryTypeMemberMissing(TypeMemberMissingEventArgs args)
+        private TypeMember BuildNewTypeMember(TypeKey key)
         {
-            var key = (TypeKey<TKeyExtension>)args.Key;
+            var typedKey = (TypeKey<TKeyExtension>)key;
             var type = new TypeMember(new TypeGeneratorInfo(this.GetType(), key));
 
             _library.DeclareTypeMember(key, type);
@@ -45,14 +51,14 @@ namespace NWheels.Compilation.Mechanism.Factories
             var conventionPipeline = new List<ITypeFactoryConvention>();
 
             DefinePipelineAndExtendFactoryContext(
-                key,
+                typedKey,
                 conventionPipeline,
                 out TContextExtension contextExtension);
 
             var factoryContext = _library.CreateFactoryContext<TContextExtension>(key, type, contextExtension);
             ExecuteConventionPipeline(conventionPipeline, factoryContext);
 
-            args.Type = type;
+            return type;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

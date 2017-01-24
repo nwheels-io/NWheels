@@ -10,7 +10,7 @@ namespace NWheels.Compilation.Mechanism.Factories
     public class TypeLibrary<TArtifact> : ITypeLibrary<TArtifact>
     {
         private readonly ITypeFactoryBackend<TArtifact> _backend;
-        private readonly Dictionary<TypeKey, TypeMember> _pendingTypeByKey;
+        private readonly Dictionary<TypeKey, TypeMember> _declaredTypeMemberByKey;
         private ImmutableDictionary<TypeKey, TypeFactoryProduct<TArtifact>> _productByKey;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ namespace NWheels.Compilation.Mechanism.Factories
         public TypeLibrary(ITypeFactoryBackend<TArtifact> backend)
         {
             _backend = backend;
-            _pendingTypeByKey = new Dictionary<TypeKey, TypeMember>();
+            _declaredTypeMemberByKey = new Dictionary<TypeKey, TypeMember>();
             _productByKey = ImmutableDictionary<TypeKey, TypeFactoryProduct<TArtifact>>.Empty;
 
             backend.ProductsLoaded += OnBackendProductsLoaded;
@@ -47,17 +47,17 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         public void DeclareTypeMember(TypeKey key, TypeMember type)
         {
-            _pendingTypeByKey.Add(key, type);
+            _declaredTypeMemberByKey.Add(key, type);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void CompilePendingTypeMembers()
+        public void CompileDeclaredTypeMembers()
         {
-            if (_pendingTypeByKey.Count > 0)
+            if (_declaredTypeMemberByKey.Count > 0)
             {
-                _backend.Compile(_pendingTypeByKey.Values);
-                _pendingTypeByKey.Clear();
+                _backend.Compile(_declaredTypeMemberByKey.Values);
+                _declaredTypeMemberByKey.Clear();
             }
         }
 
@@ -70,15 +70,22 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeMember GetOrBuildTypeMember(TypeKey key)
+        public TypeMember GetOrBuildTypeMember(TypeKey key, Func<TypeKey, TypeMember> factory)
         {
-            TypeMemberMissing?.Invoke(null);
-            throw new NotImplementedException();
+            if (_declaredTypeMemberByKey.TryGetValue(key, out TypeMember existingType))
+            {
+                return existingType;
+            }
+
+            if (_productByKey.TryGetValue(key, out TypeFactoryProduct<TArtifact> existingProduct))
+            {
+                return _backend.GetBoundTypeMember(existingProduct);
+            }
+
+            var newType = factory(key);
+            _declaredTypeMemberByKey.Add(key, newType);
+            return newType;
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public event Action<TypeMemberMissingEventArgs> TypeMemberMissing;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

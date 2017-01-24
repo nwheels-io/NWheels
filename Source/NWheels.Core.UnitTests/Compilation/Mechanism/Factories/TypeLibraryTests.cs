@@ -30,11 +30,11 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
 
             key.Should().NotBeNull();
             key.PrimaryContract.Should().NotBeNull();
-            key.PrimaryContract.Binding.Should().BeSameAs(typeof(string));
+            key.PrimaryContract.ClrBinding.Should().BeSameAs(typeof(string));
             key.SecondaryContracts.Should().NotBeNull();
             key.SecondaryContracts.Count.Should().Be(2);
-            key.SecondaryContracts[0].Binding.Should().BeSameAs(typeof(IFormattable));
-            key.SecondaryContracts[1].Binding.Should().BeSameAs(typeof(ICustomFormatter));
+            key.SecondaryContracts[0].ClrBinding.Should().BeSameAs(typeof(IFormattable));
+            key.SecondaryContracts[1].ClrBinding.Should().BeSameAs(typeof(ICustomFormatter));
             key.Extension.Should().BeSameAs(extension);
         }
 
@@ -95,16 +95,16 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             libraryUnderTest.DeclareTypeMember(key2, type2);
 
             backend.ExpectCompile(type1, type2);
-            libraryUnderTest.CompilePendingTypeMembers();
+            libraryUnderTest.CompileDeclaredTypeMembers();
 
             libraryUnderTest.DeclareTypeMember(key3, type3);
             libraryUnderTest.DeclareTypeMember(key4, type4);
 
             backend.ExpectCompile(type3, type4);
-            libraryUnderTest.CompilePendingTypeMembers();
+            libraryUnderTest.CompileDeclaredTypeMembers();
 
             // this should do nothing
-            libraryUnderTest.CompilePendingTypeMembers();
+            libraryUnderTest.CompileDeclaredTypeMembers();
 
             var product1 = libraryUnderTest.GetProduct(key1);
             var product2 = libraryUnderTest.GetProduct(key2);
@@ -117,6 +117,87 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             product2.Artifact.SourceType.Should().BeSameAs(type2);
             product3.Artifact.SourceType.Should().BeSameAs(type3);
             product4.Artifact.SourceType.Should().BeSameAs(type4);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanBuildUndeclaredTypeMember()
+        {
+            //-- arrange
+
+            var backend = new TestBackend();
+            var libraryUnderTest = new TypeLibrary<TestArtifact>(backend);
+
+            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(string));
+            var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
+
+            var callbackCount = 0;
+
+            //-- act
+
+            var actualResult = libraryUnderTest.GetOrBuildTypeMember(key1, actualKey => {
+                callbackCount++;
+                actualKey.Should().Be(key1);
+                return type1;
+            });
+
+            //-- Assert
+
+            callbackCount.Should().Be(1);
+            actualResult.Should().BeSameAs(type1);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanGetDeclaredTypeMember()
+        {
+            //-- arrange
+
+            var backend = new TestBackend();
+            var libraryUnderTest = new TypeLibrary<TestArtifact>(backend);
+
+            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(string));
+            var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
+
+            libraryUnderTest.DeclareTypeMember(key1, type1);
+
+            //-- act
+
+            var actualResult = libraryUnderTest.GetOrBuildTypeMember(key1, actualKey => {
+                throw new Exception("Callback should not be invoked");
+            });
+
+            //-- Assert
+
+            actualResult.Should().BeSameAs(type1);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanGetTypeMemberForExistingProduct()
+        {
+            //-- arrange
+
+            var backend = new TestBackend();
+            var libraryUnderTest = new TypeLibrary<TestArtifact>(backend);
+
+            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(string));
+            var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
+
+            backend.RaiseProductsLoaded(new TypeFactoryProduct<TestArtifact>(key1, new TestArtifact(type1)));
+
+            //-- act
+
+            var actualResult = libraryUnderTest.GetOrBuildTypeMember(key1, actualKey => {
+                throw new Exception("Callback should not be invoked");
+            });
+
+            //-- Assert
+
+            actualResult.Should().BeSameAs(type1);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -174,9 +255,23 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public TypeMember GetBoundTypeMember(TypeFactoryProduct<TestArtifact> product)
+            {
+                return product.Artifact.SourceType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public void ExpectCompile(params TypeMember[] types)
             {
                 _expectedCompile = types;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RaiseProductsLoaded(params TypeFactoryProduct<TestArtifact>[] products)
+            {
+                ProductsLoaded?.Invoke(products);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

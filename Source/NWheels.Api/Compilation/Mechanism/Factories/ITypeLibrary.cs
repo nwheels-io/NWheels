@@ -15,15 +15,13 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         ITypeFactoryContext CreateFactoryContext<TContextExtension>(TypeKey key, TypeMember type, TContextExtension extension);
 
-        TypeMember GetOrBuildTypeMember(TypeKey key);
+        TypeMember GetOrBuildTypeMember(TypeKey key, Func<TypeKey, TypeMember> factory);
 
         void DeclareTypeMember(TypeKey key, TypeMember type);
 
-        void CompilePendingTypeMembers();
+        void CompileDeclaredTypeMembers();
 
         TypeFactoryProduct<TArtifact> GetProduct(TypeKey key);
-
-        event Action<TypeMemberMissingEventArgs> TypeMemberMissing;
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
