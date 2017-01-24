@@ -123,6 +123,39 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void CanGetProductForCompiledTypeMember()
+        {
+            //-- arrange
+
+            var backend = new TestBackend();
+            var libraryUnderTest = new TypeLibrary<TestArtifact>(backend);
+
+            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractA));
+            var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
+
+            var key2 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractB));
+            var type2 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key2));
+
+            backend.ExpectCompile(type1, type2);
+
+            libraryUnderTest.DeclareTypeMember(key1, type1);
+            libraryUnderTest.DeclareTypeMember(key2, type2);
+            libraryUnderTest.CompileDeclaredTypeMembers();
+
+            //-- act
+
+            var product1 = libraryUnderTest.GetProduct(key1);
+            var product2 = libraryUnderTest.GetProduct(key2);
+
+            //-- Assert
+
+            product1.Artifact.SourceType.Should().BeSameAs(type1);
+            product2.Artifact.SourceType.Should().BeSameAs(type2);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void CanBuildUndeclaredTypeMember()
         {
             //-- arrange
