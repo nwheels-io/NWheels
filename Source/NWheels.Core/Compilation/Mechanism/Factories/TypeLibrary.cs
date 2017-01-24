@@ -4,6 +4,7 @@ using System.Text;
 using NWheels.Compilation.Mechanism.Syntax.Members;
 using System.Collections.Immutable;
 using System.Linq;
+using NWheels.Exceptions;
 
 namespace NWheels.Compilation.Mechanism.Factories
 {
@@ -56,8 +57,14 @@ namespace NWheels.Compilation.Mechanism.Factories
         {
             if (_declaredTypeMemberByKey.Count > 0)
             {
-                _backend.Compile(_declaredTypeMemberByKey.Values);
+                var result = _backend.Compile(_declaredTypeMemberByKey.Values);
+
                 _declaredTypeMemberByKey.Clear();
+
+                if (!result.Success)
+                {
+                    throw new CompilationErrorsException(result.Failed);
+                }
             }
         }
 

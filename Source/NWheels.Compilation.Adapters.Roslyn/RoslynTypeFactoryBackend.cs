@@ -49,7 +49,7 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CompilationResult<IRuntimeTypeFactoryArtifact> Compile(IEnumerable<TypeMember> types)
+        public CompilationResult Compile(IEnumerable<TypeMember> types)
         {
             var generator = new SourceCodeGenerator();
             var syntax = generator.GenerateSyntax(types);
@@ -57,14 +57,13 @@ namespace NWheels.Compilation.Adapters.Roslyn
             var assembly = TryCompileNewAssembly(syntax.SyntaxTree);
 
             //TODO: create real results
-            var result = new CompilationResult<IRuntimeTypeFactoryArtifact>(
-                success: true,
-                allTypes: types.Select(t => 
+            var result = new CompilationResult(
+                succeeded: types.Select(t => 
                     new TypeCompilationResult<IRuntimeTypeFactoryArtifact>(
                         t, 
                         true, 
                         new RuntimeTypeFactoryArtifact(null), new List<CompilationIssue>())).ToList(),
-                typesWithIssues: new List<TypeCompilationResult<IRuntimeTypeFactoryArtifact>>());
+                failed: new List<TypeCompilationResult<IRuntimeTypeFactoryArtifact>>());
 
             //TODO: raise ArtifactsLoaded event
 

@@ -1,25 +1,27 @@
-﻿using System;
+﻿using NWheels.Compilation.Mechanism.Syntax.Members;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace NWheels.Compilation.Mechanism.Factories
 {
-    public class CompilationResult<TArtifact>
+    public class CompilationResult
     {
         public CompilationResult(
-            bool success, 
-            IReadOnlyList<TypeCompilationResult<TArtifact>> allTypes, 
-            IReadOnlyList<TypeCompilationResult<TArtifact>> typesWithIssues)
+            IReadOnlyList<TypeCompilationResult> succeeded, 
+            IReadOnlyList<TypeCompilationResult> failed)
         {
-            this.Success = success;
-            this.AllTypes = allTypes;
-            this.TypesWithIssues = typesWithIssues;
+            this.Succeeded = succeeded;
+            this.Failed = failed;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool Success { get; }
-        public IReadOnlyList<TypeCompilationResult<TArtifact>> AllTypes { get; }
-        public IReadOnlyList<TypeCompilationResult<TArtifact>> TypesWithIssues { get; }
+        public bool Success => (Failed.Count == 0);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IReadOnlyList<TypeCompilationResult> Succeeded { get; }
+        public IReadOnlyList<TypeCompilationResult> Failed { get; }
     }
 }

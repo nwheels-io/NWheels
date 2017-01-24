@@ -6,7 +6,16 @@ using System.Text;
 
 namespace NWheels.Compilation.Mechanism.Factories
 {
-    public class TypeCompilationResult<TArtifact>
+    public abstract class TypeCompilationResult
+    {
+        public abstract TypeMember Type { get; }
+        public abstract bool Success { get; }
+        public abstract IReadOnlyList<CompilationIssue> Issues { get; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class TypeCompilationResult<TArtifact> : TypeCompilationResult
     {
         public TypeCompilationResult(
             TypeMember type,
@@ -22,9 +31,9 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeMember Type { get; }
-        public bool Success { get; }
+        public override TypeMember Type { get; }
+        public override bool Success { get; }
+        public override IReadOnlyList<CompilationIssue> Issues { get; }
         public TArtifact Artifact { get; }
-        public IReadOnlyList<CompilationIssue> Issues { get; }
     }
 }
