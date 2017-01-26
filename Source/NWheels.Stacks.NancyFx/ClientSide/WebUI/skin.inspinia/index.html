@@ -4415,9 +4415,13 @@ HEAD, JS/CSS LINKS
         <form class="form-horizontal">
             <div class="form-group">
                 <label class="col-lg-2 control-label">Type</label>
-                <div class="col-lg-3">
+                <div class="col-lg-3" ng-if="uidl.emptySelectionText">
                     <select ng-options="s.typeName as (s.text | translated) for s in uidl.selections" ng-model="selectedType.name" ng-change="selectedTypeChanged(selectedType.name)" class="form-control m-b">
-                        <option ng-if="uidl.emptySelectionText" value="">- {{::translate(uidl.emptySelectionText)}} -</option>
+                        <option value="">- {{::translate(uidl.emptySelectionText)}} -</option>
+                    </select>
+                </div>
+                <div class="col-lg-3" ng-if="!uidl.emptySelectionText">
+                    <select ng-options="s.typeName as (s.text | translated) for s in uidl.selections" ng-model="selectedType.name" ng-change="selectedTypeChanged(selectedType.name)" class="form-control m-b">                        
                     </select>
                 </div>
             </div>
