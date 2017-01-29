@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NWheels.Compilation.Mechanism.Syntax.Members;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,17 +9,18 @@ namespace NWheels.Compilation.Mechanism.Factories
         AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct | AttributeTargets.Enum, 
         AllowMultiple = false, 
         Inherited = false)]
-    public class TypeFactoryProductAttribute : Attribute
+    public class TypeKeyAttribute : Attribute
     {
         private readonly Type[] _secondaryContracts;
         private readonly object[] _extensionValues;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeFactoryProductAttribute(Type factory, Type primaryContract, Type[] secondaryContracts, object[] extensionValues)
+        public TypeKeyAttribute(Type factoryType, Type primaryContract, Type[] secondaryContracts, Type extensionType, object[] extensionValues)
         {
-            this.Factory = factory;
+            this.FactoryType = factoryType;
             this.PrimaryContract = primaryContract;
+            this.ExtensionType = extensionType;
 
             _secondaryContracts = secondaryContracts;
             _extensionValues = extensionValues;
@@ -26,7 +28,8 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Type Factory { get; }
+        public Type FactoryType { get; }
+        public Type ExtensionType { get; }
         public Type PrimaryContract { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

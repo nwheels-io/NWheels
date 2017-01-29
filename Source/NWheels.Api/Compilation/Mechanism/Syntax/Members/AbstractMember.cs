@@ -9,7 +9,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
     {
         protected AbstractMember()
         {
-            this.Attributes = new List<AttributeInfo>();
+            this.Attributes = new List<AttributeDescription>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -19,6 +19,6 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public MemberStatus Status { get; set; }
         public MemberVisibility Visibility { get; set; }
         public MemberModifiers Modifiers { get; set; }
-        public List<AttributeInfo> Attributes { get; private set; }
+        public List<AttributeDescription> Attributes { get; private set; }
     }
 }

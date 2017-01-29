@@ -23,6 +23,35 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TypeKey LoadTypeKey(TypeKeyAttribute productAttribute)
+        {
+            var extension = productAttribute.DeserializeTypeKeyExtension<TKeyExtension>();
+
+            TypeMember[] secondaryContracts;
+
+            if (productAttribute.SecondaryContracts != null)
+            {
+                secondaryContracts = new TypeMember[productAttribute.SecondaryContracts.Count];
+
+                for (int i = 0 ; i < secondaryContracts.Length ; i++)
+                {
+                    secondaryContracts[i] = productAttribute.SecondaryContracts[i];
+                }
+            }
+            else
+            {
+                secondaryContracts = null;
+            }
+
+            return _library.CreateKey<TKeyExtension>(
+                this.GetType(),
+                productAttribute.PrimaryContract,
+                secondaryContracts,
+                extension);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected abstract void DefinePipelineAndExtendFactoryContext(
             TypeKey<TKeyExtension> key,
             List<ITypeFactoryConvention> pipeline,

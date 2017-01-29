@@ -28,12 +28,13 @@ namespace NWheels.Compilation.Mechanism.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TypeKey<TKeyExtension> CreateKey<TKeyExtension>(
+            Type factoryType,
             TypeMember primaryContract, 
             TypeMember[] secondaryContracts = null, 
             TKeyExtension extension = default(TKeyExtension))
             where TKeyExtension : ITypeKeyExtension, new()
         {
-            return new RealTypeKey<TKeyExtension>(primaryContract, secondaryContracts, extension);
+            return new RealTypeKey<TKeyExtension>(factoryType, primaryContract, secondaryContracts, extension);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

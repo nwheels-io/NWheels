@@ -4,9 +4,9 @@ using System.Text;
 
 namespace NWheels.Compilation.Mechanism.Factories
 {
-    public class CompilationIssue
+    public class CompilationDiagnostic
     {
-        public CompilationIssue(CompilationIssueSeverity severity, string code, string message, string sourceLocation)
+        public CompilationDiagnostic(CompilationDiagnosticSeverity severity, string code, string message, string sourceLocation)
         {
             this.Severity = severity;
             this.Code = code;
@@ -16,7 +16,7 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CompilationIssueSeverity Severity { get; }
+        public CompilationDiagnosticSeverity Severity { get; }
         public string Code { get; }
         public string Message { get; }
         public string SourceLocation { get; }
@@ -24,7 +24,7 @@ namespace NWheels.Compilation.Mechanism.Factories
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public enum CompilationIssueSeverity
+    public enum CompilationDiagnosticSeverity
     {
         Verbose,
         Info,

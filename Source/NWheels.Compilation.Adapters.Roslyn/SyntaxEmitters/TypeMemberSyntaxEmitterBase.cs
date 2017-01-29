@@ -1,6 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using NWheels.Compilation.Mechanism.Factories;
+using NWheels.Compilation.Mechanism.Syntax.Expressions;
 using NWheels.Compilation.Mechanism.Syntax.Members;
 using System;
 using System.Collections.Generic;
@@ -18,6 +20,26 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
         protected TypeMemberSyntaxEmitterBase(TMember member)
             : base(member)
         {
+            if (member.Generator.FactoryType != null && member.Generator.TypeKey != null)
+            {
+                AddTypeKeyAttribute();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected void AddTypeKeyAttribute()
+        {
+            var typeKeyAttribute = new AttributeDescription() {
+                AttributeType = typeof(TypeKeyAttribute)
+            };
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.FactoryType });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.PrimaryContract });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = null }); //TODO: pass array of secondary contract types
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.ExtensionType });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = null }); //TODO: pass array of extension values
+
+            Member.Attributes.Add(typeKeyAttribute);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

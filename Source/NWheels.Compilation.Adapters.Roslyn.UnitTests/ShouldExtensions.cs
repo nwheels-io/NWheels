@@ -11,6 +11,11 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
 {
     public static class ShouldExtensions
     {
+        public static SyntaxAssertions Should(this SyntaxTree actualValue)
+        {
+            return new SyntaxAssertions(actualValue.GetRoot());
+        }
+
         public static SyntaxAssertions Should(this SyntaxNode actualValue)
         {
             return new SyntaxAssertions(actualValue);
@@ -18,9 +23,10 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
 
         private static string NormalizeCode(string code)
         {
-            var syntax = CSharpSyntaxTree.ParseText(code);
-            var normalizedSyntax = CSharpSyntaxTree.Create((CSharpSyntaxNode)syntax.GetRoot().NormalizeWhitespace());
-            return normalizedSyntax.GetText().ToString();
+            var parseOptions = new CSharpParseOptions(kind: SourceCodeKind.Script);
+            var syntax = CSharpSyntaxTree.ParseText(code, options: parseOptions);
+            var normalizedSyntax = syntax.GetRoot().NormalizeWhitespace(); //CSharpSyntaxTree.Create((CSharpSyntaxNode)syntax.GetRoot().NormalizeWhitespace(elasticTrivia: false));
+            return normalizedSyntax.ToFullString();// GetText().ToString();
         }
 
         public class SyntaxAssertions

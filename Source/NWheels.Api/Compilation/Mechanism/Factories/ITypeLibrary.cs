@@ -8,6 +8,7 @@ namespace NWheels.Compilation.Mechanism.Factories
     public interface ITypeLibrary<TArtifact>
     {
         TypeKey<TKeyExtension> CreateKey<TKeyExtension>(
+            Type factoryType,
             TypeMember primaryContract, 
             TypeMember[] secondaryContracts = null, 
             TKeyExtension extension = default(TKeyExtension))

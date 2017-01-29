@@ -7,8 +7,10 @@ namespace NWheels.Compilation.Mechanism.Factories
 {
     public abstract class TypeKey : IEquatable<TypeKey>
     {
+        public abstract Type FactoryType { get; }
         public abstract TypeMember PrimaryContract { get; }
         public abstract IReadOnlyList<TypeMember> SecondaryContracts { get; }
+        public abstract Type ExtensionType { get; }
         public abstract object ExtensionObject { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

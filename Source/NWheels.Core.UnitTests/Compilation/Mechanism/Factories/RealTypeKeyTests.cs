@@ -16,6 +16,7 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             //-- arrange & act
 
             var keyUnderTest = new RealTypeKey<Empty.KeyExtension>(
+                this.GetType(),
                 primaryContract: typeof(InterfaceA),
                 secondaryContracts: new TypeMember[] { typeof(InterfaceB), typeof(InterfaceC) },
                 extension: null);
@@ -39,6 +40,7 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             //-- act
 
             var keyUnderTest = new RealTypeKey<TestExtension>(
+                this.GetType(),
                 primaryContract: typeof(InterfaceA),
                 secondaryContracts: new TypeMember[] { typeof(InterfaceB), typeof(InterfaceC) },
                 extension: extension);
@@ -55,68 +57,94 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
         public static IEnumerable<object[]> TestCases_CanTestTypeKeysEquality = new object[][] {
             #region Test Cases
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, null, null),
-                new RealTypeKey<Empty.KeyExtension>(null, null, null),
+                new RealTypeKey<Empty.KeyExtension>(null, null, null, null),
+                new RealTypeKey<Empty.KeyExtension>(null, null, null, null),
                 true
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(typeof(string), null, null),
-                new RealTypeKey<Empty.KeyExtension>(typeof(string), null, null),
+                new RealTypeKey<Empty.KeyExtension>(typeof(TestFactory), null, null, null),
+                new RealTypeKey<Empty.KeyExtension>(typeof(TestFactory), null, null, null),
                 true
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(typeof(string), null, null),
-                new RealTypeKey<Empty.KeyExtension>(typeof(int), null, null),
+                new RealTypeKey<Empty.KeyExtension>(null, null, null, null),
+                new RealTypeKey<Empty.KeyExtension>(typeof(TestFactory), null, null, null),
                 false
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(typeof(string), null, null),
-                new RealTypeKey<TestExtension>(typeof(string), null, null),
+                new RealTypeKey<Empty.KeyExtension>(typeof(TestFactory), null, null, null),
+                new RealTypeKey<Empty.KeyExtension>(typeof(TestFactoryTwo), null, null, null),
                 false
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, new TypeMember[] { typeof(string), typeof(int) }, null),
-                new RealTypeKey<Empty.KeyExtension>(null, new TypeMember[] { typeof(string), typeof(int) }, null),
+                new RealTypeKey<Empty.KeyExtension>(null, typeof(string), null, null),
+                new RealTypeKey<Empty.KeyExtension>(null, typeof(string), null, null),
                 true
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, new TypeMember[] { typeof(string), typeof(int) }, null),
-                new RealTypeKey<Empty.KeyExtension>(null, new TypeMember[] { typeof(string) }, null),
-                false
-            },
-            new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, new TypeMember[] { typeof(string), typeof(int) }, null),
-                new RealTypeKey<Empty.KeyExtension>(null, new TypeMember[] { typeof(int), typeof(string) }, null),
-                false
-            },
-            new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, new TypeMember[] { typeof(string), typeof(int) }, null),
-                new RealTypeKey<Empty.KeyExtension>(null, new TypeMember[] { typeof(string) }, null),
-                false
-            },
-            new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, new TypeMember[] { typeof(string), typeof(int) }, null),
-                new RealTypeKey<Empty.KeyExtension>(null, null, null),
-                false
-            },
-            new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, null, new Empty.KeyExtension()),
-                new RealTypeKey<Empty.KeyExtension>(null, null, new Empty.KeyExtension()),
+                new RealTypeKey<Empty.KeyExtension>(null, typeof(string), null, null),
+                new RealTypeKey<Empty.KeyExtension>(null, typeof(string), null, null),
                 true
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, null, new Empty.KeyExtension()),
-                new RealTypeKey<Empty.KeyExtension>(null, null, null),
+                new RealTypeKey<Empty.KeyExtension>(null, typeof(string), null, null),
+                new RealTypeKey<Empty.KeyExtension>(null, typeof(int), null, null),
                 false
             },
             new object[] {
-                new RealTypeKey<TestExtension>(null, null, new TestExtension("ABC")),
-                new RealTypeKey<TestExtension>(null, null, new TestExtension("ABC")),
+                new RealTypeKey<Empty.KeyExtension>(null, typeof(string), null, null),
+                new RealTypeKey<TestExtension>(null, typeof(string), null, null),
+                false
+            },
+            new object[] {
+                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string), typeof(int) }, null),
+                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string), typeof(int) }, null),
                 true
             },
             new object[] {
-                new RealTypeKey<TestExtension>(null, null, new TestExtension("ABC")),
-                new RealTypeKey<TestExtension>(null, null, new TestExtension("DEF")),
+                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string), typeof(int) }, null),
+                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string) }, null),
+                false
+            },
+            new object[] {
+                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string), typeof(int) }, null),
+                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(int), typeof(string) }, null),
+                false
+            },
+            new object[] {
+                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string), typeof(int) }, null),
+                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string) }, null),
+                false
+            },
+            new object[] {
+                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string), typeof(int) }, null),
+                new RealTypeKey<Empty.KeyExtension>(null, null, null, null),
+                false
+            },
+            new object[] {
+                new RealTypeKey<Empty.KeyExtension>(null, null, null, new Empty.KeyExtension()),
+                new RealTypeKey<Empty.KeyExtension>(null, null, null, new Empty.KeyExtension()),
+                true
+            },
+            new object[] {
+                // an instance of Empty.KeyExtension and null are equal
+                new RealTypeKey<Empty.KeyExtension>(null, null, null, new Empty.KeyExtension()),
+                new RealTypeKey<Empty.KeyExtension>(null, null, null, null),
+                true
+            },
+            new object[] {
+                new RealTypeKey<TestExtension>(null, null, null, new TestExtension("ABC")),
+                new RealTypeKey<TestExtension>(null, null, null, null),
+                false
+            },
+            new object[] {
+                new RealTypeKey<TestExtension>(null, null, null, new TestExtension("ABC")),
+                new RealTypeKey<TestExtension>(null, null, null, new TestExtension("ABC")),
+                true
+            },
+            new object[] {
+                new RealTypeKey<TestExtension>(null, null, null, new TestExtension("ABC")),
+                new RealTypeKey<TestExtension>(null, null, null, new TestExtension("DEF")),
                 false
             },
             #endregion
@@ -198,5 +226,7 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
         public interface InterfaceA { }
         public interface InterfaceB { }
         public interface InterfaceC { }
+        public class TestFactory { }
+        public class TestFactoryTwo { }
     }
 }

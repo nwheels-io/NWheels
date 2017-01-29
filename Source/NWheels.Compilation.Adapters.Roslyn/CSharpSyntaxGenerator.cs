@@ -6,22 +6,27 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using NWheels.Compilation.Mechanism.Syntax.Members;
 using NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters;
 using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace NWheels.Compilation.Adapters.Roslyn
 {
-    public class SourceCodeGenerator
+    public class CSharpSyntaxGenerator
     {
-        public CompilationUnitSyntax GenerateSyntax(IEnumerable<TypeMember> typesToCompile)
+        public SyntaxTree GenerateSyntax(IEnumerable<TypeMember> typesToCompile)
         {
             var unitMemberSyntaxes = new List<MemberDeclarationSyntax>();
 
             EmitTypeSyntaxesGroupedInNamespaces(typesToCompile, unitMemberSyntaxes);
 
-            var unitSyntax = 
+            var compilationUnitSyntax = 
                 CompilationUnit()
-                    .WithMembers(List(unitMemberSyntaxes));
+                    .WithMembers(List(unitMemberSyntaxes))
+                    .NormalizeWhitespace();
 
-            return unitSyntax;
+            var syntaxTree = CSharpSyntaxTree.Create(compilationUnitSyntax, encoding: Encoding.UTF8);
+
+            return syntaxTree;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -63,19 +68,25 @@ namespace NWheels.Compilation.Adapters.Roslyn
         private MemberDeclarationSyntax EmitTypeSyntax(TypeMember type)
         {
             MemberDeclarationSyntax typeSyntax;
+
             switch (type.TypeKind)
             {
                 case TypeMemberKind.Class:
-                    var enumEmitter = new ClassSyntaxEmitter(type);
-                    typeSyntax = enumEmitter.EmitSyntax();
+                    var classEmitter = new ClassSyntaxEmitter(type);
+                    typeSyntax = classEmitter.EmitSyntax();
                     break;
                 case TypeMemberKind.Enum:
-                    var classEmitter = new EnumSyntaxEmitter(type);
-                    typeSyntax = classEmitter.EmitSyntax();
+                    var enumEmitter = new EnumSyntaxEmitter(type);
+                    typeSyntax = enumEmitter.EmitSyntax();
                     break;
                 default:
                     throw new NotSupportedException($"TypeMember of kind '{type.TypeKind}' is not supported.");
             }
+
+            var annotation = new SyntaxAnnotation();
+
+            typeSyntax = typeSyntax.WithAdditionalAnnotations(annotation);
+            type.BackendTag = annotation;
 
             return typeSyntax;
         }

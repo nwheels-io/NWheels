@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
 
 namespace NWheels.Compilation.Adapters.Roslyn
 {
@@ -25,14 +26,13 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool CompileAssembly(
+        public EmitResult CompileAssembly(
             SyntaxTree code,
             string[] references,
             bool enableDebug,
             string assemblyName,
             out byte[] dllBytes,
-            out byte[] pdbBytes,
-            out string[] errors)
+            out byte[] pdbBytes)
         {
             var context = new CompilationContext {
                 AssemblyName = assemblyName,
@@ -47,8 +47,7 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
             dllBytes = context.DllBytes;
             pdbBytes = context.PdbBytes;
-            errors = context.Errors;
-            return context.Success;
+            return context.Result;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -83,20 +82,10 @@ namespace NWheels.Compilation.Adapters.Roslyn
             {
                 using (var pdbStream = context.EnableDebug ? new MemoryStream() : null)
                 {
-                    //var clock = Stopwatch.StartNew();
-                    EmitResult result = context.Compilation.Emit(
+                    context.Result = context.Compilation.Emit(
                         dllStream, 
                         pdbStream, 
                         options: new EmitOptions(debugInformationFormat: DebugInformationFormat.PortablePdb));
-                    //Console.WriteLine(">> COMPILE TIME, ms = {0}", clock.ElapsedMilliseconds);
-
-                    context.Success = result.Success;
-
-                    if (!result.Success)
-                    {
-                        IEnumerable<Diagnostic> failures = result.Diagnostics.Where(IsErrorOrWarning);
-                        context.Errors = failures.Select(f => f.ToString()).ToArray();
-                    }
 
                     context.DllBytes = dllStream.ToArray();
                     context.PdbBytes = pdbStream?.ToArray();
@@ -106,10 +95,10 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private bool IsErrorOrWarning(Diagnostic diagnostic)
-        {
-            return (diagnostic.IsWarningAsError || diagnostic.Severity == DiagnosticSeverity.Error);
-        }
+        //private bool IsErrorOrWarning(Diagnostic diagnostic)
+        //{
+        //    return (diagnostic.IsWarningAsError || diagnostic.Severity == DiagnosticSeverity.Error);
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -121,10 +110,9 @@ namespace NWheels.Compilation.Adapters.Roslyn
             public string AssemblyName { get; set; }
             public MetadataReference[] LoadedReferences { get; set; }
             public CSharpCompilation Compilation { get; set; }
+            public EmitResult Result { get; set; }
             public byte[] DllBytes { get; set; }
             public byte[] PdbBytes { get; set; }
-            public string[] Errors { get; set; }
-            public bool Success { get; set; }
         }
     }
 }

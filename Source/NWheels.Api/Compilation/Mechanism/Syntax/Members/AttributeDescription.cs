@@ -5,25 +5,25 @@ using System.Text;
 
 namespace NWheels.Compilation.Mechanism.Syntax.Members
 {
-    public class AttributeInfo
+    public class AttributeDescription
     {
-        public AttributeInfo()
+        public AttributeDescription()
         {
             this.ConstructorArguments = new List<AbstractExpression>();
-            this.PropertyValues = new List<AttributePropertyValueInfo>();
+            this.PropertyValues = new List<PropertyValue>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TypeMember AttributeType { get; set; }
         public List<AbstractExpression> ConstructorArguments { get; private set; }
-        public List<AttributePropertyValueInfo> PropertyValues { get; private set; }
+        public List<PropertyValue> PropertyValues { get; private set; }
         public Attribute Binding { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class AttributePropertyValueInfo
+    public class PropertyValue
     {
         public string Name { get; set; }
         public AbstractExpression Value { get; set; }

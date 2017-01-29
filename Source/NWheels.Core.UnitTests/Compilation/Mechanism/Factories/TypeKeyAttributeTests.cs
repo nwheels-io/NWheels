@@ -8,23 +8,28 @@ using Xunit;
 
 namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
 {
-    public class TypeFactoryProductAttributeTests
+    public class TypeKeyAttributeTests
     {
         [Fact]
         public void CanRetrieveAttributeValues()
         {
             //-- arrange & act
 
-            var attributeUnderTest = typeof(TestTarget).GetTypeInfo().GetCustomAttribute<TypeFactoryProductAttribute>();
+            var attributeUnderTest = typeof(TestTarget).GetTypeInfo().GetCustomAttribute<TypeKeyAttribute>();
 
             //-- assert
 
             attributeUnderTest.Should().NotBeNull();
-            attributeUnderTest.Factory.Should().BeSameAs(typeof(TestFactory));
+            attributeUnderTest.FactoryType.Should().BeSameAs(typeof(TypeKeyAttributeTests));
+
             attributeUnderTest.PrimaryContract.Should().BeSameAs(typeof(TestContractOne));
+
             attributeUnderTest.SecondaryContracts.Count.Should().Be(2);
             attributeUnderTest.SecondaryContracts[0].Should().BeSameAs(typeof(TestContractTwo));
             attributeUnderTest.SecondaryContracts[1].Should().BeSameAs(typeof(TestContractThree));
+
+            attributeUnderTest.ExtensionType.Should().BeSameAs(typeof(TestTypeKeyExtension));
+
             attributeUnderTest.ExtensionValues.Count.Should().Be(3);
             attributeUnderTest.ExtensionValues[0].Should().Be(123);
             attributeUnderTest.ExtensionValues[1].Should().Be("ABC");
@@ -38,7 +43,7 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
         {
             //-- arrange
 
-            var attributeUnderTest = typeof(TestTarget).GetTypeInfo().GetCustomAttribute<TypeFactoryProductAttribute>();
+            var attributeUnderTest = typeof(TestTarget).GetTypeInfo().GetCustomAttribute<TypeKeyAttribute>();
 
             //-- act
 
@@ -67,7 +72,7 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
 
             //-- act
 
-            var values = TypeFactoryProductAttribute.SerializeTypeKeyExtension(extension);
+            var values = TypeKeyAttribute.SerializeTypeKeyExtension(extension);
 
             //-- assert
 
@@ -76,10 +81,11 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [TypeFactoryProduct(
-            factory: typeof(TestFactory), 
+        [TypeKey(
+            factoryType: typeof(TypeKeyAttributeTests),
             primaryContract: typeof(TestContractOne),
             secondaryContracts: new Type[] { typeof(TestContractTwo), typeof(TestContractThree) },
+            extensionType: typeof(TestTypeKeyExtension),
             extensionValues: new object[] { 123, "ABC", typeof(AnotherTestObject) })]
         public class TestTarget
         {

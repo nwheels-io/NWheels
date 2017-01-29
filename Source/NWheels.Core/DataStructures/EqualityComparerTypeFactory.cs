@@ -20,7 +20,7 @@ namespace NWheels.DataStructures
 
         public void ImplementEqualityComparer(Type comparedType)
         {
-            var key = Library.CreateKey<Empty.KeyExtension>(primaryContract: comparedType);
+            var key = Library.CreateKey<Empty.KeyExtension>(factoryType: this.GetType(), primaryContract: comparedType);
             GetOrBuildTypeMember(key);
         }
 
@@ -28,7 +28,7 @@ namespace NWheels.DataStructures
 
         IEqualityComparer<T> IEqualityComparerObjectFactory.GetEqualityComparer<T>()
         {
-            var key = Library.CreateKey<Empty.KeyExtension>(primaryContract: typeof(T));
+            var key = Library.CreateKey<Empty.KeyExtension>(factoryType: this.GetType(), primaryContract: typeof(T));
             var product = Library.GetProduct(key);
             var instance = product.Artifact.GetOrCreateSingleton<IEqualityComparer<T>>(constructorIndex: 0);
 
@@ -39,7 +39,7 @@ namespace NWheels.DataStructures
 
         Type IEqualityComparerObjectFactory.GetEqualityComparerImplementation(Type comparedType)
         {
-            var key = Library.CreateKey<Empty.KeyExtension>(primaryContract: comparedType);
+            var key = Library.CreateKey<Empty.KeyExtension>(factoryType: this.GetType(), primaryContract: comparedType);
             var product = Library.GetProduct(key);
 
             return product.Artifact.RunTimeType;

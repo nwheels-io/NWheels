@@ -12,8 +12,9 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public RealTypeKey(TypeMember primaryContract, TypeMember[] secondaryContracts, TExtension extension)
+        public RealTypeKey(Type factoryType, TypeMember primaryContract, TypeMember[] secondaryContracts, TExtension extension)
         {
+            this.FactoryType = factoryType;
             this.PrimaryContract = primaryContract;
             this.SecondaryContracts = secondaryContracts;
             this.Extension = extension;
@@ -33,6 +34,11 @@ namespace NWheels.Compilation.Mechanism.Factories
         public bool Equals(TypeKey<TExtension> other)
         {
             if (other == null)
+            {
+                return false;
+            }
+
+            if (other.FactoryType != this.FactoryType)
             {
                 return false;
             }
@@ -65,6 +71,11 @@ namespace NWheels.Compilation.Mechanism.Factories
             else if (other.SecondaryContracts != null)
             {
                 return false;
+            }
+
+            if (typeof(TExtension) == typeof(Empty.KeyExtension))
+            {
+                return true;
             }
 
             if (this.Extension != null)
@@ -117,10 +128,15 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override Type FactoryType { get; }
         public override TypeMember PrimaryContract { get; }
         public override IReadOnlyList<TypeMember> SecondaryContracts { get; }
         public override TExtension Extension { get; }
         public override object ExtensionObject => this.Extension;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override Type ExtensionType => typeof(TExtension);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

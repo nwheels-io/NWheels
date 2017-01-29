@@ -76,5 +76,49 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Syntax.Members
 
             hash2.Should().Be(hash1);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<object[]> TestCases_TestFullName = new object[][] {
+            #region Test cases
+            new object[] {
+                new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassOne"),
+                "ClassOne"
+            },
+            new object[] {
+                new TypeMember("NS1.NS2", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne"),
+                "NS1.NS2.ClassOne"
+            },
+            new object[] {
+                new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "NestedOne") {
+                    DeclaringType = new TypeMember("NS1.NS2", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne")
+                },
+                "NS1.NS2.ClassOne.NestedOne"
+            },
+            new object[] {
+                new TypeMember(typeof(System.IFormattable)),
+                "System.IFormattable"
+            },
+            new object[] {
+                new TypeMember(typeof(TestNestedType)),
+                "NWheels.Core.UnitTests.Compilation.Mechanism.Syntax.Members.TypeMemberTests.TestNestedType"
+            },
+            #endregion
+        };
+
+        [Theory]
+        [MemberData(nameof(TestCases_TestFullName))]
+        public void TestFullName(TypeMember typeUnderTest, string expectedFullName)
+        {
+            //-- act & assert
+
+            typeUnderTest.FullName.Should().Be(expectedFullName);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class TestNestedType
+        {
+        }
     }
 }

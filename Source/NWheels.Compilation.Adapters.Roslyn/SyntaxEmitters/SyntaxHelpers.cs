@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using NWheels.Compilation.Mechanism.Syntax.Expressions;
 using NWheels.Compilation.Mechanism.Syntax.Members;
 using System;
 using System.Collections.Generic;
@@ -12,15 +13,19 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 {
     public static class SyntaxHelpers
     {
-        public static AttributeSyntax ToAttributeSyntax(this AttributeInfo info)
+        public static AttributeSyntax ToAttributeSyntax(this AttributeDescription description)
         {
-            return Attribute(ParseName(info.AttributeType.FullName));
+            return AttributeSyntaxEmitter.EmitSyntax(description);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static LiteralExpressionSyntax GetLiteralSyntax(object value)
+        public static ExpressionSyntax GetLiteralSyntax(object value)
         {
+            if (value is ConstantExpression expression)
+            {
+                value = expression.Value;
+            }
             if (value == null)
             {
                 return LiteralExpression(SyntaxKind.NullLiteralExpression);
@@ -61,6 +66,14 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
             {
                 return LiteralExpression(SyntaxKind.CharacterLiteralExpression, Literal(charValue));
             }
+            else if (value is Type typeValue)
+            {
+                return TypeOfExpression(GetTypeNameSyntax(typeValue));
+            }
+            else if (value is TypeMember typeMember)
+            {
+                return TypeOfExpression(GetTypeNameSyntax(typeMember));
+            }
 
             throw new NotSupportedException($"Literals of type {value.GetType().Name} are not supported");
         }
@@ -71,7 +84,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
         {
             if (!type.IsGenericType)
             {
-                return ParseName(type.FullName);
+                return QualifyTypeNameSyntax(type, IdentifierName(type.Name));
             }
 
             var genericSyntax = GenericName(type.Name)
@@ -80,12 +93,24 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
                         SeparatedList<TypeSyntax>(
                             type.GenericTypeArguments.Select(GetTypeNameSyntax))));
 
-            if (!string.IsNullOrEmpty(type.Namespace))
+            return QualifyTypeNameSyntax(type, genericSyntax);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static NameSyntax QualifyTypeNameSyntax(TypeMember type, SimpleNameSyntax simpleName)
+        {
+            if (type.DeclaringType != null)
             {
-                return QualifiedName(ParseName(type.Namespace), genericSyntax);
+                return QualifiedName(GetTypeNameSyntax(type.DeclaringType), simpleName);
             }
 
-            return genericSyntax;
+            if (!string.IsNullOrEmpty(type.Namespace))
+            {
+                return QualifiedName(ParseName(type.Namespace), simpleName);
+            }
+
+            return simpleName;
         }
     }
 }

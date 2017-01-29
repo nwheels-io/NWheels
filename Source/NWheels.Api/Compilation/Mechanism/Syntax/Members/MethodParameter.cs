@@ -8,7 +8,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
     {
         public MethodParameter()
         {
-            this.Attributes = new List<AttributeInfo>();
+            this.Attributes = new List<AttributeDescription>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -17,7 +17,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public int Position { get; set; }
         public TypeMember Type { get; set; }
         public ParameterModifier Modifier { get; set; }
-        public List<AttributeInfo> Attributes { get; private set; }
+        public List<AttributeDescription> Attributes { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

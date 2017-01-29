@@ -25,6 +25,11 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
             this.Name = compiledType.Name;
             this.Namespace = compiledType.Namespace;
 
+            if (compiledType.DeclaringType != null)
+            {
+                this.DeclaringType = compiledType.DeclaringType;
+            }
+
             var info = compiledType.GetTypeInfo();
 
             this.AssemblyName = info.Assembly.FullName;
@@ -68,6 +73,20 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
             : this(visibility, typeKind, name, genericTypeArguments)
         {
             this.Namespace = namespaceName;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TypeMember(
+            TypeGeneratorInfo generator, 
+            string namespaceName, 
+            MemberVisibility visibility, 
+            TypeMemberKind typeKind, 
+            string name, 
+            params TypeMember[] genericTypeArguments)
+            : this(namespaceName, visibility, typeKind, name, genericTypeArguments)
+        {
+            this.Generator = generator;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -124,12 +143,17 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         {
             get
             {
-                if (string.IsNullOrEmpty(Namespace))
+                if (DeclaringType != null)
                 {
-                    return Name;
+                    return DeclaringType.FullName + "." + Name;
                 }
 
-                return Namespace + "." + Name;
+                if (!string.IsNullOrEmpty(Namespace))
+                {
+                    return Namespace + "." + Name;
+                }
+
+                return Name;
             }
         }
 
@@ -151,6 +175,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public TypeMember UnderlyingType { get; set; }
         public Type ClrBinding { get; set; }
         public object NonClrBinding { get; set; }
+        public object BackendTag { get; set; }
         public List<AbstractMember> Members { get; private set; }
         public TypeGeneratorInfo Generator { get; private set; }
 

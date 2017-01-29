@@ -18,12 +18,21 @@ namespace NWheels.Compilation.Mechanism.Factories
             }
             public override bool Equals(object obj)
             {
-                return (obj is KeyExtension);
+                return (ReferenceEquals(obj, null) || obj is KeyExtension);
             }
             public override int GetHashCode()
             {
                 return 0;
             }
+            public static bool operator ==(KeyExtension x, KeyExtension y)
+            {
+                return true;
+            }
+            public static bool operator !=(KeyExtension x, KeyExtension y)
+            {
+                return false;
+            }
+
         }
 
         public class ContextExtension

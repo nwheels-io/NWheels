@@ -23,6 +23,7 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             //-- act
 
             var key = libraryUnderTest.CreateKey<TestKeyExtension>(
+                this.GetType(),
                 primaryContract: typeof(string), 
                 secondaryContracts: new TypeMember[] { typeof(IFormattable), typeof(ICustomFormatter) }, 
                 extension: extension);
@@ -49,6 +50,7 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             var libraryUnderTest = new TypeLibrary<TestArtifact>(new TestBackend());
 
             var key = libraryUnderTest.CreateKey<TestKeyExtension>(
+                this.GetType(),
                 primaryContract: typeof(string),
                 secondaryContracts: new TypeMember[] { typeof(IFormattable), typeof(ICustomFormatter) },
                 extension: new TestKeyExtension());
@@ -78,16 +80,16 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             var backend = new TestBackend();
             var libraryUnderTest = new TypeLibrary<TestArtifact>(backend);
 
-            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractA));
+            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractA));
             var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
 
-            var key2 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractB));
+            var key2 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractB));
             var type2 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key2));
 
-            var key3 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractC));
+            var key3 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractC));
             var type3 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key3));
 
-            var key4 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractD));
+            var key4 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractD));
             var type4 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key4));
 
             //-- act
@@ -130,10 +132,10 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             var backend = new TestBackend();
             var libraryUnderTest = new TypeLibrary<TestArtifact>(backend);
 
-            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractA));
+            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractA));
             var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
 
-            var key2 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractB));
+            var key2 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractB));
             var type2 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key2));
 
             backend.ExpectCompile(type1, type2);
@@ -156,6 +158,38 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void CanGetProductForLoadedTypeMember()
+        {
+            //-- arrange
+
+            var backend = new TestBackend();
+            var libraryUnderTest = new TypeLibrary<TestArtifact>(backend);
+
+            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractA));
+            var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
+
+            var key2 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractB));
+            var type2 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key2));
+
+            backend.RaiseProductsLoaded(
+                new TypeFactoryProduct<TestArtifact>(key1, new TestArtifact(type1)),
+                new TypeFactoryProduct<TestArtifact>(key2, new TestArtifact(type2))
+            );
+
+            //-- act
+
+            var product1 = libraryUnderTest.GetProduct(key1);
+            var product2 = libraryUnderTest.GetProduct(key2);
+
+            //-- Assert
+
+            product1.Artifact.SourceType.Should().BeSameAs(type1);
+            product2.Artifact.SourceType.Should().BeSameAs(type2);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void CanBuildUndeclaredTypeMember()
         {
             //-- arrange
@@ -163,7 +197,7 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             var backend = new TestBackend();
             var libraryUnderTest = new TypeLibrary<TestArtifact>(backend);
 
-            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(string));
+            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(string));
             var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
 
             var callbackCount = 0;
@@ -192,7 +226,7 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             var backend = new TestBackend();
             var libraryUnderTest = new TypeLibrary<TestArtifact>(backend);
 
-            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(string));
+            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(string));
             var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
 
             libraryUnderTest.DeclareTypeMember(key1, type1);
@@ -218,7 +252,7 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             var backend = new TestBackend();
             var libraryUnderTest = new TypeLibrary<TestArtifact>(backend);
 
-            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(string));
+            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(string));
             var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
 
             backend.RaiseProductsLoaded(new TypeFactoryProduct<TestArtifact>(key1, new TestArtifact(type1)));
@@ -244,16 +278,16 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             var backend = new TestBackend();
             var libraryUnderTest = new TypeLibrary<TestArtifact>(backend);
 
-            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractA));
+            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractA));
             var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
 
-            var key2 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractB));
+            var key2 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractB));
             var type2 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key2));
 
-            var key3 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractC));
+            var key3 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractC));
             var type3 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key3));
 
-            var key4 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractD));
+            var key4 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractD));
             var type4 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key4));
 
             libraryUnderTest.DeclareTypeMember(key1, type1);
@@ -289,16 +323,16 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             var backend = new TestBackend();
             var libraryUnderTest = new TypeLibrary<TestArtifact>(backend);
 
-            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractA));
+            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractA));
             var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
 
-            var key2 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractB));
+            var key2 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractB));
             var type2 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key2));
 
-            var key3 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractC));
+            var key3 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractC));
             var type3 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key3));
 
-            var key4 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractD));
+            var key4 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractD));
             var type4 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key4));
 
             libraryUnderTest.DeclareTypeMember(key1, type1);
@@ -335,16 +369,16 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             var backend = new TestBackend();
             var libraryUnderTest = new TypeLibrary<TestArtifact>(backend);
 
-            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractA));
+            var key1 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractA));
             var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
 
-            var key2 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractB));
+            var key2 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractB));
             var type2 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key2));
 
-            var key3 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractC));
+            var key3 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractC));
             var type3 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key3));
 
-            var key4 = libraryUnderTest.CreateKey<TestKeyExtension>(typeof(ITestContractD));
+            var key4 = libraryUnderTest.CreateKey<TestKeyExtension>(this.GetType(), typeof(ITestContractD));
             var type4 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key4));
 
             libraryUnderTest.DeclareTypeMember(key1, type1);
@@ -412,7 +446,7 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public CompilationResult Compile(IEnumerable<TypeMember> types)
+            public CompilationResult Compile(ICollection<TypeMember> types)
             {
                 _expectedCompile.Should().NotBeNull("Unexpected call to backend Compile()");
                 _expectedCompile.Should().BeEquivalentTo(types, "Unexpected types in call to backend Compile()");
@@ -428,13 +462,13 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
                     if (_expectedSuccess[index++])
                     {
                         var artifact = new TestArtifact(type);
-                        succeeded.Add(new TypeCompilationResult<TestArtifact>(type, true, artifact, new CompilationIssue[0]));
+                        succeeded.Add(new TypeCompilationResult<TestArtifact>(type, true, artifact, new CompilationDiagnostic[0]));
                         products.Add(new TypeFactoryProduct<TestArtifact>(type.Generator.TypeKey, artifact));
                     }
                     else
                     {
                         failed.Add(new TypeCompilationResult<TestArtifact>(type, false, null, new[] {
-                            new CompilationIssue(CompilationIssueSeverity.Error, "ERRTEST01", "Test error", "source.cs(1,1)")
+                            new CompilationDiagnostic(CompilationDiagnosticSeverity.Error, "ERRTEST01", "Test error", "source.cs(1,1)")
                         }));
                     }
                 }
@@ -444,7 +478,7 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
                     ProductsLoaded?.Invoke(products.ToArray());
                 }
 
-                return new CompilationResult(succeeded, failed);
+                return new CompilationResult(succeeded, failed, new List<CompilationDiagnostic>());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

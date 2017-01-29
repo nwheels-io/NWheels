@@ -1,4 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using NWheels.Compilation.Mechanism.Factories;
+using NWheels.Compilation.Mechanism.Syntax.Expressions;
 using NWheels.Compilation.Mechanism.Syntax.Members;
 using System;
 using System.Collections.Generic;

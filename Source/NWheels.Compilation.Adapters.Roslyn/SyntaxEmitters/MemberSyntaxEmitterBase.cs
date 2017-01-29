@@ -31,7 +31,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
             return SingletonList<AttributeListSyntax>(
                 AttributeList(
                     SeparatedList<AttributeSyntax>(
-                        Member.Attributes.Select(SyntaxHelpers.ToAttributeSyntax))));
+                        Member.Attributes.Select(AttributeSyntaxEmitter.EmitSyntax))));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

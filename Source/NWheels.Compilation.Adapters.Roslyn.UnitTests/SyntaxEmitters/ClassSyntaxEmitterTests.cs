@@ -162,7 +162,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
             //-- arrange
 
             var classMember = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
-            classMember.Attributes.Add(new AttributeInfo() {
+            classMember.Attributes.Add(new AttributeDescription() {
                 AttributeType = new TypeMember(typeof(System.Diagnostics.DebuggerStepThroughAttribute))
             });
 
@@ -188,10 +188,10 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
 
             var classMember = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
 
-            classMember.Attributes.Add(new AttributeInfo() {
+            classMember.Attributes.Add(new AttributeDescription() {
                 AttributeType = new TypeMember(typeof(System.Diagnostics.DebuggerStepThroughAttribute))
             });
-            classMember.Attributes.Add(new AttributeInfo() {
+            classMember.Attributes.Add(new AttributeDescription() {
                 AttributeType = new TypeMember(typeof(System.ComponentModel.LocalizableAttribute))
             });
 

@@ -9,10 +9,12 @@ namespace NWheels.Compilation.Mechanism.Factories
     {
         public CompilationResult(
             IReadOnlyList<TypeCompilationResult> succeeded, 
-            IReadOnlyList<TypeCompilationResult> failed)
+            IReadOnlyList<TypeCompilationResult> failed,
+            IReadOnlyList<CompilationDiagnostic> globalDiagnostics)
         {
             this.Succeeded = succeeded;
             this.Failed = failed;
+            this.GlobalDiagnostics = globalDiagnostics;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -23,5 +25,6 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         public IReadOnlyList<TypeCompilationResult> Succeeded { get; }
         public IReadOnlyList<TypeCompilationResult> Failed { get; }
+        public IReadOnlyList<CompilationDiagnostic> GlobalDiagnostics { get; }
     }
 }

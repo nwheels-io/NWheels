@@ -45,7 +45,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
             var enumMember = new TypeMember();
             enumMember.Namespace = "SyntaxGeneratorTests";
             enumMember.Name = "TestFlagsEnum";
-            enumMember.Attributes.Add(new AttributeInfo() {
+            enumMember.Attributes.Add(new AttributeDescription() {
                 AttributeType = new TypeMember(typeof(FlagsAttribute))
             });
             enumMember.Members.Add(new EnumMember() { Name = "None", Value = 0 });

@@ -8,9 +8,10 @@ namespace NWheels.Compilation.Mechanism.Factories
 {
     public abstract class TypeCompilationResult
     {
+        public abstract TypeKey Key { get; }
         public abstract TypeMember Type { get; }
         public abstract bool Success { get; }
-        public abstract IReadOnlyList<CompilationIssue> Issues { get; }
+        public abstract IReadOnlyList<CompilationDiagnostic> Diagnostics { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -21,19 +22,23 @@ namespace NWheels.Compilation.Mechanism.Factories
             TypeMember type,
             bool success,
             TArtifact artifact,
-            IReadOnlyList<CompilationIssue> issues)
+            IReadOnlyList<CompilationDiagnostic> diagnostics)
         {
             this.Type = type;
             this.Success = success;
             this.Artifact = artifact;
-            this.Issues = issues;
+            this.Diagnostics = diagnostics;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override TypeKey Key => Type.Generator.TypeKey;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override TypeMember Type { get; }
         public override bool Success { get; }
-        public override IReadOnlyList<CompilationIssue> Issues { get; }
+        public override IReadOnlyList<CompilationDiagnostic> Diagnostics { get; }
         public TArtifact Artifact { get; }
     }
 }
