@@ -498,7 +498,7 @@ namespace NWheels.UI.Toolbox
             builder.BuildNodes(this.Fields.SelectMany(f => f.GetNestedWidgets()).Cast<AbstractUidlNode>().ToArray());
             builder.BuildNodes(this.Commands.Cast<AbstractUidlNode>().ToArray());
 
-            this.AutoRecalculateOnChange = Fields.Any(f => f.MetaProperty != null && f.MetaProperty.IsCalculated);
+            this.AutoRecalculateOnChange |= Fields.Any(f => f.MetaProperty != null && f.MetaProperty.IsCalculated);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
