@@ -12,18 +12,22 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
 {
     public class CSharpSyntaxGeneratorTests
     {
-        [Fact(Skip = "Syntax emitter for NewArrayExpression is not yet implemented")]
+        [Fact]
         public void TypeKeyAttribute_FullKey()
         {
             //-- arrange
 
             var generatorUnderTest = new CSharpSyntaxGenerator();
 
-            var key1 = new RealTypeKey<TestKeyExtension>(
+            var key1 = new TypeKey(
                 factoryType: typeof(CSharpSyntaxGeneratorTests),
                 primaryContract: typeof(IContractOne),
-                secondaryContracts: new TypeMember[] { typeof(IFormattable), typeof(IComparable) },
-                extension: new TestKeyExtension() { Values = new object[] { 123, "ABC", typeof(string) } });
+                secondaryContract1: typeof(IContractTwo),
+                secondaryContract2: typeof(IContractThree),
+                secondaryContract3: typeof(IContractFour),
+                extensionValue1: 111,
+                extensionValue2: 222,
+                extensionValue3: 333);
 
             var type1 = new TypeMember(
                 new TypeGeneratorInfo(this.GetType(), key1),
@@ -41,16 +45,16 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
                     [NWheels.Compilation.Mechanism.Factories.TypeKeyAttribute(
                         typeof(NWheels.Compilation.Adapters.Roslyn.UnitTests.CSharpSyntaxGeneratorTests),
                         typeof(NWheels.Compilation.Adapters.Roslyn.UnitTests.CSharpSyntaxGeneratorTests.IContractOne),
-                        new Type[] { typeof(System.IFormattable), typeof(System.IComparable) },
-                        typeof(NWheels.Compilation.Adapters.Roslyn.UnitTests.CSharpSyntaxGeneratorTests.TestKeyExtension), 
-                        new object[] { 123, ""ABC"", typeof(System.String) })]
+                        typeof(NWheels.Compilation.Adapters.Roslyn.UnitTests.CSharpSyntaxGeneratorTests.IContractTwo),
+                        typeof(NWheels.Compilation.Adapters.Roslyn.UnitTests.CSharpSyntaxGeneratorTests.IContractThree),
+                        typeof(NWheels.Compilation.Adapters.Roslyn.UnitTests.CSharpSyntaxGeneratorTests.IContractFour),
+                        111, 222, 333)]
                     public class MyClass { }
                 }
             ");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
 
         [Fact]
         public void SingleTypeWithNamespace()
@@ -148,21 +152,6 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
         public interface IContractOne {  }
         public interface IContractTwo { }
         public interface IContractThree { }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class TestKeyExtension : ITypeKeyExtension
-        {
-            public object[] Values { get; set; }
-
-            public void Deserialize(object[] values)
-            {
-                this.Values = values;
-            }
-            public object[] Serialize()
-            {
-                return this.Values;
-            }
-        }
+        public interface IContractFour { }
     }
 }

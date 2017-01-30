@@ -23,7 +23,6 @@ namespace NWheels.Compilation.Adapters.Roslyn
         private readonly string _compiledAssemblyDirectory;
         private readonly ReferenceCache _referenceCache;
         private readonly List<Assembly> _compiledAssemblies;
-        private readonly Dictionary<Type, TypeKeyLoader> _keyLoaderByExtensionType;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -47,7 +46,6 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
             _referenceCache = new ReferenceCache();
             _compiledAssemblies = new List<Assembly>();
-            _keyLoaderByExtensionType = new Dictionary<Type, TypeKeyLoader>();
 
             _referenceCache.IncludePrerequisiteAssemblyReferences();
         }
@@ -166,35 +164,16 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
             foreach (var runtimeType in runtimeTypes)
             {
-                var productAttribute = runtimeType.GetTypeInfo().GetCustomAttribute<TypeKeyAttribute>();
+                var keyAttribute = runtimeType.GetTypeInfo().GetCustomAttribute<TypeKeyAttribute>();
 
-                if (productAttribute != null)
+                if (keyAttribute != null)
                 {
-                    var keyLoader = GetTypeKeyLoader(productAttribute.ExtensionType);
-                    var key = keyLoader.LoadKey(productAttribute);
-
+                    var key = keyAttribute.ToTypeKey();
                     productByTypeKey.Add(key, new RuntimeTypeFactoryArtifact(runtimeType));
                 }
             }
 
             return productByTypeKey;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private TypeKeyLoader GetTypeKeyLoader(Type extensionType)
-        {
-            if (_keyLoaderByExtensionType.TryGetValue(extensionType, out TypeKeyLoader existingKeyLoader))
-            {
-                return existingKeyLoader;
-            }
-
-            var keyLoaderType = typeof(TypeKeyLoader<>).MakeGenericType(extensionType);
-            var newKeyLoader = (TypeKeyLoader)Activator.CreateInstance(keyLoaderType);
-
-            _keyLoaderByExtensionType.Add(extensionType, newKeyLoader);
-
-            return newKeyLoader;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -349,43 +328,6 @@ namespace NWheels.Compilation.Adapters.Roslyn
         private static string GetDefaultArtifactDirectory()
         {
             return Path.GetDirectoryName(typeof(RoslynTypeFactoryBackend).GetTypeInfo().Assembly.Location);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        internal abstract class TypeKeyLoader
-        {
-            public abstract TypeKey LoadKey(TypeKeyAttribute productAttribute);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        internal class TypeKeyLoader<TKeyExtension> : TypeKeyLoader
-            where TKeyExtension : ITypeKeyExtension, new()
-        {
-            public override TypeKey LoadKey(TypeKeyAttribute keyAttribute)
-            {
-                var extension = keyAttribute.DeserializeTypeKeyExtension<TKeyExtension>();
-
-                TypeMember[] secondaryContracts;
-
-                if (keyAttribute.SecondaryContracts != null)
-                {
-                    secondaryContracts = new TypeMember[keyAttribute.SecondaryContracts.Count];
-
-                    for (int i = 0 ; i < secondaryContracts.Length ; i++)
-                    {
-                        secondaryContracts[i] = keyAttribute.SecondaryContracts[i];
-                    }
-                }
-                else
-                {
-                    secondaryContracts = null;
-                }
-
-                var key = new RealTypeKey<TKeyExtension>(keyAttribute.FactoryType, keyAttribute.PrimaryContract, secondaryContracts, extension);
-                return key;
-            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

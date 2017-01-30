@@ -27,22 +27,9 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeKey<TKeyExtension> CreateKey<TKeyExtension>(
-            Type factoryType,
-            TypeMember primaryContract, 
-            TypeMember[] secondaryContracts = null, 
-            TKeyExtension extension = default(TKeyExtension))
-            where TKeyExtension : ITypeKeyExtension, new()
+        public ITypeFactoryContext CreateFactoryContext<TExtension>(TypeKey key, TypeMember type, TExtension extension)
         {
-            return new RealTypeKey<TKeyExtension>(factoryType, primaryContract, secondaryContracts, extension);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public ITypeFactoryContext CreateFactoryContext<TContextExtension>(TypeKey key, TypeMember type, TContextExtension extension)
-        {
-            var keyInternals = (ITypeKeyInternals)key;
-            return keyInternals.CreateContext<TContextExtension>(type, extension);
+            return new TypeFactoryContext<TExtension>(key, type, extension);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -71,7 +58,7 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeFactoryProduct<TArtifact> GetProduct(TypeKey key)
+        public TypeFactoryProduct<TArtifact> GetProduct(ref TypeKey key)
         {
             return _productByKey[key];
         }

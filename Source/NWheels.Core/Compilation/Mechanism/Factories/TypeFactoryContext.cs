@@ -6,10 +6,9 @@ using NWheels.Compilation.Mechanism.Syntax.Members;
 
 namespace NWheels.Compilation.Mechanism.Factories
 {
-    public class TypeFactoryContext<TKeyExtension, TContextExtension> : ITypeFactoryContext<TKeyExtension, TContextExtension>, ITypeFactoryContext
-        where TKeyExtension : ITypeKeyExtension, new()
+    public class TypeFactoryContext<TContextExtension> : ITypeFactoryContext<TContextExtension>, ITypeFactoryContext
     {
-        public TypeFactoryContext(TypeKey<TKeyExtension> key, TypeMember type, TContextExtension extension)
+        public TypeFactoryContext(TypeKey key, TypeMember type, TContextExtension extension)
         {
             this.Key = key;
             this.Type = type;
@@ -23,7 +22,7 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeKey<TKeyExtension> Key { get; }
+        public TypeKey Key { get; }
         public TypeMember Type { get; }
         public TContextExtension Extension { get; }
     }

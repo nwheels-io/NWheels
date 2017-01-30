@@ -9,8 +9,7 @@ using System.Text;
 
 namespace NWheels.Compilation.Mechanism.Factories
 {
-    public abstract class TypeFactoryBase<TKeyExtension, TContextExtension, TArtifact>
-        where TKeyExtension : ITypeKeyExtension, new()
+    public abstract class TypeFactoryBase<TContextExtension, TArtifact>
     {
         private readonly ITypeLibrary<TArtifact> _library;
 
@@ -23,43 +22,14 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeKey LoadTypeKey(TypeKeyAttribute productAttribute)
-        {
-            var extension = productAttribute.DeserializeTypeKeyExtension<TKeyExtension>();
-
-            TypeMember[] secondaryContracts;
-
-            if (productAttribute.SecondaryContracts != null)
-            {
-                secondaryContracts = new TypeMember[productAttribute.SecondaryContracts.Count];
-
-                for (int i = 0 ; i < secondaryContracts.Length ; i++)
-                {
-                    secondaryContracts[i] = productAttribute.SecondaryContracts[i];
-                }
-            }
-            else
-            {
-                secondaryContracts = null;
-            }
-
-            return _library.CreateKey<TKeyExtension>(
-                this.GetType(),
-                productAttribute.PrimaryContract,
-                secondaryContracts,
-                extension);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         protected abstract void DefinePipelineAndExtendFactoryContext(
-            TypeKey<TKeyExtension> key,
+            TypeKey key,
             List<ITypeFactoryConvention> pipeline,
             out TContextExtension contextExtension);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected TypeMember GetOrBuildTypeMember(TypeKey key)
+        protected TypeMember GetOrBuildTypeMember(ref TypeKey key)
         {
             return _library.GetOrBuildTypeMember(key, BuildNewTypeMember);
         }
@@ -72,7 +42,6 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         private TypeMember BuildNewTypeMember(TypeKey key)
         {
-            var typedKey = (TypeKey<TKeyExtension>)key;
             var type = new TypeMember(new TypeGeneratorInfo(this.GetType(), key));
 
             _library.DeclareTypeMember(key, type);
@@ -80,7 +49,7 @@ namespace NWheels.Compilation.Mechanism.Factories
             var conventionPipeline = new List<ITypeFactoryConvention>();
 
             DefinePipelineAndExtendFactoryContext(
-                typedKey,
+                key,
                 conventionPipeline,
                 out TContextExtension contextExtension);
 
@@ -115,17 +84,7 @@ namespace NWheels.Compilation.Mechanism.Factories
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public abstract class TypeFactoryBase<TContextExtension ,TArtifact> : TypeFactoryBase<Empty.KeyExtension, TContextExtension, TArtifact>
-    {
-        protected TypeFactoryBase(ITypeLibrary<TArtifact> mechanism)
-            : base(mechanism)
-        {
-        }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public abstract class TypeFactoryBase<TArtifact> : TypeFactoryBase<Empty.KeyExtension, Empty.ContextExtension, TArtifact>
+    public abstract class TypeFactoryBase<TArtifact> : TypeFactoryBase<Empty.ContextExtension, TArtifact>
     {
         protected TypeFactoryBase(ITypeLibrary<TArtifact> mechanism)
             : base(mechanism)

@@ -11,45 +11,30 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
     public class RealTypeKeyTests
     {
         [Fact]
-        public void CanCreateTypeKeyWithEmptyExtension()
+        public void CanCreateTypeKey()
         {
-            //-- arrange & act
-
-            var keyUnderTest = new RealTypeKey<Empty.KeyExtension>(
-                this.GetType(),
-                primaryContract: typeof(InterfaceA),
-                secondaryContracts: new TypeMember[] { typeof(InterfaceB), typeof(InterfaceC) },
-                extension: null);
-
-            //-- assert
-
-            keyUnderTest.PrimaryContract.Should().Be(new TypeMember(typeof(InterfaceA)));
-            keyUnderTest.SecondaryContracts.Should().Equal(new TypeMember[] { typeof(InterfaceB), typeof(InterfaceC) });
-            keyUnderTest.Extension.Should().BeNull();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void CanCreateTypeKeyWithCustomExtension()
-        {
-            //-- arrange
-
-            var extension = new TestExtension(data: "ABC");
-
             //-- act
 
-            var keyUnderTest = new RealTypeKey<TestExtension>(
-                this.GetType(),
+            var keyUnderTest = new TypeKey(
+                factoryType: this.GetType(),
                 primaryContract: typeof(InterfaceA),
-                secondaryContracts: new TypeMember[] { typeof(InterfaceB), typeof(InterfaceC) },
-                extension: extension);
+                secondaryContract1: typeof(InterfaceB),
+                secondaryContract2: typeof(InterfaceC),
+                secondaryContract3: typeof(InterfaceD),
+                extensionValue1: 123,
+                extensionValue2: 456,
+                extensionValue3: 789);
 
             //-- assert
 
+            keyUnderTest.FactoryType.Should().BeSameAs(this.GetType());
             keyUnderTest.PrimaryContract.Should().Be(new TypeMember(typeof(InterfaceA)));
-            keyUnderTest.SecondaryContracts.Should().Equal(new TypeMember[] { typeof(InterfaceB), typeof(InterfaceC) });
-            keyUnderTest.Extension.Should().BeSameAs(extension);
+            keyUnderTest.SecondaryContract1.Should().Be(new TypeMember(typeof(InterfaceB)));
+            keyUnderTest.SecondaryContract2.Should().Be(new TypeMember(typeof(InterfaceC)));
+            keyUnderTest.SecondaryContract3.Should().Be(new TypeMember(typeof(InterfaceD)));
+            keyUnderTest.ExtensionValue1.Should().Be(123);
+            keyUnderTest.ExtensionValue2.Should().Be(456);
+            keyUnderTest.ExtensionValue3.Should().Be(789);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,96 +42,110 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
         public static IEnumerable<object[]> TestCases_CanTestTypeKeysEquality = new object[][] {
             #region Test Cases
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, null, null, null),
-                new RealTypeKey<Empty.KeyExtension>(null, null, null, null),
+                new TypeKey(typeof(TestFactory), null, null, null, null, 0, 0, 0),
+                new TypeKey(typeof(TestFactory), null, null, null, null, 0, 0, 0),
                 true
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(typeof(TestFactory), null, null, null),
-                new RealTypeKey<Empty.KeyExtension>(typeof(TestFactory), null, null, null),
+                new TypeKey(typeof(TestFactory),    null, null, null, null, 0, 0, 0),
+                new TypeKey(typeof(TestFactoryTwo), null, null, null, null, 0, 0, 0),
+                false
+            },
+            new object[] {
+                new TypeKey(typeof(TestFactory), typeof(InterfaceA), typeof(InterfaceB), typeof(InterfaceC), typeof(InterfaceD), 1, 2, 3),
+                new TypeKey(typeof(TestFactory), typeof(InterfaceA), typeof(InterfaceB), typeof(InterfaceC), typeof(InterfaceD), 1, 2, 3),
                 true
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, null, null, null),
-                new RealTypeKey<Empty.KeyExtension>(typeof(TestFactory), null, null, null),
-                false
-            },
-            new object[] {
-                new RealTypeKey<Empty.KeyExtension>(typeof(TestFactory), null, null, null),
-                new RealTypeKey<Empty.KeyExtension>(typeof(TestFactoryTwo), null, null, null),
-                false
-            },
-            new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, typeof(string), null, null),
-                new RealTypeKey<Empty.KeyExtension>(null, typeof(string), null, null),
+                new TypeKey(typeof(TestFactory), typeof(InterfaceA), null, null, null, 0, 0, 0),
+                new TypeKey(typeof(TestFactory), typeof(InterfaceA), null, null, null, 0, 0, 0),
                 true
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, typeof(string), null, null),
-                new RealTypeKey<Empty.KeyExtension>(null, typeof(string), null, null),
+                new TypeKey(typeof(TestFactory), typeof(InterfaceA), null, null, null, 0, 0, 0),
+                new TypeKey(typeof(TestFactory), null,               null, null, null, 0, 0, 0),
+                false
+            },
+            new object[] {
+                new TypeKey(typeof(TestFactory), typeof(InterfaceA), null, null, null, 0, 0, 0),
+                new TypeKey(typeof(TestFactory), typeof(InterfaceB), null, null, null, 0, 0, 0),
+                false
+            },
+            new object[] {
+                new TypeKey(typeof(TestFactory), null, typeof(InterfaceA), null, null, 0, 0, 0),
+                new TypeKey(typeof(TestFactory), null, typeof(InterfaceA), null, null, 0, 0, 0),
                 true
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, typeof(string), null, null),
-                new RealTypeKey<Empty.KeyExtension>(null, typeof(int), null, null),
+                new TypeKey(typeof(TestFactory), null, typeof(InterfaceA), null, null, 0, 0, 0),
+                new TypeKey(typeof(TestFactory), null, null,               null, null, 0, 0, 0),
                 false
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, typeof(string), null, null),
-                new RealTypeKey<TestExtension>(null, typeof(string), null, null),
+                new TypeKey(typeof(TestFactory), null, typeof(InterfaceA), null, null, 0, 0, 0),
+                new TypeKey(typeof(TestFactory), null, typeof(InterfaceB), null, null, 0, 0, 0),
                 false
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string), typeof(int) }, null),
-                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string), typeof(int) }, null),
+                new TypeKey(typeof(TestFactory), null, null, typeof(InterfaceA), null, 0, 0, 0),
+                new TypeKey(typeof(TestFactory), null, null, typeof(InterfaceA), null, 0, 0, 0),
                 true
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string), typeof(int) }, null),
-                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string) }, null),
+                new TypeKey(typeof(TestFactory), null, null, typeof(InterfaceA), null, 0, 0, 0),
+                new TypeKey(typeof(TestFactory), null, null, null,               null, 0, 0, 0),
                 false
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string), typeof(int) }, null),
-                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(int), typeof(string) }, null),
+                new TypeKey(typeof(TestFactory), null, null, typeof(InterfaceA), null, 0, 0, 0),
+                new TypeKey(typeof(TestFactory), null, null, typeof(InterfaceB), null, 0, 0, 0),
                 false
             },
             new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string), typeof(int) }, null),
-                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string) }, null),
-                false
-            },
-            new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, null, new TypeMember[] { typeof(string), typeof(int) }, null),
-                new RealTypeKey<Empty.KeyExtension>(null, null, null, null),
-                false
-            },
-            new object[] {
-                new RealTypeKey<Empty.KeyExtension>(null, null, null, new Empty.KeyExtension()),
-                new RealTypeKey<Empty.KeyExtension>(null, null, null, new Empty.KeyExtension()),
+                new TypeKey(typeof(TestFactory), null, null, null, typeof(InterfaceA),  0, 0, 0),
+                new TypeKey(typeof(TestFactory), null, null, null, typeof(InterfaceA),  0, 0, 0),
                 true
             },
             new object[] {
-                // an instance of Empty.KeyExtension and null are equal
-                new RealTypeKey<Empty.KeyExtension>(null, null, null, new Empty.KeyExtension()),
-                new RealTypeKey<Empty.KeyExtension>(null, null, null, null),
-                true
-            },
-            new object[] {
-                new RealTypeKey<TestExtension>(null, null, null, new TestExtension("ABC")),
-                new RealTypeKey<TestExtension>(null, null, null, null),
+                new TypeKey(typeof(TestFactory), null, null, null, typeof(InterfaceA), 0, 0, 0),
+                new TypeKey(typeof(TestFactory), null, null, null, null,               0, 0, 0),
                 false
             },
             new object[] {
-                new RealTypeKey<TestExtension>(null, null, null, new TestExtension("ABC")),
-                new RealTypeKey<TestExtension>(null, null, null, new TestExtension("ABC")),
+                new TypeKey(typeof(TestFactory), null, null, null, typeof(InterfaceA), 0, 0, 0),
+                new TypeKey(typeof(TestFactory), null, null, null, typeof(InterfaceB), 0, 0, 0),
+                false
+            },
+            new object[] {
+                new TypeKey(typeof(TestFactory), null, null, null, null, 1, 0, 0),
+                new TypeKey(typeof(TestFactory), null, null, null, null, 1, 0, 0),
                 true
             },
             new object[] {
-                new RealTypeKey<TestExtension>(null, null, null, new TestExtension("ABC")),
-                new RealTypeKey<TestExtension>(null, null, null, new TestExtension("DEF")),
+                new TypeKey(typeof(TestFactory), null, null, null, null, 1, 0, 0),
+                new TypeKey(typeof(TestFactory), null, null, null, null, 0, 0, 0),
                 false
             },
+            new object[] {
+                new TypeKey(typeof(TestFactory), null, null, null, null, 0, 1, 0),
+                new TypeKey(typeof(TestFactory), null, null, null, null, 0, 1, 0),
+                true
+            },
+            new object[] {
+                new TypeKey(typeof(TestFactory), null, null, null, null, 0, 1, 0),
+                new TypeKey(typeof(TestFactory), null, null, null, null, 0, 0, 0),
+                false
+            },
+            new object[] {
+                new TypeKey(typeof(TestFactory), null, null, null, null, 0, 0, 1),
+                new TypeKey(typeof(TestFactory), null, null, null, null, 0, 0, 1),
+                true
+            },
+            new object[] {
+                new TypeKey(typeof(TestFactory), null, null, null, null, 0, 0, 1),
+                new TypeKey(typeof(TestFactory), null, null, null, null, 0, 0, 0),
+                false
+            }
             #endregion
         };
 
@@ -163,8 +162,8 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
             var actualResult1NotOp = (key1 != key2);
             var actualResult2NotOp = (key2 != key1);
 
-            var hash1 = key1?.GetHashCode();
-            var hash2 = key2?.GetHashCode();
+            var hash1 = key1.GetHashCode();
+            var hash2 = key2.GetHashCode();
 
             //-- assert
 
@@ -183,49 +182,11 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class TestExtension : ITypeKeyExtension
-        {
-            public TestExtension()
-            {
-            }
-
-            public TestExtension(string data)
-            {
-                this.Data = data;
-            }
-
-            public string Data { get; private set; }
-
-            public void Deserialize(object[] values)
-            {
-                Data = (string)values[0];
-            }
-
-            public object[] Serialize()
-            {
-                return new object[] { Data };
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (obj is TestExtension other)
-                {
-                    return other.Data == this.Data;
-                }
-                return base.Equals(obj);
-            }
-
-            public override int GetHashCode()
-            {
-                return (Data?.GetHashCode()).GetValueOrDefault();
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public interface InterfaceA { }
         public interface InterfaceB { }
         public interface InterfaceC { }
+        public interface InterfaceD { }
+        public interface InterfaceX { }
         public class TestFactory { }
         public class TestFactoryTwo { }
     }

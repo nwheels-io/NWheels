@@ -21,7 +21,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             var backendUnderTest = new RoslynTypeFactoryBackend();
             backendUnderTest.EnsureTypeReferenced(this.GetType());
 
-            var key1 = new RealTypeKey<Empty.KeyExtension>(this.GetType(), typeof(int), null, null);
+            var key1 = new TypeKey(this.GetType(), typeof(int));
             var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
 
             type1.Namespace = "NS1";

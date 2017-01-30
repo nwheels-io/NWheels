@@ -12,11 +12,10 @@ namespace NWheels.Compilation.Mechanism.Factories
         TypeMember Type { get; }
     }
 
-    public interface ITypeFactoryContext<TKeyExtension, TContextExtension>
-        where TKeyExtension : ITypeKeyExtension, new()
+    public interface ITypeFactoryContext<TExtension>
     {
-        TypeKey<TKeyExtension> Key { get; }
-        TContextExtension Extension { get; }
+        TypeKey Key { get; }
+        TExtension Extension { get; }
         TypeMember Type { get; }
     }
 }

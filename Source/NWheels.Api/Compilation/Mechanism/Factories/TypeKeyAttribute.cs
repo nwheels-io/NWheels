@@ -11,47 +11,50 @@ namespace NWheels.Compilation.Mechanism.Factories
         Inherited = false)]
     public class TypeKeyAttribute : Attribute
     {
-        private readonly Type[] _secondaryContracts;
-        private readonly object[] _extensionValues;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public TypeKeyAttribute(Type factoryType, Type primaryContract, Type[] secondaryContracts, Type extensionType, object[] extensionValues)
+        public TypeKeyAttribute(
+            Type factoryType, 
+            Type primaryContract, 
+            Type secondaryContract1,
+            Type secondaryContract2,
+            Type secondaryContract3,
+            int extensionValue1,
+            int extensionValue2,
+            int extensionValue3)
         {
             this.FactoryType = factoryType;
             this.PrimaryContract = primaryContract;
-            this.ExtensionType = extensionType;
-
-            _secondaryContracts = secondaryContracts;
-            _extensionValues = extensionValues;
+            this.SecondaryContract1 = secondaryContract1;
+            this.SecondaryContract2 = secondaryContract2;
+            this.SecondaryContract3 = secondaryContract3;
+            this.ExtensionValue1 = extensionValue1;
+            this.ExtensionValue2 = extensionValue2;
+            this.ExtensionValue3 = extensionValue3;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Type FactoryType { get; }
-        public Type ExtensionType { get; }
         public Type PrimaryContract { get; }
+        public Type SecondaryContract1 { get; }
+        public Type SecondaryContract2 { get; }
+        public Type SecondaryContract3 { get; }
+        public int ExtensionValue1 { get; }
+        public int ExtensionValue2 { get; }
+        public int ExtensionValue3 { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IReadOnlyList<Type> SecondaryContracts => _secondaryContracts;
-        public IReadOnlyList<object> ExtensionValues => _extensionValues;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public TExtension DeserializeTypeKeyExtension<TExtension>()
-            where TExtension : ITypeKeyExtension, new()
+        public TypeKey ToTypeKey()
         {
-            var extension = new TExtension();
-            extension.Deserialize(_extensionValues);
-            return extension;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static object[] SerializeTypeKeyExtension(ITypeKeyExtension extension)
-        {
-            return extension?.Serialize();
+            return new TypeKey(
+                FactoryType,
+                PrimaryContract,
+                SecondaryContract1,
+                SecondaryContract2,
+                SecondaryContract3,
+                ExtensionValue1,
+                ExtensionValue2,
+                ExtensionValue3);
         }
     }
 }

@@ -184,7 +184,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public static implicit operator TypeMember(Type compiledType)
         {
             //TODO: use CompiledTypeMemberCache
-            return new TypeMember(compiledType);
+            return (compiledType != null ? new TypeMember(compiledType) : null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

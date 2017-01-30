@@ -11,7 +11,7 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
     public class TypeKeyAttributeTests
     {
         [Fact]
-        public void CanRetrieveAttributeValues()
+        public void CanRetrieveCompiledAttributeValues()
         {
             //-- arrange & act
 
@@ -24,22 +24,19 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
 
             attributeUnderTest.PrimaryContract.Should().BeSameAs(typeof(TestContractOne));
 
-            attributeUnderTest.SecondaryContracts.Count.Should().Be(2);
-            attributeUnderTest.SecondaryContracts[0].Should().BeSameAs(typeof(TestContractTwo));
-            attributeUnderTest.SecondaryContracts[1].Should().BeSameAs(typeof(TestContractThree));
+            attributeUnderTest.SecondaryContract1.Should().BeSameAs(typeof(TestContractTwo));
+            attributeUnderTest.SecondaryContract2.Should().BeSameAs(typeof(TestContractThree));
+            attributeUnderTest.SecondaryContract3.Should().BeSameAs(typeof(TestContractFour));
 
-            attributeUnderTest.ExtensionType.Should().BeSameAs(typeof(TestTypeKeyExtension));
-
-            attributeUnderTest.ExtensionValues.Count.Should().Be(3);
-            attributeUnderTest.ExtensionValues[0].Should().Be(123);
-            attributeUnderTest.ExtensionValues[1].Should().Be("ABC");
-            attributeUnderTest.ExtensionValues[2].Should().BeSameAs(typeof(AnotherTestObject));
+            attributeUnderTest.ExtensionValue1.Should().Be(123);
+            attributeUnderTest.ExtensionValue2.Should().Be(456);
+            attributeUnderTest.ExtensionValue3.Should().Be(789);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void CanDeserializeTypeKeyExtension()
+        public void CanGetTypeKeyFromAttribute()
         {
             //-- arrange
 
@@ -47,36 +44,21 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
 
             //-- act
 
-            var extension = attributeUnderTest.DeserializeTypeKeyExtension<TestTypeKeyExtension>();
+            var key = attributeUnderTest.ToTypeKey();
 
             //-- assert
 
-            extension.Should().NotBeNull();
-            extension.IntValue.Should().Be(123);
-            extension.StringValue.Should().Be("ABC");
-            extension.TypeValue.Should().BeSameAs(typeof(AnotherTestObject));
-        }
+            key.FactoryType.Should().BeSameAs(typeof(TypeKeyAttributeTests));
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            key.PrimaryContract.ClrBinding.Should().BeSameAs(typeof(TestContractOne));
 
-        [Fact]
-        public void CanSerializeTypeKeyExtension()
-        {
-            //-- arrange & act
+            key.SecondaryContract1.ClrBinding.Should().BeSameAs(typeof(TestContractTwo));
+            key.SecondaryContract2.ClrBinding.Should().BeSameAs(typeof(TestContractThree));
+            key.SecondaryContract3.ClrBinding.Should().BeSameAs(typeof(TestContractFour));
 
-            var extension = new TestTypeKeyExtension() {
-                IntValue = 987,
-                StringValue = "XYZ",
-                TypeValue = typeof(Decimal)
-            };
-
-            //-- act
-
-            var values = TypeKeyAttribute.SerializeTypeKeyExtension(extension);
-
-            //-- assert
-
-            values.Should().Equal(987, "XYZ", typeof(Decimal));
+            key.ExtensionValue1.Should().Be(123);
+            key.ExtensionValue2.Should().Be(456);
+            key.ExtensionValue3.Should().Be(789);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -84,9 +66,12 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
         [TypeKey(
             factoryType: typeof(TypeKeyAttributeTests),
             primaryContract: typeof(TestContractOne),
-            secondaryContracts: new Type[] { typeof(TestContractTwo), typeof(TestContractThree) },
-            extensionType: typeof(TestTypeKeyExtension),
-            extensionValues: new object[] { 123, "ABC", typeof(AnotherTestObject) })]
+            secondaryContract1: typeof(TestContractTwo), 
+            secondaryContract2: typeof(TestContractThree),
+            secondaryContract3: typeof(TestContractFour),
+            extensionValue1: 123,
+            extensionValue2: 456,
+            extensionValue3: 789)]
         public class TestTarget
         {
         }
@@ -97,34 +82,6 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
         public interface TestContractOne {  }
         public interface TestContractTwo { }
         public interface TestContractThree { }
-        public class AnotherTestObject { }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public struct TestTypeKeyExtension : ITypeKeyExtension
-        {
-            public TestTypeKeyExtension(string s, int n, Type t)
-            {
-                StringValue = s;
-                IntValue = n;
-                TypeValue = t;
-            }
-
-            public int IntValue;
-            public string StringValue;
-            public Type TypeValue;
-
-            object[] ITypeKeyExtension.Serialize()
-            {
-                return new object[] { IntValue, StringValue, TypeValue };
-            }
-
-            void ITypeKeyExtension.Deserialize(object[] values)
-            {
-                IntValue = (int)values[0];
-                StringValue = (string)values[1];
-                TypeValue = (Type)values[2];
-            }
-        }
+        public interface TestContractFour { }
     }
 }

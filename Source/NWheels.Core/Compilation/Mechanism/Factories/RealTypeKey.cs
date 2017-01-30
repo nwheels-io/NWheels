@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if false
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using NWheels.Compilation.Mechanism.Syntax.Members;
@@ -162,11 +164,6 @@ namespace NWheels.Compilation.Mechanism.Factories
             return result;
         }
     }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public interface ITypeKeyInternals
-    {
-        ITypeFactoryContext CreateContext<TContextExtension>(TypeMember product, TContextExtension contextExtension);
-    }
 }
+
+#endif

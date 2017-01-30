@@ -35,9 +35,12 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
             };
             typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.FactoryType });
             typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.PrimaryContract });
-            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = null }); //TODO: pass array of secondary contract types
-            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.ExtensionType });
-            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = null }); //TODO: pass array of extension values
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.SecondaryContract1 });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.SecondaryContract2 });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.SecondaryContract3 });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.ExtensionValue1 });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.ExtensionValue2 });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.ExtensionValue3 });
 
             Member.Attributes.Add(typeKeyAttribute);
         }
