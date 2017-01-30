@@ -5,6 +5,9 @@ using NWheels.Compilation.Mechanism.Syntax.Members;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using Xunit;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -21,7 +24,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             var backendUnderTest = new RoslynTypeFactoryBackend();
             backendUnderTest.EnsureTypeReferenced(this.GetType());
 
-            var key1 = new TypeKey(this.GetType(), typeof(int));
+            var key1 = new TypeKey(this.GetType(), typeof(int), typeof(int), typeof(int), typeof(int), 1, 2, 3);
             var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
 
             type1.Namespace = "NS1";
@@ -87,5 +90,53 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             result.Failed[3].Diagnostics[0].Message.Should().NotBeNullOrEmpty();
             result.Failed[3].Diagnostics[0].SourceLocation.Should().NotBeNullOrEmpty();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #if false
+        //TODO later
+        [Fact]
+        public void CanPersistMethodInfoInTypeKey()
+        {
+            //-- arrange
+
+            var method = this.GetType().GetMethods().First();
+
+            var backendUnderTest = new RoslynTypeFactoryBackend();
+            backendUnderTest.EnsureTypeReferenced(this.GetType());
+
+            var sourceKey = new TypeKey(this.GetType(), typeof(string), method.MetadataToken);
+            var sourceType = new TypeMember(
+                new TypeGeneratorInfo(this.GetType(), sourceKey), 
+                "NS1", 
+                MemberVisibility.Public, 
+                TypeMemberKind.Class, 
+                "ClassOne");
+
+            TypeKey loadedKey = new TypeKey();
+
+            backendUnderTest.ProductsLoaded += (products) => {
+                var artifact = products[0].Artifact;
+                var attribute = artifact.RunTimeType.GetTypeInfo().GetCustomAttribute<TypeKeyAttribute>();
+                loadedKey = attribute.ToTypeKey();
+            };
+
+            backendUnderTest.Compile(new[] { sourceType });
+
+            //TypeBuilder builder
+
+            ////-- act
+
+            //var methodToken = loadedKey.ExtensionValue1;
+            //MethodInfo loadedMethod = MethodInfo.GetMethodFromHandle(new RuntimeMethodHandle().)
+
+            ////-- assert
+
+            //result.Success.Should().BeTrue();
+            //result.Succeeded.Count.Should().Be(1);
+            //result.Succeeded[0].Type.Should().BeSameAs(sourceType);
+            //result.Failed.Count.Should().Be(0);
+        }
+        #endif
     }
 }

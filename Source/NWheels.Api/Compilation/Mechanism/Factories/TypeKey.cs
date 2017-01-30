@@ -24,6 +24,23 @@ namespace NWheels.Compilation.Mechanism.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TypeKey(
+            Type factoryType,
+            TypeMember primaryContract,
+            int extensionValue1)
+        {
+            this.FactoryType = factoryType;
+            this.PrimaryContract = primaryContract;
+            this.SecondaryContract1 = null;
+            this.SecondaryContract2 = null;
+            this.SecondaryContract3 = null;
+            this.ExtensionValue1 = extensionValue1;
+            this.ExtensionValue2 = 0;
+            this.ExtensionValue3 = 0;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TypeKey(
             Type factoryType, 
             TypeMember primaryContract, 
             TypeMember secondaryContract1, 
