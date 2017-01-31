@@ -141,10 +141,12 @@ function ($http, $q, $timeout) {
         var entityId = entity['$id'];
         var entityState = entity['$state'];
 
-        var url = 
-            'app/entity/recalc/' + entityName + 
-            '?EntityId=' + encodeURIComponent(entityId) + 
-            '&EntityState=' + encodeURIComponent(entityState);
+        var url = 'app/entity/recalc/' + entityName;
+        if (entityId && entityState) {
+            url +=
+                '?EntityId=' + encodeURIComponent(entityId) + 
+                '&EntityState=' + encodeURIComponent(entityState);
+        }
 
         return $http.post(url, entity).then(
             function (response) {

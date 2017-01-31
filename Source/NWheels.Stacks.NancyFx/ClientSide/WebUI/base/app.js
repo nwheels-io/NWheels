@@ -1944,27 +1944,6 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     scope.refresh();
                 }
             };
-
-            scope.recalcAfterChange = function (entity) {
-                if (scope.uidl.mode !== 'Inline' || scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
-                    scope.entityService.recalcEntity(entity).then(
-                        function (newEntity) {
-                            if (scope.uidl.formTypeSelector) {
-                                for (var i = 0; i < scope.uidl.formTypeSelector.selections.length ; i++) {
-                                    scope.$broadcast(scope.uidl.formTypeSelector.selections[i].widget.qualifiedName + ':ModelUpdater', newEntity);
-                                }
-                            } else {
-                                scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelUpdater', newEntity);
-                            }
-
-                            
-                        },
-                        function(fault) {
-                            scope.$emit(scope.uidl.qualifiedName + ':RecalculateEntityFailed', commandService.createFaultInfo(fault));
-                        }
-                    );
-                }
-            };
             
             scope.rejectChanges = function (entity) {
                 if (scope.uidl.mode !== 'Inline' || scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
@@ -2047,23 +2026,6 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
                 }
             });
-
-            if (scope.uidl.formTypeSelector) {
-                for (var i = 0; i < scope.uidl.formTypeSelector.selections.length ; i++) {
-                    setupAutorecalculated(scope.uidl.formTypeSelector.selections[i].widget);
-                }
-            }
-            else {
-                setupAutorecalculated(scope.uidl.form);
-            }
-
-            function setupAutorecalculated(form) {
-                if (form && form.autoRecalculateOnChange) {
-                    scope.$on(form.qualifiedName + ':Changed', function (event, changedEntity) {
-                        scope.recalcAfterChange(changedEntity);
-                    });
-                }
-            }
 
             scope.$on(scope.uidl.qualifiedName + ':Save:Executing', function (event) {
                 scope.saveChanges(scope.model.entity);
@@ -2313,6 +2275,38 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 }
             };
 
+            scope.recalcAfterChange = function (entity) {
+                scope.entityService.recalcEntity(entity).then(
+                    function (newEntity) {
+                        scope.onRecalcComplete(newEntity);
+                    },
+                    function (fault) {
+                        scope.$emit(scope.uidl.qualifiedName + ':RecalculateEntityFailed', commandService.createFaultInfo(fault));
+                    }
+                );
+            };
+
+            scope.onRecalcComplete = function (updatedEntity) {
+                for (var i = 0 ; i < scope.calculatedFields.length ; i++) {
+                    var field = scope.calculatedFields[i];
+                    scope.model.Data.entity[field.propertyName] = updatedEntity[field.propertyName];
+                }
+
+                for (var i = 0 ; i < scope.tabSetFields.length ; i++) {
+                    var field = scope.tabSetFields[i];
+                    if (field.fieldType == 'InlineForm') {
+                        var model = updatedEntity[field.propertyName];
+                        scope.$broadcast(field.nestedWidget.qualifiedName + ':ModelUpdater', model);
+                    }
+                }
+            };
+
+            if (scope.uidl.autoRecalculateOnChange) {
+                scope.$on(scope.uidl.qualifiedName + ':Changed', function (event, changedEntity) {
+                    scope.recalcAfterChange(changedEntity);
+                });
+            }
+
             scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
                 scope.model.Data.entity = data;
                 scope.suppressAutoSubmitOnce = true;
@@ -2353,21 +2347,6 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                         }, true);
                     }
                 });
-            });
-            
-            scope.$on(scope.uidl.qualifiedName + ':ModelUpdater', function(event, updatedEntity) {
-                for (var i = 0 ; i < scope.calculatedFields.length ; i++) {
-                    var field = scope.calculatedFields[i];
-                    scope.model.Data.entity[field.propertyName] = updatedEntity[field.propertyName];
-                }
-
-                for (var i = 0 ; i < scope.tabSetFields.length ; i++) {
-                    var field = scope.tabSetFields[i];
-                    if(field.fieldType == 'InlineForm'){
-                        var model = updatedEntity[field.propertyName];
-                        scope.$broadcast(field.nestedWidget.qualifiedName + ':ModelUpdater', model);
-                    }
-                }
             });
 
             scope.$on(scope.uidl.qualifiedName + ':EditAuthorized', function(event, data) {

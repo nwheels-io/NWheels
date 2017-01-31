@@ -323,7 +323,6 @@ namespace NWheels.UI
                 {
                     domainObject = handler.CreateNew();
                     JsonConvert.PopulateObject(json, domainObject, _defaultSerializerSettings);
-                    handler.Insert(domainObject);
                 }
                 else if (entityState.IsModified())
                 {
