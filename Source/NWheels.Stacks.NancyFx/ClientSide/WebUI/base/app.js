@@ -10,6 +10,12 @@ function toCamelCase(s) {
 
 //-----------------------------------------------------------------------------------------------------------------
 
+function toPascalCase(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
 function getQueryStringValue(name) {
     var query = window.location.search.substring(1);
     var vars = query.split("&");
@@ -2287,10 +2293,19 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             };
 
             scope.onRecalcComplete = function (updatedEntity) {
-                for (var i = 0 ; i < scope.calculatedFields.length ; i++) {
-                    var field = scope.calculatedFields[i];
-                    scope.model.Data.entity[field.propertyName] = updatedEntity[field.propertyName];
+                var metaTypeProperties = scope.metaType.properties;
+
+                for (var p in metaTypeProperties) {
+                    if (metaTypeProperties.hasOwnProperty(p) && metaTypeProperties[p].isCalculated === true) {
+                        var propertyName = toPascalCase(p);
+                        scope.model.Data.entity[propertyName] = updatedEntity[propertyName];
+                    }
                 }
+
+                //for (var i = 0 ; i < scope.calculatedFields.length ; i++) {
+                //    var field = scope.calculatedFields[i];
+                //    scope.model.Data.entity[field.propertyName] = updatedEntity[field.propertyName];
+                //}
 
                 for (var i = 0 ; i < scope.tabSetFields.length ; i++) {
                     var field = scope.tabSetFields[i];
