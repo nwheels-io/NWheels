@@ -6,7 +6,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 {
     public enum MemberStatus
     {
-        Compiled,
-        Generator
+        Generator = 0,
+        Compiled = 1
     }
 }

@@ -177,6 +177,13 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TypeGeneratorInfo ToGeneratorInfo()
+        {
+            return new TypeGeneratorInfo(this.FactoryType, this);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static bool operator ==(TypeKey key1, TypeKey key2)
         {
             return key1.Equals(key2);

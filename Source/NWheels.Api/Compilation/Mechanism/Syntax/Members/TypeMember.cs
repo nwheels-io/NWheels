@@ -166,8 +166,9 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public TypeMemberKind TypeKind { get; set; }
         public bool IsAbstract { get; set; }
         public bool IsValueType { get; set; }
-        public bool IsArray { get; set; }
+        public bool IsCollection { get; set; }
         public bool IsNullable { get; set; }
+        public bool IsAwaitable { get; set; }
         public bool IsGenericType { get; set; }
         public bool IsGenericTypeDefinition { get; set; }
         public TypeMember GenericTypeDefinition { get; set; }

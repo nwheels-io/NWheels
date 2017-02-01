@@ -10,6 +10,17 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         protected AbstractMember()
         {
             this.Attributes = new List<AttributeDescription>();
+            this.Status = MemberStatus.Generator;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected AbstractMember(MemberInfo binding)
+            : this()
+        {
+            this.Status = MemberStatus.Compiled;
+            this.Name = binding.Name;
+            this.DeclaringType = binding.DeclaringType;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

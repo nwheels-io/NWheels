@@ -7,11 +7,47 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 {
     public class MethodMember : MethodMemberBase
     {
-        public MethodMember(MemberVisibility visibility, MethodParameter returnType, string Name, params MethodParameter[] parameters)
+        public MethodMember(
+            MemberVisibility visibility, 
+            MethodParameter returnValue, 
+            string name, 
+            params MethodParameter[] parameters)
+            : this(visibility, MemberModifiers.None, name, new MethodSignature() {  })
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MethodMember(
+            MemberVisibility visibility,
+            string name,
+            MethodSignature signature)
+            : this(visibility, MemberModifiers.None, name, signature)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MethodMember(
+            MemberVisibility visibility,
+            MemberModifiers modifiers,
+            string name,
+            MethodSignature signature)
+            : base()
         {
             this.Visibility = visibility;
+            this.Modifiers = modifiers;
             this.Name = Name;
-            this.Signature = new MethodSignature();
+            this.Signature = signature;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MethodMember(MethodInfo binding)
+            : base(binding)
+        {
+            this.Name = Name;
+            this.Signature = new MethodSignature(binding);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

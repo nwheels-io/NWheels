@@ -4,7 +4,7 @@ using System.Text;
 
 namespace NWheels.Compilation.Mechanism.Syntax.Members
 {
-    public enum ParameterModifier
+    public enum MethodParameterModifier
     {
         None,
         Ref,

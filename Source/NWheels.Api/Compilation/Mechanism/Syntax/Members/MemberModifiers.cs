@@ -8,9 +8,10 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
     public enum MemberModifiers
     {
         None = 0,
-        Abstract = 0x01,
-        Static = 0x02,
-        Override = 0x04,
-        Async = 0x08
+        Static = 0x01,
+        Abstract = 0x02,
+        Virtual = 0x04,
+        Override = 0x08,
+        Async = 0x10
     }
 }

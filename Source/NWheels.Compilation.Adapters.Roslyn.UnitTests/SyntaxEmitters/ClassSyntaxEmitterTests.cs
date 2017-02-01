@@ -134,8 +134,8 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
             //-- arrange
 
             var classMember = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
-            classMember.Members.Add(new MethodMember(MemberVisibility.Public, MethodParameter.Void, "First"));
-            classMember.Members.Add(new MethodMember(MemberVisibility.Public, MethodParameter.Void, "Second"));
+            classMember.Members.Add(new MethodMember(MemberVisibility.Public, MethodParameter.ReturnVoid, "First"));
+            classMember.Members.Add(new MethodMember(MemberVisibility.Public, MethodParameter.ReturnVoid, "Second"));
 
             var emitter = new ClassSyntaxEmitter(classMember);
 
