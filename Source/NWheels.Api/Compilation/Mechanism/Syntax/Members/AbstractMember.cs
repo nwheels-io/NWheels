@@ -15,12 +15,12 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected AbstractMember(MemberInfo binding)
+        protected AbstractMember(MemberInfo clrBinding)
             : this()
         {
             this.Status = MemberStatus.Compiled;
-            this.Name = binding.Name;
-            this.DeclaringType = binding.DeclaringType;
+            this.Name = clrBinding.Name;
+            this.DeclaringType = clrBinding.DeclaringType;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public TypeMember DeclaringType { get; set; }
         public MemberStatus Status { get; set; }
         public MemberVisibility Visibility { get; set; }
-        public MemberModifiers Modifiers { get; set; }
+        public MemberModifier Modifier { get; set; }
         public List<AttributeDescription> Attributes { get; private set; }
     }
 }

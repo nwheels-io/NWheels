@@ -13,6 +13,25 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 {
     public static class SyntaxHelpers
     {
+        private static readonly IReadOnlyDictionary<Type, SyntaxKind> _s_keywordPerType = new Dictionary<Type, SyntaxKind> {
+            [typeof(bool)] = SyntaxKind.BoolKeyword,
+            [typeof(byte)] = SyntaxKind.ByteKeyword,
+            [typeof(sbyte)] = SyntaxKind.SByteKeyword,
+            [typeof(short)] = SyntaxKind.ShortKeyword,
+            [typeof(ushort)] = SyntaxKind.UShortKeyword,
+            [typeof(int)] = SyntaxKind.IntKeyword,
+            [typeof(uint)] = SyntaxKind.UIntKeyword,
+            [typeof(long)] = SyntaxKind.LongKeyword,
+            [typeof(ulong)] = SyntaxKind.ULongKeyword,
+            [typeof(double)] = SyntaxKind.DoubleKeyword,
+            [typeof(float)] = SyntaxKind.FloatKeyword,
+            [typeof(decimal)] = SyntaxKind.DecimalKeyword,
+            [typeof(string)] = SyntaxKind.StringKeyword,
+            [typeof(char)] = SyntaxKind.CharKeyword,
+        };
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static AttributeSyntax ToAttributeSyntax(this AttributeDescription description)
         {
             return AttributeSyntaxEmitter.EmitSyntax(description);
@@ -80,7 +99,19 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static NameSyntax GetTypeNameSyntax(TypeMember type)
+        public static TypeSyntax GetTypeNameSyntax(this TypeMember type)
+        {
+            if (type.ClrBinding != null && _s_keywordPerType.TryGetValue(type.ClrBinding, out SyntaxKind keyword))
+            {
+                return PredefinedType(Token(keyword));
+            }
+
+            return GetTypeFullNameSyntax(type);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static NameSyntax GetTypeFullNameSyntax(this TypeMember type)
         {
             if (!type.IsGenericType)
             {
@@ -102,7 +133,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
         {
             if (type.DeclaringType != null)
             {
-                return QualifiedName(GetTypeNameSyntax(type.DeclaringType), simpleName);
+                return QualifiedName(GetTypeFullNameSyntax(type.DeclaringType), simpleName);
             }
 
             if (!string.IsNullOrEmpty(type.Namespace))

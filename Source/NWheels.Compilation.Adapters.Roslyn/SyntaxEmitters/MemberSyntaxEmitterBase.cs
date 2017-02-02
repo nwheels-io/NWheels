@@ -36,20 +36,31 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected SyntaxTokenList EmitVisibilityModifiers()
+        protected SyntaxTokenList EmitMemberModifiers()
         {
-            return TokenList(_s_visibilityKeywords[Member.Visibility].Select(Token));
+            return TokenList(_s_visibilityKeywords[Member.Visibility].Concat(_s_modifierKeywords[Member.Modifier]).Select(Token));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static IReadOnlyDictionary<MemberVisibility, SyntaxKind[]> _s_visibilityKeywords =
+        private static readonly IReadOnlyDictionary<MemberVisibility, SyntaxKind[]> _s_visibilityKeywords =
             new Dictionary<MemberVisibility, SyntaxKind[]> {
                 [MemberVisibility.Public] = new[] { SyntaxKind.PublicKeyword },
                 [MemberVisibility.Protected] = new[] { SyntaxKind.ProtectedKeyword },
                 [MemberVisibility.Internal] = new[] { SyntaxKind.InternalKeyword },
                 [MemberVisibility.InternalProtected] = new[] { SyntaxKind.InternalKeyword, SyntaxKind.ProtectedKeyword },
                 [MemberVisibility.Private] = new[] { SyntaxKind.PrivateKeyword }
+            };
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly IReadOnlyDictionary<MemberModifier, SyntaxKind[]> _s_modifierKeywords =
+            new Dictionary<MemberModifier, SyntaxKind[]> {
+                [MemberModifier.Abstract] = new[] { SyntaxKind.AbstractKeyword },
+                [MemberModifier.Virtual] = new[] { SyntaxKind.VirtualKeyword },
+                [MemberModifier.Override] = new[] { SyntaxKind.OverrideKeyword },
+                [MemberModifier.Static] = new[] { SyntaxKind.StaticKeyword },
+                [MemberModifier.None] = new SyntaxKind[0]
             };
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NWheels.Compilation.Mechanism.Syntax.Members;
 using System;
 using System.Collections.Generic;
@@ -14,5 +15,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
             : base(member)
         {
         }
+
+
     }
 }

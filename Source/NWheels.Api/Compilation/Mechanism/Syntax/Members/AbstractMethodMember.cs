@@ -14,12 +14,11 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-        protected MethodMemberBase(MethodBase binding)
-            : base(binding)
+        protected MethodMemberBase(MethodBase clrBinding)
+            : base(clrBinding)
         {
-            this.Modifiers = GetMemberModifiers(binding);
-            this.Visibility = GetMemberVisibility(binding);
+            this.Modifier = GetMemberModifiers(clrBinding);
+            this.Visibility = GetMemberVisibility(clrBinding);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -29,23 +28,23 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected static MemberModifiers GetMemberModifiers(MethodBase binding)
+        protected static MemberModifier GetMemberModifiers(MethodBase binding)
         {
-            var modifiers = MemberModifiers.None;
+            var modifiers = MemberModifier.None;
 
             if (binding.IsStatic)
             {
-                modifiers |= MemberModifiers.Static;
+                modifiers |= MemberModifier.Static;
             }
 
             if (binding.IsAbstract)
             {
-                modifiers |= MemberModifiers.Abstract;
+                modifiers |= MemberModifier.Abstract;
             }
 
             if (binding.IsVirtual)
             {
-                modifiers |= MemberModifiers.Virtual;
+                modifiers |= MemberModifier.Virtual;
             }
 
             return modifiers;

@@ -12,7 +12,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
             MethodParameter returnValue, 
             string name, 
             params MethodParameter[] parameters)
-            : this(visibility, MemberModifiers.None, name, new MethodSignature() {  })
+            : this(visibility, MemberModifier.None, name, new MethodSignature() {  })
         {
         }
 
@@ -22,7 +22,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
             MemberVisibility visibility,
             string name,
             MethodSignature signature)
-            : this(visibility, MemberModifiers.None, name, signature)
+            : this(visibility, MemberModifier.None, name, signature)
         {
         }
 
@@ -30,28 +30,27 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         public MethodMember(
             MemberVisibility visibility,
-            MemberModifiers modifiers,
+            MemberModifier modifiers,
             string name,
             MethodSignature signature)
-            : base()
         {
             this.Visibility = visibility;
-            this.Modifiers = modifiers;
-            this.Name = Name;
+            this.Modifier = modifiers;
+            this.Name = name;
             this.Signature = signature;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MethodMember(MethodInfo binding)
-            : base(binding)
+        public MethodMember(MethodInfo clrBinding)
+            : base(clrBinding)
         {
             this.Name = Name;
-            this.Signature = new MethodSignature(binding);
+            this.Signature = new MethodSignature(clrBinding);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MethodInfo Bidning { get; set; }
+        public MethodInfo ClrBinding { get; set; }
     }
 }

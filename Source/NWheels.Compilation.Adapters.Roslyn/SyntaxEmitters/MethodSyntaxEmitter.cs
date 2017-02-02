@@ -15,17 +15,27 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
         {
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override MethodDeclarationSyntax EmitSyntax()
         {
+            TypeSyntax returnTypeSyntax = (Member.Signature.IsVoid
+                ? PredefinedType(Token(SyntaxKind.VoidKeyword))
+                : Member.Signature.ReturnValue.Type.GetTypeNameSyntax());
+
             OutputSyntax =
                 MethodDeclaration(
-                    PredefinedType(
-                        Token(SyntaxKind.VoidKeyword)
-                    ),
+                    returnTypeSyntax,
                     Identifier(Member.Name)
                 );
 
-            OutputSyntax = OutputSyntax.WithModifiers(EmitVisibilityModifiers());
+            OutputSyntax = OutputSyntax.WithModifiers(EmitMemberModifiers());
+
+            if (Member.Signature.Parameters.Count > 0)
+            {
+                OutputSyntax.WithParameterList(MethodSignatureSyntaxEmitter.EmitParameterListSyntax(Member.Signature));
+            }
+
             OutputSyntax = OutputSyntax.WithBody(Block());
 
             return OutputSyntax;

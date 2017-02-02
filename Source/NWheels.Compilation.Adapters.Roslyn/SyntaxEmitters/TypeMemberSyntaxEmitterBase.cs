@@ -65,7 +65,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
         protected BaseTypeSyntax ToBaseTypeSyntax(TypeMember baseTypeMember)
         {
-            return SimpleBaseType(SyntaxHelpers.GetTypeNameSyntax(baseTypeMember));
+            return SimpleBaseType(SyntaxHelpers.GetTypeFullNameSyntax(baseTypeMember));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

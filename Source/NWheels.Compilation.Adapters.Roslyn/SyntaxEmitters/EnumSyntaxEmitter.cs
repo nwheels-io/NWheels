@@ -28,7 +28,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
                 OutputSyntax = OutputSyntax.WithAttributeLists(EmitAttributeLists());
             }
 
-            OutputSyntax = OutputSyntax.WithModifiers(EmitVisibilityModifiers());
+            OutputSyntax = OutputSyntax.WithModifiers(EmitMemberModifiers());
             OutputSyntax = OutputSyntax.WithMembers(EmitEnumMembers());
 
             return OutputSyntax;

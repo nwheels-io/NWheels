@@ -24,35 +24,22 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MethodSignature(MethodInfo binding)
+        public MethodSignature(MethodInfo clrBinding)
             : this()
         {
-            if (binding.ReturnType != null && binding.ReturnType != typeof(void))
-            {
-                this.ReturnValue = new MethodParameter() {
-                    Type = binding.ReturnType
-                };
-            }
+            this.ClrBinding = clrBinding;
 
-            var bindingParameters = binding.GetParameters();
-
-            for (int i = 0 ; i < bindingParameters.Length ; i++)
-            {
-                var parameter = new MethodParameter(
-                    name: bindingParameters[i].Name, 
-                    position: i + 1, 
-                    type: bindingParameters[i].ParameterType, 
-                    modifier: GetParameterModifier(bindingParameters[i]));
-
-                this.Parameters.Add(parameter);
-            }
+            BindClrReturnType(clrBinding);
+            BindClrParameters();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MethodSignature(ConstructorInfo binding)
+        public MethodSignature(ConstructorInfo clrBinding)
             : this()
         {
+            this.ClrBinding = clrBinding;
+            BindClrParameters();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -67,9 +54,40 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public MethodBase ClrBinding { get; }
         public bool IsAsync { get; set; }
-        public List<MethodParameter> Parameters { get; private set; }
         public MethodParameter ReturnValue { get; set; }
+        public List<MethodParameter> Parameters { get; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void BindClrReturnType(MethodInfo clrMethod)
+        {
+            if (clrMethod.ReturnType != null && clrMethod.ReturnType != typeof(void))
+            {
+                this.ReturnValue = new MethodParameter() {
+                    Type = clrMethod.ReturnType
+                };
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void BindClrParameters()
+        {
+            var clrParameters = ClrBinding.GetParameters();
+
+            for (int i = 0 ; i < clrParameters.Length ; i++)
+            {
+                var parameter = new MethodParameter(
+                    name: clrParameters[i].Name,
+                    position: i + 1,
+                    type: clrParameters[i].ParameterType,
+                    modifier: GetParameterModifier(clrParameters[i]));
+
+                this.Parameters.Add(parameter);
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

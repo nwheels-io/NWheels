@@ -12,7 +12,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
     {
         public static AttributeSyntax EmitSyntax(AttributeDescription description)
         {
-            var syntax = Attribute(SyntaxHelpers.GetTypeNameSyntax(description.AttributeType));
+            var syntax = Attribute(SyntaxHelpers.GetTypeFullNameSyntax(description.AttributeType));
 
             if (description.ConstructorArguments.Count > 0 || description.PropertyValues.Count > 0)
             {

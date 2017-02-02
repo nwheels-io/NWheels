@@ -27,7 +27,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
                 OutputSyntax = OutputSyntax.WithAttributeLists(EmitAttributeLists());
             }
 
-            OutputSyntax = OutputSyntax.WithModifiers(EmitVisibilityModifiers());
+            OutputSyntax = OutputSyntax.WithModifiers(EmitMemberModifiers());
 
             if (Member.BaseType != null || Member.Interfaces.Count > 0)
             {

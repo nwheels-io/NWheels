@@ -108,7 +108,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
 
             var classMember = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
             classMember.BaseType = new TypeMember(typeof(List<string>));
-            classMember.Interfaces.Add(new TypeMember(typeof(Dictionary<int, DateTime>)));
+            classMember.Interfaces.Add(new TypeMember(typeof(IDictionary<int, DateTime>)));
 
             var emitter = new ClassSyntaxEmitter(classMember);
 
@@ -120,8 +120,8 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
 
             syntax.Should().BeEquivalentToCode(@"
                 public class ClassOne : 
-                    System.Collections.Generic.List<System.String>, 
-                    System.Collections.Generic.Dictionary<System.Int32, System.DateTime> 
+                    System.Collections.Generic.List<string>, 
+                    System.Collections.Generic.IDictionary<int, System.DateTime> 
                 {  }
             ");
         }
