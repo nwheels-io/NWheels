@@ -17,7 +17,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         protected MethodMemberBase(MethodBase clrBinding)
             : base(clrBinding)
         {
-            this.Modifier = GetMemberModifiers(clrBinding);
+            this.Modifier = GetMemberModifier(clrBinding);
             this.Visibility = GetMemberVisibility(clrBinding);
         }
 
@@ -28,7 +28,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected static MemberModifier GetMemberModifiers(MethodBase binding)
+        protected static MemberModifier GetMemberModifier(MethodBase binding)
         {
             var modifiers = MemberModifier.None;
 

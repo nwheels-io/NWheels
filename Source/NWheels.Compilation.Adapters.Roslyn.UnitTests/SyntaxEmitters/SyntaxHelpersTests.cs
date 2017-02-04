@@ -98,6 +98,86 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static IEnumerable<object[]> TestCases_TestGetTypeNameSyntax_NullableTypes = new object[][] {
+            #region Test cases
+            new object[] { "bool ?", new TypeMember(typeof(bool?)) },
+            new object[] { "System.DateTime?", new TypeMember(typeof(DateTime?)) },
+            #endregion
+        };
+
+        [Theory]
+        [MemberData(nameof(TestCases_TestGetTypeNameSyntax_NullableTypes))]
+        public void TestGetTypeNameSyntax_NullableTypes(string expectedCode, TypeMember type)
+        {
+            //-- act
+
+            var actualSyntax = SyntaxHelpers.GetTypeNameSyntax(type);
+
+            //-- assert
+
+            actualSyntax.Should().BeEqualToCode(expectedCode);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<object[]> TestCases_TestGetTypeNameSyntax_ByRefTypes = new object[][] {
+            #region Test cases
+            new object[] { "bool", typeof(bool).MakeByRefType() },
+            new object[] { "System.DateTime", typeof(DateTime).MakeByRefType() },
+            #endregion
+        };
+
+        [Theory]
+        [MemberData(nameof(TestCases_TestGetTypeNameSyntax_ByRefTypes))]
+        public void TestGetTypeNameSyntax_ByRefTypes(string expectedCode, Type clrType)
+        {
+            //-- arrange
+
+            TypeMember typeMember = clrType;
+
+            //-- act
+
+            var actualSyntax = SyntaxHelpers.GetTypeNameSyntax(typeMember);
+
+            //-- assert
+
+            actualSyntax.Should().BeEquivalentToCode(expectedCode);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<object[]> TestCases_TestGetTypeNameSyntax_GenericTypes = new object[][] {
+            #region Test cases
+            new object[] {
+                "System.IEquatable<int>",
+                new TypeMember(typeof(IEquatable<int>))
+            },
+            new object[] {
+                "System.Action<int, string, decimal>",
+                new TypeMember(typeof(Action<int, string, decimal>))
+            },
+            new object[] {
+                "System.Collections.Generic.Dictionary<System.DateTime, System.Collections.Generic.HashSet<string>>",
+                new TypeMember(typeof(Dictionary<DateTime, HashSet<string>>))
+            },
+            #endregion
+        };
+
+        [Theory]
+        [MemberData(nameof(TestCases_TestGetTypeNameSyntax_GenericTypes))]
+        public void TestGetTypeNameSyntax_GenericTypes(string expectedCode, TypeMember type)
+        {
+            //-- act
+
+            var actualSyntax = SyntaxHelpers.GetTypeNameSyntax(type);
+
+            //-- assert
+
+            actualSyntax.Should().BeEqualToCode(expectedCode);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static IEnumerable<object[]> TestCases_TestGetLiteralSyntax = new object[][] {
             #region Test cases
             new object[] { 123 , "123" },

@@ -88,12 +88,12 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Syntax.Members
                     sig.Parameters[0].Name.Should().Be("num");
                     sig.Parameters[0].Position.Should().Be(1);
                     sig.Parameters[0].Modifier.Should().Be(MethodParameterModifier.Ref);
-                    sig.Parameters[0].Type.ClrBinding.Should().BeSameAs(typeof(int).MakeByRefType());
+                    sig.Parameters[0].Type.ClrBinding.Should().BeSameAs(typeof(int));
 
                     sig.Parameters[1].Name.Should().Be("str");
                     sig.Parameters[1].Position.Should().Be(2);
                     sig.Parameters[1].Modifier.Should().Be(MethodParameterModifier.Out);
-                    sig.Parameters[1].Type.ClrBinding.Should().BeSameAs(typeof(string).MakeByRefType());
+                    sig.Parameters[1].Type.ClrBinding.Should().BeSameAs(typeof(string));
                 })
             },
             new object[] {
@@ -111,12 +111,12 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Syntax.Members
                     sig.Parameters[0].Name.Should().Be("num");
                     sig.Parameters[0].Position.Should().Be(1);
                     sig.Parameters[0].Modifier.Should().Be(MethodParameterModifier.Ref);
-                    sig.Parameters[0].Type.ClrBinding.Should().BeSameAs(typeof(int).MakeByRefType());
+                    sig.Parameters[0].Type.ClrBinding.Should().BeSameAs(typeof(int));
 
                     sig.Parameters[1].Name.Should().Be("str");
                     sig.Parameters[1].Position.Should().Be(2);
                     sig.Parameters[1].Modifier.Should().Be(MethodParameterModifier.Out);
-                    sig.Parameters[1].Type.ClrBinding.Should().BeSameAs(typeof(string).MakeByRefType());
+                    sig.Parameters[1].Type.ClrBinding.Should().BeSameAs(typeof(string));
                 })
             },
             #endregion

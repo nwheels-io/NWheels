@@ -33,7 +33,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
             if (Member.Signature.Parameters.Count > 0)
             {
-                OutputSyntax.WithParameterList(MethodSignatureSyntaxEmitter.EmitParameterListSyntax(Member.Signature));
+                OutputSyntax = OutputSyntax.WithParameterList(MethodSignatureSyntaxEmitter.EmitParameterListSyntax(Member.Signature));
             }
 
             OutputSyntax = OutputSyntax.WithBody(Block());

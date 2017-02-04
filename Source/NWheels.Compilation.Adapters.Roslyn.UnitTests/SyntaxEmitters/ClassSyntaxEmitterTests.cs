@@ -157,6 +157,34 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void WithFields()
+        {
+            //-- arrange
+
+            var classMember = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
+            classMember.Members.Add(new FieldMember(classMember, MemberVisibility.Public, MemberModifier.None, typeof(int), "Number"));
+            classMember.Members.Add(new FieldMember(classMember, MemberVisibility.Public, MemberModifier.None, typeof(string), "Text"));
+
+            var emitter = new ClassSyntaxEmitter(classMember);
+
+            //-- act
+
+            var syntax = emitter.EmitSyntax();
+
+            //-- assert
+
+            syntax.Should().BeEquivalentToCode(@"
+                public class ClassOne 
+                { 
+                    public int Number;
+                    public string Text;
+                }
+            ");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void WithOneAttribute()
         {
             //-- arrange

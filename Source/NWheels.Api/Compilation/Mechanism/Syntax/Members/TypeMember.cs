@@ -184,8 +184,18 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         public static implicit operator TypeMember(Type compiledType)
         {
+            if (compiledType == null)
+            {
+                return null;
+            }
+
+            if (compiledType.IsByRef)
+            {
+                compiledType = compiledType.GetElementType();
+            }
+
             //TODO: use CompiledTypeMemberCache
-            return (compiledType != null ? new TypeMember(compiledType) : null);
+            return new TypeMember(compiledType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

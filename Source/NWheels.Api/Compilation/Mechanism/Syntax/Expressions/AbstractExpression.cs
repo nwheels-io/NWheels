@@ -15,7 +15,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
             return new MemberExpression() {
                 Target = this,
                 Member = field,
-                Type = field.FieldType
+                Type = field.Type
             };
         }
 

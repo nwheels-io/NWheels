@@ -30,12 +30,12 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         public MethodMember(
             MemberVisibility visibility,
-            MemberModifier modifiers,
+            MemberModifier modifier,
             string name,
             MethodSignature signature)
         {
             this.Visibility = visibility;
-            this.Modifier = modifiers;
+            this.Modifier = modifier;
             this.Name = name;
             this.Signature = signature;
         }

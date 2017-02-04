@@ -6,6 +6,7 @@ using NWheels.Compilation.Mechanism.Syntax.Members;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -101,9 +102,17 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
         public static TypeSyntax GetTypeNameSyntax(this TypeMember type)
         {
-            if (type.ClrBinding != null && _s_keywordPerType.TryGetValue(type.ClrBinding, out SyntaxKind keyword))
+            if (type.ClrBinding != null)
             {
-                return PredefinedType(Token(keyword));
+                if (_s_keywordPerType.TryGetValue(type.ClrBinding, out SyntaxKind keyword))
+                {
+                    return PredefinedType(Token(keyword));
+                }
+
+                if (IsNullableValueType(type.ClrBinding.GetTypeInfo(), out Type underlyingValueType))
+                {
+                    return NullableType(GetTypeNameSyntax(underlyingValueType));
+                }
             }
 
             return GetTypeFullNameSyntax(type);
@@ -142,6 +151,22 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
             }
 
             return simpleName;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static bool IsNullableValueType(System.Reflection.TypeInfo typeInfo, out Type underlyingValueType)
+        {
+            if (typeInfo.IsGenericType && 
+                !typeInfo.IsGenericTypeDefinition && 
+                typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                underlyingValueType = typeInfo.GetGenericArguments()[0];
+                return true;
+            }
+
+            underlyingValueType = null;
+            return false;
         }
     }
 }

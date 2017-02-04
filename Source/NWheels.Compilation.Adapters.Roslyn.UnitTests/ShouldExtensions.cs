@@ -43,6 +43,12 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
                 return normalizedActualCode.Should().Be(normalizedExpectedCode, because, becauseArgs);
             }
 
+            public AndConstraint<StringAssertions> BeEqualToCode(string expectedCode, string because = "", params object[] becauseArgs)
+            {
+                var normalizedActualCode = Subject.NormalizeWhitespace().GetText().ToString();
+                return normalizedActualCode.Should().Be(expectedCode, because, becauseArgs);
+            }
+
             public SyntaxNode Subject { get; }
         }
     }

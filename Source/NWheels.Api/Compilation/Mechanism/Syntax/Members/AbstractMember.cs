@@ -15,6 +15,17 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected AbstractMember(TypeMember declaringType, MemberVisibility visibility, MemberModifier modifier, string name)
+            : this()
+        {
+            this.DeclaringType = declaringType;
+            this.Visibility = visibility;
+            this.Modifier = modifier;
+            this.Name = name;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected AbstractMember(MemberInfo clrBinding)
             : this()
         {

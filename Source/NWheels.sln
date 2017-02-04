@@ -59,6 +59,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Remoting", "Remoting", "{A6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domains", "Domains", "{C6E05F87-B7B8-48C7-AF68-824737DC6FA8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XUnitTestProject1", "XUnitTestProject1\XUnitTestProject1.csproj", "{23AD3CCF-AAC9-428A-B254-4BBF89A21D96}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -153,6 +155,18 @@ Global
 		{9D235DC6-B5AB-44D3-9EFF-9E9B773255A6}.Release|x64.Build.0 = Release|x64
 		{9D235DC6-B5AB-44D3-9EFF-9E9B773255A6}.Release|x86.ActiveCfg = Release|x86
 		{9D235DC6-B5AB-44D3-9EFF-9E9B773255A6}.Release|x86.Build.0 = Release|x86
+		{23AD3CCF-AAC9-428A-B254-4BBF89A21D96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23AD3CCF-AAC9-428A-B254-4BBF89A21D96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23AD3CCF-AAC9-428A-B254-4BBF89A21D96}.Debug|x64.ActiveCfg = Debug|x64
+		{23AD3CCF-AAC9-428A-B254-4BBF89A21D96}.Debug|x64.Build.0 = Debug|x64
+		{23AD3CCF-AAC9-428A-B254-4BBF89A21D96}.Debug|x86.ActiveCfg = Debug|x86
+		{23AD3CCF-AAC9-428A-B254-4BBF89A21D96}.Debug|x86.Build.0 = Debug|x86
+		{23AD3CCF-AAC9-428A-B254-4BBF89A21D96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23AD3CCF-AAC9-428A-B254-4BBF89A21D96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23AD3CCF-AAC9-428A-B254-4BBF89A21D96}.Release|x64.ActiveCfg = Release|x64
+		{23AD3CCF-AAC9-428A-B254-4BBF89A21D96}.Release|x64.Build.0 = Release|x64
+		{23AD3CCF-AAC9-428A-B254-4BBF89A21D96}.Release|x86.ActiveCfg = Release|x86
+		{23AD3CCF-AAC9-428A-B254-4BBF89A21D96}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
