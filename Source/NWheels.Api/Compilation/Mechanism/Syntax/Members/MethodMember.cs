@@ -9,7 +9,6 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
     {
         public MethodMember(
             MemberVisibility visibility, 
-            MethodParameter returnValue, 
             string name, 
             params MethodParameter[] parameters)
             : this(visibility, MemberModifier.None, name, new MethodSignature() {  })

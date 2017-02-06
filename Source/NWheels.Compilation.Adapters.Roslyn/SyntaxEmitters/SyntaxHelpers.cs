@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NWheels.Compilation.Mechanism.Syntax.Expressions;
 using NWheels.Compilation.Mechanism.Syntax.Members;
+using NWheels.Compilation.Mechanism.Syntax.Statements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
             [typeof(decimal)] = SyntaxKind.DecimalKeyword,
             [typeof(string)] = SyntaxKind.StringKeyword,
             [typeof(char)] = SyntaxKind.CharKeyword,
+            [typeof(object)] = SyntaxKind.ObjectKeyword,
         };
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -86,6 +88,10 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
             {
                 return LiteralExpression(SyntaxKind.CharacterLiteralExpression, Literal(charValue));
             }
+            else if (value is bool boolValue)
+            {
+                return LiteralExpression(boolValue ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression);
+            }
             else if (value is Type typeValue)
             {
                 return TypeOfExpression(GetTypeNameSyntax(typeValue));
@@ -138,6 +144,26 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static ArgumentListSyntax GetArgumentListSyntax(this MethodCallExpression call)
+        {
+            IEnumerable<ArgumentSyntax> argumentSyntaxes = call.Arguments.Select(EmitArgument);
+            return ArgumentList(SeparatedList(argumentSyntaxes));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static BlockSyntax ToSyntax(this BlockStatement block)
+        {
+            if (block != null)
+            {
+                return Block(block.Body.Select(StatementSyntaxEmitter.EmitSyntax));
+            }
+
+            return Block();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static NameSyntax QualifyTypeNameSyntax(TypeMember type, SimpleNameSyntax simpleName)
         {
             if (type.DeclaringType != null)
@@ -167,6 +193,25 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
             underlyingValueType = null;
             return false;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static ArgumentSyntax EmitArgument(Argument argument)
+        {
+            var syntax = Argument(ExpressionSyntaxEmitter.EmitSyntax(argument.Expression));
+
+            switch (argument.Modifier)
+            {
+                case MethodParameterModifier.Ref:
+                    syntax = syntax.WithRefOrOutKeyword(Token(SyntaxKind.RefKeyword));
+                    break;
+                case MethodParameterModifier.Out:
+                    syntax = syntax.WithRefOrOutKeyword(Token(SyntaxKind.OutKeyword));
+                    break;
+            }
+
+            return syntax;
         }
     }
 }

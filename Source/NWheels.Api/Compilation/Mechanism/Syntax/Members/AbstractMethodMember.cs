@@ -24,7 +24,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public MethodSignature Signature { get; set; }
-        public AbstractStatement Body { get; set; }
+        public BlockStatement Body { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

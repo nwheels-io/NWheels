@@ -9,7 +9,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
     {
         public MethodCallExpression()
         {
-            this.Arguments = new List<AbstractExpression>();
+            this.Arguments = new List<Argument>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -17,7 +17,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
         public AbstractExpression Target { get; set; }
         public MethodMember Method { get; set; }
         public string MethodName { get; set; }
-        public List<AbstractExpression> Arguments { get; private set; }
+        public List<Argument> Arguments { get; }
         public bool IsAsyncAwait { get; set; }
     }
 }

@@ -159,21 +159,11 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         private Dictionary<TypeKey, RuntimeTypeFactoryArtifact> LoadProductAssembly(Assembly assembly)
         {
-            var productByTypeKey = new Dictionary<TypeKey, RuntimeTypeFactoryArtifact>();
-            var runtimeTypes = assembly.GetExportedTypes();
+            var catalog = RuntimeTypeFactoryArtifactCatalog.LoadFrom(assembly);
+            var artifacts = catalog.GetArtifacts();
+            var artifactByTypeKey = artifacts.ToDictionary(a => a.TypeKey);
 
-            foreach (var runtimeType in runtimeTypes)
-            {
-                var keyAttribute = runtimeType.GetTypeInfo().GetCustomAttribute<TypeKeyAttribute>();
-
-                if (keyAttribute != null)
-                {
-                    var key = keyAttribute.ToTypeKey();
-                    productByTypeKey.Add(key, new RuntimeTypeFactoryArtifact(runtimeType));
-                }
-            }
-
-            return productByTypeKey;
+            return artifactByTypeKey;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

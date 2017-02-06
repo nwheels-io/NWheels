@@ -8,6 +8,9 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
     {
         None,
         Ref,
-        Out
+        Out,
+
+        //currently not supported:
+        //OutVar // out parameter with inline declaration of local variable ('declaration expression')
     }
 }

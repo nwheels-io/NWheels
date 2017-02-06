@@ -80,6 +80,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
             new object[] { "decimal", new TypeMember(typeof(decimal)) },
             new object[] { "string", new TypeMember(typeof(string)) },
             new object[] { "char", new TypeMember(typeof(char)) },
+            new object[] { "object", new TypeMember(typeof(object)) },
             #endregion
         };
 

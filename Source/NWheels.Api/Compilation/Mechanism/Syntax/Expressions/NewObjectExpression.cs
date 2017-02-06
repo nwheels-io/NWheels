@@ -9,11 +9,10 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
     {
         public NewObjectExpression()
         {
-            this.ConstructorArguments = new List<AbstractExpression>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public List<AbstractExpression> ConstructorArguments { get; private set; }
+        public MethodCallExpression ConstructorCall { get; set; }
     }
 }

@@ -43,6 +43,13 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected SyntaxTokenList EmitMemberVisibility()
+        {
+            return TokenList(_s_visibilityKeywords[Member.Visibility].Select(Token));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static readonly IReadOnlyDictionary<MemberVisibility, SyntaxKind[]> _s_visibilityKeywords =
             new Dictionary<MemberVisibility, SyntaxKind[]> {
                 [MemberVisibility.Public] = new[] { SyntaxKind.PublicKeyword },

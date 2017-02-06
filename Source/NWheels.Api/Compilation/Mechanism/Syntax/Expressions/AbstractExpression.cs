@@ -10,6 +10,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
     {
         public TypeMember Type { get; set; }
 
+        #if false
         public AbstractExpression DOT(FieldMember field)
         {
             return new MemberExpression() {
@@ -46,5 +47,6 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
             result.Arguments.AddRange(ARGS);
             return result;
         }
+        #endif
     }
 }

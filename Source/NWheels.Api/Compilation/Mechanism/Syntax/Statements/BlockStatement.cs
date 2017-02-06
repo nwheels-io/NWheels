@@ -7,9 +7,9 @@ namespace NWheels.Compilation.Mechanism.Syntax.Statements
 {
     public class BlockStatement : AbstractStatement
     {
-        public BlockStatement()
+        public BlockStatement(params AbstractStatement[] statements)
         {
-            this.Body = new List<AbstractStatement>();
+            this.Body = new List<AbstractStatement>(statements);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -3,7 +3,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters;
 using NWheels.Compilation.Mechanism.Factories;
+using NWheels.Compilation.Mechanism.Syntax.Expressions;
 using NWheels.Compilation.Mechanism.Syntax.Members;
+using NWheels.Compilation.Mechanism.Syntax.Statements;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -101,6 +103,35 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
             var actualSyntax = emitterUnderTest.EmitSyntax();
 
             //-- assert
+
+            actualSyntax.Should().BeEquivalentToCode(expectedCode);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanEmitMethodBody()
+        {
+            //-- arrange
+
+            var method = new MethodMember(
+                MemberVisibility.Public, 
+                "TestMethod", 
+                new MethodSignature { ReturnValue = new MethodParameter { Type  = typeof(string) } });
+
+            method.Body = new BlockStatement(
+                new ReturnStatement { Expression = new ConstantExpression { Value = "ABC" } }
+            );
+
+            var emitterUnderTest = new MethodSyntaxEmitter(method);
+
+            //-- act
+
+            var actualSyntax = emitterUnderTest.EmitSyntax();
+
+            //-- assert
+
+            var expectedCode = "public string TestMethod() { return \"ABC\"; }";
 
             actualSyntax.Should().BeEquivalentToCode(expectedCode);
         }
