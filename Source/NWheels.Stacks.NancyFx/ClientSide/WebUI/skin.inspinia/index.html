@@ -452,10 +452,10 @@ HEAD, JS/CSS LINKS
         }
 
         #global_div_dropdown_popup {
-              position: fixed;
-              z-index: 2000;
-              background-color: rgba(51, 51, 51, 0.56);
-              padding-top: 20%;
+            position: fixed;
+            z-index: 2000;
+            background-color: rgba(51, 51, 51, 0.56);
+            padding-top: 20%;
         }
         
         .grid-inline-edit-control {
@@ -467,10 +467,14 @@ HEAD, JS/CSS LINKS
         }
         
         .grid-inline-edit-dropdown-panel {
-               background-color: #d2d2d2;
-                border: 7px solid #1e2f40;
-                border-radius: 7px;
-                padding: 15px;
+            background-color: #d2d2d2;
+            border: 7px solid #1e2f40;
+            border-radius: 7px;
+            padding: 15px;
+        }
+
+        .global-dropdown-close-button {
+            margin-left: 93%;
         }
         
         a.clickable-cell {
@@ -3644,6 +3648,7 @@ HEAD, JS/CSS LINKS
                 <div class="global-dropdown-content" style="display:none;margin: 0 auto;width: 35%;margin: 0 auto;">
                     <div class="grid-inline-edit-dropdown-panel">
                         <uidl-widget uidl="uidl.nestedWidget" parent-uidl="uidl" parent-model="entity"></uidl-widget>
+                        <button class="global-dropdown-close-button">Close</button>
                     </div>
                 </div>
             </div>
@@ -4901,7 +4906,8 @@ HEAD, JS/CSS LINKS
             }
             
             function hideGlobalDropdownContent(event) {
-                if ($(event.target).parents('#global_div_dropdown_popup').length > 0) {
+                if ($(event.target).parents('#global_div_dropdown_popup').length > 0
+                    && !$(event.target).hasClass('global-dropdown-close-button')) {
                     return;
                 }
                 
@@ -4918,6 +4924,7 @@ HEAD, JS/CSS LINKS
             }
 
             $('body').on('click', '.global-dropdown-toggle', showGlobalDropdownContent);
+            $('body').on('click', '.global-dropdown-close-button', hideGlobalDropdownContent);
         });
         
         angular.module('theApp').run(['$rootScope', 'uidlService', 

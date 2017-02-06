@@ -9,6 +9,12 @@ namespace NWheels.Domains.DevOps.Alerts.Entities
     public interface IEntityPartEmailRecipient
     {
         OutgoingEmailMessage.SenderRecipient ToOutgoingEmailMessageRecipient();
+
+        [PropertyContract.Calculated]
+        string SendToEmail { get; }
+
+        [PropertyContract.Calculated]
+        string UserFullName { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,6 +39,19 @@ namespace NWheels.Domains.DevOps.Alerts.Entities
 
         public abstract string Email { get; set; }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string SendToEmail
+        {
+            get { return Email; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string UserFullName
+        {
+            get { return Email; }
+        }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -55,5 +74,19 @@ namespace NWheels.Domains.DevOps.Alerts.Entities
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public abstract IUserAccountEntity User { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string SendToEmail
+        {
+            get { return User == null ? null : User.EmailAddress; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string UserFullName
+        {
+            get { return User == null ? null : User.FullName; }
+        }
     }
 }
