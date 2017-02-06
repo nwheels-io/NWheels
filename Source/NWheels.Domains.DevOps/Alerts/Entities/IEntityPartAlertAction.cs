@@ -7,12 +7,12 @@ namespace NWheels.Domains.DevOps.Alerts.Entities
     public interface IEntityPartAlertAction
     {
         [PropertyContract.Calculated]
-        string SummaryText { get; }
+        string AlertType { get; }
     }
 
     public abstract class EntityPartAlertAction : IEntityPartAlertAction
     {
         [EntityImplementation.CalculatedProperty]
-        public abstract string SummaryText { get; }
+        public abstract string AlertType { get; }
     }
 }

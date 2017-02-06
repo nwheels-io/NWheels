@@ -1,4 +1,5 @@
 ﻿using NWheels.Domains.DevOps.Alerts.Entities;
+using NWheels.Domains.Security;
 using NWheels.UI;
 using NWheels.UI.Toolbox;
 using NWheels.UI.Uidl;
@@ -31,7 +32,7 @@ namespace NWheels.Domains.DevOps.Alerts.UI.ScreenParts
 
             Crud.Form.Field(f => f.AlertActions, setup: alertActions => {
                 var alertActionCrud = (Crud<IEntityPartAlertAction>)alertActions.NestedWidget;
-                alertActionCrud.Grid.Column(x => x.SummaryText);
+                alertActionCrud.Grid.Column(x => x.AlertType);
                 /*alertActionCrud.FormTypeSelector.ForEachWidgetOfType<IUidlForm>(form => {
                     form.HideFieldsOf<IEntityPartAlertAction>(x => x.SummaryText);
                 });*/
@@ -46,9 +47,19 @@ namespace NWheels.Domains.DevOps.Alerts.UI.ScreenParts
 
                 alertActionCrud.FormTypeSelector.GetWidget<IEntityPartByEmailAlertAction, Form<IEntityPartByEmailAlertAction>>()
                     .Field(f => f.Recipients, setup: recipients => {
-                        ((Crud<IEntityPartEmailRecipient>)recipients.NestedWidget).Grid
+                        var recipientsCrud = ((Crud<IEntityPartEmailRecipient>)recipients.NestedWidget);
+                        recipientsCrud.Grid
                             .Column(x => x.SendToEmail)
                             .Column(x => x.UserFullName);
+
+                        var userAccountForm = recipientsCrud.FormTypeSelector.GetWidget<IEntityPartUserAccountEmailRecipient, Form<IEntityPartUserAccountEmailRecipient>>();
+                        userAccountForm.Field(x => x.User, setup: user => {
+                            ((DataGrid<IUserAccountEntity>)user.NestedWidget)
+                                .Column(x => x.LoginName)
+                                .Column(x => x.FullName)
+                                .Column(x => x.EmailAddress)
+                                .Column(x => x.UserRolesText, title: "Roles");
+                        });
                     });
             });
         }

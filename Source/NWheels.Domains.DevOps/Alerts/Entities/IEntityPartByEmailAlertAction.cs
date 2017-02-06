@@ -13,9 +13,9 @@ namespace NWheels.Domains.DevOps.Alerts.Entities
     {
         public abstract ICollection<IEntityPartEmailRecipient> Recipients { get; }
 
-        public override string SummaryText
+        public override string AlertType
         {
-            get { return "EntityPartAlertByEmail"; }//nameof(EntityPartAlertByEmail);
+            get { return "Alert by email"; }//nameof(EntityPartAlertByEmail);
         }
     }
 }
