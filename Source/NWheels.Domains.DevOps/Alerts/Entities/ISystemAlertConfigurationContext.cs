@@ -11,7 +11,7 @@ namespace NWheels.Domains.DevOps.Alerts.Entities
     {
         IEntityRepository<ISystemAlertConfigurationEntity> Alerts { get; }
         IEntityPartAlertAction NewEntityPartAlertAction();
-        IEntityPartAlertByEmail NewEntityPartAlertByEmail();
+        IEntityPartByEmailAlertAction NewEntityPartAlertByEmail();
         IEntityPartEmailRecipient NewEntityPartEmailRecipient();
         IEntityPartEmailAddressRecipient NewEntityPartEmailAddressRecipient();
         IEntityPartUserAccountEmailRecipient NewEntityPartUserAccountEmailRecipient();

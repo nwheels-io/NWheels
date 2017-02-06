@@ -15,7 +15,9 @@ namespace NWheels.Domains.DevOps.Alerts
             builder.NWheelsFeatures().ObjectContracts().Concretize<ISystemAlertConfigurationEntity>().With<SystemAlertConfigurationEntity>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<IEntityPartEmailAddressRecipient>().With<EntityPartEmailAddressRecipient>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<IEntityPartUserAccountEmailRecipient>().With<EntityPartUserAccountEmailRecipient>();
-            builder.NWheelsFeatures().ObjectContracts().Concretize<IEntityPartAlertByEmail>().With<EntityPartAlertByEmail>();
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IEntityPartAlertAction>().With<EntityPartAlertAction>();
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IEntityPartByEmailAlertAction>().With<EntityPartByEmailAlertAction>();
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IEntityPartEmailRecipient>().With<EntityPartEmailRecipient>();
         }
 
         #endregion

@@ -85,7 +85,7 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
                 {
                     var recipients = alert
                         .AlertActions
-                        .OfType<IEntityPartAlertByEmail>()
+                        .OfType<IEntityPartByEmailAlertAction>()
                         .Select(action => action.Recipients)
                         .SelectMany(x => x)
                         .ToArray();

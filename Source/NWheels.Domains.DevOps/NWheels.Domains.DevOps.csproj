@@ -67,7 +67,7 @@
     <Compile Include="Alerts\Entities\ISystemAlertConfigurationEntity.cs" />
     <Compile Include="Alerts\Entities\IEntityPartEmailAddressee.cs" />
     <Compile Include="Alerts\Entities\IEntityPartAlertAction.cs" />
-    <Compile Include="Alerts\Entities\IEntityPartAlertByEmail.cs" />
+    <Compile Include="Alerts\Entities\IEntityPartByEmailAlertAction.cs" />
     <Compile Include="Alerts\Entities\ISystemAlertConfigurationContext.cs" />
     <Compile Include="Alerts\ISystemAlertConfigurationFeatureSection.cs" />
     <Compile Include="Alerts\SystemAlertConfigurationFeatureLoader.cs" />

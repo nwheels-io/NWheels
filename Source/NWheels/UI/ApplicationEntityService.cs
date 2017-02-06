@@ -3659,7 +3659,6 @@ namespace NWheels.UI
             private readonly ApplicationEntityService _ownerService;
             private readonly IPropertyMetadata _metaProperty;
             private readonly ITypeMetadata _relatedMetaType;
-            private readonly EntityHandler _relatedEntityHandler;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -3668,7 +3667,6 @@ namespace NWheels.UI
                 _ownerService = ownerService;
                 _metaProperty = metaProperty;
                 _relatedMetaType = _metaProperty.Relation.RelatedPartyType;
-                _relatedEntityHandler = _ownerService._handlerByEntityName[_relatedMetaType.QualifiedName];
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -3715,13 +3713,19 @@ namespace NWheels.UI
                         }
                     }
 
-                    if (itemToPopulate != null)
+                    var typeName = jo["$type"].Value<string>();
+                    var concreteHandler = _ownerService._handlerByEntityName.GetValueOrCreateDefault(typeName, _ownerService.CreateAdHocEntityHandler);
+                    var shouldPopulateExistingItem = (
+                        itemToPopulate != null &&
+                        itemToPopulate.As<IObject>().ContractType == concreteHandler.MetaType.ContractType);
+
+                    if (shouldPopulateExistingItem)
                     {
                         removedItems.ExceptWith(new[] { itemToPopulate });
                     }
                     else
                     {
-                        itemToPopulate = (TObject)_relatedEntityHandler.CreateNew();
+                        itemToPopulate = (TObject)concreteHandler.CreateNew();
                         existingCollection.Add(itemToPopulate);
                     }
 

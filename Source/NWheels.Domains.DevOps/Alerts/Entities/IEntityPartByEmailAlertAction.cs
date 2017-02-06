@@ -4,16 +4,16 @@ using System.Collections.Generic;
 namespace NWheels.Domains.DevOps.Alerts.Entities
 {
     [EntityPartContract(BaseEntityPart = typeof(IEntityPartAlertAction))]
-    public interface IEntityPartAlertByEmail : IEntityPartAlertAction
+    public interface IEntityPartByEmailAlertAction : IEntityPartAlertAction
     {
         ICollection<IEntityPartEmailRecipient> Recipients { get; } 
     }
 
-    public abstract class EntityPartAlertByEmail : IEntityPartAlertByEmail
+    public abstract class EntityPartByEmailAlertAction : EntityPartAlertAction, IEntityPartByEmailAlertAction
     {
         public abstract ICollection<IEntityPartEmailRecipient> Recipients { get; }
 
-        public virtual string SummaryText
+        public override string SummaryText
         {
             get { return "EntityPartAlertByEmail"; }//nameof(EntityPartAlertByEmail);
         }

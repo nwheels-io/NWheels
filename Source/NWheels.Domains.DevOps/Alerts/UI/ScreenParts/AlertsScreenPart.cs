@@ -36,7 +36,7 @@ namespace NWheels.Domains.DevOps.Alerts.UI.ScreenParts
                     form.HideFieldsOf<IEntityPartAlertAction>(x => x.SummaryText);
                 });*/
 
-                var emailActionForm = alertActionCrud.FormTypeSelector.GetWidget<IEntityPartAlertByEmail, Form<IEntityPartAlertByEmail>>();
+                var emailActionForm = alertActionCrud.FormTypeSelector.GetWidget<IEntityPartByEmailAlertAction, Form<IEntityPartByEmailAlertAction>>();
                 emailActionForm.Field(x => x.Recipients, setup: f => {
                     var emailRecipientsCrud = (Crud<IEntityPartEmailRecipient>)f.NestedWidget;
                     emailRecipientsCrud.FormTypeSelector.ForEachWidgetOfType<IUidlForm>(form => {
@@ -44,7 +44,7 @@ namespace NWheels.Domains.DevOps.Alerts.UI.ScreenParts
                     });
                 });
 
-                alertActionCrud.FormTypeSelector.GetWidget<IEntityPartAlertByEmail, Form<IEntityPartAlertByEmail>>()
+                alertActionCrud.FormTypeSelector.GetWidget<IEntityPartByEmailAlertAction, Form<IEntityPartByEmailAlertAction>>()
                     .Field(f => f.Recipients, setup: recipients => {
                         ((Crud<IEntityPartEmailRecipient>)recipients.NestedWidget).Grid
                             .Column(x => x.SendToEmail)
