@@ -37,8 +37,22 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
             if (IsGenericType)
             {
-                this.GenericTypeArguments.AddRange(info.GenericTypeArguments.Select(t => new TypeMember(t)));
+                this.GenericTypeArguments.AddRange(info.GenericTypeArguments.Select(GetBoundTypeMember));
+                this.IsGenericTypeDefinition = info.IsGenericTypeDefinition;
+                this.GenericTypeDefinition = (IsGenericTypeDefinition ? null : info.GetGenericTypeDefinition());
                 this.Name = this.Name.Substring(0, this.Name.IndexOf('`'));
+            }
+
+            if (info.IsArray)
+            {
+                this.IsArray = true;
+                this.IsCollection = true;
+                this.UnderlyingType = info.GetElementType();
+            }
+            else if (GenericTypeDefinition != null && _s_collectionGenericTypeDefinitions.Contains(GenericTypeDefinition.ClrBinding))
+            {
+                this.IsCollection = true;
+                this.UnderlyingType = GenericTypeArguments[0];
             }
         }
 
@@ -167,6 +181,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public bool IsAbstract { get; set; }
         public bool IsValueType { get; set; }
         public bool IsCollection { get; set; }
+        public bool IsArray { get; set; }
         public bool IsNullable { get; set; }
         public bool IsAwaitable { get; set; }
         public bool IsGenericType { get; set; }
@@ -182,20 +197,41 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static implicit operator TypeMember(Type compiledType)
+        private static ImmutableDictionary<Type, TypeMember> _s_typeMemberByClrType;
+        private static readonly ImmutableHashSet<Type> _s_collectionGenericTypeDefinitions = ImmutableHashSet<Type>.Empty.Union(new Type[] {
+            typeof(ICollection<>), typeof(IList<>), typeof(ISet<>), typeof(List<>), typeof(HashSet<>)
+        });
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        static TypeMember()
         {
-            if (compiledType == null)
-            {
-                return null;
-            }
+            var systemTypes = new Type[] {
+                typeof(bool), typeof(char), typeof(string), typeof(object), typeof(DateTime), typeof(TimeSpan),
+                typeof(byte) , typeof(sbyte), typeof(short), typeof(ushort), typeof(int), typeof(uint), typeof(long), typeof(ulong),
+                typeof(double), typeof(float), typeof(decimal),
+                typeof(Array), typeof(List<>), typeof(HashSet<>), typeof(Dictionary<,>), typeof(IList<>), typeof(ISet<>), typeof(IDictionary<,>)
+            };
 
-            if (compiledType.IsByRef)
-            {
-                compiledType = compiledType.GetElementType();
-            }
+            _s_typeMemberByClrType = ImmutableDictionary<Type, TypeMember>.Empty.AddRange(
+                systemTypes.Select(t => new KeyValuePair<Type, TypeMember>(t, new TypeMember(t))));
 
-            //TODO: use CompiledTypeMemberCache
-            return new TypeMember(compiledType);
+            _s_typeMemberByClrType = _s_typeMemberByClrType.AddRange(
+                systemTypes.Select(t => t.MakeArrayType()).Select(t => new KeyValuePair<Type, TypeMember>(t, new TypeMember(t))));
+
+            _s_typeMemberByClrType = _s_typeMemberByClrType.AddRange(
+                systemTypes.Select(t => typeof(List<>).MakeGenericType(t)).Select(t => new KeyValuePair<Type, TypeMember>(t, new TypeMember(t))));
+
+            _s_typeMemberByClrType = _s_typeMemberByClrType.AddRange(
+                systemTypes.Select(t => typeof(IList<>).MakeGenericType(t)).Select(t => new KeyValuePair<Type, TypeMember>(t, new TypeMember(t))));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //-- Thread safety: multiple readers single writer
+        public static implicit operator TypeMember(Type clrType)
+        {
+            return GetBoundTypeMember(clrType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -217,6 +253,30 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public static bool operator != (TypeMember member1, TypeMember member2)
         {
             return !(member1 == member2);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static TypeMember GetBoundTypeMember(Type clrType)
+        {
+            if (clrType == null)
+            {
+                return null;
+            }
+
+            if (clrType.IsByRef)
+            {
+                clrType = clrType.GetElementType();
+            }
+
+            if (_s_typeMemberByClrType.TryGetValue(clrType, out TypeMember existingTypeMember))
+            {
+                return existingTypeMember;
+            }
+
+            var newTypeMember = new TypeMember(clrType);
+            _s_typeMemberByClrType = _s_typeMemberByClrType.Add(clrType, newTypeMember);
+            return newTypeMember;
         }
     }
 }

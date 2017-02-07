@@ -110,6 +110,13 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
         {
             if (type.ClrBinding != null)
             {
+                if (type.ClrBinding.IsArray)
+                {
+                    var elementTypeSyntax = GetTypeNameSyntax(type.UnderlyingType);
+                    return ArrayType(elementTypeSyntax)
+                        .WithRankSpecifiers(SingletonList(ArrayRankSpecifier(SingletonSeparatedList<ExpressionSyntax>(OmittedArraySizeExpression()))));
+                }
+
                 if (_s_keywordPerType.TryGetValue(type.ClrBinding, out SyntaxKind keyword))
                 {
                     return PredefinedType(Token(keyword));

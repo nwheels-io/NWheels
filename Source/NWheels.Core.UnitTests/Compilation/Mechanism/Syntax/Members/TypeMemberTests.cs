@@ -117,6 +117,68 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Fact]
+        public void CanInitializeFromClrArrayType()
+        {
+            //-- act
+
+            TypeMember arrayOfInt = typeof(int[]);
+
+            //-- assert
+
+            arrayOfInt.ClrBinding.Should().BeSameAs(typeof(int[]));
+            arrayOfInt.IsArray.Should().BeTrue();
+            arrayOfInt.UnderlyingType.Should().NotBeNull();
+            arrayOfInt.UnderlyingType.ClrBinding.Should().BeSameAs(typeof(int));
+
+            arrayOfInt.IsAbstract.Should().BeFalse();
+            arrayOfInt.IsAwaitable.Should().BeFalse();
+            arrayOfInt.IsCollection.Should().BeTrue();
+            arrayOfInt.IsGenericType.Should().BeFalse();
+            arrayOfInt.IsGenericTypeDefinition.Should().BeFalse();
+            arrayOfInt.IsNullable.Should().BeFalse();
+            arrayOfInt.IsValueType.Should().BeFalse();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanCacheClrBoundTypeMembers()
+        {
+            //-- arrange
+
+            TypeMember typeInt1 = typeof(int);
+            TypeMember typeString1 = typeof(string);
+            TypeMember typeArrayOfInt1 = typeof(int[]);
+            TypeMember typeListOfString1 = typeof(List<string>);
+
+            //-- act
+
+            TypeMember typeInt2 = typeof(int);
+            TypeMember typeString2 = typeof(string);
+            TypeMember typeArrayOfInt2 = typeof(int[]);
+            TypeMember typeListOfString2 = typeof(List<string>);
+
+            //-- assert
+
+            typeInt2.Should().NotBeNull();
+            typeString2.Should().NotBeNull();
+            typeArrayOfInt2.Should().NotBeNull();
+            typeListOfString2.Should().NotBeNull();
+
+            typeInt2.Should().BeSameAs(typeInt1);
+            typeString2.Should().BeSameAs(typeString1);
+            typeArrayOfInt2.Should().BeSameAs(typeArrayOfInt1);
+            typeListOfString2.Should().BeSameAs(typeListOfString1);
+
+            typeArrayOfInt1.UnderlyingType.Should().BeSameAs(typeInt1);
+            typeListOfString1.UnderlyingType.Should().BeSameAs(typeString1);
+            typeArrayOfInt2.UnderlyingType.Should().BeSameAs(typeInt1);
+            typeListOfString2.UnderlyingType.Should().BeSameAs(typeString1);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class TestNestedType
         {
         }

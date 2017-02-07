@@ -46,6 +46,18 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
                 "NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters.SyntaxHelpersTests.TestNestedType",
                 new TypeMember(typeof(TestNestedType))
             },
+            new object[] {
+                "int[]",
+                new TypeMember(typeof(int[]))
+            },
+            new object[] {
+                "NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters.SyntaxHelpersTests.TestNestedType[]",
+                new TypeMember(typeof(TestNestedType[]))
+            },
+            new object[] {
+                "NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters.SyntaxHelpersTests.TestNestedType[]",
+                new TypeMember(typeof(TestNestedType[]))
+            },
             #endregion
         };
 
