@@ -25,6 +25,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             this.Level = record.Level;
             this.Logger = record.Logger;
             this.MessageId = record.MessageId;
+            this.AlertId = record.AlertId;
             this.DurationMs = record.DurationMs;
             this.ExceptionType = record.ExceptionType;
             this.ExceptionDetails = record.ExceptionDetails;

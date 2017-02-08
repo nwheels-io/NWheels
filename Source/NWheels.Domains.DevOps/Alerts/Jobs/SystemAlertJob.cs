@@ -158,6 +158,19 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
                 using (var context = _owner._framework.NewUnitOfWork<ISystemAlertConfigurationContext>())
                 {
                     var configuredAlerts = context.Alerts.AsQueryable().ToList();
+
+                    //work around lazy loading
+                    foreach (var alert in configuredAlerts)
+                    {
+                        foreach (var emailAction in alert.AlertActions.OfType<IEntityPartByEmailAlertAction>())
+                        {
+                            foreach (var recipient in emailAction.Recipients)
+                            {
+                                recipient.ToOutgoingEmailMessageRecipient();
+                            }
+                        }
+                    }
+
                     this.Configuration = new ImmutableConfiguration(configuredAlerts);
                 }
             }
@@ -219,6 +232,7 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
             private readonly IFramework _framework;
             private readonly ServiceBus _serviceBus;
             private readonly AbstractLogMessageListTx _messageListTx;
+            private readonly char _splitChar = char.MinValue;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -318,28 +332,45 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
                 }
                 else
                 {
-                    subject = string.Format("MS Alerts: {0} different awainting for you", numOfAlerts);
+                    subject = string.Format("MS Alerts: {0} different awaiting for you", numOfAlerts);
                 }
                 message.Subject = subject;
-
                 message.BodyHtmlTemplate = string.Empty;
 
-                StringBuilder body = new StringBuilder();
-                foreach (var alert in alerts)
-                {
-                    var alertConfig = _systemAlertConfiguration.AlertList[alert.AlertId];
+                var body = new StringBuilder();
 
-                    body.AppendLine(string.Format("{0}", alert.AlertId));
-                    body.AppendLine();
+                foreach (var groupedAlerts in alerts.GroupBy(alert => GetGroupByKeyByAlert(alert)))
+                {
+                    var alertConfig = _systemAlertConfiguration.AlertList[groupedAlerts.First().AlertId];
+                    body.AppendLine(string.Format("{0} - {1}", groupedAlerts.Key, groupedAlerts.Count()));
                     body.AppendLine(string.Format("Description: {0}", alertConfig.Description));
-                    body.AppendLine();
                     body.AppendLine(string.Format("Possible reasons: {0}", alertConfig.PossibleReason));
-                    body.AppendLine();
                     body.AppendLine(string.Format("Suggested Actions: {0}", alertConfig.SuggestedAction));
+                    body.AppendLine();
                 }
 
                 message.BodyHtmlTemplate = body.ToString();
                 return message;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private string GetGroupByKeyByAlert(ILogMessageEntity logMessage)
+            {
+                var groupByConfig = _systemAlertConfiguration.AlertList[logMessage.AlertId];
+
+                var groupByResult = logMessage.AlertId;
+                foreach (var keyValue in logMessage.KeyValues)
+                {
+                    foreach (var groupItem in groupByConfig.GroupBy.Split(','))
+                    {
+                        if (keyValue.StartsWith(groupItem.Trim() + "="))
+                        {
+                            groupByResult += _splitChar + keyValue;
+                        }
+                    }
+                }
+                return groupByResult;
             }
         }
 

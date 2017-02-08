@@ -10,7 +10,6 @@ namespace NWheels.Domains.DevOps.Alerts.Entities
     {
         string Id { get; set; }
 
-
         ICollection<IEntityPartAlertAction> AlertActions { get; }
 
         [PropertyContract.Calculated]
@@ -25,6 +24,8 @@ namespace NWheels.Domains.DevOps.Alerts.Entities
         [PropertyContract.Calculated]
         string SuggestedActionText { get; }
 
+        [PropertyContract.Calculated]
+        string GroupBy { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -91,6 +92,21 @@ namespace NWheels.Domains.DevOps.Alerts.Entities
                 }
 
                 return Configuration.AlertList[Id].SuggestedAction;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string GroupBy
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Id))
+                {
+                    return null;
+                }
+
+                return Configuration.AlertList[Id].GroupBy;
             }
         }
 

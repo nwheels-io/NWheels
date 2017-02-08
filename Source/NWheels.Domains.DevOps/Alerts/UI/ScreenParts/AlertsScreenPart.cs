@@ -28,7 +28,8 @@ namespace NWheels.Domains.DevOps.Alerts.UI.ScreenParts
                 .LookupSource(x => x.Id, x => x.AvailableAlertIds)
                 .Field(x => x.DescriptionText, label: "Description", setup: f => f.Modifiers |= FormFieldModifiers.Memo)
                 .Field(x => x.PossibleReasonText, label: "PossibleReason", setup: f => f.Modifiers |= FormFieldModifiers.Memo)
-                .Field(x => x.SuggestedActionText, label: "SuggestedAction", setup: f => f.Modifiers |= FormFieldModifiers.Memo);
+                .Field(x => x.SuggestedActionText, label: "SuggestedAction", setup: f => f.Modifiers |= FormFieldModifiers.Memo)
+                .Field(x => x.GroupBy, label: "GroupBy", setup: f => f.Modifiers |= FormFieldModifiers.Memo);
 
             Crud.Form.Field(f => f.AlertActions, setup: alertActions => {
                 var alertActionCrud = (Crud<IEntityPartAlertAction>)alertActions.NestedWidget;

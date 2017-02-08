@@ -122,6 +122,13 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
                 RefineDbQuery<LogMessageRecord>(dbCriteria, options);
             }
 
+            var alertIdFilter = TryTakePropertyFilter(options, _s_messageAlertIdProperty);
+            if (alertIdFilter != null)
+            {
+                var alertIdValues = alertIdFilter.StringValue.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                dbCriteria.Add(Query<LogMessageRecord>.In(x => x.AlertId, alertIdValues));
+            }
+
             var dbQuery = Query.And(dbCriteria);
 
             return RunEnvironmentMapReduceQuery<LogMessageRecord>(
@@ -422,6 +429,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             ExpressionUtility.GetPropertyInfoFrom<IBaseLogDimensionsEntity>(x => x.Replica);
         private static readonly PropertyInfo _s_messageIdProperty =
             ExpressionUtility.GetPropertyInfoFrom<ILogMessageSummaryEntity>(x => x.MessageId);
+        private static readonly PropertyInfo _s_messageAlertIdProperty =
+            ExpressionUtility.GetPropertyInfoFrom<ILogMessageEntity>(x => x.AlertId);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

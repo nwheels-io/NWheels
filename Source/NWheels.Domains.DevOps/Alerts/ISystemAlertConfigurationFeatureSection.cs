@@ -14,5 +14,6 @@ namespace NWheels.Domains.DevOps.Alerts
         string Description { get; set; }
         string PossibleReason { get; set; }
         string SuggestedAction { get; set; }
+        string GroupBy { get; set; }
     }
 }
