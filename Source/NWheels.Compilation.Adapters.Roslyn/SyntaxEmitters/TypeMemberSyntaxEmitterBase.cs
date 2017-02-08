@@ -20,7 +20,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
         protected TypeMemberSyntaxEmitterBase(TMember member)
             : base(member)
         {
-            if (member.Generator.FactoryType != null && member.Generator.TypeKey != null)
+            if (member.Generator.FactoryType != null && member.Generator.TypeKey.HasValue)
             {
                 AddTypeKeyAttribute();
             }
@@ -34,13 +34,13 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
                 AttributeType = typeof(TypeKeyAttribute)
             };
             typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.FactoryType });
-            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.PrimaryContract });
-            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.SecondaryContract1 });
-            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.SecondaryContract2 });
-            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.SecondaryContract3 });
-            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.ExtensionValue1 });
-            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.ExtensionValue2 });
-            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.ExtensionValue3 });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.Value.PrimaryContract });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.Value.SecondaryContract1 });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.Value.SecondaryContract2 });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.Value.SecondaryContract3 });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.Value.ExtensionValue1 });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.Value.ExtensionValue2 });
+            typeKeyAttribute.ConstructorArguments.Add(new ConstantExpression() { Value = Member.Generator.TypeKey.Value.ExtensionValue3 });
 
             Member.Attributes.Add(typeKeyAttribute);
         }

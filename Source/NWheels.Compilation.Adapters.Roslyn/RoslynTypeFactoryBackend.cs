@@ -54,8 +54,13 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         public CompilationResult Compile(ICollection<TypeMember> types)
         {
-            var generator = new CSharpSyntaxGenerator();
-            var syntaxTree = generator.GenerateSyntax(types);
+            var catalogBuilder = new AssemblyArtifactCatalogBuilder(types);
+            catalogBuilder.BuildArtifactCatalog();
+
+            var allTypes = types.Concat(catalogBuilder.CatalogTypes).ToList();
+
+            var syntaxGenerator = new CSharpSyntaxGenerator();
+            var syntaxTree = syntaxGenerator.GenerateSyntax(allTypes);
             var success = TryCompileNewAssembly(ref syntaxTree, out Assembly assembly, out ImmutableArray<Diagnostic> diagnostics);
 
             if (success)
@@ -193,7 +198,10 @@ namespace NWheels.Compilation.Adapters.Roslyn
             ICollection<TypeMember> types,
             Dictionary<TypeKey, RuntimeTypeFactoryArtifact> artifactPerTypeKey)
         {
-            var typePerKey = types.ToDictionary(t => t.Generator.TypeKey, t => t);
+            var typePerKey = types
+                .Where(t => t.Generator.TypeKey.HasValue)
+                .ToDictionary(t => t.Generator.TypeKey.Value, t => t);
+
             var productPerType = new Dictionary<TypeMember, TypeFactoryProduct<IRuntimeTypeFactoryArtifact>>();
 
             foreach (var keyTypePair in typePerKey)

@@ -9,11 +9,11 @@ namespace NWheels.Compilation.Mechanism.Syntax.Statements
     {
         public BlockStatement(params AbstractStatement[] statements)
         {
-            this.Body = new List<AbstractStatement>(statements);
+            this.Statements = new List<AbstractStatement>(statements);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public List<AbstractStatement> Body { get; private set; }
+        public List<AbstractStatement> Statements { get; private set; }
     }
 }

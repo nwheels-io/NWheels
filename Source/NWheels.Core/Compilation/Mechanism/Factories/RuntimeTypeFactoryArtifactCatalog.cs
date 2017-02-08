@@ -7,7 +7,7 @@ namespace NWheels.Compilation.Mechanism.Factories
 {
     public abstract class RuntimeTypeFactoryArtifactCatalog
     {
-        public const string ConcreteCatalogClassName = "ThisAssemblyArtifactCatalog";
+        public const string ConcreteCatalogClassName = "ThisAssemblyFactoryCatalog";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

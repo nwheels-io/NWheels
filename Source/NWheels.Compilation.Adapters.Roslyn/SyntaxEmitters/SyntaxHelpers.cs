@@ -163,10 +163,38 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
         {
             if (block != null)
             {
-                return Block(block.Body.Select(StatementSyntaxEmitter.EmitSyntax));
+                return Block(block.Statements.Select(StatementSyntaxEmitter.EmitSyntax));
             }
 
             return Block();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetValidCSharpIdentifier(string proposedName)
+        {
+            if (string.IsNullOrEmpty(proposedName) || SyntaxFacts.IsValidIdentifier(proposedName))
+            {
+                return proposedName;
+            }
+
+            var validatedName = new char[proposedName.Length];
+
+            for (int i = 0 ; i < proposedName.Length ; i++)
+            {
+                var c = proposedName[i];
+
+                if (!char.IsLetter(c) && !(char.IsDigit(c) && i > 0) && !(c == '_'))
+                {
+                    validatedName[i] = '_';
+                }
+                else
+                {
+                    validatedName[i] = c;
+                }
+            }
+
+            return new string(validatedName);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -412,13 +412,13 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
                 var products = new List<TypeFactoryProduct<TestArtifact>>();
                 var index = 0;
 
-                foreach (var type in types)
+                foreach (var type in types.Where(t => t.Generator.TypeKey.HasValue))
                 {
                     if (_expectedSuccess[index++])
                     {
                         var artifact = new TestArtifact(type);
                         succeeded.Add(new TypeCompilationResult<TestArtifact>(type, true, artifact, new CompilationDiagnostic[0]));
-                        products.Add(new TypeFactoryProduct<TestArtifact>(type.Generator.TypeKey, artifact));
+                        products.Add(new TypeFactoryProduct<TestArtifact>(type.Generator.TypeKey.Value, artifact));
                     }
                     else
                     {

@@ -28,6 +28,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
 
             var backendUnderTest = new RoslynTypeFactoryBackend();
             backendUnderTest.EnsureTypeReferenced(this.GetType());
+            backendUnderTest.EnsureTypeReferenced(typeof(RuntimeTypeFactoryArtifactCatalog));
 
             var key1 = new TypeKey(this.GetType(), typeof(int), typeof(int), typeof(int), typeof(int), 1, 2, 3);
             var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
@@ -52,12 +53,54 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void CanInstantiateCompiledProducts()
+        {
+            //-- arrange
+
+            var backendUnderTest = new RoslynTypeFactoryBackend();
+            backendUnderTest.EnsureTypeReferenced(this.GetType());
+            backendUnderTest.EnsureTypeReferenced(typeof(RuntimeTypeFactoryArtifactCatalog));
+
+            var compiledArtifacts = new Dictionary<TypeKey, IRuntimeTypeFactoryArtifact<object>>();
+
+            backendUnderTest.ProductsLoaded += (products) => {
+                foreach (var product in products)
+                {
+                    compiledArtifacts.Add(product.Key, (IRuntimeTypeFactoryArtifact<object>)product.Artifact);
+                }
+            };
+
+            var key1 = new TypeKey(this.GetType(), typeof(int));
+            var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1), "NS1", MemberVisibility.Public, TypeMemberKind.Class, "ClassInt");
+
+            var key2 = new TypeKey(this.GetType(), typeof(string));
+            var type2 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key2), "NS2", MemberVisibility.Public, TypeMemberKind.Class, "ClassString");
+
+
+            //-- act
+
+            var result = backendUnderTest.Compile(new[] { type1, type2 });
+            var classInt = compiledArtifacts[key1].NewInstance();
+            var classString = compiledArtifacts[key2].NewInstance();
+
+            //-- assert
+
+            result.Success.Should().BeTrue();
+            compiledArtifacts.Count.Should().Be(2);
+            classInt.GetType().FullName.Should().Be("NS1.ClassInt");
+            classString.GetType().FullName.Should().Be("NS2.ClassString");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void CanReportCompilationIssuesPerTypeMember()
         {
             //-- arrange
 
             var backendUnderTest = new RoslynTypeFactoryBackend();
             backendUnderTest.EnsureTypeReferenced(this.GetType());
+            backendUnderTest.EnsureTypeReferenced(typeof(RuntimeTypeFactoryArtifactCatalog));
 
             var type1 = new TypeMember("NS1", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
             var type2 = new TypeMember("NS1", MemberVisibility.Private, TypeMemberKind.Class, "ClassTwo");
@@ -216,6 +259,86 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Fact]
+        public void CanGenerateHardCodedArtifactCatalogClass()
+        {
+            //-- arrange
+
+            var firstArtifactType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "FirstArtifact");
+            var secondArtifactType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "SecondArtifact");
+
+            var catalogType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ThisAssemblyArtifactCatalog");
+            catalogType.BaseType = typeof(RuntimeTypeFactoryArtifactCatalog);
+
+            var getArtifactsMethod = new MethodMember(
+                MemberVisibility.Public,
+                MemberModifier.Override,
+                nameof(RuntimeTypeFactoryArtifactCatalog.GetArtifacts),
+                new MethodSignature { ReturnValue = new MethodParameter { Type = typeof(RuntimeTypeFactoryArtifact[]) } });
+
+            var artifactsVariable = new LocalVariable { Name = "artifacts" };
+
+            getArtifactsMethod.Body = new BlockStatement(
+                new VariableDeclarationStatement {
+                    Variable = artifactsVariable,
+                    InitialValue = new NewArrayExpression {
+                        ElementType = typeof(RuntimeTypeFactoryArtifact),
+                        Length = new ConstantExpression { Value = 2 }
+                    },
+                },
+                new ExpressionStatement {
+                    Expression = new AssignmentExpression {
+                        Left = new IndexerExpression {
+                            Target = new LocalVariableExpression { Variable = artifactsVariable },
+                            Index = new ConstantExpression { Value = 0 }
+                        },
+                        Right = new NewObjectExpression { Type = firstArtifactType }
+                    }
+                },
+                new ExpressionStatement {
+                    Expression = new AssignmentExpression {
+                        Left = new IndexerExpression {
+                            Target = new LocalVariableExpression { Variable = artifactsVariable },
+                            Index = new ConstantExpression { Value = 1 }
+                        },
+                        Right = new NewObjectExpression { Type = secondArtifactType }
+                    }
+                },
+                new ReturnStatement {
+                    Expression = new LocalVariableExpression { Variable = artifactsVariable } 
+                }
+            );
+
+            catalogType.Members.Add(getArtifactsMethod);
+
+            //-- act
+
+            var syntaxEmitter = new ClassSyntaxEmitter(catalogType);
+            var actualSyntax = syntaxEmitter.EmitSyntax();
+
+            //-- assert
+
+            var expectedCode = @"
+                public class ThisAssemblyArtifactCatalog : NWheels.Compilation.Mechanism.Factories.RuntimeTypeFactoryArtifactCatalog
+                {
+                    public override NWheels.Compilation.Mechanism.Factories.RuntimeTypeFactoryArtifact[] GetArtifacts()
+                    {
+                        var artifacts = new NWheels.Compilation.Mechanism.Factories.RuntimeTypeFactoryArtifact[2];
+
+                        artifacts[0] = new FirstArtifact();
+                        artifacts[1] = new SecondArtifact();
+
+                        return artifacts;
+                    }
+                }
+            ";
+
+            actualSyntax.Should().BeEquivalentToCode(expectedCode);
+        }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
 #if false
         //TODO later
         [Fact]
@@ -280,7 +403,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-public class ThisAssemblyArtifactCatalog : RuntimeTypeFactoryArtifactCatalog
+public class ThisAssemblyFactoryCatalog : RuntimeTypeFactoryArtifactCatalog
 {
     public override RuntimeTypeFactoryArtifact[] GetArtifacts()
     {

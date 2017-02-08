@@ -8,8 +8,8 @@ namespace NWheels.Compilation.Mechanism.Factories
 {
     public abstract class TypeCompilationResult
     {
-        public abstract TypeKey Key { get; }
         public abstract TypeMember Type { get; }
+        public abstract TypeKey? Key { get; }
         public abstract bool Success { get; }
         public abstract IReadOnlyList<CompilationDiagnostic> Diagnostics { get; }
     }
@@ -32,7 +32,7 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override TypeKey Key => Type.Generator.TypeKey;
+        public override TypeKey? Key => Type.Generator.TypeKey;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

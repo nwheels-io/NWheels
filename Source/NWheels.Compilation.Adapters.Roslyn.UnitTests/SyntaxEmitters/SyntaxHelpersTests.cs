@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using FluentAssertions;
+using Microsoft.CodeAnalysis.CSharp;
 using NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters;
 using NWheels.Compilation.Mechanism.Syntax.Expressions;
 using NWheels.Compilation.Mechanism.Syntax.Members;
@@ -218,6 +219,39 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
             //-- assert
 
             actualSyntax.Should().BeEquivalentToCode(expectedCode);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<object[]> TestCases_TestGetLegalCSharpIdentifier = new object[][] {
+            #region Test cases
+            new object[] { "abcDef" , "abcDef" },
+            new object[] { "abc1Def2" , "abc1Def2" },
+            new object[] { "1abc2Def" , "_abc2Def" },
+            new object[] { "abc_def" , "abc_def" },
+            new object[] { "abc@def" , "abc_def" },
+            new object[] { "abc:def" , "abc_def" },
+            new object[] { "abc.def" , "abc_def" },
+            new object[] { "abc!def" , "abc_def" },
+            new object[] { "abc/def" , "abc_def" },
+            new object[] { "abc,def" , "abc_def" },
+            new object[] { "abc@def.ghi" , "abc_def_ghi" },
+            new object[] { "" , "" },
+            new object[] { null , null },
+            #endregion
+        };
+
+        [Theory]
+        [MemberData(nameof(TestCases_TestGetLegalCSharpIdentifier))]
+        public void TestGetLegalCSharpIdentifier(string proposedName, string expectedName)
+        {
+            //-- act
+
+            var actualName = SyntaxHelpers.GetValidCSharpIdentifier(proposedName);
+
+            //-- assert
+
+            actualName.Should().Be(expectedName);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -282,6 +282,17 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
                     return indexer;
                 })
             },
+            new object[] {
+                "a[123]",
+                new Func<IndexerExpression>(() => {
+                    var varA = new LocalVariable { Name = "a"};
+                    var indexer = new IndexerExpression {
+                        Target = new LocalVariableExpression { Variable = varA },
+                        Index = new ConstantExpression { Value = 123 }
+                    };
+                    return indexer;
+                })
+            },
             #endregion
         };
 
