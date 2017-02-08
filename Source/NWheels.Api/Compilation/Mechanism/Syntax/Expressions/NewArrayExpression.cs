@@ -10,6 +10,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
         public NewArrayExpression()
         {
             this.DimensionLengths = new List<AbstractExpression>();
+            this.DimensionInitializerValues = new List<List<AbstractExpression>>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -40,6 +41,10 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TypeMember ElementType { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public List<AbstractExpression> DimensionLengths { get; set; }
+        public List<List<AbstractExpression>> DimensionInitializerValues { get; set; }
     }
 }

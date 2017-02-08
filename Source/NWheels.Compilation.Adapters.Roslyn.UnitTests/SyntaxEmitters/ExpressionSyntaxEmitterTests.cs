@@ -1,10 +1,13 @@
-﻿using NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters;
 using NWheels.Compilation.Mechanism.Syntax.Expressions;
 using NWheels.Compilation.Mechanism.Syntax.Members;
+using NWheels.Compilation.Mechanism.Syntax.Statements;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
 {
@@ -163,6 +166,145 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
             //-- assert
 
             actualSyntax.Should().BeEquivalentToCode(expectedCode);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<object[]> TestCases_CanEmitAssignmentExpression = new object[][] {
+            #region Test cases
+            new object[] {
+                "x = 123",
+                new AssignmentExpression {
+                    Left = new LocalVariableExpression { Variable = new LocalVariable { Name = "x" } },
+                    Right = new ConstantExpression { Value = 123 }
+                }
+            },
+            #endregion
+        };
+
+        [Theory]
+        [MemberData(nameof(TestCases_CanEmitAssignmentExpression))]
+        public void CanEmitAssignmentExpression(string expectedCode, AssignmentExpression expression)
+        {
+            //-- arrange
+
+            var enclosingMethod = new MethodMember(MemberVisibility.Public, "Method1", new MethodSignature());
+            enclosingMethod.Body = new BlockStatement(
+                new ExpressionStatement { Expression = expression }
+            );
+
+            //-- act
+
+            var actualSyntax = new MethodSyntaxEmitter(enclosingMethod).EmitSyntax();
+
+            //-- assert
+
+            actualSyntax.Should().BeEquivalentToCode("public void Method1() { " + expectedCode + "; }");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<object[]> TestCases_CanEmitNewArrayExpression = new object[][] {
+            #region Test cases
+            new object[] {
+                "new int[123]",
+                new Func<AbstractExpression>(() => new NewArrayExpression {
+                    ElementType = typeof(int),
+                    Length = new ConstantExpression { Value = 123 }
+                })
+            },
+            new object[] {
+                "new int[0]",
+                new Func<AbstractExpression>(() => new NewArrayExpression {
+                    ElementType = typeof(int),
+                    Length = new ConstantExpression { Value = 0 }
+                })
+            },
+            new object[] {
+                "new int[] { 1, 2, 3 }",
+                new Func<AbstractExpression>(() => {
+                    var expression = new NewArrayExpression {
+                         ElementType = typeof(int),
+                    };
+                    expression.DimensionInitializerValues.Add(new List<AbstractExpression> {
+                        new ConstantExpression { Value = 1 },
+                        new ConstantExpression { Value = 2 },
+                        new ConstantExpression { Value = 3 }
+                    });
+                    return expression;
+                })
+            },
+            new object[] {
+                "new int[] { }",
+                new Func<AbstractExpression>(() => {
+                    var expression = new NewArrayExpression {
+                         ElementType = typeof(int),
+                    };
+                    expression.DimensionInitializerValues.Add(new List<AbstractExpression>());
+                    return expression;
+                })
+            },
+            #endregion
+        };
+
+        [Theory]
+        [MemberData(nameof(TestCases_CanEmitNewArrayExpression))]
+        public void CanEmitNewArrayExpression(string expectedCode, Func<AbstractExpression> expressionFactory)
+        {
+            //-- arrange
+
+            var expression = expressionFactory();
+
+            var enclosingMethod = new MethodMember(MemberVisibility.Public, "Method1", new MethodSignature());
+            enclosingMethod.Body = new BlockStatement(
+                new ExpressionStatement { Expression = expression }
+            );
+
+            //-- act
+
+            var actualSyntax = new MethodSyntaxEmitter(enclosingMethod).EmitSyntax();
+
+            //-- assert
+
+            actualSyntax.Should().BeEquivalentToCode("public void Method1() { " + expectedCode + "; }");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<object[]> TestCases_CanEmitIndexerExpression = new object[][] {
+            #region Test cases
+            new object[] {
+                "a[123]",
+                new Func<IndexerExpression>(() => {
+                    var varA = new LocalVariable { Name = "a"};
+                    var indexer = new IndexerExpression { Target = new LocalVariableExpression { Variable = varA } };
+                    indexer.IndexArguments.Add(new ConstantExpression { Value = 123 });
+                    return indexer;
+                })
+            },
+            #endregion
+        };
+
+        [Theory]
+        [MemberData(nameof(TestCases_CanEmitIndexerExpression))]
+        public void CanEmitIndexerExpression(string expectedCode, Func<IndexerExpression> expressionFactory)
+        {
+            //-- arrange
+
+            var expression = expressionFactory();
+
+            var enclosingMethod = new MethodMember(MemberVisibility.Public, "Method1", new MethodSignature());
+            enclosingMethod.Body = new BlockStatement(
+                new ExpressionStatement { Expression = expression }
+            );
+
+            //-- act
+
+            var actualSyntax = new MethodSyntaxEmitter(enclosingMethod).EmitSyntax();
+
+            //-- assert
+
+            actualSyntax.Should().BeEquivalentToCode("public void Method1() { " + expectedCode + "; }");
         }
     }
 }

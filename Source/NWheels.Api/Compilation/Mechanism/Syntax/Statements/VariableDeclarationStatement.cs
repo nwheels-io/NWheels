@@ -6,8 +6,9 @@ using System.Text;
 
 namespace NWheels.Compilation.Mechanism.Syntax.Statements
 {
-    public class ThrowStatement : AbstractStatement
+    public class VariableDeclarationStatement : AbstractStatement
     {
-        public AbstractExpression Exception { get; set; }
+        public LocalVariable Variable { get; set; }
+        public AbstractExpression InitialValue { get; set; } 
     }
 }

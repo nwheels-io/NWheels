@@ -25,6 +25,8 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
             this.Name = compiledType.Name;
             this.Namespace = compiledType.Namespace;
 
+            //TODO: delay further initialization until values are requested (distinguish runtime from compile-time).
+
             if (compiledType.DeclaringType != null)
             {
                 this.DeclaringType = compiledType.DeclaringType;
