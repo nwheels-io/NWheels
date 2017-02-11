@@ -5,7 +5,7 @@ using System.Text;
 
 namespace NWheels.Compilation.Mechanism.Syntax.Expressions
 {
-    public class ArgumentExpression : AbstractExpression
+    public class ParameterExpression : AbstractExpression
     {
         public MethodParameter Parameter { get; set; }
     }

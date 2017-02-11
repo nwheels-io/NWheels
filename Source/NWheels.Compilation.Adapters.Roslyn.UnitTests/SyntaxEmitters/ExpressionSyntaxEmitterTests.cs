@@ -317,5 +317,48 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
 
             actualSyntax.Should().BeEquivalentToCode("public void Method1() { " + expectedCode + "; }");
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<object[]> TestCases_CanEmitMemberExpression = new object[][] {
+            #region Test cases
+            new object[] {
+                "this.IntValue",
+                new Func<MemberExpression>(() => new MemberExpression {
+                    Target = new ThisExpression(),
+                    Member = new FieldMember { Name = "IntValue" }
+                })
+            },
+            new object[] {
+                "obj.IntValue",
+                new Func<MemberExpression>(() => new MemberExpression {
+                    Target = new LocalVariableExpression { Variable = new LocalVariable { Name = "obj" } },
+                    Member = new FieldMember { Name = "IntValue" }
+                })
+            },
+            #endregion
+        };
+
+        [Theory]
+        [MemberData(nameof(TestCases_CanEmitMemberExpression))]
+        public void CanEmitMemberExpression(string expectedCode, Func<MemberExpression> expressionFactory)
+        {
+            //-- arrange
+
+            var expression = expressionFactory();
+
+            var enclosingMethod = new MethodMember(MemberVisibility.Public, "Method1", new MethodSignature());
+            enclosingMethod.Body = new BlockStatement(
+                new ExpressionStatement { Expression = expression }
+            );
+
+            //-- act
+
+            var actualSyntax = new MethodSyntaxEmitter(enclosingMethod).EmitSyntax();
+
+            //-- assert
+
+            actualSyntax.Should().BeEquivalentToCode("public void Method1() { " + expectedCode + "; }");
+        }
     }
 }

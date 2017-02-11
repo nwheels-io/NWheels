@@ -76,12 +76,11 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             var key2 = new TypeKey(this.GetType(), typeof(string));
             var type2 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key2), "NS2", MemberVisibility.Public, TypeMemberKind.Class, "ClassString");
 
-
             //-- act
 
             var result = backendUnderTest.Compile(new[] { type1, type2 });
-            var classInt = compiledArtifacts[key1].NewInstance();
-            var classString = compiledArtifacts[key2].NewInstance();
+            var classInt = compiledArtifacts[key1].Constructor().NewInstance();
+            var classString = compiledArtifacts[key2].Constructor().NewInstance();
 
             //-- assert
 
@@ -89,6 +88,77 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             compiledArtifacts.Count.Should().Be(2);
             classInt.GetType().FullName.Should().Be("NS1.ClassInt");
             classString.GetType().FullName.Should().Be("NS2.ClassString");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanInstantiateCompiledProductWithNonDefaultConstructor()
+        {
+            //-- arrange
+
+            var backendUnderTest = new RoslynTypeFactoryBackend();
+            backendUnderTest.EnsureTypeReferenced(this.GetType());
+            backendUnderTest.EnsureTypeReferenced(typeof(RuntimeTypeFactoryArtifactCatalog));
+
+            var compiledArtifacts = new Dictionary<TypeKey, IRuntimeTypeFactoryArtifact<object>>();
+
+            backendUnderTest.ProductsLoaded += (products) => {
+                foreach (var product in products)
+                {
+                    compiledArtifacts.Add(product.Key, (IRuntimeTypeFactoryArtifact<object>)product.Artifact);
+                }
+            };
+
+            var key1 = new TypeKey(this.GetType(), typeof(int));
+            var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1), "NS1", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
+            var intValueProperty = new PropertyMember { Visibility = MemberVisibility.Public, PropertyType = typeof(int), Name = "IntValue" };
+            var stringValueProperty = new PropertyMember { Visibility = MemberVisibility.Public, PropertyType = typeof(string), Name = "StringValue" };
+            var constructor = new ConstructorMember(
+                MemberVisibility.Public, 
+                MemberModifier.None, 
+                "ClassOne",
+                new MethodSignature(new MethodParameter[] {
+                    new MethodParameter("intValue", 1, typeof(int)),
+                    new MethodParameter("stringValue", 2, typeof(string)),
+                }, null, false)
+            );
+            constructor.Body = new BlockStatement(
+                new ExpressionStatement {
+                    Expression = new AssignmentExpression {
+                        Left = new MemberExpression { Target = new ThisExpression(), Member = intValueProperty } ,
+                        Right = new ParameterExpression { Parameter = constructor.Signature.Parameters.First(p => p.Name == "intValue") },
+                    }
+                },
+                new ExpressionStatement {
+                    Expression = new AssignmentExpression {
+                        Left = new MemberExpression { Target = new ThisExpression(), Member = stringValueProperty },
+                        Right = new ParameterExpression { Parameter = constructor.Signature.Parameters.First(p => p.Name == "stringValue") },
+                    }
+                }
+            );
+            type1.Members.Add(constructor);
+            type1.Members.Add(intValueProperty);
+            type1.Members.Add(stringValueProperty);
+
+            //-- act
+
+            var result = backendUnderTest.Compile(new[] { type1 });
+            var obj = compiledArtifacts[key1].Constructor<int, string>().NewInstance(123, "ABC");
+
+            //-- assert
+
+            result.Success.Should().BeTrue();
+            compiledArtifacts.Count.Should().Be(1);
+            obj.GetType().FullName.Should().Be("NS1.ClassOne");
+
+            dynamic dynamicObj = obj;
+
+            int initializedIntValue = dynamicObj.IntValue;
+            string initializedStringValue = dynamicObj.StringValue;
+
+            initializedIntValue.Should().Be(123);
+            initializedStringValue.Should().Be("ABC");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -171,12 +241,18 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             loadedProducts[0].Key.Should().Be(expectedKey1);
             loadedProducts[0].Artifact.TypeKey.Should().Be(expectedKey1);
             loadedProducts[0].Artifact.RunTimeType.Should().BeSameAs(typeof(FirstContractImplementation));
-            loadedProducts[0].Artifact.For<IFirstContract>().NewInstance().Should().BeOfType<FirstContractImplementation>();
+
+            var instance1 = loadedProducts[0].Artifact.For<IFirstContract>().Constructor().NewInstance();
+            instance1.Should().BeOfType<FirstContractImplementation>();
 
             loadedProducts[1].Key.Should().Be(expectedKey2);
             loadedProducts[1].Artifact.TypeKey.Should().Be(expectedKey2);
             loadedProducts[1].Artifact.RunTimeType.Should().BeSameAs(typeof(SecondContractImplementation));
-            loadedProducts[1].Artifact.For<ISecondContract>().NewInstance().Should().BeOfType<SecondContractImplementation>();
+
+            var instance2 = loadedProducts[1].Artifact.For<ISecondContract>().Constructor<int, string>().NewInstance(123, "ABC");
+            instance2.Should().BeOfType<SecondContractImplementation>();
+            instance2.IntValue.Should().Be(123);
+            instance2.StringValue.Should().Be("ABC");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -188,6 +264,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
 
             var artifactType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "FirstArtifact");
             artifactType.BaseType = new TypeMember(typeof(RuntimeTypeFactoryArtifact<>).MakeGenericType(typeof(IFirstContract)));
+            artifactType.Interfaces.Add(new TypeMember(typeof(IConstructor<>).MakeGenericType(typeof(IFirstContract))));
 
             var constructor = new ConstructorMember(MemberVisibility.Public, MemberModifier.None, "FirstArtifact", new MethodSignature());
             constructor.CallBaseConstructor = new MethodCallExpression();
@@ -217,16 +294,27 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
 
             var factoryMethod = new MethodMember(
                 MemberVisibility.Public, 
-                MemberModifier.Override, 
-                nameof(IRuntimeTypeFactoryArtifact<object>.NewInstance), 
+                MemberModifier.None, 
+                nameof(IConstructor<object>.NewInstance), 
                 new MethodSignature { ReturnValue = new MethodParameter { Type = typeof(IFirstContract) } });
 
             factoryMethod.Body = new BlockStatement(
                 new ReturnStatement { Expression = new NewObjectExpression { Type = typeof(FirstContractImplementation) } }
             );
 
+            var singletonMethod = new MethodMember(
+                MemberVisibility.Public,
+                MemberModifier.None,
+                nameof(IConstructor<object>.GetOrCreateSingleton),
+                new MethodSignature { ReturnValue = new MethodParameter { Type = typeof(IFirstContract) } });
+
+            singletonMethod.Body = new BlockStatement(
+                new ThrowStatement { Exception = new NewObjectExpression { Type = typeof(NotSupportedException) } }
+            );
+
             artifactType.Members.Add(constructor);
             artifactType.Members.Add(factoryMethod);
+            artifactType.Members.Add(singletonMethod);
 
             //-- act
 
@@ -237,7 +325,8 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
 
             var expectedCode = @"
                 public class FirstArtifact : 
-                    NWheels.Compilation.Mechanism.Factories.RuntimeTypeFactoryArtifact<NWheels.Compilation.Adapters.Roslyn.UnitTests.RoslynTypeFactoryBackendTests.IFirstContract>
+                    NWheels.Compilation.Mechanism.Factories.RuntimeTypeFactoryArtifact<NWheels.Compilation.Adapters.Roslyn.UnitTests.RoslynTypeFactoryBackendTests.IFirstContract>,
+                    NWheels.Compilation.Mechanism.Factories.IConstructor<NWheels.Compilation.Adapters.Roslyn.UnitTests.RoslynTypeFactoryBackendTests.IFirstContract>
                 {
                     public FirstArtifact() : base(
                         new NWheels.Compilation.Mechanism.Factories.TypeKey(
@@ -247,9 +336,13 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
                         typeof(NWheels.Compilation.Adapters.Roslyn.UnitTests.RoslynTypeFactoryBackendTests.FirstContractImplementation)) 
                     { 
                     }
-                    public override NWheels.Compilation.Adapters.Roslyn.UnitTests.RoslynTypeFactoryBackendTests.IFirstContract NewInstance() 
+                    public NWheels.Compilation.Adapters.Roslyn.UnitTests.RoslynTypeFactoryBackendTests.IFirstContract NewInstance() 
                     { 
                         return new NWheels.Compilation.Adapters.Roslyn.UnitTests.RoslynTypeFactoryBackendTests.FirstContractImplementation();
+                    }
+                    public NWheels.Compilation.Adapters.Roslyn.UnitTests.RoslynTypeFactoryBackendTests.IFirstContract GetOrCreateSingleton() 
+                    { 
+                        throw new System.NotSupportedException();
                     }
                 }
             ";
@@ -391,13 +484,30 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public interface IFirstContract { }
-        public interface ISecondContract { }
+        public interface IFirstContract
+        {
+        }
+        public interface ISecondContract
+        {
+            int IntValue { get; }
+            string StringValue { get; }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class FirstContractImplementation : IFirstContract {  }
-        public class SecondContractImplementation : ISecondContract { }
+        public class FirstContractImplementation : IFirstContract
+        {
+        }
+        public class SecondContractImplementation : ISecondContract
+        {
+            public SecondContractImplementation(int intValue, string stringValue)
+            {
+                this.IntValue = intValue;
+                this.StringValue = stringValue;
+            }
+            public int IntValue { get; }
+            public string StringValue { get; }
+        }
     }
 }
 
@@ -417,7 +527,7 @@ public class ThisAssemblyFactoryCatalog : RuntimeTypeFactoryArtifactCatalog
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class FirstArtifact : RuntimeTypeFactoryArtifact<IFirstContract>
+    public class FirstArtifact : RuntimeTypeFactoryArtifact<IFirstContract>, IConstructor<IFirstContract>
     {
         public FirstArtifact()
             : base(new TypeKey(typeof(TestFactory), typeof(IFirstContract)), typeof(FirstContractImplementation))
@@ -426,15 +536,22 @@ public class ThisAssemblyFactoryCatalog : RuntimeTypeFactoryArtifactCatalog
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IFirstContract NewInstance()
+        public IFirstContract NewInstance()
         {
             return new FirstContractImplementation();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IFirstContract GetOrCreateSingleton()
+        {
+            throw new NotImplementedException();
         }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class SecondArtifact : RuntimeTypeFactoryArtifact<ISecondContract>
+    public class SecondArtifact : RuntimeTypeFactoryArtifact<ISecondContract>, IConstructor<int, string, ISecondContract>
     {
         public SecondArtifact()
             : base(new TypeKey(typeof(TestFactory), typeof(ISecondContract)), typeof(SecondContractImplementation))
@@ -443,9 +560,16 @@ public class ThisAssemblyFactoryCatalog : RuntimeTypeFactoryArtifactCatalog
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override ISecondContract NewInstance()
+        public ISecondContract NewInstance(int arg1, string arg2)
         {
-            return new SecondContractImplementation();
+            return new SecondContractImplementation(arg1, arg2);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ISecondContract GetOrCreateSingleton(int arg1, string arg2)
+        {
+            throw new NotImplementedException();
         }
     }
 }

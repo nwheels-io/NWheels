@@ -67,7 +67,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
                 new Action<ConstructorMember>(constructor => {
                     constructor.CallThisConstructor = new MethodCallExpression();
                     constructor.CallThisConstructor.Arguments.Add(new Argument {
-                        Expression = new ArgumentExpression {
+                        Expression = new ParameterExpression {
                             Parameter = constructor.Signature.Parameters.First(p => p.Name == "x")
                         }
                     });
@@ -82,7 +82,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
                 new Action<ConstructorMember>(constructor => {
                     constructor.CallBaseConstructor = new MethodCallExpression();
                     constructor.CallBaseConstructor.Arguments.Add(new Argument {
-                        Expression = new ArgumentExpression {
+                        Expression = new ParameterExpression {
                             Parameter = constructor.Signature.Parameters.First(p => p.Name == "x")
                         }
                     });

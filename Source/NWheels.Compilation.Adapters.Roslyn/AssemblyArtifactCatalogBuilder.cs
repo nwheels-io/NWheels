@@ -14,7 +14,7 @@ namespace NWheels.Compilation.Adapters.Roslyn
     public class AssemblyArtifactCatalogBuilder
     {
         private readonly ImmutableList<TypeMember> _typesToCompile;
-        private  List<TypeMember> _catalogTypes;
+        private List<TypeMember> _catalogTypes;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -56,51 +56,14 @@ namespace NWheels.Compilation.Adapters.Roslyn
             var activationContract = productType.Generator.ActivationContract ?? typeof(object);
 
             var artifactType = new TypeMember(
-                MemberVisibility.Public, 
-                TypeMemberKind.Class, 
+                MemberVisibility.Public,
+                TypeMemberKind.Class,
                 SyntaxHelpers.GetValidCSharpIdentifier($"FactoryOf_{productType.FullName}"));
 
             artifactType.BaseType = new TypeMember(typeof(RuntimeTypeFactoryArtifact<>).MakeGenericType(activationContract));
 
-            var constructor = new ConstructorMember(MemberVisibility.Public, MemberModifier.None, artifactType.Name, new MethodSignature());
-            constructor.CallBaseConstructor = new MethodCallExpression();
-
-            var typeKeyConstructorCall = new MethodCallExpression();
-            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.FactoryType } });
-            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.PrimaryContract } });
-            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.SecondaryContract1 } });
-            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.SecondaryContract2 } });
-            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.SecondaryContract3 } });
-            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.ExtensionValue1 } });
-            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.ExtensionValue2 } });
-            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.ExtensionValue3 } });
-
-            constructor.CallBaseConstructor.Arguments.Add(new Argument {
-                Expression = new NewObjectExpression {
-                    Type = typeof(TypeKey),
-                    ConstructorCall = typeKeyConstructorCall
-                }
-            });
-            
-            constructor.CallBaseConstructor.Arguments.Add(new Argument {
-                Expression = new ConstantExpression { Value = productType }
-            });
-
-            var factoryMethod = new MethodMember(
-                MemberVisibility.Public,
-                MemberModifier.Override,
-                nameof(IRuntimeTypeFactoryArtifact<object>.NewInstance),
-                new MethodSignature { ReturnValue = new MethodParameter { Type = activationContract } });
-
-            factoryMethod.Body = new BlockStatement(
-                new ReturnStatement {
-                    //TODO: pass arguments to constructor, if any
-                    Expression = new NewObjectExpression { Type = productType }
-                }
-            );
-
-            artifactType.Members.Add(constructor);
-            artifactType.Members.Add(factoryMethod);
+            ImplementArtifactConstructor(productType, key, artifactType);
+            ImplementActivationInterfaces(productType, activationContract, artifactType);
 
             return artifactType;
         }
@@ -157,9 +120,134 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private void ImplementArtifactConstructor(TypeMember productType, TypeKey key, TypeMember artifactType)
+        {
+            var constructor = new ConstructorMember(MemberVisibility.Public, MemberModifier.None, artifactType.Name, new MethodSignature());
+            constructor.CallBaseConstructor = new MethodCallExpression();
+
+            var typeKeyConstructorCall = new MethodCallExpression();
+            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.FactoryType } });
+            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.PrimaryContract } });
+            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.SecondaryContract1 } });
+            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.SecondaryContract2 } });
+            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.SecondaryContract3 } });
+            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.ExtensionValue1 } });
+            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.ExtensionValue2 } });
+            typeKeyConstructorCall.Arguments.Add(new Argument { Expression = new ConstantExpression { Value = key.ExtensionValue3 } });
+
+            constructor.CallBaseConstructor.Arguments.Add(new Argument {
+                Expression = new NewObjectExpression {
+                    Type = typeof(TypeKey),
+                    ConstructorCall = typeKeyConstructorCall
+                }
+            });
+
+            constructor.CallBaseConstructor.Arguments.Add(new Argument {
+                Expression = new ConstantExpression { Value = productType }
+            });
+
+            artifactType.Members.Add(constructor);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementActivationInterfaces(TypeMember productType, Type activationContract, TypeMember artifactType)
+        {
+            var productConstructors = productType.Members.OfType<ConstructorMember>().ToArray();
+
+            if (productConstructors.Length > 0)
+            {
+                foreach (var productConstructor in productConstructors)
+                {
+                    ImplementActivationInterface(productType, activationContract, productConstructor.Signature, artifactType);
+                }
+            }
+            else
+            {
+                ImplementActivationInterface(productType, activationContract, new MethodSignature(), artifactType);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementActivationInterface(
+            TypeMember productType,
+            TypeMember activationContract,
+            MethodSignature constructorSignature,
+            TypeMember artifactType)
+        {
+            var parameterCount = constructorSignature.Parameters.Count;
+
+            var iConstructorGenericParameters =
+                constructorSignature.Parameters.Select(p => p.Type)
+                .Append(activationContract);
+
+            TypeMember iConstructorInterfaceOpen = _s_iConstructorByParameterCount[parameterCount];
+            TypeMember iConstructorInterfaceClosed = iConstructorInterfaceOpen.MakeGenericType(iConstructorGenericParameters.ToArray());
+
+            artifactType.Interfaces.Add(iConstructorInterfaceClosed);
+
+            var factoryMethod = new MethodMember(
+                MemberVisibility.Public,
+                MemberModifier.None,
+                nameof(IConstructor<object>.NewInstance),
+                new MethodSignature {
+                    ReturnValue = new MethodParameter { Type = activationContract }
+                }
+            );
+
+            factoryMethod.Signature.Parameters.AddRange(constructorSignature.Parameters);
+
+            var newObjectExpression = new NewObjectExpression {
+                Type = productType,
+                ConstructorCall = new MethodCallExpression()
+            };
+
+            newObjectExpression.ConstructorCall.Arguments.AddRange(
+                constructorSignature.Parameters.Select(p => new Argument { Expression = new ParameterExpression { Parameter = p } }));
+
+            factoryMethod.Body = new BlockStatement(
+                new ReturnStatement {
+                    Expression = newObjectExpression
+                }
+            );
+
+            var singletonMethod = new MethodMember(
+                MemberVisibility.Public,
+                MemberModifier.None,
+                nameof(IConstructor<object>.GetOrCreateSingleton),
+                new MethodSignature { ReturnValue = new MethodParameter { Type = activationContract } });
+
+            singletonMethod.Signature.Parameters.AddRange(constructorSignature.Parameters);
+
+            singletonMethod.Body = new BlockStatement(
+                new ThrowStatement { Exception = new NewObjectExpression { Type = typeof(NotSupportedException) } }
+            );
+
+            artifactType.Members.Add(factoryMethod);
+            artifactType.Members.Add(singletonMethod);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private bool TypeNeedsArtifact(TypeMember type)
         {
             return (type.Status == MemberStatus.Generator && type.Generator.TypeKey.HasValue);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly ImmutableArray<Type> _s_iConstructorByParameterCount = ImmutableArray<Type>.Empty.AddRange(new[] {
+            typeof(IConstructor<>),
+            typeof(IConstructor<,>),
+            typeof(IConstructor<,,>),
+            typeof(IConstructor<,,,>),
+            typeof(IConstructor<,,,,>),
+            typeof(IConstructor<,,,,,>),
+            typeof(IConstructor<,,,,,,>),
+            typeof(IConstructor<,,,,,,,>),
+            typeof(IConstructor<,,,,,,,,>),
+            typeof(IConstructor<,,,,,,,,,>)
+        });
     }
 }

@@ -30,7 +30,7 @@ namespace NWheels.DataStructures
         {
             var key = new TypeKey(factoryType: this.GetType(), primaryContract: typeof(T));
             var product = Library.GetProduct(ref key);
-            var instance = product.Artifact.For<IEqualityComparer<T>>().GetOrCreateSingleton();
+            var instance = product.Artifact.For<IEqualityComparer<T>>().Constructor().GetOrCreateSingleton();
 
             return instance;
         }

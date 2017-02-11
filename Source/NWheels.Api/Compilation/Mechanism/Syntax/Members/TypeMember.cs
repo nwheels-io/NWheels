@@ -155,6 +155,13 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TypeMember MakeGenericType(params TypeMember[] typeArguments)
+        {
+            return ClrBinding.MakeGenericType(typeArguments.Select(t => t.ClrBinding).ToArray());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public string FullName
         {
             get
@@ -193,6 +200,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public TypeMember UnderlyingType { get; set; }
         public Type ClrBinding { get; set; }
         public object NonClrBinding { get; set; }
+
         public object BackendTag { get; set; }
         public List<AbstractMember> Members { get; private set; }
         public TypeGeneratorInfo Generator { get; private set; }

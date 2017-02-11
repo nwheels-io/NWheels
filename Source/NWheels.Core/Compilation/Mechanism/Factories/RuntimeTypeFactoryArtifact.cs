@@ -12,22 +12,6 @@ namespace NWheels.Compilation.Mechanism.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected RuntimeTypeFactoryArtifact(Type runtimeType)
-        {
-            var typeKeyAttribute = this.GetType().GetTypeInfo().GetCustomAttribute<TypeKeyAttribute>();
-
-            if (typeKeyAttribute == null)
-            {
-                throw new InvalidOperationException(
-                    $"Runtime type factory artifact mush have {nameof(TypeKeyAttribute)} when using parameterless constructor: {this.GetType().FullName}");
-            }
-
-            this.TypeKey = typeKeyAttribute.ToTypeKey();
-            this.RunTimeType = runtimeType;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         protected RuntimeTypeFactoryArtifact(TypeKey typeKey, Type runtimeType)
         {
             this.TypeKey = typeKey;
@@ -69,6 +53,144 @@ namespace NWheels.Compilation.Mechanism.Factories
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    public abstract class RuntimeTypeFactoryArtifact<T> : RuntimeTypeFactoryArtifact, IRuntimeTypeFactoryArtifact<T>
+    {
+        protected RuntimeTypeFactoryArtifact(TypeKey typeKey, Type runtimeType)
+            : base(typeKey, runtimeType)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IConstructor<T> Constructor()
+        {
+            if (this is IConstructor<T> constructor)
+            {
+                return constructor;
+            }
+
+            throw new NotSupportedException("Artifact does not provide a parameterless constructor.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IConstructor<TArg1, T> Constructor<TArg1>()
+        {
+            if (this is IConstructor<TArg1, T> constructor)
+            {
+                return constructor;
+            }
+
+            throw new NotSupportedException(
+                $"Artifact does not provide a ({typeof(TArg1)}) constructor.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IConstructor<TArg1, TArg2, T> Constructor<TArg1, TArg2>()
+        {
+            if (this is IConstructor<TArg1, TArg2, T> constructor)
+            {
+                return constructor;
+            }
+
+            throw new NotSupportedException(
+                $"Artifact does not provide a ({typeof(TArg1)},{typeof(TArg2)}) constructor.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IConstructor<TArg1, TArg2, TArg3, T> Constructor<TArg1, TArg2, TArg3>()
+        {
+            if (this is IConstructor<TArg1, TArg2, TArg3, T> constructor)
+            {
+                return constructor;
+            }
+
+            throw new NotSupportedException(
+                $"Artifact does not provide a ({typeof(TArg1)},{typeof(TArg2)},{typeof(TArg3)}) constructor.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IConstructor<TArg1, TArg2, TArg3, TArg4, T> Constructor<TArg1, TArg2, TArg3, TArg4>()
+        {
+            if (this is IConstructor<TArg1, TArg2, TArg3, TArg4, T> constructor)
+            {
+                return constructor;
+            }
+
+            throw new NotSupportedException(
+                $"Artifact does not provide a ({typeof(TArg1)},{typeof(TArg2)},{typeof(TArg3)},{typeof(TArg4)}) constructor.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IConstructor<TArg1, TArg2, TArg3, TArg4, TArg5, T> Constructor<TArg1, TArg2, TArg3, TArg4, TArg5>()
+        {
+            if (this is IConstructor<TArg1, TArg2, TArg3, TArg4, TArg5, T> constructor)
+            {
+                return constructor;
+            }
+
+            throw new NotSupportedException(
+                $"Artifact does not provide a ({typeof(TArg1)},{typeof(TArg2)},{typeof(TArg3)},{typeof(TArg4)},{typeof(TArg5)}) constructor.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IConstructor<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, T> Constructor<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6>()
+        {
+            if (this is IConstructor<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, T> constructor)
+            {
+                return constructor;
+            }
+
+            throw new NotSupportedException(
+                $"Artifact does not provide a ({typeof(TArg1)},{typeof(TArg2)},{typeof(TArg3)},{typeof(TArg4)},{typeof(TArg5)},{typeof(TArg6)}) constructor.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IConstructor<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, T> Constructor<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7>()
+        {
+            if (this is IConstructor<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, T> constructor)
+            {
+                return constructor;
+            }
+
+            throw new NotSupportedException(
+                $"Artifact does not provide a ({typeof(TArg1)},{typeof(TArg2)},{typeof(TArg3)},{typeof(TArg4)},{typeof(TArg5)},{typeof(TArg6)},{typeof(TArg7)}) constructor.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IConstructor<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, T> Constructor<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8>()
+        {
+            if (this is IConstructor<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, T> constructor)
+            {
+                return constructor;
+            }
+
+            throw new NotSupportedException(
+                $"Artifact does not provide a ({typeof(TArg1)},{typeof(TArg2)},{typeof(TArg3)},{typeof(TArg4)},{typeof(TArg5)},{typeof(TArg6)},{typeof(TArg7)},{typeof(TArg8)}) constructor.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IConstructor<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TRest, T> Constructor<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TRest>()
+        {
+            if (this is IConstructor<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TRest, T> constructor)
+            {
+                return constructor;
+            }
+
+            throw new NotSupportedException(
+                $"Artifact does not provide a ({typeof(TArg1)},{typeof(TArg2)},{typeof(TArg3)},{typeof(TArg4)},{typeof(TArg5)},{typeof(TArg6)},{typeof(TArg7)},{typeof(TArg8)},{typeof(TRest)}) constructor.");
+        }
+    }
+
+#if false
     public abstract class RuntimeTypeFactoryArtifact<T> : RuntimeTypeFactoryArtifact, IRuntimeTypeFactoryArtifact<T>
     {
         private readonly object _singletonInstanceSyncRoot = new object();
@@ -303,4 +425,5 @@ namespace NWheels.Compilation.Mechanism.Factories
                 $"({typeof(TArg1)}, {typeof(TArg2)}, {typeof(TArg3)}, {typeof(TArg4)}, {typeof(TArg5)}, {typeof(TArg6)}, {typeof(TArg7)}, {typeof(TArg8)}, object[]).");
         }
     }
+#endif
 }

@@ -179,6 +179,63 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Fact]
+        public void MakeGenericTypeOfBoundTypesResultsInBoundType()
+        {
+            //-- arrange
+
+            TypeMember typeInt = typeof(int);
+            TypeMember typeString = typeof(string);
+            TypeMember typeIDictionaryOpen = typeof(IDictionary<,>);
+
+            //-- act
+
+            TypeMember constructedType = typeIDictionaryOpen.MakeGenericType(typeInt, typeString);
+
+            //-- assert
+
+            constructedType.ClrBinding.Should().NotBeNull();
+            constructedType.ClrBinding.Should().BeSameAs(typeof(IDictionary<int, string>));
+
+            constructedType.Should().NotBeNull();
+            constructedType.IsGenericType.Should().BeTrue();
+            constructedType.IsGenericTypeDefinition.Should().BeFalse();
+            constructedType.GenericTypeDefinition.Should().BeSameAs(typeIDictionaryOpen);
+            constructedType.GenericTypeArguments.Count.Should().Be(2);
+            constructedType.GenericTypeArguments[0].Should().BeSameAs(typeInt);
+            constructedType.GenericTypeArguments[1].Should().BeSameAs(typeString);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void MakeGenericTypeOfMixedBoundAndGeneratedTypesResultsInGeneratedType()
+        {
+            //-- arrange
+
+            TypeMember typeKey = typeof(int);
+            TypeMember typeValue = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassValue");
+            TypeMember typeIDictionaryOpen = typeof(IDictionary<,>);
+
+            //-- act
+
+            TypeMember constructedType = typeIDictionaryOpen.MakeGenericType(typeKey, typeValue);
+
+            //-- assert
+
+            constructedType.ClrBinding.Should().BeNull();
+
+            constructedType.Should().NotBeNull();
+            constructedType.IsGenericType.Should().BeTrue();
+            constructedType.IsGenericTypeDefinition.Should().BeFalse();
+            constructedType.GenericTypeDefinition.Should().BeSameAs(typeIDictionaryOpen);
+            constructedType.GenericTypeArguments.Count.Should().Be(2);
+            constructedType.GenericTypeArguments[0].Should().BeSameAs(typeKey);
+            constructedType.GenericTypeArguments[1].Should().BeSameAs(typeValue);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class TestNestedType
         {
         }

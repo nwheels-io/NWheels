@@ -291,11 +291,13 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         private CompilationDiagnostic ToCompilationDiagnostic(Diagnostic roslynDiagnostic)
         {
+            string sourceLocationText = GetSourceLocationText(roslynDiagnostic.Location);
+
             return new CompilationDiagnostic(
                 severity: ToCompilationDiagnosticSeverity(roslynDiagnostic.Severity),
                 code: roslynDiagnostic.Id,
                 message: roslynDiagnostic.GetMessage(),
-                sourceLocation: roslynDiagnostic.Location?.ToString());
+                sourceLocation: sourceLocationText);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -326,6 +328,19 @@ namespace NWheels.Compilation.Adapters.Roslyn
         private static string GetDefaultArtifactDirectory()
         {
             return Path.GetDirectoryName(typeof(RoslynTypeFactoryBackend).GetTypeInfo().Assembly.Location);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static string GetSourceLocationText(Location location)
+        {
+            if (location != null && location.Kind == LocationKind.SourceFile)
+            {
+                var position = location.GetLineSpan();
+                return $"{position.Path} line {position.StartLinePosition.Line + 1}:{position.StartLinePosition.Character + 1}";
+            }
+
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

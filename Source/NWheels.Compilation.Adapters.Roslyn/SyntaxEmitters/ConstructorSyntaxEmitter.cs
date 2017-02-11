@@ -50,7 +50,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
                         Member.CallBaseConstructor.GetArgumentListSyntax()));
             }
 
-            OutputSyntax = OutputSyntax.WithBody(Block());
+            OutputSyntax = OutputSyntax.WithBody(Member.Body.ToSyntax());
 
             return OutputSyntax;
         }

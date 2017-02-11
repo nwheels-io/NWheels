@@ -39,7 +39,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
             {
                 return BaseExpression();
             }
-            if (expression is ArgumentExpression argument)
+            if (expression is ParameterExpression argument)
             {
                 return IdentifierName(argument.Parameter.Name);
             }
@@ -49,6 +49,13 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
                     SyntaxKind.SimpleAssignmentExpression,
                     EmitSyntax(assignment.Left),
                     EmitSyntax(assignment.Right));
+            }
+            if (expression is MemberExpression member)
+            {
+                return MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    EmitSyntax(member.Target),
+                    IdentifierName(member.Member?.Name ?? member.MemberName));
             }
             if (expression is NewArrayExpression newArray)
             {

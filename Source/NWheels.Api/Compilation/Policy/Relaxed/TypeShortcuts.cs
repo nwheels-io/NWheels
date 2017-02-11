@@ -5,7 +5,7 @@ using System.Text;
 
 namespace NWheels.Compilation.Policy.Relaxed
 {
-    public class ARG : ArgumentExpression
+    public class ARG : ParameterExpression
     {
     }
 
