@@ -157,7 +157,14 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         public TypeMember MakeGenericType(params TypeMember[] typeArguments)
         {
-            return ClrBinding.MakeGenericType(typeArguments.Select(t => t.ClrBinding).ToArray());
+            if (this.ClrBinding != null && !typeArguments.Any(t => t.ClrBinding == null))
+            {
+                return ClrBinding.MakeGenericType(typeArguments.Select(t => t.ClrBinding).ToArray());
+            }
+
+            var constructedType = new TypeMember(this.Namespace, this.Visibility, this.TypeKind, this.Name, typeArguments);
+            constructedType.GenericTypeDefinition = this;
+            return constructedType;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
