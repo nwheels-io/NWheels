@@ -529,6 +529,11 @@ public class ThisAssemblyFactoryCatalog : RuntimeTypeFactoryArtifactCatalog
 
     public class FirstArtifact : RuntimeTypeFactoryArtifact<IFirstContract>, IConstructor<IFirstContract>
     {
+        private object _singletonInstanceSyncRoot = new object();
+        private IFirstContract _singletonInstance;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public FirstArtifact()
             : base(new TypeKey(typeof(TestFactory), typeof(IFirstContract)), typeof(FirstContractImplementation))
         {
@@ -545,7 +550,19 @@ public class ThisAssemblyFactoryCatalog : RuntimeTypeFactoryArtifactCatalog
 
         public IFirstContract GetOrCreateSingleton()
         {
-            throw new NotImplementedException();
+            if (_singletonInstance == null)
+            {
+                lock (_singletonInstanceSyncRoot)
+                {
+                    if (_singletonInstance == null)
+                    {
+                        _singletonInstance = new FirstContractImplementation();
+                    }
+                }
+            }
+
+            return _singletonInstance;
+
         }
     }
 
@@ -553,6 +570,11 @@ public class ThisAssemblyFactoryCatalog : RuntimeTypeFactoryArtifactCatalog
 
     public class SecondArtifact : RuntimeTypeFactoryArtifact<ISecondContract>, IConstructor<int, string, ISecondContract>
     {
+        private object _singletonInstanceSyncRoot = new object();
+        private ISecondContract _singletonInstance;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public SecondArtifact()
             : base(new TypeKey(typeof(TestFactory), typeof(ISecondContract)), typeof(SecondContractImplementation))
         {
@@ -569,7 +591,18 @@ public class ThisAssemblyFactoryCatalog : RuntimeTypeFactoryArtifactCatalog
 
         public ISecondContract GetOrCreateSingleton(int arg1, string arg2)
         {
-            throw new NotImplementedException();
+            if (_singletonInstance == null)
+            {
+                lock (_singletonInstanceSyncRoot)
+                {
+                    if (_singletonInstance == null)
+                    {
+                        _singletonInstance = new SecondContractImplementation(arg1, arg2);
+                    }
+                }
+            }
+
+            return _singletonInstance;
         }
     }
 }

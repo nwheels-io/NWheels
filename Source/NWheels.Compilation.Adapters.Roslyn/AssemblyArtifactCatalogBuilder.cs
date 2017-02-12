@@ -212,19 +212,76 @@ namespace NWheels.Compilation.Adapters.Roslyn
                 }
             );
 
+            ImplementSingletonMethod(productType, activationContract, constructorSignature, artifactType);
+
+            artifactType.Members.Add(factoryMethod);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementSingletonMethod(
+            TypeMember productType, 
+            TypeMember activationContract, 
+            MethodSignature constructorSignature, 
+            TypeMember artifactType)
+        {
+            var syncRootField = new FieldMember(artifactType, MemberVisibility.Private, MemberModifier.None, typeof(object), "_singletonInstanceSyncRoot") {
+                IsReadOnly = true,
+                Initializer = new NewObjectExpression { Type = typeof(object) }
+            };
+            var singletonField = new FieldMember(artifactType, MemberVisibility.Private, MemberModifier.None, activationContract, "_singletonInstance");
+
             var singletonMethod = new MethodMember(
                 MemberVisibility.Public,
                 MemberModifier.None,
                 nameof(IConstructor<object>.GetOrCreateSingleton),
                 new MethodSignature { ReturnValue = new MethodParameter { Type = activationContract } });
 
+            NewObjectExpression newObjectExpression;
+
             singletonMethod.Signature.Parameters.AddRange(constructorSignature.Parameters);
 
             singletonMethod.Body = new BlockStatement(
-                new ThrowStatement { Exception = new NewObjectExpression { Type = typeof(NotSupportedException) } }
+                new IfStatement {
+                    Condition = new BinaryExpression {
+                        Left = new MemberExpression { Target = new ThisExpression(), Member = singletonField },
+                        Operator = BinaryOperator.Equal,
+                        Right = new ConstantExpression { Value = null }
+                    },
+                    ThenBlock = new BlockStatement(
+                        new LockStatement {
+                            SyncRoot = new MemberExpression { Target = new ThisExpression(), Member = syncRootField },
+                            Body = new BlockStatement(
+                                new IfStatement {
+                                    Condition = new BinaryExpression {
+                                        Left = new MemberExpression { Target = new ThisExpression(), Member = singletonField },
+                                        Operator = BinaryOperator.Equal,
+                                        Right = new ConstantExpression { Value = null }
+                                    },
+                                    ThenBlock = new BlockStatement(
+                                        new ExpressionStatement {
+                                            Expression = new AssignmentExpression {
+                                                Left = new MemberExpression { Target = new ThisExpression(), Member = singletonField },
+                                                Right = newObjectExpression = new NewObjectExpression {
+                                                    Type = productType,
+                                                    ConstructorCall = new MethodCallExpression()
+                                                }
+                                            }
+                                        }
+                                    )
+                                }
+                            )
+                        }
+                    )
+                },
+                new ReturnStatement { Expression = new MemberExpression { Target = new ThisExpression(), Member = singletonField } }
             );
 
-            artifactType.Members.Add(factoryMethod);
+            newObjectExpression.ConstructorCall.Arguments.AddRange(
+                constructorSignature.Parameters.Select(p => new Argument { Expression = new ParameterExpression { Parameter = p } }));
+
+            artifactType.Members.Add(singletonField);
+            artifactType.Members.Add(syncRootField);
             artifactType.Members.Add(singletonMethod);
         }
 

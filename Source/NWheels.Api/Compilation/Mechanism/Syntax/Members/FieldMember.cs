@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NWheels.Compilation.Mechanism.Syntax.Expressions;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -32,5 +33,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         public TypeMember Type { get; set; }
         public FieldInfo ClrBinding { get; set; }
+        public bool IsReadOnly { get; set; }
+        public AbstractExpression Initializer { get; set; }
     }
 }

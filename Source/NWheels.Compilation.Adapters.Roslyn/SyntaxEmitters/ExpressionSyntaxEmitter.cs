@@ -68,6 +68,10 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
                         SeparatedList<ArgumentSyntax>(
                             indexer.IndexArguments.Select(arg => Argument(EmitSyntax(arg))))));
             }
+            if (expression is BinaryExpression binary)
+            {
+                return BinaryExpression(GetBinaryOperatorKeyword(binary.Operator), EmitSyntax(binary.Left), EmitSyntax(binary.Right));
+            }
 
             //TODO: support other types of expressions
 
@@ -144,6 +148,26 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
             }
 
             return syntax;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static SyntaxKind GetBinaryOperatorKeyword(BinaryOperator op)
+        {
+            switch (op)
+            {
+                case BinaryOperator.Equal:
+                    return SyntaxKind.EqualsExpression;
+                case BinaryOperator.NotEqual:
+                    return SyntaxKind.NotEqualsExpression;
+                case BinaryOperator.GreaterThan:
+                    return SyntaxKind.GreaterThanExpression;
+                case BinaryOperator.LessThan:
+                    return SyntaxKind.LessThanExpression;
+                //TODO: include the rest of the cases
+                default:
+                    throw new NotSupportedException($"Binary operator '{op}' is not supported.");
+            }
         }
     }
 }

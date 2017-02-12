@@ -32,10 +32,32 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
             {
                 return EmitLocalDeclarationSyntax(statementVariable);
             }
+            if (statement is IfStatement statementIf)
+            {
+                return EmitIfStatementSyntax(statementIf);
+            }
+            if (statement is LockStatement statementLock)
+            {
+                return LockStatement(ExpressionSyntaxEmitter.EmitSyntax(statementLock.SyncRoot), statementLock.Body.ToSyntax());
+            }
 
             //TODO: support other types of statements
 
             throw new NotSupportedException($"Syntax emitter is not supported for statement of type '{statement.GetType().Name}'.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static StatementSyntax EmitIfStatementSyntax(IfStatement statement)
+        {
+            var syntax = IfStatement(ExpressionSyntaxEmitter.EmitSyntax(statement.Condition), statement.ThenBlock.ToSyntax());
+            
+            if (statement.ElseBlock != null)
+            {
+                syntax = syntax.WithElse(ElseClause(statement.ElseBlock.ToSyntax()));
+            }
+
+            return syntax;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

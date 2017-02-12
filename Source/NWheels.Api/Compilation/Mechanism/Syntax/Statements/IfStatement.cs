@@ -5,18 +5,16 @@ using System.Text;
 
 namespace NWheels.Compilation.Mechanism.Syntax.Statements
 {
-    public class IfStatrement : AbstractStatement
+    public class IfStatement : AbstractStatement
     {
-        public IfStatrement()
+        public IfStatement()
         {
-            this.ThenBlock = new BlockStatement();
-            this.ElseBlock = new BlockStatement();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public AbstractExpression Condition { get; set; }
-        public BlockStatement ThenBlock { get; private set; }
-        public BlockStatement ElseBlock { get; private set; }
+        public BlockStatement ThenBlock { get; set; }
+        public BlockStatement ElseBlock { get; set; }
     }
 }

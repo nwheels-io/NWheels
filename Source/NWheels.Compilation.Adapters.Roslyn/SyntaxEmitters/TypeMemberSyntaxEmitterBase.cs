@@ -73,6 +73,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
         protected SyntaxList<MemberDeclarationSyntax> EmitMembers()
         {
             return List<MemberDeclarationSyntax>(Member.Members
+                .OrderBy(m => m, new MemberOrderComparer())
                 .Select(m => CreateMemberSyntaxEmitter(m).EmitSyntax())
                 .Cast<MemberDeclarationSyntax>());
         }
@@ -107,6 +108,26 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
             }
 
             throw new ArgumentException($"Syntax emitter is not supported for members of type {member.GetType().Name}");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class MemberOrderComparer : IComparer<AbstractMember>
+        {
+            public int Compare(AbstractMember x, AbstractMember y)
+            {
+                var orderIndexX = GetMemberOrderIndex(x);
+                var orderIndexY = GetMemberOrderIndex(y);
+
+                return orderIndexX.CompareTo(orderIndexY);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private int GetMemberOrderIndex(AbstractMember member)
+            {
+                return 1;
+            }
         }
     }
 }

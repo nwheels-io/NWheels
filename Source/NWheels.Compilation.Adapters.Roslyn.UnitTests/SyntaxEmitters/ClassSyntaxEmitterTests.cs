@@ -185,6 +185,34 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void WithProperties()
+        {
+            //-- arrange
+
+            var classMember = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
+            classMember.Members.Add(new PropertyMember(classMember, MemberVisibility.Public, MemberModifier.None, typeof(int), "Number"));
+            classMember.Members.Add(new PropertyMember(classMember, MemberVisibility.Public, MemberModifier.None, typeof(string), "Text"));
+
+            var emitter = new ClassSyntaxEmitter(classMember);
+
+            //-- act
+
+            var syntax = emitter.EmitSyntax();
+
+            //-- assert
+
+            syntax.Should().BeEquivalentToCode(@"
+                public class ClassOne 
+                { 
+                    public int Number { get; }
+                    public string Text { get; }
+                }
+            ");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void WithOneAttribute()
         {
             //-- arrange
@@ -235,6 +263,142 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
                 [System.Diagnostics.DebuggerStepThroughAttribute, System.ComponentModel.LocalizableAttribute] 
                 public class ClassOne { }
             ");
+        }
+    
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanOrderMembersOfType()
+        {
+            //-- arrange
+
+            #region Expected Code
+
+            var expectedCode = @"
+                public class ClassOne 
+                { 
+                    public int PublicField;
+                    internal protected int _protectedInternalField;
+                    protected int _protectedField;
+                    internal int _internalField;
+                    private int _privateField;
+
+                    public ClassOne(string s) { }
+                    internal protected ClassOne(byte b) { }
+                    protected ClassOne(int n) { }
+                    internal ClassOne(float f) { }
+                    private ClassOne(decimal m) { }
+                    
+                    public void M1() { }
+                    public int P1 { get; }
+
+                    internal protected void M2() { }
+                    internal protected int P2 { get; }
+
+                    protected void M3() { }
+                    protected int P3 { get; }
+
+                    internal void M4() { }
+                    internal int P4 { get; }
+
+                    private void M5() { }
+                    private int P5 { get; }
+
+                    public static int PublicStaticField;
+                    internal protected static int _s_protectedInternalStaticField;
+                    protected static int _s_protectedStaticField;
+                    internal static int _s_internalStaticField;
+                    private static int _s_privateStaticField;
+
+                    static ClassOne() { }
+
+                    public static void StaticM1() { }
+                    public static int StaticP1 { get; }
+
+                    internal protected static void StaticM2() { }
+                    internal protected static int StaticP2 { get; }
+
+                    protected void static StaticM3() { }
+                    protected int static StaticP3 { get; }
+
+                    internal void static StaticM4() { }
+                    internal int static StaticP4 { get; }
+
+                    private void static StaticM5() { }
+                    private int static StaticP5 { get; }
+                }";
+
+            #endregion
+
+            var classMember = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
+
+            #region Add Members
+
+            classMember.Members.AddRange(new PropertyMember[] {
+                new PropertyMember(classMember, MemberVisibility.Protected, MemberModifier.Static, typeof(int), "StaticP3"),
+                new PropertyMember(classMember, MemberVisibility.Private, MemberModifier.Static, typeof(int), "StaticP5"),
+                new PropertyMember(classMember, MemberVisibility.InternalProtected, MemberModifier.Static, typeof(int), "StaticP2"),
+                new PropertyMember(classMember, MemberVisibility.Public, MemberModifier.Static, typeof(int), "StaticP1"),
+                new PropertyMember(classMember, MemberVisibility.Internal, MemberModifier.Static, typeof(int), "StaticP4"),
+            });
+            classMember.Members.AddRange(new AbstractMember[] {
+                new ConstructorMember(MemberVisibility.Public, MemberModifier.Static, "ClassOne", new MethodSignature()),
+                new ConstructorMember(MemberVisibility.Protected, MemberModifier.None, "ClassOne", new MethodSignature(
+                    new[] { new MethodParameter("n", 1, typeof(int)) }, returnValue: null, isAsync: false
+                )),
+                new ConstructorMember(MemberVisibility.Private, MemberModifier.None, "ClassOne", new MethodSignature(
+                    new[] { new MethodParameter("m", 1, typeof(decimal)) }, returnValue: null, isAsync: false
+                )),
+                new ConstructorMember(MemberVisibility.InternalProtected, MemberModifier.None, "ClassOne", new MethodSignature(
+                    new[] { new MethodParameter("b", 1, typeof(byte)) }, returnValue: null, isAsync: false
+                )),
+                new ConstructorMember(MemberVisibility.Public, MemberModifier.None, "ClassOne", new MethodSignature(
+                    new[] { new MethodParameter("s", 1, typeof(string)) }, returnValue: null, isAsync: false
+                )),
+                new ConstructorMember(MemberVisibility.Internal, MemberModifier.None, "ClassOne", new MethodSignature(
+                    new[] { new MethodParameter("f", 1, typeof(float)) }, returnValue: null, isAsync: false
+                )),
+            });
+            classMember.Members.AddRange(new AbstractMember[] {
+                new MethodMember(MemberVisibility.Protected, MemberModifier.Static, "StaticM3", new MethodSignature()),
+                new MethodMember(MemberVisibility.Private, MemberModifier.Static, "StaticM5", new MethodSignature()),
+                new MethodMember(MemberVisibility.Internal, MemberModifier.Static, "StaticM4", new MethodSignature()),
+                new MethodMember(MemberVisibility.Public, MemberModifier.Static, "StaticM1", new MethodSignature()),
+                new MethodMember(MemberVisibility.InternalProtected, MemberModifier.Static, "StaticM2", new MethodSignature()),
+            });
+            classMember.Members.AddRange(new AbstractMember[] {
+                new FieldMember(classMember, MemberVisibility.Protected, MemberModifier.None, typeof(int), "_protectedField"),
+                new FieldMember(classMember, MemberVisibility.Private, MemberModifier.None, typeof(int), "_privateField"),
+                new FieldMember(classMember, MemberVisibility.InternalProtected, MemberModifier.None, typeof(int), "PublicField"),
+                new FieldMember(classMember, MemberVisibility.Public, MemberModifier.None, typeof(int), "_protectedInternalField"),
+                new FieldMember(classMember, MemberVisibility.Internal, MemberModifier.None, typeof(int), "_internalField"),
+            });
+            classMember.Members.AddRange(new PropertyMember[] {
+                new PropertyMember(classMember, MemberVisibility.Private, MemberModifier.None, typeof(int), "P5"),
+                new PropertyMember(classMember, MemberVisibility.Protected, MemberModifier.None, typeof(int), "P3"),
+                new PropertyMember(classMember, MemberVisibility.Internal, MemberModifier.None, typeof(int), "P4"),
+                new PropertyMember(classMember, MemberVisibility.Public, MemberModifier.None, typeof(int), "P1"),
+                new PropertyMember(classMember, MemberVisibility.InternalProtected, MemberModifier.None, typeof(int), "P2"),
+            });
+            classMember.Members.AddRange(new AbstractMember[] {
+                new MethodMember(MemberVisibility.Private, MemberModifier.None, "M5", new MethodSignature()),
+                new MethodMember(MemberVisibility.Protected, MemberModifier.None, "M3", new MethodSignature()),
+                new MethodMember(MemberVisibility.Internal, MemberModifier.None, "M4", new MethodSignature()),
+                new MethodMember(MemberVisibility.Public, MemberModifier.None, "M1", new MethodSignature()),
+                new MethodMember(MemberVisibility.InternalProtected, MemberModifier.None, "M2", new MethodSignature()),
+            });
+
+            #endregion
+
+            var emitter = new ClassSyntaxEmitter(classMember);
+
+            //-- act
+
+            var syntax = emitter.EmitSyntax();
+
+            //-- assert
+
+            syntax.Should().BeEquivalentToCode(expectedCode);
         }
     }
 }

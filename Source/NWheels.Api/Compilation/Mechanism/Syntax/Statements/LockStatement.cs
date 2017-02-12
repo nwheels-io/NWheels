@@ -9,13 +9,12 @@ namespace NWheels.Compilation.Mechanism.Syntax.Statements
     {
         public LockStatement()
         {
-            this.Body = new BlockStatement();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public AbstractExpression SyncRoot { get; set; }
         public AbstractExpression EnterTimeout { get; set; }
-        public BlockStatement Body { get; private set; }
+        public BlockStatement Body { get; set; }
     }
 }

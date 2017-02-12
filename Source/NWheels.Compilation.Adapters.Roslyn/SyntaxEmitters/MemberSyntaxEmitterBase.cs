@@ -36,9 +36,16 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected SyntaxTokenList EmitMemberModifiers()
+        protected virtual IEnumerable<SyntaxKind> GetMemberModifierKeywords()
         {
-            return TokenList(_s_visibilityKeywords[Member.Visibility].Concat(_s_modifierKeywords[Member.Modifier]).Select(Token));
+            return _s_visibilityKeywords[Member.Visibility].Concat(_s_modifierKeywords[Member.Modifier]);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual SyntaxTokenList EmitMemberModifiers()
+        {
+            return TokenList(GetMemberModifierKeywords().Select(Token));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
