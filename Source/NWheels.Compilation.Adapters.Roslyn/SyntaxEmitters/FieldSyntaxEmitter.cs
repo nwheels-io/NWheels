@@ -20,6 +20,13 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
         public override FieldDeclarationSyntax EmitSyntax()
         {
+            var declarator = VariableDeclarator(Identifier(Member.Name));
+
+            if (Member.Initializer != null)
+            {
+                declarator = declarator.WithInitializer(EqualsValueClause(ExpressionSyntaxEmitter.EmitSyntax(Member.Initializer)));
+            }
+
             OutputSyntax =
                 FieldDeclaration(
                     VariableDeclaration(
@@ -27,9 +34,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
                     )
                     .WithVariables(
                         SingletonSeparatedList<VariableDeclaratorSyntax>(
-                            VariableDeclarator(
-                                Identifier(Member.Name)
-                            )
+                            declarator
                         )
                     )
                 )

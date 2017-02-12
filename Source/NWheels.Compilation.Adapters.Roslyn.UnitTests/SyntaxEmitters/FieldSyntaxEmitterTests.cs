@@ -1,4 +1,5 @@
 ﻿using NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters;
+using NWheels.Compilation.Mechanism.Syntax.Expressions;
 using NWheels.Compilation.Mechanism.Syntax.Members;
 using System;
 using System.Collections.Generic;
@@ -40,16 +41,45 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
                 public class ClassOne 
                 { 
                     public int PublicNumber;
+                    internal protected int InternalProtectedNumber;
                     protected int ProtectedNumber;
                     internal int InternalNumber;
-                    internal protected int InternalProtectedNumber;
                     private int _privateNumber;
 
                     public static string PublicString;
+                    internal protected static string InternalProtectedString;
                     protected static string ProtectedString;
                     internal static string InternalString;
-                    internal protected static string InternalProtectedString;
                     private static string _s_privateString;
+                }
+            ");
+        }
+
+        [Fact]
+        public void FieldWithInitializer()
+        {
+            //-- arrange
+
+            var classMember = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
+            var fieldMember = new FieldMember(classMember, MemberVisibility.Private, MemberModifier.None, typeof(int), "_number") {
+                IsReadOnly = true,
+                Initializer = new ConstantExpression { Value = 123 }
+            };
+
+            classMember.Members.Add(fieldMember);
+
+            var emitter = new ClassSyntaxEmitter(classMember);
+
+            //-- act
+
+            var syntax = emitter.EmitSyntax();
+
+            //-- assert
+
+            syntax.Should().BeEquivalentToCode(@"
+                public class ClassOne 
+                { 
+                    private readonly int _number = 123;
                 }
             ");
         }

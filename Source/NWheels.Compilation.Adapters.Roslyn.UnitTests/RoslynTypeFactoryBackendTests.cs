@@ -111,35 +111,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             };
 
             var key1 = new TypeKey(this.GetType(), typeof(int));
-            var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1), "NS1", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
-            var intValueProperty = new PropertyMember { Visibility = MemberVisibility.Public, PropertyType = typeof(int), Name = "IntValue" };
-            var stringValueProperty = new PropertyMember { Visibility = MemberVisibility.Public, PropertyType = typeof(string), Name = "StringValue" };
-            var constructor = new ConstructorMember(
-                MemberVisibility.Public, 
-                MemberModifier.None, 
-                "ClassOne",
-                new MethodSignature(new MethodParameter[] {
-                    new MethodParameter("intValue", 1, typeof(int)),
-                    new MethodParameter("stringValue", 2, typeof(string)),
-                }, null, false)
-            );
-            constructor.Body = new BlockStatement(
-                new ExpressionStatement {
-                    Expression = new AssignmentExpression {
-                        Left = new MemberExpression { Target = new ThisExpression(), Member = intValueProperty } ,
-                        Right = new ParameterExpression { Parameter = constructor.Signature.Parameters.First(p => p.Name == "intValue") },
-                    }
-                },
-                new ExpressionStatement {
-                    Expression = new AssignmentExpression {
-                        Left = new MemberExpression { Target = new ThisExpression(), Member = stringValueProperty },
-                        Right = new ParameterExpression { Parameter = constructor.Signature.Parameters.First(p => p.Name == "stringValue") },
-                    }
-                }
-            );
-            type1.Members.Add(constructor);
-            type1.Members.Add(intValueProperty);
-            type1.Members.Add(stringValueProperty);
+            TypeMember type1 = BuildClassWithIntAndStringProperties(key1);
 
             //-- act
 
@@ -160,6 +132,51 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             initializedIntValue.Should().Be(123);
             initializedStringValue.Should().Be("ABC");
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanGetCompiledProductSingleton()
+        {
+            //-- arrange
+
+            var backendUnderTest = new RoslynTypeFactoryBackend();
+            backendUnderTest.EnsureTypeReferenced(this.GetType());
+            backendUnderTest.EnsureTypeReferenced(typeof(RuntimeTypeFactoryArtifactCatalog));
+
+            var compiledArtifacts = new Dictionary<TypeKey, IRuntimeTypeFactoryArtifact<object>>();
+
+            backendUnderTest.ProductsLoaded += (products) => {
+                foreach (var product in products)
+                {
+                    compiledArtifacts.Add(product.Key, (IRuntimeTypeFactoryArtifact<object>)product.Artifact);
+                }
+            };
+
+            var key1 = new TypeKey(this.GetType(), typeof(int));
+            TypeMember type1 = BuildClassWithIntAndStringProperties(key1);
+
+            backendUnderTest.Compile(new[] { type1 });
+
+            //-- act
+
+            var obj1 = compiledArtifacts[key1].Constructor<int, string>().GetOrCreateSingleton(123, "ABC");
+            var obj2 = compiledArtifacts[key1].Constructor<int, string>().GetOrCreateSingleton(456, "DEF");
+
+            //-- assert
+
+            obj1.Should().NotBeNull();
+            obj2.Should().BeSameAs(obj1);
+
+            dynamic dynamicObj2 = obj2;
+
+            int initializedIntValue = dynamicObj2.IntValue;
+            string initializedStringValue = dynamicObj2.StringValue;
+
+            initializedIntValue.Should().Be(123);
+            initializedStringValue.Should().Be("ABC");
+        }
+
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -477,6 +494,44 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             //result.Failed.Count.Should().Be(0);
         }
 #endif
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private TypeMember BuildClassWithIntAndStringProperties(TypeKey key)
+        {
+            var classType = new TypeMember(new TypeGeneratorInfo(this.GetType(), key), "NS1", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
+
+            var intValueProperty = new PropertyMember { Visibility = MemberVisibility.Public, PropertyType = typeof(int), Name = "IntValue" };
+            var stringValueProperty = new PropertyMember { Visibility = MemberVisibility.Public, PropertyType = typeof(string), Name = "StringValue" };
+            var constructor = new ConstructorMember(
+                MemberVisibility.Public,
+                MemberModifier.None,
+                "ClassOne",
+                new MethodSignature(new MethodParameter[] {
+                    new MethodParameter("intValue", 1, typeof(int)),
+                    new MethodParameter("stringValue", 2, typeof(string)),
+                }, null, false)
+            );
+            constructor.Body = new BlockStatement(
+                new ExpressionStatement {
+                    Expression = new AssignmentExpression {
+                        Left = new MemberExpression { Target = new ThisExpression(), Member = intValueProperty },
+                        Right = new ParameterExpression { Parameter = constructor.Signature.Parameters.First(p => p.Name == "intValue") },
+                    }
+                },
+                new ExpressionStatement {
+                    Expression = new AssignmentExpression {
+                        Left = new MemberExpression { Target = new ThisExpression(), Member = stringValueProperty },
+                        Right = new ParameterExpression { Parameter = constructor.Signature.Parameters.First(p => p.Name == "stringValue") },
+                    }
+                }
+            );
+
+            classType.Members.Add(constructor);
+            classType.Members.Add(intValueProperty);
+            classType.Members.Add(stringValueProperty);
+
+            return classType;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
