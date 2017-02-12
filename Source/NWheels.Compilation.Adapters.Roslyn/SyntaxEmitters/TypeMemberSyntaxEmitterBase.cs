@@ -72,8 +72,10 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
         protected SyntaxList<MemberDeclarationSyntax> EmitMembers()
         {
-            return List<MemberDeclarationSyntax>(Member.Members
-                .OrderBy(m => m, new MemberOrderComparer())
+            var orderedMembers = new List<AbstractMember>(Member.Members);
+            orderedMembers.Sort(new MemberOrderComparer());
+
+            return List<MemberDeclarationSyntax>(orderedMembers
                 .Select(m => CreateMemberSyntaxEmitter(m).EmitSyntax())
                 .Cast<MemberDeclarationSyntax>());
         }
@@ -119,14 +121,80 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
                 var orderIndexX = GetMemberOrderIndex(x);
                 var orderIndexY = GetMemberOrderIndex(y);
 
-                return orderIndexX.CompareTo(orderIndexY);
+                return orderIndexY.CompareTo(orderIndexX);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private int GetMemberOrderIndex(AbstractMember member)
+            public static int GetMemberOrderIndex(AbstractMember member)
             {
-                return 1;
+                var memberTypeIndex = GetMemberTypeIndex(member);
+                var visibilityIndex = GetMemberVisibilityIndex(member);
+                var modifierIndex = GetMemberModifierIndex(member);
+
+                return modifierIndex + visibilityIndex + memberTypeIndex;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static int GetMemberModifierIndex(AbstractMember member)
+            {
+                switch (member.Modifier)
+                {
+                    case MemberModifier.Static:
+                        return 10000;
+                    default:
+                        return 20000;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static int GetMemberVisibilityIndex(AbstractMember member)
+            {
+                switch (member.Visibility)
+                {
+                    case MemberVisibility.Public:
+                        return 500;
+                    case MemberVisibility.InternalProtected:
+                        return 400;
+                    case MemberVisibility.Protected:
+                        return 300;
+                    case MemberVisibility.Internal:
+                        return 200;
+                    case MemberVisibility.Private:
+                        return 100;
+                    default:
+                        return 0;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static int GetMemberTypeIndex(AbstractMember member)
+            {
+                if (member is FieldMember)
+                {
+                    return 2000;
+                }
+                if (member is ConstructorMember)
+                {
+                    return 1000;
+                }
+                if (member is MethodMember)
+                {
+                    return 80;
+                }
+                if (member is PropertyMember)
+                {
+                    return 70;
+                }
+                if (member is EventMember)
+                {
+                    return 60;
+                }
+
+                return 0;
             }
         }
     }

@@ -318,14 +318,14 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
                     internal protected static void StaticM2() { }
                     internal protected static int StaticP2 { get; }
 
-                    protected void static StaticM3() { }
-                    protected int static StaticP3 { get; }
+                    protected static void StaticM3() { }
+                    protected static int StaticP3 { get; }
 
-                    internal void static StaticM4() { }
-                    internal int static StaticP4 { get; }
+                    internal static void StaticM4() { }
+                    internal static int StaticP4 { get; }
 
-                    private void static StaticM5() { }
-                    private int static StaticP5 { get; }
+                    private static void StaticM5() { }
+                    private static int StaticP5 { get; }
                 }";
 
             #endregion
@@ -367,10 +367,17 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
                 new MethodMember(MemberVisibility.InternalProtected, MemberModifier.Static, "StaticM2", new MethodSignature()),
             });
             classMember.Members.AddRange(new AbstractMember[] {
+                new FieldMember(classMember, MemberVisibility.Protected, MemberModifier.Static, typeof(int), "_s_protectedStaticField"),
+                new FieldMember(classMember, MemberVisibility.Private, MemberModifier.Static, typeof(int), "_s_privateStaticField"),
+                new FieldMember(classMember, MemberVisibility.InternalProtected, MemberModifier.Static, typeof(int), "_s_protectedInternalStaticField"),
+                new FieldMember(classMember, MemberVisibility.Public, MemberModifier.Static, typeof(int), "PublicStaticField"),
+                new FieldMember(classMember, MemberVisibility.Internal, MemberModifier.Static, typeof(int), "_s_internalStaticField"),
+            });
+            classMember.Members.AddRange(new AbstractMember[] {
                 new FieldMember(classMember, MemberVisibility.Protected, MemberModifier.None, typeof(int), "_protectedField"),
                 new FieldMember(classMember, MemberVisibility.Private, MemberModifier.None, typeof(int), "_privateField"),
-                new FieldMember(classMember, MemberVisibility.InternalProtected, MemberModifier.None, typeof(int), "PublicField"),
-                new FieldMember(classMember, MemberVisibility.Public, MemberModifier.None, typeof(int), "_protectedInternalField"),
+                new FieldMember(classMember, MemberVisibility.InternalProtected, MemberModifier.None, typeof(int), "_protectedInternalField"),
+                new FieldMember(classMember, MemberVisibility.Public, MemberModifier.None, typeof(int), "PublicField"),
                 new FieldMember(classMember, MemberVisibility.Internal, MemberModifier.None, typeof(int), "_internalField"),
             });
             classMember.Members.AddRange(new PropertyMember[] {
