@@ -321,8 +321,14 @@ namespace NWheels.UI
             {
                 if (entityState.IsNew())
                 {
+                    var traceWriter = new MemoryTraceWriter();
+                    var populationSerializerSettings = CreateSerializerSettings();
+                    populationSerializerSettings.TraceWriter = traceWriter;
+
                     domainObject = handler.CreateNew();
-                    JsonConvert.PopulateObject(json, domainObject, _defaultSerializerSettings);
+                    JsonConvert.PopulateObject(json, domainObject, populationSerializerSettings);
+
+                    Debug.WriteLine(traceWriter.ToString());
                 }
                 else if (entityState.IsModified())
                 {
@@ -2783,6 +2789,7 @@ namespace NWheels.UI
                     properties = ReplaceRelationPropertiesWithForeignKeys(metaTypes, properties);
                     ConfigureEmbeddedCollectionProperties(metaTypes, properties);
                     IncludeNavigationProperties(metaTypes, properties);
+                    ExcludeCalculatedPropertiesFromDeserialization(metaTypes, properties);
                     //IncludeForeignKeyDisplayNameProperties(metaTypes, properties);
 
                     AttachSerializationFilter(properties);
@@ -2792,6 +2799,19 @@ namespace NWheels.UI
                 }
 
                 return properties;
+            }
+
+            private void ExcludeCalculatedPropertiesFromDeserialization(ITypeMetadata[] metaTypes, IList<JsonProperty> properties)
+            {
+                foreach (var jsonProperty in properties)
+                {
+                    var metaProperty = TryGetPropertyByName(metaTypes, jsonProperty.PropertyName);
+
+                    if (metaProperty != null && metaProperty.IsCalculated)
+                    {
+                        jsonProperty.MemberConverter = new CalculatedPropertyConverter();
+                    }
+                }
             }
 
             #endregion
@@ -3649,6 +3669,54 @@ namespace NWheels.UI
                 relatedDomainObject = foreignKeyHandler.GetById(idValue.ToString());
                 return true;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class CalculatedPropertyConverter : JsonConverter
+        {
+            #region Overrides of JsonConverter
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                throw new NotSupportedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                reader.Skip();
+                return existingValue;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanConvert(Type objectType)
+            {
+                if (objectType.IsInterface)
+                {
+                    return (objectType.IsEntityContract() || objectType.IsEntityPartContract());
+                }
+
+                return objectType.GetInterfaces().Any(intf => intf.IsEntityContract() || intf.IsEntityPartContract());
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanRead
+            {
+                get { return true; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanWrite
+            {
+                get { return false; }
+            }
+
+            #endregion
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

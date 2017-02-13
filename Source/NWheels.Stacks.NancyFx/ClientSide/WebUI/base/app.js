@@ -2307,11 +2307,16 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 //    scope.model.Data.entity[field.propertyName] = updatedEntity[field.propertyName];
                 //}
 
-                for (var i = 0 ; i < scope.tabSetFields.length ; i++) {
-                    var field = scope.tabSetFields[i];
-                    if (field.fieldType == 'InlineForm') {
+                for (var i = 0 ; i < scope.uidl.fields.length ; i++) {
+                    var field = scope.uidl.fields[i];
+                    if (field.nestedWidget) { //fieldType == 'InlineForm') {
                         var model = updatedEntity[field.propertyName];
-                        scope.$broadcast(field.nestedWidget.qualifiedName + ':ModelUpdater', model);
+                        var metaProperty = metaTypeProperties[toCamelCase(field.propertyName)];
+                        if (metaProperty.isCalculated === true) {
+                            scope.$broadcast(field.nestedWidget.qualifiedName + ':ModelSetter', model);
+                        } else {
+                            scope.$broadcast(field.nestedWidget.qualifiedName + ':RecalcCompleted', model);
+                        }
                     }
                 }
             };
@@ -2322,9 +2327,15 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 });
             }
 
+            scope.$on(scope.uidl.qualifiedName + ':RecalcCompleted', function (event, updatedEntity) {
+                if (updatedEntity) {
+                    scope.onRecalcComplete(updatedEntity);
+                }
+            });
+
             scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
                 scope.model.Data.entity = data;
-                scope.suppressAutoSubmitOnce = true;
+                scope.suppressAutoSubmitOnce = (scope.uidl.autoSubmitOnChange || scope.uidl.autoSaveOnChange);
                 scope.commandInProgress = false;
                 scope.waitingForInitialModel = false;
                 scope.tabSetIndex = 0;
@@ -2367,7 +2378,8 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.$on(scope.uidl.qualifiedName + ':EditAuthorized', function(event, data) {
                 scope.editAuthorized = true;
                 Enumerable.From(scope.uidl.fields)
-                    .Where("$.fieldType=='InlineGrid' || $.fieldType=='InlineForm' || $.fieldType=='LookupMany'")
+                    .Where("$.fieldType=='InlineGrid' || $.fieldType=='InlineForm' || $.fieldType=='LookupMany' || $.fieldType=='TypeSelector'")
+                    .Where(function(f) { return !scope.metaType.properties[toCamelCase(f.propertyName)].isCalculated })
                     .Where(function(f) { return (!data || !data.restrictedEntryProperties || data.restrictedEntryProperties[f.propertyName]); })
                     .ForEach(function (field) {
                         scope.$broadcast(field.nestedWidget.qualifiedName + ':EditAuthorized');
@@ -2740,12 +2752,14 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 if (!scope.selectedType || !scope.selectedType.name) {
                     return;
                 }
-                var selection = Enumerable.From(scope.uidl.selections).Where("$.typeName=='" + scope.selectedType.name + "'").First();
-                var selectedWidgetQualifiedName = selection.widget.qualifiedName;
-                $timeout(function() {
-                    scope.$broadcast(selectedWidgetQualifiedName + ':ModelSetter', scope.model.entity);
-                    scope.$broadcast(selectedWidgetQualifiedName + ':EditAuthorized');
-                });
+                var selection = Enumerable.From(scope.uidl.selections).Where("$.typeName=='" + scope.selectedType.name + "'").FirstOrDefault();
+                if (selection) {
+                    var selectedWidgetQualifiedName = selection.widget.qualifiedName;
+                    $timeout(function () {
+                        scope.$broadcast(selectedWidgetQualifiedName + ':ModelSetter', scope.model.entity);
+                        scope.$broadcast(selectedWidgetQualifiedName + ':EditAuthorized');
+                    });
+                }
             };
 
             scope.parentModelReceived = function() {
@@ -2798,6 +2812,10 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     scope.parentModelReceived();
                     scope.sendModelToSelectedWidget();
                 }
+            });
+
+            scope.$on(scope.uidl.qualifiedName + ':EditAuthorized', function (event, data) {
+                scope.editAuthorized = true;
             });
 
             if (scope.model.entity && scope.model.entity['$type']) {
