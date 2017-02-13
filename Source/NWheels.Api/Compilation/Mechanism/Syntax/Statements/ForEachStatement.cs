@@ -15,8 +15,27 @@ namespace NWheels.Compilation.Mechanism.Syntax.Statements
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void AcceptVisitor(StatementVisitor visitor)
+        {
+            visitor.VisitForEachStatement(this);
+
+            if (Enumerable != null)
+            {
+                Enumerable.AcceptVisitor(visitor);
+            }
+
+            Body.AcceptVisitor(visitor);
+
+            if (CurrentItem != null)
+            {
+                visitor.VisitReferenceToLocalVariable(CurrentItem);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public AbstractExpression Enumerable { get; set; }
-        public BlockStatement Body { get; private set; }
+        public BlockStatement Body { get; }
         public LocalVariable CurrentItem { get; set; }
     }
 }

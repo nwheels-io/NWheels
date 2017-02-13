@@ -14,7 +14,21 @@ namespace NWheels.Compilation.Mechanism.Syntax.Statements
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void AcceptVisitor(StatementVisitor visitor)
+        {
+            visitor.VisitUsingStatement(this);
+
+            if (Disposable != null)
+            {
+                Disposable.AcceptVisitor(visitor);
+            }
+
+            Body.AcceptVisitor(visitor);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public AbstractExpression Disposable { get; set; }
-        public BlockStatement Body { get; private set; }
+        public BlockStatement Body { get; }
     }
 }

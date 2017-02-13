@@ -31,6 +31,13 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void AcceptVisitor(MemberVisitor visitor)
+        {
+            visitor.VisitConstructor(this);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public MethodCallExpression CallThisConstructor { get; set; }
         public MethodCallExpression CallBaseConstructor { get; set; }
 

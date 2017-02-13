@@ -8,6 +8,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
 {
     public abstract class AbstractExpression
     {
+        public abstract void AcceptVisitor(StatementVisitor visitor);
         public TypeMember Type { get; set; }
 
         #if false

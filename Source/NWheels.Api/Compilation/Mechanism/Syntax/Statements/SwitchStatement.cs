@@ -15,7 +15,19 @@ namespace NWheels.Compilation.Mechanism.Syntax.Statements
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public List<SwitchCaseBlock> CaseBlocks { get; private set; }
+        public override void AcceptVisitor(StatementVisitor visitor)
+        {
+            visitor.VisitSwitchStatement(this);
+
+            foreach (var caseBlock in this.CaseBlocks)
+            {
+
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public List<SwitchCaseBlock> CaseBlocks { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -29,9 +41,34 @@ namespace NWheels.Compilation.Mechanism.Syntax.Statements
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void AcceptVisitor(StatementVisitor visitor)
+        {
+            if (ConstantMatch != null)
+            {
+                ConstantMatch.AcceptVisitor(visitor);
+            }
+
+            if (PatternMatchType != null)
+            {
+                visitor.VisitReferenceToTypeMember(PatternMatchType);
+            }
+
+            if (PatternMatchCondition != null)
+            {
+                PatternMatchCondition.AcceptVisitor(visitor);
+            }
+
+            if (Body != null)
+            {
+                Body.AcceptVisitor(visitor);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public AbstractExpression ConstantMatch { get; set; }
         public TypeMember PatternMatchType { get; set; }
         public AbstractExpression PatternMatchCondition { get; set; }
-        public BlockStatement Body { get; private set; }        
+        public BlockStatement Body { get; }        
     }
 }

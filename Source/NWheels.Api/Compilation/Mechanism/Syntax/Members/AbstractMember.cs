@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NWheels.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -15,13 +16,20 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected AbstractMember(TypeMember declaringType, MemberVisibility visibility, MemberModifier modifier, string name)
+        protected AbstractMember(MemberVisibility visibility, MemberModifier modifier, string name)
             : this()
         {
-            this.DeclaringType = declaringType;
             this.Visibility = visibility;
             this.Modifier = modifier;
             this.Name = name;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected AbstractMember(TypeMember declaringType, MemberVisibility visibility, MemberModifier modifier, string name)
+            : this(visibility, modifier, name)
+        {
+            this.DeclaringType = declaringType;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,6 +40,17 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
             this.Status = MemberStatus.Compiled;
             this.Name = clrBinding.Name;
             this.DeclaringType = clrBinding.DeclaringType;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public abstract void AcceptVisitor(MemberVisitor visitor);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string ToString()
+        {
+            return $"{this.GetType().Name.TrimSuffix("Member")} {this.Name}";
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

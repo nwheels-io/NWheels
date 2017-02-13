@@ -13,6 +13,18 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void AcceptVisitor(StatementVisitor visitor)
+        {
+            visitor.VisitNewObjectExpression(this);
+
+            if (ConstructorCall != null)
+            {
+                ConstructorCall.AcceptVisitor(visitor);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public MethodCallExpression ConstructorCall { get; set; }
     }
 }

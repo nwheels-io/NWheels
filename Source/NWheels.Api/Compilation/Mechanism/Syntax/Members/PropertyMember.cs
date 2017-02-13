@@ -21,6 +21,23 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void AcceptVisitor(MemberVisitor visitor)
+        {
+            visitor.VisitProperty(this);
+
+            if (this.Getter != null)
+            {
+                this.Getter.AcceptVisitor(visitor);
+            }
+
+            if (this.Setter != null)
+            {
+                this.Setter.AcceptVisitor(visitor);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TypeMember PropertyType { get; set; }
         public MethodMember Getter { get; set; }
         public MethodMember Setter { get; set; }

@@ -14,6 +14,18 @@ namespace NWheels.Compilation.Mechanism.Syntax.Statements
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void AcceptVisitor(StatementVisitor visitor)
+        {
+            visitor.VisitBlockStatement(this);
+
+            foreach (var statement in this.Statements)
+            {
+                statement.AcceptVisitor(visitor);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public List<AbstractStatement> Statements { get; private set; }
     }
 }

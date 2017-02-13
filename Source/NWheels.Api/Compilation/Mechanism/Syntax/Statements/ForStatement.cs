@@ -16,9 +16,33 @@ namespace NWheels.Compilation.Mechanism.Syntax.Statements
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public List<AbstractStatement> Initializers { get; private set; }
+        public override void AcceptVisitor(StatementVisitor visitor)
+        {
+            visitor.VisitForStatement(this);
+
+            foreach (var initializer in Initializers)
+            {
+                initializer.AcceptVisitor(visitor);
+            }
+
+            if (Condition != null)
+            {
+                Condition.AcceptVisitor(visitor);
+            }
+
+            foreach (var iterator in Iterators)
+            {
+                iterator.AcceptVisitor(visitor);
+            }
+
+            Body.AcceptVisitor(visitor);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public List<AbstractStatement> Initializers { get; }
         public AbstractExpression Condition { get; set; }
-        public List<AbstractStatement> Iterators { get; private set; }
-        public BlockStatement Body { get; private set; }
+        public List<AbstractStatement> Iterators { get; }
+        public BlockStatement Body { get; }
     }
 }

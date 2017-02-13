@@ -14,6 +14,23 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void AcceptVisitor(StatementVisitor visitor)
+        {
+            visitor.VisitMethodCallExpression(this);
+
+            if (Target != null)
+            {
+                Target.AcceptVisitor(visitor);
+            }
+
+            foreach (var argument in Arguments)
+            {
+                argument.Expression.AcceptVisitor(visitor);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public AbstractExpression Target { get; set; }
         public MethodMember Method { get; set; }
         public string MethodName { get; set; }

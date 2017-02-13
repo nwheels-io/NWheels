@@ -12,14 +12,32 @@ namespace NWheels.Compilation.Mechanism.Syntax.Statements
         {
             this.TryBlock = new BlockStatement();
             this.CatchBlocks = new List<TryCatchBlock>();
-            this.FinallyBlock = new BlockStatement();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public BlockStatement TryBlock { get; private set; }
-        public List<TryCatchBlock> CatchBlocks { get; private set; }
-        public BlockStatement FinallyBlock { get; private set; }
+        public override void AcceptVisitor(StatementVisitor visitor)
+        {
+            visitor.VisitTryStatement(this);
+
+            TryBlock.AcceptVisitor(visitor);
+
+            foreach (var catchBlock in CatchBlocks)
+            {
+                catchBlock.AcceptVisitor(visitor);
+            }
+
+            if (FinallyBlock != null)
+            {
+                FinallyBlock.AcceptVisitor(visitor);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public BlockStatement TryBlock { get; }
+        public List<TryCatchBlock> CatchBlocks { get; }
+        public BlockStatement FinallyBlock { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,8 +51,25 @@ namespace NWheels.Compilation.Mechanism.Syntax.Statements
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void AcceptVisitor(StatementVisitor visitor)
+        {
+            if (ExceptionType != null)
+            {
+                visitor.VisitReferenceToTypeMember(ExceptionType);
+            }
+
+            if (ExceptionVariable != null)
+            {
+                visitor.VisitReferenceToLocalVariable(ExceptionVariable);
+            }
+
+            Body.AcceptVisitor(visitor);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TypeMember ExceptionType { get; set; } 
         public LocalVariable ExceptionVariable { get; set; }
-        public BlockStatement Body { get; private set; }
+        public BlockStatement Body { get; }
     }
 }

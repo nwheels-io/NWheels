@@ -15,7 +15,15 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void AcceptVisitor(StatementVisitor visitor)
+        {
+            visitor.VisitAnonymousDelegateExpression(this);
+            Body.AcceptVisitor(visitor);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public MethodSignature Signature { get; set; }
-        public BlockStatement Body { get; private set; }
+        public BlockStatement Body { get; }
     }
 }

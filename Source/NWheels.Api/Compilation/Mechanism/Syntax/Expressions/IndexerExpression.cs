@@ -13,6 +13,23 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void AcceptVisitor(StatementVisitor visitor)
+        {
+            visitor.VisitIndexerExpression(this);
+
+            if (Target != null)
+            {
+                Target.AcceptVisitor(visitor);
+            }
+
+            foreach (var argument in IndexArguments)
+            {
+                argument.AcceptVisitor(visitor);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public AbstractExpression Target { get; set; }
         public List<AbstractExpression> IndexArguments { get; }
 

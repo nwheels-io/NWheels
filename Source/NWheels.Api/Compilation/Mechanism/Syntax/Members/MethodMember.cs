@@ -50,6 +50,13 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void AcceptVisitor(MemberVisitor visitor)
+        {
+            visitor.VisitMethod(this);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public MethodInfo ClrBinding { get; set; }
     }
 }

@@ -150,7 +150,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         public override string ToString()
         {
-            return this.FullName;
+            return $"{this.TypeKind} {this.Name}";
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -165,6 +165,32 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
             var constructedType = new TypeMember(this.Namespace, this.Visibility, this.TypeKind, this.Name, typeArguments);
             constructedType.GenericTypeDefinition = this;
             return constructedType;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void AcceptVisitor(MemberVisitor visitor)
+        {
+            switch (this.TypeKind)
+            {
+                case TypeMemberKind.Class:
+                    visitor.VisitClassType(this);
+                    break;
+                case TypeMemberKind.Struct:
+                    visitor.VisitStructType(this);
+                    break;
+                case TypeMemberKind.Interface:
+                    visitor.VisitInterfaceType(this);
+                    break;
+                case TypeMemberKind.Enum:
+                    visitor.VisitEnumType(this);
+                    break;
+            }
+
+            foreach (var member in this.Members)
+            {
+                member.AcceptVisitor(visitor);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

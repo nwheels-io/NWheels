@@ -6,5 +6,9 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
 {
     public class ThisExpression : AbstractExpression
     {
+        public override void AcceptVisitor(StatementVisitor visitor)
+        {
+            visitor.VisitThisExpression(this);
+        }
     }
 }

@@ -14,7 +14,21 @@ namespace NWheels.Compilation.Mechanism.Syntax.Statements
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public BlockStatement Body { get; private set; }
+        public override void AcceptVisitor(StatementVisitor visitor)
+        {
+            visitor.VisitDoStatement(this);
+
+            Body.AcceptVisitor(visitor);
+
+            if (Condition != null)
+            {
+                Condition.AcceptVisitor(visitor);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public BlockStatement Body { get; }
         public AbstractExpression Condition { get; set; }
     }
 }

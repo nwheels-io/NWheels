@@ -15,6 +15,37 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void AcceptVisitor(StatementVisitor visitor)
+        {
+            visitor.VisitNewArrayExpression(this);
+
+            if (ElementType != null)
+            {
+                visitor.VisitReferenceToTypeMember(ElementType);
+            }
+
+            if (DimensionLengths != null)
+            {
+                foreach (var length in DimensionLengths)
+                {
+                    length.AcceptVisitor(visitor);
+                }
+            }
+
+            if (DimensionInitializerValues != null)
+            {
+                foreach (var valueList in DimensionInitializerValues)
+                {
+                    foreach (var value in valueList)
+                    {
+                        value.AcceptVisitor(visitor);
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public AbstractExpression Length
         {
             get

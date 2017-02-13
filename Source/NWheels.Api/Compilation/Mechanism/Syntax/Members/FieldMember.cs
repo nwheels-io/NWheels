@@ -31,6 +31,13 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void AcceptVisitor(MemberVisitor visitor)
+        {
+            visitor.VisitField(this);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TypeMember Type { get; set; }
         public FieldInfo ClrBinding { get; set; }
         public bool IsReadOnly { get; set; }
