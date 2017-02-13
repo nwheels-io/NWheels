@@ -702,6 +702,15 @@ namespace NWheels.UI.Toolbox
             return this;
         }
 
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DataGrid<TDataRow> BindRowCommandsEnabledTo(Expression<Func<TDataRow, object>> property, Dictionary<object, bool> valueMap = null)
+        {
+            this.RowCommandsEnabledPropertyName = property.GetPropertyInfo().Name;
+            this.RowCommandsEnabledPropertyValueMap = valueMap;
+            return this;
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         //public DataGrid<TDataRow> UseDetailPane(string staticTemplateName, bool expandOnLoad)
@@ -811,6 +820,12 @@ namespace NWheels.UI.Toolbox
 
         [DataMember]
         public List<UidlCommand<TDataRow>> RowCommands { get; set; }
+
+        [DataMember]
+        public string RowCommandsEnabledPropertyName { get; set; }
+
+        [DataMember]
+        public Dictionary<object, bool> RowCommandsEnabledPropertyValueMap { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

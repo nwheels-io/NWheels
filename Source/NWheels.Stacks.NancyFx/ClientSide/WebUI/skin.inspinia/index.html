@@ -1703,6 +1703,18 @@ HEAD, JS/CSS LINKS
                 }
             };
             
+            $scope.updateDataDrivenRowCommands = function(clickEvent) {
+                var clickTest = jqgrid_testRowDataClick(clickEvent);
+                var propertyValue = clickTest.rowData[$scope.uidl.rowCommandsEnabledPropertyName];
+                var enabled = false;
+                if ($scope.uidl.rowCommandsEnabledPropertyValueMap && propertyValue) {
+                    enabled = ($scope.uidl.rowCommandsEnabledPropertyValueMap[toCamelCase('' + propertyValue)] === true);
+                } else {
+                    enabled = (propertyValue === true);
+                }
+                clickTest.rowTr.find('i[row-action-command]').css('display', (enabled ? 'inline-block' : 'none'));
+            };
+
             $scope.compileDetailPane = function(rowData, element) {
                 var childScope = $scope.$rootScope.$new(true, $scope);
                 childScope.uidl = $scope.uidl.detailPaneWidget;
@@ -1904,7 +1916,9 @@ HEAD, JS/CSS LINKS
                         //},
                         //multiselect: true,
                         beforeSelectRow: function (rowid, e) {
-
+                            if ($scope.uidl.rowCommandsEnabledPropertyName) {
+                                $scope.updateDataDrivenRowCommands(e);
+                            }
                             if (eval($(e.target).attr('edit-grid-event')) != undefined) {
                                 if (!$("#global_div_dropdown_popup").is(":visible")) {
 
@@ -2217,6 +2231,7 @@ HEAD, JS/CSS LINKS
                 target: target,
                 scope: scope,
                 gridq: gridq,
+                rowTr: rowTr,
                 rowTd: rowTd,
                 rowId: rowId,
                 rowData: rowData,
