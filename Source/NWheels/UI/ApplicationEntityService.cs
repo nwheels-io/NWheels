@@ -1823,6 +1823,12 @@ namespace NWheels.UI
                     Execute();
                 }
 
+                if (leftSideId == null)
+                {
+                    rightSideValue = null;
+                    return false;
+                }
+
                 return _rightSideValueByLeftSideId.TryGetValue(leftSideId, out rightSideValue);
             }
 
@@ -1876,7 +1882,7 @@ namespace NWheels.UI
                         var rightSideId = rightSideIds[i];
 
                         IDomainObject rightSideValue;
-                        if (rightSideId != null && rightSideById.TryGetValue(rightSideId, out rightSideValue))
+                        if (leftSideId != null && rightSideId != null && rightSideById.TryGetValue(rightSideId, out rightSideValue))
                         {
                             _rightSideValueByLeftSideId[leftSideId] = rightSideValue;
                         }

@@ -1110,6 +1110,15 @@ HEAD, JS/CSS LINKS
     </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - LAYOUT VERTICAL
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="app/uidl-element-template/LayoutVertical">
+        <div style="m-b" ng-repeat="widget in uidl.containedWidgets">
+            <uidl-widget uidl="widget"></uidl-widget>
+        </div>
+    </script>
+    
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - SCREEN PART CONTAINER
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/ScreenPartContainer">

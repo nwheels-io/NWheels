@@ -2494,6 +2494,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 };
                 
                 if (scope.uidl.inputFormTypeSelector) {
+                    scope.$broadcast(scope.uidl.inputFormTypeSelector.qualifiedName + ':EditAuthorized', editAuthorizedData);
                     for (var i = 0; i < scope.uidl.inputFormTypeSelector.selections.length ; i++) {
                         scope.$broadcast(scope.uidl.inputFormTypeSelector.selections[i].widget.qualifiedName + ':EditAuthorized', editAuthorizedData);
                     }
