@@ -83,6 +83,9 @@ namespace NWheels.UI.Toolbox
         public bool IsInlineEditEnabled { get; set; }
 
         [DataMember]
+        public DataGridInlineEditSaveMode InlineEditSaveMode { get; set; }
+
+        [DataMember]
         public DataGridRowActions InlineEditRowActions { get; set; }
 
         [DataMember]
@@ -974,6 +977,15 @@ namespace NWheels.UI.Toolbox
         Single = 0,
         Multiple = 10,
         Disabled = 20
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum DataGridInlineEditSaveMode
+    {
+        Manual = 0,
+        AutoSaveWhenLeavingRow = 10,
+        AutoCancelWhenLeavingRow = 20
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
