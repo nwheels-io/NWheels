@@ -1471,6 +1471,8 @@ namespace NWheels.UI
 
                 var stepTarget = target;
                 var stepMetaType = metaType;
+                var stepIndex = 0;
+                var stepCount = (makeSteps > 0 ? makeSteps : PropertyPath.Count - skipSteps);
                 var subsetOfPropertyPath = GetSubsetOfPropertyPath(PropertyPath, skipSteps, makeSteps);
                 object value = null;
 
@@ -1486,7 +1488,7 @@ namespace NWheels.UI
 
                     value = stepMetaProperty.ReadValue(stepTarget);
 
-                    if ( stepMetaProperty.Relation != null )
+                    if (stepMetaProperty.Relation != null && stepIndex < stepCount - 1)
                     {
                         if ( !(value is IDomainObject) )
                         {
@@ -1507,6 +1509,8 @@ namespace NWheels.UI
                     {
                         break;
                     }
+
+                    stepIndex++;
                 }
 
                 return value;
@@ -1541,11 +1545,11 @@ namespace NWheels.UI
 
                         if ( stepMetaProperty.ClrType != stepMetaProperty.Relation.RelatedPartyType.ContractType )
                         {
-                            _needsJoinOperation = !isLastStep;
+                            _needsJoinOperation |= !isLastStep;
                         }
                         else if (stepMetaProperty.RelationalMapping != null && stepMetaProperty.RelationalMapping.IsForeignKeyEmbeddedInParent)
                         {
-                            _needsForeignKeyNavigation = !isLastStep;
+                            _needsForeignKeyNavigation |= !isLastStep;
                         }
                     }
                     else if ( !isLastStep )
