@@ -576,6 +576,40 @@ HEAD, JS/CSS LINKS
             position: relative;
             top: -2px;
         }
+.login_form_errors {
+    top: 0 !important;
+}
+@media screen and (max-width: 930px){
+.logo-name{
+    font-size: 132px;
+}
+}
+@media screen and (max-width: 651px){
+.logo-name{
+    font-size: 113px;
+}
+}
+@media screen and (max-width: 501px){
+.logo-name {
+    font-size: 20vw;
+    letter-spacing: -4px;
+}
+h2.logo-name {
+    font-size: 8vw;
+}
+.loginscreen.middle-box {
+    width: 94% !important;
+}
+.loginscreen.middle-box>div {
+    width: 100% !important;
+}
+.pull-right {
+    float: none !important;
+}
+.ibox-title h2 {
+    float: none;
+}
+}
     </style>
 </head>
 <body 
@@ -1222,7 +1256,9 @@ HEAD, JS/CSS LINKS
                         <table class="table table-hover margin bottom" ng-if="ResultSet">
                             <thead>
                                 <tr>
-                                    <th ng-repeat="column in ::uidl.displayColumns" class="text-center" ng-attr-width="{{column.nestedWidget ? '50%' : undefined}}">{{::translate(column.title)}}</th>
+                                    <th ng-repeat="column in ::uidl.displayColumns" 
+                                        class="text-center" 
+                                        ng-attr-width="{{column.nestedWidget ? '50%' : undefined}}">{{::translate(column.title)}}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1251,7 +1287,8 @@ HEAD, JS/CSS LINKS
                 <table class="table table-hover margin bottom" ng-if="ResultSet">
                     <thead>
                         <tr>
-                            <th ng-repeat="column in ::uidl.displayColumns" ng-attr-width="{{column.nestedWidget ? '50%' : undefined}}">{{::translate(column.title)}}</th>
+                            <th ng-repeat="column in ::uidl.displayColumns" 
+                                ng-style="{width: ($last ? undefined : calculateColumnWidthPx(column) + 'px')}">{{::translate(column.title)}}</th>
                         </tr>
                     </thead>
                     <tbody>

@@ -2172,6 +2172,24 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    m_controllerImplementations['StaticTable'] = {
+        implement: function (scope) {
+            scope.calculateColumnWidthPx = function(metaColumn) {
+                if (!metaColumn.size) {
+                    return undefined;
+                }
+                var colWidthPx = (
+                    metaColumn.size==='Jumbo' ? 1040 : (
+                    metaColumn.size==='ExtraLarge' ? 720 : (
+                    metaColumn.size==='Large' ? 360 : (
+                    metaColumn.size==='Small' ? 90 : 180))));
+                return colWidthPx;
+            };
+        }
+    };
+    
+    //-----------------------------------------------------------------------------------------------------------------
+
     m_controllerImplementations['Form'] = {
         implement: function (scope) {
             function fieldHasModifier(field, modifier) {
