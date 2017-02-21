@@ -208,7 +208,14 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
             if (!string.IsNullOrEmpty(type.Namespace))
             {
-                return QualifiedName(ParseName(type.Namespace), simpleName);
+                var isNamespaceImported = (
+                    type.BackendTag is RoslynTypeFactoryBackend.BackendTag backendTag && 
+                    backendTag.IsNamespaceImported);
+
+                if (!isNamespaceImported)
+                {
+                    return QualifiedName(ParseName(type.Namespace), simpleName);
+                }
             }
 
             return simpleName;

@@ -13,51 +13,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
     public class CSharpSyntaxGeneratorTests
     {
         [Fact]
-        public void TypeKeyAttribute_FullKey()
-        {
-            //-- arrange
-
-            var generatorUnderTest = new CSharpSyntaxGenerator();
-
-            var key1 = new TypeKey(
-                factoryType: typeof(CSharpSyntaxGeneratorTests),
-                primaryContract: typeof(IContractOne),
-                secondaryContract1: typeof(IContractTwo),
-                secondaryContract2: typeof(IContractThree),
-                secondaryContract3: typeof(IContractFour),
-                extensionValue1: 111,
-                extensionValue2: 222,
-                extensionValue3: 333);
-
-            var type1 = new TypeMember(
-                new TypeGeneratorInfo(this.GetType(), key1),
-                "My.Namespace", MemberVisibility.Public, TypeMemberKind.Class, "MyClass");
-            
-            //-- act
-
-            SyntaxTree syntax = generatorUnderTest.GenerateSyntax(new[] { type1 });
-
-            //-- assert
-
-            syntax.Should().BeEquivalentToCode(@"
-                namespace My.Namespace
-                {
-                    [NWheels.Compilation.Mechanism.Factories.TypeKeyAttribute(
-                        typeof(NWheels.Compilation.Adapters.Roslyn.UnitTests.CSharpSyntaxGeneratorTests),
-                        typeof(NWheels.Compilation.Adapters.Roslyn.UnitTests.CSharpSyntaxGeneratorTests.IContractOne),
-                        typeof(NWheels.Compilation.Adapters.Roslyn.UnitTests.CSharpSyntaxGeneratorTests.IContractTwo),
-                        typeof(NWheels.Compilation.Adapters.Roslyn.UnitTests.CSharpSyntaxGeneratorTests.IContractThree),
-                        typeof(NWheels.Compilation.Adapters.Roslyn.UnitTests.CSharpSyntaxGeneratorTests.IContractFour),
-                        111, 222, 333)]
-                    public class MyClass { }
-                }
-            ");
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void SingleTypeWithNamespace()
+        public void Namespaces_SingleTypeWithNamespace()
         {
             //-- arrange
 
@@ -83,7 +39,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void MultipleTypesWithSameNamespace()
+        public void Namespaces_MultipleTypesWithSameNamespace()
         {
             //-- arrange
 
@@ -111,7 +67,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void MultipleTypesWithDifferentNamespaces()
+        public void Namespaces_MultipleTypesWithDifferentNamespaces()
         {
             //-- arrange
 
@@ -143,6 +99,44 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
                 {
                     public class ClassTwo { }
                     public class ClassFour { }
+                }
+            ");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Usings_ImportAllNamespaces()
+        {
+            //-- arrange
+
+            var generatorUnderTest = new CSharpSyntaxGenerator();
+            var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType()), "My.First", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
+            var type2 = new TypeMember(new TypeGeneratorInfo(this.GetType()), "My.Second", MemberVisibility.Public, TypeMemberKind.Class, "ClassTwo");
+
+            type1.Members.Add(new PropertyMember(type1, MemberVisibility.Public, MemberModifier.None, typeof(DateTime), "Time"));
+            type2.BaseType = type1;
+
+            //-- act
+
+            SyntaxTree syntax = generatorUnderTest.GenerateSyntax(new[] { type1, type2 });
+
+            //-- assert
+
+            syntax.Should().BeEquivalentToCode(@"
+                using System;
+                using My.First;
+
+                namespace My.First
+                {
+                    public class ClassOne 
+                    {
+                        public DateTime Time { get; }
+                    }
+                }
+                namespace My.Second
+                {
+                    public class ClassTwo : ClassOne { }
                 }
             ");
         }

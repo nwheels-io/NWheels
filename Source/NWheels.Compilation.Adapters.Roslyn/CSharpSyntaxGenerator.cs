@@ -13,20 +13,50 @@ namespace NWheels.Compilation.Adapters.Roslyn
 {
     public class CSharpSyntaxGenerator
     {
-        public SyntaxTree GenerateSyntax(IEnumerable<TypeMember> typesToCompile)
+        public SyntaxTree GenerateSyntax(IEnumerable<TypeMember> typesToCompile, IReadOnlyCollection<TypeMember> allReferencedTypes = null)
         {
+            var namespaceUsingSyntaxes = GatherNamespaceUsings(allReferencedTypes);
             var unitMemberSyntaxes = new List<MemberDeclarationSyntax>();
 
             EmitTypeSyntaxesGroupedInNamespaces(typesToCompile, unitMemberSyntaxes);
 
             var compilationUnitSyntax = 
                 CompilationUnit()
+                    .WithUsings(List(namespaceUsingSyntaxes))
                     .WithMembers(List(unitMemberSyntaxes))
                     .NormalizeWhitespace();
 
             var syntaxTree = CSharpSyntaxTree.Create(compilationUnitSyntax, encoding: Encoding.UTF8);
 
             return syntaxTree;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private UsingDirectiveSyntax[] GatherNamespaceUsings(IReadOnlyCollection<TypeMember> allReferencedTypes)
+        {
+            if (allReferencedTypes == null)
+            {
+                return new UsingDirectiveSyntax[0];
+            }
+
+            var namespacesToImport = new HashSet<string>();
+            var typesGroupedByName = allReferencedTypes.GroupBy(t => t.Name);
+
+            foreach (var identicalNameGroup in typesGroupedByName)
+            {
+                var identicalNameTypes = identicalNameGroup.Take(2).ToArray();
+                if (identicalNameTypes.Length == 1 && !string.IsNullOrEmpty(identicalNameTypes[0].Namespace))
+                {
+                    namespacesToImport.Add(identicalNameTypes[0].Namespace);
+                    identicalNameTypes[0].SafeBackendTag().IsNamespaceImported = true;
+                }
+            }
+
+            var sortedNamespacesToImport = new List<string>(namespacesToImport);
+            sortedNamespacesToImport.Sort(new NamespaceImportComparer());
+
+            return sortedNamespacesToImport.Select(ns => UsingDirective(ParseName(ns))).ToArray();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -86,9 +116,32 @@ namespace NWheels.Compilation.Adapters.Roslyn
             var annotation = new SyntaxAnnotation();
 
             typeSyntax = typeSyntax.WithAdditionalAnnotations(annotation);
-            type.BackendTag = annotation;
+            type.SafeBackendTag().Annotation = annotation;
 
             return typeSyntax;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class NamespaceImportComparer : IComparer<string>
+        {
+            public int Compare(string x, string y)
+            {
+                var xIsSystem = x.StartsWith("System.");
+                var yIsSystem = y.StartsWith("System.");
+
+                if (xIsSystem && !yIsSystem)
+                {
+                    return -1;
+                }
+
+                if (yIsSystem && !xIsSystem)
+                {
+                    return 1;
+                }
+
+                return x.CompareTo(y);
+            }
         }
     }
 }

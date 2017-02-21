@@ -192,6 +192,75 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static IEnumerable<object[]> TestCases_TestGetTypeNameSyntax_OmitNamespace = new object[][] {
+            #region Test cases
+            new object[] {
+                "DateTime",
+                new Func<TypeMember>(() => new TypeMember(typeof(DateTime)) {
+                    BackendTag = new RoslynTypeFactoryBackend.BackendTag { IsNamespaceImported = true }
+                })
+            },
+            new object[] {
+                "IEquatable<System.TimeSpan>",
+                new Func<TypeMember>(() => new TypeMember(typeof(IEquatable<TimeSpan>)) {
+                    BackendTag = new RoslynTypeFactoryBackend.BackendTag { IsNamespaceImported = true }
+                })
+            },
+            new object[] {
+                "Dictionary<string, TimeSpan>",
+                new Func<TypeMember>(() => {
+                    var type = new TypeMember(typeof(Dictionary<string, TimeSpan>)) {
+                        BackendTag = new RoslynTypeFactoryBackend.BackendTag {
+                            IsNamespaceImported = true
+                        }
+                    };
+                    type.GenericTypeArguments[1].BackendTag = new RoslynTypeFactoryBackend.BackendTag {
+                        IsNamespaceImported = true
+                    };
+                    return type;
+                })
+            },
+            new object[] {
+                "MyClassOne",
+                new Func<TypeMember>(() => new TypeMember("My.NS1", MemberVisibility.Public, TypeMemberKind.Class, "MyClassOne") {
+                    BackendTag = new RoslynTypeFactoryBackend.BackendTag { IsNamespaceImported = true }
+                })
+            },
+            new object[] {
+                "MyClassOne<MyClassTwo, My.NS3.MyClassThree>",
+                new Func<TypeMember>(() => {
+                    var type = new TypeMember("My.NS1", MemberVisibility.Public, TypeMemberKind.Class, "MyClassOne",
+                        new TypeMember("My.NS2", MemberVisibility.Public, TypeMemberKind.Class, "MyClassTwo"),
+                        new TypeMember("My.NS3", MemberVisibility.Public, TypeMemberKind.Class, "MyClassThree")
+                    );
+                    type.BackendTag = new RoslynTypeFactoryBackend.BackendTag { IsNamespaceImported = true };
+                    type.GenericTypeArguments[0].BackendTag = new RoslynTypeFactoryBackend.BackendTag { IsNamespaceImported = true };
+                    type.GenericTypeArguments[1].BackendTag = new RoslynTypeFactoryBackend.BackendTag { IsNamespaceImported = false };
+                    return type;
+                })
+            },
+            #endregion
+        };
+
+        [Theory]
+        [MemberData(nameof(TestCases_TestGetTypeNameSyntax_OmitNamespace))]
+        public void TestGetTypeNameSyntax_OmitNamespaceIfImported(string expectedCode, Func<TypeMember> typeFactory)
+        {
+            //-- arrange
+
+            var type = typeFactory();
+
+            //-- act
+
+            var actualSyntax = SyntaxHelpers.GetTypeNameSyntax(type);
+
+            //-- assert
+
+            actualSyntax.Should().BeEqualToCode(expectedCode);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static IEnumerable<object[]> TestCases_TestGetLiteralSyntax = new object[][] {
             #region Test cases
             new object[] { 123 , "123" },
