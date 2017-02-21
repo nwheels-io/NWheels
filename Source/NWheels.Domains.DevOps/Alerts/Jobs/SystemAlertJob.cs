@@ -332,7 +332,7 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
                 }
                 else
                 {
-                    subject = string.Format("MS Alerts: {0} different awaiting for you", numOfAlerts);
+                    subject = string.Format("MS Alerts: {0} different alerts awaiting for you", numOfAlerts);
                 }
                 message.Subject = subject;
                 message.BodyHtmlTemplate = string.Empty;
@@ -342,10 +342,10 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
                 foreach (var groupedAlerts in alerts.GroupBy(alert => GetGroupByKeyByAlert(alert)))
                 {
                     var alertConfig = _systemAlertConfiguration.AlertList[groupedAlerts.First().AlertId];
-                    body.AppendLine(string.Format("{0} - {1}", groupedAlerts.Key, groupedAlerts.Count()));
-                    body.AppendLine(string.Format("Description: {0}", alertConfig.Description));
-                    body.AppendLine(string.Format("Possible reasons: {0}", alertConfig.PossibleReason));
-                    body.AppendLine(string.Format("Suggested Actions: {0}", alertConfig.SuggestedAction));
+                    body.AppendLine(string.Format("<h3>{0}</h3> - <h1>{1}</h1>", groupedAlerts.Key.Replace(_splitChar, ' '), groupedAlerts.Count()));
+                    body.AppendLine(string.Format("<p>Description: {0}</p>", alertConfig.Description));
+                    body.AppendLine(string.Format("<p>Possible reasons: {0}</p>", alertConfig.PossibleReason));
+                    body.AppendLine(string.Format("<p>Suggested Actions: {0}</p>", alertConfig.SuggestedAction));
                     body.AppendLine();
                 }
 

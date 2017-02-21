@@ -44,7 +44,7 @@ namespace NWheels.Processing.Messages.Impl
 
             try
             {
-                logFrom = (message.From != null ? string.Format("{0} <{1}>", message.From.DisplayName, message.From.EmailAddress) : "");
+                logFrom = (message.From != null ? string.Format("{0} <{1}>", message.From.DisplayName, message.From.EmailAddress) : _configSection.From);
                 logTo = GetRecipientsLogString(message.To);
                 logCc = GetRecipientsLogString(message.Cc);
                 logBcc = GetRecipientsLogString(message.Bcc);
@@ -171,6 +171,9 @@ namespace NWheels.Processing.Messages.Impl
 
             [PropertyContract.Semantic.Password]
             string Password { get; set; }
+
+            [PropertyContract.Required]
+            string From { get; set; }
         }
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
