@@ -62,6 +62,11 @@ namespace NWheels.Processing.Messages.Impl
                     smtp.EnableSsl = true;
                 }
 
+                if (message.From == null)
+                {
+                    message.From = new OutgoingEmailMessage.SenderRecipient(_configSection.From, _configSection.From);
+                }
+
                 message.FormatTemplates(out subject, out body);
 
                 var smtpMessage = BuildMailMessage(message, subject, body);

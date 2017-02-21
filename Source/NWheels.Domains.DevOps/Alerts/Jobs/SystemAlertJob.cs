@@ -342,11 +342,10 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
                 foreach (var groupedAlerts in alerts.GroupBy(alert => GetGroupByKeyByAlert(alert)))
                 {
                     var alertConfig = _systemAlertConfiguration.AlertList[groupedAlerts.First().AlertId];
-                    body.AppendLine(string.Format("<h3>{0}</h3> - <h1>{1}</h1>", groupedAlerts.Key.Replace(_splitChar, ' '), groupedAlerts.Count()));
+                    body.AppendLine(string.Format("<h3>{0}  -  {1}</h3>", groupedAlerts.Key.Replace(_splitChar, ' '), groupedAlerts.Count()));
                     body.AppendLine(string.Format("<p>Description: {0}</p>", alertConfig.Description));
                     body.AppendLine(string.Format("<p>Possible reasons: {0}</p>", alertConfig.PossibleReason));
                     body.AppendLine(string.Format("<p>Suggested Actions: {0}</p>", alertConfig.SuggestedAction));
-                    body.AppendLine();
                 }
 
                 message.BodyHtmlTemplate = body.ToString();
