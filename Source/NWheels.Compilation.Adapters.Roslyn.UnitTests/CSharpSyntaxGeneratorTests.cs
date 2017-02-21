@@ -117,15 +117,26 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             type1.Members.Add(new PropertyMember(type1, MemberVisibility.Public, MemberModifier.None, typeof(DateTime), "Time"));
             type2.BaseType = type1;
 
+            var allReferencedTypes = new[] {
+                type1, type2, typeof(DateTime)
+            };
+
+            type1.SafeBackendTag().IsNamespaceImported = true;
+            type2.SafeBackendTag().IsNamespaceImported = true;
+            ((TypeMember)typeof(DateTime)).SafeBackendTag().IsNamespaceImported = true;
+
             //-- act
 
-            SyntaxTree syntax = generatorUnderTest.GenerateSyntax(new[] { type1, type2 });
+            SyntaxTree syntax = generatorUnderTest.GenerateSyntax(
+                new[] { type1, type2 }, 
+                allReferencedTypes);
 
             //-- assert
 
             syntax.Should().BeEquivalentToCode(@"
                 using System;
                 using My.First;
+                using My.Second;
 
                 namespace My.First
                 {

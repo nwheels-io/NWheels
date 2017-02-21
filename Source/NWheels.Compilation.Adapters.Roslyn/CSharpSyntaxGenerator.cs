@@ -15,7 +15,11 @@ namespace NWheels.Compilation.Adapters.Roslyn
     {
         public SyntaxTree GenerateSyntax(IEnumerable<TypeMember> typesToCompile, IReadOnlyCollection<TypeMember> allReferencedTypes = null)
         {
-            var namespaceUsingSyntaxes = GatherNamespaceUsings(allReferencedTypes);
+            var namespaceUsingSyntaxes = (
+                allReferencedTypes != null
+                ? GatherNamespaceUsings(allReferencedTypes)
+                : new UsingDirectiveSyntax[0]);
+
             var unitMemberSyntaxes = new List<MemberDeclarationSyntax>();
 
             EmitTypeSyntaxesGroupedInNamespaces(typesToCompile, unitMemberSyntaxes);
@@ -35,11 +39,6 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         private UsingDirectiveSyntax[] GatherNamespaceUsings(IReadOnlyCollection<TypeMember> allReferencedTypes)
         {
-            if (allReferencedTypes == null)
-            {
-                return new UsingDirectiveSyntax[0];
-            }
-
             var namespacesToImport = new HashSet<string>();
             var typesGroupedByName = allReferencedTypes.GroupBy(t => t.Name);
 
@@ -127,8 +126,8 @@ namespace NWheels.Compilation.Adapters.Roslyn
         {
             public int Compare(string x, string y)
             {
-                var xIsSystem = x.StartsWith("System.");
-                var yIsSystem = y.StartsWith("System.");
+                var xIsSystem = (x == "System" || x.StartsWith("System."));
+                var yIsSystem = (y == "System" || y.StartsWith("System."));
 
                 if (xIsSystem && !yIsSystem)
                 {
