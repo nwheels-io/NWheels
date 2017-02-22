@@ -5,9 +5,9 @@ VisualStudioVersion = 15.0.26127.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Api", "NWheels.Api\NWheels.Api.csproj", "{2585169C-CCAE-4D0C-BDED-4BEEC4A8E011}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Core", "NWheels.Core\NWheels.Core.csproj", "{3313C738-1BDD-4541-A705-A5B4592854EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Implementation", "NWheels.Implementation\NWheels.Implementation.csproj", "{3313C738-1BDD-4541-A705-A5B4592854EB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Core.UnitTests", "NWheels.Core.UnitTests\NWheels.Core.UnitTests.csproj", "{D85AC78D-17C5-486C-A8A5-13581EC85218}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Implementation.UnitTests", "NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj", "{D85AC78D-17C5-486C-A8A5-13581EC85218}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Injection.Adapters.Autofac", "NWheels.Injection.Adapters.Autofac\NWheels.Injection.Adapters.Autofac.csproj", "{F2BC7898-360F-4980-9A5C-8976EB042A41}"
 EndProject

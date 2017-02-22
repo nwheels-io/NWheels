@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace NWheels.Core.UnitTests
+namespace NWheels.Implementation.UnitTests
 {
     public class UnitTest1
     {

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 
-namespace NWheels.Core.UnitTests.Extensions
+namespace NWheels.Implementation.UnitTests.Extensions
 {
     public class StringExtensionTests
     {

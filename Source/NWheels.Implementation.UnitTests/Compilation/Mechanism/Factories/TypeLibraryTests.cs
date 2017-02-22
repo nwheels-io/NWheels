@@ -8,7 +8,7 @@ using FluentAssertions;
 using System.Linq;
 using NWheels.Exceptions;
 
-namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
+namespace NWheels.Implementation.UnitTests.Compilation.Mechanism.Factories
 {
     public class TypeLibraryTests
     {

@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Text;
 using Xunit;
 
-namespace NWheels.Core.UnitTests.DataStructures
+namespace NWheels.Implementation.UnitTests.DataStructures
 {
     public class EqualityComparerTypeFactoryTests
     {

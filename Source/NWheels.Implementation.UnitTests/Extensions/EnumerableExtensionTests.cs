@@ -4,7 +4,7 @@ using System.Text;
 using Xunit;
 using NWheels.Extensions;
 
-namespace NWheels.Core.UnitTests.Extensions
+namespace NWheels.Implementation.UnitTests.Extensions
 {
     public class EnumerableExtensionTests
     {

@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using Xunit;
 
-namespace NWheels.Core.UnitTests.Compilation.Mechanism.Factories
+namespace NWheels.Implementation.UnitTests.Compilation.Mechanism.Factories
 {
     public class TypeKeyAttributeTests
     {

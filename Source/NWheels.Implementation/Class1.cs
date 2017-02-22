@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NWheels.Core
+namespace NWheels.Implementation
 {
     public class Class1
     {

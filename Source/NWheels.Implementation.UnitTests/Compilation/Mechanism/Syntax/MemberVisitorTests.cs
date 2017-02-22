@@ -7,7 +7,7 @@ using System.Text;
 using Xunit;
 using Visit = System.Tuple<string, object>;
 
-namespace NWheels.Core.UnitTests.Compilation.Mechanism.Syntax
+namespace NWheels.Implementation.UnitTests.Compilation.Mechanism.Syntax
 {
     public class MemberVisitorTests
     {

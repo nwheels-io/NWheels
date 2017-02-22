@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 
-namespace NWheels.Core.UnitTests.Compilation.Mechanism.Syntax.Members
+namespace NWheels.Implementation.UnitTests.Compilation.Mechanism.Syntax.Members
 {
     public class TypeMemberTests
     {
@@ -101,7 +101,7 @@ namespace NWheels.Core.UnitTests.Compilation.Mechanism.Syntax.Members
             },
             new object[] {
                 new TypeMember(typeof(TestNestedType)),
-                "NWheels.Core.UnitTests.Compilation.Mechanism.Syntax.Members.TypeMemberTests.TestNestedType"
+                "NWheels.Implementation.UnitTests.Compilation.Mechanism.Syntax.Members.TypeMemberTests.TestNestedType"
             },
             #endregion
         };

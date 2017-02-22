@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using Xunit;
 
-namespace NWheels.Core.UnitTests.Compilation.Mechanism.Syntax.Members
+namespace NWheels.Implementation.UnitTests.Compilation.Mechanism.Syntax.Members
 {
     public class MethodSignatureTests
     {
