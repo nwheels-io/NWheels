@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
 using NWheels.DataStructures;
 using NWheels.Compilation.Mechanism.Syntax;
+using System.Threading;
 
 namespace NWheels.Compilation.Adapters.Roslyn
 {
@@ -24,6 +25,7 @@ namespace NWheels.Compilation.Adapters.Roslyn
         private readonly string _compiledAssemblyDirectory;
         private readonly ReferenceCache _referenceCache;
         private readonly List<Assembly> _compiledAssemblies;
+        private int _productAssemblyIndex;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -49,6 +51,7 @@ namespace NWheels.Compilation.Adapters.Roslyn
             _compiledAssemblies = new List<Assembly>();
 
             _referenceCache.IncludePrerequisiteAssemblyReferences();
+            _productAssemblyIndex = 1000 * Interlocked.Increment(ref _s_productAssemblyIndexSeed);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -139,7 +142,8 @@ namespace NWheels.Compilation.Adapters.Roslyn
         private bool TryCompileNewAssembly(ref SyntaxTree syntax, out Assembly assembly, out ImmutableArray<Diagnostic> diagnostics)
         {
             var compiler = new AssemblyCompiler(_referenceCache);
-            var assemblyName = $"{_assemblyNamePrefix}{_compiledAssemblies.Count + 1}";
+            var assemblyIndex = Interlocked.Increment(ref _productAssemblyIndex);
+            var assemblyName = $"{_assemblyNamePrefix}{assemblyIndex}";
 
             if (_debugMode)
             {
@@ -341,6 +345,7 @@ namespace NWheels.Compilation.Adapters.Roslyn
         private static readonly IReadOnlyList<CompilationDiagnostic> _s_emptyDiagnostics = new CompilationDiagnostic[0];
         private static readonly IReadOnlyList<TypeCompilationResult> _s_emptyCompilationResults = new TypeCompilationResult[0];
         private static readonly TextSpanComparer _s_textSpanComparer = new TextSpanComparer();
+        private static int _s_productAssemblyIndexSeed = 0;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
