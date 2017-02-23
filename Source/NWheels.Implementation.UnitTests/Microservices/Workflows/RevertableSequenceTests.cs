@@ -122,24 +122,21 @@ namespace NWheels.Implementation.UnitTests.Microservices.Workflows
 
             //-- Act
 
-            try
-            {
+            var exception = Assert.Throws<AggregateException>(() => {
                 sequence.Perform();
-            }
-            catch (AggregateException aggregate)
-            {
-                //-- Assert
+            });
+               
+            //-- Assert
 
-                Assert.Equal(sequence.State, RevertableSequenceState.RevertFailed);
-                Assert.Equal(codeBehind.TakeLog(), new[] {
-                    "PerformOne()", "PerformTwo()", "THROWING-FROM:PerformThree()", "RevertTwo()", "THROWING-FROM:RevertOne()"
-                });
+            Assert.Equal(sequence.State, RevertableSequenceState.RevertFailed);
+            Assert.Equal(codeBehind.TakeLog(), new[] {
+                "PerformOne()", "PerformTwo()", "THROWING-FROM:PerformThree()", "RevertTwo()", "THROWING-FROM:RevertOne()"
+            });
 
-                Assert.True(aggregate.InnerExceptions.All(e => e is TestSequenceException), "Exception type");
-                Assert.Equal(aggregate.InnerExceptions.Select(e => e.Message), new[] {
-                    "PerformThree()", "RevertOne()"
-                });
-            }
+            Assert.True(exception.InnerExceptions.All(e => e is TestSequenceException), "Exception type");
+            Assert.Equal(exception.InnerExceptions.Select(e => e.Message), new[] {
+                "PerformThree()", "RevertOne()"
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -160,25 +157,22 @@ namespace NWheels.Implementation.UnitTests.Microservices.Workflows
             codeBehind.TakeLog();
 
             //-- Act
-
-            try
-            {
+            
+            var exception = Assert.Throws<AggregateException>(() => {
                 sequence.Revert();
-            }
-            catch (AggregateException aggregate)
-            {
-                //-- Assert
+            });
+            
+            //-- Assert
 
-                Assert.Equal(sequence.State, RevertableSequenceState.RevertFailed);
-                Assert.Equal(codeBehind.TakeLog(), new[] {
-                    "THROWING-FROM:RevertFour()", "THROWING-FROM:RevertTwo()", "RevertOne()"
-                });
+            Assert.Equal(sequence.State, RevertableSequenceState.RevertFailed);
+            Assert.Equal(codeBehind.TakeLog(), new[] {
+                "THROWING-FROM:RevertFour()", "THROWING-FROM:RevertTwo()", "RevertOne()"
+            });
 
-                Assert.True(aggregate.InnerExceptions.All(e => e is TestSequenceException), "Exception type");
-                Assert.Equal(aggregate.InnerExceptions.Select(e => e.Message), new[] {
-                    "RevertFour()", "RevertTwo()"
-                });
-            }
+            Assert.True(exception.InnerExceptions.All(e => e is TestSequenceException), "Exception type");
+            Assert.Equal(exception.InnerExceptions.Select(e => e.Message), new[] {
+                "RevertFour()", "RevertTwo()"
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -197,14 +191,10 @@ namespace NWheels.Implementation.UnitTests.Microservices.Workflows
 
             sequence.Perform();
 
-            try
-            {
+            var exception = Assert.Throws<AggregateException>(() => {
                 sequence.Revert();
-            }
-            catch (AggregateException)
-            {
-            }
-
+            });
+            
             codeBehind.TakeLog();
 
             codeBehind.ThrowFromRevertFour = false;
@@ -263,30 +253,27 @@ namespace NWheels.Implementation.UnitTests.Microservices.Workflows
 
             //-- Act
 
-            try
-            {
+            var exception = Assert.Throws<TestSequenceException>(() => {
                 sequence.Perform();
-            }
-            catch (TestSequenceException e)
-            {
-                //-- Assert
+            });
+             
+            //-- Assert
 
-                Assert.Equal(e.Message, "PerformFiveItem(333,index=2,last=T)");
-                Assert.Equal(sequence.State, RevertableSequenceState.Reverted);
-                Assert.Equal(codeBehind.TakeLog(), new[] {
-                    "PerformOne()",
-                    "PerformTwo()",
-                    "PerformThree()",
-                    "PerformFiveItem(111,index=0,last=F)",
-                    "PerformFiveItem(222,index=1,last=F)",
-                    "THROWING-FROM:PerformFiveItem(333,index=2,last=T)",
-                    "RevertFiveItem(222,index=1,last=F)",
-                    "RevertFiveItem(111,index=0,last=F)",
-                    "RevertFour()",
-                    "RevertTwo()",
-                    "RevertOne()"
-                });
-            }
+            Assert.Equal(exception.Message, "PerformFiveItem(333,index=2,last=T)");
+            Assert.Equal(sequence.State, RevertableSequenceState.Reverted);
+            Assert.Equal(codeBehind.TakeLog(), new[] {
+                "PerformOne()",
+                "PerformTwo()",
+                "PerformThree()",
+                "PerformFiveItem(111,index=0,last=F)",
+                "PerformFiveItem(222,index=1,last=F)",
+                "THROWING-FROM:PerformFiveItem(333,index=2,last=T)",
+                "RevertFiveItem(222,index=1,last=F)",
+                "RevertFiveItem(111,index=0,last=F)",
+                "RevertFour()",
+                "RevertTwo()",
+                "RevertOne()"
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -369,35 +356,31 @@ namespace NWheels.Implementation.UnitTests.Microservices.Workflows
 
             //-- Act
 
-            try
-            {
+
+            var exception = Assert.Throws<AggregateException>(() => {
                 sequence.Perform();
-            }
-            catch (AggregateException aggregate)
-            {
+            });
 
+            Assert.Equal(sequence.State, RevertableSequenceState.RevertFailed);
+            Assert.Equal(codeBehind.TakeLog(), new[] {
+                "PerformOne()",
+                "PerformTwo()",
+                "PerformThree()",
+                "PerformFiveItem(111,index=0,last=F)",
+                "PerformFiveItem(222,index=1,last=T)",
+                "PerformSixItem(AAA,index=0,last=F)",
+                "THROWING-FROM:PerformSixItem(BBB,index=1,last=T)",
+                "RevertFiveItem(222,index=1,last=T)",
+                "THROWING-FROM:RevertFiveItem(111,index=0,last=F)",
+                "THROWING-FROM:RevertFour()",
+                "RevertTwo()",
+                "RevertOne()",
+            });
 
-                Assert.Equal(sequence.State, RevertableSequenceState.RevertFailed);
-                Assert.Equal(codeBehind.TakeLog(), new[] {
-                    "PerformOne()",
-                    "PerformTwo()",
-                    "PerformThree()",
-                    "PerformFiveItem(111,index=0,last=F)",
-                    "PerformFiveItem(222,index=1,last=T)",
-                    "PerformSixItem(AAA,index=0,last=F)",
-                    "THROWING-FROM:PerformSixItem(BBB,index=1,last=T)",
-                    "RevertFiveItem(222,index=1,last=T)",
-                    "THROWING-FROM:RevertFiveItem(111,index=0,last=F)",
-                    "THROWING-FROM:RevertFour()",
-                    "RevertTwo()",
-                    "RevertOne()",
-                });
-
-                Assert.True(aggregate.InnerExceptions.All(e => e is TestSequenceException), "Exception type");
-                Assert.Equal(aggregate.InnerExceptions.Select(e => e.Message), new[] {
-                    "PerformSixItem(BBB,index=1,last=T)", "RevertFiveItem(111,index=0,last=F)", "RevertFour()"
-                });
-            }
+            Assert.True(exception.InnerExceptions.All(e => e is TestSequenceException), "Exception type");
+            Assert.Equal(exception.InnerExceptions.Select(e => e.Message), new[] {
+                "PerformSixItem(BBB,index=1,last=T)", "RevertFiveItem(111,index=0,last=F)", "RevertFour()"
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -417,14 +400,10 @@ namespace NWheels.Implementation.UnitTests.Microservices.Workflows
             codeBehind.ThrowFromRevertFiveItemIndex = 0;
             codeBehind.ThrowFromRevertFour = true;
 
-            try
-            {
+            var exception = Assert.Throws<AggregateException>(() => {
                 sequence.Perform();
-            }
-            catch (AggregateException)
-            {
-            }
-
+            });
+            
             codeBehind.ThrowFromRevertFiveItemIndex = null;
             codeBehind.ThrowFromRevertFour = false;
             codeBehind.TakeLog();
