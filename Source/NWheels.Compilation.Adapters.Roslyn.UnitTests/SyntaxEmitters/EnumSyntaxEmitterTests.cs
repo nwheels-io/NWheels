@@ -8,7 +8,7 @@ using Xunit;
 
 namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
 {
-    public class EnumSyntaxEmitterTests
+    public class EnumSyntaxEmitterTests : SyntaxEmittingTestBase
     {
         [Fact]
         public void SimpleEnum()

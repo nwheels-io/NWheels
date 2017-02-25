@@ -9,7 +9,7 @@ using Xunit;
 
 namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
 {
-    public class StatementSyntaxEmitterTests
+    public class StatementSyntaxEmitterTests : SyntaxEmittingTestBase
     {
         public static IEnumerable<object[]> TestCases_CanEmitStatementSyntax = new object[][] {
             #region Test cases

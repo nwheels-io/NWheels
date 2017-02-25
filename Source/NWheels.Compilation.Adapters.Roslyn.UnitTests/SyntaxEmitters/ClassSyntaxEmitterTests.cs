@@ -7,7 +7,7 @@ using Xunit;
 
 namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
 {
-    public class ClassSyntaxEmitterTests
+    public class ClassSyntaxEmitterTests : SyntaxEmittingTestBase
     {
         [Fact]
         public void Empty()

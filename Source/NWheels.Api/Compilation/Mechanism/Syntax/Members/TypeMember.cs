@@ -234,7 +234,6 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public Type ClrBinding { get; set; }
         public object NonClrBinding { get; set; }
 
-        public object BackendTag { get; set; }
         public List<AbstractMember> Members { get; private set; }
         public TypeGeneratorInfo Generator { get; private set; }
 

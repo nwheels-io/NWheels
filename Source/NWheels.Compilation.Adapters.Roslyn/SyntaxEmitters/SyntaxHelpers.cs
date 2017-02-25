@@ -208,9 +208,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
             if (!string.IsNullOrEmpty(type.Namespace))
             {
-                var isNamespaceImported = (
-                    type.BackendTag is RoslynTypeFactoryBackend.BackendTag backendTag && 
-                    backendTag.IsNamespaceImported);
+                var isNamespaceImported = type.SafeBackendTag().IsNamespaceImported;
 
                 if (!isNamespaceImported)
                 {

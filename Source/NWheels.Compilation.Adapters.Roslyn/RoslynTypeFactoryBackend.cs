@@ -58,27 +58,23 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         public CompilationResult Compile(ICollection<TypeMember> types)
         {
-            var catalogBuilder = new AssemblyArtifactCatalogBuilder(types);
-            catalogBuilder.BuildArtifactCatalog();
-
-            var allTypesToCompile = types.Concat(catalogBuilder.CatalogTypes).ToList();
-            var allReferencedTypes = GetAllReferencedTypes(allTypesToCompile);
-
-            var syntaxGenerator = new CSharpSyntaxGenerator();
-            var syntaxTree = syntaxGenerator.GenerateSyntax(allTypesToCompile, allReferencedTypes);
-            var success = TryCompileNewAssembly(ref syntaxTree, out Assembly assembly, out ImmutableArray<Diagnostic> diagnostics);
-
-            if (success)
+            using (TypeMemberTagCache.CreateOnCurrentThread())
             {
-                var artifactPerTypeKey = LoadProductAssembly(assembly);
-                var productPerType = CreateProductPerTypeDictionary(types, artifactPerTypeKey);
+                var syntaxTree = GenerateSyntaxTree(types);
+                var success = TryCompileNewAssembly(ref syntaxTree, out Assembly assembly, out ImmutableArray<Diagnostic> diagnostics);
 
-                ProductsLoaded?.Invoke(productPerType.Values.ToArray());
+                if (success)
+                {
+                    var artifactPerTypeKey = LoadProductAssembly(assembly);
+                    var productPerType = CreateProductPerTypeDictionary(types, artifactPerTypeKey);
 
-                return CreateSuccessfulCompilationResult(types, diagnostics, productPerType);
+                    ProductsLoaded?.Invoke(productPerType.Values.ToArray());
+
+                    return CreateSuccessfulCompilationResult(types, diagnostics, productPerType);
+                }
+
+                return CreateFailedCompilatioResult(types, diagnostics, syntaxTree);
             }
-
-            return CreateFailedCompilatioResult(types, diagnostics, syntaxTree);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -121,6 +117,22 @@ namespace NWheels.Compilation.Adapters.Roslyn
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public event Action<TypeFactoryProduct<IRuntimeTypeFactoryArtifact>[]> ProductsLoaded;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private SyntaxTree GenerateSyntaxTree(ICollection<TypeMember> types)
+        {
+            var catalogBuilder = new AssemblyArtifactCatalogBuilder(types);
+            catalogBuilder.BuildArtifactCatalog();
+
+            var allTypesToCompile = types.Concat(catalogBuilder.CatalogTypes).ToList();
+            var allReferencedTypes = GetAllReferencedTypes(allTypesToCompile);
+
+            var syntaxGenerator = new CSharpSyntaxGenerator();
+            var syntaxTree = syntaxGenerator.GenerateSyntax(allTypesToCompile, allReferencedTypes);
+
+            return syntaxTree;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

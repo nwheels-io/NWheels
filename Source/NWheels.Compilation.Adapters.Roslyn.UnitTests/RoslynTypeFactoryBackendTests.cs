@@ -16,6 +16,7 @@ using NWheels.Compilation.Adapters.Roslyn.UnitTests;
 using NWheels.Compilation.Mechanism.Syntax.Expressions;
 using NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters;
 using NWheels.Compilation.Mechanism.Syntax.Statements;
+using Microsoft.CodeAnalysis;
 
 namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
 {
@@ -336,7 +337,12 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             //-- act
 
             var syntaxEmitter = new ClassSyntaxEmitter(artifactType);
-            var actualSyntax = syntaxEmitter.EmitSyntax();
+            SyntaxNode actualSyntax;
+
+            using (TypeMemberTagCache.CreateOnCurrentThread())
+            {
+                actualSyntax = syntaxEmitter.EmitSyntax();
+            }
 
             //-- assert
 
@@ -424,7 +430,12 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             //-- act
 
             var syntaxEmitter = new ClassSyntaxEmitter(catalogType);
-            var actualSyntax = syntaxEmitter.EmitSyntax();
+            SyntaxNode actualSyntax;
+
+            using (TypeMemberTagCache.CreateOnCurrentThread())
+            {
+                actualSyntax = syntaxEmitter.EmitSyntax();
+            }
 
             //-- assert
 

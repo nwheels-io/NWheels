@@ -9,14 +9,7 @@ namespace NWheels.Compilation.Adapters.Roslyn
     {
         internal static RoslynTypeFactoryBackend.BackendTag SafeBackendTag(this TypeMember type)
         {
-            if (type.BackendTag is RoslynTypeFactoryBackend.BackendTag existingTag)
-            {
-                return existingTag;
-            }
-
-            var newTag = new RoslynTypeFactoryBackend.BackendTag();
-            type.BackendTag = newTag;
-            return newTag;
+            return TypeMemberTagCache.Current.GetOrAddBackendTagFor(type);
         }
     }
 }

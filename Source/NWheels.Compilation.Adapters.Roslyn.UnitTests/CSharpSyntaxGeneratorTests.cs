@@ -10,7 +10,7 @@ using Xunit;
 
 namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
 {
-    public class CSharpSyntaxGeneratorTests
+    public class CSharpSyntaxGeneratorTests : SyntaxEmittingTestBase
     {
         [Fact]
         public void Namespaces_SingleTypeWithNamespace()

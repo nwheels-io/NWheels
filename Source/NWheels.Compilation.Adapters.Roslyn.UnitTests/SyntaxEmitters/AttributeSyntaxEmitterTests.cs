@@ -8,7 +8,7 @@ using Xunit;
 
 namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
 {
-    public class AttributeSyntaxEmitterTests
+    public class AttributeSyntaxEmitterTests : SyntaxEmittingTestBase
     {
         [Fact]
         public void AttributeWithNoValues()

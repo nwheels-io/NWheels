@@ -10,7 +10,7 @@ using Xunit;
 
 namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
 {
-    public class SyntaxHelpersTests
+    public class SyntaxHelpersTests : SyntaxEmittingTestBase
     {
         public static IEnumerable<object[]> TestCases_TestGetTypeNameSyntax = new object[][] {
             #region Test cases
@@ -196,34 +196,35 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
             #region Test cases
             new object[] {
                 "DateTime",
-                new Func<TypeMember>(() => new TypeMember(typeof(DateTime)) {
-                    BackendTag = new RoslynTypeFactoryBackend.BackendTag { IsNamespaceImported = true }
+                new Func<TypeMember>(() => {
+                    var type = new TypeMember(typeof(DateTime));
+                    type.SafeBackendTag().IsNamespaceImported = true;
+                    return type;
                 })
             },
             new object[] {
                 "IEquatable<System.TimeSpan>",
-                new Func<TypeMember>(() => new TypeMember(typeof(IEquatable<TimeSpan>)) {
-                    BackendTag = new RoslynTypeFactoryBackend.BackendTag { IsNamespaceImported = true }
+                new Func<TypeMember>(() => {
+                    var type = new TypeMember(typeof(IEquatable<TimeSpan>));
+                    type.SafeBackendTag().IsNamespaceImported = true;
+                    return type;
                 })
             },
             new object[] {
                 "Dictionary<string, TimeSpan>",
                 new Func<TypeMember>(() => {
-                    var type = new TypeMember(typeof(Dictionary<string, TimeSpan>)) {
-                        BackendTag = new RoslynTypeFactoryBackend.BackendTag {
-                            IsNamespaceImported = true
-                        }
-                    };
-                    type.GenericTypeArguments[1].BackendTag = new RoslynTypeFactoryBackend.BackendTag {
-                        IsNamespaceImported = true
-                    };
+                    var type = new TypeMember(typeof(Dictionary<string, TimeSpan>));
+                    type.SafeBackendTag().IsNamespaceImported = true;
+                    type.GenericTypeArguments[1].SafeBackendTag().IsNamespaceImported = true;
                     return type;
                 })
             },
             new object[] {
                 "MyClassOne",
-                new Func<TypeMember>(() => new TypeMember("My.NS1", MemberVisibility.Public, TypeMemberKind.Class, "MyClassOne") {
-                    BackendTag = new RoslynTypeFactoryBackend.BackendTag { IsNamespaceImported = true }
+                new Func<TypeMember>(() => {
+                    var type = new TypeMember("My.NS1", MemberVisibility.Public, TypeMemberKind.Class, "MyClassOne");
+                    type.SafeBackendTag().IsNamespaceImported = true;
+                    return type;
                 })
             },
             new object[] {
@@ -233,9 +234,9 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
                         new TypeMember("My.NS2", MemberVisibility.Public, TypeMemberKind.Class, "MyClassTwo"),
                         new TypeMember("My.NS3", MemberVisibility.Public, TypeMemberKind.Class, "MyClassThree")
                     );
-                    type.BackendTag = new RoslynTypeFactoryBackend.BackendTag { IsNamespaceImported = true };
-                    type.GenericTypeArguments[0].BackendTag = new RoslynTypeFactoryBackend.BackendTag { IsNamespaceImported = true };
-                    type.GenericTypeArguments[1].BackendTag = new RoslynTypeFactoryBackend.BackendTag { IsNamespaceImported = false };
+                    type.SafeBackendTag().IsNamespaceImported = true;
+                    type.GenericTypeArguments[0].SafeBackendTag().IsNamespaceImported = true;
+                    type.GenericTypeArguments[1].SafeBackendTag().IsNamespaceImported = false;
                     return type;
                 })
             },

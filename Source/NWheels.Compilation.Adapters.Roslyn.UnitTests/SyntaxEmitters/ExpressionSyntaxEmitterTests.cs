@@ -11,7 +11,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
 {
-    public class ExpressionSyntaxEmitterTests
+    public class ExpressionSyntaxEmitterTests : SyntaxEmittingTestBase
     {
         public static IEnumerable<object[]> TestCases_CanEmitNewObjectExpression = new object[][] {
             #region Test cases
