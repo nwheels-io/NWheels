@@ -8,12 +8,22 @@ namespace NWheels.Compilation.Mechanism.Syntax
     public class TypeReferenceMemberVisitor : MemberVisitor
     {
         private readonly HashSet<TypeMember> _referencedTypes;
+        private readonly TypeReferenceStatementVisitor _statementVisitor;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TypeReferenceMemberVisitor(HashSet<TypeMember> referencedTypes)
         {
             _referencedTypes = referencedTypes;
+            _statementVisitor = new TypeReferenceStatementVisitor(referencedTypes);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void VisitTypeMember(TypeMember type)
+        {
+            base.VisitTypeMember(type);
+            AddReferencedType(type);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,6 +43,11 @@ namespace NWheels.Compilation.Mechanism.Syntax
                         AddReferencedType(parameter.Type);
                     }
                 }
+            }
+
+            if (method.Body != null)
+            {
+                method.Body.AcceptVisitor(_statementVisitor);
             }
         }
 
@@ -54,11 +69,39 @@ namespace NWheels.Compilation.Mechanism.Syntax
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void VisitEvent(EventMember eventMember)
+        {
+            base.VisitEvent(eventMember);
+            AddReferencedType(eventMember.DelegateType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void AddReferencedType(TypeMember type)
+        {
+            AddReferencedType(_referencedTypes, type);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal static void AddReferencedType(HashSet<TypeMember> typeSet, TypeMember type)
         {
             if (type != null)
             {
-                _referencedTypes.Add(type);
+                if (!type.IsGenericType || type.IsGenericTypeDefinition)
+                {
+                    typeSet.Add(type);
+                }
+
+                if (type.IsGenericType && !type.IsGenericTypeDefinition) 
+                {
+                    AddReferencedType(typeSet, type.GenericTypeDefinition);
+
+                    foreach (var argument in type.GenericTypeArguments)
+                    {
+                        AddReferencedType(typeSet, argument);
+                    }
+                }
             }
         }
     }
