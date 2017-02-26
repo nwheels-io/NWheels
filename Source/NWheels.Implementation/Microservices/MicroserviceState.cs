@@ -3,6 +3,7 @@
     public enum MicroserviceState
     {
         Down,
+        Configuring,
         Configured,
         Loading,
         Standby,
