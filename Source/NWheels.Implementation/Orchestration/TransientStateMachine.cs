@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NWheels.Microservices.Workflows
+namespace NWheels.Microservices.Orchestration
 {
     public class TransientStateMachine<TState, TTrigger> : IStateMachine<TState, TTrigger>, IStateMachineBuilder<TState, TTrigger>
     {

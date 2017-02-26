@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NWheels.Microservices.Workflows
+namespace NWheels.Microservices.Orchestration
 {
     public interface IStateMachineBuilder<TState, TTrigger>
     {

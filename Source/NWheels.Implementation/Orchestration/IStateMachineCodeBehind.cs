@@ -1,4 +1,4 @@
-﻿namespace NWheels.Microservices.Workflows
+﻿namespace NWheels.Microservices.Orchestration
 {
     public interface IStateMachineCodeBehind<TState, TTrigger>
     {

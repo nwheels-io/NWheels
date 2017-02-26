@@ -1,10 +1,10 @@
-﻿using NWheels.Microservices.Workflows;
+﻿using NWheels.Microservices.Orchestration;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Xunit;
 
-namespace NWheels.Implementation.UnitTests.Microservices.Workflows
+namespace NWheels.Implementation.UnitTests.Microservices.Orchestration
 {
     public class TransientStateMachineTests
     {
