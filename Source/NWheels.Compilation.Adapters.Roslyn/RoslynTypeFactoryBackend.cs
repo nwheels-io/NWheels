@@ -423,48 +423,5 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class TypeReferenceMemberVisitor : MemberVisitor
-        {
-            private readonly HashSet<TypeMember> _referencedTypes;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public TypeReferenceMemberVisitor(HashSet<TypeMember> referencedTypes)
-            {
-                _referencedTypes = referencedTypes;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            protected override void VisitTypeMember(TypeMember type)
-            {
-                base.VisitTypeMember(type);
-                _referencedTypes.Add(type);
-            }
-
-            protected override void VisitMethodBase(MethodMemberBase method)
-            {
-                base.VisitMethodBase(method);
-
-                //method.Signature
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class TypeReferenceStatementVisitor : StatementVisitor
-        {
-            private readonly HashSet<TypeMember> _referencedTypes;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public TypeReferenceStatementVisitor(HashSet<TypeMember> referencedTypes)
-            {
-                _referencedTypes = referencedTypes;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        }
     }
 }

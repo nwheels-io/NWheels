@@ -192,7 +192,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static IEnumerable<object[]> TestCases_TestGetTypeNameSyntax_OmitNamespace = new object[][] {
+        public static IEnumerable<object[]> TestCases_TestGetTypeNameSyntax_OmitNamespaceIfImported = new object[][] {
             #region Test cases
             new object[] {
                 "DateTime",
@@ -206,7 +206,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
                 "IEquatable<System.TimeSpan>",
                 new Func<TypeMember>(() => {
                     var type = new TypeMember(typeof(IEquatable<TimeSpan>));
-                    type.SafeBackendTag().IsNamespaceImported = true;
+                    type.GenericTypeDefinition.SafeBackendTag().IsNamespaceImported = true;
                     return type;
                 })
             },
@@ -214,7 +214,16 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
                 "Dictionary<string, TimeSpan>",
                 new Func<TypeMember>(() => {
                     var type = new TypeMember(typeof(Dictionary<string, TimeSpan>));
-                    type.SafeBackendTag().IsNamespaceImported = true;
+                    type.GenericTypeDefinition.SafeBackendTag().IsNamespaceImported = true;
+                    type.GenericTypeArguments[1].SafeBackendTag().IsNamespaceImported = true;
+                    return type;
+                })
+            },
+            new object[] {
+                "System.Collections.Generic.Dictionary<string, TimeSpan>",
+                new Func<TypeMember>(() => {
+                    var type = new TypeMember(typeof(Dictionary<string, TimeSpan>));
+                    type.GenericTypeDefinition.SafeBackendTag().IsNamespaceImported = false;
                     type.GenericTypeArguments[1].SafeBackendTag().IsNamespaceImported = true;
                     return type;
                 })
@@ -240,11 +249,24 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
                     return type;
                 })
             },
+            new object[] {
+                "My.NS1.MyClassOne<MyClassTwo, MyClassThree>",
+                new Func<TypeMember>(() => {
+                    var type = new TypeMember("My.NS1", MemberVisibility.Public, TypeMemberKind.Class, "MyClassOne",
+                        new TypeMember("My.NS2", MemberVisibility.Public, TypeMemberKind.Class, "MyClassTwo"),
+                        new TypeMember("My.NS3", MemberVisibility.Public, TypeMemberKind.Class, "MyClassThree")
+                    );
+                    type.SafeBackendTag().IsNamespaceImported = false;
+                    type.GenericTypeArguments[0].SafeBackendTag().IsNamespaceImported = true;
+                    type.GenericTypeArguments[1].SafeBackendTag().IsNamespaceImported = true;
+                    return type;
+                })
+            },
             #endregion
         };
 
         [Theory]
-        [MemberData(nameof(TestCases_TestGetTypeNameSyntax_OmitNamespace))]
+        [MemberData(nameof(TestCases_TestGetTypeNameSyntax_OmitNamespaceIfImported))]
         public void TestGetTypeNameSyntax_OmitNamespaceIfImported(string expectedCode, Func<TypeMember> typeFactory)
         {
             //-- arrange
