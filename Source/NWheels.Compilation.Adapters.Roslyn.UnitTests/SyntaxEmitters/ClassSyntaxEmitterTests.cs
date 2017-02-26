@@ -129,6 +129,35 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests.SyntaxEmitters
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void WithGenericTypeParameters()
+        {
+            //-- arrange
+
+            var classMember = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassOne",
+                new TypeMember(MemberVisibility.Public, TypeMemberKind.GenericParameter, "T"),
+                new TypeMember(MemberVisibility.Public, TypeMemberKind.GenericParameter, "K"));
+
+            //classMember.BaseType = new TypeMember(typeof(List<string>));
+            //classMember.Interfaces.Add(new TypeMember(typeof(IDictionary<int, DateTime>)));
+
+            var emitter = new ClassSyntaxEmitter(classMember);
+
+            //-- act
+
+            var syntax = emitter.EmitSyntax();
+
+            //-- assert
+
+            syntax.Should().BeEquivalentToCode(@"
+                public class ClassOne<T, K> 
+                { 
+                }
+            ");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void WithMethods()
         {
             //-- arrange

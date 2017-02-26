@@ -70,6 +70,16 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected TypeParameterListSyntax EmitTypeParameterList()
+        {
+            return TypeParameterList(
+                SeparatedList<TypeParameterSyntax>(
+                    Member.GenericTypeParameters
+                        .Select(t => TypeParameter(Identifier(t.Name)))));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected SyntaxList<MemberDeclarationSyntax> EmitMembers()
         {
             var orderedMembers = new List<AbstractMember>(Member.Members);

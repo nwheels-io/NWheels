@@ -143,6 +143,67 @@ namespace NWheels.Implementation.UnitTests.Compilation.Mechanism.Syntax.Members
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void CanInitializeFromClrConstructedGenericType()
+        {
+            //-- act
+
+            TypeMember listOfInt = typeof(List<int>);
+
+            //-- assert
+
+            listOfInt.ClrBinding.Should().BeSameAs(typeof(List<int>));
+            listOfInt.IsGenericType.Should().BeTrue();
+            listOfInt.IsGenericTypeDefinition.Should().BeFalse();
+            listOfInt.GenericTypeArguments.Should().NotBeNull();
+            listOfInt.GenericTypeArguments.Count.Should().Be(1);
+            listOfInt.GenericTypeArguments[0].ClrBinding.Should().BeSameAs(typeof(int));
+            listOfInt.GenericTypeParameters.Should().NotBeNull();
+            listOfInt.GenericTypeParameters.Count.Should().Be(0);
+
+            listOfInt.IsAbstract.Should().BeFalse();
+            listOfInt.IsArray.Should().BeFalse();
+            listOfInt.IsAwaitable.Should().BeFalse();
+            listOfInt.IsCollection.Should().BeTrue();
+            listOfInt.IsNullable.Should().BeFalse();
+            listOfInt.IsValueType.Should().BeFalse();
+
+            listOfInt.UnderlyingType.Should().BeSameAs(listOfInt.GenericTypeArguments[0]);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanInitializeFromClrGenericTypeDefinition()
+        {
+            //-- act
+
+            TypeMember genericList = typeof(List<>);
+
+            //-- assert
+
+            genericList.ClrBinding.Should().BeSameAs(typeof(List<>));
+            genericList.IsGenericType.Should().BeTrue();
+            genericList.IsGenericTypeDefinition.Should().BeTrue();
+            genericList.GenericTypeArguments.Should().NotBeNull();
+            genericList.GenericTypeArguments.Count.Should().Be(0);
+            genericList.GenericTypeParameters.Should().NotBeNull();
+            genericList.GenericTypeParameters.Count.Should().Be(1);
+            genericList.GenericTypeParameters[0].ClrBinding.Should().BeNull();
+            genericList.GenericTypeParameters[0].TypeKind.Should().Be(TypeMemberKind.GenericParameter);
+
+            genericList.IsAbstract.Should().BeFalse();
+            genericList.IsArray.Should().BeFalse();
+            genericList.IsAwaitable.Should().BeFalse();
+            genericList.IsCollection.Should().BeTrue();
+            genericList.IsNullable.Should().BeFalse();
+            genericList.IsValueType.Should().BeFalse();
+
+            genericList.UnderlyingType.Should().BeSameAs(genericList.GenericTypeParameters[0]);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void CanCacheClrBoundTypeMembers()
         {
             //-- arrange

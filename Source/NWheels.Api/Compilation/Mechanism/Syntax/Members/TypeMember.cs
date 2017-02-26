@@ -13,6 +13,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         {
             this.Interfaces = new HashSet<TypeMember>();
             this.GenericTypeArguments = new List<TypeMember>();
+            this.GenericTypeParameters = new List<TypeMember>();
             this.Members = new List<AbstractMember>();
         }
 
@@ -21,6 +22,8 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public TypeMember(Type compiledType)
             : this()
         {
+            //System.IO.File.AppendAllText(@"D:\TypeMember.cctor", compiledType.FullName + "\r\n");
+
             this.ClrBinding = compiledType;
             this.Name = compiledType.Name;
             this.Namespace = compiledType.Namespace;
@@ -39,9 +42,21 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
             if (IsGenericType)
             {
-                this.GenericTypeArguments.AddRange(info.GenericTypeArguments.Select(GetBoundTypeMember));
                 this.IsGenericTypeDefinition = info.IsGenericTypeDefinition;
-                this.GenericTypeDefinition = (IsGenericTypeDefinition ? null : info.GetGenericTypeDefinition());
+
+                if (this.IsGenericTypeDefinition)
+                {
+                    this.GenericTypeParameters.AddRange(info.GenericTypeParameters.Select(p => new TypeMember() {
+                        TypeKind = TypeMemberKind.GenericParameter,
+                        Name = p.Name
+                    }));
+                }
+                else
+                {
+                    this.GenericTypeArguments.AddRange(info.GenericTypeArguments.Select(GetBoundTypeMember));
+                    this.GenericTypeDefinition = info.GetGenericTypeDefinition();
+                }
+
                 this.Name = this.Name.Substring(0, this.Name.IndexOf('`'));
             }
 
@@ -56,6 +71,11 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
                 this.IsCollection = true;
                 this.UnderlyingType = GenericTypeArguments[0];
             }
+            else if (this.IsGenericTypeDefinition && _s_collectionGenericTypeDefinitions.Contains(this.ClrBinding))
+            {
+                this.IsCollection = true;
+                this.UnderlyingType = GenericTypeParameters[0];
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -68,25 +88,37 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeMember(MemberVisibility visibility, TypeMemberKind typeKind, string name, params TypeMember[] genericTypeArguments)
+        public TypeMember(MemberVisibility visibility, TypeMemberKind typeKind, string name, params TypeMember[] genericArguments)
             : this()
         {
             this.Visibility = visibility;
             this.TypeKind = typeKind;
             this.Name = name;
 
-            if (genericTypeArguments != null)
+            if (genericArguments != null)
             {
-                this.GenericTypeArguments.AddRange(genericTypeArguments);
-            }
+                this.IsGenericType = (genericArguments.Length > 0);
 
-            this.IsGenericType = (GenericTypeArguments.Count > 0);
+                if (this.IsGenericType)
+                {
+                    this.IsGenericTypeDefinition = genericArguments.Any(arg => arg.TypeKind == TypeMemberKind.GenericParameter);
+
+                    if (this.IsGenericTypeDefinition)
+                    {
+                        this.GenericTypeParameters.AddRange(genericArguments);
+                    }
+                    else
+                    {
+                        this.GenericTypeArguments.AddRange(genericArguments);
+                    }
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeMember(string namespaceName, MemberVisibility visibility, TypeMemberKind typeKind, string name, params TypeMember[] genericTypeArguments)
-            : this(visibility, typeKind, name, genericTypeArguments)
+        public TypeMember(string namespaceName, MemberVisibility visibility, TypeMemberKind typeKind, string name, params TypeMember[] genericArguments)
+            : this(visibility, typeKind, name, genericArguments)
         {
             this.Namespace = namespaceName;
         }
@@ -229,13 +261,14 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public bool IsGenericType { get; set; }
         public bool IsGenericTypeDefinition { get; set; }
         public TypeMember GenericTypeDefinition { get; set; }
-        public List<TypeMember> GenericTypeArguments { get; private set; }
+        public List<TypeMember> GenericTypeArguments { get; }
+        public List<TypeMember> GenericTypeParameters { get; }
         public TypeMember UnderlyingType { get; set; }
         public Type ClrBinding { get; set; }
         public object NonClrBinding { get; set; }
 
-        public List<AbstractMember> Members { get; private set; }
-        public TypeGeneratorInfo Generator { get; private set; }
+        public List<AbstractMember> Members { get; }
+        public TypeGeneratorInfo Generator { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -248,24 +281,28 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         static TypeMember()
         {
-            var systemTypes = new Type[] {
-                typeof(bool), typeof(char), typeof(string), typeof(object), typeof(DateTime), typeof(TimeSpan),
-                typeof(byte) , typeof(sbyte), typeof(short), typeof(ushort), typeof(int), typeof(uint), typeof(long), typeof(ulong),
-                typeof(double), typeof(float), typeof(decimal),
-                typeof(Array), typeof(List<>), typeof(HashSet<>), typeof(Dictionary<,>), typeof(IList<>), typeof(ISet<>), typeof(IDictionary<,>)
-            };
+            //System.IO.File.WriteAllText(@"D:\TypeMember.cctor", "starting\r\n");
 
-            _s_typeMemberByClrType = ImmutableDictionary<Type, TypeMember>.Empty.AddRange(
-                systemTypes.Select(t => new KeyValuePair<Type, TypeMember>(t, new TypeMember(t))));
+            try
+            { 
+                var systemTypes = new Type[] {
+                    typeof(bool), typeof(char), typeof(string), typeof(object), typeof(DateTime), typeof(TimeSpan),
+                    typeof(byte) , typeof(sbyte), typeof(short), typeof(ushort), typeof(int), typeof(uint), typeof(long), typeof(ulong),
+                    typeof(double), typeof(float), typeof(decimal),
+                    typeof(Array), typeof(List<>), typeof(HashSet<>), typeof(Dictionary<,>), typeof(IList<>), typeof(ISet<>), typeof(IDictionary<,>)
+                };
 
-            _s_typeMemberByClrType = _s_typeMemberByClrType.AddRange(
-                systemTypes.Select(t => t.MakeArrayType()).Select(t => new KeyValuePair<Type, TypeMember>(t, new TypeMember(t))));
+                _s_typeMemberByClrType = ImmutableDictionary<Type, TypeMember>.Empty;
 
-            _s_typeMemberByClrType = _s_typeMemberByClrType.AddRange(
-                systemTypes.Select(t => typeof(List<>).MakeGenericType(t)).Select(t => new KeyValuePair<Type, TypeMember>(t, new TypeMember(t))));
-
-            _s_typeMemberByClrType = _s_typeMemberByClrType.AddRange(
-                systemTypes.Select(t => typeof(IList<>).MakeGenericType(t)).Select(t => new KeyValuePair<Type, TypeMember>(t, new TypeMember(t))));
+                AddClrBoundTypeMembers(systemTypes);
+                AddClrBoundTypeMembers(systemTypes.Select(t => t.MakeArrayType()));
+                AddClrBoundTypeMembers(systemTypes.Select(t => typeof(List<>).MakeGenericType(t)));
+                AddClrBoundTypeMembers(systemTypes.Select(t => typeof(IList<>).MakeGenericType(t)));
+            }
+            catch (Exception e)
+            {
+                System.IO.File.WriteAllText(@"D:\TypeMember.crash.log", e.ToString());
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -286,6 +323,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
             }
             else
             {
+
                 return ReferenceEquals(member2, null);
             }
         }
@@ -297,6 +335,29 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
             return !(member1 == member2);
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void AddClrBoundTypeMembers(IEnumerable<Type> clrTypes)
+        {
+            TypeMember GetOrCreateNewTypeMember(Type clrType)
+            {
+                if (_s_typeMemberByClrType.TryGetValue(clrType, out TypeMember existing))
+                {
+                    return existing;
+                }
+
+                return new TypeMember(clrType);
+            }
+
+            var boundClrTypeMemberPairs = clrTypes
+                .Select(t => new KeyValuePair<Type, TypeMember>(t, GetOrCreateNewTypeMember(t)))
+                .ToList();
+
+            _s_typeMemberByClrType = _s_typeMemberByClrType.AddRange(
+                boundClrTypeMemberPairs
+                .Where(kvp => !_s_typeMemberByClrType.ContainsKey(kvp.Key)));
+        }
+        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static TypeMember GetBoundTypeMember(Type clrType)

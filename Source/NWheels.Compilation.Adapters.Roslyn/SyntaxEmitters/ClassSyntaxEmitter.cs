@@ -4,6 +4,7 @@ using NWheels.Compilation.Mechanism.Syntax.Expressions;
 using NWheels.Compilation.Mechanism.Syntax.Members;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -32,6 +33,11 @@ namespace NWheels.Compilation.Adapters.Roslyn.SyntaxEmitters
             if (Member.BaseType != null || Member.Interfaces.Count > 0)
             {
                 OutputSyntax = OutputSyntax.WithBaseList(EmitBaseList());
+            }
+
+            if (Member.IsGenericTypeDefinition && Member.GenericTypeParameters.Count > 0)
+            {
+                OutputSyntax = OutputSyntax.WithTypeParameterList(EmitTypeParameterList());
             }
 
             OutputSyntax = OutputSyntax.WithMembers(EmitMembers());

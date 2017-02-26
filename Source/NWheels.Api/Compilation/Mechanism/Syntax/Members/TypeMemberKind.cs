@@ -9,6 +9,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         Class,
         Struct,
         Enum,
-        Interface
+        Interface,
+        GenericParameter
     }
 }
