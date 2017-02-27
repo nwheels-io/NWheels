@@ -17,7 +17,7 @@ NWheels is an infrastructural ecosystem and ongoing development effort, which is
 
 - **Clouds?** Yes, any compatible IaaS will be supported. NWheels comes with its own runtime platform, and unless explicitly specified, no dependencies on concrete vendor PaaS will be included. Thus for example, mission-critical software will be able to run on Azure with disaster recovery on AWS and Google Cloud. [Learn more: architecture overview](https://github.com/felix-b/NWheels/wiki/architecture-high-level-overview).
 
-- **High-end SLA?** Yes, 24x7 availability, automatic failover, elastic scalability, low-latency, high-throughput applications will be supported.
+- **High-end SLA?** Yes, high availability and fault tolerance, elastic scalability, low-latency, high-throughput applications running on clouds are our focus.
 
 Learn more: [Feature highlighs](#feature-highlights) below, [Doing one thing well](https://github.com/felix-b/NWheels/wiki/architecture-doing-one-thing-well), [Architecture overview](https://github.com/felix-b/NWheels/wiki/architecture-high-level-overview) in Wiki 
 
