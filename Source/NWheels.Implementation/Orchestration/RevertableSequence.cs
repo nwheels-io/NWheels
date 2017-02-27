@@ -1,9 +1,9 @@
-﻿using NWheels.Microservices.Orchestration.Fluent.RevertableSequence;
+﻿using NWheels.Orchestration.Fluent.RevertableSequence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NWheels.Microservices.Orchestration
+namespace NWheels.Orchestration
 {
     internal class RevertableSequence : IRevertableSequence, IRevertableSequenceBuilder
     {

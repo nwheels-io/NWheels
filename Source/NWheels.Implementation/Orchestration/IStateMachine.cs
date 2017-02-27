@@ -1,4 +1,4 @@
-﻿namespace NWheels.Microservices.Orchestration
+﻿namespace NWheels.Orchestration
 {
     public interface IStateMachine<TState, TTrigger>
     {

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace NWheels.Injection
 {
-    public interface IContainer
+    public interface IContainer : IDisposable
     {
         TInterface Resolve<TInterface>();
 

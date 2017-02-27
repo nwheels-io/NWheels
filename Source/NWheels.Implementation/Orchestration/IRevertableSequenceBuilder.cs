@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NWheels.Microservices.Orchestration
+namespace NWheels.Orchestration
 {
     public interface IRevertableSequenceBuilder
     {
