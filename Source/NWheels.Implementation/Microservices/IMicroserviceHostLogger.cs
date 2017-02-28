@@ -4,6 +4,8 @@ namespace NWheels.Microservices
 {
     public interface IMicroserviceHostLogger
     {
+        IDisposable NodeConfiguring();
+
         IDisposable NodeLoading();
 
         void NodeHasFailedToConfigure(Exception e);

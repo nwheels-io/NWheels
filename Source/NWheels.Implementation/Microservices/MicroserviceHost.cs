@@ -9,16 +9,24 @@ namespace NWheels.Microservices
     public class MicroserviceHost
     {
         private readonly BootConfiguration _bootConfig;
+        private readonly List<ILifecycleListenerComponent> _lifecycleComponents;
+        private readonly RevertableSequence _configureSequence;
+        private readonly RevertableSequence _loadSequence;
+        private readonly RevertableSequence _activateSequence;
         private int _initializationCount = 0;
-        private IContainer _baseContainer;
+        private IContainer _container;
         private IMicroserviceHostLogger _logger;        
-        private TransientStateMachine<MicroserviceState, MicroserviceTrigger> _stateMachine;
+        private TransientStateMachine<MicroserviceState, MicroserviceTrigger> _stateMachine;        
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public MicroserviceHost(BootConfiguration bootConfig)
         {
             _bootConfig = bootConfig;
+            _configureSequence = new RevertableSequence(new ConfigureSequenceCodeBehind(this));
+            _loadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
+            _activateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
+            _lifecycleComponents = new List<ILifecycleListenerComponent>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,9 +35,9 @@ namespace NWheels.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Load()
+        public void Configure()
         {
-            InitializeBeforeLoad();
+            InitializeBeforeConfigure();
 
             using (_logger.NodeLoading())
             {
@@ -47,7 +55,15 @@ namespace NWheels.Microservices
                 {
                     throw _logger.NodeHasFailedToConfigure();
                 }
+            }
+        }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void Load()
+        {
+            using (_logger.NodeLoading())
+            {
                 try
                 {
                     _stateMachine.ReceiveTrigger(MicroserviceTrigger.Load);
@@ -96,7 +112,7 @@ namespace NWheels.Microservices
 
         public void LoadAndActivate()
         {
-            InitializeBeforeLoad();
+            InitializeBeforeConfigure();
 
             using (_logger.NodeStartingUp(
                 /*_bootConfig.ApplicationName,
@@ -164,33 +180,79 @@ namespace NWheels.Microservices
             FinalizeAfterUnload();
         }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private MicroserviceLifetime CreateNodeLifetime()
+        private bool ExecuteConfigurePhase()
         {
-            return new MicroserviceLifetime(
-                _bootConfig,
-                _baseContainer,
-                _logger);
+            return ExecutePhase(_configureSequence.Perform, _logger.NodeConfigureError);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool ExecuteLoadPhase()
+        {
+            return ExecutePhase(_loadSequence.Perform, _logger.NodeLoadError);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool ExecuteActivatePhase()
+        {
+            return ExecutePhase(_activateSequence.Perform, _logger.NodeActivationError);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool ExecuteDeactivatePhase()
+        {
+            return ExecutePhase(_activateSequence.Revert, _logger.NodeDeactivationError);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool ExecuteUnloadPhase()
+        {
+            return ExecutePhase(
+                () => {
+                    _loadSequence.Revert();
+                    _configureSequence.Revert();
+                }, 
+                _logger.NodeUnloadError);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void InitializeBeforeLoad()
+        private bool ExecutePhase(Action phaseAction, Action<Exception> loggerAction)
+        {
+            try
+            {
+                phaseAction();
+                return true;
+            }
+            catch(Exception e)
+            {
+                loggerAction(e);
+                return false;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void InitializeBeforeConfigure()
         {
             if (Interlocked.Increment(ref _initializationCount) > 1)
             {
                 return;
             }
 
-            //_baseContainer = BuildBaseContainer(_registerHostComponents);
+            //_container = BuildBaseContainer(_registerHostComponents);
 
             _stateMachine = new TransientStateMachine<MicroserviceState, MicroserviceTrigger>(
                 new StateMachineCodeBehind(this),
-                _baseContainer.Resolve<TransientStateMachine<MicroserviceState, MicroserviceTrigger>.ILogger>());
+                _container.Resolve<TransientStateMachine<MicroserviceState, MicroserviceTrigger>.ILogger>());
             _stateMachine.CurrentStateChanged += OnStateChanged;
 
-            _logger = _baseContainer.Resolve<IMicroserviceHostLogger>();
+            _logger = _container.Resolve<IMicroserviceHostLogger>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -202,8 +264,8 @@ namespace NWheels.Microservices
                 return;
             }
 
-            _baseContainer.Dispose();
-            _baseContainer = null;
+            _container.Dispose();
+            _container = null;
             _stateMachine = null;
             _logger = null;
         }
@@ -223,7 +285,6 @@ namespace NWheels.Microservices
         private class StateMachineCodeBehind : IStateMachineCodeBehind<MicroserviceState, MicroserviceTrigger>
         {
             private readonly MicroserviceHost _owner;
-            private MicroserviceLifetime _lifetime = null;            
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -280,8 +341,7 @@ namespace NWheels.Microservices
 
             private void ConfiguringEntered(object sender, StateMachineFeedbackEventArgs<MicroserviceState, MicroserviceTrigger> e)
             {
-                _lifetime = _owner.CreateNodeLifetime();
-                var success = _lifetime.ExecuteConfigurePhase();
+                var success = _owner.ExecuteConfigurePhase();
                 e.ReceiveFeedback(success ? MicroserviceTrigger.OK : MicroserviceTrigger.Failed);
             }
 
@@ -289,7 +349,7 @@ namespace NWheels.Microservices
 
             private void LoadingEntered(object sender, StateMachineFeedbackEventArgs<MicroserviceState, MicroserviceTrigger> e)
             {
-                var success = _lifetime.ExecuteLoadPhase();
+                var success = _owner.ExecuteLoadPhase();
                 e.ReceiveFeedback(success ? MicroserviceTrigger.OK : MicroserviceTrigger.Failed);
             }
 
@@ -297,7 +357,7 @@ namespace NWheels.Microservices
 
             private void ActivatingEntered(object sender, StateMachineFeedbackEventArgs<MicroserviceState, MicroserviceTrigger> e)
             {
-                var success = _lifetime.ExecuteActivatePhase();
+                var success = _owner.ExecuteActivatePhase();
                 e.ReceiveFeedback(success ? MicroserviceTrigger.OK : MicroserviceTrigger.Failed);
             }
 
@@ -305,7 +365,7 @@ namespace NWheels.Microservices
 
             private void DeactivatingEntered(object sender, StateMachineFeedbackEventArgs<MicroserviceState, MicroserviceTrigger> e)
             {
-                var success = _lifetime.ExecuteDeactivatePhase();
+                var success = _owner.ExecuteDeactivatePhase();
                 e.ReceiveFeedback(success ? MicroserviceTrigger.OK : MicroserviceTrigger.Failed);
             }
 
@@ -313,147 +373,8 @@ namespace NWheels.Microservices
 
             private void UnloadingEntered(object sender, StateMachineFeedbackEventArgs<MicroserviceState, MicroserviceTrigger> e)
             {
-                _lifetime.ExecuteUnloadPhase();
+                _owner.ExecuteUnloadPhase();
                 e.ReceiveFeedback(MicroserviceTrigger.Done);
-                _lifetime = null;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class MicroserviceLifetime //: IDisposable, ITenantIdentificationStrategy
-        {
-            private readonly BootConfiguration _nodeConfig;
-            private readonly IMicroserviceHostLogger _logger;
-            private readonly IContainer _lifetimeContainer;
-            private readonly List<ILifecycleListenerComponent> _lifecycleComponents;
-            private readonly RevertableSequence _configureSequence;
-            private readonly RevertableSequence _loadSequence;
-            private readonly RevertableSequence _activateSequence;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public MicroserviceLifetime(
-                BootConfiguration microserviceConfig,
-                IContainer baseContainer,
-                IMicroserviceHostLogger logger)
-            {
-                _nodeConfig = microserviceConfig;
-                _logger = logger;
-                _lifetimeContainer = baseContainer;
-                _configureSequence = new RevertableSequence(new ConfigureSequenceCodeBehind(this));
-                _loadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
-                _activateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
-                _lifecycleComponents = new List<ILifecycleListenerComponent>();
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public bool ExecuteConfigurePhase()
-            {
-                try
-                {
-                    _configureSequence.Perform();
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    _logger.NodeConfigureError(e);
-                    return false;
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public bool ExecuteLoadPhase()
-            {
-                try
-                {
-                    _loadSequence.Perform();
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    _logger.NodeLoadError(e);
-                    return false;
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public bool ExecuteActivatePhase()
-            {
-                try
-                {
-                    _activateSequence.Perform();
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    _logger.NodeActivationError(e);
-                    return false;
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public bool ExecuteDeactivatePhase()//???
-            {
-                try
-                {
-                    _activateSequence.Revert();
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    _logger.NodeDeactivationError(e);
-                    return false;
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public void ExecuteUnloadPhase()
-            {
-                try
-                {
-                    _loadSequence.Revert();
-                    _configureSequence.Revert();//???
-                }
-                catch (Exception e)
-                {
-                    _logger.NodeUnloadError(e);
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public BootConfiguration NodeConfig
-            {
-                get
-                {
-                    return _nodeConfig;
-                }
-            }
-            
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public List<ILifecycleListenerComponent> LifecycleComponents
-            {
-                get
-                {
-                    return _lifecycleComponents;
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public IMicroserviceHostLogger Logger
-            {
-                get
-                {
-                    return _logger;
-                }
             }
         }
 
@@ -461,14 +382,14 @@ namespace NWheels.Microservices
 
         private abstract class MicroserviceLifecycleSequenceBase
         {
-            private readonly MicroserviceLifetime _ownerLifetime;
+            private readonly MicroserviceHost _ownerHost;
             private IDisposable _systemSession;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected MicroserviceLifecycleSequenceBase(MicroserviceLifetime ownerLifetime)
+            protected MicroserviceLifecycleSequenceBase(MicroserviceHost ownerHost)
             {
-                _ownerLifetime = ownerLifetime;
+                _ownerHost = ownerHost;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -488,9 +409,9 @@ namespace NWheels.Microservices
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected MicroserviceLifetime OwnerLifetime
+            protected MicroserviceHost OwnerHost
             {
-                get { return _ownerLifetime; }
+                get { return _ownerHost; }
             }
         }
 
@@ -502,10 +423,10 @@ namespace NWheels.Microservices
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public ConfigureSequenceCodeBehind(MicroserviceLifetime ownerLifetime)
-                : base(ownerLifetime)
+            public ConfigureSequenceCodeBehind(MicroserviceHost ownerHost)
+                : base(ownerHost)
             {
-                _logger = OwnerLifetime.Logger;
+                _logger = OwnerHost.Logger;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -523,10 +444,10 @@ namespace NWheels.Microservices
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public LoadSequenceCodeBehind(MicroserviceLifetime ownerLifetime)
-                : base(ownerLifetime)
+            public LoadSequenceCodeBehind(MicroserviceHost ownerHost)
+                : base(ownerHost)
             {
-                _logger = OwnerLifetime.Logger;
+                _logger = OwnerHost.Logger;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -557,10 +478,10 @@ namespace NWheels.Microservices
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public ActivateSequenceCodeBehind(MicroserviceLifetime ownerLifetime)
-                : base(ownerLifetime)
+            public ActivateSequenceCodeBehind(MicroserviceHost ownerHost)
+                : base(ownerHost)
             {
-                _logger = OwnerLifetime.Logger;
+                _logger = OwnerHost.Logger;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
