@@ -28,7 +28,7 @@ namespace NWheels.Microservices
             _activateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
             _lifecycleComponents = new List<ILifecycleListenerComponent>();
         }
-
+        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public event EventHandler StateChanged;
@@ -180,6 +180,16 @@ namespace NWheels.Microservices
             FinalizeAfterUnload();
         }
 
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IMicroserviceHostLogger Logger
+        {
+            get
+            {
+                return _logger;
+            }
+        }
+        
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         private bool ExecuteConfigurePhase()
