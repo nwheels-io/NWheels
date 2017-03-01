@@ -2,6 +2,9 @@
 using NWheels.Orchestration;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Runtime.Loader;
 using System.Threading;
 
 namespace NWheels.Microservices
@@ -9,6 +12,7 @@ namespace NWheels.Microservices
     public class MicroserviceHost
     {
         private readonly BootConfiguration _bootConfig;
+        private readonly string _modulesPath;
         private readonly List<ILifecycleListenerComponent> _lifecycleComponents;
         private readonly RevertableSequence _configureSequence;
         private readonly RevertableSequence _loadSequence;
@@ -20,9 +24,10 @@ namespace NWheels.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHost(BootConfiguration bootConfig)
+        public MicroserviceHost(BootConfiguration bootConfig, string modulesPath)
         {
             _bootConfig = bootConfig;
+            _modulesPath = modulesPath;
             _configureSequence = new RevertableSequence(new ConfigureSequenceCodeBehind(this));
             _loadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
             _activateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
@@ -39,7 +44,7 @@ namespace NWheels.Microservices
         {
             InitializeBeforeConfigure();
 
-            using (_logger.NodeLoading())
+            using (_logger.NodeConfiguring())
             {
                 try
                 {
@@ -189,7 +194,23 @@ namespace NWheels.Microservices
                 return _logger;
             }
         }
-        
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private BootConfiguration BootConfig
+        {
+            get
+            {
+                return _bootConfig;
+            }
+        }
+
+        private void CreateContainer(IContainerBuilder builder)
+        {
+            //TODO: validate _container == null
+            _container = builder.CreateContainer();
+        }
+
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         private bool ExecuteConfigurePhase()
@@ -259,10 +280,11 @@ namespace NWheels.Microservices
 
             _stateMachine = new TransientStateMachine<MicroserviceState, MicroserviceTrigger>(
                 new StateMachineCodeBehind(this),
-                _container.Resolve<TransientStateMachine<MicroserviceState, MicroserviceTrigger>.ILogger>());
+                new Mocks.TransientStateMachineLoggerMock<MicroserviceState, MicroserviceTrigger>());
+                //_container.Resolve<TransientStateMachine<MicroserviceState, MicroserviceTrigger>.ILogger>());
             _stateMachine.CurrentStateChanged += OnStateChanged;
-
-            _logger = _container.Resolve<IMicroserviceHostLogger>();
+            
+            _logger = new Mocks.MicroserviceHostLoggerMock();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -443,6 +465,42 @@ namespace NWheels.Microservices
 
             public void BuildSequence(IRevertableSequenceBuilder sequence)
             {
+                sequence.Once().OnPerform(RegisterFeatureLoaders);
+            }
+
+            private void RegisterFeatureLoaders()
+            {
+                IContainerBuilder builder = null;
+                /*var type = asm.GetType("MyClassLib.SampleClasses.Sample");
+                dynamic obj = Activator.CreateInstance(type);*/
+
+                var featureLoaders = new List<Type>();
+
+                foreach (var file in Directory.GetFiles(OwnerHost.BootConfig.ModulesDirectory, "*.dll"))
+                {
+                    var assemblyLoadContext = AssemblyLoadContext.Default.LoadFromAssemblyPath(file);
+                    //var assembly = Assembly.Load(assemblyLoadContext.GetName());
+                    try
+                    {
+                        foreach (var type in assemblyLoadContext.GetTypes())
+                        {
+                            foreach (var implementedInterface in type.GetTypeInfo().ImplementedInterfaces)
+                            {
+                                if (implementedInterface == typeof(IFeatureLoader))
+                                {
+                                    featureLoaders.Add(type);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        var info = ex.ToString();
+                    }
+                }
+
+                OwnerHost.CreateContainer(builder);
             }
         }
 

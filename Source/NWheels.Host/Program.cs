@@ -15,8 +15,11 @@ namespace NWheels.Host
                 Console.WriteLine($"configPath {args[1]}");
                 Console.WriteLine($"modulesPath {args[3]}");
 
-                var config = BootConfiguration.LoadFromDirectory(args[1]);
-                var host = new MicroserviceHost(config);
+                var config = BootConfiguration.LoadFromDirectory(args[1], args[3]);
+                var host = new MicroserviceHost(config, args[3]);
+
+                host.Configure();
+
             }
             catch (Exception ex)
             {

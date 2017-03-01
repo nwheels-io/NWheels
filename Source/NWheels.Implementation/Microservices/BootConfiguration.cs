@@ -15,10 +15,13 @@ namespace NWheels.Microservices
 
         public string LoadedFromDirectory { get; set; }
 
-        public static BootConfiguration LoadFromDirectory(string dirPath)
+        public string ModulesDirectory { get; set; }
+
+        public static BootConfiguration LoadFromDirectory(string dirPath, string modulesPath)
         {
             return new BootConfiguration() {
                 LoadedFromDirectory = dirPath,
+                ModulesDirectory = modulesPath,
                 MicroserviceConfig = Deserialize<MicroserviceConfig>($"{dirPath}\\{MicroserviceConfigFileName}"),
                 EnvironmentConfig = Deserialize<EnvironmentConfig>($"{dirPath}\\{EnvironmentConfigFileName}")
             };

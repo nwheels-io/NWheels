@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <microservice name="FirstHappyPath">
 
-  <framework-modules>
-  
+  <framework-modules injection-adapter-assembly="NWheels.Injection.Adapters.Autofac">
+    
   </framework-modules>
 
   <application-modules>

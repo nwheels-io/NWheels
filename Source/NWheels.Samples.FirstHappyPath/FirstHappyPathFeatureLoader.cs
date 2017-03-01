@@ -7,7 +7,7 @@ namespace NWheels.Samples.FirstHappyPath
     [FeatureLoader(Name = "FirstFeatureLoader")]
     public class FirstHappyPathFeatureLoader : IFeatureLoader
     {
-        public void RegisterComponents(IContainer container)
+        public void RegisterComponents(IContainerBuilder containerBuilder)
         {
         }
 

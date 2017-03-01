@@ -6,6 +6,6 @@ namespace NWheels.Microservices
     {
         void RegisterConfigSections();
 
-        void RegisterComponents(IContainer container);
+        void RegisterComponents(IContainerBuilder containerBuilder);
     }
 }
