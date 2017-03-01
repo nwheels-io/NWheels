@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using NWheels.Compilation.Mechanism.Syntax;
+using NWheels.Compilation.Mechanism.Syntax.Expressions;
 using NWheels.Compilation.Mechanism.Syntax.Members;
 using NWheels.Compilation.Mechanism.Syntax.Statements;
 using System;
@@ -11,6 +12,33 @@ namespace NWheels.Implementation.UnitTests.Compilation.Mechanism.Syntax
 {
     public class TypeReferenceMemberVisitorTests
     {
+        [Fact]
+        public void Visit_BaseTypesIncluded()
+        {
+            //-- arrange
+
+            var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType()), "NS1", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
+            var type2 = new TypeMember(new TypeGeneratorInfo(this.GetType()), "NS2", MemberVisibility.Public, TypeMemberKind.Class, "ClassTwo*");
+
+            type1.BaseType = typeof(IDisposable);
+            type1.Interfaces.Add(((TypeMember)typeof(IList<>)).MakeGenericType(type2));
+
+            var foundTypes = new HashSet<TypeMember>();
+            var visitorUnderTest = new TypeReferenceMemberVisitor(foundTypes);
+
+            //-- act
+
+            type1.AcceptVisitor(visitorUnderTest);
+
+            //-- assert
+
+            foundTypes.Should().BeEquivalentTo(new TypeMember[] {
+                type1, typeof(IDisposable), typeof(IList<>), type2
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [Fact]
         public void Visit_FieldTypesIncluded()
         {
@@ -128,6 +156,45 @@ namespace NWheels.Implementation.UnitTests.Compilation.Mechanism.Syntax
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void Visit_ConstructorDelegationCallIncluded()
+        {
+            //-- arrange
+
+            var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType()), "NS1", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
+            var type2 = new TypeMember(new TypeGeneratorInfo(this.GetType()), "NS2", MemberVisibility.Public, TypeMemberKind.Class, "ClassTwo");
+
+            MethodCallExpression baseConstructorCall;
+            var constructor1 = new ConstructorMember(MemberVisibility.Public, MemberModifier.None, "ClassOne", new MethodSignature()) {
+                CallBaseConstructor = baseConstructorCall = new MethodCallExpression()
+            };
+            baseConstructorCall.Arguments.Add(new Argument { Expression = new NewObjectExpression { Type = type2 } });
+
+            MethodCallExpression thisConstructorCall;
+            var constructor2 = new ConstructorMember(MemberVisibility.Public, MemberModifier.None, "ClassOne", new MethodSignature()) {
+                CallThisConstructor = thisConstructorCall = new MethodCallExpression()
+            };
+            thisConstructorCall.Arguments.Add(new Argument { Expression = new NewObjectExpression { Type = typeof(System.IO.MemoryStream) } });
+
+            type1.Members.Add(constructor1);
+            type1.Members.Add(constructor2);
+
+            var foundTypes = new HashSet<TypeMember>();
+            var visitorUnderTest = new TypeReferenceMemberVisitor(foundTypes);
+
+            //-- act
+
+            type1.AcceptVisitor(visitorUnderTest);
+
+            //-- assert
+
+            foundTypes.Should().BeEquivalentTo(new TypeMember[] {
+                type1, type2, typeof(System.IO.MemoryStream)
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void Visit_EventDelegateTypesInluded()
         {
             //-- arrange
@@ -183,6 +250,32 @@ namespace NWheels.Implementation.UnitTests.Compilation.Mechanism.Syntax
 
             foundTypes.Should().BeEquivalentTo(new TypeMember[] {
                 type1, typeof(IList<>), typeof(IDictionary<,>), type2, type3
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Visit_ArrayElementTypesIncluded()
+        {
+            //-- arrange
+
+            var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType()), "NS1", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
+
+            type1.Members.Add(new PropertyMember(
+                type1, MemberVisibility.Public, MemberModifier.None, typeof(DateTime[]), "Timestamps"));
+
+            var foundTypes = new HashSet<TypeMember>();
+            var visitorUnderTest = new TypeReferenceMemberVisitor(foundTypes);
+
+            //-- act
+
+            type1.AcceptVisitor(visitorUnderTest);
+
+            //-- assert
+
+            foundTypes.Should().BeEquivalentTo(new TypeMember[] {
+                type1, typeof(DateTime)
             });
         }
 
@@ -245,6 +338,30 @@ namespace NWheels.Implementation.UnitTests.Compilation.Mechanism.Syntax
 
             foundTypes.Should().BeEquivalentTo(new TypeMember[] {
                 type1, typeof(TimeSpan)
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Visit_AttributeTypesIncluded()
+        {
+            //-- arrange
+
+            var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType()), "NS1", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
+            type1.Attributes.Add(new AttributeDescription() { AttributeType = typeof(System.ComponentModel.DefaultPropertyAttribute) });
+
+            var foundTypes = new HashSet<TypeMember>();
+            var visitorUnderTest = new TypeReferenceMemberVisitor(foundTypes);
+
+            //-- act
+
+            type1.AcceptVisitor(visitorUnderTest);
+
+            //-- assert
+
+            foundTypes.Should().BeEquivalentTo(new TypeMember[] {
+                type1, typeof(System.ComponentModel.DefaultPropertyAttribute)
             });
         }
     }

@@ -24,6 +24,19 @@ namespace NWheels.Compilation.Mechanism.Syntax
         {
             base.VisitTypeMember(type);
             AddReferencedType(type);
+
+            if (type.BaseType != null)
+            {
+                AddReferencedType(type.BaseType);
+            }
+
+            if (type.Interfaces != null)
+            {
+                foreach (var interfaceType in type.Interfaces)
+                {
+                    AddReferencedType(interfaceType);
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -53,6 +66,23 @@ namespace NWheels.Compilation.Mechanism.Syntax
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void VisitConstructor(ConstructorMember constructor)
+        {
+            base.VisitConstructor(constructor);
+
+            if (constructor.CallThisConstructor != null)
+            {
+                constructor.CallThisConstructor.AcceptVisitor(_statementVisitor);
+            }
+
+            if (constructor.CallBaseConstructor != null)
+            {
+                constructor.CallBaseConstructor.AcceptVisitor(_statementVisitor);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override void VisitField(FieldMember field)
         {
             base.VisitField(field);
@@ -77,6 +107,14 @@ namespace NWheels.Compilation.Mechanism.Syntax
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void VisitAttribute(AttributeDescription attribute)
+        {
+            base.VisitAttribute(attribute);
+            AddReferencedType(attribute.AttributeType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void AddReferencedType(TypeMember type)
         {
             AddReferencedType(_referencedTypes, type);
@@ -88,18 +126,25 @@ namespace NWheels.Compilation.Mechanism.Syntax
         {
             if (type != null)
             {
-                if (!type.IsGenericType || type.IsGenericTypeDefinition)
+                if (type.IsArray)
                 {
-                    typeSet.Add(type);
+                    typeSet.Add(type.UnderlyingType);
                 }
-
-                if (type.IsGenericType && !type.IsGenericTypeDefinition) 
+                else
                 {
-                    AddReferencedType(typeSet, type.GenericTypeDefinition);
-
-                    foreach (var argument in type.GenericTypeArguments)
+                    if (!type.IsGenericType || type.IsGenericTypeDefinition)
                     {
-                        AddReferencedType(typeSet, argument);
+                        typeSet.Add(type);
+                    }
+
+                    if (type.IsGenericType && !type.IsGenericTypeDefinition)
+                    {
+                        AddReferencedType(typeSet, type.GenericTypeDefinition);
+
+                        foreach (var argument in type.GenericTypeArguments)
+                        {
+                            AddReferencedType(typeSet, argument);
+                        }
                     }
                 }
             }

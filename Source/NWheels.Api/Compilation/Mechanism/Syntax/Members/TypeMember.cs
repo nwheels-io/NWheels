@@ -201,8 +201,55 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string MakeGenericName(string openBracket, string closeBracket, string commaSeparator)
+        {
+            if (!IsGenericType)
+            {
+                return this.Name;
+            }
+
+            if (IsGenericTypeDefinition)
+            {
+                return (
+                    this.Name + 
+                    openBracket + 
+                    string.Join(commaSeparator, GenericTypeParameters.Select(t => t.Name)) +
+                    closeBracket);
+            }
+            else
+            {
+                return (
+                    this.Name +
+                    openBracket + 
+                    string.Join(commaSeparator, GenericTypeArguments.Select(t => t.MakeGenericName(openBracket, closeBracket, commaSeparator))) +
+                    closeBracket);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string MakeNameWithGenericArity(char aritySeparator)
+        {
+            if (IsGenericTypeDefinition)
+            {
+                return (this.Name + aritySeparator + GenericTypeParameters.Count);
+            }
+            else if (IsGenericType)
+            {
+                return (this.Name + aritySeparator + GenericTypeArguments.Count);
+            }
+            else
+            {
+                return this.Name;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override void AcceptVisitor(MemberVisitor visitor)
         {
+            base.AcceptVisitor(visitor);
+
             switch (this.TypeKind)
             {
                 case TypeMemberKind.Class:

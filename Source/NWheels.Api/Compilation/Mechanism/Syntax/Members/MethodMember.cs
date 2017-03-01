@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -52,6 +53,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         public override void AcceptVisitor(MemberVisitor visitor)
         {
+            base.AcceptVisitor(visitor);
             visitor.VisitMethod(this);
         }
 

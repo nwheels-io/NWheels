@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NWheels.Compilation.Mechanism.Syntax.Members;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,7 +11,15 @@ namespace NWheels.Compilation.Mechanism.Syntax.Expressions
         {
             visitor.VisitConstantExpression(this);
 
-            if (Value != null)
+            if (Value is TypeMember typeMember)
+            {
+                visitor.VisitReferenceToTypeMember(typeMember);
+            }
+            else if (Value is System.Type systemType)
+            {
+                visitor.VisitReferenceToTypeMember(systemType);
+            }
+            else if (Value != null)
             {
                 visitor.VisitReferenceToTypeMember(Value.GetType());
             }

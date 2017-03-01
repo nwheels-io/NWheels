@@ -8,6 +8,7 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
     {
         public override void AcceptVisitor(MemberVisitor visitor)
         {
+            base.AcceptVisitor(visitor);
             visitor.VisitEnumMember(this);
         }
 

@@ -106,7 +106,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void Usings_UniqueTypeNames_NamespacesImported()
+        public void Usings_UniqueTypeNames_ReferredByShortName()
         {
             //-- arrange
 
@@ -146,7 +146,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void Usings_DuplicateTypeNames_TypesAreNamespaceQualified()
+        public void Usings_DuplicateTypeNames_ReferredByQualifiedName()
         {
             //-- arrange
 
@@ -194,7 +194,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void Usings_SomeTypeNamesDuplicate_OnlyDuplicatesNamespaceQualified()
+        public void Usings_SomeTypeNamesDuplicate_OnlyDuplicatesReferredByQualifiedName()
         {
             //-- arrange
 
@@ -330,6 +330,73 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
                     {
                         public Dictionary<My.First.ClassA, My.Second.ClassA> SecondByFirst { get; }
                         public System.Collections.Generic.List<ClassB> ListOfB { get; }
+                    }
+                }
+            ");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Usings_DuplicateTypeNamesWithDifferentGenericArity_ReferredByShortName()
+        {
+            //-- arrange
+
+            var generatorUnderTest = new CSharpSyntaxGenerator();
+
+            var typeClassList = new TypeMember(new TypeGeneratorInfo(this.GetType()), "My.First", MemberVisibility.Public, TypeMemberKind.Class, "List");
+            var typeClassListInOut = 
+                new TypeMember(new TypeGeneratorInfo(this.GetType()), "My.First", MemberVisibility.Public, TypeMemberKind.Class, "List",
+                    new TypeMember(MemberVisibility.Public, TypeMemberKind.GenericParameter, "TInner"),
+                    new TypeMember(MemberVisibility.Public, TypeMemberKind.GenericParameter, "TOuter"))
+                {
+                    IsGenericType = true,
+                    IsGenericTypeDefinition = true
+                };
+            var typeSecondClassA = 
+                new TypeMember(new TypeGeneratorInfo(this.GetType()), "My.Second", MemberVisibility.Public, TypeMemberKind.Class, "ClassA") {
+                    BaseType = typeClassList
+                };
+            var typeListOfInt = ((TypeMember)typeof(List<>)).MakeGenericType(typeof(int));
+
+            typeSecondClassA.Members.Add(new PropertyMember(
+                typeSecondClassA,
+                MemberVisibility.Public,
+                MemberModifier.None,
+                typeListOfInt,
+                "Numbers"));
+
+            //-- act
+
+            SyntaxTree syntax = generatorUnderTest.GenerateSyntax(
+                typesToCompile: new[] {
+                    typeClassList, typeClassListInOut, typeSecondClassA
+                },
+                allReferencedTypes: new[] {
+                    typeClassList, typeClassListInOut, typeSecondClassA, typeof(List<>)
+                });
+
+            //-- assert
+
+            syntax.Should().BeEquivalentToCode(@"
+                using System.Collections.Generic;
+                using My.First;
+                using My.Second;
+
+                namespace My.First
+                {
+                    public class List
+                    {
+                    }
+                    public class List<TInner,TOuter>
+                    {
+                    }
+                }
+                namespace My.Second
+                {
+                    public class ClassA : List
+                    {
+                        public List<int> Numbers { get; }
                     }
                 }
             ");

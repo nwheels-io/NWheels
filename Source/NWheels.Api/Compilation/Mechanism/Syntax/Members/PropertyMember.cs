@@ -23,6 +23,8 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         public override void AcceptVisitor(MemberVisitor visitor)
         {
+            base.AcceptVisitor(visitor);
+
             visitor.VisitProperty(this);
 
             if (this.Getter != null)

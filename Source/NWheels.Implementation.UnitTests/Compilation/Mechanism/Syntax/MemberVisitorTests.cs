@@ -102,6 +102,95 @@ namespace NWheels.Implementation.UnitTests.Compilation.Mechanism.Syntax
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Fact]
+        public void CanVisitAppliedAttributes()
+        {
+            //-- arrange
+
+            var classAttribute1 = new AttributeDescription() { AttributeType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "A1") };
+            var fieldAttribute1 = new AttributeDescription() { AttributeType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "A2") };
+            var constructorAttribute1 = new AttributeDescription() { AttributeType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "A3") };
+            var constructorParamAttribute1 = new AttributeDescription() { AttributeType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "A3B") };
+            var methodAttribute1 = new AttributeDescription() { AttributeType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "A4") };
+            var methodParamAttribute1 = new AttributeDescription() { AttributeType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "A4B") };
+            var methodRetValAttribute1 = new AttributeDescription() { AttributeType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "A4C") };
+            var propertyAttribute1 = new AttributeDescription() { AttributeType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "A5") };
+            var propertyGetterAttribute1 = new AttributeDescription() { AttributeType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "A5") };
+            var propertySetterAttribute1 = new AttributeDescription() { AttributeType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "A5") };
+            var eventAttribute1 = new AttributeDescription() { AttributeType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "A6") };
+            var eventAdderAttribute1 = new AttributeDescription() { AttributeType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "A6B") };
+            var eventRemoverAttribute1 = new AttributeDescription() { AttributeType = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "A6C") };
+
+            var class1 = new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "Class1");
+            class1.Attributes.Add(classAttribute1);
+
+            #region Build class type members
+
+            var field1 = new FieldMember(class1, MemberVisibility.Private, MemberModifier.None, typeof(int), "_field1");
+            field1.Attributes.Add(fieldAttribute1);
+
+            var constructor1 = new ConstructorMember(MemberVisibility.Public, MemberModifier.None, "Class1", new MethodSignature(
+                new[] { new MethodParameter("n", 1, typeof(int), MethodParameterModifier.None, constructorParamAttribute1) },
+                returnValue: null, 
+                isAsync: false
+            ));
+            constructor1.Attributes.Add(constructorAttribute1);
+
+            var method1 = new MethodMember(MemberVisibility.Public, MemberModifier.None, "M1", new MethodSignature(
+                new[] { new MethodParameter("n", 1, typeof(int), MethodParameterModifier.None, methodParamAttribute1) },
+                returnValue: new MethodParameter(null, -1, typeof(string), MethodParameterModifier.None, methodRetValAttribute1),
+                isAsync: false
+            ));
+            method1.Attributes.Add(methodAttribute1);
+
+            var property1 = new PropertyMember(class1, MemberVisibility.Public, MemberModifier.None, typeof(int), "P1");
+            property1.Getter = new MethodMember(property1.Visibility, "get_" + property1.Name);
+            property1.Setter = new MethodMember(property1.Visibility, "set_" + property1.Name);
+            property1.Attributes.Add(propertyAttribute1);
+            property1.Getter.Attributes.Add(propertyGetterAttribute1);
+            property1.Setter.Attributes.Add(propertySetterAttribute1);
+
+            var event1 = new EventMember(MemberVisibility.Public, MemberModifier.None, typeof(Action), "E1");
+            event1.Adder = new MethodMember(event1.Visibility, "add_" + event1.Name);
+            event1.Remover = new MethodMember(event1.Visibility, "remove_" + event1.Name);
+            event1.Attributes.Add(eventAttribute1);
+            event1.Adder.Attributes.Add(eventAdderAttribute1);
+            event1.Remover.Attributes.Add(eventRemoverAttribute1);
+
+            #endregion
+
+            class1.Members.AddRange(new AbstractMember[] {
+                field1, constructor1, method1, property1, event1
+            });
+
+            var visitLog = new List<Visit>();
+            var visitor = new TestMemberVisitor(visitLog);
+
+            //-- act
+
+            class1.AcceptVisitor(visitor);
+
+            //-- assert
+
+            visitLog.Should().ContainInOrder(
+                new Visit(nameof(MemberVisitor.VisitAttribute), classAttribute1),
+                new Visit(nameof(MemberVisitor.VisitAttribute), fieldAttribute1),
+                new Visit(nameof(MemberVisitor.VisitAttribute), constructorAttribute1),
+                new Visit(nameof(MemberVisitor.VisitAttribute), constructorParamAttribute1),
+                new Visit(nameof(MemberVisitor.VisitAttribute), methodAttribute1),
+                new Visit(nameof(MemberVisitor.VisitAttribute), methodParamAttribute1),
+                new Visit(nameof(MemberVisitor.VisitAttribute), methodRetValAttribute1),
+                new Visit(nameof(MemberVisitor.VisitAttribute), propertyAttribute1),
+                new Visit(nameof(MemberVisitor.VisitAttribute), propertyGetterAttribute1),
+                new Visit(nameof(MemberVisitor.VisitAttribute), propertySetterAttribute1),
+                new Visit(nameof(MemberVisitor.VisitAttribute), eventAttribute1),
+                new Visit(nameof(MemberVisitor.VisitAttribute), eventAdderAttribute1),
+                new Visit(nameof(MemberVisitor.VisitAttribute), eventRemoverAttribute1)
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private class TestMemberVisitor : MemberVisitor
         {
             private readonly List<Visit> _visitLog;

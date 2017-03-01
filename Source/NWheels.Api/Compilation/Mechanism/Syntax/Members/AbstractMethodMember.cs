@@ -1,6 +1,7 @@
 ﻿using NWheels.Compilation.Mechanism.Syntax.Statements;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -19,6 +20,35 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         {
             this.Modifier = GetMemberModifier(clrBinding);
             this.Visibility = GetMemberVisibility(clrBinding);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void AcceptVisitor(MemberVisitor visitor)
+        {
+            base.AcceptVisitor(visitor);
+
+            if (this.Signature != null)
+            {
+                if (this.Signature.Parameters != null)
+                {
+                    foreach (var parameter in this.Signature.Parameters.Where(p => p.Attributes != null))
+                    {
+                        foreach (var attribute in parameter.Attributes)
+                        {
+                            visitor.VisitAttribute(attribute);
+                        }
+                    }
+                }
+
+                if (this.Signature.ReturnValue != null && this.Signature.ReturnValue.Attributes != null)
+                {
+                    foreach (var attribute in this.Signature.ReturnValue.Attributes)
+                    {
+                        visitor.VisitAttribute(attribute);
+                    }
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

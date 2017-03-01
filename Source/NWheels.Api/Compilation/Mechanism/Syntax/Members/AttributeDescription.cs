@@ -15,6 +15,13 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override string ToString()
+        {
+            return (AttributeType?.Name ?? base.ToString());
+        }
+
+        //------------------------------------------------- ----------------------------------------------------------------------------------------------------
+
         public TypeMember AttributeType { get; set; }
         public List<AbstractExpression> ConstructorArguments { get; private set; }
         public List<PropertyValue> PropertyValues { get; private set; }

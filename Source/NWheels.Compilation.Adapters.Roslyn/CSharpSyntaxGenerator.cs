@@ -40,7 +40,7 @@ namespace NWheels.Compilation.Adapters.Roslyn
         private UsingDirectiveSyntax[] GatherNamespaceUsings(IReadOnlyCollection<TypeMember> allReferencedTypes)
         {
             var namespacesToImport = new HashSet<string>();
-            var typesGroupedByName = allReferencedTypes.GroupBy(t => t.Name);
+            var typesGroupedByName = allReferencedTypes.GroupBy(t => t.MakeNameWithGenericArity('#'));
 
             foreach (var identicalNameGroup in typesGroupedByName)
             {

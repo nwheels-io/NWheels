@@ -22,11 +22,30 @@ namespace NWheels.Compilation.Mechanism.Syntax
         public override void VisitVariableDeclaraitonStatement(VariableDeclarationStatement statement)
         {
             base.VisitVariableDeclaraitonStatement(statement);
-            TypeReferenceMemberVisitor.AddReferencedType(_referencedTypes, statement.Variable.Type);
+            AddReferencedType(statement.Variable?.Type);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void VisitReferenceToTypeMember(TypeMember type)
+        {
+            base.VisitReferenceToTypeMember(type);
+            AddReferencedType(type);
+        }
 
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void VisitReferenceToLocalVariable(LocalVariable variable)
+        {
+            base.VisitReferenceToLocalVariable(variable);
+            AddReferencedType(variable.Type);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void AddReferencedType(TypeMember type)
+        {
+            TypeReferenceMemberVisitor.AddReferencedType(_referencedTypes, type);
+        }
     }
 }

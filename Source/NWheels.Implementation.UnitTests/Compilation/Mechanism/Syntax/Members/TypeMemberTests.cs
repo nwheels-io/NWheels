@@ -117,6 +117,124 @@ namespace NWheels.Implementation.UnitTests.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static IEnumerable<object[]> TestCases_MakeGenericName = new object[][] {
+            #region Test cases
+            new object[] {
+                (TypeMember)typeof(int),
+                "Int32"
+            },
+            new object[] {
+                new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassOne"),
+                "ClassOne"
+            },
+            new object[] {
+                (TypeMember)typeof(List<int>),
+                "List{Int32}"
+            },
+            new object[] {
+                new TypeMember("NS1.NS2", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne",
+                    new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassTwo"))
+                {
+                    IsGenericType = true,
+                    IsGenericTypeDefinition = false
+                },
+                "ClassOne{ClassTwo}"
+            },
+            new object[] {
+                (TypeMember)typeof(IDictionary<,>),
+                "IDictionary{TKey;TValue}"
+            },
+            new object[] {
+                new TypeMember("NS1.NS2", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne",
+                    new TypeMember(MemberVisibility.Public, TypeMemberKind.GenericParameter, "T"),
+                    new TypeMember(MemberVisibility.Public, TypeMemberKind.GenericParameter, "K"))
+                {
+                    IsGenericType = true,
+                    IsGenericTypeDefinition = true
+                },
+                "ClassOne{T;K}"
+            },
+            new object[] {
+                (TypeMember)typeof(List<Dictionary<int, HashSet<string>>>),
+                "List{Dictionary{Int32;HashSet{String}}}"
+            },
+            #endregion
+        };
+
+        [Theory]
+        [MemberData(nameof(TestCases_MakeGenericName))]
+        public void TestMakeGenerocName(TypeMember typeUnderTest, string expectedGenericName)
+        {
+            //-- act & 
+
+            var actualGenericName = typeUnderTest.MakeGenericName("{", "}", ";");
+
+            //-- assert
+
+            actualGenericName.Should().Be(expectedGenericName);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<object[]> TestCases_MakeNameWithGenericArity = new object[][] {
+            #region Test cases
+            new object[] {
+                (TypeMember)typeof(int),
+                "Int32"
+            },
+            new object[] {
+                new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassOne"),
+                "ClassOne"
+            },
+            new object[] {
+                (TypeMember)typeof(List<int>),
+                "List#1"
+            },
+            new object[] {
+                new TypeMember("NS1.NS2", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne",
+                    new TypeMember(MemberVisibility.Public, TypeMemberKind.Class, "ClassTwo"))
+                {
+                    IsGenericType = true,
+                    IsGenericTypeDefinition = false
+                },
+                "ClassOne#1"
+            },
+            new object[] {
+                (TypeMember)typeof(IDictionary<,>),
+                "IDictionary#2"
+            },
+            new object[] {
+                new TypeMember("NS1.NS2", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne",
+                    new TypeMember(MemberVisibility.Public, TypeMemberKind.GenericParameter, "T"),
+                    new TypeMember(MemberVisibility.Public, TypeMemberKind.GenericParameter, "K"))
+                {
+                    IsGenericType = true,
+                    IsGenericTypeDefinition = true
+                },
+                "ClassOne#2"
+            },
+            new object[] {
+                (TypeMember)typeof(List<Dictionary<int, HashSet<string>>>),
+                "List#1"
+            },
+            #endregion
+        };
+
+        [Theory]
+        [MemberData(nameof(TestCases_MakeNameWithGenericArity))]
+        public void TestMakeNameWithGenericArity(TypeMember typeUnderTest, string expectedGenericName)
+        {
+            //-- act & 
+
+            var actualGenericName = typeUnderTest.MakeNameWithGenericArity('#');
+
+            //-- assert
+
+            actualGenericName.Should().Be(expectedGenericName);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [Fact]
         public void CanInitializeFromClrArrayType()
         {

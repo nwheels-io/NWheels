@@ -44,7 +44,16 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public abstract void AcceptVisitor(MemberVisitor visitor);
+        public virtual void AcceptVisitor(MemberVisitor visitor)
+        {
+            if (this.Attributes != null)
+            {
+                foreach (var attribute in this.Attributes)
+                {
+                    visitor.VisitAttribute(attribute);
+                }
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
