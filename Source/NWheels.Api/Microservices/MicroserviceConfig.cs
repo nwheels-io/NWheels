@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace NWheels.Configuration
+namespace NWheels.Microservices
 {
     [XmlRoot(ElementName = "microservice", IsNullable = false)]
     public class MicroserviceConfig

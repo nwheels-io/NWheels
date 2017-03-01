@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NWheels.Configuration
+namespace NWheels.Microservices
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class FeatureLoaderAttribute : Attribute

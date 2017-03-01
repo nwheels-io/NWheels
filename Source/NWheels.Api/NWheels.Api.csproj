@@ -16,11 +16,11 @@
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Configuration\" />
     <Folder Include="MetaTyping\" />
     <Folder Include="Logging\" />
     <Folder Include="Authorization\" />
     <Folder Include="Aspectization\" />
-    <Folder Include="Microservices\" />
     <Folder Include="Serialization\" />
   </ItemGroup>
 </Project>

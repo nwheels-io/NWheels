@@ -1,11 +1,10 @@
-﻿using NWheels.Microservices;
-using NWheels.Injection;
+﻿using NWheels.Injection;
+using NWheels.Microservices;
 
 namespace NWheels.Samples.FirstHappyPath
 {
-    [DefaultFeatureLoader]
-    [FeatureLoader(Name = "FirstFeatureLoader")]
-    public class FirstHappyPathFeatureLoader : IFeatureLoader
+    [FeatureLoader(Name = "NamedFirstHappyPathFeatureLoader")]
+    public class NamedFirstHappyPathFeatureLoader : IFeatureLoader
     {
         public void RegisterComponents(IContainer container)
         {

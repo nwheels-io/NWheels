@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<environment name="dev">
+
+  <variable-list>
+
+    <variable
+        name="someVariable"
+        value="someValue" />
+
+  </variable-list>
+
+</environment>

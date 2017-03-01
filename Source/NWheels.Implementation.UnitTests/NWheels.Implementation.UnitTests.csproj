@@ -19,7 +19,4 @@
     <ProjectReference Include="..\NWheels.Implementation\NWheels.Implementation.csproj" />
     <ProjectReference Include="..\NWheels.Testability\NWheels.Testability.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Microservices\" />
-  </ItemGroup>
 </Project>

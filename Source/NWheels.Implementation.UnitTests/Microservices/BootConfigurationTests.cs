@@ -1,11 +1,12 @@
-using NWheels.Configuration;
+using FluentAssertions;
+using NWheels.Microservices;
 using System.IO;
 using System.Xml.Serialization;
 using Xunit;
 
-namespace NWheels.Implementation.UnitTests
+namespace NWheels.Implementation.UnitTests.Microservices
 {
-    public class UnitTest1
+    public class BootConfigurationTests
     {
         [Fact]
         public void DeserializeMicroserviceConfig()
@@ -31,7 +32,8 @@ namespace NWheels.Implementation.UnitTests
             var reader = new StringReader(xml);
             var result = (MicroserviceConfig)serializer.Deserialize(reader);
 
-            Assert.NotNull(result);
+            result.Should().NotBeNull();
+
             Assert.Equal(result.Name, "BackendApi");
             Assert.Equal(result.FrameworkModules.Length, 2);
             Assert.Equal(result.FrameworkModules[0].Assembly, "NWheels.Platform.Database");

@@ -1,6 +1,6 @@
 ﻿using NWheels.Injection;
 
-namespace NWheels.Configuration
+namespace NWheels.Microservices
 {
     public interface IFeatureLoader
     {
