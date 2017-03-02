@@ -3,10 +3,10 @@ using NWheels.Microservices;
 
 namespace NWheels.Samples.FirstHappyPath
 {
-    [FeatureLoader(Name = "NamedFirstHappyPathFeatureLoader")]
+    [FeatureLoader(Name = "SpecificNamedFirstHappyPathFeatureLoader")]
     public class NamedFirstHappyPathFeatureLoader : IFeatureLoader
     {
-        public void RegisterComponents(IContainerBuilder containerBuilder)
+        public void RegisterComponents(IContainerBuilderWrapper containerBuilder)
         {
         }
 

@@ -1,7 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <microservice name="FirstHappyPath">
 
-  <framework-modules injection-adapter-assembly="NWheels.Injection.Adapters.Autofac">
+  <injection-adapter assembly="NWheels.Injection.Adapters.Autofac" />
+
+  <framework-modules>
     
   </framework-modules>
 
@@ -9,7 +11,7 @@
 
     <module assembly="NWheels.Samples.FirstHappyPath">
       
-      <feature name="NamedFirstHappyPathFeatureLoader" />
+      <feature name="SpecificNamedFirstHappyPathFeatureLoader" />
       
     </module>
 

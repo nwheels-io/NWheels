@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System.Collections.Generic;
+using System.Xml.Serialization;
 
 namespace NWheels.Microservices
 {
@@ -7,22 +8,31 @@ namespace NWheels.Microservices
     {
         [XmlAttribute(AttributeName = "name")]
         public string Name { get; set; }
-        
+
+        [XmlElement("injection-adapter")]
+        public InjectionAdapterWrapper InjectionAdapter { get; set; }
+
         [XmlArray("framework-modules")]
         [XmlArrayItem("module")]
-        public ModuleConfig[] FrameworkModules { get; set; }
-
+        public List<ModuleConfig> FrameworkModules { get; set; }
+        
         [XmlArray("application-modules")]
         [XmlArrayItem("module")]
-        public ModuleConfig[] ApplicationModules { get; set; }
+        public List<ModuleConfig> ApplicationModules { get; set; }
         
+        public class InjectionAdapterWrapper
+        {
+            [XmlAttribute(AttributeName = "assembly")]
+            public string Assembly { get; set; }
+        }
+
         public class ModuleConfig
         {
             [XmlAttribute(AttributeName = "assembly")]
             public string Assembly { get; set; }
 
             [XmlElement(ElementName = "feature")]
-            public FeatureConfig[] Features { get; set; }
+            public List<FeatureConfig> Features { get; set; }
 
             public class FeatureConfig
             {

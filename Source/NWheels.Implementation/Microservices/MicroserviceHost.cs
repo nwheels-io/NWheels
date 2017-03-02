@@ -2,7 +2,7 @@
 using NWheels.Orchestration;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
@@ -18,7 +18,7 @@ namespace NWheels.Microservices
         private readonly RevertableSequence _loadSequence;
         private readonly RevertableSequence _activateSequence;
         private int _initializationCount = 0;
-        private IContainer _container;
+        private IContainerWrapper _container;
         private IMicroserviceHostLogger _logger;        
         private TransientStateMachine<MicroserviceState, MicroserviceTrigger> _stateMachine;        
 
@@ -187,7 +187,7 @@ namespace NWheels.Microservices
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IMicroserviceHostLogger Logger
+        private IMicroserviceHostLogger Logger
         {
             get
             {
@@ -205,7 +205,7 @@ namespace NWheels.Microservices
             }
         }
 
-        private void CreateContainer(IContainerBuilder builder)
+        private void CreateContainer(IContainerBuilderWrapper builder)
         {
             //TODO: validate _container == null
             _container = builder.CreateContainer();
@@ -468,39 +468,103 @@ namespace NWheels.Microservices
                 sequence.Once().OnPerform(RegisterFeatureLoaders);
             }
 
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private void RegisterFeatureLoaders()
             {
-                IContainerBuilder builder = null;
-                /*var type = asm.GetType("MyClassLib.SampleClasses.Sample");
-                dynamic obj = Activator.CreateInstance(type);*/
+                //var containerBuilder = CreateContainerBuilder();
 
-                var featureLoaders = new List<Type>();
+                var foundFeatureLoaders = new List<Type>();
 
-                foreach (var file in Directory.GetFiles(OwnerHost.BootConfig.ModulesDirectory, "*.dll"))
+                foreach(var moduleConfig in OwnerHost.BootConfig.MicroserviceConfig.ApplicationModules)
                 {
-                    var assemblyLoadContext = AssemblyLoadContext.Default.LoadFromAssemblyPath(file);
-                    //var assembly = Assembly.Load(assemblyLoadContext.GetName());
-                    try
+                    var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(
+                        $"{OwnerHost.BootConfig.ModulesDirectory}\\{moduleConfig.Assembly}.dll");
+
+                    var featureLoaderTypes = assembly.GetTypes().Where(
+                        x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == typeof(IFeatureLoader))).ToList();
+
+                    var defaultFeatureLoaderType = GetDefaultFeatrueLoaderType(featureLoaderTypes);
+                    if (defaultFeatureLoaderType != null)
                     {
-                        foreach (var type in assemblyLoadContext.GetTypes())
-                        {
-                            foreach (var implementedInterface in type.GetTypeInfo().ImplementedInterfaces)
-                            {
-                                if (implementedInterface == typeof(IFeatureLoader))
-                                {
-                                    featureLoaders.Add(type);
-                                    break;
-                                }
-                            }
-                        }
+                        foundFeatureLoaders.Add(defaultFeatureLoaderType);
                     }
-                    catch (Exception ex)
+
+                    foreach (var featueConfig in moduleConfig.Features)
                     {
-                        var info = ex.ToString();
+                        var type = GetTypeByFeatureLoaderConfig(featureLoaderTypes, featueConfig);
+                        if (type == null)
+                        {
+                            throw new Exception("Feature wasn't found");
+                        }
+                        else
+                        {
+                            foundFeatureLoaders.Add(type);
+                        }
                     }
                 }
 
-                OwnerHost.CreateContainer(builder);
+                //OwnerHost.CreateContainer(containerBuilder);
+            }
+
+            private IContainerBuilderWrapper CreateContainerBuilder()
+            {
+                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(
+                    $"{OwnerHost.BootConfig.ModulesDirectory}\\{OwnerHost.BootConfig.MicroserviceConfig.InjectionAdapter.Assembly}.dll");
+
+                var containerBuilderType = assembly.GetTypes().Where(
+                    x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == typeof(IContainerBuilderWrapper))).FirstOrDefault();
+
+                var containerBuilder = (IContainerBuilderWrapper)Activator.CreateInstance(containerBuilderType);
+                //Assembly.Load(assembly.GetName());
+
+                return containerBuilder;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private Type GetDefaultFeatrueLoaderType(List<Type> featureLoaderTypes)
+            {
+                Type type = null;
+
+                foreach (var featureType in featureLoaderTypes)
+                {
+                    var typeInfo = featureType.GetTypeInfo();
+                    if (typeInfo.CustomAttributes.Any(x => x.AttributeType == typeof(DefaultFeatureLoaderAttribute)))
+                    {
+                        type = featureType;
+                        break;
+                    }
+                }
+
+                return type;
+            }
+
+            private Type GetTypeByFeatureLoaderConfig(List<Type> featureLoaderTypes, MicroserviceConfig.ModuleConfig.FeatureConfig featureConfig)
+            {
+                Type type = null;
+                foreach (var featureType in featureLoaderTypes)
+                {
+                    var typeInfo = featureType.GetTypeInfo();
+                    if (typeInfo.Name == featureConfig.Name)
+                    {
+                        type = featureType;
+                        break;
+                    }
+                    else
+                    {
+                        var featureAttribute = typeInfo.CustomAttributes.Where(x => x.AttributeType == typeof(FeatureLoaderAttribute)).FirstOrDefault();
+                        if (featureAttribute != null &&
+                            featureAttribute.NamedArguments.Any(x =>
+                                x.MemberName == nameof(FeatureLoaderAttribute.Name) &&
+                                x.TypedValue.Value.ToString() == featureConfig.Name))
+                        {
+                            type = featureType;
+                            break;
+                        }
+                    }
+                }
+                return type;
             }
         }
 
