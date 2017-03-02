@@ -4538,13 +4538,14 @@ h2.logo-name {
         <form class="form-horizontal">
             <div class="form-group">
                 <label class="col-lg-2 control-label">Type</label>
-                <div class="col-lg-3" ng-if="uidl.emptySelectionText">
-                    <select ng-options="s.typeName as (s.text | translated) for s in uidl.selections" ng-model="selectedType.name" ng-change="selectedTypeChanged(selectedType.name)" class="form-control m-b" ng-disabled="!editAuthorized">
+                <div class="col-lg-3" ng-if="!editAuthorized && selectedType" style="margin-top: 6px;font-weight: bold;">{{translate(selectedType.text)}}</div>
+                <div class="col-lg-3" ng-if="editAuthorized && uidl.emptySelectionText">
+                    <select ng-options="s.typeName as (s.text | translated) for s in uidl.selections" ng-model="selectedType.name" ng-change="selectedTypeChanged(selectedType.name)" class="form-control m-b">
                         <option value="">- {{::translate(uidl.emptySelectionText)}} -</option>
                     </select>
                 </div>
-                <div class="col-lg-3" ng-if="!uidl.emptySelectionText">
-                    <select ng-options="s.typeName as (s.text | translated) for s in uidl.selections" ng-model="selectedType.name" ng-change="selectedTypeChanged(selectedType.name)" class="form-control m-b" ng-disabled="!editAuthorized">
+                <div class="col-lg-3" ng-if="editAuthorized && !uidl.emptySelectionText">
+                    <select ng-options="s.typeName as (s.text | translated) for s in uidl.selections" ng-model="selectedType.name" ng-change="selectedTypeChanged(selectedType.name)" class="form-control m-b">
                     </select>
                 </div>
             </div>

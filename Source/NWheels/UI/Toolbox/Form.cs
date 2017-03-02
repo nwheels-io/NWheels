@@ -372,6 +372,8 @@ namespace NWheels.UI.Toolbox
         public bool AutoRecalculateOnChange { get; set; }
         [DataMember]
         public bool AutoSaveOnChange { get; set; }
+        [DataMember]
+        public bool IsReadOnly { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1029,6 +1031,7 @@ namespace NWheels.UI.Toolbox
         bool IsModalPopup { get; }
         bool NeedsInitialModel { get; set; }
         bool NeedsAuthorize { get; set; }
+        bool IsReadOnly { get; set; }
         bool AutoSaveOnChange { get; set; }
     }
 

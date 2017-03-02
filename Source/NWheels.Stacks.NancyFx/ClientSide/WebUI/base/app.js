@@ -16,6 +16,12 @@ function toPascalCase(s) {
 
 //-----------------------------------------------------------------------------------------------------------------
 
+function hasModifier(value, modifier) {
+    return (value && value.indexOf(modifier) > -1);
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
 function getQueryStringValue(name) {
     var query = window.location.search.substring(1);
     var vars = query.split("&");
@@ -2243,7 +2249,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 
             scope.waitingForInitialModel = (scope.uidl.needsInitialModel ? true : false);
             scope.commandInProgress = scope.waitingForInitialModel;
-            scope.editAuthorized = (scope.uidl.needsAuthorize ? false : true);
+            scope.editAuthorized = (scope.uidl.needsAuthorize || scope.uidl.isReadOnly ? false : true);
 
 			if (scope.uidl.mode === 'StandaloneCreate') {
 				scope.parentModel = {
@@ -2394,6 +2400,9 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             });
 
             scope.$on(scope.uidl.qualifiedName + ':EditAuthorized', function(event, data) {
+                if (scope.uidl.isReadOnly) {
+                    return;
+                }
                 scope.editAuthorized = true;
                 Enumerable.From(scope.uidl.fields)
                     .Where("$.fieldType=='InlineGrid' || $.fieldType=='InlineForm' || $.fieldType=='LookupMany' || $.fieldType=='TypeSelector'")
@@ -2730,7 +2739,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 
     m_controllerImplementations['TypeSelector'] = {
         implement: function (scope) {
-            scope.selectedType = { name: null };
+            scope.selectedType = { name: null, text: null };
             scope.parentModelProperty = scope.uidl.parentModelProperty; //toCamelCase(scope.uidl.parentModelProperty);
             
             scope.selectedTypeChanged = function (type) {
@@ -2776,7 +2785,9 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     var selectedWidgetQualifiedName = selection.widget.qualifiedName;
                     $timeout(function () {
                         scope.$broadcast(selectedWidgetQualifiedName + ':ModelSetter', scope.model.entity);
-                        scope.$broadcast(selectedWidgetQualifiedName + ':EditAuthorized');
+                        if (!scope.parentUidl || !hasModifier(scope.parentUidl.modifiers, 'ReadOnly')) {
+                            scope.$broadcast(selectedWidgetQualifiedName + ':EditAuthorized');
+                        }
                     });
                 }
             };
@@ -2799,6 +2810,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.selectTabByIndex = function(index) {
                 if (index !== scope.selectedTabIndex) {
                     scope.selectedTabIndex = index;
+                    scope.selectedType.text = scope.uidl.selections[index].text;
                     scope.$emit(scope.uidl.qualifiedName + ':SelectionChanged', scope.uidl.selections[index]);
                     $timeout(function() {
                         scope.$broadcast(scope.uidl.selections[index].widget.qualifiedName + ':NavigatedHere');
@@ -3381,7 +3393,7 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
                 }
             });
             
-            $scope.editAuthorized = ($scope.parentUidl.needsAuthorize ? false : true);
+            $scope.editAuthorized = ($scope.parentUidl.needsAuthorize || $scope.parentUidl.isReadOnly ? false : true);
             if (!$scope.editAuthorized) {
                 $scope.$on($scope.parentUidl.qualifiedName + ':EditAuthorized', function(event, data) {
                     $scope.editAuthorized = (!data || !data.restrictedEntryProperties || data.restrictedEntryProperties[$scope.uidl.propertyName]);
