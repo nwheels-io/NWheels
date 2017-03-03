@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis.Text;
 using NWheels.DataStructures;
 using NWheels.Compilation.Mechanism.Syntax;
 using System.Threading;
+using System.Diagnostics;
 
 namespace NWheels.Compilation.Adapters.Roslyn
 {
@@ -169,7 +170,8 @@ namespace NWheels.Compilation.Adapters.Roslyn
         {
             var compiler = new AssemblyCompiler(_referenceCache);
             var assemblyIndex = Interlocked.Increment(ref _productAssemblyIndex);
-            var assemblyName = $"{_assemblyNamePrefix}{assemblyIndex}";
+            var assemblyName = $"{_assemblyNamePrefix}{assemblyIndex}{Stopwatch.GetTimestamp()}";
+
             var referencedAssemblyNames = referencedAssemblies.Select(asm => asm.Location).ToArray();
 
             if (_debugMode)
