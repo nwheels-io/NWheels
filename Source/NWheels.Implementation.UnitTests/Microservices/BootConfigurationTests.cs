@@ -41,13 +41,13 @@ namespace NWheels.Implementation.UnitTests.Microservices
             //-- assert
 
             result.Should().NotBeNull();
-            result.Name.ShouldBeEquivalentTo("BackendApi");
-            result.InjectionAdapter.Assembly.ShouldAllBeEquivalentTo("NWheels.Injection.Adapters.Autofac");
-            result.FrameworkModules.Count.ShouldBeEquivalentTo(2);
-            result.FrameworkModules[0].Assembly.ShouldAllBeEquivalentTo("NWheels.Platform.Database");
-            result.FrameworkModules[1].Features.Count.ShouldBeEquivalentTo(2);
-            result.FrameworkModules[1].Features[1].Name.ShouldAllBeEquivalentTo("PubSub");
-            result.ApplicationModules.Count.ShouldBeEquivalentTo(2);
+            result.Name.Should().Be("BackendApi");
+            result.InjectionAdapter.Assembly.Should().Be("NWheels.Injection.Adapters.Autofac");
+            result.FrameworkModules.Count.Should().Be(2);
+            result.FrameworkModules[0].Assembly.Should().Be("NWheels.Platform.Database");
+            result.FrameworkModules[1].Features.Count.Should().Be(2);
+            result.FrameworkModules[1].Features[1].Name.Should().Be("PubSub");
+            result.ApplicationModules.Count.Should().Be(2);
         }
 
         [Fact]
@@ -76,10 +76,10 @@ namespace NWheels.Implementation.UnitTests.Microservices
             //-- assert
 
             result.Should().NotBeNull();
-            result.Name.ShouldAllBeEquivalentTo("uk-main");
-            result.Variables.Length.ShouldBeEquivalentTo(2);
-            result.Variables[1].Name.ShouldAllBeEquivalentTo("input-queue-url");
-            result.Variables[1].Value.ShouldAllBeEquivalentTo("my-queue-address");
+            result.Name.Should().Be("uk-main");
+            result.Variables.Length.Should().Be(2);
+            result.Variables[1].Name.Should().Be("input-queue-url");
+            result.Variables[1].Value.Should().Be("my-queue-address");
         }
 
         [Fact]
