@@ -46,9 +46,8 @@ namespace NWheels.Compilation.Adapters.Roslyn
             var systemAssemblyFolder = Path.GetDirectoryName(systemObjectAssemblyLocation);
 
             EnsureReferenceCached(systemObjectAssemblyLocation);
-            EnsureReferenceCached(Path.Combine(systemAssemblyFolder, "mscorlib.dll"));
             EnsureReferenceCached(Path.Combine(systemAssemblyFolder, "System.Runtime.dll"));
-            EnsureReferenceCached(typeof(TypeKeyAttribute).GetTypeInfo().Assembly.Location);
+            EnsureReferenceCached(Path.Combine(systemAssemblyFolder, "mscorlib.dll"));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

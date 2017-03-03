@@ -60,8 +60,12 @@ namespace NWheels.Compilation.Adapters.Roslyn
         {
             using (TypeMemberTagCache.CreateOnCurrentThread())
             {
-                var syntaxTree = GenerateSyntaxTree(types);
-                var success = TryCompileNewAssembly(ref syntaxTree, out Assembly assembly, out ImmutableArray<Diagnostic> diagnostics);
+                var syntaxTree = GenerateSyntaxTree(types, out Assembly[] referencedAssemblies);
+                var success = TryCompileNewAssembly(
+                    referencedAssemblies, 
+                    ref syntaxTree, 
+                    out Assembly assembly, 
+                    out ImmutableArray<Diagnostic> diagnostics);
 
                 if (success)
                 {
@@ -120,13 +124,19 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private SyntaxTree GenerateSyntaxTree(ICollection<TypeMember> types)
+        private SyntaxTree GenerateSyntaxTree(ICollection<TypeMember> types, out Assembly[] references)
         {
             var catalogBuilder = new AssemblyArtifactCatalogBuilder(types);
             catalogBuilder.BuildArtifactCatalog();
 
             var allTypesToCompile = types.Concat(catalogBuilder.CatalogTypes).ToList();
             var allReferencedTypes = GetAllReferencedTypes(allTypesToCompile);
+
+            references = allReferencedTypes
+                .Where(t => t.ClrBinding != null)
+                .Select(t => t.ClrBinding.GetTypeInfo().Assembly)
+                .Distinct()
+                .ToArray();
 
             var syntaxGenerator = new CSharpSyntaxGenerator();
             var syntaxTree = syntaxGenerator.GenerateSyntax(allTypesToCompile, allReferencedTypes);
@@ -151,11 +161,16 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private bool TryCompileNewAssembly(ref SyntaxTree syntax, out Assembly assembly, out ImmutableArray<Diagnostic> diagnostics)
+        private bool TryCompileNewAssembly(
+            IEnumerable<Assembly> referencedAssemblies, 
+            ref SyntaxTree syntax, 
+            out Assembly assembly, 
+            out ImmutableArray<Diagnostic> diagnostics)
         {
             var compiler = new AssemblyCompiler(_referenceCache);
             var assemblyIndex = Interlocked.Increment(ref _productAssemblyIndex);
             var assemblyName = $"{_assemblyNamePrefix}{assemblyIndex}";
+            var referencedAssemblyNames = referencedAssemblies.Select(asm => asm.Location).ToArray();
 
             if (_debugMode)
             {
@@ -166,7 +181,7 @@ namespace NWheels.Compilation.Adapters.Roslyn
 
             var result = compiler.CompileAssembly(
                 syntax,
-                references: new string[0],
+                references: referencedAssemblyNames,
                 enableDebug: _debugMode,
                 assemblyName: assemblyName,
                 dllBytes: out byte[] dllBytes,

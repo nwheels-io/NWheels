@@ -28,8 +28,6 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             //-- arrange
 
             var backendUnderTest = new RoslynTypeFactoryBackend();
-            backendUnderTest.EnsureTypeReferenced(this.GetType());
-            backendUnderTest.EnsureTypeReferenced(typeof(RuntimeTypeFactoryArtifactCatalog));
 
             var key1 = new TypeKey(this.GetType(), typeof(int), typeof(int), typeof(int), typeof(int), 1, 2, 3);
             var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
@@ -59,9 +57,6 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             //-- arrange
 
             var backendUnderTest = new RoslynTypeFactoryBackend();
-            backendUnderTest.EnsureTypeReferenced(this.GetType());
-            backendUnderTest.EnsureTypeReferenced(typeof(RuntimeTypeFactoryArtifactCatalog));
-
             var compiledArtifacts = new Dictionary<TypeKey, IRuntimeTypeFactoryArtifact<object>>();
 
             backendUnderTest.ProductsLoaded += (products) => {
@@ -99,9 +94,6 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             //-- arrange
 
             var backendUnderTest = new RoslynTypeFactoryBackend();
-            backendUnderTest.EnsureTypeReferenced(this.GetType());
-            backendUnderTest.EnsureTypeReferenced(typeof(RuntimeTypeFactoryArtifactCatalog));
-
             var compiledArtifacts = new Dictionary<TypeKey, IRuntimeTypeFactoryArtifact<object>>();
 
             backendUnderTest.ProductsLoaded += (products) => {
@@ -142,9 +134,6 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             //-- arrange
 
             var backendUnderTest = new RoslynTypeFactoryBackend();
-            backendUnderTest.EnsureTypeReferenced(this.GetType());
-            backendUnderTest.EnsureTypeReferenced(typeof(RuntimeTypeFactoryArtifactCatalog));
-
             var compiledArtifacts = new Dictionary<TypeKey, IRuntimeTypeFactoryArtifact<object>>();
 
             backendUnderTest.ProductsLoaded += (products) => {
@@ -187,8 +176,6 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             //-- arrange
 
             var backendUnderTest = new RoslynTypeFactoryBackend();
-            backendUnderTest.EnsureTypeReferenced(this.GetType());
-            backendUnderTest.EnsureTypeReferenced(typeof(RuntimeTypeFactoryArtifactCatalog));
 
             var type1 = new TypeMember("NS1", MemberVisibility.Public, TypeMemberKind.Class, "ClassOne");
             var type2 = new TypeMember("NS1", MemberVisibility.Private, TypeMemberKind.Class, "ClassTwo");
@@ -470,7 +457,6 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
             var method = this.GetType().GetMethods().First();
 
             var backendUnderTest = new RoslynTypeFactoryBackend();
-            backendUnderTest.EnsureTypeReferenced(this.GetType());
 
             var sourceKey = new TypeKey(this.GetType(), typeof(string), method.MetadataToken);
             var sourceType = new TypeMember(
