@@ -321,6 +321,9 @@ body.mini-navbar .navbar-default .nav > li > .nav-second-level li a {
 .navbar-fixed-top,
 .navbar-static-top {
   background: #f3f3f4;
+  position: fixed;
+  width: 100%;
+  padding-right: 220px;
 }
 .fixed-nav #wrapper {
   margin-top: 0;
@@ -3464,6 +3467,9 @@ body.body-small .footer.fixed {
 .panel-heading h1,
 .panel-heading h2 {
   margin-bottom: 5px;
+}
+.row.wrapper.border-bottom.white-bg.page-heading {
+  margin-top: 63px;
 }
 /* TABLES */
 .table-bordered {
@@ -7996,7 +8002,7 @@ body.md-skin {
   }
   .navbar-static-side {
     z-index: 2001;
-    position: absolute;
+    position: fixed;
     width: 220px;
   }
   .navbar-top-links .dropdown-messages,
