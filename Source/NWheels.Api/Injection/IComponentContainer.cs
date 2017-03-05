@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NWheels.Injection
 {
-    public interface IContainerWrapper : IDisposable
+    public interface IComponentContainer : IDisposable
     {
         TInterface Resolve<TInterface>();
 

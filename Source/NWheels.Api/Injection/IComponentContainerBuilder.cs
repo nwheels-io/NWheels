@@ -1,13 +1,16 @@
 ﻿using NWheels.Microservices;
+using System;
 
 namespace NWheels.Injection
 {
-    public interface IContainerBuilderWrapper
+    public interface IComponentContainerBuilder
     {
         void ContributeLifecycleListener<T>() where T : ILifecycleListenerComponent;
 
         void Register<TInterface, TImplementation>(LifeStyle lifeStyle = LifeStyle.Singleton) where TImplementation : TInterface;
 
-        IContainerWrapper CreateContainer();
+        void Register<TInterface>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
+
+        IComponentContainer CreateComponentContainer();
     }
 }

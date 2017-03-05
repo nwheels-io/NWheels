@@ -19,6 +19,7 @@ namespace NWheels.Host
                 var host = new MicroserviceHost(config, args[3]);
 
                 host.Configure();
+                host.Load();
 
             }
             catch (Exception ex)

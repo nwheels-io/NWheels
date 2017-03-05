@@ -43,11 +43,11 @@ namespace NWheels.Implementation.UnitTests.Microservices
             result.Should().NotBeNull();
             result.Name.Should().Be("BackendApi");
             result.InjectionAdapter.Assembly.Should().Be("NWheels.Injection.Adapters.Autofac");
-            result.FrameworkModules.Count.Should().Be(2);
+            result.FrameworkModules.Length.Should().Be(2);
             result.FrameworkModules[0].Assembly.Should().Be("NWheels.Platform.Database");
-            result.FrameworkModules[1].Features.Count.Should().Be(2);
+            result.FrameworkModules[1].Features.Length.Should().Be(2);
             result.FrameworkModules[1].Features[1].Name.Should().Be("PubSub");
-            result.ApplicationModules.Count.Should().Be(2);
+            result.ApplicationModules.Length.Should().Be(2);
         }
 
         [Fact]
@@ -90,18 +90,18 @@ namespace NWheels.Implementation.UnitTests.Microservices
             var config = new MicroserviceConfig()
             {
                 Name = "test",
-                InjectionAdapter = new MicroserviceConfig.InjectionAdapterWrapper()
+                InjectionAdapter = new MicroserviceConfig.InjectionAdapterElement()
                 {
                     Assembly = "InjectionAdapter"
                 },
-                FrameworkModules = new List<MicroserviceConfig.ModuleConfig>()
+                FrameworkModules = new MicroserviceConfig.ModuleConfig[]
                 {
                     new MicroserviceConfig.ModuleConfig()
                     {
                         Assembly = "FrameworkAssembly"
                     }
                 },
-                ApplicationModules = new List<MicroserviceConfig.ModuleConfig>()
+                ApplicationModules = new MicroserviceConfig.ModuleConfig[]
                 {
                     new MicroserviceConfig.ModuleConfig()
                     {

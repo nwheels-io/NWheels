@@ -114,6 +114,20 @@ namespace NWheels.Microservices.Mocks
             return new DisposableMock();
         }
 
+        public IDisposable LookingForLifecycleComponents()
+        {
+            return new DisposableMock();
+        }
+
+        public void FoundLifecycleComponent(string component)
+        { }
+
+        public void NoLifecycleComponentsFound()
+        { }
+
+        public void FailedToLoadLifecycleComponents(Exception e)
+        { }
+
         public class DisposableMock : IDisposable
         {
             public void Dispose()

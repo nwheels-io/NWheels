@@ -17,17 +17,27 @@ namespace NWheels.Microservices
         private readonly RevertableSequence _configureSequence;
         private readonly RevertableSequence _loadSequence;
         private readonly RevertableSequence _activateSequence;
+        private readonly ModuleLoaderBase _moduleLoader;
         private int _initializationCount = 0;
-        private IContainerWrapper _container;
+        private IComponentContainer _container;
         private IMicroserviceHostLogger _logger;        
         private TransientStateMachine<MicroserviceState, MicroserviceTrigger> _stateMachine;        
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHost(BootConfiguration bootConfig, string modulesPath)
+        public MicroserviceHost(BootConfiguration bootConfig, string modulesPath, ModuleLoaderBase moduleLoader = null)
         {
             _bootConfig = bootConfig;
             _modulesPath = modulesPath;
+            if (moduleLoader == null)
+            {
+                _moduleLoader = new RealModuleLoader(_bootConfig);
+            }
+            else
+            {
+                _moduleLoader = moduleLoader;
+            }
+
             _configureSequence = new RevertableSequence(new ConfigureSequenceCodeBehind(this));
             _loadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
             _activateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
@@ -205,10 +215,42 @@ namespace NWheels.Microservices
             }
         }
 
-        private void CreateContainer(IContainerBuilderWrapper builder)
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private ModuleLoaderBase ModuleLoader
+        {
+            get
+            {
+                return _moduleLoader;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private List<ILifecycleListenerComponent> LifecycleComponents
+        {
+            get
+            {
+                return _lifecycleComponents;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IComponentContainer Container
+        {
+            get
+            {
+                return _container;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void CreateComponentContainer(IComponentContainerBuilder builder)
         {
             //TODO: validate _container == null
-            _container = builder.CreateContainer();
+            _container = builder.CreateComponentContainer();
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -451,14 +493,9 @@ namespace NWheels.Microservices
 
         private class ConfigureSequenceCodeBehind : MicroserviceLifecycleSequenceBase, IRevertableSequenceCodeBehind
         {
-            private readonly IMicroserviceHostLogger _logger;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
             public ConfigureSequenceCodeBehind(MicroserviceHost ownerHost)
                 : base(ownerHost)
             {
-                _logger = OwnerHost.Logger;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -472,99 +509,33 @@ namespace NWheels.Microservices
 
             private void RegisterFeatureLoaders()
             {
-                //var containerBuilder = CreateContainerBuilder();
+                var containerBuilder = CreateComponentContainerBuilder();
 
-                var foundFeatureLoaders = new List<Type>();
+                var featureLoaders = OwnerHost.ModuleLoader.LoadModule();
 
-                foreach(var moduleConfig in OwnerHost.BootConfig.MicroserviceConfig.ApplicationModules)
-                {
-                    var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(
-                        $"{OwnerHost.BootConfig.ModulesDirectory}\\{moduleConfig.Assembly}.dll");
+                featureLoaders.ForEach(x => x.RegisterConfigSections());
 
-                    var featureLoaderTypes = assembly.GetTypes().Where(
-                        x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == typeof(IFeatureLoader))).ToList();
+                //load configuration
 
-                    var defaultFeatureLoaderType = GetDefaultFeatrueLoaderType(featureLoaderTypes);
-                    if (defaultFeatureLoaderType != null)
-                    {
-                        foundFeatureLoaders.Add(defaultFeatureLoaderType);
-                    }
+                featureLoaders.ForEach(x => x.RegisterComponents(containerBuilder));
 
-                    foreach (var featueConfig in moduleConfig.Features)
-                    {
-                        var type = GetTypeByFeatureLoaderConfig(featureLoaderTypes, featueConfig);
-                        if (type == null)
-                        {
-                            throw new Exception("Feature wasn't found");
-                        }
-                        else
-                        {
-                            foundFeatureLoaders.Add(type);
-                        }
-                    }
-                }
-
-                //OwnerHost.CreateContainer(containerBuilder);
+                OwnerHost.CreateComponentContainer(containerBuilder);
             }
 
-            private IContainerBuilderWrapper CreateContainerBuilder()
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IComponentContainerBuilder CreateComponentContainerBuilder()
             {
                 var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(
                     $"{OwnerHost.BootConfig.ModulesDirectory}\\{OwnerHost.BootConfig.MicroserviceConfig.InjectionAdapter.Assembly}.dll");
 
                 var containerBuilderType = assembly.GetTypes().Where(
-                    x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == typeof(IContainerBuilderWrapper))).FirstOrDefault();
+                    x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == typeof(IComponentContainerBuilder))).FirstOrDefault();
 
-                var containerBuilder = (IContainerBuilderWrapper)Activator.CreateInstance(containerBuilderType);
+                var containerBuilder = (IComponentContainerBuilder)Activator.CreateInstance(containerBuilderType);
                 //Assembly.Load(assembly.GetName());
 
                 return containerBuilder;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private Type GetDefaultFeatrueLoaderType(List<Type> featureLoaderTypes)
-            {
-                Type type = null;
-
-                foreach (var featureType in featureLoaderTypes)
-                {
-                    var typeInfo = featureType.GetTypeInfo();
-                    if (typeInfo.CustomAttributes.Any(x => x.AttributeType == typeof(DefaultFeatureLoaderAttribute)))
-                    {
-                        type = featureType;
-                        break;
-                    }
-                }
-
-                return type;
-            }
-
-            private Type GetTypeByFeatureLoaderConfig(List<Type> featureLoaderTypes, MicroserviceConfig.ModuleConfig.FeatureConfig featureConfig)
-            {
-                Type type = null;
-                foreach (var featureType in featureLoaderTypes)
-                {
-                    var typeInfo = featureType.GetTypeInfo();
-                    if (typeInfo.Name == featureConfig.Name)
-                    {
-                        type = featureType;
-                        break;
-                    }
-                    else
-                    {
-                        var featureAttribute = typeInfo.CustomAttributes.Where(x => x.AttributeType == typeof(FeatureLoaderAttribute)).FirstOrDefault();
-                        if (featureAttribute != null &&
-                            featureAttribute.NamedArguments.Any(x =>
-                                x.MemberName == nameof(FeatureLoaderAttribute.Name) &&
-                                x.TypedValue.Value.ToString() == featureConfig.Name))
-                        {
-                            type = featureType;
-                            break;
-                        }
-                    }
-                }
-                return type;
             }
         }
 
@@ -572,20 +543,16 @@ namespace NWheels.Microservices
 
         private class LoadSequenceCodeBehind : MicroserviceLifecycleSequenceBase, IRevertableSequenceCodeBehind
         {
-            private readonly IMicroserviceHostLogger _logger;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
             public LoadSequenceCodeBehind(MicroserviceHost ownerHost)
                 : base(ownerHost)
             {
-                _logger = OwnerHost.Logger;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public void BuildSequence(IRevertableSequenceBuilder sequence)
             {
+                sequence.Once().OnPerform(FindLifecycleComponents);
                 /*sequence.Once().OnPerform(JoinSystemSession).OnRevert(LeaveSystemSession);
                 sequence.Once().OnRevert(SaveDynamicModuleToAssembly);
                 sequence.Once().OnRevert(WriteEffectiveMetadataJson);
@@ -599,6 +566,29 @@ namespace NWheels.Microservices
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentLoad).OnRevert(CallComponentUnload);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeLoaded).OnRevert(CallComponentNodeUnloading);
                 sequence.Once().OnPerform(LeaveSystemSession).OnRevert(JoinSystemSession);*/
+            }
+
+            private void FindLifecycleComponents()
+            {
+                using (OwnerHost.Logger.LookingForLifecycleComponents())
+                {
+                    try
+                    {
+                        var foundComponents = OwnerHost.Container.ResolveAll<ILifecycleListenerComponent>();
+                        OwnerHost.LifecycleComponents.AddRange(foundComponents);
+                        OwnerHost.LifecycleComponents.ForEach(x => OwnerHost.Logger.FoundLifecycleComponent(x.GetType().ToString()));
+                        
+                        if (OwnerHost.LifecycleComponents.Count == 0)
+                        {
+                            OwnerHost.Logger.NoLifecycleComponentsFound();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        OwnerHost.Logger.FailedToLoadLifecycleComponents(e);
+                        throw;
+                    }
+                }
             }
         }
 

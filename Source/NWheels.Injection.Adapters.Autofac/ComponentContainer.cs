@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 namespace NWheels.Injection.Adapters.Autofac
 {
-    public class ContainerWrapper : IContainerWrapper
+    public class ComponentContainer : IComponentContainer
     {
         IContainer _container;
 
-        public ContainerWrapper(IContainer container)
+        public ComponentContainer(IContainer container)
         {
             _container = container;
         }
@@ -25,7 +25,7 @@ namespace NWheels.Injection.Adapters.Autofac
 
         public IEnumerable<TInterface> ResolveAll<TInterface>()
         {
-            throw new NotImplementedException();
+            return _container.Resolve<IEnumerable<TInterface>>();
         }
     }
 }

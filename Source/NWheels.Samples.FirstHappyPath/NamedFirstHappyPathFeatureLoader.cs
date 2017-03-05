@@ -4,13 +4,13 @@ using NWheels.Microservices;
 namespace NWheels.Samples.FirstHappyPath
 {
     [FeatureLoader(Name = "SpecificNamedFirstHappyPathFeatureLoader")]
-    public class NamedFirstHappyPathFeatureLoader : IFeatureLoader
+    public class NamedFirstHappyPathFeatureLoader : FeatureLoaderBase
     {
-        public void RegisterComponents(IContainerBuilderWrapper containerBuilder)
+        public override void RegisterComponents(IComponentContainerBuilder containerBuilder)
         {
         }
 
-        public void RegisterConfigSections()
+        public override void RegisterConfigSections()
         {
         }
     }

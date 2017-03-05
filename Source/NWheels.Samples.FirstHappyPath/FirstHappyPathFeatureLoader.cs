@@ -4,13 +4,14 @@ using NWheels.Injection;
 namespace NWheels.Samples.FirstHappyPath
 {
     [DefaultFeatureLoader]
-    public class FirstHappyPathFeatureLoader : IFeatureLoader
+    public class FirstHappyPathFeatureLoader : FeatureLoaderBase
     {
-        public void RegisterComponents(IContainerBuilderWrapper containerBuilder)
+        public override void RegisterComponents(IComponentContainerBuilder containerBuilder)
         {
+            containerBuilder.Register<ILifecycleListenerComponent, FirstLifecycleListenerComponent>();
         }
 
-        public void RegisterConfigSections()
+        public override void RegisterConfigSections()
         {
         }
     }

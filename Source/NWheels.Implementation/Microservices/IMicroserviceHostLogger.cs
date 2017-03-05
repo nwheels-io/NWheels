@@ -51,5 +51,13 @@ namespace NWheels.Microservices
         void NodeDeactivationError(Exception e);
 
         void NodeUnloadError(Exception e);
+
+        IDisposable LookingForLifecycleComponents();
+
+        void FoundLifecycleComponent(string component);
+
+        void NoLifecycleComponentsFound();
+
+        void FailedToLoadLifecycleComponents(Exception e);
     }
 }
