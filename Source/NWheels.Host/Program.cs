@@ -19,14 +19,20 @@ namespace NWheels.Host
                 var host = new MicroserviceHost(config, args[3]);
 
                 host.Configure();
-                host.Load();
+                host.LoadAndActivate();
 
+                Console.WriteLine("Microservice is up.");
+                Console.Write("Press ENTER to go down.");  
+                Console.ReadLine();
+
+                host.DeactivateAndUnload();
             }
             catch (Exception ex)
             {
                 Console.Write(ex);
             }
 
+            Console.Write("Press ENTER to exit.");
             Console.ReadLine();
         }
     }

@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using NWheels.Logging;
+using System;
 
 namespace NWheels.Microservices.Mocks
 {
     internal class MicroserviceHostLoggerMock : IMicroserviceHostLogger
     {
-        public IDisposable NodeActivating()
+        public ILogActivity NodeActivating()
         {
-            return new DisposableMock();
+            return new LogActivityMock();
         }
 
         public void NodeActivationError(Exception e)
@@ -19,18 +18,18 @@ namespace NWheels.Microservices.Mocks
         {
         }
 
-        public IDisposable NodeConfiguring()
+        public ILogActivity NodeConfiguring()
         {
-            return new DisposableMock();
+            return new LogActivityMock();
         }
 
         public void NodeDeactivated()
         {
         }
 
-        public IDisposable NodeDeactivating()
+        public ILogActivity NodeDeactivating()
         {
-            return new DisposableMock();
+            return new LogActivityMock();
         }
 
         public void NodeDeactivationError(Exception e)
@@ -78,19 +77,19 @@ namespace NWheels.Microservices.Mocks
         {
         }
 
-        public IDisposable NodeLoading()
+        public ILogActivity NodeLoading()
         {
-            return new DisposableMock();
+            return new LogActivityMock();
         }
 
-        public IDisposable NodeShuttingDown()
+        public ILogActivity NodeShuttingDown()
         {
-            return new DisposableMock();
+            return new LogActivityMock();
         }
 
-        public IDisposable NodeStartingUp()
+        public ILogActivity NodeStartingUp()
         {
-            return new DisposableMock();
+            return new LogActivityMock();
         }
 
         public void NodeSuccessfullyActivated()
@@ -109,14 +108,14 @@ namespace NWheels.Microservices.Mocks
         {
         }
 
-        public IDisposable NodeUnloading()
+        public ILogActivity NodeUnloading()
         {
-            return new DisposableMock();
+            return new LogActivityMock();
         }
 
-        public IDisposable LookingForLifecycleComponents()
+        public ILogActivity LookingForLifecycleComponents()
         {
-            return new DisposableMock();
+            return new LogActivityMock();
         }
 
         public void FoundLifecycleComponent(string component)
@@ -128,11 +127,80 @@ namespace NWheels.Microservices.Mocks
         public void FailedToLoadLifecycleComponents(Exception e)
         { }
 
-        public class DisposableMock : IDisposable
+        public void ComponentsEventFailed(Type component, string @event, Exception error)
+        { }
+
+        public ILogActivity MicroserviceLoading(string component)
+        {
+            return new LogActivityMock();
+        }
+
+        public ILogActivity MicroserviceUnloaded(string component)
+        {
+            return new LogActivityMock();
+        }
+
+        public ILogActivity MicroserviceLoad(string component)
+        {
+            return new LogActivityMock();
+        }
+
+        public ILogActivity MicroserviceUnload(string component)
+        {
+            return new LogActivityMock();
+        }
+
+        public ILogActivity MicroserviceLoaded(string component)
+        {
+            return new LogActivityMock();
+        }
+
+        public ILogActivity MicroserviceUnloading(string component)
+        {
+            return new LogActivityMock();
+        }
+
+        public ILogActivity MicroserviceActivating(string component)
+        {
+            return new LogActivityMock();
+        }
+
+        public ILogActivity MicroserviceDeactivated(string component)
+        {
+            return new LogActivityMock();
+        }
+
+        public ILogActivity MicroserviceActivate(string component)
+        {
+            return new LogActivityMock();
+        }
+
+        public ILogActivity MicroserviceDeactivate(string component)
+        {
+            return new LogActivityMock();
+        }
+
+        public ILogActivity MicroserviceActivated(string component)
+        {
+            return new LogActivityMock();
+        }
+
+        public ILogActivity MicroserviceDeactivating(string component)
+        {
+            return new LogActivityMock();
+        }
+
+        public class LogActivityMock : ILogActivity
         {
             public void Dispose()
             {
             }
+
+            public void Warn(Exception error)
+            { }
+
+            public void Fail(Exception error)
+            { }
         }
     }
 }

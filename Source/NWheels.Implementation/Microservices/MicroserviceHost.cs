@@ -1,4 +1,5 @@
 ﻿using NWheels.Injection;
+using NWheels.Logging;
 using NWheels.Orchestration;
 using System;
 using System.Collections.Generic;
@@ -468,6 +469,28 @@ namespace NWheels.Microservices
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            protected void CallComponentsLifecycleStep(
+                ILifecycleListenerComponent component,
+                Func<string, ILogActivity> loggerFunc,
+                Action componentLifecycleStep)
+            {
+                using (var activity = loggerFunc(component.GetType().FullName))
+                {
+                    try
+                    {
+                        componentLifecycleStep();
+                    }
+                    catch (Exception e)
+                    {
+                        activity.Fail(e);
+                        OwnerHost.Logger.ComponentsEventFailed(component.GetType(), nameof(componentLifecycleStep), e);
+                        throw;
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             protected void JoinSystemSession()
             {
                 //_systemSession = _ownerLifetime.LifetimeContainer.Resolve<ISessionManager>().JoinGlobalSystem();
@@ -533,7 +556,6 @@ namespace NWheels.Microservices
                     x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == typeof(IComponentContainerBuilder))).FirstOrDefault();
 
                 var containerBuilder = (IComponentContainerBuilder)Activator.CreateInstance(containerBuilderType);
-                //Assembly.Load(assembly.GetName());
 
                 return containerBuilder;
             }
@@ -553,20 +575,30 @@ namespace NWheels.Microservices
             public void BuildSequence(IRevertableSequenceBuilder sequence)
             {
                 sequence.Once().OnPerform(FindLifecycleComponents);
+
+                sequence.ForEach(() => OwnerHost.LifecycleComponents)
+                    .OnPerform((component, index, isLast) => 
+                        CallComponentsLifecycleStep(component, OwnerHost.Logger.MicroserviceLoading, component.MicroserviceLoading))
+                    .OnRevert((component, index, isLast) =>
+                        CallComponentsLifecycleStep(component, OwnerHost.Logger.MicroserviceUnloaded, component.MicroserviceMaybeUnloaded));
+
+                sequence.ForEach(() => OwnerHost.LifecycleComponents)
+                    .OnPerform((component, index, isLast) =>
+                        CallComponentsLifecycleStep(component, OwnerHost.Logger.MicroserviceLoad, component.Load))
+                    .OnRevert((component, index, isLast) =>
+                        CallComponentsLifecycleStep(component, OwnerHost.Logger.MicroserviceUnload, component.MayUnload));
+
+                sequence.ForEach(() => OwnerHost.LifecycleComponents)
+                    .OnPerform((component, index, isLast) =>
+                        CallComponentsLifecycleStep(component, OwnerHost.Logger.MicroserviceLoaded, component.MicroserviceLoaded))
+                    .OnRevert((component, index, isLast) =>
+                        CallComponentsLifecycleStep(component, OwnerHost.Logger.MicroserviceUnloading, component.MicroserviceMaybeUnloading));
                 /*sequence.Once().OnPerform(JoinSystemSession).OnRevert(LeaveSystemSession);
-                sequence.Once().OnRevert(SaveDynamicModuleToAssembly);
-                sequence.Once().OnRevert(WriteEffectiveMetadataJson);
-                sequence.Once().OnPerform(LoadConfiguration);
-                sequence.Once().OnPerform(WriteEffectiveConfigurationXml);
-                sequence.Once().OnPerform(PreInitializeComponents);
-                sequence.Once().OnPerform(InitializeDataAccessComponents);
-                sequence.Once().OnPerform(FindLifecycleComponents);
-                sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeConfigured);
-                sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeLoading).OnRevert(CallComponentNodeUnloaded);
-                sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentLoad).OnRevert(CallComponentUnload);
-                sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeLoaded).OnRevert(CallComponentNodeUnloading);
+                ...
                 sequence.Once().OnPerform(LeaveSystemSession).OnRevert(JoinSystemSession);*/
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private void FindLifecycleComponents()
             {
@@ -596,24 +628,34 @@ namespace NWheels.Microservices
 
         private class ActivateSequenceCodeBehind : MicroserviceLifecycleSequenceBase, IRevertableSequenceCodeBehind
         {
-            private readonly IMicroserviceHostLogger _logger;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
             public ActivateSequenceCodeBehind(MicroserviceHost ownerHost)
                 : base(ownerHost)
             {
-                _logger = OwnerHost.Logger;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public void BuildSequence(IRevertableSequenceBuilder sequence)
             {
+                sequence.ForEach(() => OwnerHost.LifecycleComponents)
+                    .OnPerform((component, index, isLast) =>
+                        CallComponentsLifecycleStep(component, OwnerHost.Logger.MicroserviceActivating, component.MicroserviceActivating))
+                    .OnRevert((component, index, isLast) =>
+                        CallComponentsLifecycleStep(component, OwnerHost.Logger.MicroserviceDeactivated, component.MicroserviceMaybeDeactivated));
+
+                sequence.ForEach(() => OwnerHost.LifecycleComponents)
+                    .OnPerform((component, index, isLast) =>
+                        CallComponentsLifecycleStep(component, OwnerHost.Logger.MicroserviceActivate, component.Activate))
+                    .OnRevert((component, index, isLast) =>
+                        CallComponentsLifecycleStep(component, OwnerHost.Logger.MicroserviceDeactivate, component.MayDeactivate));
+
+                sequence.ForEach(() => OwnerHost.LifecycleComponents)
+                    .OnPerform((component, index, isLast) =>
+                        CallComponentsLifecycleStep(component, OwnerHost.Logger.MicroserviceActivated, component.MicroserviceActivated))
+                    .OnRevert((component, index, isLast) =>
+                        CallComponentsLifecycleStep(component, OwnerHost.Logger.MicroserviceDeactivating, component.MicroserviceMaybeDeactivating));
                 /*sequence.Once().OnPerform(JoinSystemSession).OnRevert(LeaveSystemSession);
-                sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeActivating).OnRevert(CallComponentNodeDeactivated);
-                sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentActivate).OnRevert(CallComponentDeactivate);
-                sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeActivated).OnRevert(CallComponentNodeDeactivating);
+                ...
                 sequence.Once().OnPerform(LeaveSystemSession).OnRevert(JoinSystemSession);*/
             }
         }

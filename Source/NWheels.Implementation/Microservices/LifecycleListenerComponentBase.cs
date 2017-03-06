@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace NWheels.Microservices
+﻿namespace NWheels.Microservices
 {
     public class LifecycleListenerComponentBase : ILifecycleListenerComponent
     {
-        public virtual void Activate()
+        public virtual void MicroserviceLoading()
         {
         }
 
@@ -12,15 +10,7 @@ namespace NWheels.Microservices
         {
         }
 
-        public virtual void MayDeactivate()
-        {
-        }
-
-        public virtual void MayUnload()
-        {
-        }
-
-        public virtual void MicroserviceActivated()
+        public virtual void MicroserviceLoaded()
         {
         }
 
@@ -28,15 +18,11 @@ namespace NWheels.Microservices
         {
         }
 
-        public virtual void MicroserviceLoaded()
+        public virtual void Activate()
         {
         }
 
-        public virtual void MicroserviceLoading()
-        {
-        }
-
-        public virtual void MicroserviceMaybeDeactivated()
+        public virtual void MicroserviceActivated()
         {
         }
 
@@ -44,11 +30,23 @@ namespace NWheels.Microservices
         {
         }
 
-        public virtual void MicroserviceMaybeUnloaded()
+        public virtual void MayDeactivate()
+        {
+        }
+
+        public virtual void MicroserviceMaybeDeactivated()
         {
         }
 
         public virtual void MicroserviceMaybeUnloading()
+        {
+        }
+
+        public virtual void MayUnload()
+        {
+        }
+
+        public virtual void MicroserviceMaybeUnloaded()
         {
         }
     }

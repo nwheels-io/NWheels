@@ -1,12 +1,13 @@
-﻿using System;
+﻿using NWheels.Logging;
+using System;
 
 namespace NWheels.Microservices
 {
     public interface IMicroserviceHostLogger
     {
-        IDisposable NodeConfiguring();
+        ILogActivity NodeConfiguring();
 
-        IDisposable NodeLoading();
+        ILogActivity NodeLoading();
 
         void NodeHasFailedToConfigure(Exception e);
 
@@ -18,7 +19,7 @@ namespace NWheels.Microservices
 
         void NodeSuccessfullyLoaded();
 
-        IDisposable NodeActivating();
+        ILogActivity NodeActivating();
 
         void NodeHasFailedToActivate(Exception e);
 
@@ -26,17 +27,17 @@ namespace NWheels.Microservices
 
         void NodeSuccessfullyActivated();
 
-        IDisposable NodeStartingUp();
+        ILogActivity NodeStartingUp();
 
-        IDisposable NodeDeactivating();
+        ILogActivity NodeDeactivating();
 
         Exception NodeHasFailedToDeactivate();
 
         void NodeDeactivated();
 
-        IDisposable NodeShuttingDown();
+        ILogActivity NodeShuttingDown();
 
-        IDisposable NodeUnloading();
+        ILogActivity NodeUnloading();
 
         Exception NodeHasFailedToUnload();
 
@@ -52,12 +53,38 @@ namespace NWheels.Microservices
 
         void NodeUnloadError(Exception e);
 
-        IDisposable LookingForLifecycleComponents();
+        ILogActivity LookingForLifecycleComponents();
 
         void FoundLifecycleComponent(string component);
 
         void NoLifecycleComponentsFound();
 
         void FailedToLoadLifecycleComponents(Exception e);
+
+        void ComponentsEventFailed(Type component, string @event, Exception error);
+
+        ILogActivity MicroserviceLoading(string component);
+
+        ILogActivity MicroserviceUnloaded(string component);
+
+        ILogActivity MicroserviceLoad(string component);
+
+        ILogActivity MicroserviceUnload(string component);
+
+        ILogActivity MicroserviceLoaded(string component);
+
+        ILogActivity MicroserviceUnloading(string component);
+
+        ILogActivity MicroserviceActivating(string component);
+
+        ILogActivity MicroserviceDeactivated(string component);
+
+        ILogActivity MicroserviceActivate(string component);
+
+        ILogActivity MicroserviceDeactivate(string component);
+
+        ILogActivity MicroserviceActivated(string component);
+
+        ILogActivity MicroserviceDeactivating(string component);
     }
 }

@@ -18,7 +18,6 @@
   <ItemGroup>
     <Folder Include="Configuration\" />
     <Folder Include="MetaTyping\" />
-    <Folder Include="Logging\" />
     <Folder Include="Authorization\" />
     <Folder Include="Aspectization\" />
     <Folder Include="Serialization\" />
