@@ -55,6 +55,10 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
             {
                 _crossInvocationState = new CrossInvocationJobState(this);
             }
+            else
+            {
+                _crossInvocationState.RefreshConfiguration();
+            }
 
             var operation = new DetectAndNotifyOperation(_crossInvocationState, _systemAlertConfiguration);
             operation.ExecuteOnce();
@@ -64,10 +68,10 @@ namespace NWheels.Domains.DevOps.Alerts.Jobs
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Refresh()
-        {
-            _crossInvocationState.RefreshConfiguration();
-        }
+        //public void Refresh()
+        //{
+        //    _crossInvocationState.RefreshConfiguration();
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
