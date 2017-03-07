@@ -17,6 +17,7 @@
     <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
     <ProjectReference Include="..\NWheels.Compilation.Adapters.Roslyn\NWheels.Compilation.Adapters.Roslyn.csproj" />
     <ProjectReference Include="..\NWheels.Implementation\NWheels.Implementation.csproj" />
+    <ProjectReference Include="..\NWheels.Injection.Adapters.Autofac\NWheels.Injection.Adapters.Autofac.csproj" />
     <ProjectReference Include="..\NWheels.Testability\NWheels.Testability.csproj" />
   </ItemGroup>
   <ItemGroup>

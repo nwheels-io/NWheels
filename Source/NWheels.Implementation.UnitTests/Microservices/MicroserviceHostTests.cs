@@ -1,7 +1,6 @@
 ﻿using NWheels.Injection;
+using NWheels.Injection.Adapters.Autofac;
 using NWheels.Microservices;
-using System;
-using System.Collections.Generic;
 using Xunit;
 
 namespace NWheels.Implementation.UnitTests.Microservices
@@ -13,23 +12,73 @@ namespace NWheels.Implementation.UnitTests.Microservices
         {
             //-- arrange
 
-            /*var bootConfig = new BootConfiguration()
+            var host = new MicroserviceHost(CreateBootConfiguration());
+            AssemblyLoadEventArgs containerEventArgs;
+            AssemblyLoadEventArgs featureLoaderEventArgs;
+            host.AssemblyLoad += (object sender, AssemblyLoadEventArgs e) =>
             {
-                MicroserviceConfig = new MicroserviceConfig()
+                if (e.ImplementedInterface == typeof(IComponentContainerBuilder))
                 {
-                },
-                EnvironmentConfig = new EnvironmentConfig()
+                    e.Destination.Add(typeof(ComponentContainerBuilder));
+                    containerEventArgs = e;
+                }
+                if (e.ImplementedInterface == typeof(IFeatureLoader))
                 {
+                    e.Destination.Add(typeof(FirstFeatureLoader));
+                    e.Destination.Add(typeof(SecondFeatureLoader));
+                    e.Destination.Add(typeof(ThirdFeatureLoader));
+                    e.Destination.Add(typeof(ForthFeatureLoader));
+                    e.Destination.Add(typeof(NamedFeatureLoader));
+                    featureLoaderEventArgs = e;
                 }
             };
-            var moduleLoader = new ModuleLoader();
-            var host = new MicroserviceHost(new BootConfiguration(), moduleLoader);
 
             //-- act
 
-            host.Configure();*/
+            host.Configure();
 
             //-- assert
+        }
+
+        private BootConfiguration CreateBootConfiguration()
+        {
+            return new BootConfiguration()
+            {
+                ConfigsDirectory = "ConfigsDirectory",
+                ModulesDirectory = "ModulesDirectory",
+                MicroserviceConfig = new MicroserviceConfig()
+                {
+                    Name = "MicroserviceName",
+                    InjectionAdapter = new MicroserviceConfig.InjectionAdapterElement()
+                    {
+                        Assembly = "InjectionAdapter"
+                    },
+                    ApplicationModules = new MicroserviceConfig.ModuleConfig[] 
+                    {
+                        new MicroserviceConfig.ModuleConfig()
+                        {
+                            Assembly = "ModuleAssembly",
+                            Features = new MicroserviceConfig.ModuleConfig.FeatureConfig[]
+                            {
+                                new MicroserviceConfig.ModuleConfig.FeatureConfig()
+                                {
+                                    Name = "ThirdFeatureLoader"
+                                },
+                                new MicroserviceConfig.ModuleConfig.FeatureConfig()
+                                {
+                                    Name = "NamedLoader"
+                                }
+                            }
+                        }
+                    },
+                    FrameworkModules = new MicroserviceConfig.ModuleConfig[] { }
+                },
+                EnvironmentConfig = new EnvironmentConfig()
+                {
+                    Name = "EnvironmentName",
+                    Variables = new EnvironmentConfig.VariableConfig[] { }
+                }
+            };
         }
 
         private class TestFeatureLoaderBase : FeatureLoaderBase
@@ -49,11 +98,27 @@ namespace NWheels.Implementation.UnitTests.Microservices
             public int RegisterConfigSectionsCounter { get; private set; }
         }
 
+        [DefaultFeatureLoader]
         private class FirstFeatureLoader : TestFeatureLoaderBase
         {
         }
 
+        [DefaultFeatureLoader]
         private class SecondFeatureLoader : TestFeatureLoaderBase
+        {
+        }
+
+        
+        private class ThirdFeatureLoader : TestFeatureLoaderBase
+        {
+        }
+
+        private class ForthFeatureLoader : TestFeatureLoaderBase
+        {
+        }
+
+        [FeatureLoader(Name = "NamedLoader")]
+        private class NamedFeatureLoader : TestFeatureLoaderBase
         {
         }
     }

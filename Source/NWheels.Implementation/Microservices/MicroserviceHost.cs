@@ -14,9 +14,7 @@ namespace NWheels.Microservices
 {
     public class MicroserviceHost
     {
-        public delegate List<Type> GetImplementingTypesDelegate(Type implementedType, string dirPath, string assembly);
         private readonly BootConfiguration _bootConfig;
-        private readonly GetImplementingTypesDelegate _loader;
         private readonly List<ILifecycleListenerComponent> _lifecycleComponents;
         private readonly RevertableSequence _configureSequence;
         private readonly RevertableSequence _loadSequence;
@@ -28,18 +26,9 @@ namespace NWheels.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHost(BootConfiguration bootConfig, GetImplementingTypesDelegate loader = null)
+        public MicroserviceHost(BootConfiguration bootConfig)
         {
             _bootConfig = bootConfig;
-            if (loader == null)
-            {
-                _loader = this.GetImplementingTypes;
-            }
-            else
-            {
-                _loader = loader;
-            }
-
             _configureSequence = new RevertableSequence(new ConfigureSequenceCodeBehind(this));
             _loadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
             _activateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
@@ -49,6 +38,7 @@ namespace NWheels.Microservices
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public event EventHandler StateChanged;
+        public event EventHandler<AssemblyLoadEventArgs> AssemblyLoad;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -219,16 +209,6 @@ namespace NWheels.Microservices
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private GetImplementingTypesDelegate Loader
-        {
-            get
-            {
-                return _loader;
-            }
-        }
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
         private List<ILifecycleListenerComponent> LifecycleComponents
         {
             get
@@ -356,13 +336,27 @@ namespace NWheels.Microservices
             }
         }
 
-        private List<Type> GetImplementingTypes(Type implementedType, string dirPath, string assembly)
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private List<Type> LoadAssembly(Type implementedInterface, string directoryPath, string assemblyName)
         {
+            var loadHandler = this.AssemblyLoad;
+            List<Type> types;
 
-            var assemblyContext = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.Combine(dirPath, $"{assembly}.dll"));
+            if (loadHandler != null)
+            {
+                var args = new AssemblyLoadEventArgs(implementedInterface, directoryPath, assemblyName);
+                loadHandler(this, args);
 
-            var types = assemblyContext.GetTypes().Where(
-                x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == implementedType)).ToList();
+                types = args.Destination;
+            }
+            else
+            {
+                var assemblyContext = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.Combine(directoryPath, $"{assemblyName}.dll"));
+
+                types = assemblyContext.GetTypes().Where(
+                    x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == implementedInterface)).ToList();
+            }
 
             return types;
         }
@@ -573,7 +567,7 @@ namespace NWheels.Microservices
 
                 foreach (var moduleConfig in configs)
                 {
-                    var featureLoaderTypes = OwnerHost.Loader(typeof(IFeatureLoader), OwnerHost.BootConfig.ModulesDirectory, moduleConfig.Assembly);
+                    var featureLoaderTypes = OwnerHost.LoadAssembly(typeof(IFeatureLoader), OwnerHost.BootConfig.ModulesDirectory, moduleConfig.Assembly);
 
                     types.AddRange(featureLoaderTypes.Where(x => x.GetTypeInfo().IsDefined(typeof(DefaultFeatureLoaderAttribute))).ToList());
 
@@ -631,7 +625,7 @@ namespace NWheels.Microservices
 
             private IComponentContainerBuilder CreateComponentContainerBuilder()
             {
-                var containerBuilderType = OwnerHost.Loader(
+                var containerBuilderType = OwnerHost.LoadAssembly(
                     typeof(IComponentContainerBuilder), 
                     OwnerHost.BootConfig.ModulesDirectory, 
                     OwnerHost.BootConfig.MicroserviceConfig.InjectionAdapter.Assembly);
