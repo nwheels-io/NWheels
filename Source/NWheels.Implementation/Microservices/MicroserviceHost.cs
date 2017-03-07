@@ -14,12 +14,13 @@ namespace NWheels.Microservices
 {
     public class MicroserviceHost
     {
+        public delegate List<Type> GetImplementingTypesDelegate(Type implementedType, string dirPath, string assembly);
         private readonly BootConfiguration _bootConfig;
+        private readonly GetImplementingTypesDelegate _loader;
         private readonly List<ILifecycleListenerComponent> _lifecycleComponents;
         private readonly RevertableSequence _configureSequence;
         private readonly RevertableSequence _loadSequence;
         private readonly RevertableSequence _activateSequence;
-        private readonly ModuleLoaderBase _moduleLoader;
         private int _initializationCount = 0;
         private IComponentContainer _container;
         private IMicroserviceHostLogger _logger;        
@@ -27,16 +28,16 @@ namespace NWheels.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHost(BootConfiguration bootConfig, ModuleLoaderBase moduleLoader = null)
+        public MicroserviceHost(BootConfiguration bootConfig, GetImplementingTypesDelegate loader = null)
         {
             _bootConfig = bootConfig;
-            if (moduleLoader == null)
+            if (loader == null)
             {
-                _moduleLoader = new RealModuleLoader(_bootConfig);
+                _loader = this.GetImplementingTypes;
             }
             else
             {
-                _moduleLoader = moduleLoader;
+                _loader = loader;
             }
 
             _configureSequence = new RevertableSequence(new ConfigureSequenceCodeBehind(this));
@@ -218,11 +219,11 @@ namespace NWheels.Microservices
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private ModuleLoaderBase ModuleLoader
+        private GetImplementingTypesDelegate Loader
         {
             get
             {
-                return _moduleLoader;
+                return _loader;
             }
         }
 
@@ -353,6 +354,17 @@ namespace NWheels.Microservices
             {
                 StateChanged(this, e);
             }
+        }
+
+        private List<Type> GetImplementingTypes(Type implementedType, string dirPath, string assembly)
+        {
+
+            var assemblyContext = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.Combine(dirPath, $"{assembly}.dll"));
+
+            var types = assemblyContext.GetTypes().Where(
+                x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == implementedType)).ToList();
+
+            return types;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -534,7 +546,7 @@ namespace NWheels.Microservices
             {
                 var containerBuilder = CreateComponentContainerBuilder();
 
-                var featureLoaders = OwnerHost.ModuleLoader.LoadAllFeatures();
+                var featureLoaders = LoadAllFeatures();
 
                 featureLoaders.ForEach(x => x.RegisterConfigSections());
 
@@ -545,18 +557,91 @@ namespace NWheels.Microservices
                 OwnerHost.CreateComponentContainer(containerBuilder);
             }
 
+            public List<IFeatureLoader> LoadAllFeatures()
+            {
+                var featureLoaders = GetFeatureLoadersByModuleConfigs(OwnerHost.BootConfig.MicroserviceConfig.ApplicationModules);
+                featureLoaders.AddRange(GetFeatureLoadersByModuleConfigs(OwnerHost.BootConfig.MicroserviceConfig.FrameworkModules));
+
+                return featureLoaders;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private List<IFeatureLoader> GetFeatureLoadersByModuleConfigs(MicroserviceConfig.ModuleConfig[] configs)
+            {
+                var types = new List<Type>();
+
+                foreach (var moduleConfig in configs)
+                {
+                    var featureLoaderTypes = OwnerHost.Loader(typeof(IFeatureLoader), OwnerHost.BootConfig.ModulesDirectory, moduleConfig.Assembly);
+
+                    types.AddRange(featureLoaderTypes.Where(x => x.GetTypeInfo().IsDefined(typeof(DefaultFeatureLoaderAttribute))).ToList());
+
+                    foreach (var featueConfig in moduleConfig.Features)
+                    {
+                        var type = GetTypeByFeatureLoaderConfig(featureLoaderTypes, featueConfig);
+                        if (type == null)
+                        {
+                            throw new Exception("Feature wasn't found.");
+                        }
+                        else
+                        {
+                            types.Add(type);
+                        }
+                    }
+                }
+
+                return types.Distinct().Select(x => (IFeatureLoader)Activator.CreateInstance(x)).ToList();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private Type GetTypeByFeatureLoaderConfig(List<Type> featureLoaderTypes, MicroserviceConfig.ModuleConfig.FeatureConfig featureConfig)
+            {
+                var duplicationException = new Exception($"Found more than one FeatureLoader for {featureConfig.Name} config name.");
+                Type type = null;
+                foreach (var featureType in featureLoaderTypes)
+                {
+                    var typeInfo = featureType.GetTypeInfo();
+                    if (typeInfo.Name == featureConfig.Name)
+                    {
+                        if (type != null)
+                        {
+                            throw duplicationException;
+                        }
+                        type = featureType;
+                    }
+                    else
+                    {
+                        var featureAttribute = typeInfo.GetCustomAttribute<FeatureLoaderAttribute>();
+                        if (featureAttribute != null && featureAttribute.Name == featureConfig.Name)
+                        {
+                            if (type != null)
+                            {
+                                throw duplicationException;
+                            }
+                            type = featureType;
+                        }
+                    }
+                }
+                return type;
+            }
+
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private IComponentContainerBuilder CreateComponentContainerBuilder()
             {
-                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.Combine(
+                var containerBuilderType = OwnerHost.Loader(
+                    typeof(IComponentContainerBuilder), 
                     OwnerHost.BootConfig.ModulesDirectory, 
-                    $"{OwnerHost.BootConfig.MicroserviceConfig.InjectionAdapter.Assembly}.dll"));
+                    OwnerHost.BootConfig.MicroserviceConfig.InjectionAdapter.Assembly);
 
-                var containerBuilderType = assembly.GetTypes().Where(
-                    x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == typeof(IComponentContainerBuilder))).FirstOrDefault();
+                if (containerBuilderType.Count != 1)
+                {
+                    throw new Exception($"{containerBuilderType.Count} IComponentContainerBuilder found.");
+                }
 
-                var containerBuilder = (IComponentContainerBuilder)Activator.CreateInstance(containerBuilderType);
+                var containerBuilder = (IComponentContainerBuilder)Activator.CreateInstance(containerBuilderType.First());
 
                 return containerBuilder;
             }

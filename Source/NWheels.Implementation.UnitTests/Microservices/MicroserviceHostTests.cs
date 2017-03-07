@@ -1,5 +1,6 @@
 ﻿using NWheels.Injection;
 using NWheels.Microservices;
+using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -29,18 +30,6 @@ namespace NWheels.Implementation.UnitTests.Microservices
             host.Configure();*/
 
             //-- assert
-        }
-
-        private class ModuleLoader : ModuleLoaderBase
-        {
-            public override List<IFeatureLoader> LoadAllFeatures()
-            {
-                return new List<IFeatureLoader>()
-                {
-                    new FirstFeatureLoader(),
-                    new SecondFeatureLoader()
-                };
-            }
         }
 
         private class TestFeatureLoaderBase : FeatureLoaderBase
