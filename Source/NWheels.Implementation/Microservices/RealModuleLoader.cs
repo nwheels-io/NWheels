@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -15,7 +16,7 @@ namespace NWheels.Microservices
             _config = config;
         }
 
-        public override List<IFeatureLoader> LoadModule()
+        public override List<IFeatureLoader> LoadAllFeatures()
         {
             var featureLoaders = GetFeatureLoadersByModuleConfigs(_config.MicroserviceConfig.ApplicationModules);
             featureLoaders.AddRange(GetFeatureLoadersByModuleConfigs(_config.MicroserviceConfig.FrameworkModules));
@@ -31,13 +32,14 @@ namespace NWheels.Microservices
 
             foreach (var moduleConfig in configs)
             {
-                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(
-                    $"{_config.ModulesDirectory}\\{moduleConfig.Assembly}.dll");
+                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.Combine(
+                    _config.ModulesDirectory,
+                    $"{moduleConfig.Assembly}.dll"));
 
                 var featureLoaderTypes = assembly.GetTypes().Where(
                     x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == typeof(IFeatureLoader))).ToList();
 
-                types = featureLoaderTypes.Where(x => x.GetTypeInfo().IsDefined(typeof(DefaultFeatureLoaderAttribute))).ToList();
+                types.AddRange(featureLoaderTypes.Where(x => x.GetTypeInfo().IsDefined(typeof(DefaultFeatureLoaderAttribute))).ToList());
 
                 foreach (var featueConfig in moduleConfig.Features)
                 {

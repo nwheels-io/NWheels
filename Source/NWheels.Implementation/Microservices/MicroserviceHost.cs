@@ -1,8 +1,10 @@
-﻿using NWheels.Injection;
+﻿using NWheels.Extensions;
+using NWheels.Injection;
 using NWheels.Logging;
 using NWheels.Orchestration;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -13,7 +15,6 @@ namespace NWheels.Microservices
     public class MicroserviceHost
     {
         private readonly BootConfiguration _bootConfig;
-        private readonly string _modulesPath;
         private readonly List<ILifecycleListenerComponent> _lifecycleComponents;
         private readonly RevertableSequence _configureSequence;
         private readonly RevertableSequence _loadSequence;
@@ -26,10 +27,9 @@ namespace NWheels.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHost(BootConfiguration bootConfig, string modulesPath, ModuleLoaderBase moduleLoader = null)
+        public MicroserviceHost(BootConfiguration bootConfig, ModuleLoaderBase moduleLoader = null)
         {
             _bootConfig = bootConfig;
-            _modulesPath = modulesPath;
             if (moduleLoader == null)
             {
                 _moduleLoader = new RealModuleLoader(_bootConfig);
@@ -534,7 +534,7 @@ namespace NWheels.Microservices
             {
                 var containerBuilder = CreateComponentContainerBuilder();
 
-                var featureLoaders = OwnerHost.ModuleLoader.LoadModule();
+                var featureLoaders = OwnerHost.ModuleLoader.LoadAllFeatures();
 
                 featureLoaders.ForEach(x => x.RegisterConfigSections());
 
@@ -549,8 +549,9 @@ namespace NWheels.Microservices
 
             private IComponentContainerBuilder CreateComponentContainerBuilder()
             {
-                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(
-                    $"{OwnerHost.BootConfig.ModulesDirectory}\\{OwnerHost.BootConfig.MicroserviceConfig.InjectionAdapter.Assembly}.dll");
+                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.Combine(
+                    OwnerHost.BootConfig.ModulesDirectory, 
+                    $"{OwnerHost.BootConfig.MicroserviceConfig.InjectionAdapter.Assembly}.dll"));
 
                 var containerBuilderType = assembly.GetTypes().Where(
                     x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == typeof(IComponentContainerBuilder))).FirstOrDefault();
@@ -608,7 +609,7 @@ namespace NWheels.Microservices
                     {
                         var foundComponents = OwnerHost.Container.ResolveAll<ILifecycleListenerComponent>();
                         OwnerHost.LifecycleComponents.AddRange(foundComponents);
-                        OwnerHost.LifecycleComponents.ForEach(x => OwnerHost.Logger.FoundLifecycleComponent(x.GetType().ToString()));
+                        OwnerHost.LifecycleComponents.ForEach(x => OwnerHost.Logger.FoundLifecycleComponent(x.GetType().FriendlyName()));
                         
                         if (OwnerHost.LifecycleComponents.Count == 0)
                         {

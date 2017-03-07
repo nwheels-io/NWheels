@@ -1,5 +1,4 @@
-﻿using NWheels.Microservices;
-using System.IO;
+﻿using System.IO;
 using System.Xml.Serialization;
 
 namespace NWheels.Microservices
@@ -13,17 +12,17 @@ namespace NWheels.Microservices
 
         public EnvironmentConfig EnvironmentConfig { get; set; }
 
-        public string LoadedFromDirectory { get; set; }
+        public string ConfigsDirectory { get; set; }
 
         public string ModulesDirectory { get; set; }
 
-        public static BootConfiguration LoadFromDirectory(string dirPath, string modulesPath)
+        public static BootConfiguration LoadFromDirectory(string configsPath, string modulesPath)
         {
             return new BootConfiguration() {
-                LoadedFromDirectory = dirPath,
+                ConfigsDirectory = configsPath,
                 ModulesDirectory = modulesPath,
-                MicroserviceConfig = Deserialize<MicroserviceConfig>($"{dirPath}\\{MicroserviceConfigFileName}"),
-                EnvironmentConfig = Deserialize<EnvironmentConfig>($"{dirPath}\\{EnvironmentConfigFileName}")
+                MicroserviceConfig = Deserialize<MicroserviceConfig>($"{configsPath}\\{MicroserviceConfigFileName}"),
+                EnvironmentConfig = Deserialize<EnvironmentConfig>($"{configsPath}\\{EnvironmentConfigFileName}")
             };
         }
 

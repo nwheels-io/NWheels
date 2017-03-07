@@ -4,6 +4,6 @@ namespace NWheels.Microservices
 {
     public abstract class ModuleLoaderBase
     {
-        public abstract List<IFeatureLoader> LoadModule();
+        public abstract List<IFeatureLoader> LoadAllFeatures();
     }
 }
