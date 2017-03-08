@@ -15,20 +15,21 @@ namespace NWheels.Microservices
     public class MicroserviceHost
     {
         private readonly BootConfiguration _bootConfig;
+        private readonly IMicroserviceHostLogger _logger;        
         private readonly List<ILifecycleListenerComponent> _lifecycleComponents;
         private readonly RevertableSequence _configureSequence;
         private readonly RevertableSequence _loadSequence;
         private readonly RevertableSequence _activateSequence;
         private int _initializationCount = 0;
         private IComponentContainer _container;
-        private IMicroserviceHostLogger _logger;        
         private TransientStateMachine<MicroserviceState, MicroserviceTrigger> _stateMachine;        
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHost(BootConfiguration bootConfig)
+        public MicroserviceHost(BootConfiguration bootConfig, IMicroserviceHostLogger logger)
         {
             _bootConfig = bootConfig;
+            _logger = logger;
             _configureSequence = new RevertableSequence(new ConfigureSequenceCodeBehind(this));
             _loadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
             _activateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
@@ -307,8 +308,6 @@ namespace NWheels.Microservices
                 new Mocks.TransientStateMachineLoggerMock<MicroserviceState, MicroserviceTrigger>());
                 //_container.Resolve<TransientStateMachine<MicroserviceState, MicroserviceTrigger>.ILogger>());
             _stateMachine.CurrentStateChanged += OnStateChanged;
-            
-            _logger = new Mocks.MicroserviceHostLoggerMock();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -323,7 +322,6 @@ namespace NWheels.Microservices
             _container.Dispose();
             _container = null;
             _stateMachine = null;
-            _logger = null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -551,11 +549,10 @@ namespace NWheels.Microservices
                 OwnerHost.CreateComponentContainer(containerBuilder);
             }
 
-            public List<IFeatureLoader> LoadAllFeatures()
+            private List<IFeatureLoader> LoadAllFeatures()
             {
                 var featureLoaders = GetFeatureLoadersByModuleConfigs(OwnerHost.BootConfig.MicroserviceConfig.ApplicationModules);
                 featureLoaders.AddRange(GetFeatureLoadersByModuleConfigs(OwnerHost.BootConfig.MicroserviceConfig.FrameworkModules));
-
                 return featureLoaders;
             }
 
@@ -585,7 +582,11 @@ namespace NWheels.Microservices
                     }
                 }
 
-                return types.Distinct().Select(x => (IFeatureLoader)Activator.CreateInstance(x)).ToList();
+                return types.Distinct().Select(x =>
+                {
+                    OwnerHost.Logger.FoundFeatureLoaderComponent(x.FriendlyName());
+                    return (IFeatureLoader)Activator.CreateInstance(x);
+                }).ToList();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

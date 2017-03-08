@@ -1,6 +1,5 @@
 using FluentAssertions;
 using NWheels.Microservices;
-using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 using Xunit;
@@ -50,6 +49,8 @@ namespace NWheels.Implementation.UnitTests.Microservices
             result.ApplicationModules.Length.Should().Be(2);
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [Fact]
         public void DeserializeEnvironmentConfig()
         {
@@ -81,6 +82,8 @@ namespace NWheels.Implementation.UnitTests.Microservices
             result.Variables[1].Name.Should().Be("input-queue-url");
             result.Variables[1].Value.Should().Be("my-queue-address");
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
         public void SerializeMicroserviceConfig()

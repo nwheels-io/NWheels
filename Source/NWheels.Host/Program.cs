@@ -1,4 +1,5 @@
 ﻿using NWheels.Microservices;
+using NWheels.Microservices.Mocks;
 using System;
 
 namespace NWheels.Host
@@ -16,7 +17,7 @@ namespace NWheels.Host
                 Console.WriteLine($"modulesPath {args[3]}");
 
                 var config = BootConfiguration.LoadFromDirectory(configsPath: args[1], modulesPath: args[3]);
-                var host = new MicroserviceHost(config);
+                var host = new MicroserviceHost(config, new MicroserviceHostLoggerMock());
 
                 host.Configure();
                 host.LoadAndActivate();

@@ -1,10 +1,19 @@
 ﻿using NWheels.Logging;
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace NWheels.Microservices.Mocks
 {
-    internal class MicroserviceHostLoggerMock : IMicroserviceHostLogger
+    public class MicroserviceHostLoggerMock : IMicroserviceHostLogger
     {
+        private List<string> _logs;
+
+        public MicroserviceHostLoggerMock()
+        {
+            _logs = new List<string>();
+        }
+
         public ILogActivity NodeActivating()
         {
             return new LogActivityMock();
@@ -121,6 +130,11 @@ namespace NWheels.Microservices.Mocks
         public void FoundLifecycleComponent(string component)
         { }
 
+        public void FoundFeatureLoaderComponent(string component)
+        {
+            Log(nameof(this.FoundFeatureLoaderComponent), nameof(component), component);
+        }
+
         public void NoLifecycleComponentsFound()
         { }
 
@@ -188,6 +202,23 @@ namespace NWheels.Microservices.Mocks
         public ILogActivity MicroserviceDeactivating(string component)
         {
             return new LogActivityMock();
+        }
+
+        public string[] TakeLog()
+        {
+            var result = _logs.ToArray();
+            _logs.Clear();
+            return result;
+        }
+
+        private void Log(string methodName, params string[] args)
+        {
+            var arguments = new StringBuilder();
+            for (var i = 0; i < args.Length / 2; i++)
+            {
+                arguments.Append($"{args[i*2]}={args[i*2 + 1]}");
+            }
+            _logs.Add($"{methodName}({arguments})");
         }
 
         public class LogActivityMock : ILogActivity

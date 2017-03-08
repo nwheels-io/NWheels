@@ -1,6 +1,10 @@
-﻿using NWheels.Injection;
+﻿using FluentAssertions;
+using NWheels.Injection;
 using NWheels.Injection.Adapters.Autofac;
 using NWheels.Microservices;
+using NWheels.Microservices.Mocks;
+using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace NWheels.Implementation.UnitTests.Microservices
@@ -8,37 +12,144 @@ namespace NWheels.Implementation.UnitTests.Microservices
     public class MicroserviceHostTests
     {
         [Fact]
-        public void Configure()
+        public void CheckMicroserviceConfigOnConfiguring()
         {
             //-- arrange
 
-            var host = new MicroserviceHost(CreateBootConfiguration());
-            AssemblyLoadEventArgs containerEventArgs;
-            AssemblyLoadEventArgs featureLoaderEventArgs;
-            host.AssemblyLoad += (object sender, AssemblyLoadEventArgs e) =>
-            {
-                if (e.ImplementedInterface == typeof(IComponentContainerBuilder))
-                {
-                    e.Destination.Add(typeof(ComponentContainerBuilder));
-                    containerEventArgs = e;
-                }
-                if (e.ImplementedInterface == typeof(IFeatureLoader))
-                {
-                    e.Destination.Add(typeof(FirstFeatureLoader));
-                    e.Destination.Add(typeof(SecondFeatureLoader));
-                    e.Destination.Add(typeof(ThirdFeatureLoader));
-                    e.Destination.Add(typeof(ForthFeatureLoader));
-                    e.Destination.Add(typeof(NamedFeatureLoader));
-                    featureLoaderEventArgs = e;
-                }
-            };
+            var host = new MicroserviceHost(CreateBootConfiguration(), new MicroserviceHostLoggerMock());
+            var handler = new AssemblyLoadEventHandler();
+            
+            host.AssemblyLoad += handler.Handle;
 
             //-- act
 
             host.Configure();
 
             //-- assert
+
+            var config = CreateBootConfiguration();
+
+            handler.ContainerEventArgs.Should().NotBeNull();
+            handler.ContainerEventArgs.AssemblyName.Should().Be(config.MicroserviceConfig.InjectionAdapter.Assembly);
+            handler.ContainerEventArgs.Destination.Count.Should().Be(1);
+            handler.ContainerEventArgs.DirectoryPath.Should().Be(config.ModulesDirectory);
+
+            handler.FeatureLoaderEventArgsList.Should().HaveCount(
+                config.MicroserviceConfig.FrameworkModules.Length + config.MicroserviceConfig.ApplicationModules.Length);
+            handler.FeatureLoaderEventArgsList.Should().ContainSingle(
+                x => x.AssemblyName == config.MicroserviceConfig.ApplicationModules[0].Assembly);
+            handler.FeatureLoaderEventArgsList.Should().ContainSingle(
+                x => x.AssemblyName == config.MicroserviceConfig.ApplicationModules[1].Assembly);
+            handler.FeatureLoaderEventArgsList.Should().ContainSingle(
+                x => x.AssemblyName == config.MicroserviceConfig.FrameworkModules[0].Assembly);
+            handler.FeatureLoaderEventArgsList.ForEach(x => x.DirectoryPath.Should().Be(config.ModulesDirectory));
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CheckDefaultFeatureLoadersDiscoveredOnConfiguring()
+        {
+            //-- arrange
+
+            var logger = new MicroserviceHostLoggerMock();
+            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
+            var handler = new AssemblyLoadEventHandler();
+
+            host.AssemblyLoad += handler.Handle;
+
+            //-- act
+
+            host.Configure();
+
+            //-- assert
+
+            var logs = logger.TakeLog();
+            logs.Should().Contain(new string[] {
+                "FoundFeatureLoaderComponent(component=FirstFeatureLoader)",
+                "FoundFeatureLoaderComponent(component=SecondFeatureLoader)",
+
+                "FoundFeatureLoaderComponent(component=SeventhFeatureLoader)",
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CheckNamedByAttributeFeatureLoadersDiscoveredOnConfiguring()
+        {
+            //-- arrange
+
+            var logger = new MicroserviceHostLoggerMock();
+            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
+            var handler = new AssemblyLoadEventHandler();
+
+            host.AssemblyLoad += handler.Handle;
+
+            //-- act
+
+            host.Configure();
+
+            //-- assert
+
+            var logs = logger.TakeLog();
+            logs.Should().Contain(new string[] {
+                "FoundFeatureLoaderComponent(component=NamedFeatureLoader)"
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CheckNamedByConventionFeatureLoadersDiscoveredOnConfiguring()
+        {
+            //-- arrange
+
+            var logger = new MicroserviceHostLoggerMock();
+            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
+            var handler = new AssemblyLoadEventHandler();
+
+            host.AssemblyLoad += handler.Handle;
+
+            //-- act
+
+            host.Configure();
+
+            //-- assert
+
+            var logs = logger.TakeLog();
+            logs.Should().Contain(new string[] {
+                "FoundFeatureLoaderComponent(component=ThirdFeatureLoader)",
+
+                "FoundFeatureLoaderComponent(component=FifthFeatureLoader)",
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void TryDiscoverUnexistedFeatureLoaderOnConfiguring()
+        {
+            //-- arrange
+
+            var logger = new MicroserviceHostLoggerMock();
+            var config = CreateBootConfiguration();
+            config.MicroserviceConfig.ApplicationModules[0].Features[0].Name = "Abracadabra";
+            var host = new MicroserviceHost(config, logger);
+            var handler = new AssemblyLoadEventHandler();
+
+            host.AssemblyLoad += handler.Handle;
+
+            //-- act
+
+            Action configuring = () => host.Configure();
+
+            //-- assert
+
+            configuring.ShouldThrow<Exception>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private BootConfiguration CreateBootConfiguration()
         {
@@ -57,7 +168,7 @@ namespace NWheels.Implementation.UnitTests.Microservices
                     {
                         new MicroserviceConfig.ModuleConfig()
                         {
-                            Assembly = "ModuleAssembly",
+                            Assembly = "FirstModuleAssembly",
                             Features = new MicroserviceConfig.ModuleConfig.FeatureConfig[]
                             {
                                 new MicroserviceConfig.ModuleConfig.FeatureConfig()
@@ -69,34 +180,115 @@ namespace NWheels.Implementation.UnitTests.Microservices
                                     Name = "NamedLoader"
                                 }
                             }
+                        },
+                        new MicroserviceConfig.ModuleConfig()
+                        {
+                            Assembly = "SecondModuleAssembly",
+                            Features = new MicroserviceConfig.ModuleConfig.FeatureConfig[]
+                            {
+                                new MicroserviceConfig.ModuleConfig.FeatureConfig()
+                                {
+                                    Name = "FifthFeatureLoader"
+                                }
+                            }
                         }
                     },
-                    FrameworkModules = new MicroserviceConfig.ModuleConfig[] { }
+                    FrameworkModules = new MicroserviceConfig.ModuleConfig[] 
+                    {
+                        new MicroserviceConfig.ModuleConfig()
+                        {
+                            Assembly = "FrameworkModule",
+                            Features = new MicroserviceConfig.ModuleConfig.FeatureConfig[]{ }
+                        }
+                    }
                 },
                 EnvironmentConfig = new EnvironmentConfig()
                 {
                     Name = "EnvironmentName",
-                    Variables = new EnvironmentConfig.VariableConfig[] { }
+                    Variables = new EnvironmentConfig.VariableConfig[] 
+                    {
+                        new EnvironmentConfig.VariableConfig()
+                        {
+                            Name = "FirstVariable",
+                            Value = "FirstValue"
+                        },
+                        new EnvironmentConfig.VariableConfig()
+                        {
+                            Name = "SecondVariable",
+                            Value = "SecondValue"
+                        },
+                        new EnvironmentConfig.VariableConfig()
+                        {
+                            Name = "ThirdVariable",
+                            Value = "ThirdValue"
+                        }
+                    }
                 }
             };
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class AssemblyLoadEventHandler
+        {
+            public AssemblyLoadEventHandler()
+            {
+                FeatureLoaderEventArgsList = new List<AssemblyLoadEventArgs>();
+            }
+
+            public void Handle(object sender, AssemblyLoadEventArgs e)
+            {
+                if (e.ImplementedInterface == typeof(IComponentContainerBuilder))
+                {
+                    e.Destination.Add(typeof(ComponentContainerBuilder));
+                    ContainerEventArgs = e;
+                }
+                if (e.ImplementedInterface == typeof(IFeatureLoader))
+                {
+                    if (e.AssemblyName == "FirstModuleAssembly")
+                    {
+                        e.Destination.Add(typeof(FirstFeatureLoader));
+                        e.Destination.Add(typeof(SecondFeatureLoader));
+                        e.Destination.Add(typeof(ThirdFeatureLoader));
+                        e.Destination.Add(typeof(ForthFeatureLoader));
+                        e.Destination.Add(typeof(NamedFeatureLoader));
+                    }
+                    if (e.AssemblyName == "SecondModuleAssembly")
+                    {
+                        e.Destination.Add(typeof(FifthFeatureLoader));
+                        e.Destination.Add(typeof(SixthFeatureLoader));
+                    }
+                    if (e.AssemblyName == "FrameworkModule")
+                    {
+                        e.Destination.Add(typeof(SeventhFeatureLoader));
+                        e.Destination.Add(typeof(EighthFeatureLoader));
+                    }
+
+                    FeatureLoaderEventArgsList.Add(e);
+                }
+            }
+
+            public AssemblyLoadEventArgs ContainerEventArgs { get; private set; }
+
+            public List<AssemblyLoadEventArgs> FeatureLoaderEventArgsList { get; private set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private class TestFeatureLoaderBase : FeatureLoaderBase
         {
             public override void RegisterComponents(IComponentContainerBuilder containerBuilder)
             {
-                RegisterComponentsCounter++;
+                //log to string
             }
 
             public override void RegisterConfigSections()
             {
-                RegisterConfigSectionsCounter++;
+                //log to string
             }
-
-            public int RegisterComponentsCounter { get; private set; }
-
-            public int RegisterConfigSectionsCounter { get; private set; }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DefaultFeatureLoader]
         private class FirstFeatureLoader : TestFeatureLoaderBase
@@ -107,7 +299,6 @@ namespace NWheels.Implementation.UnitTests.Microservices
         private class SecondFeatureLoader : TestFeatureLoaderBase
         {
         }
-
         
         private class ThirdFeatureLoader : TestFeatureLoaderBase
         {
@@ -119,6 +310,23 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
         [FeatureLoader(Name = "NamedLoader")]
         private class NamedFeatureLoader : TestFeatureLoaderBase
+        {
+        }
+
+        private class FifthFeatureLoader : TestFeatureLoaderBase
+        {
+        }
+
+        private class SixthFeatureLoader : TestFeatureLoaderBase
+        {
+        }
+
+        [DefaultFeatureLoader]
+        private class SeventhFeatureLoader : TestFeatureLoaderBase
+        {
+        }
+
+        private class EighthFeatureLoader : TestFeatureLoaderBase
         {
         }
     }

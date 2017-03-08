@@ -57,6 +57,8 @@ namespace NWheels.Microservices
 
         void FoundLifecycleComponent(string component);
 
+        void FoundFeatureLoaderComponent(string component);
+
         void NoLifecycleComponentsFound();
 
         void FailedToLoadLifecycleComponents(Exception e);
