@@ -547,6 +547,8 @@ namespace NWheels.Microservices
                 featureLoaders.ForEach(x => x.RegisterComponents(containerBuilder));
 
                 OwnerHost.CreateComponentContainer(containerBuilder);
+
+                //OwnerHost.Container
             }
 
             private List<IFeatureLoader> LoadAllFeatures()

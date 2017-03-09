@@ -7,5 +7,7 @@ namespace NWheels.Microservices
         void RegisterConfigSections();
 
         void RegisterComponents(IComponentContainerBuilder containerBuilder);
+
+        void CompileComponents(IComponentContainer input, IComponentContainerBuilder output);
     }
 }

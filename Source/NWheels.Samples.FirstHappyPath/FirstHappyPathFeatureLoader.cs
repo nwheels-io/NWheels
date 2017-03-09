@@ -10,9 +10,5 @@ namespace NWheels.Samples.FirstHappyPath
         {
             containerBuilder.Register<ILifecycleListenerComponent, FirstLifecycleListenerComponent>();
         }
-
-        public override void RegisterConfigSections()
-        {
-        }
     }
 }

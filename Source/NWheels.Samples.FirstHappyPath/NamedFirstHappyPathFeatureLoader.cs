@@ -9,9 +9,5 @@ namespace NWheels.Samples.FirstHappyPath
         public override void RegisterComponents(IComponentContainerBuilder containerBuilder)
         {
         }
-
-        public override void RegisterConfigSections()
-        {
-        }
     }
 }

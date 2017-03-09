@@ -151,6 +151,39 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Fact]
+        public void TryDiscoverDuplicatedFeatureLoaderOnConfiguring()
+        {
+            //-- arrange
+
+            var logger = new MicroserviceHostLoggerMock();
+            var config = CreateBootConfiguration();
+            var host = new MicroserviceHost(config, logger);
+            var handler = new AssemblyLoadEventHandler();
+
+            host.AssemblyLoad += handler.Handle;
+            host.AssemblyLoad += (object sender, AssemblyLoadEventArgs e) =>
+            {
+                if (e.ImplementedInterface == typeof(IFeatureLoader))
+                {
+                    if (e.AssemblyName == "FirstModuleAssembly")
+                    {
+                        e.Destination.Add(typeof(DuplicatedFeatureLoader));
+                    }
+                }
+            };
+
+            //-- act
+
+            Action configuring = () => host.Configure();
+
+            //-- assert
+
+            configuring.ShouldThrow<Exception>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private BootConfiguration CreateBootConfiguration()
         {
             return new BootConfiguration()
@@ -279,12 +312,6 @@ namespace NWheels.Implementation.UnitTests.Microservices
         {
             public override void RegisterComponents(IComponentContainerBuilder containerBuilder)
             {
-                //log to string
-            }
-
-            public override void RegisterConfigSections()
-            {
-                //log to string
             }
         }
 
@@ -327,6 +354,11 @@ namespace NWheels.Implementation.UnitTests.Microservices
         }
 
         private class EighthFeatureLoader : TestFeatureLoaderBase
+        {
+        }
+
+        [FeatureLoader(Name = "ThirdFeatureLoader")]
+        private class DuplicatedFeatureLoader : TestFeatureLoaderBase
         {
         }
     }

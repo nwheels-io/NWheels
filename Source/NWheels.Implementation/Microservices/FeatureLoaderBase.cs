@@ -6,6 +6,12 @@ namespace NWheels.Microservices
     {
         public abstract void RegisterComponents(IComponentContainerBuilder containerBuilder);
 
-        public abstract void RegisterConfigSections();
+        public virtual void RegisterConfigSections()
+        {
+        }
+
+        public virtual void CompileComponents(IComponentContainer input, IComponentContainerBuilder output)
+        {
+        }
     }
 }
