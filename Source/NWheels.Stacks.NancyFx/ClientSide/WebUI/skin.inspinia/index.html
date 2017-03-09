@@ -60,6 +60,7 @@ HEAD, JS/CSS LINKS
         .middle-box {
             max-width:500px;
         }
+        
         .btn-md.btn-circle {
             width: 36px;
             height: 36px;
@@ -610,6 +611,9 @@ h2.logo-name {
     float: none;
 }
 }
+    .menu-item-highlight-nw {
+        color: white !important;
+    }
     </style>
 </head>
 <body 
@@ -1104,6 +1108,19 @@ h2.logo-name {
                     SmoothlyMenu();
                 });
             });
+            $scope.onItemClick = function(item, event) {
+                if ($scope.selectedItemEl) {
+                    $scope.selectedItemEl.removeClass('menu-item-highlight-nw');
+                    $scope.selectedItemEl.closest('li').removeClass('active');
+                    $scope.selectedItemEl = null;
+                }
+
+                var el = $(event.target);
+                el.addClass('menu-item-highlight-nw');
+                $scope.selectedItemEl = el;
+                
+                $scope.$emit(item.notifications[1].qualifiedName, item.value);
+            };
         }
     </script>
 
@@ -1111,7 +1128,7 @@ h2.logo-name {
     UIDL WIDGET - MANAGEMENT CONSOLE MENU ITEM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/ManagementConsole-menu-item">
-        <a ng-class="{bold: item.level==0}" ng-show="item.subItems.length==0" href="#" ng-click="$emit(item.notifications[1].qualifiedName, item.value)"><i ng-if="item.icon" style="width:19px;" class="fa fa-{{::item.icon}}"></i>{{::translate(item.text)}}</a>
+        <a ng-class="{bold: item.level==0}" ng-show="item.subItems.length==0" href="#" ng-click="onItemClick(item, $event)"><i ng-if="item.icon" style="width:19px;" class="fa fa-{{::item.icon}}"></i>{{::translate(item.text)}}</a>
         <a href="#" ng-show="::item.subItems.length > 0" ng-controller="menuSubItemsExpander" ng-click="toggleSubItems()">
             <i ng-if="item.icon" style="width:16px;" class="fa fa-{{::item.icon}}"></i>
             <span class="nav-label" ng-class="{bold: item.level==0}">{{::translate(item.text)}}</span>
