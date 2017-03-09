@@ -3035,7 +3035,7 @@ h2.logo-name {
                             <div ng-hide="nestedObjectExists()">
                                 Turned off. Toggle checkbox above to turn on.
                             </div>
-                            <div ng-show="nestedObjectExists()">
+                            <div ng-if="nestedObjectExists()">
                                 <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="model.Data.entity"></uidl-widget>
                             </div>
                         </div>

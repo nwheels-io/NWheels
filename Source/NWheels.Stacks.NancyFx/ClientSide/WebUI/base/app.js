@@ -3468,8 +3468,8 @@ function ($timeout, $rootScope, uidlService, entityService) {
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.controller('formNestedObject',
-['$scope', 'entityService', 'commandService', 'uidlService',
-function ($scope, entityService, commandService, uidlService) {
+['$scope', '$timeout', 'entityService', 'commandService', 'uidlService',
+function ($scope, $timeout, entityService, commandService, uidlService) {
     
     $scope.isNullable = (
         $scope.fieldHasModifier($scope.field, 'Nullable') && 
@@ -3494,8 +3494,10 @@ function ($scope, entityService, commandService, uidlService) {
                 entityService.newDomainObject($scope.field.nestedWidget.entityName).then(
                     function (newObj) {
                         $scope.model.Data.entity[$scope.field.propertyName] = newObj;
-                        $scope.$broadcast($scope.field.nestedWidget.qualifiedName + ':ModelSetter', newObj);
-                        $scope.$broadcast($scope.field.nestedWidget.qualifiedName + ':EditAuthorized');
+                        $timeout(function() { 
+                            $scope.$broadcast($scope.field.nestedWidget.qualifiedName + ':ModelSetter', newObj);
+                            $scope.$broadcast($scope.field.nestedWidget.qualifiedName + ':EditAuthorized');
+                        });
                     },
                     function (fault) {
                         scope.$emit($scope.uidl.qualifiedName + ':NewDomainObjectFailed', commandService.createFaultInfo(fault));
