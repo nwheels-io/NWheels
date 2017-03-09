@@ -42,6 +42,7 @@ namespace NWheels.DataObjects
         bool IsCollection { get; }
         bool IsReadOnly { get; }
         bool IsCalculated { get; }
+        bool IsCalculatedForceUpdateOnSave { get; }
         bool IsPartition { get; }
         string PartitionValuePropertyName { get; }
         int? NumericPrecision { get; }

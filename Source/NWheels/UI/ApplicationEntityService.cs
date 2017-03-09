@@ -2817,7 +2817,7 @@ namespace NWheels.UI
                 {
                     var metaProperty = TryGetPropertyByName(metaTypes, jsonProperty.PropertyName);
 
-                    if (metaProperty != null && metaProperty.IsCalculated)
+                    if (metaProperty != null && metaProperty.IsCalculated && !metaProperty.IsCalculatedForceUpdateOnSave)
                     {
                         jsonProperty.MemberConverter = new CalculatedPropertyConverter();
                     }

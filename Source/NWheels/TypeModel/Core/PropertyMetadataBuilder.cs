@@ -235,6 +235,7 @@ namespace NWheels.DataObjects.Core
         public PropertyAccess Access { get; set; }
         public bool IsSensitive { get; set; }
         public bool IsCalculated { get; set; }
+        public bool IsCalculatedForceUpdateOnSave { get; set; }
         public bool IsPartition { get; set; }
         public string PartitionValuePropertyName { get; set; }
         public int? NumericPrecision { get; set; }

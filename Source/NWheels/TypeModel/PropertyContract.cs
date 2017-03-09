@@ -123,11 +123,14 @@ namespace NWheels.DataObjects
             public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
             {
                 property.IsCalculated = true;
+                property.IsCalculatedForceUpdateOnSave = this.ForceUpdateOnSave;
                 property.Access |= PropertyAccess.Read;
                 property.Access &= ~PropertyAccess.Write;
             }
 
             #endregion
+
+            public bool ForceUpdateOnSave { get; set; }
         }
 
         public class ReadOnlyAttribute : PropertyContractAttribute { }
