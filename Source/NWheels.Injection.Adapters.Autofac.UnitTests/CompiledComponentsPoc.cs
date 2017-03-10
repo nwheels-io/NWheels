@@ -16,27 +16,55 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
         {
             var builder = new ContainerBuilder();
 
-            var feature1 = new GinArmyFeatureLoader();
-            var feature2 = new GinInABottleFeatureLoader();
+            // a feature provided by the Jinn Framework
+            // Jinn Army gathers all existing Jinns under one roof
+            var feature1 = new JinnArmyFeatureLoader();       
+
+            // a feature provided by the Bottle Framework
+            // with this feature, every Bottle will have a generated Jinn inside it
+            var feature2 = new JinnInABottleFeatureLoader();
+
+            // a feature provided by application
+            // contributes some application-specific Bottles
             var feature3 = new MyBottlesFeatureLoader();
 
+            // a feature provided by application
+            // contributes some free Jinns (not sitting inside Bottles)
+            var feature4 = new MyFreeJinnsFeatureLoader();  
+
+            // STEP 1. Let all features register components in container builder
             feature1.RegisterComponents(builder);
             feature2.RegisterComponents(builder);
             feature3.RegisterComponents(builder);
+            feature4.RegisterComponents(builder);
 
+            // STEP 2. Create container instance from the builder
             var container = builder.Build();
 
+            // STEP 3. Based on already registered components, generate layers of derivative components
+            // (in this example, a Jinn component will be generated for every registered Bottle).
+            // Register the generated components, so that other components can depend on them.
             feature1.CompileComponents(container);
             feature2.CompileComponents(container);
             feature3.CompileComponents(container);
+            feature4.CompileComponents(container);
 
-            var army = container.Resolve<GinArmy>();
-            var ginsInTheArmy = army.Enumerate().ToArray();
+            // STEP 4. Resolve JinnArmy, and verify that it received Jinns generated in step 3, from the container.
+            var army = container.Resolve<JinnArmy>();
+            var jinnsInTheArmy = army.Enumerate().ToArray();
 
-            Assert.Equal(2, ginsInTheArmy.Length);
-            Assert.IsType<GeneratedGinForBeerBottle>(ginsInTheArmy[0]);
-            Assert.IsType<GeneratedGinForJerrycan>(ginsInTheArmy[1]);
+            Assert.Equal(4, jinnsInTheArmy.Length);
+
+            // verify that the container delivers generated and manually registered Jinns together
+            Assert.Equal(1, jinnsInTheArmy.Count(j => j is GeneratedJinnForBeerBottle));
+            Assert.Equal(1, jinnsInTheArmy.Count(j => j is GeneratedJinnForJerrycan));
+            Assert.Equal(1, jinnsInTheArmy.Count(j => j is FreeJinn && j.Name == "Jonny"));
+            Assert.Equal(1, jinnsInTheArmy.Count(j => j is FreeJinn && j.Name == "Tommy"));
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Application feature that contributes some application-specific bottles
 
         [BottleComponent]
         private class BeerBottle { }
@@ -48,49 +76,134 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
         {
             public void RegisterComponents(ContainerBuilder builder)
             {
-                // in real code, the following will be extension methods on builder:
+                // in real code, extension method syntax will be used:
                 // builder.ContributeBottle<BeerBottle>();
 
-                ContainerBuilderExtensions.ContributeBottle<BeerBottle>(builder);
-                ContainerBuilderExtensions.ContributeBottle<Jerrycan>(builder);
+                BottleContainerBuilderExtensions.ContributeBottle<BeerBottle>(builder);
+                BottleContainerBuilderExtensions.ContributeBottle<Jerrycan>(builder);
             }
             public void CompileComponents(IContainer container)
             {
             }
         }
 
-        private class GinInABottleFeatureLoader
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Application feature that contributes some free Jinns, not related to any bottles
+
+        private class MyFreeJinnsFeatureLoader
         {
             public void RegisterComponents(ContainerBuilder builder)
             {
-                builder.RegisterType<GinInABottleTypeFactory>().As<GinInABottleTypeFactory, IGinInABottleObjectFactory>().SingleInstance();
+                // in real code, extension method syntax will be used:
+                // builder.ContributeFreeJinn("Jonny");
+
+                JinnContainerBuilderExtensions.ContributeFreeJinn(builder, "Jonny");
+                JinnContainerBuilderExtensions.ContributeFreeJinn(builder, "Tommy");
+            }
+            public void CompileComponents(IContainer container)
+            {
+            }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region The Bottle Framework module
+
+        [AttributeUsage(AttributeTargets.Class)]
+        private class BottleComponentAttribute : Attribute
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        static class BottleContainerBuilderExtensions
+        {
+            public static void ContributeBottle<TBottle>(ContainerBuilder builder)
+            {
+                builder.RegisterType<TBottle>().AsSelf().InstancePerDependency();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private interface IJinnInABottleObjectFactory
+        {
+            IJinn CreateJinnFor(Type bottleType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class JinnInABottleTypeFactory : IJinnInABottleObjectFactory
+        {
+            private readonly Dictionary<Type, Func<IJinn>> _jinnActivatorByBottleType = new Dictionary<Type, Func<IJinn>>();
+
+            public void GenerateJinnTypeFor(Type bottleType)
+            {
+                if (bottleType == typeof(BeerBottle))
+                {
+                    _jinnActivatorByBottleType[bottleType] = () => new GeneratedJinnForBeerBottle();
+                }
+                else if (bottleType == typeof(Jerrycan))
+                {
+                    _jinnActivatorByBottleType[bottleType] = () => new GeneratedJinnForJerrycan();
+                }
+                else
+                {
+                    throw new NotSupportedException("What did you expect? this is just a test.");
+                }
+            }
+
+            IJinn IJinnInABottleObjectFactory.CreateJinnFor(Type bottleType)
+            {
+                var activator = _jinnActivatorByBottleType[bottleType];
+                var newJinnInstance = activator();
+                return newJinnInstance;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class JinnInABottleFeatureLoader
+        {
+            public void RegisterComponents(ContainerBuilder builder)
+            {
+                builder.RegisterType<JinnInABottleTypeFactory>().As<JinnInABottleTypeFactory, IJinnInABottleObjectFactory>().SingleInstance();
             }
 
             public void CompileComponents(IContainer container)
             {
-                var registeredBottleTypes = GinInABottleRegistrationSource.FindRegisteredBottleTypes(container.ComponentRegistry.Registrations);
-                var typeFactory = container.Resolve<GinInABottleTypeFactory>();
+                var registeredBottleTypes = JinnInABottleRegistrationSource.FindRegisteredBottleTypes(container.ComponentRegistry.Registrations);
+                var typeFactory = container.Resolve<JinnInABottleTypeFactory>();
 
                 foreach (var bottleType in registeredBottleTypes)
                 {
-                    typeFactory.GenerateGinTypeFor(bottleType);
+                    typeFactory.GenerateJinnTypeFor(bottleType);
                 }
 
-                var ginRegistrationSource = new GinInABottleRegistrationSource(typeFactory, registeredBottleTypes);
-                container.ComponentRegistry.AddRegistrationSource(ginRegistrationSource);
+                var jinnInABottleRegistrations = new JinnInABottleRegistrationSource(typeFactory, registeredBottleTypes);
+                container.ComponentRegistry.AddRegistrationSource(jinnInABottleRegistrations);
             }
         }
 
-        private class GinInABottleRegistrationSource : IRegistrationSource
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //TODO: implementing registration source is quite a bit of work!
+        //      we should see how we offload it from the code of every concrete feature loader
+        private class JinnInABottleRegistrationSource : IRegistrationSource
         {
-            private readonly IGinInABottleObjectFactory _ginObjectFactory;
+            private readonly IJinnInABottleObjectFactory _jinnObjectFactory;
             private readonly Type[] _bottleTypes;
 
-            public GinInABottleRegistrationSource(
-                IGinInABottleObjectFactory ginObjectFactory, 
+            public JinnInABottleRegistrationSource(
+                IJinnInABottleObjectFactory jinnObjectFactory, 
                 IEnumerable<Type> bottleTypes)
             {
-                _ginObjectFactory = ginObjectFactory;
+                _jinnObjectFactory = jinnObjectFactory;
                 _bottleTypes = bottleTypes.ToArray();
             }
 
@@ -100,7 +213,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
                 Service service, 
                 Func<Service, IEnumerable<IComponentRegistration>> registrationAccessor)
             {
-                if (!IsServiceOfTypeIGin(service))
+                if (!IsServiceOfTypeIJinn(service))
                 {
                     return Enumerable.Empty<IComponentRegistration>();
                 }
@@ -111,9 +224,9 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
                 {
                     var bottleTypeCopy = bottleType;
                     newRegistrations.Add(RegistrationBuilder.ForDelegate(
-                        typeof(IGin),
+                        typeof(IJinn),
                         (c, p) => {
-                            return _ginObjectFactory.CreateGinFor(bottleTypeCopy);
+                            return _jinnObjectFactory.CreateJinnFor(bottleTypeCopy);
                         }
                     ).CreateRegistration());
                 }
@@ -131,102 +244,94 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
                     .ToArray();
             }
 
-            private static bool IsServiceOfTypeIGin(Service service)
+            private static bool IsServiceOfTypeIJinn(Service service)
             {
                 return (
                     service is IServiceWithType serviceWithType && 
-                    serviceWithType.ServiceType == typeof(IGin));
+                    serviceWithType.ServiceType == typeof(IJinn));
             }
         }
 
-        private class GinArmyFeatureLoader
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region The Jinn Framework module
+
+        private interface IJinn
+        {
+            void FulfillWish(string wish);
+            string Name { get; }
+        }
+
+        private class JinnArmy
+        {
+            private readonly IReadOnlyList<IJinn> _allJinns;
+
+            public JinnArmy(IEnumerable<IJinn> allJinns)
+            {
+                _allJinns = allJinns.ToArray();
+            }
+
+            public IEnumerable<IJinn> Enumerate() => _allJinns;
+        }
+
+        static class JinnContainerBuilderExtensions
+        {
+            public static void ContributeFreeJinn(ContainerBuilder builder, string jinnName)
+            {
+                builder.RegisterType<FreeJinn>()
+                    .As<IJinn>()
+                    .WithParameter(TypedParameter.From(jinnName))
+                    .InstancePerDependency();
+            }
+        }
+
+        private class FreeJinn : IJinn
+        {
+            public FreeJinn(string name)
+            {
+                this.Name = name;
+            }
+            public void FulfillWish(string wish)
+            {
+            }
+            public string Name { get; }
+        }
+
+        private class JinnArmyFeatureLoader
         {
             public void RegisterComponents(ContainerBuilder builder)
             {
-                builder.RegisterType<GinArmy>().SingleInstance();
+                builder.RegisterType<JinnArmy>().SingleInstance();
             }
             public void CompileComponents(IContainer container)
             {
             }
         }
 
-        [AttributeUsage(AttributeTargets.Class)]
-        private class BottleComponentAttribute : Attribute
-        {
-        }
+        #endregion
 
-        internal interface IGin
-        {
-            void FulfillWish(string wish);
-        }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class GinArmy
-        {
-            private readonly IReadOnlyList<IGin> _allGins;
+        #region Generated components
 
-            public GinArmy(IEnumerable<IGin> allGins)
-            {
-                _allGins = allGins.ToArray();
-            }
-
-            public IEnumerable<IGin> Enumerate() => _allGins;
-        }
-
-        private interface IGinInABottleObjectFactory
-        {
-            IGin CreateGinFor(Type bottleType);
-        }
-
-        private class GinInABottleTypeFactory : IGinInABottleObjectFactory
-        {
-            private readonly Dictionary<Type, Func<IGin>> _ginFactoryByBottleType = new Dictionary<Type, Func<IGin>>();
-
-            public void GenerateGinTypeFor(Type bottleType)
-            {
-                if (bottleType == typeof(BeerBottle))
-                { 
-                    _ginFactoryByBottleType[bottleType] = () => new GeneratedGinForBeerBottle();
-                }
-                else if (bottleType == typeof(Jerrycan))
-                {
-                    _ginFactoryByBottleType[bottleType] = () => new GeneratedGinForJerrycan();
-                }
-                else
-                {
-                    throw new NotSupportedException("What did you expect? this is just a test.");
-                }
-            }
-
-            IGin IGinInABottleObjectFactory.CreateGinFor(Type bottleType)
-            {
-                var ginFactory = _ginFactoryByBottleType[bottleType];
-                var newGinInstance = ginFactory();
-                return newGinInstance;
-            }
-        }
-
-        private class GeneratedGinForBeerBottle : IGin
+        private class GeneratedJinnForBeerBottle : IJinn
         {
             public void FulfillWish(string wish)
             {
-                throw new NotImplementedException();
             }
+            public string Name => "Beer Bottle Jinn";
         }
 
-        private class GeneratedGinForJerrycan : IGin
+        private class GeneratedJinnForJerrycan : IJinn
         {
             public void FulfillWish(string wish)
             {
-                throw new NotImplementedException();
             }
+            public string Name => "Jerrycan Jinn";
         }
 
-        static class ContainerBuilderExtensions
-        {
-            public static void ContributeBottle<TBottle>(ContainerBuilder builder)
-            {
-                builder.RegisterType<TBottle>().AsSelf().InstancePerDependency();
-            }
-        }
+        #endregion
     }
 }
