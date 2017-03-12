@@ -9,7 +9,7 @@ using System.Text;
 
 namespace NWheels.Compilation.Mechanism.Factories
 {
-    public abstract class TypeFactoryBase<TContextExtension, TArtifact>
+    public abstract class TypeFactoryBase<TContextExtension, TArtifact> : ITypeFactory
     {
         private readonly ITypeLibrary<TArtifact> _library;
 
@@ -19,6 +19,10 @@ namespace NWheels.Compilation.Mechanism.Factories
         {
             _library = library;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Type ITypeFactory.ArtifactType => typeof(TArtifact);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
