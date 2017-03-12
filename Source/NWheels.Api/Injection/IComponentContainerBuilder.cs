@@ -7,9 +7,24 @@ namespace NWheels.Injection
     {
         void ContributeLifecycleListener<T>() where T : ILifecycleListenerComponent;
 
-        void Register<TInterface, TImplementation>(LifeStyle lifeStyle = LifeStyle.Singleton) where TImplementation : TInterface;
+        //TODO: refactor the following APIs to be more self-documenting
+        //for example: 
+        //  RegisterComponent<...>().ForServices<...>()
+        //  or
+        //  RegisterImplementation<...>().ForInterfaces<...>()
+
+        void Register<TInterface, TImplementation>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+            where TImplementation : TInterface;
+
+        void Register<TInterface1, TInterface2, TImplementation>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+            where TImplementation : TInterface1, TInterface2;
+
+        void Register<TInterface1, TInterface2, TInterface3, TImplementation>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+            where TImplementation : TInterface1, TInterface2, TInterface3;
 
         void Register<TInterface>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
+        void Register<TInterface1, TInterface2>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
+        void Register<TInterface1, TInterface2, TInterface3>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
 
         IComponentContainer CreateComponentContainer();
     }

@@ -4,6 +4,6 @@
     {
         Singleton,
         Transient,
-        PerCall
+        PerExecutionPath
     }
 }
