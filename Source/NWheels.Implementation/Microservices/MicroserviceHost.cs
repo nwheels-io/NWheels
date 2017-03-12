@@ -21,7 +21,7 @@ namespace NWheels.Microservices
         private readonly RevertableSequence _loadSequence;
         private readonly RevertableSequence _activateSequence;
         private int _initializationCount = 0;
-        private IComponentContainer _container;
+        private IInternalComponentContainer _container;
         private TransientStateMachine<MicroserviceState, MicroserviceTrigger> _stateMachine;        
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -188,6 +188,13 @@ namespace NWheels.Microservices
             FinalizeAfterUnload();
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IComponentContainer GetContainer()
+        {
+            return _container;
+        }
+
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         private IMicroserviceHostLogger Logger
@@ -220,20 +227,16 @@ namespace NWheels.Microservices
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IComponentContainer Container
+        private IInternalComponentContainer Container
         {
             get
             {
                 return _container;
             }
-        }
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void CreateComponentContainer(IComponentContainerBuilder builder)
-        {
-            //TODO: validate _container == null
-            _container = builder.CreateComponentContainer();
+            set
+            {
+                _container = value;
+            }
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -546,10 +549,16 @@ namespace NWheels.Microservices
 
                 featureLoaders.ForEach(x => x.RegisterComponents(containerBuilder));
 
-                OwnerHost.CreateComponentContainer(containerBuilder);
+                OwnerHost.Container = containerBuilder.CreateComponentContainer();
 
-                featureLoaders.ForEach(x => x.CompileComponents(OwnerHost.Container, containerBuilder));
+                var compileContainerBuilder = CreateComponentContainerBuilder();
+
+                featureLoaders.ForEach(x => x.CompileComponents(OwnerHost.Container, compileContainerBuilder));
+
+                OwnerHost.Container.Merge(compileContainerBuilder);
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private List<IFeatureLoader> LoadAllFeatures()
             {
@@ -626,7 +635,7 @@ namespace NWheels.Microservices
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private IComponentContainerBuilder CreateComponentContainerBuilder()
+            private IInternalComponentContainerBuilder CreateComponentContainerBuilder()
             {
                 var containerBuilderType = OwnerHost.LoadAssembly(
                     typeof(IComponentContainerBuilder), 
@@ -638,7 +647,7 @@ namespace NWheels.Microservices
                     throw new Exception($"{containerBuilderType.Count} IComponentContainerBuilder found.");
                 }
 
-                var containerBuilder = (IComponentContainerBuilder)Activator.CreateInstance(containerBuilderType.First());
+                var containerBuilder = (IInternalComponentContainerBuilder)Activator.CreateInstance(containerBuilderType.First());
 
                 return containerBuilder;
             }

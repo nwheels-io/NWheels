@@ -184,6 +184,30 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Fact]
+        public void GetCompileRegistredComponentAfterConfiguring()
+        {
+            //-- arrange
+
+            var logger = new MicroserviceHostLoggerMock();
+            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
+            var handler = new AssemblyLoadEventHandler();
+
+            host.AssemblyLoad += handler.Handle;
+
+            //-- act
+
+            host.Configure();
+            var container = host.GetContainer();
+            var component = container.Resolve<ICompileRegistered>();
+
+            //-- assert
+
+            component.Should().NotBeNull();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private BootConfiguration CreateBootConfiguration()
         {
             return new BootConfiguration()
@@ -317,9 +341,24 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private interface ICompileRegistered
+        { }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class CompileRegistered : ICompileRegistered
+        { }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DefaultFeatureLoader]
         private class FirstFeatureLoader : TestFeatureLoaderBase
         {
+            public override void CompileComponents(IInternalComponentContainer input, IComponentContainerBuilder output)
+            {
+                output.Register<ICompileRegistered, CompileRegistered>();
+                base.CompileComponents(input, output);
+            }
         }
 
         [DefaultFeatureLoader]

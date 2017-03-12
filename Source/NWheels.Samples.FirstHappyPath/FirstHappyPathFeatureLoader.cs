@@ -12,7 +12,7 @@ namespace NWheels.Samples.FirstHappyPath
             containerBuilder.Register<ILifecycleListenerComponent, FirstLifecycleListenerComponent>();
         }
 
-        public override void CompileComponents(IComponentContainer input, IComponentContainerBuilder output)
+        public override void CompileComponents(IInternalComponentContainer input, IComponentContainerBuilder output)
         {
             output.Register<IDisposable, FirstHappyPathCompiler>();
         }

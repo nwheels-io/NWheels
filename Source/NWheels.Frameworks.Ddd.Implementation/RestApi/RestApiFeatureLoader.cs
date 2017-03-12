@@ -1,12 +1,9 @@
-﻿using NWheels.Microservices;
-using NWheels.Compilation;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using NWheels.Compilation;
 using NWheels.Injection;
+using NWheels.Microservices;
+using NWheels.Platform.Rest;
 using System.Linq;
 using System.Reflection;
-using NWheels.Platform.Rest;
 
 namespace NWheels.Frameworks.Ddd.RestApi
 {
@@ -20,14 +17,14 @@ namespace NWheels.Frameworks.Ddd.RestApi
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void CompileComponents(IComponentContainer input, IComponentContainerBuilder output)
+        public override void CompileComponents(IInternalComponentContainer input, IComponentContainerBuilder output)
         {
             CompileTxHandlers(input, output);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void CompileTxHandlers(IComponentContainer input, IComponentContainerBuilder output)
+        private static void CompileTxHandlers(IInternalComponentContainer input, IComponentContainerBuilder output)
         {
             var allTxTypes = input.GetAllServices(typeof(object))
                 .Where(t => t.GetTypeInfo().IsDefined(typeof(TransactionScriptComponentAttribute)))

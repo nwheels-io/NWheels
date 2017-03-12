@@ -16,7 +16,7 @@ namespace NWheels.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public virtual void CompileComponents(IComponentContainer input, IComponentContainerBuilder output)
+        public virtual void CompileComponents(IInternalComponentContainer input, IComponentContainerBuilder output)
         {
         }
     }

@@ -17,7 +17,8 @@ namespace NWheels.Frameworks.Ddd.RestApi
 
         public void EnsureResourceHandlersCompiled(Type txType)
         {
-            throw new NotImplementedException();
+            var key = new TypeKey(this.GetType(), txType);
+            base.GetOrBuildTypeMember(ref key);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

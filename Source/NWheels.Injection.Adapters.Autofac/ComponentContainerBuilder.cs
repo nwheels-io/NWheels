@@ -4,7 +4,7 @@ using System;
 
 namespace NWheels.Injection.Adapters.Autofac
 {
-    public class ComponentContainerBuilder : IComponentContainerBuilder
+    public class ComponentContainerBuilder : IInternalComponentContainerBuilder
     {
         private readonly ContainerBuilder _containerBuilder;
 
@@ -24,7 +24,7 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IComponentContainer CreateComponentContainer()
+        public IInternalComponentContainer CreateComponentContainer()
         {
             var container = _containerBuilder.Build();
             var containerWrapper = new ComponentContainer(container);

@@ -10,22 +10,20 @@ namespace NWheels.Injection
         //TODO: refactor the following APIs to be more self-documenting
         //for example: 
         //  RegisterComponent<...>().ForServices<...>()
-        //  or
-        //  RegisterImplementation<...>().ForInterfaces<...>()
 
-        void Register<TInterface, TImplementation>(LifeStyle lifeStyle = LifeStyle.Singleton) 
-            where TImplementation : TInterface;
+        void Register<TService, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+            where TComponent : TService;
 
-        void Register<TInterface1, TInterface2, TImplementation>(LifeStyle lifeStyle = LifeStyle.Singleton) 
-            where TImplementation : TInterface1, TInterface2;
+        void Register<TService1, TService2, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+            where TComponent : TService1, TService2;
 
-        void Register<TInterface1, TInterface2, TInterface3, TImplementation>(LifeStyle lifeStyle = LifeStyle.Singleton) 
-            where TImplementation : TInterface1, TInterface2, TInterface3;
+        void Register<TService1, TService2, TService3, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+            where TComponent : TService1, TService2, TService3;
 
-        void Register<TInterface>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
-        void Register<TInterface1, TInterface2>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
-        void Register<TInterface1, TInterface2, TInterface3>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
+        void Register<TService>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
 
-        IComponentContainer CreateComponentContainer();
+        void Register<TService1, TService2>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
+
+        void Register<TService1, TService2, TService3>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
     }
 }

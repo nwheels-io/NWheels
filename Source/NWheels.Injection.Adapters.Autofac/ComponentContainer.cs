@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace NWheels.Injection.Adapters.Autofac
 {
-    public class ComponentContainer : IComponentContainer
+    public class ComponentContainer : IInternalComponentContainer
     {
         IContainer _container;
 
@@ -26,6 +26,20 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TService Resolve<TService>()
+        {
+            return _container.Resolve<TService>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEnumerable<TService> ResolveAll<TService>()
+        {
+            return _container.Resolve<IEnumerable<TService>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IEnumerable<Type> GetAllServices(Type baseType)
         {
             return _container
@@ -38,16 +52,14 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TInterface Resolve<TInterface>()
+        public void Merge(IInternalComponentContainerBuilder containerBuilder)
         {
-            throw new NotImplementedException();
-        }
+            var componentContainer = (ComponentContainer)containerBuilder.CreateComponentContainer();
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public IEnumerable<TInterface> ResolveAll<TInterface>()
-        {
-            return _container.Resolve<IEnumerable<TInterface>>();
+            foreach (var componentRegistration in componentContainer._container.ComponentRegistry.Registrations)
+            {
+                _container.ComponentRegistry.Register(componentRegistration);
+            }
         }
     }
 }
