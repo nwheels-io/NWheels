@@ -1,4 +1,6 @@
-﻿using NWheels.Extensions;
+﻿using NWheels.Compilation;
+using NWheels.Compilation.Mechanism.Factories;
+using NWheels.Extensions;
 using NWheels.Injection;
 using NWheels.Logging;
 using NWheels.Orchestration;
@@ -521,6 +523,9 @@ namespace NWheels.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        //TODO: we don't use any features of revertable sequence here; 
+        //      why not just convert it into a plain logic class?
+        //      or instead, we can convert ForEach loops over feature loaders into ForEach'es of the revertable sequence.
         private class ConfigureSequenceCodeBehind : MicroserviceLifecycleSequenceBase, IRevertableSequenceCodeBehind
         {
             public ConfigureSequenceCodeBehind(MicroserviceHost ownerHost)
@@ -532,44 +537,68 @@ namespace NWheels.Microservices
 
             public void BuildSequence(IRevertableSequenceBuilder sequence)
             {
-                sequence.Once().OnPerform(RegisterFeatureLoaders);
+                sequence.Once().OnPerform(LoadFeatures);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void RegisterFeatureLoaders()
+            private void LoadFeatures()
             {
                 var containerBuilder = CreateComponentContainerBuilder();
+                var featureLoaders = GetConfiguredFeatureLoaders();
 
-                var featureLoaders = LoadAllFeatures();
+                featureLoaders.ForEach(x => x.ContributeConfigSections());
 
-                featureLoaders.ForEach(x => x.RegisterConfigSections());
+                //TODO: load configuration here
 
-                //load configuration
-
-                featureLoaders.ForEach(x => x.RegisterComponents(containerBuilder));
+                featureLoaders.ForEach(x => x.ContributeComponents(containerBuilder));
 
                 OwnerHost.Container = containerBuilder.CreateComponentContainer();
 
-                var compileContainerBuilder = CreateComponentContainerBuilder();
-
-                featureLoaders.ForEach(x => x.CompileComponents(OwnerHost.Container, compileContainerBuilder));
-
-                OwnerHost.Container.Merge(compileContainerBuilder);
+                CompileComponents(featureLoaders);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private List<IFeatureLoader> LoadAllFeatures()
+            private void CompileComponents(List<IFeatureLoader> featureLoaders)
             {
-                var featureLoaders = GetFeatureLoadersByModuleConfigs(OwnerHost.BootConfig.MicroserviceConfig.ApplicationModules);
+                featureLoaders.ForEach(x => x.CompileComponents(OwnerHost.Container));
+
+                var typeLibrary = OwnerHost.Container.Resolve<ITypeLibrary<IRuntimeTypeFactoryArtifact>>();
+                typeLibrary.CompileDeclaredTypeMembers();
+
+                var compiledComponents = CreateComponentContainerBuilder();
+
+                featureLoaders.ForEach(x => x.ContributeCompiledComponents(OwnerHost.Container, compiledComponents));
+
+                OwnerHost.Container.Merge(compiledComponents);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private List<IFeatureLoader> GetConfiguredFeatureLoaders()
+            {
+                var featureLoaders = new List<IFeatureLoader>();
+
+                featureLoaders.AddRange(GetKernelDefaultFeatureLoaders());
+                featureLoaders.AddRange(GetFeatureLoadersByModuleConfigs(OwnerHost.BootConfig.MicroserviceConfig.ApplicationModules));
                 featureLoaders.AddRange(GetFeatureLoadersByModuleConfigs(OwnerHost.BootConfig.MicroserviceConfig.FrameworkModules));
+
                 return featureLoaders;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private List<IFeatureLoader> GetFeatureLoadersByModuleConfigs(MicroserviceConfig.ModuleConfig[] configs)
+            private IEnumerable<IFeatureLoader> GetKernelDefaultFeatureLoaders()
+            {
+                return new IFeatureLoader[] {
+                    new CompilationFeatureLoader()
+                };
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IEnumerable<IFeatureLoader> GetFeatureLoadersByModuleConfigs(MicroserviceConfig.ModuleConfig[] configs)
             {
                 var types = new List<Type>();
 
@@ -651,6 +680,10 @@ namespace NWheels.Microservices
 
                 return containerBuilder;
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

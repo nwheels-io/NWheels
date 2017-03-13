@@ -2,6 +2,7 @@
 using NWheels.Injection;
 using NWheels.Microservices;
 using NWheels.Platform.Rest;
+using System;
 using System.Linq;
 using System.Reflection;
 
@@ -10,36 +11,52 @@ namespace NWheels.Frameworks.Ddd.RestApi
     [FeatureLoader(Name = "RestApi")]
     public class RestApiFeatureLoader : FeatureLoaderBase
     {
-        public override void RegisterComponents(IComponentContainerBuilder containerBuilder)
+        private Type[] _allTxTypes;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
         {
             containerBuilder.ContributeTypeFactory<TxResourceHandlerTypeFactory, ITxResourceHandlerObjectFactory>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void CompileComponents(IInternalComponentContainer input, IComponentContainerBuilder output)
+        public override void CompileComponents(IInternalComponentContainer input)
         {
-            CompileTxHandlers(input, output);
+            CompileTxHandlers(input);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void CompileTxHandlers(IInternalComponentContainer input, IComponentContainerBuilder output)
+        public override void ContributeCompiledComponents(IInternalComponentContainer input, IComponentContainerBuilder output)
         {
-            var allTxTypes = input.GetAllServices(typeof(object))
+            ContributeCompiledTxHandlers(input, output);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void CompileTxHandlers(IInternalComponentContainer input)
+        {
+            _allTxTypes = input.GetAllServices(typeof(object))
                 .Where(t => t.GetTypeInfo().IsDefined(typeof(TransactionScriptComponentAttribute)))
                 .ToArray();
 
             var handlerTypeFactory = input.Resolve<TxResourceHandlerTypeFactory>();
 
-            foreach (var txType in allTxTypes)
+            foreach (var txType in _allTxTypes)
             {
                 handlerTypeFactory.EnsureResourceHandlersCompiled(txType);
             }
+        }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ContributeCompiledTxHandlers(IInternalComponentContainer input, IComponentContainerBuilder output)
+        {
             var handlerObjectFactory = input.Resolve<ITxResourceHandlerObjectFactory>();
 
-            foreach (var txType in allTxTypes)
+            foreach (var txType in _allTxTypes)
             {
                 var handlerList = handlerObjectFactory.CreateResourceHandlerList(txType);
 

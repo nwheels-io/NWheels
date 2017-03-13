@@ -6,7 +6,7 @@ namespace NWheels.Samples.FirstHappyPath
     [FeatureLoader(Name = "SpecificNamedFirstHappyPathFeatureLoader")]
     public class NamedFirstHappyPathFeatureLoader : FeatureLoaderBase
     {
-        public override void RegisterComponents(IComponentContainerBuilder containerBuilder)
+        public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
         {
         }
     }

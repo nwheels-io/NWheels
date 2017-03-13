@@ -7,12 +7,16 @@ namespace NWheels.Samples.FirstHappyPath
     [DefaultFeatureLoader]
     public class FirstHappyPathFeatureLoader : FeatureLoaderBase
     {
-        public override void RegisterComponents(IComponentContainerBuilder containerBuilder)
+        public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
         {
             containerBuilder.Register<ILifecycleListenerComponent, FirstLifecycleListenerComponent>();
         }
 
-        public override void CompileComponents(IInternalComponentContainer input, IComponentContainerBuilder output)
+        public override void CompileComponents(IInternalComponentContainer input)
+        {
+        }
+
+        public override void ContributeCompiledComponents(IInternalComponentContainer input, IComponentContainerBuilder output)
         {
             output.Register<IDisposable, FirstHappyPathCompiler>();
         }
