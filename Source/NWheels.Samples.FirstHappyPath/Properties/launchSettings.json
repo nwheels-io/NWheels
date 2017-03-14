@@ -3,7 +3,7 @@
     "NWheels.Samples.FirstHappyPath": {
       "commandName": "Executable",
       "executablePath": "C:\\Program Files\\dotnet\\dotnet.exe",
-      "commandLineArgs": "C:\\Work\\Repo\\NWheels\\Source\\Bin\\netcoreapp1.0\\NWheels.Host.dll --configPath C:\\Work\\Repo\\NWheels\\Source\\NWheels.Samples.FirstHappyPath --modulesPath C:\\Work\\Repo\\NWheels\\Source\\Bin\\netstandard1.6"
+      "commandLineArgs": "C:\\Work\\Repo\\NWheelsFork\\Source\\Bin\\netcoreapp1.0\\NWheels.Host.dll --configPath C:\\Work\\Repo\\NWheelsFork\\Source\\NWheels.Samples.FirstHappyPath --modulesPath C:\\Work\\Repo\\NWheelsFork\\Source\\Bin\\netstandard1.6"
     }
   }
 }

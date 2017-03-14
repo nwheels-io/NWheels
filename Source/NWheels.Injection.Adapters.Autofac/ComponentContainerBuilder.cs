@@ -17,13 +17,6 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void ContributeLifecycleListener<T>() where T : ILifecycleListenerComponent
-        {
-            throw new NotImplementedException();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public IInternalComponentContainer CreateComponentContainer()
         {
             var container = _containerBuilder.Build();
@@ -41,29 +34,29 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Register<TInterface, TImplementation>(LifeStyle lifeStyle = LifeStyle.Singleton) 
-            where TImplementation : TInterface
+        public void Register<TService, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+            where TComponent : TService
         {
             //TODO: apply lifestyle setting
-            _containerBuilder.RegisterType<TImplementation>().AsSelf().As<TInterface>();
+            _containerBuilder.RegisterType<TComponent>().AsSelf().As<TService>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Register<TInterface1, TInterface2, TImplementation>(LifeStyle lifeStyle = LifeStyle.Singleton) 
-            where TImplementation : TInterface1, TInterface2
+        public void Register<TService1, TService2, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+            where TComponent : TService1, TService2
         {
             //TODO: apply lifestyle setting
-            _containerBuilder.RegisterType<TImplementation>().AsSelf().As<TInterface1, TInterface2>();
+            _containerBuilder.RegisterType<TComponent>().AsSelf().As<TService1, TService2>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Register<TInterface1, TInterface2, TInterface3, TImplementation>(LifeStyle lifeStyle = LifeStyle.Singleton) 
-            where TImplementation : TInterface1, TInterface2, TInterface3
+        public void Register<TService1, TService2, TService3, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+            where TComponent : TService1, TService2, TService3
         {
             //TODO: apply lifestyle setting
-            _containerBuilder.RegisterType<TImplementation>().AsSelf().As<TInterface1, TInterface2, TInterface3>();
+            _containerBuilder.RegisterType<TComponent>().AsSelf().As<TService1, TService2, TService3>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -76,26 +69,26 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Register<TInterface>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton)
+        public void Register<TService>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton)
         {
             //TODO: apply lifestyle setting
-            _containerBuilder.RegisterType(type).AsSelf().As<TInterface>();
+            _containerBuilder.RegisterType(type).AsSelf().As<TService>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Register<TInterface1, TInterface2>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton)
+        public void Register<TService1, TService2>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton)
         {
             //TODO: apply lifestyle setting
-            _containerBuilder.RegisterType(type).AsSelf().As<TInterface1, TInterface2>();
+            _containerBuilder.RegisterType(type).AsSelf().As<TService1, TService2>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Register<TInterface1, TInterface2, TInterface3>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton)
+        public void Register<TService1, TService2, TService3>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton)
         {
             //TODO: apply lifestyle setting
-            _containerBuilder.RegisterType(type).AsSelf().As<TInterface1, TInterface2, TInterface3>();
+            _containerBuilder.RegisterType(type).AsSelf().As<TService1, TService2, TService3>();
         }
     }
 }

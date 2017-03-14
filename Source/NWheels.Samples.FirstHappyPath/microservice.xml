@@ -5,6 +5,12 @@
 
   <framework-modules>
     
+    <module assembly="NWheels.Platform.Messaging.Implementation">
+      
+      <feature name="HttpEndpointFeatureLoader" />
+      
+    </module>
+    
   </framework-modules>
 
   <application-modules>
