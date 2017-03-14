@@ -9,6 +9,7 @@ namespace NWheels.Platform.Rest
     public class RestApiService
     {
         private readonly Dictionary<string, IRestResourceHandler> _handlerByUriPath;
+        private static readonly HttpMethod PatchMethod = new HttpMethod("PATCH");
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -39,7 +40,7 @@ namespace NWheels.Platform.Rest
                 {
                     response = handler.Put(request);
                 }
-                else if (request.Method == new HttpMethod("PATCH"))
+                else if (request.Method == PatchMethod)
                 {
                     response = handler.Patch(request);
                 }
