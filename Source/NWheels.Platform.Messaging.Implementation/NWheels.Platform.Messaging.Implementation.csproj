@@ -1,13 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>exe</OutputType>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
-    <ApplicationIcon />
-    <OutputTypeEx>exe</OutputTypeEx>
-    <StartupObject />
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <RootNamespace>NWheels.Platform.Messaging</RootNamespace>
     <OutputPath>..\Bin\</OutputPath>
-    <PostBuildEvent>xcopy "$(ProjectDir)$(OutDir)*.*" "$(ProjectDir)..\netstandard1.6" /i /d /y</PostBuildEvent>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,7 +14,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
-    <ProjectReference Include="..\NWheels.Implementation\NWheels.Implementation.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Messaging.Api\NWheels.Platform.Messaging.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Rest.Api\NWheels.Platform.Rest.Api.csproj" />
   </ItemGroup>
 
 </Project>

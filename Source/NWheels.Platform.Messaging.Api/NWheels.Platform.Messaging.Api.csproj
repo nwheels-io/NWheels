@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
-    <RootNamespace>NWheels.Frameworks.Ddd</RootNamespace>
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <RootNamespace>NWheels.Platform.Messaging</RootNamespace>
     <OutputPath>..\Bin\</OutputPath>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="1.1.1" />
   </ItemGroup>
 
 </Project>

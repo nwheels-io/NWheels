@@ -1,14 +1,16 @@
 ﻿using NWheels.Injection;
 using NWheels.Microservices;
 
-namespace NWheels.Samples.FirstHappyPath
+namespace NWheels.Platform.Rest
 {
-    [FeatureLoader(Name = "SpecificNamedFirstHappyPathFeatureLoader")]
-    public class NamedFirstHappyPathFeatureLoader : FeatureLoaderBase
+    [DefaultFeatureLoader]
+    public class RestApiFeatureLoader : FeatureLoaderBase
     {
         public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
         {
             base.ContributeComponents(containerBuilder);
+
+            containerBuilder.Register<IRestApiService, RestApiService>();
         }
     }
 }

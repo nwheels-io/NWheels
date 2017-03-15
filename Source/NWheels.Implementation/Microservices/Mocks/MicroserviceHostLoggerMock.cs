@@ -21,10 +21,12 @@ namespace NWheels.Microservices.Mocks
 
         public void NodeActivationError(Exception e)
         {
+            Console.WriteLine(e);
         }
 
         public void NodeConfigureError(Exception e)
         {
+            Console.WriteLine(e);
         }
 
         public ILogActivity NodeConfiguring()
@@ -43,10 +45,12 @@ namespace NWheels.Microservices.Mocks
 
         public void NodeDeactivationError(Exception e)
         {
+            Console.WriteLine(e);
         }
 
         public void NodeHasFailedToActivate(Exception e)
         {
+            Console.WriteLine(e);
         }
 
         public Exception NodeHasFailedToActivate()
@@ -56,6 +60,7 @@ namespace NWheels.Microservices.Mocks
 
         public void NodeHasFailedToConfigure(Exception e)
         {
+            Console.WriteLine(e);
         }
 
         public Exception NodeHasFailedToConfigure()
@@ -70,6 +75,7 @@ namespace NWheels.Microservices.Mocks
 
         public void NodeHasFailedToLoad(Exception e)
         {
+            Console.WriteLine(e);
         }
 
         public Exception NodeHasFailedToLoad()
@@ -84,6 +90,7 @@ namespace NWheels.Microservices.Mocks
 
         public void NodeLoadError(Exception e)
         {
+            Console.WriteLine(e);
         }
 
         public ILogActivity NodeLoading()
@@ -115,6 +122,7 @@ namespace NWheels.Microservices.Mocks
 
         public void NodeUnloadError(Exception e)
         {
+            Console.WriteLine(e);
         }
 
         public ILogActivity NodeUnloading()
@@ -139,10 +147,14 @@ namespace NWheels.Microservices.Mocks
         { }
 
         public void FailedToLoadLifecycleComponents(Exception e)
-        { }
+        {
+            Console.WriteLine(e);
+        }
 
-        public void ComponentsEventFailed(Type component, string @event, Exception error)
-        { }
+        public void ComponentsEventFailed(Type component, string @event, Exception e)
+        {
+            Console.WriteLine(e);
+        }
 
         public ILogActivity MicroserviceLoading(string component)
         {

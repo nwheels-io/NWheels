@@ -32,7 +32,6 @@ namespace NWheels.Implementation.UnitTests.Microservices
             handler.ContainerEventArgs.Should().NotBeNull();
             handler.ContainerEventArgs.AssemblyName.Should().Be(config.MicroserviceConfig.InjectionAdapter.Assembly);
             handler.ContainerEventArgs.Destination.Count.Should().Be(1);
-            handler.ContainerEventArgs.DirectoryPath.Should().Be(config.ModulesDirectory);
 
             handler.FeatureLoaderEventArgsList.Should().HaveCount(
                 config.MicroserviceConfig.FrameworkModules.Length + config.MicroserviceConfig.ApplicationModules.Length);
@@ -42,7 +41,6 @@ namespace NWheels.Implementation.UnitTests.Microservices
                 x => x.AssemblyName == config.MicroserviceConfig.ApplicationModules[1].Assembly);
             handler.FeatureLoaderEventArgsList.Should().ContainSingle(
                 x => x.AssemblyName == config.MicroserviceConfig.FrameworkModules[0].Assembly);
-            handler.FeatureLoaderEventArgsList.ForEach(x => x.DirectoryPath.Should().Be(config.ModulesDirectory));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -213,7 +211,6 @@ namespace NWheels.Implementation.UnitTests.Microservices
             return new BootConfiguration()
             {
                 ConfigsDirectory = "ConfigsDirectory",
-                ModulesDirectory = "ModulesDirectory",
                 MicroserviceConfig = new MicroserviceConfig()
                 {
                     Name = "MicroserviceName",

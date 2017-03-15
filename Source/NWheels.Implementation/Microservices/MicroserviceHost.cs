@@ -341,21 +341,21 @@ namespace NWheels.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private List<Type> LoadAssembly(Type implementedInterface, string directoryPath, string assemblyName)
+        private List<Type> LoadAssembly(Type implementedInterface, string assemblyName)
         {
             var loadHandler = this.AssemblyLoad;
             List<Type> types;
 
             if (loadHandler != null)
             {
-                var args = new AssemblyLoadEventArgs(implementedInterface, directoryPath, assemblyName);
+                var args = new AssemblyLoadEventArgs(implementedInterface, assemblyName);
                 loadHandler(this, args);
 
                 types = args.Destination;
             }
             else
             {
-                var assemblyContext = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.Combine(directoryPath, $"{assemblyName}.dll"));
+                var assemblyContext = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.dll"));
 
                 types = assemblyContext.GetTypes().Where(
                     x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == implementedInterface)).ToList();
@@ -569,6 +569,8 @@ namespace NWheels.Microservices
 
                 var compiledComponents = CreateComponentContainerBuilder();
 
+                compiledComponents.Register<IComponentContainer>(OwnerHost.Container);
+                
                 featureLoaders.ForEach(x => x.ContributeCompiledComponents(OwnerHost.Container, compiledComponents));
 
                 OwnerHost.Container.Merge(compiledComponents);
@@ -604,20 +606,23 @@ namespace NWheels.Microservices
 
                 foreach (var moduleConfig in configs)
                 {
-                    var featureLoaderTypes = OwnerHost.LoadAssembly(typeof(IFeatureLoader), OwnerHost.BootConfig.ModulesDirectory, moduleConfig.Assembly);
+                    var featureLoaderTypes = OwnerHost.LoadAssembly(typeof(IFeatureLoader), moduleConfig.Assembly);
 
                     types.AddRange(featureLoaderTypes.Where(x => x.GetTypeInfo().IsDefined(typeof(DefaultFeatureLoaderAttribute))).ToList());
 
-                    foreach (var featueConfig in moduleConfig.Features)
+                    if (moduleConfig.Features != null)
                     {
-                        var type = GetTypeByFeatureLoaderConfig(featureLoaderTypes, featueConfig);
-                        if (type == null)
+                        foreach (var featueConfig in moduleConfig.Features)
                         {
-                            throw new Exception("Feature wasn't found.");
-                        }
-                        else
-                        {
-                            types.Add(type);
+                            var type = GetTypeByFeatureLoaderConfig(featureLoaderTypes, featueConfig);
+                            if (type == null)
+                            {
+                                throw new Exception("Feature wasn't found.");
+                            }
+                            else
+                            {
+                                types.Add(type);
+                            }
                         }
                     }
                 }
@@ -668,7 +673,6 @@ namespace NWheels.Microservices
             {
                 var containerBuilderType = OwnerHost.LoadAssembly(
                     typeof(IComponentContainerBuilder), 
-                    OwnerHost.BootConfig.ModulesDirectory, 
                     OwnerHost.BootConfig.MicroserviceConfig.InjectionAdapter.Assembly);
 
                 if (containerBuilderType.Count != 1)
@@ -680,10 +684,6 @@ namespace NWheels.Microservices
 
                 return containerBuilder;
             }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

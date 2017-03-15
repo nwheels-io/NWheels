@@ -1,12 +1,9 @@
-﻿using NWheels.Microservices;
-using System;
+﻿using System;
 
 namespace NWheels.Injection
 {
     public interface IComponentContainerBuilder
     {
-        void ContributeLifecycleListener<T>() where T : ILifecycleListenerComponent;
-
         //TODO: refactor the following APIs to be more self-documenting
         //for example: 
         //  RegisterComponent<...>().ForServices<...>()

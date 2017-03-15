@@ -9,14 +9,12 @@ namespace NWheels.Host
         static void Main(string[] args)
         {
             //--configPath
-            //--modulesPath
 
             try
             {
                 Console.WriteLine($"configPath {args[1]}");
-                Console.WriteLine($"modulesPath {args[3]}");
 
-                var config = BootConfiguration.LoadFromDirectory(configsPath: args[1], modulesPath: args[3]);
+                var config = BootConfiguration.LoadFromDirectory(configsPath: args[1]);
                 var host = new MicroserviceHost(config, new MicroserviceHostLoggerMock());
 
                 host.Configure();

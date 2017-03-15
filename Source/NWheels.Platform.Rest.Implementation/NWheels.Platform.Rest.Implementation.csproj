@@ -4,7 +4,7 @@
     <TargetFramework>netstandard1.6</TargetFramework>
     <RootNamespace>NWheels.Platform.Rest</RootNamespace>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-    <OutputPath>..\Bin\netstandard1.6\</OutputPath>
+    <OutputPath>..\Bin\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
