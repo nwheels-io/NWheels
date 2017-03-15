@@ -2411,7 +2411,13 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     .Where(function(f) { return !scope.metaType.properties[toCamelCase(f.propertyName)].isCalculated })
                     .Where(function(f) { return (!data || !data.restrictedEntryProperties || data.restrictedEntryProperties[f.propertyName]); })
                     .ForEach(function (field) {
-                        scope.$broadcast(field.nestedWidget.qualifiedName + ':EditAuthorized');
+                        if (scope.fieldHasModifier(field, 'Nullable')) {
+                            scope.$timeout(function() {
+                                scope.$broadcast(field.nestedWidget.qualifiedName + ':EditAuthorized');
+                            });
+                        } else {
+                            scope.$broadcast(field.nestedWidget.qualifiedName + ':EditAuthorized');
+                        }
                     });
             });
             
