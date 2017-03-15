@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Messaging.Api\NWheels.Platform.Messaging.Api.csproj" />
     <ProjectReference Include="..\NWheels.Platform.Rest.Api\NWheels.Platform.Rest.Api.csproj" />
   </ItemGroup>
 

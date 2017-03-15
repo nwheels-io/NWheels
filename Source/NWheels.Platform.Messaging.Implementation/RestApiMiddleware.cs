@@ -1,25 +1,32 @@
 ﻿using Microsoft.AspNetCore.Http;
+using NWheels.Platform.Rest;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace NWheels.Platform.Messaging
 {
-    public class RestApiMiddleware
+    public class RestApiMiddleware// : IMiddleware
     {
         private readonly RequestDelegate _next;
+        //private readonly IRestApiService _restApiService;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public RestApiMiddleware(RequestDelegate next)
+        public RestApiMiddleware(RequestDelegate next/*, IRestApiService restApiService*/)
         {
             _next = next;
+            //_restApiService = restApiService;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public async Task Invoke(HttpContext httpContext)
+        public async Task Invoke(HttpContext context)
         {
-            await httpContext.Response.WriteAsync("Hello from Middleware");
-            await _next.Invoke(httpContext);
+            /*var response = _restApiService.HandleApiRequest(new HttpRequestMessage());
+            httpContext.Response.StatusCode = (int)response.StatusCode;*/
+            context.Response.StatusCode = (int)HttpStatusCode.OK;
+            await context.Response.WriteAsync("Hello world!!!");
         }
     }
 }
