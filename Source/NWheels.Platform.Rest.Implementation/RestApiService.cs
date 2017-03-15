@@ -6,10 +6,10 @@ using System.Net.Http;
 
 namespace NWheels.Platform.Rest
 {
-    public class RestApiService
+    public class RestApiService : IRestApiService
     {
         private readonly Dictionary<string, IRestResourceHandler> _handlerByUriPath;
-        private static readonly HttpMethod PatchMethod = new HttpMethod("PATCH");
+        private static readonly HttpMethod _s_patchMethod = new HttpMethod("PATCH");
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ namespace NWheels.Platform.Rest
                 {
                     response = handler.Put(request);
                 }
-                else if (request.Method == PatchMethod)
+                else if (request.Method == _s_patchMethod)
                 {
                     response = handler.Patch(request);
                 }

@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
-    <ProjectReference Include="..\NWheels.Implementation\NWheels.Implementation.csproj" />
   </ItemGroup>
 
 </Project>
