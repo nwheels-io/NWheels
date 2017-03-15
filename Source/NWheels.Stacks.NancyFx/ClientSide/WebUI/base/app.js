@@ -1665,6 +1665,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.refresh = function () {
                 scope.resetCrudState();
                 scope.requestAuthorization();
+                scope.originalEntity = null;
                 scope.queryEntities();
             };
 
@@ -1672,6 +1673,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 scope.uiShowCrudForm = false;
                 scope.selectedEntity = null;
                 scope.entity = null;
+                scope.originalEntity = null;
                 scope.model.State.CurrentEntity = null;
                 scope.$broadcast(scope.uidl.grid.qualifiedName + ':PageRefreshRequested');
             };
@@ -1931,7 +1933,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 
                 if (scope.uidl.mode !== 'Inline' || scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
 					var diff = (scope.originalEntity ? scope.entityService.getEntityDiff(entity, scope.originalEntity) : entity);
-					
+                    
 					scope.entityService.storeEntity(diff).then(
                         function() {
                             scope.$emit(scope.uidl.qualifiedName + ':StoreEntityCompleted');

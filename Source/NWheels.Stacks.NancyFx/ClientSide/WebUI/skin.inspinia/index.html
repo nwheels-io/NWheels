@@ -2057,6 +2057,7 @@ h2.logo-name {
                                 }
                                 $scope.lastSelectedRowId = rowId;
                                 $scope.rowObjectClonedBeforeInlineEdit = jQuery.extend(true, {}, rowObject);
+                                $scope.originalEntity = $scope.rowObjectClonedBeforeInlineEdit;
                                 gridObj.editRow(
                                     rowId, 
                                     true, 
@@ -2080,6 +2081,7 @@ h2.logo-name {
                                             gridObj.setRowData(restoreRowId, rowObjectClonedBeforeInlineEdit);
                                             $scope.lastSelectedRowId = -1;
                                             $scope.rowObjectClonedBeforeInlineEdit = null;
+                                            $scope.originalEntity = null;
                                         }
                                     },
                                     function(restoreRowId) {
@@ -2088,6 +2090,7 @@ h2.logo-name {
                                             gridObj.setRowData(restoreRowId, $scope.rowObjectClonedBeforeInlineEdit);
                                             $scope.lastSelectedRowId = -1;
                                             $scope.rowObjectClonedBeforeInlineEdit = null;
+                                            $scope.originalEntity = null;
                                         }
                                     }
                                 );
@@ -2266,6 +2269,7 @@ h2.logo-name {
                             $scope.ResultSet[rowId - 1] = rowData;
                             $scope.lastSelectedRowId = -1;
                             $scope.rowObjectClonedBeforeInlineEdit = null;
+                            $scope.originalEntity = null;
                             if ($scope.uidl.rowStylePropertyName) {
                                 $scope.applyDataDrivenRowStyles(rowId - 1, rowId, 0);
                             }
