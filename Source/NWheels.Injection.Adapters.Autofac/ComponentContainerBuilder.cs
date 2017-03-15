@@ -26,6 +26,13 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void Register<TService>(object instance)
+        {
+            _containerBuilder.RegisterInstance(instance).As<TService>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void Register<TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton)
         {
             //TODO: apply lifestyle setting

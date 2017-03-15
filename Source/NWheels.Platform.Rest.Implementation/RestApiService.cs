@@ -1,4 +1,5 @@
 ﻿using NWheels.Injection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -23,39 +24,46 @@ namespace NWheels.Platform.Rest
         public HttpResponseMessage HandleApiRequest(HttpRequestMessage request)
         {
             IRestResourceHandler handler;
-            HttpResponseMessage response;
+            HttpResponseMessage response = null;
 
-            //TODO AbsolutePath will be replaced by Fragment or will be method's argument
-            if (_handlerByUriPath.TryGetValue(request.RequestUri.AbsolutePath, out handler))
-            {
-                if (request.Method == HttpMethod.Get)
+            try
+            { 
+                //TODO AbsolutePath will be replaced by Fragment or will be method's argument
+                if (_handlerByUriPath.TryGetValue(request.RequestUri.AbsolutePath, out handler))
                 {
-                    response = handler.Get(request);
-                }
-                else if (request.Method == HttpMethod.Post)
-                {
-                    response = handler.Post(request);
-                }
-                else if (request.Method == HttpMethod.Put)
-                {
-                    response = handler.Put(request);
-                }
-                else if (request.Method == _s_patchMethod)
-                {
-                    response = handler.Patch(request);
-                }
-                else if (request.Method == HttpMethod.Delete)
-                {
-                    response = handler.Delete(request);
+                    if (request.Method == HttpMethod.Get)
+                    {
+                        response = handler.Get(request);
+                    }
+                    else if (request.Method == HttpMethod.Post)
+                    {
+                        response = handler.Post(request);
+                    }
+                    else if (request.Method == HttpMethod.Put)
+                    {
+                        response = handler.Put(request);
+                    }
+                    else if (request.Method == _s_patchMethod)
+                    {
+                        response = handler.Patch(request);
+                    }
+                    else if (request.Method == HttpMethod.Delete)
+                    {
+                        response = handler.Delete(request);
+                    }
+                    else
+                    {
+                        response = new HttpResponseMessage(HttpStatusCode.NotImplemented);
+                    }
                 }
                 else
                 {
-                    response = new HttpResponseMessage(HttpStatusCode.NotImplemented);
+                    response = new HttpResponseMessage(HttpStatusCode.NotFound);
                 }
             }
-            else
+            catch (Exception)
             {
-                response = new HttpResponseMessage(HttpStatusCode.NotFound);
+                response = new HttpResponseMessage(HttpStatusCode.BadRequest);
             }
 
             return response;

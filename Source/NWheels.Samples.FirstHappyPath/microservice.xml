@@ -4,7 +4,7 @@
   <injection-adapter assembly="NWheels.Injection.Adapters.Autofac" />
 
   <framework-modules>
-    <!--<module assembly="NWheels.Platform.Rest.Implementation" />-->
+    <module assembly="NWheels.Platform.Rest.Implementation" />
     
     <module assembly="NWheels.Platform.Messaging.Implementation">
       <feature name="HttpEndpointFeatureLoader" />

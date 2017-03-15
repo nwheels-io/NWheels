@@ -8,14 +8,14 @@ namespace NWheels.Platform.Messaging
 {
     public class KestrelLifecycleListenerComponent : LifecycleListenerComponentBase
     {
-        //private readonly IRestApiService _restApiService;
+        private readonly IRestApiService _restApiService;
         private IWebHost _host;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public KestrelLifecycleListenerComponent(/*IRestApiService restApiService*/)
+        public KestrelLifecycleListenerComponent(IRestApiService restApiService)
         {
-            //_restApiService = restApiService;
+            _restApiService = restApiService;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ namespace NWheels.Platform.Messaging
                 .UseKestrel()
                 .UseUrls("http://localhost:5000")
                 .Configure(app => {
-                    app.UseMiddleware<RestApiMiddleware>(/*_restApiService*/);
+                    app.UseMiddleware<RestApiMiddleware>(_restApiService);
                 })
                 .Build();
             
