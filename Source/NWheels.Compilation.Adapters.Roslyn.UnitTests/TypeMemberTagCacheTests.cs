@@ -120,7 +120,7 @@ namespace NWheels.Compilation.Adapters.Roslyn.UnitTests
 
             //-- assert
 
-            intTag1.Should().NotBeNull();
+            intTag1.Should().BeNull();
             intTag2.Should().BeSameAs(intTag1);
 
             stringTag1.Should().NotBeNull();
