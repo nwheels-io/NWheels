@@ -408,7 +408,7 @@ namespace NWheels.Processing.Documents
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private EntityTableBuilder<TEntity> InternalColumn(
+            public EntityTableBuilder<TEntity> InternalColumn(
                 LambdaExpression propertyExpression,
                 string title = null,
                 double? width = null,

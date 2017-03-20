@@ -800,6 +800,7 @@ namespace NWheels.UI
             public long? ResultCount { get; set; }
             public bool? MoreAvailable { get; set; }
             public object[] ResultSet { get; set; }
+            public DocumentDesign Design { get; set; }
             public ChartData Visualization { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -2162,6 +2163,8 @@ namespace NWheels.UI
             public override QueryResults Query(QueryOptions options, IQueryable query = null, object txViewModel = null)
             {
                 var results = QueryContext.Current.Results;
+                
+                results.Design = TryGetDocumentDesignFrom(query);
                 results.Visualization = TryGetVisualizationFrom(query);
 
                 using (var contextOrNull = NewUnitOfWork(txViewModel) as TContext)
@@ -2580,6 +2583,20 @@ namespace NWheels.UI
                 if (visualized != null)
                 {
                     return visualized.Visualization;
+                }
+
+                return null;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private DocumentDesign TryGetDocumentDesignFrom(IQueryable query)
+            {
+                var visualized = query as IVisualizedQueryable;
+
+                if (visualized != null)
+                {
+                    return visualized.DocumentDesign;
                 }
 
                 return null;

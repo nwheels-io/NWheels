@@ -1851,6 +1851,9 @@ h2.logo-name {
             
             $scope.onStandalongGridDataReceived = function (grid, response) {
                 $scope.ResultSet = response.data.ResultSet;
+                if (response.data.Design) {
+                    $scope.selectVisibleColumns(grid, response.data.Design);
+                }
                 if ($scope.uidl.expandableTreeMode) {
                     var adjacentModel = [ ];
                     for (var i = 0; i < $scope.ResultSet.length ; i++) {
@@ -1863,6 +1866,23 @@ h2.logo-name {
                 grid[0].addJSONData(response.data);
                 $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data);
             }
+            
+            $scope.selectVisibleColumns = function(grid, design) {
+                if (design && design.Contents && design.Contents.Columns && design.Contents.Columns.length) {
+                    var designColumns = design.Contents.Columns;
+                    var designColumnByIndex = { };
+                    for (var i = 0 ; i < designColumns.length ; i++) {
+                        designColumnByIndex[designColumns[i].Binding.Expression] = true;
+                    }
+                    var columnsToHide = [];
+                    for (var i = 0 ; i < columnsModel.length ; i++) {
+                        if (!designColumnByIndex[columnsModel[i].index]) {
+                            columnsToHide.push(columnsModel[i].index);
+                        }
+                    }
+                    grid.jqGrid('hideCol', columnsToHide);
+                }
+            };
             
             $scope.onStandaloneGridRequestPrepared = function (event, request) {
                 $scope.defineElementIds();

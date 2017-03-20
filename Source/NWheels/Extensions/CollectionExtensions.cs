@@ -45,5 +45,19 @@ namespace NWheels.Extensions
         {
             return new WriteOnlyCollectionWrapper<T>(collection);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool ContainsAny<T>(this ISet<T> set, params T[] values)
+        {
+            return set.Intersect(values).Any();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool ContainsAll<T>(this ISet<T> set, params T[] values)
+        {
+            return (set.Intersect(values).Count() == values.Length);
+        }
     }
 }
