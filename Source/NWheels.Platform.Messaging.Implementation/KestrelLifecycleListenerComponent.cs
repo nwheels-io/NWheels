@@ -26,12 +26,16 @@ namespace NWheels.Platform.Messaging
             
             _host = new WebHostBuilder()
                 .UseKestrel()
-                .UseUrls("http://localhost:5000")
+                //.UseUrls("http://localhost:5000/restapi")
+                .UseUrls("http://localhost:5000")                
+
+                // C:\Work\Repo\NWheelsFork\Source\Presentation\Web.Angular\angular2-webpack-starter\dist should be created by "npm run build:aot"
+                //.UseUrls("http://localhost:5000/")        return *.html, *.js, *.css, *.txt, ....
                 .Configure(app => {
                     app.UseMiddleware<RestApiMiddleware>(_restApiService);
                 })
                 .Build();
-            
+
             _host.Run();
         }
 

@@ -1,0 +1,1 @@
+All presentation platform projects will reside under this folder.
