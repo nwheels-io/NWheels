@@ -69,25 +69,29 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Host", "Host", "{85078B3A-9
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Host", "NWheels.Host\NWheels.Host.csproj", "{8B922CF8-4E9D-437D-9AA0-DEB99A104B52}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Injection.Adapters.Autofac.UnitTests", "NWheels.Injection.Adapters.Autofac.UnitTests\NWheels.Injection.Adapters.Autofac.UnitTests.csproj", "{93EF4EFD-790E-4D7A-A7B7-A7B3597A2294}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Injection.Adapters.Autofac.UnitTests", "NWheels.Injection.Adapters.Autofac.UnitTests\NWheels.Injection.Adapters.Autofac.UnitTests.csproj", "{93EF4EFD-790E-4D7A-A7B7-A7B3597A2294}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Frameworks.Ddd.Api", "NWheels.Frameworks.Ddd.Api\NWheels.Frameworks.Ddd.Api.csproj", "{5D374005-B864-49A2-BF74-3B0E4E0B579B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Frameworks.Ddd.Api", "NWheels.Frameworks.Ddd.Api\NWheels.Frameworks.Ddd.Api.csproj", "{5D374005-B864-49A2-BF74-3B0E4E0B579B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Frameworks.Ddd.Implementation", "NWheels.Frameworks.Ddd.Implementation\NWheels.Frameworks.Ddd.Implementation.csproj", "{40399BF5-1BBF-4B44-8DFE-2B81CA7B3DF6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Frameworks.Ddd.Implementation", "NWheels.Frameworks.Ddd.Implementation\NWheels.Frameworks.Ddd.Implementation.csproj", "{40399BF5-1BBF-4B44-8DFE-2B81CA7B3DF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Frameworks.Ddd.Implementation.UnitTests", "NWheels.Frameworks.Ddd.Implementation.UnitTests\NWheels.Frameworks.Ddd.Implementation.UnitTests.csproj", "{9BFE319C-7E31-42E2-8011-09828E3A561C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Frameworks.Ddd.Implementation.UnitTests", "NWheels.Frameworks.Ddd.Implementation.UnitTests\NWheels.Frameworks.Ddd.Implementation.UnitTests.csproj", "{9BFE319C-7E31-42E2-8011-09828E3A561C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Platform.Rest.Api", "NWheels.Platform.Rest.Api\NWheels.Platform.Rest.Api.csproj", "{4E1FC7DA-FDD3-47DD-8394-5E5E50225C24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Platform.Rest.Api", "NWheels.Platform.Rest.Api\NWheels.Platform.Rest.Api.csproj", "{4E1FC7DA-FDD3-47DD-8394-5E5E50225C24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Platform.Rest.Implementation", "NWheels.Platform.Rest.Implementation\NWheels.Platform.Rest.Implementation.csproj", "{9344F98B-8037-4F41-A2B7-823483C90F1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Platform.Rest.Implementation", "NWheels.Platform.Rest.Implementation\NWheels.Platform.Rest.Implementation.csproj", "{9344F98B-8037-4F41-A2B7-823483C90F1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Platform.Rest.Implementation.UnitTests", "NWheels.Platform.Rest.Implementation.UnitTests\NWheels.Platform.Rest.Implementation.UnitTests.csproj", "{A1336622-8871-4611-A267-EC6F0D49EA87}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Platform.Rest.Implementation.UnitTests", "NWheels.Platform.Rest.Implementation.UnitTests\NWheels.Platform.Rest.Implementation.UnitTests.csproj", "{A1336622-8871-4611-A267-EC6F0D49EA87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Platform.Messaging.Api", "NWheels.Platform.Messaging.Api\NWheels.Platform.Messaging.Api.csproj", "{CD1431FC-B633-4A20-8B06-EACE34A7D4D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Platform.Messaging.Api", "NWheels.Platform.Messaging.Api\NWheels.Platform.Messaging.Api.csproj", "{CD1431FC-B633-4A20-8B06-EACE34A7D4D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Platform.Messaging.Implementation", "NWheels.Platform.Messaging.Implementation\NWheels.Platform.Messaging.Implementation.csproj", "{9C881998-3C26-48DE-B4E3-3716C299BDC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Platform.Messaging.Implementation", "NWheels.Platform.Messaging.Implementation\NWheels.Platform.Messaging.Implementation.csproj", "{9C881998-3C26-48DE-B4E3-3716C299BDC4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Platform.Messaging.UnitTests", "NWheels.Platform.Messaging.UnitTests\NWheels.Platform.Messaging.UnitTests.csproj", "{D5D42B6F-DDC2-48DA-BEE5-07138FB5175B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Platform.Messaging.UnitTests", "NWheels.Platform.Messaging.UnitTests\NWheels.Platform.Messaging.UnitTests.csproj", "{D5D42B6F-DDC2-48DA-BEE5-07138FB5175B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SystemTests", "SystemTests", "{1691176C-88F7-4041-BD41-89F994600B49}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.SystemTests", "NWheels.SystemTests\NWheels.SystemTests.csproj", "{BAB41834-4F57-430F-B2C2-A44A9FF6647E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CLI", "CLI", "{51124E7A-D5AF-4C6C-9340-4078C99CABBA}"
 EndProject
@@ -343,6 +347,18 @@ Global
 		{C8799217-AF8A-46C0-841F-B63C56E413D8}.Release|x64.Build.0 = Release|Any CPU
 		{C8799217-AF8A-46C0-841F-B63C56E413D8}.Release|x86.ActiveCfg = Release|Any CPU
 		{C8799217-AF8A-46C0-841F-B63C56E413D8}.Release|x86.Build.0 = Release|Any CPU
+		{BAB41834-4F57-430F-B2C2-A44A9FF6647E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAB41834-4F57-430F-B2C2-A44A9FF6647E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAB41834-4F57-430F-B2C2-A44A9FF6647E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BAB41834-4F57-430F-B2C2-A44A9FF6647E}.Debug|x64.Build.0 = Debug|Any CPU
+		{BAB41834-4F57-430F-B2C2-A44A9FF6647E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BAB41834-4F57-430F-B2C2-A44A9FF6647E}.Debug|x86.Build.0 = Debug|Any CPU
+		{BAB41834-4F57-430F-B2C2-A44A9FF6647E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAB41834-4F57-430F-B2C2-A44A9FF6647E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAB41834-4F57-430F-B2C2-A44A9FF6647E}.Release|x64.ActiveCfg = Release|Any CPU
+		{BAB41834-4F57-430F-B2C2-A44A9FF6647E}.Release|x64.Build.0 = Release|Any CPU
+		{BAB41834-4F57-430F-B2C2-A44A9FF6647E}.Release|x86.ActiveCfg = Release|Any CPU
+		{BAB41834-4F57-430F-B2C2-A44A9FF6647E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -387,5 +403,7 @@ Global
 		{9C881998-3C26-48DE-B4E3-3716C299BDC4} = {8CC4DEA7-567E-40A9-8CE8-51993E12AD51}
 		{D5D42B6F-DDC2-48DA-BEE5-07138FB5175B} = {8CC4DEA7-567E-40A9-8CE8-51993E12AD51}
 		{C8799217-AF8A-46C0-841F-B63C56E413D8} = {51124E7A-D5AF-4C6C-9340-4078C99CABBA}
+		{1691176C-88F7-4041-BD41-89F994600B49} = {5828E8A7-E5C6-4683-B4BE-14BE49382BC3}
+		{BAB41834-4F57-430F-B2C2-A44A9FF6647E} = {1691176C-88F7-4041-BD41-89F994600B49}
 	EndGlobalSection
 EndGlobal
