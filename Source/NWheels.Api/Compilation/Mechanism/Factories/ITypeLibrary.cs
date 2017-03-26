@@ -16,5 +16,7 @@ namespace NWheels.Compilation.Mechanism.Factories
         void CompileDeclaredTypeMembers();
 
         TypeFactoryProduct<TArtifact> GetProduct(ref TypeKey key);
+
+        void PopulateProducts(params TypeFactoryProduct<TArtifact>[] products);
     }
 }

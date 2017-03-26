@@ -97,5 +97,26 @@ namespace NWheels.Injection.Adapters.Autofac
             //TODO: apply lifestyle setting
             _containerBuilder.RegisterType(type).AsSelf().As<TService1, TService2, TService3>();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RegisterInstance<TService>(object componentInstance)
+        {
+            _containerBuilder.RegisterInstance(componentInstance).As <TService>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RegisterInstance<TService1, TService2>(object componentInstance)
+        {
+            _containerBuilder.RegisterInstance(componentInstance).As<TService1, TService2>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RegisterInstance<TService1, TService2, TService3>(object componentInstance)
+        {
+            _containerBuilder.RegisterInstance(componentInstance).As<TService1, TService2, TService3>();
+        }
     }
 }

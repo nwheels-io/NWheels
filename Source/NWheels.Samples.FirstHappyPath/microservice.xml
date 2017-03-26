@@ -7,7 +7,7 @@
     <module assembly="NWheels.Platform.Rest.Implementation" />
     
     <module assembly="NWheels.Platform.Messaging.Implementation">
-      <feature name="HttpEndpointFeatureLoader" />
+      <feature name="HttpEndpoint" />
     </module>
   </framework-modules>
 

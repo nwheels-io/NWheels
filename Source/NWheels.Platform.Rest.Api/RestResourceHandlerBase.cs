@@ -17,35 +17,80 @@ namespace NWheels.Platform.Rest
 
         HttpResponseMessage IRestResourceHandler.Get(HttpRequestMessage request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return OnGet(request);
+            }
+            catch (Exception e)
+            {
+                //TODO: provide error handling logic
+                Console.Error.WriteLine(e.ToString());
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         HttpResponseMessage IRestResourceHandler.Post(HttpRequestMessage request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return OnPost(request);
+            }
+            catch (Exception e)
+            {
+                //TODO: provide error handling logic
+                Console.Error.WriteLine(e.ToString());
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         HttpResponseMessage IRestResourceHandler.Put(HttpRequestMessage request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return OnPut(request);
+            }
+            catch (Exception e)
+            {
+                //TODO: provide error handling logic
+                Console.Error.WriteLine(e.ToString());
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         HttpResponseMessage IRestResourceHandler.Patch(HttpRequestMessage request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return OnPatch(request);
+            }
+            catch (Exception e)
+            {
+                //TODO: provide error handling logic
+                Console.Error.WriteLine(e.ToString());
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         HttpResponseMessage IRestResourceHandler.Delete(HttpRequestMessage request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return OnDelete(request);
+            }
+            catch (Exception e)
+            {
+                //TODO: provide error handling logic
+                Console.Error.WriteLine(e.ToString());
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,35 +99,35 @@ namespace NWheels.Platform.Rest
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual HttpResponseMessage OnGet(HttpRequestMessage request)
+        internal protected virtual HttpResponseMessage OnGet(HttpRequestMessage request)
         {
             return new HttpResponseMessage(HttpStatusCode.BadRequest);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual HttpResponseMessage OnPost(HttpRequestMessage request)
+        internal protected virtual HttpResponseMessage OnPost(HttpRequestMessage request)
         {
             return new HttpResponseMessage(HttpStatusCode.BadRequest);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual HttpResponseMessage OnPut(HttpRequestMessage request)
+        internal protected virtual HttpResponseMessage OnPut(HttpRequestMessage request)
         {
             return new HttpResponseMessage(HttpStatusCode.BadRequest);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual HttpResponseMessage OnPatch(HttpRequestMessage request)
+        internal protected virtual HttpResponseMessage OnPatch(HttpRequestMessage request)
         {
             return new HttpResponseMessage(HttpStatusCode.BadRequest);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual HttpResponseMessage OnDelete(HttpRequestMessage request)
+        internal protected virtual HttpResponseMessage OnDelete(HttpRequestMessage request)
         {
             return new HttpResponseMessage(HttpStatusCode.BadRequest);
         }

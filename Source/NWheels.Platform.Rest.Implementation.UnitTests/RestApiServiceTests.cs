@@ -176,10 +176,14 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
             {
             }
 
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public TService Resolve<TService>()
             {
                 throw new NotImplementedException();
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public IEnumerable<TService> ResolveAll<TService>()
             {
@@ -199,29 +203,41 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private abstract class TestRestResourceHandlerBase : IRestResourceHandler
         {
             public abstract string UriPath { get; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public virtual HttpResponseMessage Delete(HttpRequestMessage request)
             {
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
             }
 
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public virtual HttpResponseMessage Get(HttpRequestMessage request)
             {
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public virtual HttpResponseMessage Patch(HttpRequestMessage request)
             {
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
             }
 
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public virtual HttpResponseMessage Post(HttpRequestMessage request)
             {
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public virtual HttpResponseMessage Put(HttpRequestMessage request)
             {
@@ -229,9 +245,13 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private class FirstTestRestResourceHandler : TestRestResourceHandlerBase
         {
             public override string UriPath => "/first";
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override HttpResponseMessage Get(HttpRequestMessage request)
             {
@@ -241,6 +261,8 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
                     StatusCode = HttpStatusCode.PartialContent
                 };
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override HttpResponseMessage Patch(HttpRequestMessage request)
             {
@@ -252,9 +274,13 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private class SecondTestRestResourceHandler : TestRestResourceHandlerBase
         {
             public override string UriPath => "/second";
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override HttpResponseMessage Post(HttpRequestMessage request)
             {
@@ -264,6 +290,8 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
                     StatusCode = HttpStatusCode.Created
                 };
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override HttpResponseMessage Delete(HttpRequestMessage request)
             {
@@ -275,9 +303,13 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private class ThirdTestRestResourceHandler : TestRestResourceHandlerBase
         {
             public override string UriPath => "/third";
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override HttpResponseMessage Put(HttpRequestMessage request)
             {

@@ -1,6 +1,8 @@
 ﻿using NWheels.Microservices;
 using NWheels.Injection;
 using System;
+using NWheels.Samples.FirstHappyPath.Domain;
+using NWheels.Frameworks.Ddd;
 
 namespace NWheels.Samples.FirstHappyPath
 {
@@ -9,23 +11,13 @@ namespace NWheels.Samples.FirstHappyPath
     {
         public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
         {
-            containerBuilder.Register<ILifecycleListenerComponent, FirstLifecycleListenerComponent>();
+            containerBuilder.ContributeTransactionScript<HelloWorldTx>();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void CompileComponents(IInternalComponentContainer input)
         {
-        }
-
-        public override void ContributeCompiledComponents(IInternalComponentContainer input, IComponentContainerBuilder output)
-        {
-            output.Register<IDisposable, FirstHappyPathCompiler>();
-        }
-
-        public class FirstHappyPathCompiler : IDisposable
-        {
-            public void Dispose()
-            {
-            }
         }
     }
 }

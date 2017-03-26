@@ -51,6 +51,13 @@ namespace NWheels.Compilation
             {
                 throw new NotImplementedException();
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void PopulateProducts(params TypeFactoryProduct<IRuntimeTypeFactoryArtifact>[] products)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
