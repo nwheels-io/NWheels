@@ -54,35 +54,35 @@ namespace NWheels.Platform.Rest
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual HttpResponseMessage OnGet(HttpRequestMessage request)
+        internal protected virtual HttpResponseMessage OnGet(HttpRequestMessage request)
         {
             return new HttpResponseMessage(HttpStatusCode.BadRequest);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual HttpResponseMessage OnPost(HttpRequestMessage request)
+        internal protected virtual HttpResponseMessage OnPost(HttpRequestMessage request)
         {
             return new HttpResponseMessage(HttpStatusCode.BadRequest);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual HttpResponseMessage OnPut(HttpRequestMessage request)
+        internal protected virtual HttpResponseMessage OnPut(HttpRequestMessage request)
         {
             return new HttpResponseMessage(HttpStatusCode.BadRequest);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual HttpResponseMessage OnPatch(HttpRequestMessage request)
+        internal protected virtual HttpResponseMessage OnPatch(HttpRequestMessage request)
         {
             return new HttpResponseMessage(HttpStatusCode.BadRequest);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual HttpResponseMessage OnDelete(HttpRequestMessage request)
+        internal protected virtual HttpResponseMessage OnDelete(HttpRequestMessage request)
         {
             return new HttpResponseMessage(HttpStatusCode.BadRequest);
         }

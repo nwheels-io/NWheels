@@ -1,6 +1,7 @@
 ﻿using NWheels.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -44,6 +45,24 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool HasAttribute<TAttribute>()
+            where TAttribute : Attribute
+        {
+            return TryGetAttribute<TAttribute>(out TAttribute attribute);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool TryGetAttribute<TAttribute>(out TAttribute attribute)
+            where TAttribute : Attribute
+        {
+            var description = this.Attributes.FirstOrDefault(a => a.Binding is TAttribute);
+            attribute = (description?.Binding as TAttribute);
+            return (attribute != null);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public virtual void AcceptVisitor(MemberVisitor visitor)
         {
             if (this.Attributes != null)
@@ -69,6 +88,6 @@ namespace NWheels.Compilation.Mechanism.Syntax.Members
         public MemberStatus Status { get; set; }
         public MemberVisibility Visibility { get; set; }
         public MemberModifier Modifier { get; set; }
-        public List<AttributeDescription> Attributes { get; private set; }
+        public List<AttributeDescription> Attributes { get; }
     }
 }
