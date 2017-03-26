@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Net.Http;
+using NWheels.Execution;
 
 namespace NWheels.Frameworks.Ddd.RestApi
 {
@@ -17,19 +18,11 @@ namespace NWheels.Frameworks.Ddd.RestApi
 
         protected override HttpResponseMessage OnPost(HttpRequestMessage request)
         {
-            throw new NotImplementedException();
+            return InternalHandlePostRequest(request);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected abstract void OnReadInput(HttpRequestMessage request);
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected abstract void OnInvokeTx();
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected abstract void OnWriteOutput(HttpResponseMessage response);
+        internal protected abstract HttpResponseMessage InternalHandlePostRequest(HttpRequestMessage request);
     }
 }

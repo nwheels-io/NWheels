@@ -6,6 +6,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Frameworks.Ddd.Api\NWheels.Frameworks.Ddd.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="UI\" />
   </ItemGroup>
 
 </Project>

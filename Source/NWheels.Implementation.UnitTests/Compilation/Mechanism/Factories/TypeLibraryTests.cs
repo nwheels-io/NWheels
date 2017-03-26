@@ -158,6 +158,38 @@ namespace NWheels.Implementation.UnitTests.Compilation.Mechanism.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void CanPopulateProducts()
+        {
+            //-- arrange
+
+            var backend = new TestBackend();
+            var libraryUnderTest = new TypeLibrary<TestArtifact>(backend);
+
+            var key1 = new TypeKey(this.GetType(), typeof(ITestContractA));
+            var type1 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key1));
+
+            var key2 = new TypeKey(this.GetType(), typeof(ITestContractB));
+            var type2 = new TypeMember(new TypeGeneratorInfo(this.GetType(), key2));
+
+            libraryUnderTest.PopulateProducts(
+                new TypeFactoryProduct<TestArtifact>(key1, new TestArtifact(type1)),
+                new TypeFactoryProduct<TestArtifact>(key2, new TestArtifact(type2))
+            );
+
+            //-- act
+
+            var product1 = libraryUnderTest.GetProduct(ref key1);
+            var product2 = libraryUnderTest.GetProduct(ref key2);
+
+            //-- Assert
+
+            product1.Artifact.SourceType.Should().BeSameAs(type1);
+            product2.Artifact.SourceType.Should().BeSameAs(type2);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void CanBuildUndeclaredTypeMember()
         {
             //-- arrange

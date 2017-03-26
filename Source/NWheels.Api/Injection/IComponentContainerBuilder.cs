@@ -22,5 +22,11 @@ namespace NWheels.Injection
         void Register<TService1, TService2>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
 
         void Register<TService1, TService2, TService3>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
+
+        void RegisterInstance<TService>(object componentInstance);
+
+        void RegisterInstance<TService1, TService2>(object componentInstance);
+
+        void RegisterInstance<TService1, TService2, TService3>(object componentInstance);
     }
 }

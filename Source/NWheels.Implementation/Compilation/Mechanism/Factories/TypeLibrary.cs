@@ -82,6 +82,13 @@ namespace NWheels.Compilation.Mechanism.Factories
             return newType;
         }
 
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void PopulateProducts(params TypeFactoryProduct<TArtifact>[] products)
+        {
+            OnBackendProductsLoaded(products);
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private void OnBackendProductsLoaded(TypeFactoryProduct<TArtifact>[] products)
