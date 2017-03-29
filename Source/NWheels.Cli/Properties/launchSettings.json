@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "NWheels.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "service -h"
+    }
+  }
+}
