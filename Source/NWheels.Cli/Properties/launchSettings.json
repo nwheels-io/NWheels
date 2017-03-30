@@ -2,7 +2,7 @@
   "profiles": {
     "NWheels.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "service -h"
+      "commandLineArgs": "service --build --src d:\\oss\\NWheels\\Source\\ --work d:\\oss\\NWheels\\.work\\Sample1"
     }
   }
 }

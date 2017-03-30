@@ -10,4 +10,9 @@
     <PackageReference Include="System.CommandLine" Version="0.1.0-e170329-6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Implementation\NWheels.Implementation.csproj" />
+  </ItemGroup>
+
 </Project>

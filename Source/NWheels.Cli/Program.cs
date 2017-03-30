@@ -6,23 +6,33 @@ namespace NWheels.Cli
 {
     class Program
     {
-        private static readonly ICommand[] _s_commands = new[] {
-            new Service.ServiceCommand()
-        };
+        private static ICommand[] _s_commands;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         static int Main(string[] args)
         {
+            var context = new RealCommandContext();
+
+            _s_commands = new ICommand[] {
+                new Publish.PublishCommand(context),
+                new Run.RunCommand(context)
+            };
+
             ArgumentSyntax arguments = ParseCommandLine(args);      // will exit with code 1 if not parsed
             ICommand activeCommand = FindActiveCommand(arguments);  // will exit with code 1 if not found
-            activeCommand.ValidateArguments(arguments);             // will exit with code 1 if not valid
 
             int exitCode = 0;
 
             try
             {
+                activeCommand.ValidateArguments();  // will throw BadArgumentsException if invalid
                 activeCommand.Execute();
+            }
+            catch (BadArgumentsException e)
+            {
+                Console.WriteLine(e.Message);
+                exitCode = 1;
             }
             catch (Exception e)
             {
@@ -40,9 +50,7 @@ namespace NWheels.Cli
             return ArgumentSyntax.Parse(args, syntax => {
                 foreach (var command in _s_commands)
                 {
-                    var commandSyntax = syntax.DefineCommand(command.Name);
-                    commandSyntax.Help = command.HelpText;
-                    command.DefineArguments(syntax);
+                    command.BindToCommandLine(syntax);
                 }
             });
         }
