@@ -3,89 +3,150 @@ using NWheels.Microservices.Mocks;
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace NWheels.Cli.Publish
 {
-    public class PublishCommand : ICommand
+    public class PublishCommand : CommandBase
     {
-        public const string DefaultPulishSubFolder = "bin/microservice.working";
+        public static readonly string DefaultPulishSubFolder = "bin/microservice.working".Replace('/', Path.DirectorySeparatorChar);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private readonly ICommandContext _context;
-        private string _sourceFolder;
-        private string _publishFolder;
-        private string _environmentFile;
+        private string _sourceFolderPath;
+        private string _publishFolderPath;
+        private string _environmentFilePath;
+        private bool _suppressPublishCli;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public PublishCommand(ICommandContext context)
+        public PublishCommand() : base(
+            "publish",
+            "creates working folder with all files required to run a microservice")
         {
-            _context = context;
-            _sourceFolder = _context.GetCurrentDirectory();
+            _sourceFolderPath = Directory.GetCurrentDirectory();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void DefineArguments(ArgumentSyntax syntax)
+        public override void DefineArguments(ArgumentSyntax syntax)
         {
-            syntax.DefineOption("o|out", ref _publishFolder, requireValue: false, help: "working folder to publish to");
-            syntax.DefineOption("e|env", ref _environmentFile, requireValue: false, help: "path to environment XML file to use");
-            syntax.DefineParameter("source-folder", ref _sourceFolder, "micoservice source folder*");
+            syntax.DefineOption("o|out", ref _publishFolderPath, requireValue: false, help: "working folder to publish to");
+            syntax.DefineOption("e|env", ref _environmentFilePath, requireValue: false, help: "path to environment XML file to use");
+            syntax.DefineOption("n|no-cli", ref _suppressPublishCli, requireValue: false, help: "suppress publish CLI (useful for F5 debug)");
+            syntax.DefineParameter("source-folder", ref _sourceFolderPath, "micoservice source folder*");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void ValidateArguments()
+        public override void ValidateArguments(ArgumentSyntax arguments)
         {
-            if (string.IsNullOrEmpty(_sourceFolder))
+            if (string.IsNullOrEmpty(_sourceFolderPath))
             {
-                throw new BadArgumentsException("microservice folder must be specified");
+                arguments.ReportError("microservice folder must be specified");
             }
 
-            if (!_context.DirectoryExists(_sourceFolder))
+            if (!Directory.Exists(_sourceFolderPath))
             {
-                throw new BadArgumentsException($"folder does not exist: {_sourceFolder}");
+                arguments.ReportError($"folder does not exist: {_sourceFolderPath}");
             }
 
-            if (string.IsNullOrEmpty(_publishFolder))
+            if (string.IsNullOrEmpty(_publishFolderPath))
             {
-                _publishFolder = Path.Combine(_sourceFolder, DefaultPulishSubFolder);
+                _publishFolderPath = Path.Combine(_sourceFolderPath, DefaultPulishSubFolder);
             }
 
-            if (!_context.DirectoryExists(_publishFolder))
+            if (!Directory.Exists(_publishFolderPath))
             {
-                _context.CreateDirectory(_publishFolder);
+                Directory.CreateDirectory(_publishFolderPath);
             }
 
-            if (string.IsNullOrEmpty(_environmentFile))
+            if (string.IsNullOrEmpty(_environmentFilePath))
             {
-                _environmentFile = Path.Combine(_sourceFolder, BootConfiguration.EnvironmentConfigFileName);
+                _environmentFilePath = Path.Combine(_sourceFolderPath, BootConfiguration.EnvironmentConfigFileName);
             }
 
-            if (!File.Exists(_environmentFile))
+            if (!File.Exists(_environmentFilePath))
             {
-                throw new BadArgumentsException($"environment file does not exist: {_environmentFile}");
+                arguments.ReportError($"environment file does not exist: {_environmentFilePath}");
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Execute()
+        public override void Execute()
         {
-            throw new NotImplementedException();
+            File.Copy(
+                Path.Combine(_sourceFolderPath, BootConfiguration.MicroserviceConfigFileName),
+                Path.Combine(_publishFolderPath, BootConfiguration.MicroserviceConfigFileName),
+                overwrite: true);
+
+            File.Copy(
+                _environmentFilePath,
+                Path.Combine(_publishFolderPath, BootConfiguration.EnvironmentConfigFileName),
+                overwrite: true);
+
+            var bootConfig = BootConfiguration.LoadFromDirectory(_publishFolderPath);
+
+            //TODO: the following code assumes that NWheels and the application reside in the same solution,
+            //      which obviously will not be the case with real users.
+            //      the full implementation of this command should bring NWheels assemblies from NuGet
+
+            DotNetPublish(bootConfig.MicroserviceConfig.InjectionAdapter.Assembly);
+
+            if (!_suppressPublishCli)
+            {
+                DotNetPublish("NWheels.Cli");
+            }
+
+            var allModules = bootConfig.MicroserviceConfig.FrameworkModules.Concat(bootConfig.MicroserviceConfig.ApplicationModules);
+
+            foreach (var module in allModules)
+            {
+                DotNetPublish(module.Assembly);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string Name => "publish";
-        public string HelpText => "creates working folder with all files required to run a microservice";
+        public string PublishFolderPath => _publishFolderPath;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string PublishFolderPath => _publishFolder;
+        private void DotNetPublish(string assemblyName)
+        {
+            LogImportant($"publish > {assemblyName}");
+
+            var projectFolderPath = Path.Combine(Path.GetDirectoryName(_sourceFolderPath), assemblyName);
+
+            if (ValidateProjectFolder(projectFolderPath, out string projectFilePath))
+            {
+                ExecuteProgram(
+                    "dotnet",
+                    new[] { "publish", projectFilePath, "-o", _publishFolderPath });
+            }
+            else
+            {
+                LogFatal($"project not found: {assemblyName}");
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static bool ValidateProjectFolder(string path, out string projectFilePath)
+        {
+            if (Directory.Exists(path))
+            {
+                projectFilePath = Directory.GetFiles(path, "*.*proj", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                return (projectFilePath != null);
+            }
+
+            projectFilePath = null;
+            return false;
+        }
     }
 }

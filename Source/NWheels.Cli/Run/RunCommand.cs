@@ -10,52 +10,52 @@ using System.Text;
 
 namespace NWheels.Cli.Run
 {
-    public class RunCommand : ICommand
+    public class RunCommand : CommandBase
     {
-        private readonly ICommandContext _context;
-        private string _microserviceFolder;
-        private bool _isPublishFolder;
+        private string _microserviceFolderPath;
+        private MicroserviceFolderType _microserviceFolderType;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public RunCommand(ICommandContext context)
+        public RunCommand() : base(
+            "run",
+            "runs microservice from publish folder (optionally performs publish first)")
         {
-            _context = context;
-            _microserviceFolder = _context.GetCurrentDirectory();
+            _microserviceFolderPath = Directory.GetCurrentDirectory();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void DefineArguments(ArgumentSyntax syntax)
+        public override void DefineArguments(ArgumentSyntax syntax)
         {
-            syntax.DefineParameter("microservice-folder", ref _microserviceFolder, "microservice publish or source folder");
+            syntax.DefineParameter("microservice-folder", ref _microserviceFolderPath, "microservice publish or source folder");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void ValidateArguments()
+        public override void ValidateArguments(ArgumentSyntax arguments)
         {
-            if (string.IsNullOrEmpty(_microserviceFolder))
+            if (string.IsNullOrEmpty(_microserviceFolderPath))
             {
-                throw new BadArgumentsException("microservice folder must be specified");
+                arguments.ReportError("microservice folder must be specified");
             }
 
-            if (!_context.DirectoryExists(_microserviceFolder))
+            if (!Directory.Exists(_microserviceFolderPath))
             {
-                throw new BadArgumentsException($"folder does not exist: {_microserviceFolder}");
+                arguments.ReportError($"folder does not exist: {_microserviceFolderPath}");
             }
 
-            if (!DetermineFolderType())
+            if (!DetermineFolderType(out _microserviceFolderType))
             {
-                throw new BadArgumentsException("specified microservice folder is neither source nor publish");
+                arguments.ReportError("specified microservice folder is neither source nor publish");
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Execute()
+        public override void Execute()
         {
-            if (!_isPublishFolder)
+            if (_microserviceFolderType == MicroserviceFolderType.Source)
             {
                 PublishMicroservice();
             }
@@ -65,29 +65,25 @@ namespace NWheels.Cli.Run
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string Name => "run";
-        public string HelpText => "runs microservice from publish folder (optionally performs publish first)";
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private bool DetermineFolderType()
+        private bool DetermineFolderType(out MicroserviceFolderType type)
         {
-            if (_context.FindFiles(_microserviceFolder, "System.*.dll", recursive: false).Any() &&
-                _context.FileExists(Path.Combine(_microserviceFolder, BootConfiguration.MicroserviceConfigFileName)) &&
-                _context.FileExists(Path.Combine(_microserviceFolder, BootConfiguration.EnvironmentConfigFileName)))
+            if (Directory.GetFiles(_microserviceFolderPath, "System.*.dll", SearchOption.TopDirectoryOnly).Any() &&
+                File.Exists(Path.Combine(_microserviceFolderPath, BootConfiguration.MicroserviceConfigFileName)) &&
+                File.Exists(Path.Combine(_microserviceFolderPath, BootConfiguration.EnvironmentConfigFileName)))
             {
-                _isPublishFolder = true;
+                type = MicroserviceFolderType.Publish;
                 return true;
             }
 
-            if (_context.FindFiles(_microserviceFolder, "*.*proj", recursive: false).Length == 1 &&
-                _context.FileExists(Path.Combine(_microserviceFolder, BootConfiguration.MicroserviceConfigFileName)))
+            if (Directory.GetFiles(_microserviceFolderPath, "*.*proj", SearchOption.TopDirectoryOnly).Length == 1 &&
+                File.Exists(Path.Combine(_microserviceFolderPath, BootConfiguration.MicroserviceConfigFileName)))
             {
-                _isPublishFolder = false;
+                type = MicroserviceFolderType.Source;
                 return true;
             }
 
             // folder type cannot be determined
+            type = MicroserviceFolderType.Unknown;
             return false;
         }
 
@@ -95,15 +91,15 @@ namespace NWheels.Cli.Run
 
         private void PublishMicroservice()
         {
-            var publish = new PublishCommand(_context);
-            ArgumentSyntax.Parse(
-                new[] { publish.Name, "--src", _microserviceFolder },
+            var publish = new PublishCommand();
+            var arguments = ArgumentSyntax.Parse(
+                new[] { publish.Name, _microserviceFolderPath, "--no-cli" },
                 syntax => publish.BindToCommandLine(syntax)
             );
-            publish.ValidateArguments();
+            publish.ValidateArguments(arguments);
             publish.Execute();
 
-            _microserviceFolder = publish.PublishFolderPath;
+            _microserviceFolderPath = publish.PublishFolderPath;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -113,9 +109,9 @@ namespace NWheels.Cli.Run
             // copied almost as is from NWheels.Host
             try
             {
-                Console.WriteLine($"configPath {_microserviceFolder}");
+                Console.WriteLine($"configPath {_microserviceFolderPath}");
 
-                var config = BootConfiguration.LoadFromDirectory(configsPath: _microserviceFolder);
+                var config = BootConfiguration.LoadFromDirectory(configsPath: _microserviceFolderPath);
                 var host = new MicroserviceHost(config, new MicroserviceHostLoggerMock());
 
                 host.Configure();
@@ -134,6 +130,15 @@ namespace NWheels.Cli.Run
 
             Console.Write("Press ENTER to exit.");
             Console.ReadLine();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private enum MicroserviceFolderType
+        {
+            Unknown,
+            Source,
+            Publish
         }
     }
 }

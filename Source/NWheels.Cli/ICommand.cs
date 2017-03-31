@@ -6,7 +6,7 @@ namespace NWheels.Cli
     public interface ICommand
     {
         void DefineArguments(ArgumentSyntax syntax);
-        void ValidateArguments();
+        void ValidateArguments(ArgumentSyntax arguments);
         void Execute();
         string Name { get; }
         string HelpText { get; }

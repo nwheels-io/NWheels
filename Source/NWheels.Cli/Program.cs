@@ -6,41 +6,43 @@ namespace NWheels.Cli
 {
     class Program
     {
-        private static ICommand[] _s_commands;
+        private static readonly ICommand[] _s_commands = {
+            new Publish.PublishCommand(),
+            new Run.RunCommand()
+        };
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         static int Main(string[] args)
         {
-            var context = new RealCommandContext();
+            var arguments = ParseCommandLine(args);             // will Environment.Exit with code 1 if not parsed
+            var activeCommand = FindActiveCommand(arguments);   // will Environment.Exit with code 1 if not found
+            activeCommand.ValidateArguments(arguments);         // will Environment.Exit with code 1 if not valid
 
-            _s_commands = new ICommand[] {
-                new Publish.PublishCommand(context),
-                new Run.RunCommand(context)
-            };
-
-            ArgumentSyntax arguments = ParseCommandLine(args);      // will exit with code 1 if not parsed
-            ICommand activeCommand = FindActiveCommand(arguments);  // will exit with code 1 if not found
-
-            int exitCode = 0;
+            var exitCode = 0;
 
             try
             {
-                activeCommand.ValidateArguments();  // will throw BadArgumentsException if invalid
                 activeCommand.Execute();
-            }
-            catch (BadArgumentsException e)
-            {
-                Console.WriteLine(e.Message);
-                exitCode = 1;
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                LogMessageWithColor(ConsoleColor.Red, "FAILED: " + e.Message);
+                Console.Error.WriteLine(e.ToString());
                 exitCode = 2;
             }
 
             return exitCode;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void LogMessageWithColor(ConsoleColor color, string message)
+        {
+            var saveColor = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            Console.WriteLine(message);
+            Console.ForegroundColor = saveColor;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
