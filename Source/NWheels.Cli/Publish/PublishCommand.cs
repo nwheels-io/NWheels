@@ -20,6 +20,7 @@ namespace NWheels.Cli.Publish
         private string _sourceFolderPath;
         private string _publishFolderPath;
         private string _environmentFilePath;
+        private string _projectConfigurationName;
         private bool _suppressPublishCli;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -29,16 +30,32 @@ namespace NWheels.Cli.Publish
             "creates working folder with all files required to run a microservice")
         {
             _sourceFolderPath = Directory.GetCurrentDirectory();
+            _projectConfigurationName = "Release";
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void DefineArguments(ArgumentSyntax syntax)
         {
-            syntax.DefineOption("o|out", ref _publishFolderPath, requireValue: false, help: "working folder to publish to");
-            syntax.DefineOption("e|env", ref _environmentFilePath, requireValue: false, help: "path to environment XML file to use");
-            syntax.DefineOption("n|no-cli", ref _suppressPublishCli, requireValue: false, help: "suppress publish CLI (useful for F5 debug)");
-            syntax.DefineParameter("source-folder", ref _sourceFolderPath, "micoservice source folder*");
+            syntax.DefineOption("o|out", 
+                ref _publishFolderPath, requireValue: false, 
+                help: "working folder to publish to");
+
+            syntax.DefineOption("e|env", 
+                ref _environmentFilePath, requireValue: false, 
+                help: "path to environment XML file to use");
+
+            syntax.DefineOption("n|no-cli", 
+                ref _suppressPublishCli, requireValue: false, 
+                help: "suppress publish CLI (useful for F5 debug)");
+
+            syntax.DefineOption("p|project-config",
+                ref _projectConfigurationName, requireValue: true,
+                help: "projects configuration name (default: Release)");
+
+            syntax.DefineParameter("source-folder", 
+                ref _sourceFolderPath, 
+                "micoservice source folder*");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -127,11 +144,11 @@ namespace NWheels.Cli.Publish
             {
                 ExecuteProgram(
                     "dotnet",
-                    new[] { "publish", projectFilePath, "-o", _publishFolderPath });
+                    new[] { "publish", projectFilePath, "-o", _publishFolderPath, "-c", _projectConfigurationName });
             }
             else
             {
-                LogFatal($"project not found: {assemblyName}");
+                ReportFatalError($"project not found: {assemblyName}");
             }
         }
 

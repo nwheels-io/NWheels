@@ -6,6 +6,7 @@ using NWheels.Logging;
 using NWheels.Orchestration;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,10 +15,11 @@ using System.Threading;
 
 namespace NWheels.Microservices
 {
-    public class MicroserviceHost
+    public class MicroserviceHost : IDisposable
     {
         private readonly BootConfiguration _bootConfig;
-        private readonly IMicroserviceHostLogger _logger;        
+        private readonly IMicroserviceHostLogger _logger;
+        private readonly IReadOnlyList<string> _assemblyLookupFolders;
         private readonly List<ILifecycleListenerComponent> _lifecycleComponents;
         private readonly RevertableSequence _configureSequence;
         private readonly RevertableSequence _loadSequence;
@@ -32,16 +34,21 @@ namespace NWheels.Microservices
         {
             _bootConfig = bootConfig;
             _logger = logger;
+            _assemblyLookupFolders = GetAssemblyLookupFolderList();
             _configureSequence = new RevertableSequence(new ConfigureSequenceCodeBehind(this));
             _loadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
             _activateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
             _lifecycleComponents = new List<ILifecycleListenerComponent>();
+
+            AssemblyLoadContext.Default.Resolving += OnLoadContextResolvingAssembly;
         }
-        
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public event EventHandler StateChanged;
-        public event EventHandler<AssemblyLoadEventArgs> AssemblyLoad;
+        void IDisposable.Dispose()
+        {
+            AssemblyLoadContext.Default.Resolving -= OnLoadContextResolvingAssembly;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -197,7 +204,27 @@ namespace NWheels.Microservices
             return _container;
         }
 
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public event EventHandler StateChanged;
+        public event EventHandler<AssemblyLoadEventArgs> AssemblyLoad;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IReadOnlyList<string> GetAssemblyLookupFolderList()
+        {
+            if (_bootConfig.AssemblyDirectories != null && _bootConfig.AssemblyDirectories.Count > 0)
+            {
+                return _bootConfig.AssemblyDirectories;
+            }
+
+            return new[] {
+                _bootConfig.ConfigsDirectory,
+                AppContext.BaseDirectory
+            };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private IMicroserviceHostLogger Logger
         {
@@ -207,7 +234,7 @@ namespace NWheels.Microservices
             }
         }
 
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private BootConfiguration BootConfig
         {
@@ -217,7 +244,7 @@ namespace NWheels.Microservices
             }
         }
 
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private List<ILifecycleListenerComponent> LifecycleComponents
         {
@@ -227,7 +254,7 @@ namespace NWheels.Microservices
             }
         }
 
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private IInternalComponentContainer Container
         {
@@ -241,35 +268,35 @@ namespace NWheels.Microservices
             }
         }
 
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private bool ExecuteConfigurePhase()
         {
             return ExecutePhase(_configureSequence.Perform, _logger.NodeConfigureError);
         }
 
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private bool ExecuteLoadPhase()
         {
             return ExecutePhase(_loadSequence.Perform, _logger.NodeLoadError);
         }
 
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private bool ExecuteActivatePhase()
         {
             return ExecutePhase(_activateSequence.Perform, _logger.NodeActivationError);
         }
 
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private bool ExecuteDeactivatePhase()
         {
             return ExecutePhase(_activateSequence.Revert, _logger.NodeDeactivationError);
         }
 
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private bool ExecuteUnloadPhase()
         {
@@ -355,13 +382,40 @@ namespace NWheels.Microservices
             }
             else
             {
-                var assemblyContext = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.dll"));
-
-                types = assemblyContext.GetTypes().Where(
-                    x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == implementedInterface)).ToList();
+                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyName(new AssemblyName(assemblyName));
+                types = assembly.GetTypes()
+                    .Where(x => x.GetTypeInfo().ImplementedInterfaces.Any(i => i == implementedInterface))
+                    .ToList();
             }
 
             return types;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Assembly OnLoadContextResolvingAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
+        {
+            foreach (var folderPathProbe in _assemblyLookupFolders)
+            {
+                var filePathProbes = new[] {
+                    Path.Combine(folderPathProbe, assemblyName.Name + ".dll"),
+                    Path.Combine(folderPathProbe, assemblyName.Name + ".exe")
+                };
+
+                foreach (var filePath in filePathProbes)
+                {
+                    if (File.Exists(filePath))
+                    {
+                        return AssemblyLoadContext.Default.LoadFromAssemblyPath(filePath);
+                    }
+                }
+            }
+
+            var errorMessage =
+                $"Assembly '{assemblyName.Name}' could not be found in any of probed locations:{Environment.NewLine}" +
+                string.Join(Environment.NewLine, _assemblyLookupFolders.Select((path, index) => $"[{index + 1}] {path}"));
+
+            throw new FileNotFoundException(errorMessage);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -782,6 +836,37 @@ namespace NWheels.Microservices
                 /*sequence.Once().OnPerform(JoinSystemSession).OnRevert(LeaveSystemSession);
                 ...
                 sequence.Once().OnPerform(LeaveSystemSession).OnRevert(JoinSystemSession);*/
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class ModuleAssemblyLoadContext : AssemblyLoadContext
+        {
+            private readonly MicroserviceHost _ownerHost;
+            //private readonly Dictionary<string, Assembly> _loadedAssemblyByName;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ModuleAssemblyLoadContext(MicroserviceHost ownerHost)
+            {
+                _ownerHost = ownerHost;
+                this.Resolving += OnResolving;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override Assembly Load(AssemblyName assemblyName)
+            {
+                return null;
+                //return this.LoadFromAssemblyPath(Path.Combine(_ownerHost.BootConfig.ConfigsDirectory, assemblyName.Name + ".dll"));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private Assembly OnResolving(AssemblyLoadContext context, AssemblyName assemblyName)
+            {
+                return this.LoadFromAssemblyPath(Path.Combine(_ownerHost.BootConfig.ConfigsDirectory, assemblyName.Name + ".dll"));
             }
         }
     }

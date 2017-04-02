@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.CommandLine" Version="0.1.0-e170329-6" />
+    <PackageReference Include="System.Xml.XPath.XDocument" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

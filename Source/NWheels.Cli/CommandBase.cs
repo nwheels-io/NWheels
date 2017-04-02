@@ -69,6 +69,13 @@ namespace NWheels.Cli
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected void LogSuccess(string message)
+        {
+            Program.LogMessageWithColor(ConsoleColor.Green, message);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected void LogWarning(string message)
         {
             Program.LogMessageWithColor(ConsoleColor.Yellow, message);
@@ -83,7 +90,15 @@ namespace NWheels.Cli
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected void LogFatal(string message)
+        protected void ReportFatalError(Exception error)
+        {
+            Console.Error.WriteLine(error.ToString());
+            ReportFatalError(error.Message);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected void ReportFatalError(string message)
         {
             LogError("FATAL ERROR: " + message);
             Environment.Exit(2);

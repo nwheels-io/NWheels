@@ -2,7 +2,7 @@
   "profiles": {
     "NWheels.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "publish d:\\oss\\NWheels\\Source\\NWheels.Samples.FirstHappyPath --no-cli"
+      "commandLineArgs": "run d:\\oss\\NWheels\\Source\\NWheels.Samples.FirstHappyPath --no-publish"
     }
   }
 }
