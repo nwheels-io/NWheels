@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
     <RootNamespace>NWheels.Platform.Messaging</RootNamespace>
-    <OutputPath>..\Bin\</OutputPath>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
 
