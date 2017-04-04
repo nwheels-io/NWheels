@@ -9,6 +9,10 @@
   <ItemGroup>
     <PackageReference Include="System.CommandLine" Version="0.1.0-e170329-6" />
     <PackageReference Include="System.Xml.XPath.XDocument" Version="4.3.0" />
+    <!--
+    <PackageReference Include="Microsoft.Build.Framework" Version="15.1.548" />
+    <PackageReference Include="Microsoft.NET.Sdk" Version="1.1.0-alpha-20170315-1" />
+    -->
   </ItemGroup>
 
   <ItemGroup>

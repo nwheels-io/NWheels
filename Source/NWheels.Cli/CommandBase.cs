@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.CommandLine;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace NWheels.Cli
@@ -27,23 +28,25 @@ namespace NWheels.Cli
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected int ExecuteProgram(string nameOrFilePath, string[] args, string workingDirectory = null, bool validateExitCode = true)
+        protected int ExecuteProgram(
+            string nameOrFilePath,
+            string[] args = null,
+            string workingDirectory = null,
+            bool validateExitCode = true)
         {
-            var info = new ProcessStartInfo() {
-                FileName = nameOrFilePath,
-                Arguments = string.Join(" ", args),
-                WorkingDirectory = workingDirectory
-            };
+            return ExecuteProgram(out StreamReader stdOut, nameOrFilePath, args, workingDirectory, validateExitCode, shouldInterceptOutput: false);
+        }
 
-            var process = Process.Start(info);
-            process.WaitForExit();
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            if (validateExitCode && process.ExitCode != 0)
-            {
-                throw new Exception($"Program '{nameOrFilePath}' failed with code {process.ExitCode}.");
-            }
-
-            return process.ExitCode;
+        protected int ExecuteProgram(
+            out StreamReader output,
+            string nameOrFilePath,
+            string[] args = null,
+            string workingDirectory = null,
+            bool validateExitCode = true)
+        {
+            return ExecuteProgram(out output, nameOrFilePath, args, workingDirectory, validateExitCode, shouldInterceptOutput: true);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -102,6 +105,36 @@ namespace NWheels.Cli
         {
             LogError("FATAL ERROR: " + message);
             Environment.Exit(2);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private int ExecuteProgram(
+            out StreamReader output,
+            string nameOrFilePath,
+            string[] args,
+            string workingDirectory,
+            bool validateExitCode,
+            bool shouldInterceptOutput)
+        {
+            var info = new ProcessStartInfo()
+            {
+                FileName = nameOrFilePath,
+                Arguments = (args != null ? string.Join(" ", args) : string.Empty),
+                WorkingDirectory = workingDirectory,
+                RedirectStandardOutput = shouldInterceptOutput
+            };
+
+            var process = Process.Start(info);
+            process.WaitForExit();
+            output = (shouldInterceptOutput ? process.StandardOutput : null);
+
+            if (validateExitCode && process.ExitCode != 0)
+            {
+                throw new Exception($"Program '{nameOrFilePath}' failed with code {process.ExitCode}.");
+            }
+
+            return process.ExitCode;
         }
     }
 }

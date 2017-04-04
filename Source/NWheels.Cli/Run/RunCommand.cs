@@ -134,7 +134,7 @@ namespace NWheels.Cli.Run
 
                 if (_noPublish)
                 {
-                    ListSourceProjectAssemblyDirectories(bootConfig);
+                    MapAssemblyLocationsFromSources(bootConfig);
                 }
 
                 using (var host = new MicroserviceHost(bootConfig, new MicroserviceHostLoggerMock()))
@@ -158,9 +158,9 @@ namespace NWheels.Cli.Run
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ListSourceProjectAssemblyDirectories(BootConfiguration bootConfig)
+        private void MapAssemblyLocationsFromSources(BootConfiguration bootConfig)
         {
-            var directorySet = new HashSet<string>();
+            bootConfig.AssemblyMap = new AssemblyLocationMap();
 
             var solutionFolderPath = Directory.GetParent(bootConfig.ConfigsDirectory).FullName;
             var allProjectNames = Enumerable.Empty<string>()
@@ -170,21 +170,26 @@ namespace NWheels.Cli.Run
 
             foreach (var projectName in allProjectNames)
             {
-                if (TryFindProjectBinaryFolder(projectName, solutionFolderPath, out string binaryFolderPath))
+                if (TryFindProjectBinaryFolder(
+                    projectName, 
+                    solutionFolderPath, 
+                    out string projectFilePath,
+                    out string binaryFolderPath))
                 {
-                    directorySet.Add(binaryFolderPath);
+                    var projectAssemblyLocations = MapProjectAssemblyLocations(projectFilePath);
+                    bootConfig.AssemblyMap.AddDirectory(binaryFolderPath);
+                    bootConfig.AssemblyMap.AddLocations(projectAssemblyLocations);
                 }
             }
 
-            bootConfig.AssemblyDirectories = new List<string>();
-            bootConfig.AssemblyDirectories.AddRange(directorySet);
-            bootConfig.AssemblyDirectories.Add(AppContext.BaseDirectory);
+            bootConfig.AssemblyMap.AddDirectory(AppContext.BaseDirectory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private bool TryFindProjectBinaryFolder(string projectName, string solutionFolderPath, out string binaryFolderPath)
+        private bool TryFindProjectBinaryFolder(string projectName, string solutionFolderPath, out string projectFilePath, out string binaryFolderPath)
         {
+            projectFilePath = null;
             binaryFolderPath = null;
 
             var projectFolderPath = Path.Combine(solutionFolderPath, projectName);
@@ -193,7 +198,7 @@ namespace NWheels.Cli.Run
                 return false;
             }
 
-            var projectFilePath = Directory.GetFiles(projectFolderPath, "*.*proj", SearchOption.TopDirectoryOnly).SingleOrDefault();
+            projectFilePath = Directory.GetFiles(projectFolderPath, "*.*proj", SearchOption.TopDirectoryOnly).SingleOrDefault();
             if (projectFilePath == null)
             {
                 return false;
@@ -215,6 +220,119 @@ namespace NWheels.Cli.Run
 
             binaryFolderPath = Path.Combine(projectFolderPath, outputPath);
             return Directory.Exists(binaryFolderPath);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IReadOnlyDictionary<string, string> MapProjectAssemblyLocations(string projectFilePath)
+        {
+            var sdkDirectory = @"C:\Program Files\dotnet\sdk\1.0.0\Sdks\Microsoft.NET.Sdk"; //TODO: determine programmatically
+            var tempProjectFilePath = Path.Combine(Path.GetTempPath(), $"nwheels_cli_{Guid.NewGuid().ToString("N")}.proj");
+            var tempProjectXml = GenerateResolvePublishAssembliesProject(projectFilePath, sdkDirectory);
+
+            using (var tempFile = File.Create(tempProjectFilePath))
+            {
+                tempProjectXml.Save(tempFile);
+                tempFile.Flush();
+            }
+
+            try
+            {
+                ExecuteProgram(out StreamReader output, "dotnet", new[] { "msbuild", tempProjectFilePath, "/nologo" });
+
+                var outputLines = new List<string>();
+                string line;
+                while ((line = output.ReadLine()) != null)
+                {
+                    outputLines.Add(line);
+                }
+
+                var parsedMap = ParseAssemblyDirectoryMap(outputLines);
+                return parsedMap;
+            }
+            finally
+            {
+                File.Delete(tempProjectFilePath);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private XElement GenerateResolvePublishAssembliesProject(string projectFilePath, string sdkDirectory)
+        {
+            XNamespace ns = @"http://schemas.microsoft.com/developer/msbuild/2003";
+
+            var projectElement = new XElement(ns + "Project",
+                new XElement(ns + "UsingTask",
+                    new XAttribute("TaskName", "ResolvePublishAssemblies"),
+                    new XAttribute(
+                        "AssemblyFile",  //TODO: determine this path programmatically
+                        Path.Combine(sdkDirectory, "tools", "netcoreapp1.0", "Microsoft.NET.Build.Tasks.dll"))),
+                new XElement(ns + "Target",
+                    new XAttribute("Name", "Build"),
+                    new XElement(ns + "ResolvePublishAssemblies",
+                        new XAttribute("ProjectPath", projectFilePath),
+                        new XAttribute("AssetsFilePath", Path.Combine(Path.GetDirectoryName(projectFilePath), "obj", "project.assets.json")),
+                        new XAttribute("TargetFramework", ".NETStandard,Version=v1.6"),
+                        new XElement(ns + "Output",
+                            new XAttribute("TaskParameter", "AssembliesToPublish"),
+                            new XAttribute("ItemName", "ResolvedAssembliesToPublish"))),
+                    new XElement(ns + "Message",
+                        new XAttribute("Text", "%(DestinationSubPath)=@(ResolvedAssembliesToPublish)"),
+                        new XAttribute("Importance", "high"))));
+
+            return projectElement;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IReadOnlyDictionary<string, string> ParseAssemblyDirectoryMap(IEnumerable<string> nameValuePairLines)
+        {
+            var map = new Dictionary<string, string>();
+
+            foreach (var line in nameValuePairLines)
+            {
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                var nameValueParts = line.Trim().Split('=');
+
+                if (nameValueParts.Length == 2 && !string.IsNullOrEmpty(nameValueParts[0]) && !string.IsNullOrEmpty(nameValueParts[1]))
+                {
+                    AddAssemblyDirectoryMapEntry(map, assemblyPart: nameValueParts[0], directoryPart: nameValueParts[1]);
+                }
+                else
+                {
+                    LogWarning($"Assembly directory pair could not be parsed: {line}");
+                }
+            }
+
+            return map;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void AddAssemblyDirectoryMapEntry(Dictionary<string, string> map, string assemblyPart, string directoryPart)
+        {
+            var fileName = Path.GetFileName(assemblyPart);
+            var fileExtension = Path.GetExtension(fileName).ToLower();
+            string assemblyName;
+
+            if (fileExtension == ".exe" || fileExtension == ".dll" || fileExtension == ".so")
+            {
+                assemblyName = fileName.Substring(0, fileName.Length - fileExtension.Length);
+            }
+            else
+            {
+                assemblyName = fileName;
+            }
+
+            if (!map.ContainsKey(assemblyName))
+            {
+                map.Add(assemblyName, directoryPart);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
