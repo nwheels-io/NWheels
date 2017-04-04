@@ -34,19 +34,31 @@ namespace NWheels.Cli
             string workingDirectory = null,
             bool validateExitCode = true)
         {
-            return ExecuteProgram(out StreamReader stdOut, nameOrFilePath, args, workingDirectory, validateExitCode, shouldInterceptOutput: false);
+            return ExecuteProgram(
+                out IEnumerable<string> output, 
+                nameOrFilePath, 
+                args, 
+                workingDirectory, 
+                validateExitCode, 
+                shouldInterceptOutput: false);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected int ExecuteProgram(
-            out StreamReader output,
+            out IEnumerable<string> output,
             string nameOrFilePath,
             string[] args = null,
             string workingDirectory = null,
             bool validateExitCode = true)
         {
-            return ExecuteProgram(out output, nameOrFilePath, args, workingDirectory, validateExitCode, shouldInterceptOutput: true);
+            return ExecuteProgram(
+                out output, 
+                nameOrFilePath, 
+                args, 
+                workingDirectory, 
+                validateExitCode, 
+                shouldInterceptOutput: true);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -110,15 +122,14 @@ namespace NWheels.Cli
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private int ExecuteProgram(
-            out StreamReader output,
+            out IEnumerable<string> output,
             string nameOrFilePath,
             string[] args,
             string workingDirectory,
             bool validateExitCode,
             bool shouldInterceptOutput)
         {
-            var info = new ProcessStartInfo()
-            {
+            var info = new ProcessStartInfo() {
                 FileName = nameOrFilePath,
                 Arguments = (args != null ? string.Join(" ", args) : string.Empty),
                 WorkingDirectory = workingDirectory,
@@ -126,8 +137,20 @@ namespace NWheels.Cli
             };
 
             var process = Process.Start(info);
+            List<string> outputLines = null;
+
+            if (shouldInterceptOutput)
+            {
+                outputLines = new List<string>(capacity: 100);
+                string line;
+                while ((line = process.StandardOutput.ReadLine()) != null)
+                {
+                    outputLines.Add(line);
+                }
+            }
+
             process.WaitForExit();
-            output = (shouldInterceptOutput ? process.StandardOutput : null);
+            output = outputLines;
 
             if (validateExitCode && process.ExitCode != 0)
             {

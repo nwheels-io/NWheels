@@ -238,16 +238,11 @@ namespace NWheels.Cli.Run
 
             try
             {
-                ExecuteProgram(out StreamReader output, "dotnet", new[] { "msbuild", tempProjectFilePath, "/nologo" });
+                ExecuteProgram(
+                    out IEnumerable<string> output, 
+                    "dotnet", new[] { "msbuild", tempProjectFilePath, "/nologo" });
 
-                var outputLines = new List<string>();
-                string line;
-                while ((line = output.ReadLine()) != null)
-                {
-                    outputLines.Add(line);
-                }
-
-                var parsedMap = ParseAssemblyDirectoryMap(outputLines);
+                var parsedMap = ParseAssemblyDirectoryMap(output);
                 return parsedMap;
             }
             finally
