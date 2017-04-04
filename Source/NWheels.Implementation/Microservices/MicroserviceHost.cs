@@ -19,7 +19,7 @@ namespace NWheels.Microservices
     {
         private readonly BootConfiguration _bootConfig;
         private readonly IMicroserviceHostLogger _logger;
-        private readonly IReadOnlyList<string> _assemblyLookupFolders;
+        private readonly AssemblyLocationMap _assemblyMap;
         private readonly List<ILifecycleListenerComponent> _lifecycleComponents;
         private readonly RevertableSequence _configureSequence;
         private readonly RevertableSequence _loadSequence;
@@ -34,7 +34,7 @@ namespace NWheels.Microservices
         {
             _bootConfig = bootConfig;
             _logger = logger;
-            _assemblyLookupFolders = GetAssemblyLookupFolderList();
+            _assemblyMap = GetAssemblyLocationMap();
             _configureSequence = new RevertableSequence(new ConfigureSequenceCodeBehind(this));
             _loadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
             _activateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
@@ -211,17 +211,17 @@ namespace NWheels.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IReadOnlyList<string> GetAssemblyLookupFolderList()
+        private AssemblyLocationMap GetAssemblyLocationMap()
         {
-            if (_bootConfig.AssemblyDirectories != null && _bootConfig.AssemblyDirectories.Count > 0)
+            if (_bootConfig.AssemblyMap != null)
             {
-                return _bootConfig.AssemblyDirectories;
+                return _bootConfig.AssemblyMap;
             }
 
-            return new[] {
-                _bootConfig.ConfigsDirectory,
-                AppContext.BaseDirectory
-            };
+            var defaultMap = new AssemblyLocationMap();
+            defaultMap.AddDirectory(_bootConfig.ConfigsDirectory);
+            defaultMap.AddDirectory(AppContext.BaseDirectory);
+            return defaultMap;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -395,11 +395,17 @@ namespace NWheels.Microservices
 
         private Assembly OnLoadContextResolvingAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
         {
-            foreach (var folderPathProbe in _assemblyLookupFolders)
+            if (_assemblyMap.FilePathByAssemblyName.TryGetValue(assemblyName.Name, out string mappedFilePath))
+            {
+                return AssemblyLoadContext.Default.LoadFromAssemblyPath(mappedFilePath);
+            }
+
+            foreach (var directoryProbe in _assemblyMap.Directories)
             {
                 var filePathProbes = new[] {
-                    Path.Combine(folderPathProbe, assemblyName.Name + ".dll"),
-                    Path.Combine(folderPathProbe, assemblyName.Name + ".exe")
+                    Path.Combine(directoryProbe, assemblyName.Name + ".dll"),
+                    Path.Combine(directoryProbe, assemblyName.Name + ".exe"),
+                    Path.Combine(directoryProbe, assemblyName.Name + ".so")
                 };
 
                 foreach (var filePath in filePathProbes)
@@ -413,7 +419,7 @@ namespace NWheels.Microservices
 
             var errorMessage =
                 $"Assembly '{assemblyName.Name}' could not be found in any of probed locations:{Environment.NewLine}" +
-                string.Join(Environment.NewLine, _assemblyLookupFolders.Select((path, index) => $"[{index + 1}] {path}"));
+                string.Join(Environment.NewLine, _assemblyMap.Directories.Select((path, index) => $"[{index + 1}] {path}"));
 
             throw new FileNotFoundException(errorMessage);
         }

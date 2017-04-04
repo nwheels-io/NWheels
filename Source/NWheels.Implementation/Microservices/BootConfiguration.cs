@@ -17,7 +17,7 @@ namespace NWheels.Microservices
 
         public string ConfigsDirectory { get; set; }
 
-        public List<string> AssemblyDirectories { get; set; }
+        public AssemblyLocationMap AssemblyMap { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
