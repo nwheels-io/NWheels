@@ -67,6 +67,8 @@ namespace NWheels.Cli.Publish
                 arguments.ReportError("microservice folder must be specified");
             }
 
+            _sourceFolderPath = Path.GetFullPath(_sourceFolderPath);
+
             if (!Directory.Exists(_sourceFolderPath))
             {
                 arguments.ReportError($"folder does not exist: {_sourceFolderPath}");
@@ -77,6 +79,8 @@ namespace NWheels.Cli.Publish
                 _publishFolderPath = Path.Combine(_sourceFolderPath, DefaultPulishSubFolder);
             }
 
+            _publishFolderPath = Path.GetFullPath(_publishFolderPath);
+
             if (!Directory.Exists(_publishFolderPath))
             {
                 Directory.CreateDirectory(_publishFolderPath);
@@ -86,6 +90,8 @@ namespace NWheels.Cli.Publish
             {
                 _environmentFilePath = Path.Combine(_sourceFolderPath, BootConfiguration.EnvironmentConfigFileName);
             }
+
+            _environmentFilePath = Path.GetFullPath(_environmentFilePath);
 
             if (!File.Exists(_environmentFilePath))
             {

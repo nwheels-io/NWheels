@@ -56,6 +56,8 @@ namespace NWheels.Cli.Run
                 arguments.ReportError("microservice folder must be specified");
             }
 
+            _microserviceFolderPath = Path.GetFullPath(_microserviceFolderPath);
+
             if (!Directory.Exists(_microserviceFolderPath))
             {
                 arguments.ReportError($"folder does not exist: {_microserviceFolderPath}");
