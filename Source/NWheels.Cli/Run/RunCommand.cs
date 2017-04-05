@@ -168,29 +168,46 @@ namespace NWheels.Cli.Run
                 .Concat(bootConfig.MicroserviceConfig.FrameworkModules.Select(m => m.Assembly))
                 .Concat(bootConfig.MicroserviceConfig.ApplicationModules.Select(m => m.Assembly));
 
+            List<string> allProjectFilePaths = new List<string>();
+            Dictionary<string, string> projectOutputAssemblyLocations = new Dictionary<string, string>();
+
             foreach (var projectName in allProjectNames)
             {
                 if (TryFindProjectBinaryFolder(
                     projectName, 
                     solutionFolderPath, 
                     out string projectFilePath,
-                    out string binaryFolderPath))
+                    out string binaryFolderPath,
+                    out string outputAssemblyFilePath))
                 {
-                    var projectAssemblyLocations = MapProjectAssemblyLocations(projectFilePath);
+                    allProjectFilePaths.Add(projectFilePath);
                     bootConfig.AssemblyMap.AddDirectory(binaryFolderPath);
-                    bootConfig.AssemblyMap.AddLocations(projectAssemblyLocations);
+
+                    if (!string.IsNullOrEmpty(outputAssemblyFilePath))
+                    {
+                        projectOutputAssemblyLocations[projectName] = outputAssemblyFilePath;
+                    }
                 }
             }
 
+            var dependencyAssemblyLocations = MapDependencyAssemblyLocations(allProjectFilePaths);
+            bootConfig.AssemblyMap.AddLocations(dependencyAssemblyLocations);
+            bootConfig.AssemblyMap.AddLocations(projectOutputAssemblyLocations);
             bootConfig.AssemblyMap.AddDirectory(AppContext.BaseDirectory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private bool TryFindProjectBinaryFolder(string projectName, string solutionFolderPath, out string projectFilePath, out string binaryFolderPath)
+        private bool TryFindProjectBinaryFolder(
+            string projectName, 
+            string solutionFolderPath, 
+            out string projectFilePath, 
+            out string binaryFolderPath,
+            out string assemblyFilePath)
         {
             projectFilePath = null;
             binaryFolderPath = null;
+            assemblyFilePath = null;
 
             var projectFolderPath = Path.Combine(solutionFolderPath, projectName);
             if (!Directory.Exists(projectFolderPath))
@@ -216,19 +233,32 @@ namespace NWheels.Cli.Run
 
             var slash = Path.DirectorySeparatorChar;
             var targetFramework = (targetFrameworkElement?.Value.DefaultIfNullOrEmpty(null) ?? "netstandard1.6");
-            var outputPath = (outputPathElement?.Value.DefaultIfNullOrEmpty(null) ?? $"bin{slash}{_projectConfigurationName}{slash}{targetFramework}");
+            var outputPath = (
+                outputPathElement?.Value.DefaultIfNullOrEmpty(null) ?? 
+                $"bin{slash}{_projectConfigurationName}{slash}{targetFramework}");
 
             binaryFolderPath = Path.Combine(projectFolderPath, outputPath);
-            return Directory.Exists(binaryFolderPath);
+            if (!Directory.Exists(binaryFolderPath))
+            {
+                return false;
+            }
+
+            assemblyFilePath = Path.Combine(binaryFolderPath, projectName + ".dll");
+            if (!File.Exists(assemblyFilePath))
+            {
+                assemblyFilePath = null;
+            }
+
+            return true;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IReadOnlyDictionary<string, string> MapProjectAssemblyLocations(string projectFilePath)
+        private Dictionary<string, string> MapDependencyAssemblyLocations(IEnumerable<string> projectFilePaths)
         {
             var sdkDirectory = @"C:\Program Files\dotnet\sdk\1.0.0\Sdks\Microsoft.NET.Sdk"; //TODO: determine programmatically
             var tempProjectFilePath = Path.Combine(Path.GetTempPath(), $"nwheels_cli_{Guid.NewGuid().ToString("N")}.proj");
-            var tempProjectXml = GenerateResolvePublishAssembliesProject(projectFilePath, sdkDirectory);
+            var tempProjectXml = GenerateResolvePublishAssembliesProject(projectFilePaths, sdkDirectory);
 
             using (var tempFile = File.Create(tempProjectFilePath))
             {
@@ -253,9 +283,12 @@ namespace NWheels.Cli.Run
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private XElement GenerateResolvePublishAssembliesProject(string projectFilePath, string sdkDirectory)
+        private XElement GenerateResolvePublishAssembliesProject(IEnumerable<string> projectFilePaths, string sdkDirectory)
         {
             XNamespace ns = @"http://schemas.microsoft.com/developer/msbuild/2003";
+
+            var projectFilesItemGroupElement = new XElement(ns + "ItemGroup", 
+                projectFilePaths.Select(item => CreateProjectFileItemElement(ns, item)));
 
             var projectElement = new XElement(ns + "Project",
                 new XElement(ns + "UsingTask",
@@ -263,12 +296,13 @@ namespace NWheels.Cli.Run
                     new XAttribute(
                         "AssemblyFile",  //TODO: determine this path programmatically
                         Path.Combine(sdkDirectory, "tools", "netcoreapp1.0", "Microsoft.NET.Build.Tasks.dll"))),
+                projectFilesItemGroupElement,
                 new XElement(ns + "Target",
                     new XAttribute("Name", "Build"),
                     new XElement(ns + "ResolvePublishAssemblies",
-                        new XAttribute("ProjectPath", projectFilePath),
-                        new XAttribute("AssetsFilePath", Path.Combine(Path.GetDirectoryName(projectFilePath), "obj", "project.assets.json")),
-                        new XAttribute("TargetFramework", ".NETStandard,Version=v1.6"),
+                        new XAttribute("ProjectPath", "@(ProjectFiles)"),
+                        new XAttribute("AssetsFilePath", "%(AssetsJson)"),
+                        new XAttribute("TargetFramework", ".NETStandard,Version=v1.6"), // TODO: determine prgrammatically
                         new XElement(ns + "Output",
                             new XAttribute("TaskParameter", "AssembliesToPublish"),
                             new XAttribute("ItemName", "ResolvedAssembliesToPublish"))),
@@ -281,7 +315,18 @@ namespace NWheels.Cli.Run
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IReadOnlyDictionary<string, string> ParseAssemblyDirectoryMap(IEnumerable<string> nameValuePairLines)
+        private XElement CreateProjectFileItemElement(XNamespace ns, string projectFilePath)
+        {
+            var itemElement = new XElement(ns + "ProjectFiles",
+                new XAttribute("Include", projectFilePath),
+                new XElement(ns + "AssetsJson", Path.Combine(Path.GetDirectoryName(projectFilePath), "obj", "project.assets.json")));
+
+            return itemElement;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Dictionary<string, string> ParseAssemblyDirectoryMap(IEnumerable<string> nameValuePairLines)
         {
             var map = new Dictionary<string, string>();
 
@@ -296,6 +341,11 @@ namespace NWheels.Cli.Run
 
                 if (nameValueParts.Length == 2 && !string.IsNullOrEmpty(nameValueParts[0]) && !string.IsNullOrEmpty(nameValueParts[1]))
                 {
+                    //TODO: skip assemblies that come from runtimes/<RID>/... (RID = Runtime IDentifier, e.g. win7-x64, debian-x64)
+                    //      since such assemblies are listed multiple times (per each RID), 
+                    //      and we don't filter by any specific RID, it is unreliable anyway
+                    //      + those assemblies don't seem to ever arrive to AssemblyLoadContext.Resolving
+
                     AddAssemblyDirectoryMapEntry(map, assemblyPart: nameValueParts[0], directoryPart: nameValueParts[1]);
                 }
                 else
@@ -317,6 +367,8 @@ namespace NWheels.Cli.Run
 
             if (fileExtension == ".exe" || fileExtension == ".dll" || fileExtension == ".so")
             {
+                //TODO: inspect assembly and extract its correct name; will this be a performance problem?
+                //      for now assume that assembly name equals to file name (this default covers 99% of the cases)
                 assemblyName = fileName.Substring(0, fileName.Length - fileExtension.Length);
             }
             else

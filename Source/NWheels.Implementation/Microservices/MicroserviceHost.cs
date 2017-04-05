@@ -844,36 +844,5 @@ namespace NWheels.Microservices
                 sequence.Once().OnPerform(LeaveSystemSession).OnRevert(JoinSystemSession);*/
             }
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class ModuleAssemblyLoadContext : AssemblyLoadContext
-        {
-            private readonly MicroserviceHost _ownerHost;
-            //private readonly Dictionary<string, Assembly> _loadedAssemblyByName;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public ModuleAssemblyLoadContext(MicroserviceHost ownerHost)
-            {
-                _ownerHost = ownerHost;
-                this.Resolving += OnResolving;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            protected override Assembly Load(AssemblyName assemblyName)
-            {
-                return null;
-                //return this.LoadFromAssemblyPath(Path.Combine(_ownerHost.BootConfig.ConfigsDirectory, assemblyName.Name + ".dll"));
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private Assembly OnResolving(AssemblyLoadContext context, AssemblyName assemblyName)
-            {
-                return this.LoadFromAssemblyPath(Path.Combine(_ownerHost.BootConfig.ConfigsDirectory, assemblyName.Name + ".dll"));
-            }
-        }
     }
 }
