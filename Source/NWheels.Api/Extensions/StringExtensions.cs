@@ -37,5 +37,17 @@ namespace NWheels.Extensions
 
             return source.Substring(startIndex: 0, length: source.Length - suffix.Length);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string DefaultIfNullOrEmpty(this string source, string defaultValue)
+        {
+            if (string.IsNullOrEmpty(source))
+            {
+                return defaultValue;
+            }
+
+            return source;
+        }
     }
 }

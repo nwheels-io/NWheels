@@ -58,5 +58,24 @@ namespace NWheels.Implementation.UnitTests.Extensions
 
             actualOutput.Should().Be(expectedOutput);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Theory]
+        [InlineData("ABC", "DEF", "ABC")]
+        [InlineData(null, "DEF", "DEF")]
+        [InlineData("", "DEF", "DEF")]
+        [InlineData("", null, null)]
+        [InlineData(null, null, null)]
+        public void TestDefaultIfNullOrEmpty(string input, string defaultValue, string expectedOutput)
+        {
+            //-- act
+
+            var actualOutput = input.DefaultIfNullOrEmpty(defaultValue);
+
+            //-- assert
+
+            actualOutput.Should().Be(expectedOutput);
+        }
     }
 }

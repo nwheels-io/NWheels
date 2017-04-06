@@ -6,7 +6,6 @@
     <ApplicationIcon />
     <OutputTypeEx>exe</OutputTypeEx>
     <StartupObject />
-    <OutputPath>..\Bin\</OutputPath>
     <PostBuildEvent>xcopy "$(ProjectDir)$(OutDir)*.*" "$(ProjectDir)..\netstandard1.6" /i /d /y</PostBuildEvent>
   </PropertyGroup>
 
