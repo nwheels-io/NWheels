@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace NWheels.SystemTests.Microservices
 {
-    [Trait("Purpose", "Integration")]
+    [Trait("Purpose", "SystemTest")]
     public class MicroserviceHostSmokeTest
     {
         [Fact]
