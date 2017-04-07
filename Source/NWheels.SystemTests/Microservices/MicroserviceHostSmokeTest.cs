@@ -20,8 +20,10 @@ namespace NWheels.SystemTests.Microservices
             var testListenerUrl = "http://localhost:5555";
 
             var hostController = new MicroserviceHostBuilder(microserviceName: "SmokeTest")
+                .UseCliDirectoryFromEnvironment()
+                .UseMicroserviceFromSource("..")
                 .UseAutofacInjectionAdapter()
-                .AddApplicationModuleOf<SmokeTestFeatureLoader>()
+                .UseApplicationFeature<SmokeTestFeatureLoader>()
                 .GetHostController();
 
             hostController.Start();
@@ -50,8 +52,9 @@ namespace NWheels.SystemTests.Microservices
             {
                 try
                 {
-                    var stopped = hostController.Stop(10000);
+                    var stopped = hostController.Stop(10000, out int exitCode);
                     Assert.True(stopped, "Microservice host didn't stop within allotted timeout.");
+                    exitCode.Should().Be(0, "microservice exit code");
                 }
                 catch (Exception e)
                 {
@@ -81,16 +84,16 @@ namespace NWheels.SystemTests.Microservices
 
             }
         }
-    }
 
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [DefaultFeatureLoader]
-    public class SmokeTestFeatureLoader : FeatureLoaderBase
-    {
-        public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
+        [FeatureLoader(Name = "SmokeTest")]
+        public class SmokeTestFeatureLoader : FeatureLoaderBase
         {
-            containerBuilder.ContributeLifecycleListener<MicroserviceHostSmokeTest.SmokeTestComponent>();
+            public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
+            {
+                containerBuilder.ContributeLifecycleListener<MicroserviceHostSmokeTest.SmokeTestComponent>();
+            }
         }
     }
 }

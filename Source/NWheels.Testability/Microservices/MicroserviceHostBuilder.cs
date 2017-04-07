@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace NWheels.Testability.Microservices
@@ -12,7 +13,8 @@ namespace NWheels.Testability.Microservices
     {
         private readonly MicroserviceConfig _microserviceConfig;
         private readonly EnvironmentConfig _environmentConfig;
-        private string _workingDirectory;
+        private string _cliDirectory;
+        private string _microserviceDirectory;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -32,20 +34,30 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder UseWorkingDirectory(string directoryPath)
+        public MicroserviceHostBuilder UseMicroserviceDirectory(string directoryPath)
         {
-            if (Path.IsPathRooted(directoryPath))
-            {
-                _workingDirectory = directoryPath;
-            }
-            else
-            {
-                _workingDirectory = Path.Combine(
-                    Path.GetDirectoryName(this.GetType().GetTypeInfo().Assembly.Location),
-                    "system_test",
-                    directoryPath);
-            }
+            _microserviceDirectory = directoryPath;
+            return this;
+        }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MicroserviceHostBuilder UseMicroserviceFromSource(string relativeDirectoryPath, [CallerFilePath] string sourceFilePath = "")
+        {
+            relativeDirectoryPath = relativeDirectoryPath
+                .Replace('\\', Path.DirectorySeparatorChar)
+                .Replace('/', Path.DirectorySeparatorChar);
+
+            _microserviceDirectory = Path.Combine(Path.GetDirectoryName(sourceFilePath), relativeDirectoryPath);
+
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MicroserviceHostBuilder UseCliDirectoryFromEnvironment()
+        {
+            _cliDirectory = Environment.GetEnvironmentVariable("NWHEELS_CLI");
             return this;
         }
 
@@ -62,18 +74,54 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder AddApplicationModuleOf<T>()
+        public MicroserviceHostBuilder UseApplicationModuleFor<T>()
         {
-            var moduleAssemblyName = typeof(T).GetTypeInfo().Assembly.GetName().Name;
+            _microserviceConfig.ApplicationModules = EnsureModuleListed(
+                typeof(T),
+                _microserviceConfig.ApplicationModules,
+                out MicroserviceConfig.ModuleConfig module);
 
-            if (!_microserviceConfig.ApplicationModules.Any(m => m.Assembly.Equals(moduleAssemblyName, StringComparison.OrdinalIgnoreCase)))
-            {
-                var moduleConfig = new MicroserviceConfig.ModuleConfig {
-                    Assembly = moduleAssemblyName
-                };
+            return this;
+        }
 
-                _microserviceConfig.ApplicationModules = _microserviceConfig.ApplicationModules.Append(moduleConfig).ToArray();
-            }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MicroserviceHostBuilder UseApplicationFeature<T>()
+            where T : IFeatureLoader
+        {
+            _microserviceConfig.ApplicationModules = EnsureModuleListed(
+                typeof(T),
+                _microserviceConfig.ApplicationModules,
+                out MicroserviceConfig.ModuleConfig module);
+
+            EnsureFeatureListed(typeof(T), module);
+
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MicroserviceHostBuilder UseFrameworkFeature<T>() 
+            where T : IFeatureLoader
+        {
+            _microserviceConfig.FrameworkModules = EnsureModuleListed(
+                typeof(T),
+                _microserviceConfig.FrameworkModules,
+                out MicroserviceConfig.ModuleConfig module);
+
+            EnsureFeatureListed(typeof(T), module);
+
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MicroserviceHostBuilder UseFrameworkModuleFor<T>()
+        {
+            _microserviceConfig.FrameworkModules = EnsureModuleListed(
+                typeof(T), 
+                _microserviceConfig.FrameworkModules, 
+                out MicroserviceConfig.ModuleConfig module);
 
             return this;
         }
@@ -82,7 +130,48 @@ namespace NWheels.Testability.Microservices
 
         public MicroserviceHostController GetHostController()
         {
-            return new MicroserviceHostController(_workingDirectory, _microserviceConfig, _environmentConfig);
+            return new MicroserviceHostController(_cliDirectory, _microserviceDirectory, _microserviceConfig, _environmentConfig);
+        }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private MicroserviceConfig.ModuleConfig[] EnsureModuleListed(
+            Type typeFromModuleAssembly,
+            MicroserviceConfig.ModuleConfig[] moduleList, 
+            out MicroserviceConfig.ModuleConfig module)
+        {
+            var assemblyName = typeFromModuleAssembly.GetTypeInfo().Assembly.GetName().Name;
+            module = moduleList.FirstOrDefault(m => m.Assembly.Equals(assemblyName, StringComparison.OrdinalIgnoreCase));
+
+            if (module != null)
+            {
+                return moduleList;
+            }
+
+            module = new MicroserviceConfig.ModuleConfig {
+                Assembly = assemblyName,
+                Features = Array.Empty<MicroserviceConfig.ModuleConfig.FeatureConfig>()
+            };
+
+            return moduleList.Append(module).ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void EnsureFeatureListed(Type featureLoaderType, MicroserviceConfig.ModuleConfig moduleConfig)
+        {
+            var namedFeatureAttribute = featureLoaderType.GetTypeInfo().GetCustomAttribute<FeatureLoaderAttribute>();
+
+            if (namedFeatureAttribute != null)
+            {
+                var feature = moduleConfig.Features.FirstOrDefault(f => f.Name == namedFeatureAttribute.Name);
+
+                if (feature == null)
+                {
+                    moduleConfig.Features = moduleConfig.Features.Append(new MicroserviceConfig.ModuleConfig.FeatureConfig() {
+                        Name = namedFeatureAttribute.Name
+                    }).ToArray();
+                }
+            }
         }
     }
 }
