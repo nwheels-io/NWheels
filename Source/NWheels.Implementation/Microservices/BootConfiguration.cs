@@ -18,14 +18,24 @@ namespace NWheels.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public static BootConfiguration LoadFromDirectory(string configsPath)
         {
+            var bootConfig = LoadFromFiles(
+                Path.Combine(configsPath, MicroserviceConfigFileName),
+                Path.Combine(configsPath, EnvironmentConfigFileName));
+
+            bootConfig.ConfigsDirectory = configsPath;
+
+            return bootConfig;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static BootConfiguration LoadFromFiles(string microserviceFilePath, string environmentFilePath)
+        {
             return new BootConfiguration() {
-                ConfigsDirectory = configsPath,
-                MicroserviceConfig = Deserialize<MicroserviceConfig>($"{configsPath}\\{MicroserviceConfigFileName}"),
-                EnvironmentConfig = Deserialize<EnvironmentConfig>($"{configsPath}\\{EnvironmentConfigFileName}")
+                MicroserviceConfig = Deserialize<MicroserviceConfig>(microserviceFilePath),
+                EnvironmentConfig = Deserialize<EnvironmentConfig>(environmentFilePath)
             };
         }
 

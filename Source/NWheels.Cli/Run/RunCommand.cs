@@ -16,6 +16,8 @@ namespace NWheels.Cli.Run
     public class RunCommand : CommandBase
     {
         private string _microserviceFolderPath;
+        private string _microserviceFilePath;
+        private string _environmentFilePath;
         private bool _noPublish;
         private string _projectConfigurationName;
         private MicroserviceFolderType _microserviceFolderType;
@@ -37,6 +39,14 @@ namespace NWheels.Cli.Run
             syntax.DefineOption("n|no-publish", 
                 ref _noPublish, 
                 help: "run without publish: load modules from where they were compiled");
+
+            syntax.DefineOption("m|microservice-xml",
+                ref _microserviceFilePath, requireValue: true,
+                help: "path to environment XML file to use");
+
+            syntax.DefineOption("e|environment-xml",
+                ref _environmentFilePath, requireValue: true,
+                help: "path to environment XML file to use");
 
             syntax.DefineOption("p|project-config", 
                 ref _projectConfigurationName, requireValue: true, 
@@ -61,6 +71,16 @@ namespace NWheels.Cli.Run
             if (!Directory.Exists(_microserviceFolderPath))
             {
                 arguments.ReportError($"folder does not exist: {_microserviceFolderPath}");
+            }
+
+            if (!string.IsNullOrEmpty(_microserviceFilePath) && !File.Exists(_microserviceFilePath))
+            {
+                arguments.ReportError($"file does not exist: {_microserviceFilePath}");
+            }
+
+            if (!string.IsNullOrEmpty(_environmentFilePath) && !File.Exists(_environmentFilePath))
+            {
+                arguments.ReportError($"file does not exist: {_environmentFilePath}");
             }
 
             if (!DetermineFolderType(out _microserviceFolderType))
@@ -132,7 +152,9 @@ namespace NWheels.Cli.Run
             try
             {
                 LogImportant($"run > {_microserviceFolderPath}");
-                var bootConfig = BootConfiguration.LoadFromDirectory(configsPath: _microserviceFolderPath);
+
+                var bootConfig = BootConfiguration.LoadFromFiles(_microserviceFilePath, _environmentFilePath);
+                bootConfig.ConfigsDirectory = _microserviceFilePath;
 
                 if (_noPublish)
                 {
