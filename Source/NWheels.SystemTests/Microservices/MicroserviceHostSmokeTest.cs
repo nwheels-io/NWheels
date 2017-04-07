@@ -8,23 +8,30 @@ using NWheels.Testability.Microservices;
 using System.Net.Http;
 using FluentAssertions;
 using System.Linq;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace NWheels.SystemTests.Microservices
 {
     [Trait("Purpose", "SystemTest")]
     public class MicroserviceHostSmokeTest
     {
+        public const string TestListenerUrl = "http://localhost:5555";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [Fact]
         public void SmokeTest()
         {
-            var testListenerUrl = "http://localhost:5555";
-
             var hostController = new MicroserviceHostBuilder(microserviceName: "SmokeTest")
-                .UseCliDirectoryFromEnvironment()
-                .UseMicroserviceFromSource("..")
+                .UseCliDirectoryFromSource(relativeProjectDirectoryPath: "..", allowOverrideByEnvironmentVar: true)
+                .UseMicroserviceFromSource(relativeProjectDirectoryPath: "..")
                 .UseAutofacInjectionAdapter()
                 .UseApplicationFeature<SmokeTestFeatureLoader>()
-                .GetHostController();
+                .Build();
 
             hostController.Start();
 
@@ -34,7 +41,7 @@ namespace NWheels.SystemTests.Microservices
             {
                 using (var client = new HttpClient())
                 {
-                    var httpTask = client.GetAsync(testListenerUrl + "/this-is-a-test", HttpCompletionOption.ResponseContentRead);
+                    var httpTask = client.GetAsync(TestListenerUrl + "/this-is-a-test", HttpCompletionOption.ResponseContentRead);
                     var completed = httpTask.Wait(10000);
                     Assert.True(completed, "HTTP request didn't complete within allotted timeout.");
 
@@ -44,6 +51,7 @@ namespace NWheels.SystemTests.Microservices
                     responseText.Should().Be("this-is-a-test");
                 }
             }
+            //TODO: move exception handling logic to NWheels.Testability, to make it reusable
             catch (Exception e)
             {
                 exceptions.Add(e);
@@ -72,16 +80,30 @@ namespace NWheels.SystemTests.Microservices
 
         public class SmokeTestComponent : LifecycleListenerComponentBase
         {
+            private IWebHost _host;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public override void Activate()
             {
+                _host = new WebHostBuilder()
+                    .UseKestrel()
+                    .UseUrls(TestListenerUrl)
+                    .Configure(app => {
+                        app.Run(async context => {
+                            await context.Response.WriteAsync(context.Request.Path.Value.TrimStart('/'));
+                        });
+                    })
+                    .Build();
 
+                _host.Start();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override void MayDeactivate()
             {
-
+                _host.Dispose();
             }
         }
 

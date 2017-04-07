@@ -73,12 +73,22 @@ namespace NWheels.Cli.Run
                 arguments.ReportError($"folder does not exist: {_microserviceFolderPath}");
             }
 
-            if (!string.IsNullOrEmpty(_microserviceFilePath) && !File.Exists(_microserviceFilePath))
+            if (string.IsNullOrEmpty(_microserviceFilePath))
+            {
+                _microserviceFilePath = Path.Combine(_microserviceFolderPath, BootConfiguration.MicroserviceConfigFileName);
+            }
+
+            if (!File.Exists(_microserviceFilePath))
             {
                 arguments.ReportError($"file does not exist: {_microserviceFilePath}");
             }
 
-            if (!string.IsNullOrEmpty(_environmentFilePath) && !File.Exists(_environmentFilePath))
+            if (string.IsNullOrEmpty(_environmentFilePath))
+            {
+                _environmentFilePath = Path.Combine(_microserviceFolderPath, BootConfiguration.EnvironmentConfigFileName);
+            }
+
+            if (!File.Exists(_environmentFilePath))
             {
                 arguments.ReportError($"file does not exist: {_environmentFilePath}");
             }

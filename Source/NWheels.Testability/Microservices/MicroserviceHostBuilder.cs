@@ -42,13 +42,46 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder UseMicroserviceFromSource(string relativeDirectoryPath, [CallerFilePath] string sourceFilePath = "")
+        public MicroserviceHostBuilder UseMicroserviceFromSource(string relativeProjectDirectoryPath, [CallerFilePath] string sourceFilePath = "")
         {
-            relativeDirectoryPath = relativeDirectoryPath
+            relativeProjectDirectoryPath = relativeProjectDirectoryPath
                 .Replace('\\', Path.DirectorySeparatorChar)
                 .Replace('/', Path.DirectorySeparatorChar);
 
-            _microserviceDirectory = Path.Combine(Path.GetDirectoryName(sourceFilePath), relativeDirectoryPath);
+            _microserviceDirectory = Path.Combine(Path.GetDirectoryName(sourceFilePath), relativeProjectDirectoryPath);
+
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MicroserviceHostBuilder UseCliDirectoryFromSource(
+            string relativeProjectDirectoryPath, 
+            string cliProjectConfiguration = null, 
+            bool allowOverrideByEnvironmentVar = false,
+            [CallerFilePath] string sourceFilePath = "")
+        {
+            if (allowOverrideByEnvironmentVar)
+            {
+                var environmentValue = GetCliDirectoryFromEnvironment();
+                if (!string.IsNullOrEmpty(environmentValue))
+                {
+                    _cliDirectory = environmentValue;
+                    return this;
+                }
+            }
+
+            var effectiveCliProjectConfiguration = cliProjectConfiguration ?? DefaultProjectConfigurationName;
+
+            relativeProjectDirectoryPath = relativeProjectDirectoryPath
+                .Replace('\\', Path.DirectorySeparatorChar)
+                .Replace('/', Path.DirectorySeparatorChar);
+
+            _cliDirectory = Path.Combine(
+                Path.GetDirectoryName(sourceFilePath),
+                relativeProjectDirectoryPath,
+                "..",
+                $"NWheels.Cli/bin/{effectiveCliProjectConfiguration}/netcoreapp1.1".Replace('/', Path.DirectorySeparatorChar));
 
             return this;
         }
@@ -57,7 +90,7 @@ namespace NWheels.Testability.Microservices
 
         public MicroserviceHostBuilder UseCliDirectoryFromEnvironment()
         {
-            _cliDirectory = Environment.GetEnvironmentVariable("NWHEELS_CLI");
+            _cliDirectory = GetCliDirectoryFromEnvironment();
             return this;
         }
 
@@ -128,10 +161,11 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostController GetHostController()
+        public MicroserviceHostController Build()
         {
             return new MicroserviceHostController(_cliDirectory, _microserviceDirectory, _microserviceConfig, _environmentConfig);
         }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private MicroserviceConfig.ModuleConfig[] EnsureModuleListed(
@@ -173,5 +207,22 @@ namespace NWheels.Testability.Microservices
                 }
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetCliDirectoryFromEnvironment()
+        {
+            return Environment.GetEnvironmentVariable("NWHEELS_CLI");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string DefaultProjectConfigurationName =>
+#if DEBUG
+                "Debug"
+#else
+                "Release"
+#endif
+        ;
     }
 }
