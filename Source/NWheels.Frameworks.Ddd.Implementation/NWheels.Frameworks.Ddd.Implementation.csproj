@@ -13,6 +13,7 @@
     <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
     <ProjectReference Include="..\NWheels.Frameworks.Ddd.Api\NWheels.Frameworks.Ddd.Api.csproj" />
     <ProjectReference Include="..\NWheels.Platform.Rest.Api\NWheels.Platform.Rest.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Rest.Implementation\NWheels.Platform.Rest.Implementation.csproj" />
   </ItemGroup>
 
 </Project>

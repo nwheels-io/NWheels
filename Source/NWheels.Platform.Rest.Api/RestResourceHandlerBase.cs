@@ -131,5 +131,10 @@ namespace NWheels.Platform.Rest
         {
             return new HttpResponseMessage(HttpStatusCode.BadRequest);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected abstract IHttpRequestReader RequestReader { get; }
+        protected abstract IHttpResponseWriter ResponseWriter { get; }
     }
 }
