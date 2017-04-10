@@ -49,7 +49,9 @@ namespace NWheels.Cli
 
         private static ArgumentSyntax ParseCommandLine(string[] args)
         {
-            return ArgumentSyntax.Parse(args, syntax => {
+            var safeArgs = args.DefaultIfEmpty("--help");
+
+            return ArgumentSyntax.Parse(safeArgs, syntax => {
                 foreach (var command in _s_commands)
                 {
                     command.BindToCommandLine(syntax);
