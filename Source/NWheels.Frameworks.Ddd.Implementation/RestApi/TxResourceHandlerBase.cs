@@ -24,5 +24,10 @@ namespace NWheels.Frameworks.Ddd.RestApi
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         internal protected abstract HttpResponseMessage InternalHandlePostRequest(HttpRequestMessage request);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override IHttpRequestReader RequestReader => DefaultHttpRequestReader.Instance;
+        protected override IHttpResponseWriter ResponseWriter => DefaultHttpResponseWriter.Instance;
     }
 }
