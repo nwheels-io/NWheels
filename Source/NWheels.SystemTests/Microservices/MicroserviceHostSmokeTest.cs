@@ -26,54 +26,29 @@ namespace NWheels.SystemTests.Microservices
         [Fact]
         public void SmokeTest()
         {
-            var hostController = new MicroserviceHostBuilder(microserviceName: "SmokeTest")
+            var host = new MicroserviceHostBuilder(microserviceName: "SmokeTest")
                 .UseCliDirectoryFromSource(relativeProjectDirectoryPath: "..", allowOverrideByEnvironmentVar: true)
                 .UseMicroserviceFromSource(relativeProjectDirectoryPath: "..")
                 .UseAutofacInjectionAdapter()
                 .UseApplicationFeature<SmokeTestFeatureLoader>()
                 .Build();
 
-            hostController.Start();
+            host.Start();
 
-            var exceptions = new List<Exception>();
+            using (var client = new HttpClient())
+            {
+                var httpTask = client.GetAsync(TestListenerUrl + "/this-is-a-test", HttpCompletionOption.ResponseContentRead);
+                var completed = httpTask.Wait(10000);
+                Assert.True(completed, "HTTP request didn't complete within allotted timeout.");
 
-            try
-            {
-                using (var client = new HttpClient())
-                {
-                    var httpTask = client.GetAsync(TestListenerUrl + "/this-is-a-test", HttpCompletionOption.ResponseContentRead);
-                    var completed = httpTask.Wait(10000);
-                    Assert.True(completed, "HTTP request didn't complete within allotted timeout.");
-
-                    var response = httpTask.Result;
-                    response.EnsureSuccessStatusCode();
-                    var responseText = response.Content.ReadAsStringAsync().Result;
-                    responseText.Should().Be("this-is-a-test");
-                }
-            }
-            //TODO: move exception handling logic to NWheels.Testability, to make it reusable
-            catch (Exception e)
-            {
-                exceptions.Add(e);
-            }
-            finally
-            {
-                try
-                {
-                    var stopped = hostController.Stop(10000, out int exitCode);
-                    Assert.True(stopped, "Microservice host didn't stop within allotted timeout.");
-                    exitCode.Should().Be(0, "microservice exit code");
-                }
-                catch (Exception e)
-                {
-                    exceptions.Add(e);
-                }
+                var response = httpTask.Result;
+                response.EnsureSuccessStatusCode();
+                var responseText = response.Content.ReadAsStringAsync().Result;
+                responseText.Should().Be("this-is-a-test");
             }
 
-            if (exceptions.Count > 0)
-            {
-                throw new AggregateException(string.Join(" ; ", exceptions.Select(e => e.Message)), exceptions).Flatten();
-            }
+            host.StopOrThrow(10000);
+            host.AssertNoErrors();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
