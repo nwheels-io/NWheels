@@ -154,7 +154,9 @@ namespace NWheels.Cli
 
             if (validateExitCode && process.ExitCode != 0)
             {
-                throw new Exception($"Program '{nameOrFilePath}' failed with code {process.ExitCode}.");
+                throw new Exception(
+                    $"Program '{nameOrFilePath}' failed with code {process.ExitCode}." +
+                    (outputLines != null ? Environment.NewLine + string.Join(Environment.NewLine, outputLines) : string.Empty));
             }
 
             return process.ExitCode;
