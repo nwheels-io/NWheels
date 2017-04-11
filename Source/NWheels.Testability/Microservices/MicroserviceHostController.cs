@@ -58,7 +58,7 @@ namespace NWheels.Testability.Microservices
             WriteConfigurationXml(_environmentConfig, _environmentFilePath);
 
             var arguments =
-                $"{Path.Combine(_cliDirectory, "nwheels.dll")} rrun --no-publish " +
+                $"{Path.Combine(_cliDirectory, "nwheels.dll")} run --no-publish " +
                 _microserviceDirectory +
                 $" --microservice-xml {_microserviceFilePath}" +
                 $" --environment-xml {_environmentFilePath}";
@@ -120,26 +120,100 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string FormatOutput()
+        public void FormatOutput(StringBuilder output)
         {
-            return (
-                (_stdOut?.Format("STDOUT") ?? string.Empty) +
-                (_stdErr?.Format("STDERR") ?? string.Empty));
+            if (_stdOut != null)
+            {
+                _stdOut.Format("stdout", output);
+            }
+
+            if (_stdErr != null)
+            {
+                _stdErr.Format("stderr", output);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void FormatSummary(StringBuilder output)
+        {
+            if (!HasErrors())
+            {
+                output.AppendLine("Microservice execution completed successfully");
+                return;
+            }
+
+            output.AppendLine("Microservice execution produced error(s).");
+
+            var exceptionSet = new HashSet<Exception>();
+
+            if (_exitCode.HasValue && _exitCode.Value != 0)
+            {
+                output.AppendLine($"Process exited with code {_exitCode}.");
+            }
+
+            foreach (var exception in _exceptions)
+            {
+                if (exception is AggregateException aggregate)
+                {
+                    foreach (var innerException in aggregate.Flatten().InnerExceptions)
+                    {
+                        addExceptionText(innerException);
+                    }
+                }
+                else
+                {
+                    addExceptionText(exception);
+                }
+            }
+
+            FormatOutput(output);
+
+            void addExceptionText(Exception e)
+            {
+                if (exceptionSet.Add(e))
+                {
+                    output.AppendLine("------ exception ------");
+                    output.AppendLine($"{e.GetType().Name}: {e.Message}");
+                    output.AppendLine(e.StackTrace);
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AssertNoErrors()
         {
+            if (HasErrors())
+            {
+                var message = new StringBuilder();
+                FormatSummary(message);
+                throw new Exception(message.ToString());
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool HasErrors()
+        {
+            var stdErr = _stdErr;
+
+            if (stdErr != null && stdErr.Lines.Count > 0)
+            {
+                return true;
+            }
+
             if (_exceptions.Count > 0)
             {
-                var message =
-                    string.Join($"{Environment.NewLine}---error---{Environment.NewLine}",
-                    _exceptions.Select(e => e.Message)) +
-                    FormatOutput();
-
-                throw new AggregateException(message, _exceptions).Flatten();
+                return true;
             }
+                    
+            if (_exitCode.HasValue && _exitCode.Value != 0)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -191,7 +265,7 @@ namespace NWheels.Testability.Microservices
                     _exceptions = _exceptions.Add(e2);
                 }
 
-                throw new Exception("Microservice has failed to start. Check Exceptions for details.");
+                AssertNoErrors();
             }
         }
 
@@ -238,12 +312,16 @@ namespace NWheels.Testability.Microservices
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public string Format(string title)
+            public void Format(string title, StringBuilder output)
             {
-                return (
-                    $"{Environment.NewLine}------ {title} -------{Environment.NewLine}" +
-                    string.Join(Environment.NewLine, _lines) +
-                    $"{Environment.NewLine}--- end of {title} ---{Environment.NewLine}");
+                output.AppendLine($"{Environment.NewLine}------ {title} -------{Environment.NewLine}");
+
+                if (_lines.Count > 0)
+                {
+                    output.AppendLine(string.Join(Environment.NewLine, _lines));
+                }
+
+                output.AppendLine($"{Environment.NewLine}--- end of {title} ---{Environment.NewLine}");
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
