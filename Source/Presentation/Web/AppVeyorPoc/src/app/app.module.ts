@@ -5,6 +5,7 @@ import { HttpModule } from '@angular/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { AppVeyorService } from './app-veyor.service';
 import { ProjectsComponent } from './projects/projects.component';
 import { ProjectDetailsComponent } from './projects/project-details.component';
 import { HistoryComponent } from './projects/history.component';
@@ -32,7 +33,7 @@ import { ArtifactsComponent } from './projects/build/artifacts.component';
     HttpModule,
     AppRoutingModule
   ],
-  providers: [],
+  providers: [AppVeyorService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -14,7 +14,7 @@ const routes: Routes = [
   { path: '', redirectTo: '/projects', pathMatch: 'full' },
   { path: 'projects', component: ProjectsComponent },
   {
-    path: 'project/:projectId', component: ProjectDetailsComponent,
+    path: 'project/:projectName', component: ProjectDetailsComponent,
     children: [
       { path: 'history', component: HistoryComponent },
       { path: 'settings', component: SettingsComponent },

@@ -1,6 +1,6 @@
-﻿List of projects
+﻿<h1>List of projects</h1>
 <ul>
-  <li><a [routerLink]="['/project', 'first']">First</a></li>
-  <li><a [routerLink]="['/project', 'second']">Second</a></li>
-  <li><a [routerLink]="['/project', 'third']">Third</a></li>
+  <li *ngFor="let project of projects">
+    <a [routerLink]="['/project', project.name]">{{project.name}}</a>
+  </li>
 </ul>

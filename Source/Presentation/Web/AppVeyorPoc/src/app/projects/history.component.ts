@@ -1,4 +1,8 @@
 ﻿import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+
+import { Project } from './project';
+import { AppVeyorService } from '../app-veyor.service';
 
 @Component({
   selector: 'app-history',
@@ -8,7 +12,17 @@
 
 export class HistoryComponent implements OnInit {
 
-  constructor() { }
+  private sub: any;
+  project: Project;
 
-  ngOnInit(): void { }
+  constructor( private route: ActivatedRoute, private appVeyorService: AppVeyorService) { }
+
+  ngOnInit(): void {
+    this.sub = this.route.parent.params.subscribe(params => 
+      this.appVeyorService.getBuildsByProjectName(params['projectName']).then(project => this.project = project));
+  }
+
+  ngOnDestroy() {
+    this.sub.unsubscribe();
+  }
 }

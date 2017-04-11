@@ -1,5 +1,8 @@
 ﻿import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+
+import { Project } from './project';
+import { AppVeyorService } from '../app-veyor.service';
 
 @Component({
   selector: 'app-project-details',
@@ -9,11 +12,17 @@ import { ActivatedRoute, Params } from '@angular/router';
 
 export class ProjectDetailsComponent implements OnInit {
 
-  constructor(private route: ActivatedRoute) { }
+  private sub: any;
+  project: Project;
 
-  projectId: string;
+  constructor(private route: ActivatedRoute, private appVeyorService: AppVeyorService) { }
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => this.projectId = params['projectId']);
+    this.sub = this.route.params.subscribe(params =>
+      this.appVeyorService.getProjectByName(params['projectName']).then(project => this.project = project));
+  }
+
+  ngOnDestroy() {
+    this.sub.unsubscribe();
   }
 }
