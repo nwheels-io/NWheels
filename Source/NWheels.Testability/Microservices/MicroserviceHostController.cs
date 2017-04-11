@@ -38,8 +38,6 @@ namespace NWheels.Testability.Microservices
 
         public void Start()
         {
-            //var binDirectory = Path.GetDirectoryName(this.GetType().GetTypeInfo().Assembly.Location);
-
             _microserviceFilePath = Path.Combine(Path.GetTempPath(), $"microservice_{Guid.NewGuid().ToString("N")}.xml");
             _environmentFilePath = Path.Combine(Path.GetTempPath(), $"environment_{Guid.NewGuid().ToString("N")}.xml");
 
@@ -56,10 +54,12 @@ namespace NWheels.Testability.Microservices
                 FileName = "dotnet",
                 Arguments = arguments,
                 WorkingDirectory = _microserviceDirectory,
-                RedirectStandardInput = true
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true
             };
 
             _process = Process.Start(info);
+            _process.StandardOutput.ReadLine();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -77,6 +77,8 @@ namespace NWheels.Testability.Microservices
                 catch
                 {
                 }
+
+                while (_process.StandardOutput.ReadLine() != null) ;
             }
 
             var exited = _process.WaitForExit(millisecondsTimeout);
