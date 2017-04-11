@@ -59,7 +59,15 @@ namespace NWheels.Testability.Microservices
             };
 
             _process = Process.Start(info);
-            _process.StandardOutput.ReadLine();
+
+            string line;
+            while ((line = _process.StandardOutput.ReadLine()) != null)
+            {
+                if (line.ToLower().Contains("microservice is up")) //TODO: replace this with formalized log inspection based on logger interfaces
+                {
+                    break;
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
