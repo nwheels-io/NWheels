@@ -4,8 +4,6 @@ branches:
   - master
 image: Visual Studio 2017
 clone_folder: c:\projects\NWheels
-init:
-- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 before_build:
 - cmd: >-
     cd c:\projects\NWheels\Source
@@ -37,5 +35,4 @@ test_script:
     dotnet test NWheels.Frameworks.Ddd.Implementation.UnitTests\NWheels.Frameworks.Ddd.Implementation.UnitTests.csproj --logger "trx;LogFileName=test-results-6.xml"
 
     dotnet test NWheels.SystemTests\NWheels.SystemTests.csproj --logger "trx;LogFileName=test-results-7.xml"
-on_finish:
-- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))    
+    
