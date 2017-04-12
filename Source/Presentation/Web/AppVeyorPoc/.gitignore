@@ -43,3 +43,6 @@ Thumbs.db
 
 # Token to AppVeyor
 app-veyor-service-token.ts
+
+# Make sure to include everything in node_modules.
+!src/**
