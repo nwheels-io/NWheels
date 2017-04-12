@@ -3,8 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-build',
-  templateUrl: './build.component.html',
-  styleUrls: ['../../../assets/css/app/projects/build/build.component.css']
+  templateUrl: './build.component.html'
 })
 
 export class BuildComponent implements OnInit {

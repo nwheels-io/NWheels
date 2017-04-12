@@ -2,8 +2,7 @@
 
 @Component({
   selector: 'app-console',
-  templateUrl: './console.component.html',
-  styleUrls: ['../../../assets/css/app/projects/build/console.component.css']
+  templateUrl: './console.component.html'
 })
 
 export class ConsoleComponent implements OnInit {

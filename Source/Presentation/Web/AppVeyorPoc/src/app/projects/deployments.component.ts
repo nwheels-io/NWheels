@@ -2,8 +2,7 @@
 
 @Component({
   selector: 'app-deployments',
-  templateUrl: './deployments.component.html',
-  styleUrls: ['../assets/css/app/deployments.component.css']
+  templateUrl: './deployments.component.html'
 })
 
 export class DeploymentsComponent implements OnInit {

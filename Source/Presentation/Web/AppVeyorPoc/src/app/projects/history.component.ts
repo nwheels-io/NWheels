@@ -6,8 +6,7 @@ import { AppVeyorService } from '../app-veyor.service';
 
 @Component({
   selector: 'app-history',
-  templateUrl: './history.component.html',
-  styleUrls: ['../../assets/css/app/projects/history.component.css']
+  templateUrl: './history.component.html'
 })
 
 export class HistoryComponent implements OnInit {

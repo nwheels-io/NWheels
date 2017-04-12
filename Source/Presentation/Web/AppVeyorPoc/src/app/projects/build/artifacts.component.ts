@@ -2,8 +2,7 @@
 
 @Component({
   selector: 'app-artifacts',
-  templateUrl: './artifacts.component.html',
-  styleUrls: ['../../../assets/css/app/projects/build/artifacts.component.css']
+  templateUrl: './artifacts.component.html'
 })
 
 export class ArtifactsComponent implements OnInit {

@@ -6,8 +6,7 @@ import { AppVeyorService } from '../app-veyor.service';
 
 @Component({
   selector: 'app-project-details',
-  templateUrl: './project-details.component.html',
-  styleUrls: ['../../assets/css/app/projects/project-details.component.css']
+  templateUrl: './project-details.component.html'
 })
 
 export class ProjectDetailsComponent implements OnInit {

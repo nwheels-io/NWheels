@@ -2,8 +2,7 @@
 
 @Component({
   selector: 'app-messages',
-  templateUrl: './messages.component.html',
-  styleUrls: ['../../../assets/css/app/projects/build/messages.component.css']
+  templateUrl: './messages.component.html'
 })
 
 export class MessagesComponent implements OnInit {

@@ -2,8 +2,7 @@
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['../assets/css/app/app.component.css']
+  templateUrl: './app.component.html'
 })
 
 export class AppComponent {
