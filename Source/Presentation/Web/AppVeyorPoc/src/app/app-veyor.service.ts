@@ -4,13 +4,13 @@ import { Headers, Http } from '@angular/http';
 import 'rxjs/add/operator/toPromise';
 
 import { Project } from './projects/project';
-import { AppVeyorServiceToken } from './app-veyor-service-token';
+import { Configuration } from '../../configuration';
 
 @Injectable()
 export class AppVeyorService {
 
   private headers = new Headers({
-    'Authorization': `Bearer ${AppVeyorServiceToken.token}`,
+    'Authorization': `Bearer ${Configuration.appVeyorToken}`,
     'Content-type': 'application/xml'
   });
   private appVeyorUrl = 'https://ci.appveyor.com/api';  // URL to web api

@@ -41,8 +41,8 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# Token to AppVeyor
-app-veyor-service-token.ts
+# Web configuration
+configuration.ts
 
-# Make sure to include everything in node_modules.
+# Make sure to include everything in src.
 !src/**
