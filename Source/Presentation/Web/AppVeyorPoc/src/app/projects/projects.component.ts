@@ -6,16 +6,14 @@ import { AppVeyorService } from '../app-veyor.service';
 @Component({
   selector: 'app-projects',
   templateUrl: './projects.component.html',
-  styleUrls: [
-    '../../assets/css/app/projects/projects.component.css',
-    '../../assets/css-custom/app/projects/projects.component.css']
+  styleUrls: ['./projects.component.css']
 })
 
 export class ProjectsComponent implements OnInit {
 
   projects: Project[];
 
-  constructor(private appVeyorService: AppVeyorService) { }
+  constructor(protected appVeyorService: AppVeyorService) { }
 
   ngOnInit(): void {
     this.appVeyorService

@@ -10,9 +10,11 @@ import { ConsoleComponent } from './projects/build/console.component';
 import { MessagesComponent } from './projects/build/messages.component';
 import { ArtifactsComponent } from './projects/build/artifacts.component';
 
+import { Layer3ProjectsComponent } from '../app-layer3/projects/projects.component'
+
 const routes: Routes = [
   { path: '', redirectTo: '/projects', pathMatch: 'full' },
-  { path: 'projects', component: ProjectsComponent },
+  { path: 'projects', component: Layer3ProjectsComponent },
   {
     path: 'project/:projectName', component: ProjectDetailsComponent,
     children: [
@@ -27,9 +29,7 @@ const routes: Routes = [
         ]
       }
     ]
-  }/*,
-  { path: 'detail/:id', component: HeroDetailComponent },
-  { path: 'heroes', component: HeroesComponent }*/
+  }
 ];
 
 @NgModule({

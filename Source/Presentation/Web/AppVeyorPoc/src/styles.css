@@ -1,3 +1,5 @@
 ﻿/* Use imported file for you global style customisation */
-@import 'assets/css/styles.css';
-@import 'assets/css-custom/styles.css';
+@import 'app/styles.css';
+@import 'app-layer1/styles.css';
+@import 'app-layer2/styles.css';
+@import 'app-layer3/styles.css';

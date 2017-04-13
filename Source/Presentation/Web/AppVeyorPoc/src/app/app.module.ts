@@ -15,6 +15,8 @@ import { ConsoleComponent } from './projects/build/console.component';
 import { MessagesComponent } from './projects/build/messages.component';
 import { ArtifactsComponent } from './projects/build/artifacts.component';
 
+import { Layer3ProjectsComponent } from '../app-layer3/projects/projects.component'
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -25,7 +27,9 @@ import { ArtifactsComponent } from './projects/build/artifacts.component';
     BuildComponent,
     ConsoleComponent,
     MessagesComponent,
-    ArtifactsComponent
+    ArtifactsComponent,
+
+    Layer3ProjectsComponent
   ],
   imports: [
     BrowserModule,
