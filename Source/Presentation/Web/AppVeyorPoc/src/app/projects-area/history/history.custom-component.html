@@ -1,0 +1,6 @@
+﻿<h3>Builds history(custom)</h3>
+<div *ngIf="project">
+  <ul>
+    <li *ngFor="let build of project.builds"><a [routerLink]="['../build', build.buildId]">{{build.message}}</a></li>
+  </ul>
+</div>

@@ -6,30 +6,26 @@ import { HttpModule } from '@angular/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AppVeyorService } from './app-veyor.service';
-import { ProjectsComponent } from './projects/projects.component';
-import { ProjectDetailsComponent } from './projects/project-details.component';
-import { HistoryComponent } from './projects/history.component';
-import { SettingsComponent } from './projects/settings.component';
-import { BuildComponent } from './projects/build/build.component';
-import { ConsoleComponent } from './projects/build/console.component';
-import { MessagesComponent } from './projects/build/messages.component';
-import { ArtifactsComponent } from './projects/build/artifacts.component';
-
-import { Layer3ProjectsComponent } from '../app-layer3/projects/projects.component'
+import { ProjectsCustomComponent } from './projects-area/projects/projects.custom-component';
+import { ProjectDetailsComponent } from './projects-area/project-details/project-details.component';
+import { HistoryComponent } from './projects-area/history/history.component';
+import { SettingsComponent } from './projects-area/settings/settings.component';
+import { BuildComponent } from './projects-area/build-area/build/build.component';
+import { ConsoleComponent } from './projects-area/build-area/console/console.component';
+import { MessagesComponent } from './projects-area/build-area/messages/messages.component';
+import { ArtifactsComponent } from './projects-area/build-area/artifacts/artifacts.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    ProjectsComponent,
+    ProjectsCustomComponent,
     ProjectDetailsComponent,
     HistoryComponent,
     SettingsComponent,
     BuildComponent,
     ConsoleComponent,
     MessagesComponent,
-    ArtifactsComponent,
-
-    Layer3ProjectsComponent
+    ArtifactsComponent
   ],
   imports: [
     BrowserModule,

@@ -1,20 +1,18 @@
 ﻿import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { ProjectsComponent } from './projects/projects.component';
-import { ProjectDetailsComponent } from './projects/project-details.component';
-import { HistoryComponent } from './projects/history.component';
-import { SettingsComponent } from './projects/settings.component';
-import { BuildComponent } from './projects/build/build.component';
-import { ConsoleComponent } from './projects/build/console.component';
-import { MessagesComponent } from './projects/build/messages.component';
-import { ArtifactsComponent } from './projects/build/artifacts.component';
-
-import { Layer3ProjectsComponent } from '../app-layer3/projects/projects.component'
+import { ProjectsCustomComponent } from './projects-area/projects/projects.custom-component';
+import { ProjectDetailsComponent } from './projects-area/project-details/project-details.component';
+import { HistoryComponent } from './projects-area/history/history.component';
+import { SettingsComponent } from './projects-area/settings/settings.component';
+import { BuildComponent } from './projects-area/build-area/build/build.component';
+import { ConsoleComponent } from './projects-area/build-area/console/console.component';
+import { MessagesComponent } from './projects-area/build-area/messages/messages.component';
+import { ArtifactsComponent } from './projects-area/build-area/artifacts/artifacts.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/projects', pathMatch: 'full' },
-  { path: 'projects', component: Layer3ProjectsComponent },
+  { path: 'projects', component: ProjectsCustomComponent },
   {
     path: 'project/:projectName', component: ProjectDetailsComponent,
     children: [

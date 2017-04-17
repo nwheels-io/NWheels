@@ -3,7 +3,7 @@ import { Headers, Http } from '@angular/http';
 
 import 'rxjs/add/operator/toPromise';
 
-import { Project } from './projects/project';
+import { Project } from './projects-area/project';
 import { Configuration } from '../../configuration';
 
 @Injectable()
