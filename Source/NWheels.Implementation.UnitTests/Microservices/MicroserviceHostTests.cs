@@ -351,12 +351,12 @@ namespace NWheels.Implementation.UnitTests.Microservices
         [DefaultFeatureLoader]
         private class FirstFeatureLoader : TestFeatureLoaderBase
         {
-            public override void CompileComponents(IInternalComponentContainer input)
+            public override void CompileComponents(IComponentContainer input)
             {
                 base.CompileComponents(input);
             }
 
-            public override void ContributeCompiledComponents(IInternalComponentContainer input, IComponentContainerBuilder output)
+            public override void ContributeCompiledComponents(IComponentContainer input, IComponentContainerBuilder output)
             {
                 output.Register<ICompileRegistered, CompileRegistered>();
                 base.ContributeCompiledComponents(input, output);

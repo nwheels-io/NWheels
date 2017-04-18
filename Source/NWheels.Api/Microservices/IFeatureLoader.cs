@@ -8,8 +8,8 @@ namespace NWheels.Microservices
 
         void ContributeComponents(IComponentContainerBuilder containerBuilder);
 
-        void CompileComponents(IInternalComponentContainer input);
+        void CompileComponents(IComponentContainer input);
 
-        void ContributeCompiledComponents(IInternalComponentContainer input, IComponentContainerBuilder output);
+        void ContributeCompiledComponents(IComponentContainer input, IComponentContainerBuilder output);
     }
 }
