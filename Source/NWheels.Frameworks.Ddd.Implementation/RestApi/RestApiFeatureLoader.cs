@@ -22,23 +22,23 @@ namespace NWheels.Frameworks.Ddd.RestApi
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void CompileComponents(IInternalComponentContainer input)
+        public override void CompileComponents(IComponentContainer input)
         {
             CompileTxHandlers(input);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void ContributeCompiledComponents(IInternalComponentContainer input, IComponentContainerBuilder output)
+        public override void ContributeCompiledComponents(IComponentContainer input, IComponentContainerBuilder output)
         {
             ContributeCompiledTxHandlers(input, output);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void CompileTxHandlers(IInternalComponentContainer input)
+        private void CompileTxHandlers(IComponentContainer input)
         {
-            _allTxTypes = input.GetAllServices(typeof(object))
+            _allTxTypes = input.GetAllServiceTypes(typeof(object))
                 .Where(t => t.GetTypeInfo().IsDefined(typeof(TransactionScriptComponentAttribute)))
                 .ToArray();
 
@@ -52,7 +52,7 @@ namespace NWheels.Frameworks.Ddd.RestApi
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ContributeCompiledTxHandlers(IInternalComponentContainer input, IComponentContainerBuilder output)
+        private void ContributeCompiledTxHandlers(IComponentContainer input, IComponentContainerBuilder output)
         {
             var handlerObjectFactory = input.Resolve<ITxResourceHandlerObjectFactory>();
 

@@ -16,7 +16,7 @@ namespace NWheels.Samples.FirstHappyPath
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void CompileComponents(IInternalComponentContainer input)
+        public override void CompileComponents(IComponentContainer input)
         {
         }
     }

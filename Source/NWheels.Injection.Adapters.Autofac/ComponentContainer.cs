@@ -40,7 +40,7 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IEnumerable<Type> GetAllServices(Type baseType)
+        public IEnumerable<Type> GetAllServiceTypes(Type baseType)
         {
             return _container
                 .ComponentRegistry.RegistrationsFor(new TypedService(baseType))
