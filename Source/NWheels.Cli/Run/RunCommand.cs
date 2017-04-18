@@ -297,9 +297,10 @@ namespace NWheels.Cli.Run
             IEnumerable<string> projectFilePaths, 
             IReadOnlyDictionary<string, string> projectTargetFrameworkByFilePath)
         {
-            var sdkDirectory = @"C:\Program Files\dotnet\sdk\1.0.0\Sdks\Microsoft.NET.Sdk"; //TODO: determine programmatically
+            var sdkDirectory = FindDotNetSdkBasePath();
+            var sdkToolsDirectory = Path.Combine(sdkDirectory, "Sdks", "Microsoft.NET.Sdk");
             var tempProjectFilePath = Path.Combine(Path.GetTempPath(), $"nwheels_cli_{Guid.NewGuid().ToString("N")}.proj");
-            var tempProjectXml = GenerateResolvePublishAssembliesProject(projectFilePaths, projectTargetFrameworkByFilePath, sdkDirectory);
+            var tempProjectXml = GenerateResolvePublishAssembliesProject(projectFilePaths, projectTargetFrameworkByFilePath, sdkToolsDirectory);
 
             using (var tempFile = File.Create(tempProjectFilePath))
             {
@@ -320,6 +321,27 @@ namespace NWheels.Cli.Run
             {
                 File.Delete(tempProjectFilePath);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string FindDotNetSdkBasePath()
+        {
+            var basePathPhrase = "base path:";
+
+            ExecuteProgram(out IEnumerable<string> output, "dotnet", new[] { "--info" });
+            var basePathLine = output
+                .Select(s => s.Trim())
+                .FirstOrDefault(s => s.ToLower().StartsWith(basePathPhrase));
+
+            if (basePathLine != null)
+            {
+                var basePath = basePathLine.Substring(basePathPhrase.Length).Trim();
+                LogDebug($".NET SDK base path = {basePath}");
+                return basePath;
+            }
+
+            throw new Exception("SDK installation directory cannot be determined from 'dotnet --info' output.");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
