@@ -1,0 +1,24 @@
+﻿<h1>Project details</h1>
+<div *ngIf="project">
+  <h2>{{project.name}}</h2>
+  <section>
+    <label>Account Name:</label>
+    <label>{{project.accountName}}</label>
+  </section>
+  <section>
+    <label>Repository Name:</label>
+    <label>{{project.repositoryName}}</label>
+  </section>
+  <section>
+    <label>Repository Branch:</label>
+    <label>{{project.repositoryBranch}}</label>
+  </section>
+  <br />
+  <nav>
+    <a>LATEST BUILD</a>
+    <a routerLink="history">HISTORY</a>
+    <a>DEPLOYMENTS</a>
+    <a routerLink="settings">SETTINGS</a>
+  </nav>
+  <router-outlet></router-outlet>
+</div>
