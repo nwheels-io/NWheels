@@ -1,4 +1,5 @@
-﻿using NWheels.Injection;
+﻿using System;
+using NWheels.Injection;
 
 namespace NWheels.Microservices
 {
@@ -11,6 +12,12 @@ namespace NWheels.Microservices
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public virtual void ContributeComponents(IComponentContainerBuilder containerBuilder)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual void ContributeAdapterComponents(IComponentContainer input, IComponentContainerBuilder output)
         {
         }
 
