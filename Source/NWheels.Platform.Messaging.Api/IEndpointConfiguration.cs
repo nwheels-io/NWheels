@@ -16,14 +16,14 @@ namespace NWheels.Platform.Messaging
     public interface IHttpEndpointConfiguration : IEndpointConfiguration
     {
         int Port { get; }
-        IEndpointHttpsConfig Https { get; }
+        IHttpsConfig Https { get; }
         IList<IHttpStaticFolderConfig> StaticFolders { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     //TODO: [ConfigurationElement]
-    public interface IEndpointHttpsConfig
+    public interface IHttpsConfig
     {
         int Port { get; }
         bool RequireHttps { get; }

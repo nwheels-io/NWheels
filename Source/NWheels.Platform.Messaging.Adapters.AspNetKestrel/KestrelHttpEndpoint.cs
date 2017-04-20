@@ -15,9 +15,9 @@ using Microsoft.AspNetCore.Server.Kestrel;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 
-namespace NWheels.Platform.Messaging
+namespace NWheels.Platform.Messaging.Adapters.AspNetKestrel
 {
-    public class AspNetKestrelHttpEndpoint : LifecycleListenerComponentBase, IEndpoint<HttpContext>
+    public class KestrelHttpEndpoint : LifecycleListenerComponentBase, IEndpoint<HttpContext>
     {
         private readonly string _name;
         private readonly IHttpEndpointConfiguration _configuration;
@@ -27,10 +27,11 @@ namespace NWheels.Platform.Messaging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public AspNetKestrelHttpEndpoint(string name, IHttpEndpointConfiguration configuration)
+        public KestrelHttpEndpoint(string name, HttpEndpointInjectorPort port)
         {
             _name = name;
-            _configuration = configuration;
+            _configuration = port.Configuration;
+            _handler = port.Handler;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -97,7 +98,7 @@ namespace NWheels.Platform.Messaging
 
         private void ConfigureKestrelServer(KestrelServerOptions options)
         {
-            //TODO: many interesting options added in .NET Core 2.0:
+            //TODO: many interesting options exposed in .NET Core 2.0:
             //https://github.com/aspnet/KestrelHttpServer/blob/dev/samples/SampleApp/Startup.cs
 
             if (_configuration.Https != null)

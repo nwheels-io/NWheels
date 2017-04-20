@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
-    <RootNamespace>NWheels.Platform.Messaging</RootNamespace>
+    <RootNamespace>NWheels.Platform.Messaging.Adapters.AspNetKestrel</RootNamespace>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
 
