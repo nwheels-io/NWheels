@@ -13,7 +13,7 @@
 
   <application-modules>
     <module assembly="NWheels.Samples.FirstHappyPath">
-      <feature name="SpecificNamedFirstHappyPathFeatureLoader" />
+      <!--REMOVED: <feature name="SpecificNamedFirstHappyPathFeatureLoader" /> -->
     </module>
   </application-modules>
 

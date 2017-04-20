@@ -246,7 +246,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //[Fact] -- not yet implemented
+        [Fact]
         public void CanInjectContainerAsDependency()
         {
             //-- arrange

@@ -1,7 +1,13 @@
 ﻿using Autofac;
 using Autofac.Builder;
+using Autofac.Core;
+using Autofac.Core.Activators.Delegate;
+using Autofac.Core.Activators.ProvidedInstance;
+using Autofac.Core.Lifetime;
+using Autofac.Core.Registration;
 using NWheels.Microservices;
 using System;
+using System.Collections.Generic;
 
 namespace NWheels.Injection.Adapters.Autofac
 {
@@ -35,12 +41,17 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IInternalComponentContainer CreateComponentContainer()
+        public IInternalComponentContainer CreateComponentContainer(bool isRootContainer)
         {
-            var container = _containerBuilder.Build();
+            var underlyingContainer = _containerBuilder.Build();
+            var wrappingContainer = new ComponentContainer(underlyingContainer);
 
-            var containerWrapper = new ComponentContainer(container);
-            return containerWrapper;
+            if (isRootContainer)
+            {
+                RegisterSelf(underlyingContainer, wrappingContainer);
+            }
+
+            return wrappingContainer;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -144,6 +155,26 @@ namespace NWheels.Injection.Adapters.Autofac
         public void RegisterInstance<TService1, TService2, TService3>(object componentInstance)
         {
             _containerBuilder.RegisterInstance(componentInstance).As<TService1, TService2, TService3>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void RegisterSelf(IContainer underlyingContainer, ComponentContainer wrappingContainer)
+        {
+            underlyingContainer.ComponentRegistry.Register(
+                new ComponentRegistration(
+                    Guid.NewGuid(),
+                    new ProvidedInstanceActivator(wrappingContainer),
+                    new CurrentScopeLifetime(),
+                    InstanceSharing.Shared,
+                    InstanceOwnership.ExternallyOwned,
+                    new Service[] {
+                        new TypedService(typeof(IComponentContainer)),
+                        new TypedService(typeof(IInternalComponentContainer))
+                    },
+                    new Dictionary<string, object>()
+                )
+            );
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
