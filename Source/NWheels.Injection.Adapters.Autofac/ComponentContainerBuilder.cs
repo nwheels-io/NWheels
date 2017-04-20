@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Autofac.Builder;
 using NWheels.Microservices;
 using System;
 
@@ -17,9 +18,27 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IComponentInstantiationBuilder RegisterComponent2<TComponent>()
+        {
+            var registration = _containerBuilder.RegisterType<TComponent>().AsSelf();
+            return new RegistrationBuilderWrapper<TComponent, ConcreteReflectionActivatorData, SingleRegistrationStyle>(registration);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IComponentRegistrationBuilder RegisterInstance2<TComponent>(TComponent componentInstance)
+            where TComponent : class
+        {
+            var registration = _containerBuilder.RegisterInstance<TComponent>(componentInstance).AsSelf();
+            return new RegistrationBuilderWrapper<TComponent, SimpleActivatorData, SingleRegistrationStyle>(registration);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IInternalComponentContainer CreateComponentContainer()
         {
             var container = _containerBuilder.Build();
+
             var containerWrapper = new ComponentContainer(container);
             return containerWrapper;
         }
@@ -33,69 +52,77 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Register<TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton)
+        public IComponentInstantiationBuilder Register<TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton)
         {
             //TODO: apply lifestyle setting
-            _containerBuilder.RegisterType<TComponent>().AsSelf();
+            var registration = _containerBuilder.RegisterType<TComponent>().AsSelf();
+            return new RegistrationBuilderWrapper<TComponent, ConcreteReflectionActivatorData, SingleRegistrationStyle>(registration);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Register<TService, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+        public IComponentInstantiationBuilder Register<TService, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
             where TComponent : TService
         {
             //TODO: apply lifestyle setting
-            _containerBuilder.RegisterType<TComponent>().AsSelf().As<TService>();
+            var registration = _containerBuilder.RegisterType<TComponent>().AsSelf().As<TService>();
+            return new RegistrationBuilderWrapper<TComponent, ConcreteReflectionActivatorData, SingleRegistrationStyle>(registration);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Register<TService1, TService2, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+        public IComponentInstantiationBuilder Register<TService1, TService2, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
             where TComponent : TService1, TService2
         {
             //TODO: apply lifestyle setting
-            _containerBuilder.RegisterType<TComponent>().AsSelf().As<TService1, TService2>();
+            var registration = _containerBuilder.RegisterType<TComponent>().AsSelf().As<TService1, TService2>();
+            return new RegistrationBuilderWrapper<TComponent, ConcreteReflectionActivatorData, SingleRegistrationStyle>(registration);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Register<TService1, TService2, TService3, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+        public IComponentInstantiationBuilder Register<TService1, TService2, TService3, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
             where TComponent : TService1, TService2, TService3
         {
             //TODO: apply lifestyle setting
-            _containerBuilder.RegisterType<TComponent>().AsSelf().As<TService1, TService2, TService3>();
+            var registration = _containerBuilder.RegisterType<TComponent>().AsSelf().As<TService1, TService2, TService3>();
+            return new RegistrationBuilderWrapper<TComponent, ConcreteReflectionActivatorData, SingleRegistrationStyle>(registration);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Register(Type type, LifeStyle lifeStyle = LifeStyle.Singleton)
+        public IComponentInstantiationBuilder Register(Type type, LifeStyle lifeStyle = LifeStyle.Singleton)
         {
             //TODO: apply lifestyle setting
-            _containerBuilder.RegisterType(type).AsSelf();
+            var registration = _containerBuilder.RegisterType(type).AsSelf();
+            return new RegistrationBuilderWrapper<object, ConcreteReflectionActivatorData, SingleRegistrationStyle>(registration);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Register<TService>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton)
+        public IComponentInstantiationBuilder Register<TService>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton)
         {
             //TODO: apply lifestyle setting
-            _containerBuilder.RegisterType(type).AsSelf().As<TService>();
+            var registration = _containerBuilder.RegisterType(type).AsSelf().As<TService>();
+            return new RegistrationBuilderWrapper<object, ConcreteReflectionActivatorData, SingleRegistrationStyle>(registration);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Register<TService1, TService2>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton)
+        public IComponentInstantiationBuilder Register<TService1, TService2>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton)
         {
             //TODO: apply lifestyle setting
-            _containerBuilder.RegisterType(type).AsSelf().As<TService1, TService2>();
+            var registration = _containerBuilder.RegisterType(type).AsSelf().As<TService1, TService2>();
+            return new RegistrationBuilderWrapper<object, ConcreteReflectionActivatorData, SingleRegistrationStyle>(registration);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Register<TService1, TService2, TService3>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton)
+        public IComponentInstantiationBuilder Register<TService1, TService2, TService3>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton)
         {
             //TODO: apply lifestyle setting
-            _containerBuilder.RegisterType(type).AsSelf().As<TService1, TService2, TService3>();
+            var registration = _containerBuilder.RegisterType(type).AsSelf().As<TService1, TService2, TService3>();
+            return new RegistrationBuilderWrapper<object, ConcreteReflectionActivatorData, SingleRegistrationStyle>(registration);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -117,6 +144,81 @@ namespace NWheels.Injection.Adapters.Autofac
         public void RegisterInstance<TService1, TService2, TService3>(object componentInstance)
         {
             _containerBuilder.RegisterInstance(componentInstance).As<TService1, TService2, TService3>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class RegistrationBuilderWrapper<TLimit, TActivatorData, TRegistrationStyle> : IComponentRegistrationBuilder, IComponentInstantiationBuilder
+        {
+            private readonly IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> _inner;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public RegistrationBuilderWrapper(IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> inner)
+            {
+                _inner = inner;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IComponentInstantiationBuilder WithParameter<T>(T value)
+            {
+                InnerAsReflectionActivator().WithParameter(new TypedParameter(typeof(T), value));
+                return this;
+            }
+
+            private IRegistrationBuilder<TLimit, ReflectionActivatorData, TRegistrationStyle> InnerAsReflectionActivator()
+            {
+                return (IRegistrationBuilder<TLimit, ReflectionActivatorData, TRegistrationStyle>)_inner;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IComponentRegistrationBuilder SingleInstance()
+            {
+                _inner.SingleInstance();
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IComponentRegistrationBuilder InstancePerDependency()
+            {
+                _inner.InstancePerDependency();
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IComponentRegistrationBuilder As<TService>()
+            {
+                _inner.As<TService>();
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IComponentRegistrationBuilder As<TService1, TService2>()
+            {
+                _inner.As<TService1, TService2>();
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IComponentRegistrationBuilder As<TService1, TService2, TService3>()
+            {
+                _inner.As<TService1, TService2, TService3>();
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IComponentRegistrationBuilder As(params Type[] serviceTypes)
+            {
+                _inner.As(serviceTypes);
+                return this;
+            }
         }
     }
 }

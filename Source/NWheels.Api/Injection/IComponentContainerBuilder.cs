@@ -8,25 +8,30 @@ namespace NWheels.Injection
         //for example: 
         //  RegisterComponent<...>().ForServices<...>()
 
-        void Register<TService, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+        IComponentInstantiationBuilder RegisterComponent2<TComponent>();
+        IComponentRegistrationBuilder RegisterInstance2<TComponent>(TComponent componentInstance)
+            where TComponent : class;
+
+        IComponentInstantiationBuilder Register<TService, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
             where TComponent : TService;
 
-        void Register<TService1, TService2, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+        IComponentInstantiationBuilder Register<TService1, TService2, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
             where TComponent : TService1, TService2;
 
-        void Register<TService1, TService2, TService3, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
+        IComponentInstantiationBuilder Register<TService1, TService2, TService3, TComponent>(LifeStyle lifeStyle = LifeStyle.Singleton) 
             where TComponent : TService1, TService2, TService3;
 
-        void Register<TService>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
+        IComponentInstantiationBuilder Register<TService>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
 
-        void Register<TService1, TService2>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
+        IComponentInstantiationBuilder Register<TService1, TService2>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
 
-        void Register<TService1, TService2, TService3>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
+        IComponentInstantiationBuilder Register<TService1, TService2, TService3>(Type type, LifeStyle lifeStyle = LifeStyle.Singleton);
 
         void RegisterInstance<TService>(object componentInstance);
 
         void RegisterInstance<TService1, TService2>(object componentInstance);
 
         void RegisterInstance<TService1, TService2, TService3>(object componentInstance);
+
     }
 }

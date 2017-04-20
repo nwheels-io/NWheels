@@ -629,7 +629,8 @@ namespace NWheels.Microservices
 
                 var compiledComponents = CreateComponentContainerBuilder();
 
-                compiledComponents.Register<IComponentContainer>(OwnerHost.Container);
+                //TODO: move this to injection adapter 
+                compiledComponents.RegisterInstance2<IComponentContainer>(OwnerHost.Container);
                 
                 featureLoaders.ForEach(x => x.ContributeCompiledComponents(OwnerHost.Container, compiledComponents));
 
