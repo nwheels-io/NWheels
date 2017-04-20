@@ -7,6 +7,7 @@ using NWheels.Orchestration;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -629,9 +630,6 @@ namespace NWheels.Microservices
 
                 var compiledComponents = CreateComponentContainerBuilder();
 
-                //TODO: move this to injection adapter 
-                compiledComponents.RegisterInstance2<IComponentContainer>(OwnerHost.Container);
-                
                 featureLoaders.ForEach(x => x.ContributeCompiledComponents(OwnerHost.Container, compiledComponents));
 
                 OwnerHost.Container.Merge(compiledComponents);
@@ -673,12 +671,12 @@ namespace NWheels.Microservices
 
                     if (moduleConfig.Features != null)
                     {
-                        foreach (var featueConfig in moduleConfig.Features)
+                        foreach (var featureConfig in moduleConfig.Features)
                         {
-                            var type = GetTypeByFeatureLoaderConfig(featureLoaderTypes, featueConfig);
+                            var type = GetTypeByFeatureLoaderConfig(featureLoaderTypes, featureConfig);
                             if (type == null)
                             {
-                                throw new Exception("Feature wasn't found.");
+                                throw new Exception($"Feature wasn't found: '{featureConfig.Name}'.");
                             }
                             else
                             {

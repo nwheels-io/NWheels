@@ -8,7 +8,7 @@ namespace NWheels.Injection.Adapters.Autofac
 {
     public class ComponentContainer : IInternalComponentContainer
     {
-        IContainer _container;
+        private readonly IContainer _container;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -21,7 +21,6 @@ namespace NWheels.Injection.Adapters.Autofac
 
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,7 +53,7 @@ namespace NWheels.Injection.Adapters.Autofac
 
         public void Merge(IInternalComponentContainerBuilder containerBuilder)
         {
-            var componentContainer = (ComponentContainer)containerBuilder.CreateComponentContainer();
+            var componentContainer = (ComponentContainer)containerBuilder.CreateComponentContainer(isRootContainer: false);
 
             foreach (var componentRegistration in componentContainer._container.ComponentRegistry.Registrations)
             {

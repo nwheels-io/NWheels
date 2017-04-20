@@ -27,7 +27,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             features.ForEach(f => f.ContributeComponents(builder));
 
-            var container = builder.CreateComponentContainer();
+            var container = builder.CreateComponentContainer(isRootContainer: true);
             var adapterBuilder = new ComponentContainerBuilder();
 
             features.ForEach(f => f.ContributeAdapterComponents(container, adapterBuilder));
