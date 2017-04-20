@@ -62,7 +62,7 @@ namespace NWheels.Frameworks.Ddd.RestApi
 
                 foreach (var handlerType in handlerList.GetHandlerTypes())
                 {
-                    output.Register<IRestResourceHandler>(handlerType);
+                    output.RegisterComponentType(handlerType).ForService<IRestResourceHandler>();
                 }
             }
         }

@@ -87,7 +87,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
             public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
             {
                 base.ContributeComponents(containerBuilder);
-                containerBuilder.RegisterComponent2<ExampleDependency>().SingleInstance();//typeof(ExampleDependency), LifeStyle.Singleton);
+                containerBuilder.RegisterComponentType<ExampleDependency>().SingleInstance();//typeof(ExampleDependency), LifeStyle.Singleton);
             }
         }
 
@@ -116,10 +116,10 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
                 foreach (var port in allPorts)
                 {
-                    output.RegisterComponent2<ExampleAdapter>()
+                    output.RegisterComponentType<ExampleAdapter>()
                         .WithParameter<ExamplePort>(port)
                         .SingleInstance()
-                        .As<IExampleAdapter, ILifecycleListenerComponent>();
+                        .ForServices<IExampleAdapter, ILifecycleListenerComponent>();
                     
                     //output.Register<IExampleAdapter, ILifecycleListenerComponent, ExampleAdapter>(LifeStyle.Singleton).WithParameter<ExamplePort>(port);
                 }
@@ -133,7 +133,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
     {
         public static void ContributePortExample(this IComponentContainerBuilder containerBuilder, string value)
         {
-            containerBuilder.RegisterInstance2<PortsAndAdaptersPoc.ExamplePort>(
+            containerBuilder.RegisterComponentInstance<PortsAndAdaptersPoc.ExamplePort>(
                 new PortsAndAdaptersPoc.ExamplePort {
                     Value = value
                 }

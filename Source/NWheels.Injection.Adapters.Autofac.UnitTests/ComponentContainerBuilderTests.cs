@@ -17,7 +17,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- act
 
-            builderUnderTest.RegisterComponent2<ComponentOne>().SingleInstance();
+            builderUnderTest.RegisterComponentType<ComponentOne>().SingleInstance();
 
             //-- assert
 
@@ -39,8 +39,8 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- act
 
-            builderUnderTest.RegisterComponent2<ComponentOne>(); // no need to specify - default is InstancePerDependency
-            builderUnderTest.RegisterComponent2<ComponentTwo>().InstancePerDependency();
+            builderUnderTest.RegisterComponentType<ComponentOne>(); // no need to specify - default is InstancePerDependency
+            builderUnderTest.RegisterComponentType<ComponentTwo>().InstancePerDependency();
 
             //-- assert
 
@@ -67,7 +67,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- act
 
-            builderUnderTest.RegisterComponent2<ComponentOne>().As<IServiceOne>();
+            builderUnderTest.RegisterComponentType<ComponentOne>().ForService<IServiceOne>();
 
             //-- assert
 
@@ -91,7 +91,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- act
 
-            builderUnderTest.RegisterComponent2<ComponentOne>().As<IServiceOne, ITestComponent>();
+            builderUnderTest.RegisterComponentType<ComponentOne>().ForServices<IServiceOne, ITestComponent>();
 
             //-- assert
 
@@ -120,7 +120,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- act
 
-            builderUnderTest.RegisterComponent2<ComponentOne>().As<IServiceOne, ITestComponent, IAnyComponent>();
+            builderUnderTest.RegisterComponentType<ComponentOne>().ForServices<IServiceOne, ITestComponent, IAnyComponent>();
 
             //-- assert
 
@@ -153,7 +153,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- act
 
-            builderUnderTest.RegisterComponent2<ComponentOne>().As(typeof(IServiceOne), typeof(IAnyComponent));
+            builderUnderTest.RegisterComponentType<ComponentOne>().ForServices(typeof(IServiceOne), typeof(IAnyComponent));
 
             //-- assert
 
@@ -182,8 +182,8 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- act
 
-            builderUnderTest.RegisterComponent2<ComponentOne>().SingleInstance();
-            builderUnderTest.RegisterComponent2<ComponentThree>().WithParameter<int>(123);
+            builderUnderTest.RegisterComponentType<ComponentOne>().SingleInstance();
+            builderUnderTest.RegisterComponentType<ComponentThree>().WithParameter<int>(123);
 
             //-- assert
 
@@ -207,7 +207,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- act
 
-            builderUnderTest.RegisterInstance2<ComponentOne>(componentInstance);
+            builderUnderTest.RegisterComponentInstance<ComponentOne>(componentInstance);
 
             //-- assert
 
@@ -230,7 +230,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- act
 
-            builderUnderTest.RegisterInstance2<ComponentOne>(componentInstance).As<IServiceOne, IAnyComponent>();
+            builderUnderTest.RegisterComponentInstance<ComponentOne>(componentInstance).ForServices<IServiceOne, IAnyComponent>();
 
             //-- assert
 
@@ -255,7 +255,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- act
 
-            builderUnderTest.RegisterComponent2<ComponentFour>();
+            builderUnderTest.RegisterComponentType<ComponentFour>();
 
             var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
             var resolved = container.Resolve<ComponentFour>();

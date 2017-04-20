@@ -358,7 +358,7 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
             public override void ContributeCompiledComponents(IComponentContainer input, IComponentContainerBuilder output)
             {
-                output.Register<ICompileRegistered, CompileRegistered>();
+                output.RegisterComponentType<CompileRegistered>().ForService<ICompileRegistered>();
                 base.ContributeCompiledComponents(input, output);
             }
         }

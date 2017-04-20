@@ -12,8 +12,13 @@ namespace NWheels.Compilation
     {
         public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
         {
-            containerBuilder.Register<ITypeLibrary<IRuntimeTypeFactoryArtifact>, TypeLibrary<IRuntimeTypeFactoryArtifact>>(LifeStyle.Singleton);
-            containerBuilder.Register<ITypeLibrary<IRuntimeTypeFactoryArtifact>, VoidTypeFactoryBackend>(LifeStyle.Singleton);
+            containerBuilder.RegisterComponentType<TypeLibrary<IRuntimeTypeFactoryArtifact>>()
+                .SingleInstance()
+                .ForService<ITypeLibrary<IRuntimeTypeFactoryArtifact>>();
+
+            containerBuilder.RegisterComponentType<VoidTypeFactoryBackend>()
+                .SingleInstance()
+                .ForService<ITypeLibrary<IRuntimeTypeFactoryArtifact>>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

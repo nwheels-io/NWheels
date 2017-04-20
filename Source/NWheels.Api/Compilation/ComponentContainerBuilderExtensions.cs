@@ -11,7 +11,7 @@ namespace NWheels.Compilation
         public static void ContributeTypeFactory<TTypeFactory, TObjectFactory>(this IComponentContainerBuilder containerBuilder)
             where TTypeFactory : class, TObjectFactory, ITypeFactory
         {
-            containerBuilder.Register<TObjectFactory, TTypeFactory>(LifeStyle.Singleton);
+            containerBuilder.RegisterComponentType<TTypeFactory>().SingleInstance().ForService<TObjectFactory>();
         }
     }
 }

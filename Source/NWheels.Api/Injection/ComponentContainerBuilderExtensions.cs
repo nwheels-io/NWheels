@@ -9,7 +9,9 @@ namespace NWheels.Injection
         public static void ContributeLifecycleListener<TComponent>(this IComponentContainerBuilder containerBuilder) 
             where TComponent : ILifecycleListenerComponent
         {
-            containerBuilder.Register<ILifecycleListenerComponent, TComponent>(LifeStyle.Singleton);
+            containerBuilder.RegisterComponentType<TComponent>()
+                .SingleInstance()
+                .ForService<ILifecycleListenerComponent>();
         }
     }
 }
