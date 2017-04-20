@@ -12,7 +12,11 @@ namespace NWheels.Compilation.Adapters.Roslyn
     {
         public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
         {
-            containerBuilder.Register<ITypeFactoryBackend<IRuntimeTypeFactoryArtifact>, RoslynTypeFactoryBackend>(LifeStyle.Singleton);
+            containerBuilder.RegisterComponentType<RoslynTypeFactoryBackend>()
+                .SingleInstance()
+                .ForService<ITypeFactoryBackend<IRuntimeTypeFactoryArtifact>>();
+
+            //containerBuilder.Register<ITypeFactoryBackend<IRuntimeTypeFactoryArtifact>, RoslynTypeFactoryBackend>(LifeStyle.Singleton);
         }
     }
 }

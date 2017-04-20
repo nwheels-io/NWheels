@@ -24,7 +24,7 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IComponentInstantiationBuilder RegisterComponent2<TComponent>()
+        public IComponentInstantiationBuilder RegisterComponentType<TComponent>()
         {
             var registration = _containerBuilder.RegisterType<TComponent>().AsSelf();
             return new RegistrationBuilderWrapper<TComponent, ConcreteReflectionActivatorData, SingleRegistrationStyle>(registration);
@@ -32,7 +32,15 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IComponentRegistrationBuilder RegisterInstance2<TComponent>(TComponent componentInstance)
+        public IComponentInstantiationBuilder RegisterComponentType(Type componentType)
+        {
+            var registration = _containerBuilder.RegisterType(componentType).AsSelf();
+            return new RegistrationBuilderWrapper<object, ConcreteReflectionActivatorData, SingleRegistrationStyle>(registration);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IComponentRegistrationBuilder RegisterComponentInstance<TComponent>(TComponent componentInstance)
             where TComponent : class
         {
             var registration = _containerBuilder.RegisterInstance<TComponent>(componentInstance).AsSelf();
@@ -221,7 +229,7 @@ namespace NWheels.Injection.Adapters.Autofac
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IComponentRegistrationBuilder As<TService>()
+            public IComponentRegistrationBuilder ForService<TService>()
             {
                 _inner.As<TService>();
                 return this;
@@ -229,7 +237,7 @@ namespace NWheels.Injection.Adapters.Autofac
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IComponentRegistrationBuilder As<TService1, TService2>()
+            public IComponentRegistrationBuilder ForServices<TService1, TService2>()
             {
                 _inner.As<TService1, TService2>();
                 return this;
@@ -237,7 +245,7 @@ namespace NWheels.Injection.Adapters.Autofac
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IComponentRegistrationBuilder As<TService1, TService2, TService3>()
+            public IComponentRegistrationBuilder ForServices<TService1, TService2, TService3>()
             {
                 _inner.As<TService1, TService2, TService3>();
                 return this;
@@ -245,7 +253,7 @@ namespace NWheels.Injection.Adapters.Autofac
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IComponentRegistrationBuilder As(params Type[] serviceTypes)
+            public IComponentRegistrationBuilder ForServices(params Type[] serviceTypes)
             {
                 _inner.As(serviceTypes);
                 return this;

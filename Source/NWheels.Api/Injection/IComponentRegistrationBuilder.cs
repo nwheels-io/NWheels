@@ -6,10 +6,10 @@ namespace NWheels.Injection
 {
     public interface IComponentRegistrationBuilder
     {
-        IComponentRegistrationBuilder As<TService>();
-        IComponentRegistrationBuilder As<TService1, TService2>();
-        IComponentRegistrationBuilder As<TService1, TService2, TService3>();
-        IComponentRegistrationBuilder As(params Type[] serviceTypes);
+        IComponentRegistrationBuilder ForService<TService>();
+        IComponentRegistrationBuilder ForServices<TService1, TService2>();
+        IComponentRegistrationBuilder ForServices<TService1, TService2, TService3>();
+        IComponentRegistrationBuilder ForServices(params Type[] serviceTypes);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

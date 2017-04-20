@@ -11,7 +11,7 @@ namespace NWheels.Frameworks.Ddd
         public static void ContributeTransactionScript<TComponent>(this IComponentContainerBuilder containerBuilder)
             where TComponent : class
         {
-            containerBuilder.RegisterInstance<TxRegistration>(new TxRegistration(typeof(TComponent)));
+            containerBuilder.RegisterComponentInstance<TxRegistration>(new TxRegistration(typeof(TComponent)));
         }
     }
 }

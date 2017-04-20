@@ -15,7 +15,7 @@ namespace NWheels.Platform.Messaging
             Func<HttpContext, Task> handler)
             where TComponent : class
         {
-            containerBuilder.RegisterInstance<HttpEndpointInjectorPort>(new HttpEndpointInjectorPort(configuration, handler));
+            containerBuilder.RegisterComponentInstance<HttpEndpointInjectorPort>(new HttpEndpointInjectorPort(configuration, handler));
         }
     }
 }

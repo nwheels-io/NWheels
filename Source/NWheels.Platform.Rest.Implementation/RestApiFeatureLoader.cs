@@ -10,7 +10,9 @@ namespace NWheels.Platform.Rest
         {
             base.ContributeComponents(containerBuilder);
 
-            containerBuilder.Register<IRestApiService, RestApiService>();
+            containerBuilder.RegisterComponentType<RestApiService>()
+                .SingleInstance()
+                .ForService<IRestApiService>();
         }
     }
 }
