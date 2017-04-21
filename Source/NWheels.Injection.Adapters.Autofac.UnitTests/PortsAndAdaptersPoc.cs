@@ -36,35 +36,69 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- assert
 
-            var allAdapters = container.ResolveAll<IExampleAdapter>().ToArray();
+            var allAdaptersA = container.ResolveAll<IExampleAdapterA>().ToArray();
+            var allAdaptersB = container.ResolveAll<IExampleAdapterB>().ToArray();
             var allLifecycleListeners = container.ResolveAll<ILifecycleListenerComponent>().ToArray();
 
-            allAdapters.Select(a => a.QualifiedValue).Should().BeEquivalentTo("DPY_ABC", "DPY_DEF");
-            allLifecycleListeners.OfType<IExampleAdapter>().Should().BeEquivalentTo(allAdapters);
+            allAdaptersA.Select(a => a.QualifiedValue).Should().BeEquivalentTo("DPY_ABC", "DPY_DEF");
+            allAdaptersB.Select(a => a.QualifiedValue).Should().BeEquivalentTo("DPY_ZZZ");
+
+            allLifecycleListeners.OfType<IExampleAdapterA>().Should().BeEquivalentTo(allAdaptersA);
+            allLifecycleListeners.OfType<IExampleAdapterB>().Should().BeEquivalentTo(allAdaptersB);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class ExamplePort : InjectorPort
+        public class ExamplePortA : InjectorPort
         {
             public string Value { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public interface IExampleAdapter
+        public class ExamplePortB : InjectorPort
+        {
+            public string Value { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IExampleAdapterA
         {
             string QualifiedValue { get; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class ExampleAdapter : LifecycleListenerComponentBase, IExampleAdapter
+        public interface IExampleAdapterB
+        {
+            string QualifiedValue { get; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ExampleAdapterA : LifecycleListenerComponentBase, IExampleAdapterA
         {
             private readonly ExampleDependency _dependnecy;
             private readonly string _value;
 
-            public ExampleAdapter(ExampleDependency dependency, ExamplePort port)
+            public ExampleAdapterA(ExampleDependency dependency, ExamplePortA port)
+            {
+                _dependnecy = dependency;
+                _value = port.Value;
+            }
+
+            public string QualifiedValue => $"{_dependnecy.Prefix}_{_value}";
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ExampleAdapterB : LifecycleListenerComponentBase, IExampleAdapterB
+        {
+            private readonly ExampleDependency _dependnecy;
+            private readonly string _value;
+
+            public ExampleAdapterB(ExampleDependency dependency, ExamplePortB port)
             {
                 _dependnecy = dependency;
                 _value = port.Value;
@@ -99,8 +133,9 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
             {
                 base.ContributeComponents(containerBuilder);
 
-                containerBuilder.ContributePortExample("ABC");
-                containerBuilder.ContributePortExample("DEF");
+                containerBuilder.ContributePortAExample("ABC");
+                containerBuilder.ContributePortAExample("DEF");
+                containerBuilder.ContributePortBExample("ZZZ");
             }
         }
 
@@ -112,16 +147,24 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
             {
                 base.ContributeAdapterComponents(input, output);
 
-                var allPorts = input.ResolveAll<ExamplePort>();
+                var allPortsA = input.ResolveAll<ExamplePortA>();
 
-                foreach (var port in allPorts)
+                foreach (var port in allPortsA)
                 {
-                    output.RegisterComponentType<ExampleAdapter>()
-                        .WithParameter<ExamplePort>(port)
+                    output.RegisterComponentType<ExampleAdapterA>()
+                        .WithParameter<ExamplePortA>(port)
                         .SingleInstance()
-                        .ForServices<IExampleAdapter, ILifecycleListenerComponent>();
-                    
-                    //output.Register<IExampleAdapter, ILifecycleListenerComponent, ExampleAdapter>(LifeStyle.Singleton).WithParameter<ExamplePort>(port);
+                        .ForServices<IExampleAdapterA, ILifecycleListenerComponent>();
+                }
+
+                var allPortsB = input.ResolveAll<ExamplePortB>();
+
+                foreach (var port in allPortsB)
+                {
+                    output.RegisterComponentType<ExampleAdapterB>()
+                        .WithParameter<ExamplePortB>(port)
+                        .SingleInstance()
+                        .ForServices<IExampleAdapterB, ILifecycleListenerComponent>();
                 }
             }
         }
@@ -131,10 +174,21 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
     public static class TestContainerBuilderExtensions
     {
-        public static void ContributePortExample(this IComponentContainerBuilder containerBuilder, string value)
+        public static void ContributePortAExample(this IComponentContainerBuilder containerBuilder, string value)
         {
-            containerBuilder.RegisterComponentInstance<PortsAndAdaptersPoc.ExamplePort>(
-                new PortsAndAdaptersPoc.ExamplePort {
+            containerBuilder.RegisterComponentInstance<PortsAndAdaptersPoc.ExamplePortA>(
+                new PortsAndAdaptersPoc.ExamplePortA {
+                    Value = value
+                }
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void ContributePortBExample(this IComponentContainerBuilder containerBuilder, string value)
+        {
+            containerBuilder.RegisterComponentInstance<PortsAndAdaptersPoc.ExamplePortB>(
+                new PortsAndAdaptersPoc.ExamplePortB {
                     Value = value
                 }
             );

@@ -9,7 +9,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
     public class ComponentContainerBuilderTests
     {
         [Fact]
-        public void CanRegisterSingletonComponent()
+        public void CanRegisterSingletonComponentType()
         {
             //-- arrange
 
@@ -31,7 +31,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void CanRegisterTransientComponent()
+        public void CanRegisterTransientComponentType()
         {
             //-- arrange
 
@@ -59,7 +59,32 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void CanRegisterComponentForOneService()
+        public void CanRegisterComponentTypeNonGeneric()
+        {
+            //-- arrange
+
+            IComponentContainerBuilder builderUnderTest = new ComponentContainerBuilder();
+
+            //-- act
+
+            builderUnderTest.RegisterComponentType(typeof(ComponentOne))
+                .SingleInstance()
+                .ForService<IServiceOne>();
+
+            //-- assert
+
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
+            var asService = container.Resolve<IServiceOne>();
+            var asSelf = container.Resolve<ComponentOne>();
+
+            asSelf.Should().NotBeNull();
+            asService.Should().BeSameAs(asSelf);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanRegisterComponentTypeForOneService()
         {
             //-- arrange
 
@@ -83,7 +108,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void CanRegisterComponentForTwoServices()
+        public void CanRegisterComponentTypeForTwoServices()
         {
             //-- arrange
 
@@ -112,7 +137,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void CanRegisterComponentForThreeServices()
+        public void CanRegisterComponentTypeForThreeServices()
         {
             //-- arrange
 
@@ -145,7 +170,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void CanRegisterComponentForArrayOfServices()
+        public void CanRegisterComponentTypeForArrayOfServices()
         {
             //-- arrange
 
@@ -198,7 +223,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void CanRegisterInstance()
+        public void CanRegisterComponentInstance()
         {
             //-- arrange
 
@@ -221,7 +246,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void CanRegisterInstanceForServices()
+        public void CanRegisterComponentInstanceForServices()
         {
             //-- arrange
 
