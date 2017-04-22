@@ -9,9 +9,9 @@ namespace NWheels.Samples.FirstHappyPath
     [DefaultFeatureLoader]
     public class FirstHappyPathFeatureLoader : FeatureLoaderBase
     {
-        public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
+        public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
-            containerBuilder.ContributeTransactionScript<HelloWorldTx>();
+            newComponents.ContributeTransactionScript<HelloWorldTx>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

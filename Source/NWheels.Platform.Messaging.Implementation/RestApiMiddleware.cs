@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿#if false
+
+using Microsoft.AspNetCore.Http;
 using NWheels.Platform.Rest;
 using System;
 using System.Net;
@@ -31,3 +33,5 @@ namespace NWheels.Platform.Messaging
         }
     }
 }
+
+#endif

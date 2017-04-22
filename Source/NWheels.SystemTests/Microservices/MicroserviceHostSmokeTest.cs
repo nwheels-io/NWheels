@@ -87,9 +87,9 @@ namespace NWheels.SystemTests.Microservices
         [FeatureLoader(Name = "SmokeTest")]
         public class SmokeTestFeatureLoader : FeatureLoaderBase
         {
-            public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
+            public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
             {
-                containerBuilder.ContributeLifecycleListener<MicroserviceHostSmokeTest.SmokeTestComponent>();
+                newComponents.ContributeLifecycleListener<MicroserviceHostSmokeTest.SmokeTestComponent>();
             }
         }
     }

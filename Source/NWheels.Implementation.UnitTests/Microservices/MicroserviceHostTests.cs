@@ -331,7 +331,7 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
         private class TestFeatureLoaderBase : FeatureLoaderBase
         {
-            public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
+            public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
             {
             }
         }
@@ -351,15 +351,15 @@ namespace NWheels.Implementation.UnitTests.Microservices
         [DefaultFeatureLoader]
         private class FirstFeatureLoader : TestFeatureLoaderBase
         {
-            public override void CompileComponents(IComponentContainer input)
+            public override void CompileComponents(IComponentContainer existingComponents)
             {
-                base.CompileComponents(input);
+                base.CompileComponents(existingComponents);
             }
 
-            public override void ContributeCompiledComponents(IComponentContainer input, IComponentContainerBuilder output)
+            public override void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
             {
-                output.RegisterComponentType<CompileRegistered>().ForService<ICompileRegistered>();
-                base.ContributeCompiledComponents(input, output);
+                newComponents.RegisterComponentType<CompileRegistered>().ForService<ICompileRegistered>();
+                base.ContributeCompiledComponents(existingComponents, newComponents);
             }
         }
 

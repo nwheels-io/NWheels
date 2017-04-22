@@ -10,9 +10,9 @@ namespace NWheels.Compilation.Adapters.Roslyn
     [DefaultFeatureLoader]
     public class RoslynCompilationAdapterFeatureLoader : FeatureLoaderBase
     {
-        public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
+        public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
-            containerBuilder.RegisterComponentType<RoslynTypeFactoryBackend>()
+            newComponents.RegisterComponentType<RoslynTypeFactoryBackend>()
                 .SingleInstance()
                 .ForService<ITypeFactoryBackend<IRuntimeTypeFactoryArtifact>>();
 

@@ -21,7 +21,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
             var resolved1 = container.Resolve<ComponentOne>();
             var resolved2 = container.Resolve<ComponentOne>();
 
@@ -44,7 +44,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
 
             var one1 = container.Resolve<ComponentOne>();
             var one2 = container.Resolve<ComponentOne>();
@@ -73,7 +73,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
             var asService = container.Resolve<IServiceOne>();
             var asSelf = container.Resolve<ComponentOne>();
 
@@ -96,7 +96,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
             var asService = container.Resolve<IServiceOne>();
             var asSelf = container.Resolve<ComponentOne>();
 
@@ -120,7 +120,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
             var asService1 = container.Resolve<IServiceOne>();
             var asService2 = container.Resolve<ITestComponent>();
             var asSelf = container.Resolve<ComponentOne>();
@@ -149,7 +149,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
             var asService1 = container.Resolve<IServiceOne>();
             var asService2 = container.Resolve<ITestComponent>();
             var asService3 = container.Resolve<IAnyComponent>();
@@ -182,7 +182,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
             var asService1 = container.Resolve<IServiceOne>();
             var asService2 = container.Resolve<IAnyComponent>();
             var asSelf = container.Resolve<ComponentOne>();
@@ -212,7 +212,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
             var resolved = container.Resolve<ComponentThree>();
 
             resolved.Should().NotBeNull();
@@ -236,7 +236,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
             var resolved = container.Resolve<ComponentOne>();
 
             resolved.Should().NotBeNull();
@@ -259,7 +259,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
             var asService1 = container.Resolve<IServiceOne>();
             var asService2 = container.Resolve<IAnyComponent>();
             var asSelf = container.Resolve<ComponentOne>();
@@ -282,7 +282,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             builderUnderTest.RegisterComponentType<ComponentFour>();
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
             var resolved = container.Resolve<ComponentFour>();
 
             //-- assert

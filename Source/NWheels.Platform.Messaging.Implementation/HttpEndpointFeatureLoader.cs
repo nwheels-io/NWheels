@@ -1,4 +1,6 @@
-﻿using NWheels.Injection;
+﻿#if false
+
+using NWheels.Injection;
 using NWheels.Microservices;
 
 namespace NWheels.Platform.Messaging
@@ -14,3 +16,5 @@ namespace NWheels.Platform.Messaging
         }
     }
 }
+
+#endif

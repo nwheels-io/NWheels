@@ -5,31 +5,31 @@ namespace NWheels.Microservices
 {
     public abstract class FeatureLoaderBase : IFeatureLoader
     {
-        public virtual void ContributeConfigSections()
+        public virtual void ContributeConfigSections(IComponentContainerBuilder newComponents)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public virtual void ContributeComponents(IComponentContainerBuilder containerBuilder)
+        public virtual void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public virtual void ContributeAdapterComponents(IComponentContainer input, IComponentContainerBuilder output)
+        public virtual void ContributeAdapterComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public virtual void CompileComponents(IComponentContainer input)
+        public virtual void CompileComponents(IComponentContainer existingComponents)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public virtual void ContributeCompiledComponents(IComponentContainer input, IComponentContainerBuilder output)
+        public virtual void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
         }
     }

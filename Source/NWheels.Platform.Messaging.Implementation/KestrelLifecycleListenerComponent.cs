@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿#if false
+
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using NWheels.Microservices;
@@ -49,3 +51,5 @@ namespace NWheels.Platform.Messaging
         }
     }
 }
+
+#endif
