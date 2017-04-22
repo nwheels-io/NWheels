@@ -605,35 +605,52 @@ namespace NWheels.Microservices
 
             private void LoadFeatures()
             {
-                var containerBuilder = CreateComponentContainerBuilder();
+                var rootBuilder = CreateComponentContainerBuilder();
+                var rootContainer = rootBuilder.CreateComponentContainer(isRootContainer: true);
                 var featureLoaders = GetConfiguredFeatureLoaders();
 
-                featureLoaders.ForEach(x => x.ContributeConfigSections());
+                executeFeatureLoaderStep((feature, newComponents) => feature.ContributeConfigSections(newComponents));
 
-                //TODO: load configuration here
+                //TODO: compile & register contributed configuration objects
 
-                featureLoaders.ForEach(x => x.ContributeComponents(containerBuilder));
+                executeFeatureLoaderStep((feature, newComponents) => feature.ContributeComponents(rootContainer, newComponents));
+                executeFeatureLoaderStep((feature, newComponents) => feature.ContributeAdapterComponents(rootContainer, newComponents));
+                executeFeatureLoaderStep((feature, newComponents) => feature.CompileComponents(rootContainer));
 
-                OwnerHost.Container = containerBuilder.CreateComponentContainer();
-
-                CompileComponents(featureLoaders);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void CompileComponents(List<IFeatureLoader> featureLoaders)
-            {
-                featureLoaders.ForEach(x => x.CompileComponents(OwnerHost.Container));
-
-                var typeLibrary = OwnerHost.Container.Resolve<ITypeLibrary<IRuntimeTypeFactoryArtifact>>();
+                var typeLibrary = rootContainer.Resolve<ITypeLibrary<IRuntimeTypeFactoryArtifact>>();
                 typeLibrary.CompileDeclaredTypeMembers();
 
-                var compiledComponents = CreateComponentContainerBuilder();
+                executeFeatureLoaderStep((feature, newComponents) => feature.ContributeCompiledComponents(rootContainer, newComponents));
 
-                featureLoaders.ForEach(x => x.ContributeCompiledComponents(OwnerHost.Container, compiledComponents));
+                OwnerHost.Container = rootContainer;
 
-                OwnerHost.Container.Merge(compiledComponents);
+                void executeFeatureLoaderStep(Action<IFeatureLoader, IComponentContainerBuilder> step)
+                {
+                    var newComponents = CreateComponentContainerBuilder();
+
+                    foreach (var feature in featureLoaders) {
+                        step(feature, newComponents);
+                    };
+
+                    rootContainer.Merge(newComponents);
+                }
             }
+
+            ////-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            //private void CompileComponents(List<IFeatureLoader> featureLoaders)
+            //{
+            //    featureLoaders.ForEach(x => x.CompileComponents(OwnerHost.Container));
+
+            //    var typeLibrary = OwnerHost.Container.Resolve<ITypeLibrary<IRuntimeTypeFactoryArtifact>>();
+            //    typeLibrary.CompileDeclaredTypeMembers();
+
+            //    var compiledComponents = CreateComponentContainerBuilder();
+
+            //    featureLoaders.ForEach(x => x.ContributeCompiledComponents(OwnerHost.Container, compiledComponents));
+
+            //    OwnerHost.Container.Merge(compiledComponents);
+            //}
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
