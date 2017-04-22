@@ -6,11 +6,11 @@ namespace NWheels.Platform.Rest
     [DefaultFeatureLoader]
     public class RestApiFeatureLoader : FeatureLoaderBase
     {
-        public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
+        public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
-            base.ContributeComponents(containerBuilder);
+            base.ContributeComponents(existingComponents, newComponents);
 
-            containerBuilder.RegisterComponentType<RestApiService>()
+            newComponents.RegisterComponentType<RestApiService>()
                 .SingleInstance()
                 .ForService<IRestApiService>();
         }

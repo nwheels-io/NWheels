@@ -4,14 +4,14 @@ namespace NWheels.Microservices
 {
     public interface IFeatureLoader
     {
-        void ContributeConfigSections();
+        void ContributeConfigSections(IComponentContainerBuilder newComponents);
 
-        void ContributeComponents(IComponentContainerBuilder containerBuilder);
+        void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents);
 
-        void ContributeAdapterComponents(IComponentContainer input, IComponentContainerBuilder output);
+        void ContributeAdapterComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents);
 
-        void CompileComponents(IComponentContainer input);
+        void CompileComponents(IComponentContainer existingComponents);
 
-        void ContributeCompiledComponents(IComponentContainer input, IComponentContainerBuilder output);
+        void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents);
     }
 }

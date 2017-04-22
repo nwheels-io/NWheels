@@ -10,13 +10,13 @@ namespace NWheels.Compilation
 {
     public class CompilationFeatureLoader : FeatureLoaderBase
     {
-        public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
+        public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
-            containerBuilder.RegisterComponentType<TypeLibrary<IRuntimeTypeFactoryArtifact>>()
+            newComponents.RegisterComponentType<TypeLibrary<IRuntimeTypeFactoryArtifact>>()
                 .SingleInstance()
                 .ForService<ITypeLibrary<IRuntimeTypeFactoryArtifact>>();
 
-            containerBuilder.RegisterComponentType<VoidTypeFactoryBackend>()
+            newComponents.RegisterComponentType<VoidTypeFactoryBackend>()
                 .SingleInstance()
                 .ForService<ITypeLibrary<IRuntimeTypeFactoryArtifact>>();
         }

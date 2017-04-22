@@ -14,6 +14,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Server.Kestrel;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
+using NWheels.Injection;
 
 namespace NWheels.Platform.Messaging.Adapters.AspNetKestrel
 {
@@ -27,9 +28,9 @@ namespace NWheels.Platform.Messaging.Adapters.AspNetKestrel
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public KestrelHttpEndpoint(string name, HttpEndpointInjectorPort port)
+        public KestrelHttpEndpoint(HttpEndpointInjectorPort port)
         {
-            _name = name;
+            _name = port.Name;
             _configuration = port.Configuration;
             _handler = port.Handler;
         }

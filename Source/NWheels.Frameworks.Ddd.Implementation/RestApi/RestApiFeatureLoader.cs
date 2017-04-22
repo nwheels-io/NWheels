@@ -15,34 +15,34 @@ namespace NWheels.Frameworks.Ddd.RestApi
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
+        public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
-            containerBuilder.ContributeTypeFactory<TxResourceHandlerTypeFactory, ITxResourceHandlerObjectFactory>();
+            newComponents.ContributeTypeFactory<TxResourceHandlerTypeFactory, ITxResourceHandlerObjectFactory>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void CompileComponents(IComponentContainer input)
+        public override void CompileComponents(IComponentContainer existingComponents)
         {
-            CompileTxHandlers(input);
+            CompileTxHandlers(existingComponents);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void ContributeCompiledComponents(IComponentContainer input, IComponentContainerBuilder output)
+        public override void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
-            ContributeCompiledTxHandlers(input, output);
+            ContributeCompiledTxHandlers(existingComponents, newComponents);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void CompileTxHandlers(IComponentContainer input)
+        private void CompileTxHandlers(IComponentContainer existingComponents)
         {
-            _allTxTypes = input.GetAllServiceTypes(typeof(object))
+            _allTxTypes = existingComponents.GetAllServiceTypes(typeof(object))
                 .Where(t => t.GetTypeInfo().IsDefined(typeof(TransactionScriptComponentAttribute)))
                 .ToArray();
 
-            var handlerTypeFactory = input.Resolve<TxResourceHandlerTypeFactory>();
+            var handlerTypeFactory = existingComponents.Resolve<TxResourceHandlerTypeFactory>();
 
             foreach (var txType in _allTxTypes)
             {

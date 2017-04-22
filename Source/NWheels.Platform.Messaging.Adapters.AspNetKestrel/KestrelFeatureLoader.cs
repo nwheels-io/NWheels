@@ -13,11 +13,14 @@ namespace NWheels.Platform.Messaging.Adapters.AspNetKestrel
         {
             base.ContributeCompiledComponents(input, output);
 
-            var allInjectors = input.ResolveAll<HttpEndpointInjectorPort>();
+            var allPorts = input.ResolveAll<HttpEndpointInjectorPort>();
 
-            foreach (var injector in allInjectors)
+            foreach (var port in allPorts)
             {
-                //output.Register<>
+                output.RegisterComponentType<KestrelHttpEndpoint>()
+                    .WithParameter<HttpEndpointInjectorPort>(port)
+                    .SingleInstance()
+                    .ForServices<IEndpoint, ILifecycleListenerComponent>();
             }
         }
     }

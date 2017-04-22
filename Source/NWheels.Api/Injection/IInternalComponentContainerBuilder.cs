@@ -2,6 +2,6 @@
 {
     public interface IInternalComponentContainerBuilder : IComponentContainerBuilder
     {
-        IInternalComponentContainer CreateComponentContainer(bool isRootContainer = true);
+        IInternalComponentContainer CreateComponentContainer(bool isRootContainer);
     }
 }

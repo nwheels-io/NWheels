@@ -16,6 +16,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
         {
             //-- arrange
 
+            var container = new ComponentContainerBuilder().CreateComponentContainer(isRootContainer: true);
             var builder = new ComponentContainerBuilder();
             var features = new List<IFeatureLoader> {
                 new ExampleDependencyFeatureLoader(),
@@ -25,9 +26,9 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
             //-- act
 
-            features.ForEach(f => f.ContributeComponents(builder));
+            features.ForEach(f => f.ContributeComponents(container, builder));
 
-            var container = builder.CreateComponentContainer(isRootContainer: true);
+            container.Merge(builder);
             var adapterBuilder = new ComponentContainerBuilder();
 
             features.ForEach(f => f.ContributeAdapterComponents(container, adapterBuilder));
@@ -118,10 +119,10 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
         public class ExampleDependencyFeatureLoader : FeatureLoaderBase
         {
-            public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
+            public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
             {
-                base.ContributeComponents(containerBuilder);
-                containerBuilder.RegisterComponentType<ExampleDependency>().SingleInstance();//typeof(ExampleDependency), LifeStyle.Singleton);
+                base.ContributeComponents(existingComponents, newComponents);
+                newComponents.RegisterComponentType<ExampleDependency>().SingleInstance();//typeof(ExampleDependency), LifeStyle.Singleton);
             }
         }
 
@@ -129,13 +130,13 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
         public class ExamplePortFeatureLoader : FeatureLoaderBase
         {
-            public override void ContributeComponents(IComponentContainerBuilder containerBuilder)
+            public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
             {
-                base.ContributeComponents(containerBuilder);
+                base.ContributeComponents(existingComponents, newComponents);
 
-                containerBuilder.ContributePortAExample("ABC");
-                containerBuilder.ContributePortAExample("DEF");
-                containerBuilder.ContributePortBExample("ZZZ");
+                newComponents.ContributePortAExample("ABC");
+                newComponents.ContributePortAExample("DEF");
+                newComponents.ContributePortBExample("ZZZ");
             }
         }
 
@@ -143,25 +144,25 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
         public class ExampleAdapterFeatureLoader : FeatureLoaderBase
         {
-            public override void ContributeAdapterComponents(IComponentContainer input, IComponentContainerBuilder output)
+            public override void ContributeAdapterComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
             {
-                base.ContributeAdapterComponents(input, output);
+                base.ContributeAdapterComponents(existingComponents, newComponents);
 
-                var allPortsA = input.ResolveAll<ExamplePortA>();
+                var allPortsA = existingComponents.ResolveAll<ExamplePortA>();
 
                 foreach (var port in allPortsA)
                 {
-                    output.RegisterComponentType<ExampleAdapterA>()
+                    newComponents.RegisterComponentType<ExampleAdapterA>()
                         .WithParameter<ExamplePortA>(port)
                         .SingleInstance()
                         .ForServices<IExampleAdapterA, ILifecycleListenerComponent>();
                 }
 
-                var allPortsB = input.ResolveAll<ExamplePortB>();
+                var allPortsB = existingComponents.ResolveAll<ExamplePortB>();
 
                 foreach (var port in allPortsB)
                 {
-                    output.RegisterComponentType<ExampleAdapterB>()
+                    newComponents.RegisterComponentType<ExampleAdapterB>()
                         .WithParameter<ExamplePortB>(port)
                         .SingleInstance()
                         .ForServices<IExampleAdapterB, ILifecycleListenerComponent>();
