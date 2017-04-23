@@ -9,8 +9,22 @@ using Xunit;
 
 namespace NWheels.Implementation.UnitTests.Microservices
 {
-    public class MicroserviceHostTests
+    public class MicroserviceHostTests : IDisposable
     {
+        public MicroserviceHostTests()
+        {
+            _s_featureLoaderMocks = new Dictionary<Type, FeatureLoaderMock>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void Dispose()
+        {
+            _s_featureLoaderMocks = null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [Fact]
         public void CheckMicroserviceConfigOnConfiguring()
         {
@@ -206,6 +220,47 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Fact]
+        public void CanExecuteFeatureLoadersLifecycle()
+        {
+            //-- arrange
+
+            var host = new MicroserviceHost(CreateBootConfiguration(), new MicroserviceHostLoggerMock());
+            var handler = new AssemblyLoadEventHandler();
+
+            host.AssemblyLoad += handler.Handle;
+
+            var featureLoaderLog = new List<string>();
+
+            AddFeatureLoaderLoggingInterceptor<FirstFeatureLoader>(featureLoaderLog);
+            AddFeatureLoaderLoggingInterceptor<SecondFeatureLoader>(featureLoaderLog);
+
+            //-- act
+
+            host.Configure();
+
+            //-- assert
+
+            featureLoaderLog.Should().Equal(
+                $"{typeof(FirstFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeConfigSections)}",
+                $"{typeof(SecondFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeConfigSections)}",
+
+                $"{typeof(FirstFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeComponents)}",
+                $"{typeof(SecondFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeComponents)}",
+
+                $"{typeof(FirstFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeAdapterComponents)}",
+                $"{typeof(SecondFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeAdapterComponents)}",
+
+                $"{typeof(FirstFeatureLoader).Name}.{nameof(IFeatureLoader.CompileComponents)}",
+                $"{typeof(SecondFeatureLoader).Name}.{nameof(IFeatureLoader.CompileComponents)}",
+
+                $"{typeof(FirstFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeCompiledComponents)}",
+                $"{typeof(SecondFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeCompiledComponents)}"
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private BootConfiguration CreateBootConfiguration()
         {
             return new BootConfiguration()
@@ -283,10 +338,109 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private void AddFeatureLoaderMock<TFeature>(Action<FeatureLoaderMock> setup) 
+            where TFeature : IFeatureLoader
+        {
+            var mock = new FeatureLoaderMock(typeof(TFeature));
+            setup(mock);
+            _s_featureLoaderMocks[typeof(TFeature)] = mock;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void AddFeatureLoaderLoggingInterceptor<TFeature>(List<string> log, Action<FeatureLoaderMock> setup = null)
+            where TFeature : IFeatureLoader
+        {
+            var mock = new FeatureLoaderMock(typeof(TFeature)) {
+                OnContributeConfigSections = (t, from) => {
+                    log.Add($"{typeof(TFeature).Name}.{nameof(IFeatureLoader.ContributeConfigSections)}");
+                },
+                OnContributeComponents = (t, from, to) => {
+                    log.Add($"{typeof(TFeature).Name}.{nameof(IFeatureLoader.ContributeComponents)}");
+                },
+                OnContributeAdapterComponents = (t, from, to) => {
+                    log.Add($"{typeof(TFeature).Name}.{nameof(IFeatureLoader.ContributeAdapterComponents)}");
+                },
+                OnCompileComponents = (t, from) => {
+                    log.Add($"{typeof(TFeature).Name}.{nameof(IFeatureLoader.CompileComponents)}");
+                },
+                OnContributeCompiledComponents = (t, from, to) => {
+                    log.Add($"{typeof(TFeature).Name}.{nameof(IFeatureLoader.ContributeCompiledComponents)}");
+                },
+            };
+
+            setup?.Invoke(mock);
+            _s_featureLoaderMocks[typeof(TFeature)] = mock;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class FeatureLoaderMock : FeatureLoaderBase
+        {
+            private readonly Type _featureLoaderType;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public FeatureLoaderMock(Type featureLoaderType)
+            {
+                _featureLoaderType = featureLoaderType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void ContributeConfigSections(IComponentContainerBuilder newComponents)
+            {
+                OnContributeConfigSections?.Invoke(_featureLoaderType, newComponents);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
+            {
+                OnContributeComponents?.Invoke(_featureLoaderType, existingComponents, newComponents);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void ContributeAdapterComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
+            {
+                OnContributeAdapterComponents?.Invoke(_featureLoaderType, existingComponents, newComponents);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void CompileComponents(IComponentContainer existingComponents)
+            {
+                OnCompileComponents?.Invoke(_featureLoaderType, existingComponents);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
+            {
+                OnContributeCompiledComponents?.Invoke(_featureLoaderType, existingComponents, newComponents);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Action<Type, IComponentContainerBuilder> OnContributeConfigSections { get; set; }
+            public Action<Type, IComponentContainer, IComponentContainerBuilder> OnContributeComponents { get; set; }
+            public Action<Type, IComponentContainer, IComponentContainerBuilder> OnContributeAdapterComponents { get; set; }
+            public Action<Type, IComponentContainer> OnCompileComponents { get; set; }
+            public Action<Type, IComponentContainer, IComponentContainerBuilder> OnContributeCompiledComponents { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ThreadStatic]
+        private static Dictionary<Type, FeatureLoaderMock> _s_featureLoaderMocks;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private class AssemblyLoadEventHandler
         {
             public AssemblyLoadEventHandler()
-            {
+            {                                                                                                                                                                            
                 FeatureLoaderEventArgsList = new List<AssemblyLoadEventArgs>();
             }
 
@@ -331,8 +485,52 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
         private class TestFeatureLoaderBase : FeatureLoaderBase
         {
+            public override void ContributeConfigSections(IComponentContainerBuilder newComponents)
+            {
+                if (_s_featureLoaderMocks.TryGetValue(this.GetType(), out FeatureLoaderMock mock))
+                {
+                    mock.ContributeConfigSections(newComponents);
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
             public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
             {
+                if (_s_featureLoaderMocks.TryGetValue(this.GetType(), out FeatureLoaderMock mock))
+                {
+                    mock.ContributeComponents(existingComponents, newComponents);
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void ContributeAdapterComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
+            {
+                if (_s_featureLoaderMocks.TryGetValue(this.GetType(), out FeatureLoaderMock mock))
+                {
+                    mock.ContributeAdapterComponents(existingComponents, newComponents);
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void CompileComponents(IComponentContainer existingComponents)
+            {
+                if (_s_featureLoaderMocks.TryGetValue(this.GetType(), out FeatureLoaderMock mock))
+                {
+                    mock.CompileComponents(existingComponents);
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
+            {
+                if (_s_featureLoaderMocks.TryGetValue(this.GetType(), out FeatureLoaderMock mock))
+                {
+                    mock.ContributeCompiledComponents(existingComponents, newComponents);
+                }
             }
         }
 
