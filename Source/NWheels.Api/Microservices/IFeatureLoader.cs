@@ -6,6 +6,8 @@ namespace NWheels.Microservices
     {
         void ContributeConfigSections(IComponentContainerBuilder newComponents);
 
+        void ContributeConfiguration(IComponentContainer existingComponents);
+
         void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents);
 
         void ContributeAdapterComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents);

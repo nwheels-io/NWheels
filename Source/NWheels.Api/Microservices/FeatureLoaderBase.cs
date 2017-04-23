@@ -11,6 +11,12 @@ namespace NWheels.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public virtual void ContributeConfiguration(IComponentContainer existingComponents)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public virtual void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
         }

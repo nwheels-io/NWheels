@@ -613,6 +613,7 @@ namespace NWheels.Microservices
 
                 //TODO: compile & register contributed configuration objects
 
+                executeFeatureLoaderStep((feature, newComponents) => feature.ContributeConfiguration(rootContainer));
                 executeFeatureLoaderStep((feature, newComponents) => feature.ContributeComponents(rootContainer, newComponents));
                 executeFeatureLoaderStep((feature, newComponents) => feature.ContributeAdapterComponents(rootContainer, newComponents));
                 executeFeatureLoaderStep((feature, newComponents) => feature.CompileComponents(rootContainer));
