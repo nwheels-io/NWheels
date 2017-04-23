@@ -245,6 +245,9 @@ namespace NWheels.Implementation.UnitTests.Microservices
                 $"{typeof(FirstFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeConfigSections)}",
                 $"{typeof(SecondFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeConfigSections)}",
 
+                $"{typeof(FirstFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeConfiguration)}",
+                $"{typeof(SecondFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeConfiguration)}",
+
                 $"{typeof(FirstFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeComponents)}",
                 $"{typeof(SecondFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeComponents)}",
 
@@ -355,6 +358,9 @@ namespace NWheels.Implementation.UnitTests.Microservices
                 OnContributeConfigSections = (t, from) => {
                     log.Add($"{typeof(TFeature).Name}.{nameof(IFeatureLoader.ContributeConfigSections)}");
                 },
+                OnContributeConfiguration = (t, from) => {
+                    log.Add($"{typeof(TFeature).Name}.{nameof(IFeatureLoader.ContributeConfiguration)}");
+                },
                 OnContributeComponents = (t, from, to) => {
                     log.Add($"{typeof(TFeature).Name}.{nameof(IFeatureLoader.ContributeComponents)}");
                 },
@@ -395,6 +401,13 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public override void ContributeConfiguration(IComponentContainer existingComponents)
+            {
+                OnContributeConfiguration?.Invoke(_featureLoaderType, existingComponents);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
             {
                 OnContributeComponents?.Invoke(_featureLoaderType, existingComponents, newComponents);
@@ -424,6 +437,7 @@ namespace NWheels.Implementation.UnitTests.Microservices
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public Action<Type, IComponentContainerBuilder> OnContributeConfigSections { get; set; }
+            public Action<Type, IComponentContainer> OnContributeConfiguration { get; set; }
             public Action<Type, IComponentContainer, IComponentContainerBuilder> OnContributeComponents { get; set; }
             public Action<Type, IComponentContainer, IComponentContainerBuilder> OnContributeAdapterComponents { get; set; }
             public Action<Type, IComponentContainer> OnCompileComponents { get; set; }
@@ -490,6 +504,16 @@ namespace NWheels.Implementation.UnitTests.Microservices
                 if (_s_featureLoaderMocks.TryGetValue(this.GetType(), out FeatureLoaderMock mock))
                 {
                     mock.ContributeConfigSections(newComponents);
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void ContributeConfiguration(IComponentContainer existingComponents)
+            {
+                if (_s_featureLoaderMocks.TryGetValue(this.GetType(), out FeatureLoaderMock mock))
+                {
+                    mock.ContributeConfiguration(existingComponents);
                 }
             }
 
