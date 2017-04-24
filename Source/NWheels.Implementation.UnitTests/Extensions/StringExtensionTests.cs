@@ -2,6 +2,7 @@
 using NWheels.Extensions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Xunit;
 
@@ -72,6 +73,34 @@ namespace NWheels.Implementation.UnitTests.Extensions
             //-- act
 
             var actualOutput = input.DefaultIfNullOrEmpty(defaultValue);
+
+            //-- assert
+
+            actualOutput.Should().Be(expectedOutput);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<object[]> TestCases_TestToPathString = new object[][] {
+            #region Test cases
+            new object[] { @"abc", "abc" },
+            new object[] { @"abc/def", $"abc{Path.DirectorySeparatorChar}def" },
+            new object[] { @"abc\def", $"abc{Path.DirectorySeparatorChar}def" },
+            new object[] { @"a/b/c", $"a{Path.DirectorySeparatorChar}b{Path.DirectorySeparatorChar}c" },
+            new object[] { @"a\b\c", $"a{Path.DirectorySeparatorChar}b{Path.DirectorySeparatorChar}c" },
+            new object[] { @"   ", "   " },
+            new object[] { @"", "" },
+            new object[] { null, null },
+            #endregion
+        };
+
+        [Theory]
+        [MemberData(nameof(TestCases_TestToPathString))]
+        public void TestToPathString(string input, string expectedOutput)
+        {
+            //-- act
+
+            var actualOutput = input.ToPathString();
 
             //-- assert
 
