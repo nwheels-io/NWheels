@@ -1,19 +1,77 @@
 using NWheels.Injection;
 using NWheels.Microservices;
 using NWheels.Testability.Microservices;
+using NWheels.Extensions;
 using System;
 using Xunit;
 using System.Collections.Generic;
+using NWheels.Platform.Messaging.Adapters.AspNetKestrel;
+using System.Reflection;
+using System.IO;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using System.Net.Http;
+using System.Net;
+using FluentAssertions;
 
 namespace NWheels.Platform.Messaging.Tests.System
 {
-    [Trait("Purpose", "System")]
-    public class KestrelHttpEndpointTests // : IClassFixture<AspNetKestrelHttpEndpointTests.ClassFixture>
+    [Trait("Purpose", "SystemTest")]
+    public class KestrelHttpEndpointTests : IClassFixture<KestrelHttpEndpointTests.ClassFixture>
     {
-        //[Fact]
-        public void BasicHttpServerTest()
-        {
+        private readonly ClassFixture _fixture;
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public KestrelHttpEndpointTests(ClassFixture fixture)
+        {
+            _fixture = fixture;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanServeStaticContent()
+        {
+            //-- arrange
+
+            _fixture.Microservice.Start();
+
+            //-- act
+
+
+
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //private void MakeHttpRequest(
+        //    string path, 
+        //    HttpStatusCode expectedStatusCode, 
+        //    string expectedContentType, 
+        //    string expectedContentFile)
+        //{
+        //    using (var client = new HttpClient())
+        //    {
+        //        var httpTask = client.GetAsync("http://localhost:5500/" + path, HttpCompletionOption.ResponseContentRead);
+        //        var completed = httpTask.Wait(10000);
+        //        Assert.True(completed, "HTTP request didn't complete within allotted timeout.");
+
+        //        var response = httpTask.Result;
+        //        response.StatusCode.Should().Be(expectedStatusCode);
+        //        var responseText = response.Content.ReadAsStringAsync().Result;
+        //        responseText.Should().Be("this-is-a-test");
+        //    }
+        //}
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class NonStaticTestRequestHandler
+        {
+            public async Task HandleRequest(HttpContext context)
+            {
+
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -30,6 +88,7 @@ namespace NWheels.Platform.Messaging.Tests.System
                     .UseCliDirectoryFromSource(relativeProjectDirectoryPath: "..", allowOverrideByEnvironmentVar: true)
                     .UseMicroserviceFromSource(relativeProjectDirectoryPath: "..")
                     .UseAutofacInjectionAdapter()
+                    .UseFrameworkFeature<KestrelFeatureLoader>()
                     .UseApplicationFeature<TestKestrelEndpointFeatureLoader>()
                     .Build();
             }
@@ -38,7 +97,13 @@ namespace NWheels.Platform.Messaging.Tests.System
 
             public void Dispose()
             {
+                _microservice.StopOrThrow(10000);
+                _microservice.AssertNoErrors();
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public MicroserviceHostController Microservice => _microservice;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,55 +111,100 @@ namespace NWheels.Platform.Messaging.Tests.System
         [FeatureLoader(Name = "TestKestrelEndpoint")]
         public class TestKestrelEndpointFeatureLoader : FeatureLoaderBase
         {
+            public override void ContributeConfigSections(IComponentContainerBuilder newComponents)
+            {
+                var binaryFolder = Path.GetDirectoryName(this.GetType().GetTypeInfo().Assembly.Location);
+
+                var httpConfig = new TestHttpEndpointConfiguration() {
+                    Name = "Test",
+                    Port = 5500,
+                    StaticFolders = new IHttpStaticFolderConfig[] {
+                        new TestHttpStaticFolderConfig {
+                            LocalRootPath = Path.Combine(binaryFolder, "System/wwwroot/Static1".ToPathString()),
+                            RequestBasePath = "/static/files/one"
+                        },
+                        new TestHttpStaticFolderConfig {
+                            LocalRootPath = Path.Combine(binaryFolder, "System/wwwroot/Static2".ToPathString()),
+                            RequestBasePath = "/static/files/two",
+                            DefaultDocuments = new string[] {
+                                "index.html"
+                            }
+                        }
+                    }
+                };
+
+                newComponents.RegisterComponentInstance(httpConfig).ForService<IHttpEndpointConfiguration>();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
             {
-                //newComponents.ContributeHttpEndpoint(
-                //    "Test", 
-                //    new TestConfiguration(), 
-                //    handler: context => existingComponents.Resolve<>)
-            }
+                newComponents.RegisterComponentType<NonStaticTestRequestHandler>().InstancePerDependency();
 
-            public override void ContributeAdapterComponents(IComponentContainer input, IComponentContainerBuilder output)
+                var httpConfig = existingComponents.Resolve<IHttpEndpointConfiguration>();
+
+                newComponents.ContributeHttpEndpoint(
+                    "Test",
+                    httpConfig,
+                    handler: context => {
+                        var handler = existingComponents.Resolve<NonStaticTestRequestHandler>();
+                        return handler.HandleRequest(context);
+                    });
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class TestHttpEndpointConfiguration : IHttpEndpointConfiguration
+        {
+            public TestHttpEndpointConfiguration()
             {
-                
+                this.StaticFolders = new List<IHttpStaticFolderConfig>();
             }
 
-            private class TestConfiguration : IHttpEndpointConfiguration
+            public int Port { get; set; }
+
+            public IHttpsConfig Https { get; set; }
+
+            public IList<IHttpStaticFolderConfig> StaticFolders { get; set; }
+
+            public string Name { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class TestHttpsConfig : IHttpsConfig
+        {
+            public int Port { get; set; }
+
+            public bool RequireHttps { get; set; }
+
+            public string CertFilePath { get; set; }
+
+            public string CertFilePassword { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class TestHttpStaticFolderConfig : IHttpStaticFolderConfig
+        {
+            public TestHttpStaticFolderConfig()
             {
-                public int Port => throw new NotImplementedException();
-
-                public IHttpsConfig Https => throw new NotImplementedException();
-
-                public IList<IHttpStaticFolderConfig> StaticFolders => throw new NotImplementedException();
-
-                public string Name => throw new NotImplementedException();
+                this.DefaultDocuments = new List<string>();
             }
 
-            private class TestHttpsConfig : IHttpsConfig
-            {
-                public int Port => throw new NotImplementedException();
+            public string RequestBasePath { get; set; }
 
-                public bool RequireHttps => throw new NotImplementedException();
+            public string LocalRootPath { get; set; }
 
-                public string CertFilePath => throw new NotImplementedException();
+            public IList<string> DefaultDocuments { get; set; }
 
-                public string CertFilePassword => throw new NotImplementedException();
-            }
+            public string CacheControl { get; set; }
 
-            private class TestHttpStaticFolderConfig : IHttpStaticFolderConfig
-            {
-                public string RequestBasePath => throw new NotImplementedException();
+            public string DefaultContentType { get; set; }
 
-                public string LocalRootPath => throw new NotImplementedException();
-
-                public IList<string> DefaultDocuments => throw new NotImplementedException();
-
-                public string CacheControl => throw new NotImplementedException();
-
-                public string DefaultContentType => throw new NotImplementedException();
-
-                public bool EnableDirectoryBrowsing => throw new NotImplementedException();
-            }
+            public bool EnableDirectoryBrowsing { get; set; }
         }
     }
 }

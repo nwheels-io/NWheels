@@ -7,7 +7,7 @@ namespace NWheels.Platform.Messaging
     //TODO: [ConfigurationSection]
     public interface IEndpointConfiguration
     {
-        string Name { get; }
+        string Name { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -16,8 +16,8 @@ namespace NWheels.Platform.Messaging
     public interface IHttpEndpointConfiguration : IEndpointConfiguration
     {
         int Port { get; }
-        IHttpsConfig Https { get; }
-        IList<IHttpStaticFolderConfig> StaticFolders { get; }
+        IHttpsConfig Https { get; set; }
+        IList<IHttpStaticFolderConfig> StaticFolders { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
