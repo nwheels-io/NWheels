@@ -373,7 +373,7 @@ namespace NWheels.Cli.Run
                             new XAttribute("TaskParameter", "AssembliesToPublish"),
                             new XAttribute("ItemName", "ResolvedAssembliesToPublish"))),
                     new XElement(ns + "Message",
-                        new XAttribute("Text", "%(DestinationSubPath)=@(ResolvedAssembliesToPublish)"),
+                        new XAttribute("Text", "%(DestinationSubPath)=@(ResolvedAssembliesToPublish->Distinct())"),
                         new XAttribute("Importance", "high"))));
 
             return projectElement;
