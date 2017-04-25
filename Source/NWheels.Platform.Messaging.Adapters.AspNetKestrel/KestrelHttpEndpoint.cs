@@ -130,23 +130,29 @@ namespace NWheels.Platform.Messaging.Adapters.AspNetKestrel
         {
             foreach (var folder in _configuration.StaticFolders)
             {
-                var options = new StaticFileOptions() {
+                var folderOptions = new FileServerOptions {
                     FileProvider = new PhysicalFileProvider(GetStaticWebContentFolderPath(folder)),
-                    RequestPath =  new PathString(folder.RequestBasePath.DefaultIfNullOrEmpty("/")),
-                    DefaultContentType = folder.DefaultContentType
+                    RequestPath = new PathString(folder.RequestBasePath.DefaultIfNullOrEmpty("/")),
+                    EnableDefaultFiles = (folder.DefaultFiles?.Count > 0),
+                    EnableDirectoryBrowsing = folder.EnableDirectoryBrowsing
                 };
 
-                app.UseStaticFiles(options);
+                folderOptions.StaticFileOptions.DefaultContentType = folder.DefaultContentType;
 
                 if (folder.EnableDirectoryBrowsing)
                 {
-                    var browserOptions = new DirectoryBrowserOptions() {
-                        FileProvider = new PhysicalFileProvider(GetStaticWebContentFolderPath(folder)),
-                        RequestPath = folder.RequestBasePath.DefaultIfNullOrEmpty("/")
-                    };
-
-                    app.UseDirectoryBrowser(browserOptions);
+                    folderOptions.DirectoryBrowserOptions.FileProvider = new PhysicalFileProvider(GetStaticWebContentFolderPath(folder));
+                    folderOptions.DirectoryBrowserOptions.RequestPath = folder.RequestBasePath.DefaultIfNullOrEmpty("/");
                 }
+
+                if (folderOptions.EnableDefaultFiles)
+                {
+                    folderOptions.DefaultFilesOptions.FileProvider = new PhysicalFileProvider(GetStaticWebContentFolderPath(folder));
+                    folderOptions.DefaultFilesOptions.RequestPath = new PathString(folder.RequestBasePath.DefaultIfNullOrEmpty("/"));
+                    folderOptions.DefaultFilesOptions.DefaultFileNames = folder.DefaultFiles.ToArray();
+                }
+
+                app.UseFileServer(folderOptions);
             }
         }
 
