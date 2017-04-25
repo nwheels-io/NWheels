@@ -132,7 +132,7 @@ namespace NWheels.Platform.Messaging.Adapters.AspNetKestrel
             {
                 var options = new StaticFileOptions() {
                     FileProvider = new PhysicalFileProvider(GetStaticWebContentFolderPath(folder)),
-                    RequestPath = folder.RequestBasePath.DefaultIfNullOrEmpty("/"),
+                    RequestPath =  new PathString(folder.RequestBasePath.DefaultIfNullOrEmpty("/")),
                     DefaultContentType = folder.DefaultContentType
                 };
 
