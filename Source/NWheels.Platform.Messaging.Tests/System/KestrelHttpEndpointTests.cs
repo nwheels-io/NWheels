@@ -13,12 +13,18 @@ using Microsoft.AspNetCore.Http;
 using System.Net.Http;
 using System.Net;
 using FluentAssertions;
+using System.Threading;
 
 namespace NWheels.Platform.Messaging.Tests.System
 {
     [Trait("Purpose", "SystemTest")]
     public class KestrelHttpEndpointTests : IClassFixture<KestrelHttpEndpointTests.ClassFixture>
     {
+        private static readonly string _s_binaryFolder = 
+            Path.GetDirectoryName(typeof(KestrelHttpEndpointTests).GetTypeInfo().Assembly.Location);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private readonly ClassFixture _fixture;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,30 +45,93 @@ namespace NWheels.Platform.Messaging.Tests.System
 
             //-- act
 
+            var response = MakeHttpRequest(HttpMethod.Get, "/static/files/one/test.js");
 
+            //-- assert
 
+            AssertHttpResponse(response, HttpStatusCode.OK, "application/javascript", "System/wwwroot/Static1/test.js");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //private void MakeHttpRequest(
-        //    string path, 
-        //    HttpStatusCode expectedStatusCode, 
-        //    string expectedContentType, 
-        //    string expectedContentFile)
-        //{
-        //    using (var client = new HttpClient())
-        //    {
-        //        var httpTask = client.GetAsync("http://localhost:5500/" + path, HttpCompletionOption.ResponseContentRead);
-        //        var completed = httpTask.Wait(10000);
-        //        Assert.True(completed, "HTTP request didn't complete within allotted timeout.");
+        private HttpResponseMessage MakeHttpRequest(HttpMethod method, string path)
+        {
+            using (var client = new HttpClient())
+            {
+                var requestUri = "http://localhost:5500/" + path.TrimStart('/');
+                var httpTask = client.SendAsync(new HttpRequestMessage(method, requestUri), HttpCompletionOption.ResponseContentRead, CancellationToken.None);
+                var completed = httpTask.Wait(10000);
 
-        //        var response = httpTask.Result;
-        //        response.StatusCode.Should().Be(expectedStatusCode);
-        //        var responseText = response.Content.ReadAsStringAsync().Result;
-        //        responseText.Should().Be("this-is-a-test");
-        //    }
-        //}
+                Assert.True(completed, "HTTP request didn't complete within allotted timeout.");
+
+                var response = httpTask.Result;
+                return response;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void AssertHttpResponse(
+            HttpResponseMessage response,
+            HttpStatusCode expectedStatusCode,
+            string expectedContentType,
+            string expectedContentFilePath)
+        {
+            response.StatusCode.Should().Be(expectedStatusCode, "HTTP status code");
+
+            if (expectedContentType != null)
+            {
+                response.Content.Headers.ContentType.ToString().Should().Be(expectedContentType, "content type");
+            }
+
+            if (expectedContentFilePath != null)
+            {
+                AssertResponseContentsEqual(response, expectedContentFilePath);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void AssertResponseContentsEqual(HttpResponseMessage response, string expectedContentFilePath)
+        {
+            var actualContents = response.Content.ReadAsStreamAsync().Result;
+            var expectedFileFullPath = Path.Combine(_s_binaryFolder, expectedContentFilePath.ToPathString());
+
+            using (var expectedContents = File.OpenRead(expectedFileFullPath))
+            {
+                AssertStreamsEqual(actualContents, expectedContents);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void AssertStreamsEqual(Stream actual, Stream expected)
+        {
+            var bufferActual = new byte[1024];
+            var bufferExpected = new byte[1024];
+
+            int lengthActual;
+            int lengthExpected;
+
+            int offset = 0;
+
+            while (true)
+            {
+                lengthActual = actual.Read(bufferActual, 0, bufferActual.Length);
+                lengthExpected = expected.Read(bufferExpected, 0, bufferExpected.Length);
+
+                (offset + lengthActual).Should().Be(offset + lengthExpected, "size of the stream");
+
+                if (lengthActual == 0)
+                {
+                    break;
+                }
+
+                bufferActual.Should().Equal(bufferExpected, $"contents, {lengthActual} bytes at offset {offset}");
+
+                offset += lengthActual;
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -113,18 +182,16 @@ namespace NWheels.Platform.Messaging.Tests.System
         {
             public override void ContributeConfigSections(IComponentContainerBuilder newComponents)
             {
-                var binaryFolder = Path.GetDirectoryName(this.GetType().GetTypeInfo().Assembly.Location);
-
                 var httpConfig = new TestHttpEndpointConfiguration() {
                     Name = "Test",
                     Port = 5500,
                     StaticFolders = new IHttpStaticFolderConfig[] {
                         new TestHttpStaticFolderConfig {
-                            LocalRootPath = Path.Combine(binaryFolder, "System/wwwroot/Static1".ToPathString()),
+                            LocalRootPath = Path.Combine(_s_binaryFolder, "System/wwwroot/Static1".ToPathString()),
                             RequestBasePath = "/static/files/one"
                         },
                         new TestHttpStaticFolderConfig {
-                            LocalRootPath = Path.Combine(binaryFolder, "System/wwwroot/Static2".ToPathString()),
+                            LocalRootPath = Path.Combine(_s_binaryFolder, "System/wwwroot/Static2".ToPathString()),
                             RequestBasePath = "/static/files/two",
                             DefaultDocuments = new string[] {
                                 "index.html"
