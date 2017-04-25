@@ -38,7 +38,7 @@ namespace NWheels.Platform.Messaging
     {
         string RequestBasePath { get; }
         string LocalRootPath { get; }
-        IList<string> DefaultDocuments { get; }
+        IList<string> DefaultFiles { get; }
         string CacheControl { get; }
         string DefaultContentType { get; }
         bool EnableDirectoryBrowsing { get; }

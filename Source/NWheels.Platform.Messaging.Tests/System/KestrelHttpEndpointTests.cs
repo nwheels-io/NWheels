@@ -45,11 +45,15 @@ namespace NWheels.Platform.Messaging.Tests.System
 
             //-- act
 
-            var response = MakeHttpRequest(HttpMethod.Get, "/static/files/one/test.js");
+            var response1 = MakeHttpRequest(HttpMethod.Get, "/static/files/one/test.js");
+            var response2 = MakeHttpRequest(HttpMethod.Get, "/static/files/two/");
+            var response3 = MakeHttpRequest(HttpMethod.Get, "/static/files/two/non-existent-resource.xyz");
 
             //-- assert
 
-            AssertHttpResponse(response, HttpStatusCode.OK, "application/javascript", "System/wwwroot/Static1/test.js");
+            AssertHttpResponse(response1, HttpStatusCode.OK, "application/javascript", "System/wwwroot/Static1/test.js");
+            AssertHttpResponse(response2, HttpStatusCode.OK, "text/html", "System/wwwroot/Static2/index.html");
+            AssertHttpResponse(response3, HttpStatusCode.NotFound, null, null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -81,7 +85,7 @@ namespace NWheels.Platform.Messaging.Tests.System
 
             if (expectedContentType != null)
             {
-                response.Content.Headers.ContentType.ToString().Should().Be(expectedContentType, "content type");
+                response.Content?.Headers?.ContentType?.ToString().Should().Be(expectedContentType, "content type");
             }
 
             if (expectedContentFilePath != null)
@@ -193,7 +197,7 @@ namespace NWheels.Platform.Messaging.Tests.System
                         new TestHttpStaticFolderConfig {
                             LocalRootPath = Path.Combine(_s_binaryFolder, "System/wwwroot/Static2".ToPathString()),
                             RequestBasePath = "/static/files/two",
-                            DefaultDocuments = new string[] {
+                            DefaultFiles = new string[] {
                                 "index.html"
                             }
                         }
@@ -214,10 +218,10 @@ namespace NWheels.Platform.Messaging.Tests.System
                 newComponents.ContributeHttpEndpoint(
                     "Test",
                     httpConfig,
-                    handler: context => {
+                    handler: null /*context => {
                         var handler = existingComponents.Resolve<NonStaticTestRequestHandler>();
                         return handler.HandleRequest(context);
-                    });
+                    }*/);
             }
         }
 
@@ -225,11 +229,6 @@ namespace NWheels.Platform.Messaging.Tests.System
 
         private class TestHttpEndpointConfiguration : IHttpEndpointConfiguration
         {
-            public TestHttpEndpointConfiguration()
-            {
-                this.StaticFolders = new List<IHttpStaticFolderConfig>();
-            }
-
             public int Port { get; set; }
 
             public IHttpsConfig Https { get; set; }
@@ -256,16 +255,11 @@ namespace NWheels.Platform.Messaging.Tests.System
 
         private class TestHttpStaticFolderConfig : IHttpStaticFolderConfig
         {
-            public TestHttpStaticFolderConfig()
-            {
-                this.DefaultDocuments = new List<string>();
-            }
-
             public string RequestBasePath { get; set; }
 
             public string LocalRootPath { get; set; }
 
-            public IList<string> DefaultDocuments { get; set; }
+            public IList<string> DefaultFiles { get; set; }
 
             public string CacheControl { get; set; }
 
