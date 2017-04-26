@@ -2,13 +2,7 @@
 import { Headers, Http, Request, Response, RequestMethod } from '@angular/http';
 
 import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/map';
-import "rxjs/add/operator/catch";
-import "rxjs/add/operator/publishReplay";
-import "rxjs/add/operator/filter";
-import "rxjs/add/operator/first";
-import 'rxjs/add/operator/mergeMap';
-import "rxjs/add/observable/throw";
+import 'rxjs/Rx';
 
 import { Project } from './projects-area/project';
 import { Configuration } from '../../configuration';
