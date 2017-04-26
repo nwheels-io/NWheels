@@ -32,6 +32,13 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TService ResolveNamed<TService>(string name)
+        {
+            return _container.ResolveNamed<TService>(name);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IEnumerable<TService> ResolveAll<TService>()
         {
             return _container.Resolve<IEnumerable<TService>>();

@@ -10,6 +10,11 @@ namespace NWheels.Injection
         IComponentConditionBuilder ForServices<TService1, TService2>();
         IComponentConditionBuilder ForServices<TService1, TService2, TService3>();
         IComponentConditionBuilder ForServices(params Type[] serviceTypes);
+
+        IComponentConditionBuilder NamedForService<TService>(string name);
+        IComponentConditionBuilder NamedForServices<TService1, TService2>(string name);
+        IComponentConditionBuilder NamedForServices<TService1, TService2, TService3>(string name);
+        IComponentConditionBuilder NamedForServices(string name, params Type[] serviceTypes);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

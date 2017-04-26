@@ -106,11 +106,6 @@ namespace NWheels.Injection.Adapters.Autofac
                 return this;
             }
 
-            private IRegistrationBuilder<TLimit, ReflectionActivatorData, TRegistrationStyle> InnerAsReflectionActivator()
-            {
-                return (IRegistrationBuilder<TLimit, ReflectionActivatorData, TRegistrationStyle>)_inner;
-            }
-
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public IComponentRegistrationBuilder SingleInstance()
@@ -161,9 +156,51 @@ namespace NWheels.Injection.Adapters.Autofac
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public IComponentConditionBuilder NamedForService<TService>(string name)
+            {
+                _inner.Named<TService>(name);
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IComponentConditionBuilder NamedForServices<TService1, TService2>(string name)
+            {
+                _inner.Named<TService1>(name).Named<TService2>(name);
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IComponentConditionBuilder NamedForServices<TService1, TService2, TService3>(string name)
+            {
+                _inner.Named<TService1>(name).Named<TService2>(name).Named<TService3>(name);
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IComponentConditionBuilder NamedForServices(string name, params Type[] serviceTypes)
+            {
+                foreach (var type in serviceTypes)
+                {
+                    _inner.Named(name, type);
+                }
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public void AsFallback()
             {
                 ((IRegistrationBuilder<TLimit, TActivatorData, SingleRegistrationStyle>)_inner).PreserveExistingDefaults();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IRegistrationBuilder<TLimit, ReflectionActivatorData, TRegistrationStyle> InnerAsReflectionActivator()
+            {
+                return (IRegistrationBuilder<TLimit, ReflectionActivatorData, TRegistrationStyle>)_inner;
             }
         }
     }
