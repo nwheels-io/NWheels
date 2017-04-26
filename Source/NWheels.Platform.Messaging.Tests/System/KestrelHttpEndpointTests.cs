@@ -1,3 +1,5 @@
+#if false
+
 using NWheels.Injection;
 using NWheels.Microservices;
 using NWheels.Testability.Microservices;
@@ -37,7 +39,85 @@ namespace NWheels.Platform.Messaging.Tests.System
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void CanServeStaticContent()
+        public void CanServeStaticFile()
+        {
+            //-- act
+
+            var response = MakeHttpRequest(HttpMethod.Get, "/static/files/one/test.js");
+
+            //-- assert
+
+            AssertHttpResponse(response, HttpStatusCode.OK, "application/javascript", "System/wwwroot/Static1/test.js");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanServeStaticFilesFromMultipleFolders()
+        {
+            //-- arrange
+
+            _fixture.Microservice.Start();
+
+            //-- act
+
+            var response1 = MakeHttpRequest(HttpMethod.Get, "/static/files/one/test.js");
+            var response2 = MakeHttpRequest(HttpMethod.Get, "/static/files/two/index.html");
+
+            //-- assert
+
+            AssertHttpResponse(response1, HttpStatusCode.OK, "application/javascript", "System/wwwroot/Static1/test.js");
+            AssertHttpResponse(response2, HttpStatusCode.OK, "text/html", "System/wwwroot/Static2/index.html");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanServeStaticFileAsFolderDefault()
+        {
+            //-- arrange
+
+            _fixture.Microservice.Start();
+
+            //-- act
+
+            var response = MakeHttpRequest(HttpMethod.Get, "/static/files/two/"); // should serve /static/files/two/index.html
+
+            //-- assert
+
+            AssertHttpResponse(
+                response, 
+                HttpStatusCode.OK, 
+                expectedContentType: "text/html", 
+                expectedContentFilePath: "System/wwwroot/Static2/index.html");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanRedirectToStaticFileAsFolderDefault()
+        {
+            //-- arrange
+
+            _fixture.Microservice.Start();
+
+            //-- act
+
+            var response = MakeHttpRequest(HttpMethod.Get, "/static/files/two"); // should redirect to /static/files/two/
+
+            //-- assert
+
+            AssertHttpResponse(
+                response,
+                HttpStatusCode.OK,
+                expectedContentType: "text/html",
+                expectedContentFilePath: "System/wwwroot/Static2/index.html");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanServeStaticDefaultFile()
         {
             //-- arrange
 
@@ -58,11 +138,11 @@ namespace NWheels.Platform.Messaging.Tests.System
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private HttpResponseMessage MakeHttpRequest(HttpMethod method, string path)
+        private HttpResponseMessage MakeHttpRequest(int endpointPort, HttpMethod method, string path)
         {
             using (var client = new HttpClient())
             {
-                var requestUri = "http://localhost:5500/" + path.TrimStart('/');
+                var requestUri = $"http://localhost:{endpointPort}/{path.TrimStart('/')}";
                 var httpTask = client.SendAsync(new HttpRequestMessage(method, requestUri), HttpCompletionOption.ResponseContentRead, CancellationToken.None);
                 var completed = httpTask.Wait(10000);
 
@@ -164,6 +244,8 @@ namespace NWheels.Platform.Messaging.Tests.System
                     .UseFrameworkFeature<KestrelFeatureLoader>()
                     .UseApplicationFeature<TestKestrelEndpointFeatureLoader>()
                     .Build();
+
+                _microservice.Start();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -181,8 +263,8 @@ namespace NWheels.Platform.Messaging.Tests.System
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [FeatureLoader(Name = "TestKestrelEndpoint")]
-        public class TestKestrelEndpointFeatureLoader : FeatureLoaderBase
+        [FeatureLoader(Name = "StaticFileServer")]
+        public class StaticFileServerFeatureLoader : FeatureLoaderBase
         {
             public override void ContributeConfigSections(IComponentContainerBuilder newComponents)
             {
@@ -213,7 +295,7 @@ namespace NWheels.Platform.Messaging.Tests.System
             {
                 newComponents.RegisterComponentType<NonStaticTestRequestHandler>().InstancePerDependency();
 
-                var httpConfig = existingComponents.Resolve<IHttpEndpointConfiguration>();
+                var httpConfig = existingComponents.Resolve<IHttpEndpointConfig>();
 
                 newComponents.ContributeHttpEndpoint(
                     "Test",
@@ -227,7 +309,19 @@ namespace NWheels.Platform.Messaging.Tests.System
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class TestHttpEndpointConfiguration : IHttpEndpointConfiguration
+        private class TestMessagingPlatformConfiguration : IMessagingPlatformConfiguration
+        {
+            public TestMessagingPlatformConfiguration()
+            {
+                this.Endpoints = new Dictionary<string, IEndpointConfig>();
+            }
+
+            public IDictionary<string, IEndpointConfig> Endpoints { get; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class TestHttpEndpointConfiguration : IHttpEndpointConfig
         {
             public int Port { get; set; }
 
@@ -269,3 +363,5 @@ namespace NWheels.Platform.Messaging.Tests.System
         }
     }
 }
+
+#endif
