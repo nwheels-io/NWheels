@@ -17,8 +17,8 @@ export class HistoryComponent implements OnInit {
   constructor( private route: ActivatedRoute, private appVeyorService: AppVeyorService) { }
 
   ngOnInit(): void {
-    this.sub = this.route.parent.params.subscribe(params => 
-      this.appVeyorService.getBuildsByProjectName(params['projectName']).then(project => this.project = project));
+    this.sub = this.route.parent.params.subscribe(params =>
+      this.appVeyorService.getBuildsByProjectName(params['projectName']).subscribe(project => this.project = project));
   }
 
   ngOnDestroy() {

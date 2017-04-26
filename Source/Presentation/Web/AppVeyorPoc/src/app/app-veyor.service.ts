@@ -1,7 +1,14 @@
 ﻿import { Injectable } from '@angular/core';
-import { Headers, Http } from '@angular/http';
+import { Headers, Http, Request, Response, RequestMethod } from '@angular/http';
 
-import 'rxjs/add/operator/toPromise';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/map';
+import "rxjs/add/operator/catch";
+import "rxjs/add/operator/publishReplay";
+import "rxjs/add/operator/filter";
+import "rxjs/add/operator/first";
+import 'rxjs/add/operator/mergeMap';
+import "rxjs/add/observable/throw";
 
 import { Project } from './projects-area/project';
 import { Configuration } from '../../configuration';
@@ -14,46 +21,47 @@ export class AppVeyorService {
     'Content-type': 'application/xml'
   });
   private appVeyorUrl = 'https://ci.appveyor.com/api';  // URL to web api
-  private projects: Project[];
+  private projects: Observable<Project[]>;
 
   constructor(private http: Http) { }
 
-  getProjects(): Promise<Project[]> {
-    if (this.projects) {
-      return new Promise((resolve, reject) => resolve(this.projects));
+  getProjects(): Observable<Project[]> {
+    if (!this.projects) {
+      this.projects = this.sendRequest<Project[]>(RequestMethod.Get, `${this.appVeyorUrl}/projects`)
+        .publishReplay(1)
+        .refCount();
     }
-    else {
-      return this.http.get(`${this.appVeyorUrl}/projects`, { headers: this.headers })
-        .toPromise()
-        .then(response => {
-          this.projects = response.json();
-          return this.projects;
-        })
-        .catch(this.handleError);
-    }
+    return this.projects;
   }
 
-  getProjectByName(projectName: string): Promise<Project> {
-    return this.getProjects().then(projects => projects.find(project => project.name == projectName));
+  clearCache() {
+    this.projects = null;
   }
-
-  getBuildsByProjectName(projectName: string): Promise<Project> {
-    //GET /api/projects/{accountName}/{projectSlug}/history?recordsNumber={records-per-page}[&startBuildId={buildId}&branch={branch}]
-    return this.getProjectByName(projectName).then(project =>
-
-      this.http.get(
-        `${this.appVeyorUrl}/projects/${project.accountName}/${project.slug}/history?recordsNumber=10`,
-        { headers: this.headers })
-        .toPromise()
-        .then(response => {
-          return response.json() as Project;
-        })
-        .catch(this.handleError)
+  
+  getProjectByName(projectName: string): Observable<Project> {
+    return this.getProjects()
+      .mergeMap(projects => {
+        return projects.filter(project => project.name === projectName);
+      }).first();
+  }
+  
+  getBuildsByProjectName(projectName: string): Observable<Project> {
+    return this.getProjectByName(projectName).flatMap(project =>
+      this.sendRequest<Project>(
+        RequestMethod.Get,
+        `${this.appVeyorUrl}/projects/${project.accountName}/${project.slug}/history?recordsNumber=10`)
     );
   }
-
-  private handleError(error: any): Promise<any> {
-    console.error('An error occurred', error); // for demo purposes only
-    return Promise.reject(error.message || error);
-  }
+  
+  private sendRequest<T>(verb: RequestMethod, url: string, body?: T): Observable<T> {
+    return this.http.request(
+      new Request({
+        headers: this.headers,
+        method: verb,
+        url: url,
+        body: body
+      }))
+      .map(response => response.json())
+      .catch((error: Response) => Observable.throw(`Network Error: ${error.statusText} (${error.status})`));;
+  } 
 }

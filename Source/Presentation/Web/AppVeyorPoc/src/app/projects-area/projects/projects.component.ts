@@ -10,13 +10,13 @@ import { AppVeyorService } from '../../app-veyor.service';
 
 export class ProjectsComponent implements OnInit {
 
-  projects: Project[];
+  projects: Project[];// = new Array<Project>();
 
   constructor(protected appVeyorService: AppVeyorService) { }
 
   ngOnInit(): void {
     this.appVeyorService
       .getProjects()
-      .then(projects => this.projects = projects);
+      .subscribe(projects => this.projects = projects);
   }
 }
