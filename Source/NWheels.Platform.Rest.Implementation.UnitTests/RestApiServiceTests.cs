@@ -185,6 +185,13 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public TService ResolveNamed<TService>(string name)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public IEnumerable<TService> ResolveAll<TService>()
             {
                 IEnumerable<TService> result = null;
