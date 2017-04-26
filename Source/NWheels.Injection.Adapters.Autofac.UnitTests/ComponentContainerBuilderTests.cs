@@ -318,6 +318,136 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Fact]
+        public void CanRegisterComponentNamedForService()
+        {
+            //-- arrange
+
+            IComponentContainerBuilder builderUnderTest = new ComponentContainerBuilder();
+
+            //-- act
+
+            builderUnderTest.RegisterComponentType<ComponentOne>().NamedForService<ITestComponent>("A");
+            builderUnderTest.RegisterComponentType<ComponentTwo>().NamedForService<ITestComponent>("B");
+
+
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+
+            var resolved1 = container.ResolveNamed<ITestComponent>("A");
+            var resolved2 = container.ResolveNamed<ITestComponent>("B");
+
+            //-- assert
+
+            resolved1.Should().BeOfType<ComponentOne>();
+            resolved2.Should().BeOfType<ComponentTwo>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanRegisterComponentNamedForTwoServices()
+        {
+            //-- arrange
+
+            IComponentContainerBuilder builderUnderTest = new ComponentContainerBuilder();
+
+            //-- act
+
+            builderUnderTest.RegisterComponentType<ComponentOne>().NamedForServices<ITestComponent, IAnyComponent>("A");
+            builderUnderTest.RegisterComponentType<ComponentTwo>().NamedForServices<ITestComponent, IAnyComponent>("B");
+
+
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+
+            var resolved1a = container.ResolveNamed<IAnyComponent>("A");
+            var resolved1b = container.ResolveNamed<ITestComponent>("A");
+
+            var resolved2a = container.ResolveNamed<IAnyComponent>("B");
+            var resolved2b = container.ResolveNamed<ITestComponent>("B");
+
+            //-- assert
+
+            resolved1a.Should().BeOfType<ComponentOne>();
+            resolved1b.Should().BeOfType<ComponentOne>();
+
+            resolved2a.Should().BeOfType<ComponentTwo>();
+            resolved2b.Should().BeOfType<ComponentTwo>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanRegisterComponentNamedForThreeServices()
+        {
+            //-- arrange
+
+            IComponentContainerBuilder builderUnderTest = new ComponentContainerBuilder();
+
+            var instanceA = new ComponentOne();
+            var instanceB = new ComponentOne();
+
+            //-- act
+
+            builderUnderTest.RegisterComponentInstance(instanceA).NamedForServices<IServiceOne, ITestComponent, IAnyComponent>("A");
+            builderUnderTest.RegisterComponentInstance(instanceB).NamedForServices<IServiceOne, ITestComponent, IAnyComponent>("B");
+
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+
+            var resolvedA1 = container.ResolveNamed<IServiceOne>("A");
+            var resolvedA2 = container.ResolveNamed<IAnyComponent>("A");
+            var resolvedA3 = container.ResolveNamed<ITestComponent>("A");
+
+            var resolvedB1 = container.ResolveNamed<IServiceOne>("B");
+            var resolvedB2 = container.ResolveNamed<IAnyComponent>("B");
+            var resolvedB3 = container.ResolveNamed<ITestComponent>("B");
+
+            //-- assert
+
+            resolvedA1.Should().BeSameAs(instanceA);
+            resolvedA2.Should().BeSameAs(instanceA);
+            resolvedA3.Should().BeSameAs(instanceA);
+
+            resolvedB1.Should().BeSameAs(instanceB);
+            resolvedB2.Should().BeSameAs(instanceB);
+            resolvedB3.Should().BeSameAs(instanceB);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanRegisterComponentNamedForMultipleServicesNonGeneric()
+        {
+            //-- arrange
+
+            IComponentContainerBuilder builderUnderTest = new ComponentContainerBuilder();
+
+            var instanceA = new ComponentOne();
+            var instanceB = new ComponentOne();
+
+            //-- act
+
+            builderUnderTest.RegisterComponentInstance(instanceA).NamedForServices("A", typeof(IServiceOne), typeof(ITestComponent));
+            builderUnderTest.RegisterComponentInstance(instanceB).NamedForServices("B", typeof(IServiceOne), typeof(ITestComponent));
+
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+
+            var resolvedA1 = container.ResolveNamed<IServiceOne>("A");
+            var resolvedA2 = container.ResolveNamed<ITestComponent>("A");
+
+            var resolvedB1 = container.ResolveNamed<IServiceOne>("B");
+            var resolvedB2 = container.ResolveNamed<ITestComponent>("B");
+
+            //-- assert
+
+            resolvedA1.Should().BeSameAs(instanceA);
+            resolvedA2.Should().BeSameAs(instanceA);
+
+            resolvedB1.Should().BeSameAs(instanceB);
+            resolvedB2.Should().BeSameAs(instanceB);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public interface IAnyComponent
         {
         }
