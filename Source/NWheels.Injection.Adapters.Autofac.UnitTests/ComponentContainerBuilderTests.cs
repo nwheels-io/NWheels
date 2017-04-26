@@ -294,6 +294,30 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Fact]
+        public void CanRegisterFallbackComponent()
+        {
+            //-- arrange
+
+            IComponentContainerBuilder builderUnderTest = new ComponentContainerBuilder();
+
+            //-- act
+
+            builderUnderTest.RegisterComponentType<ComponentOne>().ForService<ITestComponent>();
+            builderUnderTest.RegisterComponentType<ComponentTwo>().ForService<ITestComponent>().AsFallback();
+
+
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var resolved = container.Resolve<ITestComponent>();
+
+            //-- assert
+
+            resolved.Should().NotBeNull();
+            resolved.Should().BeOfType<ComponentOne>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public interface IAnyComponent
         {
         }

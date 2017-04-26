@@ -84,7 +84,10 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class RegistrationBuilderWrapper<TLimit, TActivatorData, TRegistrationStyle> : IComponentRegistrationBuilder, IComponentInstantiationBuilder
+        private class RegistrationBuilderWrapper<TLimit, TActivatorData, TRegistrationStyle> : 
+            IComponentRegistrationBuilder, 
+            IComponentInstantiationBuilder,
+            IComponentConditionBuilder
         {
             private readonly IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> _inner;
 
@@ -126,7 +129,7 @@ namespace NWheels.Injection.Adapters.Autofac
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IComponentRegistrationBuilder ForService<TService>()
+            public IComponentConditionBuilder ForService<TService>()
             {
                 _inner.As<TService>();
                 return this;
@@ -134,7 +137,7 @@ namespace NWheels.Injection.Adapters.Autofac
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IComponentRegistrationBuilder ForServices<TService1, TService2>()
+            public IComponentConditionBuilder ForServices<TService1, TService2>()
             {
                 _inner.As<TService1, TService2>();
                 return this;
@@ -142,7 +145,7 @@ namespace NWheels.Injection.Adapters.Autofac
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IComponentRegistrationBuilder ForServices<TService1, TService2, TService3>()
+            public IComponentConditionBuilder ForServices<TService1, TService2, TService3>()
             {
                 _inner.As<TService1, TService2, TService3>();
                 return this;
@@ -150,10 +153,17 @@ namespace NWheels.Injection.Adapters.Autofac
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IComponentRegistrationBuilder ForServices(params Type[] serviceTypes)
+            public IComponentConditionBuilder ForServices(params Type[] serviceTypes)
             {
                 _inner.As(serviceTypes);
                 return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void AsFallback()
+            {
+                ((IRegistrationBuilder<TLimit, TActivatorData, SingleRegistrationStyle>)_inner).PreserveExistingDefaults();
             }
         }
     }
