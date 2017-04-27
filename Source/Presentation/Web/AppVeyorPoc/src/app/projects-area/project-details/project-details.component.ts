@@ -18,7 +18,7 @@ export class ProjectDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.sub = this.route.params.subscribe(params =>
-      this.appVeyorService.getProjectByName(params['projectName']).then(project => this.project = project));
+      this.appVeyorService.getProjectByName(params['projectName']).subscribe(project => this.project = project));
   }
 
   ngOnDestroy() {
