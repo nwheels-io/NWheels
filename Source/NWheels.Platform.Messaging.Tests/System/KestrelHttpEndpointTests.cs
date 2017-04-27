@@ -1,5 +1,3 @@
-#if false
-
 using NWheels.Injection;
 using NWheels.Microservices;
 using NWheels.Testability.Microservices;
@@ -16,6 +14,7 @@ using System.Net.Http;
 using System.Net;
 using FluentAssertions;
 using System.Threading;
+using System.Linq;
 
 namespace NWheels.Platform.Messaging.Tests.System
 {
@@ -43,7 +42,7 @@ namespace NWheels.Platform.Messaging.Tests.System
         {
             //-- act
 
-            var response = MakeHttpRequest(HttpMethod.Get, "/static/files/one/test.js");
+            var response = MakeHttpRequest(5500, HttpMethod.Get, "/static/files/one/test.js");
 
             //-- assert
 
@@ -55,14 +54,10 @@ namespace NWheels.Platform.Messaging.Tests.System
         [Fact]
         public void CanServeStaticFilesFromMultipleFolders()
         {
-            //-- arrange
-
-            _fixture.Microservice.Start();
-
             //-- act
 
-            var response1 = MakeHttpRequest(HttpMethod.Get, "/static/files/one/test.js");
-            var response2 = MakeHttpRequest(HttpMethod.Get, "/static/files/two/index.html");
+            var response1 = MakeHttpRequest(5500, HttpMethod.Get, "/static/files/one/test.js");
+            var response2 = MakeHttpRequest(5500, HttpMethod.Get, "/static/files/two/index.html");
 
             //-- assert
 
@@ -75,13 +70,9 @@ namespace NWheels.Platform.Messaging.Tests.System
         [Fact]
         public void CanServeStaticFileAsFolderDefault()
         {
-            //-- arrange
-
-            _fixture.Microservice.Start();
-
             //-- act
 
-            var response = MakeHttpRequest(HttpMethod.Get, "/static/files/two/"); // should serve /static/files/two/index.html
+            var response = MakeHttpRequest(5500, HttpMethod.Get, "/static/files/two/"); // should serve /static/files/two/index.html
 
             //-- assert
 
@@ -97,13 +88,9 @@ namespace NWheels.Platform.Messaging.Tests.System
         [Fact]
         public void CanRedirectToStaticFileAsFolderDefault()
         {
-            //-- arrange
-
-            _fixture.Microservice.Start();
-
             //-- act
 
-            var response = MakeHttpRequest(HttpMethod.Get, "/static/files/two"); // should redirect to /static/files/two/
+            var response = MakeHttpRequest(5500, HttpMethod.Get, "/static/files/two"); // should redirect to /static/files/two/
 
             //-- assert
 
@@ -119,21 +106,69 @@ namespace NWheels.Platform.Messaging.Tests.System
         [Fact]
         public void CanServeStaticDefaultFile()
         {
-            //-- arrange
-
-            _fixture.Microservice.Start();
-
             //-- act
 
-            var response1 = MakeHttpRequest(HttpMethod.Get, "/static/files/one/test.js");
-            var response2 = MakeHttpRequest(HttpMethod.Get, "/static/files/two/");
-            var response3 = MakeHttpRequest(HttpMethod.Get, "/static/files/two/non-existent-resource.xyz");
+            var response1 = MakeHttpRequest(5500, HttpMethod.Get, "/static/files/one/test.js");
+            var response2 = MakeHttpRequest(5500, HttpMethod.Get, "/static/files/two/");
+            var response3 = MakeHttpRequest(5500, HttpMethod.Get, "/static/files/two/non-existent-resource.xyz");
 
             //-- assert
 
             AssertHttpResponse(response1, HttpStatusCode.OK, "application/javascript", "System/wwwroot/Static1/test.js");
             AssertHttpResponse(response2, HttpStatusCode.OK, "text/html", "System/wwwroot/Static2/index.html");
             AssertHttpResponse(response3, HttpStatusCode.NotFound, null, null);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanHandleNonStaticRequest()
+        {
+            //-- act
+
+            var response = MakeHttpRequest(5501, HttpMethod.Get, "/my/dynamic/path");
+
+            //-- assert
+
+            AssertHttpResponse(
+                response, 
+                expectedStatusCode: HttpStatusCode.OK, 
+                expectedContentType: "application/json", 
+                expectedContentFilePath: null, 
+                expectedContentAsString: "{my:1,dynamic:2,path:3}");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanServeStaticFileInMixedEndpoint()
+        {
+            //-- act
+
+            var response = MakeHttpRequest(5502, HttpMethod.Get, "/static/files/one/test.js");
+
+            //-- assert
+
+            AssertHttpResponse(response, HttpStatusCode.OK, "application/javascript", "System/wwwroot/Static1/test.js");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanHandleNonStaticRequestInMixedEndpoint()
+        {
+            //-- act
+
+            var response = MakeHttpRequest(5502, HttpMethod.Get, "/my/dynamic/path");
+
+            //-- assert
+
+            AssertHttpResponse(
+                response,
+                expectedStatusCode: HttpStatusCode.OK,
+                expectedContentType: "application/json",
+                expectedContentFilePath: null,
+                expectedContentAsString: "{my:1,dynamic:2,path:3}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -159,7 +194,8 @@ namespace NWheels.Platform.Messaging.Tests.System
             HttpResponseMessage response,
             HttpStatusCode expectedStatusCode,
             string expectedContentType,
-            string expectedContentFilePath)
+            string expectedContentFilePath,
+            string expectedContentAsString = null)
         {
             response.StatusCode.Should().Be(expectedStatusCode, "HTTP status code");
 
@@ -171,6 +207,12 @@ namespace NWheels.Platform.Messaging.Tests.System
             if (expectedContentFilePath != null)
             {
                 AssertResponseContentsEqual(response, expectedContentFilePath);
+            }
+
+            if (expectedContentAsString != null)
+            {
+                var actualContentAsString = response.Content.ReadAsStringAsync().Result;
+                actualContentAsString.Should().Be(expectedContentAsString, "content as string");
             }
         }
 
@@ -223,7 +265,18 @@ namespace NWheels.Platform.Messaging.Tests.System
         {
             public async Task HandleRequest(HttpContext context)
             {
+                await Task.Yield(); // simulate async execution
 
+                var parts = context.Request.Path.Value.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                var properties = string.Join(",", parts.Select((p, index) => $"{p}:{index + 1}"));
+
+                context.Response.ContentType = "application/json";
+
+                using (var writer = new StreamWriter(context.Response.Body))
+                {
+                    writer.Write("{" + properties + "}");
+                    writer.Flush();
+                }
             }
         }
 
@@ -242,7 +295,7 @@ namespace NWheels.Platform.Messaging.Tests.System
                     .UseMicroserviceFromSource(relativeProjectDirectoryPath: "..")
                     .UseAutofacInjectionAdapter()
                     .UseFrameworkFeature<KestrelFeatureLoader>()
-                    .UseApplicationFeature<TestKestrelEndpointFeatureLoader>()
+                    .UseApplicationFeature<TestFeatureLoader>()
                     .Build();
 
                 _microservice.Start();
@@ -263,13 +316,24 @@ namespace NWheels.Platform.Messaging.Tests.System
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [FeatureLoader(Name = "StaticFileServer")]
-        public class StaticFileServerFeatureLoader : FeatureLoaderBase
+        [FeatureLoader(Name = "Test")]
+        public class TestFeatureLoader : FeatureLoaderBase
         {
             public override void ContributeConfigSections(IComponentContainerBuilder newComponents)
             {
-                var httpConfig = new TestHttpEndpointConfiguration() {
-                    Name = "Test",
+                newComponents.RegisterComponentInstance(new TestMessagingPlatformConfiguration()).ForService<IMessagingPlatformConfiguration>();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void ContributeConfiguration(IComponentContainer existingComponents)
+            {
+                base.ContributeConfiguration(existingComponents);
+
+                var configuration = existingComponents.Resolve<IMessagingPlatformConfiguration>();
+
+                configuration.Endpoints["Static"] = new TestHttpEndpointConfiguration() {
+                    Name = "Static",
                     Port = 5500,
                     StaticFolders = new IHttpStaticFolderConfig[] {
                         new TestHttpStaticFolderConfig {
@@ -285,8 +349,20 @@ namespace NWheels.Platform.Messaging.Tests.System
                         }
                     }
                 };
-
-                newComponents.RegisterComponentInstance(httpConfig).ForService<IHttpEndpointConfiguration>();
+                configuration.Endpoints["Dynamic"] = new TestHttpEndpointConfiguration() {
+                    Name = "Dynamic",
+                    Port = 5501
+                };
+                configuration.Endpoints["Mixed"] = new TestHttpEndpointConfiguration() {
+                    Name = "Mixed",
+                    Port = 5502,
+                    StaticFolders = new IHttpStaticFolderConfig[] {
+                        new TestHttpStaticFolderConfig {
+                            LocalRootPath = Path.Combine(_s_binaryFolder, "System/wwwroot/Static1".ToPathString()),
+                            RequestBasePath = "/static/files/one"
+                        }
+                    }
+                };
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -295,15 +371,23 @@ namespace NWheels.Platform.Messaging.Tests.System
             {
                 newComponents.RegisterComponentType<NonStaticTestRequestHandler>().InstancePerDependency();
 
-                var httpConfig = existingComponents.Resolve<IHttpEndpointConfig>();
+                newComponents.ContributeHttpEndpoint(
+                    "Static",
+                    handler: null);
 
                 newComponents.ContributeHttpEndpoint(
-                    "Test",
-                    httpConfig,
-                    handler: null /*context => {
+                    "Dynamic",
+                    handler: context => {
                         var handler = existingComponents.Resolve<NonStaticTestRequestHandler>();
                         return handler.HandleRequest(context);
-                    }*/);
+                    });
+
+                newComponents.ContributeHttpEndpoint(
+                    "Mixed",
+                    handler: context => {
+                        var handler = existingComponents.Resolve<NonStaticTestRequestHandler>();
+                        return handler.HandleRequest(context);
+                    });
             }
         }
 
@@ -363,5 +447,3 @@ namespace NWheels.Platform.Messaging.Tests.System
         }
     }
 }
-
-#endif
