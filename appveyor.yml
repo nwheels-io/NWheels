@@ -47,8 +47,6 @@ test_script:
 
     dotnet test NWheels.Platform.Rest.Implementation.UnitTests\NWheels.Platform.Rest.Implementation.UnitTests.csproj --logger "trx;LogFileName=test-results-4.xml"
 
-    dotnet test NWheels.Platform.Messaging.Tests\NWheels.Platform.Messaging.Tests.csproj --logger "trx;LogFileName=test-results-5.xml"
-
     dotnet test NWheels.Frameworks.Ddd.Implementation.UnitTests\NWheels.Frameworks.Ddd.Implementation.UnitTests.csproj --logger "trx;LogFileName=test-results-6.xml"
 
     dotnet test NWheels.SystemTests\NWheels.SystemTests.csproj --logger "trx;LogFileName=test-results-7.xml"
