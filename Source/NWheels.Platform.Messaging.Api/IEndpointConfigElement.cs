@@ -1,19 +1,20 @@
-﻿using System;
+﻿using NWheels.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace NWheels.Platform.Messaging
 {
-    //TODO: [ConfigurationSection]
-    public interface IEndpointConfiguration
+    [ConfigElement]
+    public interface IEndpointConfig
     {
+        [ConfigElementKey]
         string Name { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    //TODO: [ConfigurationSection]
-    public interface IHttpEndpointConfiguration : IEndpointConfiguration
+    public interface IHttpEndpointConfig : IEndpointConfig
     {
         int Port { get; }
         IHttpsConfig Https { get; set; }
@@ -22,7 +23,7 @@ namespace NWheels.Platform.Messaging
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    //TODO: [ConfigurationElement]
+    [ConfigElement]
     public interface IHttpsConfig
     {
         int Port { get; }
@@ -33,7 +34,7 @@ namespace NWheels.Platform.Messaging
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    //TODO: [ConfigurationElement]
+    [ConfigElement]
     public interface IHttpStaticFolderConfig
     {
         string RequestBasePath { get; }

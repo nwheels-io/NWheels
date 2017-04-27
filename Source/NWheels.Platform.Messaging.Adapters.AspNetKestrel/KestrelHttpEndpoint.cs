@@ -21,17 +21,17 @@ namespace NWheels.Platform.Messaging.Adapters.AspNetKestrel
     public class KestrelHttpEndpoint : LifecycleListenerComponentBase, IEndpoint<HttpContext>
     {
         private readonly string _name;
-        private readonly IHttpEndpointConfiguration _configuration;
+        private readonly IHttpEndpointConfig _configuration;
         private Func<HttpContext, Task> _handler;
         private ImmutableArray<string> _listenUrls;
         private volatile IWebHost _host;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public KestrelHttpEndpoint(HttpEndpointInjectorPort port)
+        public KestrelHttpEndpoint(IMessagingPlatformConfiguration platformConfig, HttpEndpointInjectorPort port)
         {
             _name = port.Name;
-            _configuration = port.Configuration;
+            _configuration = (IHttpEndpointConfig)platformConfig.Endpoints[port.Name];
             _handler = port.Handler;
         }
 
