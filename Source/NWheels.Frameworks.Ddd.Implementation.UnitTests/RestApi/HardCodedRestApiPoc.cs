@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Net.Http;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace NWheels.Frameworks.Ddd.Implementation.UnitTests.RestApi
 {
@@ -41,33 +43,34 @@ namespace NWheels.Frameworks.Ddd.Implementation.UnitTests.RestApi
 
         private class ResourceHandler_Of_IcecreamConcentrationJournalTx_AddSensorReading : IRestResourceHandler
         {
-            public HttpResponseMessage Post(HttpRequestMessage request)
+
+            public string UriPath => "ddd/tx/HardCodedRestApiPoc.IcecreamConcentrationJournalTx/AddSensorReading";
+            public IReadOnlyList<HttpMethod> SupportedHttpMethods => new[] { HttpMethod.Post };
+
+            public Task HttpDelete(HttpContext context)
             {
                 throw new NotImplementedException();
             }
 
-            public HttpResponseMessage Delete(HttpRequestMessage request)
+            public Task HttpGet(HttpContext context)
             {
-                throw new NotSupportedException();
+                throw new NotImplementedException();
             }
 
-            public HttpResponseMessage Get(HttpRequestMessage request)
+            public Task HttpPatch(HttpContext context)
             {
-                throw new NotSupportedException();
+                throw new NotImplementedException();
             }
 
-            public HttpResponseMessage Patch(HttpRequestMessage request)
+            public Task HttpPost(HttpContext context)
             {
-                throw new NotSupportedException();
+                throw new NotImplementedException();
             }
 
-            public HttpResponseMessage Put(HttpRequestMessage request)
+            public Task HttpPut(HttpContext context)
             {
-                throw new NotSupportedException();
+                throw new NotImplementedException();
             }
-
-            public string UriPath => "ddd/tx/HardCodedRestApiPoc.IcecreamConcentrationJournalTx/AddSensorReading";
-            public IReadOnlyList<HttpMethod> SupportedHttpMethods => new[] { HttpMethod.Post };
         }
 
     }

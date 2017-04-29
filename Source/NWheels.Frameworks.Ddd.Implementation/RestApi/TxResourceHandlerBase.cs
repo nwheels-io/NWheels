@@ -1,4 +1,6 @@
-﻿using NWheels.Platform.Rest;
+﻿# if false
+
+using NWheels.Platform.Rest;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -31,3 +33,5 @@ namespace NWheels.Frameworks.Ddd.RestApi
         protected override IHttpResponseWriter ResponseWriter => DefaultHttpResponseWriter.Instance;
     }
 }
+
+#endif

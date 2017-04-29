@@ -1,9 +1,11 @@
-﻿using NWheels.Injection;
+﻿using Microsoft.AspNetCore.Http;
+using NWheels.Injection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace NWheels.Platform.Rest
 {
@@ -21,52 +23,81 @@ namespace NWheels.Platform.Rest
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public HttpResponseMessage HandleApiRequest(HttpRequestMessage request)
+        public Task HandleHttpRequest(HttpContext context)
         {
             IRestResourceHandler handler;
-            HttpResponseMessage response = null;
 
             try
             { 
                 //TODO AbsolutePath will be replaced by Fragment or will be method's argument
-                if (_handlerByUriPath.TryGetValue(request.RequestUri.AbsolutePath, out handler))
+                if (_handlerByUriPath.TryGetValue(context.Request.Path, out handler))
                 {
-                    if (request.Method == HttpMethod.Get)
+                    var method = context.Request.Method;
+
+                    if (method == HttpMethod.Get.Method)
                     {
-                        response = handler.Get(request);
+                        return handler.HttpGet(context);
                     }
-                    else if (request.Method == HttpMethod.Post)
+                    else if (method == HttpMethod.Post.Method)
                     {
-                        response = handler.Post(request);
+                        return handler.HttpPost(context);
                     }
-                    else if (request.Method == HttpMethod.Put)
+                    else if (method == HttpMethod.Put.Method)
                     {
-                        response = handler.Put(request);
+                        return handler.HttpPut(context);
                     }
-                    else if (request.Method == _s_patchMethod)
+                    else if (method == _s_patchMethod.Method)
                     {
-                        response = handler.Patch(request);
+                        return handler.HttpPatch(context);
                     }
-                    else if (request.Method == HttpMethod.Delete)
+                    else if (method == HttpMethod.Delete.Method)
                     {
-                        response = handler.Delete(request);
+                        return handler.HttpDelete(context);
                     }
                     else
                     {
-                        response = new HttpResponseMessage(HttpStatusCode.NotImplemented);
+                        context.Response.StatusCode = (int)HttpStatusCode.NotImplemented;
                     }
                 }
                 else
                 {
-                    response = new HttpResponseMessage(HttpStatusCode.NotFound);
+                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                 }
             }
             catch (Exception)
             {
-                response = new HttpResponseMessage(HttpStatusCode.BadRequest);
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             }
 
-            return response;
+            return Task.CompletedTask;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public THandler GetHandler<THandler>(string uriPath)
+            where THandler : class, IRestResourceHandler
+        {
+            if (TryGetHandler<THandler>(uriPath, out THandler handler))
+            {
+                return handler;
+            }
+
+            throw new ArgumentException($"Handler for specified URI path does not exist: {uriPath}");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool TryGetHandler<THandler>(string uriPath, out THandler handler)
+            where THandler : class, IRestResourceHandler
+        {
+            if (_handlerByUriPath.TryGetValue(uriPath, out IRestResourceHandler nonTypedHandler))
+            {
+                handler = (THandler)nonTypedHandler;
+                return true;
+            }
+
+            handler = null;
+            return false;
         }
     }
 }

@@ -1,9 +1,11 @@
 ﻿using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using NWheels.Injection;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace NWheels.Platform.Rest.Implementation.UnitTests
@@ -16,16 +18,17 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
             //-- arrange
 
             var restApiService = new RestApiService(new TestComponentContainer());            
-            var request = new HttpRequestMessage(HttpMethod.Get, new Uri("http://test.com/first"));
+            var httpContext = CreateTestRequest(HttpMethod.Get, new Uri("http://test.com/first"));
 
             //-- act
 
-            var response = restApiService.HandleApiRequest(request);
+            restApiService.HandleHttpRequest(httpContext).Wait();
+            var response = httpContext.Response;
 
             //-- assert
 
             response.Should().NotBeNull();
-            response.StatusCode.Should().Be(HttpStatusCode.PartialContent);
+            response.StatusCode.Should().Be((int)HttpStatusCode.PartialContent);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -36,16 +39,17 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
             //-- arrange
 
             var restApiService = new RestApiService(new TestComponentContainer());
-            var request = new HttpRequestMessage(HttpMethod.Post, new Uri("http://test.com/second"));
+            var httpContext = CreateTestRequest(HttpMethod.Post, new Uri("http://test.com/second"));
 
             //-- act
 
-            var response = restApiService.HandleApiRequest(request);
+            restApiService.HandleHttpRequest(httpContext).Wait();
+            var response = httpContext.Response;
 
             //-- assert
 
             response.Should().NotBeNull();
-            response.StatusCode.Should().Be(HttpStatusCode.Created);
+            response.StatusCode.Should().Be((int)HttpStatusCode.Created);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -56,16 +60,17 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
             //-- arrange
 
             var restApiService = new RestApiService(new TestComponentContainer());
-            var request = new HttpRequestMessage(HttpMethod.Put, new Uri("http://test.com/third"));
+            var httpContext = CreateTestRequest(HttpMethod.Put, new Uri("http://test.com/third"));
 
             //-- act
 
-            var response = restApiService.HandleApiRequest(request);
+            restApiService.HandleHttpRequest(httpContext).Wait();
+            var response = httpContext.Response;
 
             //-- assert
 
             response.Should().NotBeNull();
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -76,16 +81,17 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
             //-- arrange
 
             var restApiService = new RestApiService(new TestComponentContainer());
-            var request = new HttpRequestMessage(new HttpMethod("PATCH"), new Uri("http://test.com/first"));
+            var httpContext = CreateTestRequest(new HttpMethod("PATCH"), new Uri("http://test.com/first"));
 
             //-- act
 
-            var response = restApiService.HandleApiRequest(request);
+            restApiService.HandleHttpRequest(httpContext).Wait();
+            var response = httpContext.Response;
 
             //-- assert
 
             response.Should().NotBeNull();
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -96,16 +102,17 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
             //-- arrange
 
             var restApiService = new RestApiService(new TestComponentContainer());
-            var request = new HttpRequestMessage(HttpMethod.Delete, new Uri("http://test.com/second"));
+            var httpContext = CreateTestRequest(HttpMethod.Delete, new Uri("http://test.com/second"));
 
             //-- act
 
-            var response = restApiService.HandleApiRequest(request);
+            restApiService.HandleHttpRequest(httpContext).Wait();
+            var response = httpContext.Response;
 
             //-- assert
 
             response.Should().NotBeNull();
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -116,16 +123,17 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
             //-- arrange
 
             var restApiService = new RestApiService(new TestComponentContainer());
-            var request = new HttpRequestMessage(HttpMethod.Post, new Uri("http://test.com/third"));
+            var httpContext = CreateTestRequest(HttpMethod.Post, new Uri("http://test.com/third"));
 
             //-- act
 
-            var response = restApiService.HandleApiRequest(request);
+            restApiService.HandleHttpRequest(httpContext).Wait();
+            var response = httpContext.Response;
 
             //-- assert
 
             response.Should().NotBeNull();
-            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            response.StatusCode.Should().Be((int)HttpStatusCode.BadRequest);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -136,16 +144,17 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
             //-- arrange
 
             var restApiService = new RestApiService(new TestComponentContainer());
-            var request = new HttpRequestMessage(new HttpMethod("TEST"), new Uri("http://test.com/third"));
+            var httpContext = CreateTestRequest(new HttpMethod("TEST"), new Uri("http://test.com/third"));
 
             //-- act
 
-            var response = restApiService.HandleApiRequest(request);
+            restApiService.HandleHttpRequest(httpContext).Wait();
+            var response = httpContext.Response;
 
             //-- assert
 
             response.Should().NotBeNull();
-            response.StatusCode.Should().Be(HttpStatusCode.NotImplemented);
+            response.StatusCode.Should().Be((int)HttpStatusCode.NotImplemented);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -156,16 +165,27 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
             //-- arrange
 
             var restApiService = new RestApiService(new TestComponentContainer());
-            var request = new HttpRequestMessage(HttpMethod.Get, new Uri("http://test.com/test"));
+            var httpContext = CreateTestRequest(HttpMethod.Get, new Uri("http://test.com/test"));
 
             //-- act
 
-            var response = restApiService.HandleApiRequest(request);
+            restApiService.HandleHttpRequest(httpContext).Wait();
+            var response = httpContext.Response;
 
             //-- assert
 
             response.Should().NotBeNull();
-            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+            response.StatusCode.Should().Be((int)HttpStatusCode.NotFound);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private HttpContext CreateTestRequest(HttpMethod method, Uri uri)
+        {
+            var context = new DefaultHttpContext();
+            context.Request.Method = method.Method;
+            context.Request.Path = uri.AbsolutePath;
+            return context;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -219,119 +239,71 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private abstract class TestRestResourceHandlerBase : IRestResourceHandler
+        private class FirstTestRestResourceHandler : RestResourceHandlerBase
         {
-            public abstract string UriPath { get; }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public virtual HttpResponseMessage Delete(HttpRequestMessage request)
+            public FirstTestRestResourceHandler() 
+                : base("/first")
             {
-                return new HttpResponseMessage(HttpStatusCode.BadRequest);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public virtual HttpResponseMessage Get(HttpRequestMessage request)
+            public override Task HttpGet(HttpContext context)
             {
-                return new HttpResponseMessage(HttpStatusCode.BadRequest);
+                context.Response.StatusCode = (int)HttpStatusCode.PartialContent;
+                return Task.CompletedTask;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public virtual HttpResponseMessage Patch(HttpRequestMessage request)
+            public override Task HttpPatch(HttpContext context)
             {
-                return new HttpResponseMessage(HttpStatusCode.BadRequest);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public virtual HttpResponseMessage Post(HttpRequestMessage request)
-            {
-                return new HttpResponseMessage(HttpStatusCode.BadRequest);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public virtual HttpResponseMessage Put(HttpRequestMessage request)
-            {
-                return new HttpResponseMessage(HttpStatusCode.BadRequest);
+                context.Response.StatusCode = (int)HttpStatusCode.OK;
+                return Task.CompletedTask;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class FirstTestRestResourceHandler : TestRestResourceHandlerBase
+        private class SecondTestRestResourceHandler : RestResourceHandlerBase
         {
-            public override string UriPath => "/first";
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override HttpResponseMessage Get(HttpRequestMessage request)
+            public SecondTestRestResourceHandler() 
+                : base("/second")
             {
-                return new HttpResponseMessage()
-                {
-                    RequestMessage = request,
-                    StatusCode = HttpStatusCode.PartialContent
-                };
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public override HttpResponseMessage Patch(HttpRequestMessage request)
+            public override Task HttpPost(HttpContext context)
             {
-                return new HttpResponseMessage()
-                {
-                    RequestMessage = request,
-                    StatusCode = HttpStatusCode.OK
-                };
+                context.Response.StatusCode = (int)HttpStatusCode.Created;
+                return Task.CompletedTask;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override Task HttpDelete(HttpContext context)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.OK;
+                return Task.CompletedTask;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class SecondTestRestResourceHandler : TestRestResourceHandlerBase
+        private class ThirdTestRestResourceHandler : RestResourceHandlerBase
         {
-            public override string UriPath => "/second";
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override HttpResponseMessage Post(HttpRequestMessage request)
+            public ThirdTestRestResourceHandler() 
+                : base("/third")
             {
-                return new HttpResponseMessage()
-                {
-                    RequestMessage = request,
-                    StatusCode = HttpStatusCode.Created
-                };
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public override HttpResponseMessage Delete(HttpRequestMessage request)
+            public override Task HttpPut(HttpContext context)
             {
-                return new HttpResponseMessage()
-                {
-                    RequestMessage = request,
-                    StatusCode = HttpStatusCode.OK
-                };
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class ThirdTestRestResourceHandler : TestRestResourceHandlerBase
-        {
-            public override string UriPath => "/third";
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override HttpResponseMessage Put(HttpRequestMessage request)
-            {
-                return new HttpResponseMessage()
-                {
-                    RequestMessage = request,
-                    StatusCode = HttpStatusCode.OK
-                };
+                context.Response.StatusCode = (int)HttpStatusCode.OK;
+                return Task.CompletedTask;
             }
         }
     }

@@ -5,13 +5,19 @@ using System.Text;
 using System.Net.Http;
 using NWheels.Platform.Rest;
 using NWheels.Samples.FirstHappyPath.Domain;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
+using NWheels.Execution;
+using System.IO;
+using Newtonsoft.Json;
+using System.Net;
 
 namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
 {
     /// <summary>
     /// This is a prototype of class that will be generated
     /// </summary>
-    public class TxResourceHandler_of_HelloWorldTx_Hello : TxResourceHandlerBase
+    public class TxResourceHandler_of_HelloWorldTx_Hello : RestResourceHandlerBase
     {
         private readonly HelloWorldTx _tx;
 
@@ -25,30 +31,82 @@ namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override HttpResponseMessage InternalHandlePostRequest(HttpRequestMessage request)
+        public override async Task HttpPost(HttpContext context)
         {
-            // here we should only handle the happy path
-            // RestResourceHandlerBase implements proper error handling, for the case something goes wrong
+            try
+            {
+                var invocation = new InvocationMessage_of_HelloWorldTx_Hello();
+                if (!TryReadRequest(context.Request, invocation))
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    return;
+                }
 
-            HelloRequestBody requestBody = RequestReader.DeserializeBodyJson<HelloRequestBody>(request);
-            var result = _tx.Hello(requestBody.Name).Result;
-            var responseBody = new HelloResponseBody();
-            responseBody.Result = result;
-            return ResponseWriter.CreateWithJsonBody<HelloResponseBody>(responseBody);
+                await ((IInvocationMessage)invocation).Invoke(_tx);
+
+                WriteResponse(invocation, context.Response);
+            }
+            catch //(Exception e)
+            {
+                //TODO: log exception
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private struct HelloRequestBody
+        private bool TryReadRequest(HttpRequest request, InvocationMessage_of_HelloWorldTx_Hello invocation)
         {
-            public string Name;
+            using (var reader = new StreamReader(request.Body))
+            {
+                using (var json = new JsonTextReader(reader))
+                {
+                    if (!json.Read() || json.TokenType != JsonToken.StartObject)
+                    {
+                        return false;
+                    }
+                    if (!json.Read() || json.TokenType != JsonToken.PropertyName)
+                    {
+                        return false;
+                    }
+                    if (json.ReadAsString() != "name")
+                    {
+                        return false;
+                    }
+                    if (json.TokenType != JsonToken.String)
+                    {
+                        return false;
+                    }
+
+                    invocation.Name = json.ReadAsString();
+
+                    if (json.TokenType != JsonToken.EndObject)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private struct HelloResponseBody
+        private void WriteResponse(InvocationMessage_of_HelloWorldTx_Hello invocation, HttpResponse response)
         {
-            public string Result;
+            using (var writer = new StreamWriter(response.Body))
+            {
+                using (var json = new JsonTextWriter(writer))
+                {
+                    json.WriteStartObject();
+                    json.WritePropertyName("result");
+                    json.WriteValue(invocation.Result);
+                    json.WriteEndObject();
+                    json.Flush();
+                }
+
+                writer.Flush();
+            }
         }
     }
 }
