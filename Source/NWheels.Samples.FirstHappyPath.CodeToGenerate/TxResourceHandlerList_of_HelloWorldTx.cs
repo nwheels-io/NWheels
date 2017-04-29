@@ -7,7 +7,9 @@ namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
     {
         public Type[] GetHandlerTypes()
         {
-            throw new NotImplementedException();
+            return new Type[] {
+                typeof(TxResourceHandler_of_HelloWorldTx_Hello)
+            };
         }
     }
 }

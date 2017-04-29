@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace NWheels.Platform.Rest
 {
@@ -10,131 +12,51 @@ namespace NWheels.Platform.Rest
     {
         protected RestResourceHandlerBase(string uriPath)
         {
-            this.UriPath = UriPath;
-        }
-        
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        HttpResponseMessage IRestResourceHandler.Get(HttpRequestMessage request)
-        {
-            try
-            {
-                return OnGet(request);
-            }
-            catch (Exception e)
-            {
-                //TODO: provide error handling logic
-                Console.Error.WriteLine(e.ToString());
-                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
-            }
+            this.UriPath = uriPath;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        HttpResponseMessage IRestResourceHandler.Post(HttpRequestMessage request)
+        public virtual Task HttpDelete(HttpContext context)
         {
-            try
-            {
-                return OnPost(request);
-            }
-            catch (Exception e)
-            {
-                //TODO: provide error handling logic
-                Console.Error.WriteLine(e.ToString());
-                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
-            }
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            return Task.CompletedTask;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        HttpResponseMessage IRestResourceHandler.Put(HttpRequestMessage request)
+        public virtual Task HttpGet(HttpContext context)
         {
-            try
-            {
-                return OnPut(request);
-            }
-            catch (Exception e)
-            {
-                //TODO: provide error handling logic
-                Console.Error.WriteLine(e.ToString());
-                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
-            }
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            return Task.CompletedTask;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        HttpResponseMessage IRestResourceHandler.Patch(HttpRequestMessage request)
+        public virtual Task HttpPatch(HttpContext context)
         {
-            try
-            {
-                return OnPatch(request);
-            }
-            catch (Exception e)
-            {
-                //TODO: provide error handling logic
-                Console.Error.WriteLine(e.ToString());
-                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
-            }
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            return Task.CompletedTask;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        HttpResponseMessage IRestResourceHandler.Delete(HttpRequestMessage request)
+        public virtual Task HttpPost(HttpContext context)
         {
-            try
-            {
-                return OnDelete(request);
-            }
-            catch (Exception e)
-            {
-                //TODO: provide error handling logic
-                Console.Error.WriteLine(e.ToString());
-                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
-            }
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            return Task.CompletedTask;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual Task HttpPut(HttpContext context)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            return Task.CompletedTask;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public string UriPath { get; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        internal protected virtual HttpResponseMessage OnGet(HttpRequestMessage request)
-        {
-            return new HttpResponseMessage(HttpStatusCode.BadRequest);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        internal protected virtual HttpResponseMessage OnPost(HttpRequestMessage request)
-        {
-            return new HttpResponseMessage(HttpStatusCode.BadRequest);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        internal protected virtual HttpResponseMessage OnPut(HttpRequestMessage request)
-        {
-            return new HttpResponseMessage(HttpStatusCode.BadRequest);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        internal protected virtual HttpResponseMessage OnPatch(HttpRequestMessage request)
-        {
-            return new HttpResponseMessage(HttpStatusCode.BadRequest);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        internal protected virtual HttpResponseMessage OnDelete(HttpRequestMessage request)
-        {
-            return new HttpResponseMessage(HttpStatusCode.BadRequest);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected abstract IHttpRequestReader RequestReader { get; }
-        protected abstract IHttpResponseWriter ResponseWriter { get; }
     }
 }

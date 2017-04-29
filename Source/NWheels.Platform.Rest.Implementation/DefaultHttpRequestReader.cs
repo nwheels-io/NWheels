@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿#if false
+
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -26,3 +28,5 @@ namespace NWheels.Platform.Rest
         public static DefaultHttpRequestReader Instance => _s_instance;
     }
 }
+
+#endif
