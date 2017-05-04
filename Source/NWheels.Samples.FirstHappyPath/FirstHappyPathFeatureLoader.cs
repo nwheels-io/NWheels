@@ -3,6 +3,8 @@ using NWheels.Injection;
 using System;
 using NWheels.Samples.FirstHappyPath.Domain;
 using NWheels.Frameworks.Ddd;
+using NWheels.Platform.Messaging;
+using NWheels.Platform.Rest;
 
 namespace NWheels.Samples.FirstHappyPath
 {
@@ -12,12 +14,7 @@ namespace NWheels.Samples.FirstHappyPath
         public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
             newComponents.ContributeTransactionScript<HelloWorldTx>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public override void CompileComponents(IComponentContainer input)
-        {
+            newComponents.ContributeHttpEndpoint(name: "rest-api").RouteRequestsToRestApiService();
         }
     }
 }

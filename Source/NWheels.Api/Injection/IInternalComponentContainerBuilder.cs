@@ -3,5 +3,6 @@
     public interface IInternalComponentContainerBuilder : IComponentContainerBuilder
     {
         IInternalComponentContainer CreateComponentContainer(bool isRootContainer);
+        IInternalComponentContainer RootContainer { get; }
     }
 }

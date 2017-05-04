@@ -9,12 +9,10 @@ namespace NWheels.Execution
 {
     public interface IInvocationMessage
     {
-        Task<object> Invoke(object target);
-        Task<object> Awaitable { get; }
-        TaskAwaiter<object> GetAwaiter();
+        Task Invoke(object target);
+        Task CompletionFuture { get; }
         Type TargetType { get; }
         MethodInfo TargetMethod { get; }
-        object Result { get; }
         Exception Exception { get; }
     }
 }

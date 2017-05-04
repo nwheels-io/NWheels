@@ -6,35 +6,166 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using NWheels.Samples.FirstHappyPath.Domain;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
 {
     public class InvocationMessage_of_HelloWorldTx_Hello : TaskCompletionSource<object>, IInvocationMessage
     {
-        private string _result;
+        private InputMessage _input;
+        private OutputMessage _output;
 
-        Task<object> IInvocationMessage.Awaitable => base.Task;
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public InvocationMessage_of_HelloWorldTx_Hello()
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ref InputMessage Input
+        {
+            get
+            {
+                return ref _input;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ref OutputMessage Output
+        {
+            get
+            {
+                var awaitResult = base.Task.Result;
+                return ref _output;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Task IInvocationMessage.CompletionFuture => base.Task;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         Type IInvocationMessage.TargetType => typeof(HelloWorldTx);
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         MethodInfo IInvocationMessage.TargetMethod => throw new NotImplementedException("Requires netstandard2.0"); //Module.ResolveMethod
 
-        object IInvocationMessage.Result => _result;
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         Exception IInvocationMessage.Exception => base.Task.Exception;
 
-        TaskAwaiter<object> IInvocationMessage.GetAwaiter()
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        async Task IInvocationMessage.Invoke(object target)
         {
-            return base.Task.GetAwaiter();
+            try
+            {
+                string returnValue = await ((HelloWorldTx)target).Hello(_input.Name);
+
+                _output = new OutputMessage {
+                    ReturnValue = returnValue
+                };
+
+                base.SetResult(null);
+            }
+            catch (Exception e)
+            {
+                base.SetException(e);
+            }
         }
 
-        async Task<object> IInvocationMessage.Invoke(object target)
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public struct InputMessage
         {
-            _result = await ((HelloWorldTx)target).Hello(this.Name);
-            return _result;
+            public string Name;
         }
 
-        public string Name { get; set; }
-        public string Result => _result;
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public struct OutputMessage
+        {
+            public string ReturnValue;
+
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public delegate bool MessagePropertyPopulator<TInput, TTarget>(TInput input, ref TTarget target);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static class InputMessageSerializer
+        {
+            private static readonly Dictionary<string, MessagePropertyPopulator<JsonTextReader, InputMessage>> _s_propertyPopulatorByName = 
+                new Dictionary<string, MessagePropertyPopulator<JsonTextReader, InputMessage>> {
+                    ["name"] = new MessagePropertyPopulator<JsonTextReader, InputMessage>((JsonTextReader json, ref InputMessage target) => {
+                        if (json.TokenType == JsonToken.String)
+                        {
+                            target.Name = json.ReadAsString();
+                            return true;
+                        }
+                        return false;
+                    })
+                };
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static bool DeserializeFromJson(JsonTextReader json, ref InputMessage target)
+            {
+                if (json.TokenType != JsonToken.StartObject)
+                {
+                    return false;
+                }
+
+                while (json.Read() && json.TokenType != JsonToken.EndObject)
+                {
+                    if (json.TokenType != JsonToken.PropertyName)
+                    {
+                        return false;
+                    }
+                    if (!_s_propertyPopulatorByName.TryGetValue(
+                        json.ReadAsString(), 
+                        out MessagePropertyPopulator<JsonTextReader, InputMessage> deserializeProperty))
+                    {
+                        return false;
+                    }
+                    if (!deserializeProperty(json, ref target))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            //TODO: all encodings are contributed by registered implementations of IMessageEncoderTypeFactory:
+            //TODO: public static bool DeserializeToXml(XmlReader xml, ref OutputMessage target)
+            //TODO: public static bool DeserializeToBson(BsonReader bson, ref OutputMessage target)
+            //TODO: public static bool DeserializeToRawBinary(RawBinaryReader binary, ref OutputMessage target)
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static class OutputMessageSerializer
+        {
+            public static void SerializeToJson(JsonTextWriter json, ref OutputMessage target)
+            {
+                json.WriteStartObject();
+                json.WritePropertyName("result");
+                json.WriteValue(target.ReturnValue);
+                json.WriteEndObject();
+            }
+
+            //TODO: all encodings are contributed by registered implementations of IMessageEncoderTypeFactory:
+            //TODO: public static void SerializeToXml(XmlWriter xml, ref OutputMessage target)
+            //TODO: public static void SerializeToBson(BsonWriter bson, ref OutputMessage target)
+            //TODO: public static void SerializeToRawBinary(RawBinaryWriter binary, ref OutputMessage target)
+        }
     }
 }

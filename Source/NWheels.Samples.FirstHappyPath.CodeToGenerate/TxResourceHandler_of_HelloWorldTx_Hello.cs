@@ -17,95 +17,81 @@ namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
     /// <summary>
     /// This is a prototype of class that will be generated
     /// </summary>
-    public class TxResourceHandler_of_HelloWorldTx_Hello : RestResourceHandlerBase
+    public class TxResourceHandler_of_HelloWorldTx_Hello : ResourceHandlerBase
     {
-        private readonly HelloWorldTx _tx;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public TxResourceHandler_of_HelloWorldTx_Hello(HelloWorldTx tx) 
-            : base("tx/HelloWorld/Hello")
+        public TxResourceHandler_of_HelloWorldTx_Hello(Func<InvocationMessage_of_HelloWorldTx_Hello, Task> nextHandler) 
+            : base(
+                  "tx/HelloWorld/Hello", 
+                  new IResourceProtocolHandler[] {
+                      new Protocol_Http_Rest_NWheelsApi(nextHandler)
+                  }
+              )
         {
-            _tx = tx;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override async Task HttpPost(HttpContext context)
+        public class Protocol_Http_Rest_NWheelsApi : HttpResourceProtocolHandlerBase
         {
-            try
+            private readonly Func<InvocationMessage_of_HelloWorldTx_Hello, Task> _nextHandler;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Protocol_Http_Rest_NWheelsApi(Func<InvocationMessage_of_HelloWorldTx_Hello, Task> nextHandler) 
+                : base("http/rest/nwheels-api")
+            {
+                _nextHandler = nextHandler;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override async Task HttpPost(HttpContext context)
             {
                 var invocation = new InvocationMessage_of_HelloWorldTx_Hello();
-                if (!TryReadRequest(context.Request, invocation))
+
+                try
                 {
+                    using (var reader = new StreamReader(context.Request.Body))
+                    {
+                        using (var json = new JsonTextReader(reader))
+                        {
+                            if (!InvocationMessage_of_HelloWorldTx_Hello.InputMessageSerializer.DeserializeFromJson(json, ref invocation.Input))
+                            {
+                                //TODO: log error
+                                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                                return;
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    //TODO: log error
+                    Console.Error.WriteLine(e.ToString());
                     context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    return;
                 }
 
-                await ((IInvocationMessage)invocation).Invoke(_tx);
-
-                WriteResponse(invocation, context.Response);
-            }
-            catch //(Exception e)
-            {
-                //TODO: log exception
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private bool TryReadRequest(HttpRequest request, InvocationMessage_of_HelloWorldTx_Hello invocation)
-        {
-            using (var reader = new StreamReader(request.Body))
-            {
-                using (var json = new JsonTextReader(reader))
+                try
                 {
-                    if (!json.Read() || json.TokenType != JsonToken.StartObject)
-                    {
-                        return false;
-                    }
-                    if (!json.Read() || json.TokenType != JsonToken.PropertyName)
-                    {
-                        return false;
-                    }
-                    if (json.ReadAsString() != "name")
-                    {
-                        return false;
-                    }
-                    if (json.TokenType != JsonToken.String)
-                    {
-                        return false;
-                    }
+                    await _nextHandler(invocation);
 
-                    invocation.Name = json.ReadAsString();
-
-                    if (json.TokenType != JsonToken.EndObject)
+                    using (var writer = new StreamWriter(context.Response.Body))
                     {
-                        return false;
+                        using (var json = new JsonTextWriter(writer))
+                        {
+                            InvocationMessage_of_HelloWorldTx_Hello.OutputMessageSerializer.SerializeToJson(json, ref invocation.Output);
+                            json.Flush();
+                        }
+
+                        writer.Flush();
                     }
                 }
-            }
-
-            return true;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void WriteResponse(InvocationMessage_of_HelloWorldTx_Hello invocation, HttpResponse response)
-        {
-            using (var writer = new StreamWriter(response.Body))
-            {
-                using (var json = new JsonTextWriter(writer))
+                catch (Exception e)
                 {
-                    json.WriteStartObject();
-                    json.WritePropertyName("result");
-                    json.WriteValue(invocation.Result);
-                    json.WriteEndObject();
-                    json.Flush();
+                    //TODO: log error
+                    Console.Error.WriteLine(e.ToString());
+                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 }
-
-                writer.Flush();
             }
         }
     }

@@ -14,12 +14,14 @@ namespace NWheels.Injection.Adapters.Autofac
     public class ComponentContainerBuilder : IInternalComponentContainerBuilder
     {
         private readonly ContainerBuilder _containerBuilder;
+        private readonly IInternalComponentContainer _rootContainer;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ComponentContainerBuilder()
+        public ComponentContainerBuilder(IInternalComponentContainer rootContainer = null)
         {
             _containerBuilder = new ContainerBuilder();
+            _rootContainer = rootContainer;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -61,6 +63,10 @@ namespace NWheels.Injection.Adapters.Autofac
 
             return wrappingContainer;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IInternalComponentContainer RootContainer => _rootContainer;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
