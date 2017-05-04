@@ -9,7 +9,8 @@ namespace NWheels.Platform.Messaging
 {
     public class HttpEndpointInjectorPort : InjectorPort
     {
-        public HttpEndpointInjectorPort(string name, Func<HttpContext, Task> handler)
+        public HttpEndpointInjectorPort(IComponentContainerBuilder containerBuilder, string name, Func<HttpContext, Task> handler)
+            : base(containerBuilder)
         {
             this.Name = name;
             this.Handler = handler;
@@ -18,6 +19,6 @@ namespace NWheels.Platform.Messaging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public string Name { get; }
-        public Func<HttpContext, Task> Handler { get; }
+        public Func<HttpContext, Task> Handler { get; set; }
     }
 }

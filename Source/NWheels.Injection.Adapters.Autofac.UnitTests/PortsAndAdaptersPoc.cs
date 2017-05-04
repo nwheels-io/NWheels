@@ -52,6 +52,10 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
         public class ExamplePortA : InjectorPort
         {
+            public ExamplePortA(IComponentContainerBuilder containerBuilder) : base(containerBuilder)
+            {
+            }
+
             public string Value { get; set; }
         }
 
@@ -59,6 +63,10 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
 
         public class ExamplePortB : InjectorPort
         {
+            public ExamplePortB(IComponentContainerBuilder containerBuilder) : base(containerBuilder)
+            {
+            }
+
             public string Value { get; set; }
         }
 
@@ -178,7 +186,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
         public static void ContributePortAExample(this IComponentContainerBuilder containerBuilder, string value)
         {
             containerBuilder.RegisterComponentInstance<PortsAndAdaptersPoc.ExamplePortA>(
-                new PortsAndAdaptersPoc.ExamplePortA {
+                new PortsAndAdaptersPoc.ExamplePortA(containerBuilder) {
                     Value = value
                 }
             );
@@ -189,7 +197,7 @@ namespace NWheels.Injection.Adapters.Autofac.UnitTests
         public static void ContributePortBExample(this IComponentContainerBuilder containerBuilder, string value)
         {
             containerBuilder.RegisterComponentInstance<PortsAndAdaptersPoc.ExamplePortB>(
-                new PortsAndAdaptersPoc.ExamplePortB {
+                new PortsAndAdaptersPoc.ExamplePortB(containerBuilder) {
                     Value = value
                 }
             );

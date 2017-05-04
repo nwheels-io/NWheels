@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿#if false
+
+using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using NWheels.Injection;
 using System;
@@ -216,9 +218,9 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
             {
                 IEnumerable<TService> result = null;
 
-                if (typeof(TService) == typeof(IRestResourceHandler))
+                if (typeof(TService) == typeof(IResourceHandler))
                 {
-                    var handlers = new List<IRestResourceHandler>() {
+                    var handlers = new List<IResourceHandler>() {
                         new FirstTestRestResourceHandler(),
                         new SecondTestRestResourceHandler(),
                         new ThirdTestRestResourceHandler()
@@ -239,7 +241,7 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class FirstTestRestResourceHandler : RestResourceHandlerBase
+        private class FirstTestRestResourceHandler : ResourceHandlerBase
         {
             public FirstTestRestResourceHandler() 
                 : base("/first")
@@ -265,7 +267,7 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class SecondTestRestResourceHandler : RestResourceHandlerBase
+        private class SecondTestRestResourceHandler : ResourceHandlerBase
         {
             public SecondTestRestResourceHandler() 
                 : base("/second")
@@ -291,7 +293,7 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class ThirdTestRestResourceHandler : RestResourceHandlerBase
+        private class ThirdTestRestResourceHandler : ResourceHandlerBase
         {
             public ThirdTestRestResourceHandler() 
                 : base("/third")
@@ -308,3 +310,5 @@ namespace NWheels.Platform.Rest.Implementation.UnitTests
         }
     }
 }
+
+#endif

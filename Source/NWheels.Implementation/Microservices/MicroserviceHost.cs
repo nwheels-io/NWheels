@@ -757,8 +757,11 @@ namespace NWheels.Microservices
                     throw new Exception($"{containerBuilderType.Count} IComponentContainerBuilder found.");
                 }
 
-                var containerBuilder = (IInternalComponentContainerBuilder)Activator.CreateInstance(containerBuilderType.First());
+                // component container builder constructor must have signature:
+                // ctor(IInternalComponentContainer rootContainer)
+                // where rootContainer can be passed null value
 
+                var containerBuilder = (IInternalComponentContainerBuilder)Activator.CreateInstance(containerBuilderType.First(), new object[] { null });
                 return containerBuilder;
             }
         }

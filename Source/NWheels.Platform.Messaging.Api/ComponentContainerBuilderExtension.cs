@@ -9,12 +9,14 @@ namespace NWheels.Platform.Messaging
 {
     public static class ComponentContainerBuilderExtensions
     {
-        public static void ContributeHttpEndpoint(
+        public static HttpEndpointInjectorPort ContributeHttpEndpoint(
             this IComponentContainerBuilder containerBuilder, 
             string name,
-            Func<HttpContext, Task> handler)
+            Func<HttpContext, Task> onRequest = null)
         {
-            containerBuilder.RegisterComponentInstance<HttpEndpointInjectorPort>(new HttpEndpointInjectorPort(name, handler));
+            var port = new HttpEndpointInjectorPort(containerBuilder, name, onRequest);
+            containerBuilder.RegisterComponentInstance<HttpEndpointInjectorPort>(port);
+            return port;
         }
     }
 }

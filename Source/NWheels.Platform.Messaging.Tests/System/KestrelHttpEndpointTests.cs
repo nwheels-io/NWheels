@@ -373,18 +373,18 @@ namespace NWheels.Platform.Messaging.Tests.System
 
                 newComponents.ContributeHttpEndpoint(
                     "Static",
-                    handler: null);
+                    onRequest: null);
 
                 newComponents.ContributeHttpEndpoint(
                     "Dynamic",
-                    handler: context => {
+                    onRequest: context => {
                         var handler = existingComponents.Resolve<NonStaticTestRequestHandler>();
                         return handler.HandleRequest(context);
                     });
 
                 newComponents.ContributeHttpEndpoint(
                     "Mixed",
-                    handler: context => {
+                    onRequest: context => {
                         var handler = existingComponents.Resolve<NonStaticTestRequestHandler>();
                         return handler.HandleRequest(context);
                     });
