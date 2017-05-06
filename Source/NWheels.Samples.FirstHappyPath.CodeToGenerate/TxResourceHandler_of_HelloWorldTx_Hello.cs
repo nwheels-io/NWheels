@@ -19,28 +19,36 @@ namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
     /// </summary>
     public class TxResourceHandler_of_HelloWorldTx_Hello : ResourceHandlerBase
     {
-        public TxResourceHandler_of_HelloWorldTx_Hello(Func<InvocationMessage_of_HelloWorldTx_Hello, Task> nextHandler) 
+        public TxResourceHandler_of_HelloWorldTx_Hello(IInvocationScheduler scheduler) 
             : base(
-                  "tx/HelloWorld/Hello", 
-                  new IResourceProtocolHandler[] {
-                      new Protocol_Http_Rest_NWheelsApi(nextHandler)
-                  }
-              )
+                  "tx/HelloWorld/Hello",
+                  CreateProtocolHandlers(scheduler))
         {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static IResourceProtocolHandler[] CreateProtocolHandlers(IInvocationScheduler scheduler)
+        {
+            var channel = scheduler.GetInvocationChannel(null, null);
+
+            return new IResourceProtocolHandler[] {
+                new Protocol_Http_Rest_NWheelsApi(channel)
+            };
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class Protocol_Http_Rest_NWheelsApi : HttpResourceProtocolHandlerBase
         {
-            private readonly Func<InvocationMessage_of_HelloWorldTx_Hello, Task> _nextHandler;
+            private readonly IInvocationChannel _invocationChannel;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public Protocol_Http_Rest_NWheelsApi(Func<InvocationMessage_of_HelloWorldTx_Hello, Task> nextHandler) 
+            public Protocol_Http_Rest_NWheelsApi(IInvocationChannel invocationChannel) 
                 : base("http/rest/nwheels-api")
             {
-                _nextHandler = nextHandler;
+                _invocationChannel = invocationChannel;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -73,7 +81,7 @@ namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
 
                 try
                 {
-                    await _nextHandler(invocation);
+                    await _invocationChannel.ScheduledInvoke(invocation);
 
                     using (var writer = new StreamWriter(context.Response.Body))
                     {

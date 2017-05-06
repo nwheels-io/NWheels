@@ -4,11 +4,13 @@
   <injection-adapter assembly="NWheels.Injection.Adapters.Autofac" />
 
   <framework-modules>
+    <module assembly="NWheels.Implementation" />
+
     <module assembly="NWheels.Platform.Rest.Implementation" />
     
-    <module assembly="NWheels.Platform.Messaging.Implementation">
-      <feature name="HttpEndpoint" />
-    </module>
+    <module assembly="NWheels.Platform.Messaging.Implementation" />
+
+    <module assembly="NWheels.Platform.Messaging.Adapters.AspNetKestrel" />
   </framework-modules>
 
   <application-modules>

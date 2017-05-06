@@ -14,16 +14,13 @@ namespace NWheels.Platform.Rest
     public class RestApiService : IRestApiService
     {
         private readonly ImmutableDictionary<string, IResourceHandler> _handlerByUriPath;
-        private readonly Func<IInvocationMessage, Task> _nextHandler;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public RestApiService(IEnumerable<IResourceHandler> resources, Func<IInvocationMessage, Task> nextHandler)
+        public RestApiService(IEnumerable<IResourceHandler> resources)
         {
             //TODO: catch duplicate key exception and throw a more informative one instead
             _handlerByUriPath = resources.ToImmutableDictionary(x => x.UriPath);
-
-            _nextHandler = nextHandler;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -37,7 +34,7 @@ namespace NWheels.Platform.Rest
         //        //TODO AbsolutePath will be replaced by Fragment or will be method's argument
         //        if (_handlerByUriPath.TryGetValue(context.Request.Path, out handler))
         //        {
-        //            var method = context.Request.Method;
+        //            var method = context.Request.M ethod;
 
         //            if (method == HttpMethod.Get.Method)
         //            {

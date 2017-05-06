@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace NWheels.Execution
 {
-    public interface IInvocationMiddleware
+    public interface IInvocationChannel
     {
-        Task HandleInvocation(IInvocationMessage invocation);
+        Task ScheduledInvoke(IInvocationMessage invocation);
     }
 }
