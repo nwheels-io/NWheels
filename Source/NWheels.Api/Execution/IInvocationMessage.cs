@@ -12,7 +12,7 @@ namespace NWheels.Execution
         Task Invoke(object target);
         Task CompletionFuture { get; }
         Type TargetType { get; }
-        MethodInfo TargetMethod { get; }
+        MethodInfo TargetMethod { get; } //TODO: necassary?
         Exception Exception { get; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using NWheels.Frameworks.Ddd.RestApi;
+using NWheels.Injection;
 using System;
 
 namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
@@ -13,3 +14,4 @@ namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
         }
     }
 }
+
