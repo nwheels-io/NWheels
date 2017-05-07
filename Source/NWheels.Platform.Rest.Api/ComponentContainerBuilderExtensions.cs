@@ -12,8 +12,7 @@ namespace NWheels.Platform.Rest
         {
             port.Handler = (context) => {
                 var restApiService = port.Components.Resolve<IRestApiService>();
-                var resource = restApiService.GetProtocolHandler<IHttpResourceProtocolHandler>(context.Request.Path);
-                return resource.HandleHttpRequest(context);
+                return restApiService.HandleHttpRequest(context);
             };
 
             return port;

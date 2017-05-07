@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Autofac.Core;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -49,6 +50,35 @@ namespace NWheels.Injection.Adapters.Autofac
         public IEnumerable<TService> ResolveAll<TService>()
         {
             return _container.Resolve<IEnumerable<TService>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool TryResolve(Type serviceType, out object instance)
+        {
+            return _container.TryResolve(serviceType, out instance);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public object Resolve(Type serviceType)
+        {
+            return _container.Resolve(serviceType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public object ResolveNamed(Type serviceType, string name)
+        {
+            return _container.ResolveNamed(name, serviceType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEnumerable<object> ResolveAll(Type serviceType)
+        {
+            var resolved = _container.Resolve(typeof(IEnumerable<>).MakeGenericType(serviceType));
+            return ((IEnumerable)resolved).Cast<object>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
