@@ -6,8 +6,6 @@ namespace NWheels.Platform.Rest
 {
     public interface IRestApiService
     {
-        Task HandleHttpRequest(HttpContext context);
-
         THandler GetHandler<THandler>(string uriPath) 
             where THandler : class, IResourceHandler;
 

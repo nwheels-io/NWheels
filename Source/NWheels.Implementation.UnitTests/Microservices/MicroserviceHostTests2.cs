@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿#if false
+
+using FluentAssertions;
 using NWheels.Injection;                                                                                                                                                        
 using NWheels.Injection.Adapters.Autofac;
 using NWheels.Microservices;
@@ -45,7 +47,7 @@ namespace NWheels.Implementation.UnitTests.Microservices
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void EmptyBootConfig_DefaultFeaturesLoaded()
+        public void CanLoadInjectionAdapter()
         {
             //-- arrange
 
@@ -57,9 +59,6 @@ namespace NWheels.Implementation.UnitTests.Microservices
             var logger = new MicroserviceHostLoggerMock();
             var microserviceUnderTest = new MicroserviceHost(bootConfig, logger);
             microserviceUnderTest.AssemblyLoad += assemlyLoadHandler.Handle;
-
-            var featureLog = new List<string>();
-            InterpeptAllFeatureLoadersLogs(featureLog);
 
             //-- act
 
@@ -74,6 +73,66 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
             assemlyLoadHandler.EventList[1].ImplementedInterface.Should().Be(typeof(IFeatureLoader));
             assemlyLoadHandler.EventList[1].AssemblyName.Should().Be("NWheels.Implementation");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void EmptyBootConfig_DefaultKernelFeaturesLoaded()
+        {
+            //-- arrange
+
+            var bootConfig = CreateBootConfiguration(
+                frameworkModules: new MicroserviceConfig.ModuleConfig[0],
+                applicationModules: new MicroserviceConfig.ModuleConfig[0]);
+
+            var assemlyLoadHandler = new AssemblyLoadEventHandler();
+            var logger = new MicroserviceHostLoggerMock();
+            var microserviceUnderTest = new MicroserviceHost(bootConfig, logger);
+            microserviceUnderTest.AssemblyLoad += assemlyLoadHandler.Handle;
+
+            var featureLog = new List<string>();
+            InterceptAllFeatureLoadersLogs(featureLog);
+
+            //-- act
+
+            microserviceUnderTest.Configure();
+
+            //-- assert
+
+            featureLog.Should().Contain($"{typeof(Kernel_FeatureOne).Name}.{nameof(IFeatureLoader.ContributeComponents)}");
+            featureLog.Should().Contain($"{typeof(Kernel_FeatureTwo).Name}.{nameof(IFeatureLoader.ContributeComponents)}");
+            featureLog.Should().NotContain($"{typeof(Kernel_FeatureThree).Name}.{nameof(IFeatureLoader.ContributeComponents)}");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void FrameworkModule_DefaultKernelFeaturesLoaded()
+        {
+            //-- arrange
+
+            var bootConfig = CreateBootConfiguration(
+                frameworkModules: new MicroserviceConfig.ModuleConfig[0],
+                applicationModules: new MicroserviceConfig.ModuleConfig[0]);
+
+            var assemlyLoadHandler = new AssemblyLoadEventHandler();
+            var logger = new MicroserviceHostLoggerMock();
+            var microserviceUnderTest = new MicroserviceHost(bootConfig, logger);
+            microserviceUnderTest.AssemblyLoad += assemlyLoadHandler.Handle;
+
+            var featureLog = new List<string>();
+            InterceptAllFeatureLoadersLogs(featureLog);
+
+            //-- act
+
+            microserviceUnderTest.Configure();
+
+            //-- assert
+
+            featureLog.Should().Contain($"{typeof(Kernel_FeatureOne).Name}.{nameof(IFeatureLoader.ContributeComponents)}");
+            featureLog.Should().Contain($"{typeof(Kernel_FeatureTwo).Name}.{nameof(IFeatureLoader.ContributeComponents)}");
+            featureLog.Should().NotContain($"{typeof(Kernel_FeatureThree).Name}.{nameof(IFeatureLoader.ContributeComponents)}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -129,7 +188,7 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void InterpeptAllFeatureLoadersLogs(List<string> log, Action<FeatureLoaderMock> setup = null)
+        private void InterceptAllFeatureLoadersLogs(List<string> log, Action<FeatureLoaderMock> setup = null)
         {
             InterceptFeatureLoaderLogs<Kernel_FeatureOne>(log, setup);
             InterceptFeatureLoaderLogs<Kernel_FeatureTwo>(log, setup);
@@ -491,3 +550,5 @@ namespace NWheels.Implementation.UnitTests.Microservices
         }
     }
 }
+
+#endif

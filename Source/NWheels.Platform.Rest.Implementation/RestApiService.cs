@@ -87,11 +87,6 @@ namespace NWheels.Platform.Rest
             throw new ArgumentException($"Handler for specified URI path does not exist: {uriPath}");
         }
 
-        public Task HandleHttpRequest(HttpContext context)
-        {
-            throw new NotImplementedException();
-        }
-
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public bool TryGetHandler<THandler>(string uriPath, out THandler handler)
@@ -107,24 +102,50 @@ namespace NWheels.Platform.Rest
             return false;
         }
 
-        TProtocolHandler IRestApiService.GetProtocolHandler<TProtocolHandler>(string uriPath)
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TProtocolHandler GetProtocolHandler<TProtocolHandler>(string uriPath)
+            where TProtocolHandler : class, IResourceProtocolHandler
         {
-            throw new NotImplementedException();
+            var handler = GetHandler<IResourceHandler>(uriPath);
+            return handler.GetProtocolHandler<TProtocolHandler>();
         }
 
-        TProtocolHandler IRestApiService.GetProtocolHandler<TProtocolHandler>(string uriPath, string protocolName)
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TProtocolHandler GetProtocolHandler<TProtocolHandler>(string uriPath, string protocolName)
+            where TProtocolHandler : class, IResourceProtocolHandler
         {
-            throw new NotImplementedException();
+            var handler = GetHandler<IResourceHandler>(uriPath);
+            return handler.GetProtocolHandler<TProtocolHandler>(protocolName);
         }
 
-        bool IRestApiService.TryGetProtocolHandler<TProtocolHandler>(string uriPath, out TProtocolHandler protocol)
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool TryGetProtocolHandler<TProtocolHandler>(string uriPath, out TProtocolHandler protocol)
+            where TProtocolHandler : class, IResourceProtocolHandler
         {
-            throw new NotImplementedException();
+            if (TryGetHandler<IResourceHandler>(uriPath, out IResourceHandler handler))
+            {
+                return handler.TryGetProtocolHandler<TProtocolHandler>(out protocol);
+            }
+
+            protocol = null;
+            return false;
         }
 
-        bool IRestApiService.TryGetProtocolHandler<TProtocolHandler>(string uriPath, string protocolName, out TProtocolHandler protocol)
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool TryGetProtocolHandler<TProtocolHandler>(string uriPath, string protocolName, out TProtocolHandler protocol)
+            where TProtocolHandler : class, IResourceProtocolHandler
         {
-            throw new NotImplementedException();
+            if (TryGetHandler<IResourceHandler>(uriPath, out IResourceHandler handler))
+            {
+                return handler.TryGetProtocolHandler<TProtocolHandler>(protocolName, out protocol);
+            }
+
+            protocol = null;
+            return false;
         }
     }
 }

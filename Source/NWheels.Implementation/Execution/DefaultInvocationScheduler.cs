@@ -41,7 +41,7 @@ namespace NWheels.Execution
 
             public Task ScheduledInvoke(IInvocationMessage invocation)
             {
-                object target = null;// TODO: _components.Resolve(invocation.TargetType)
+                object target = _components.Resolve(invocation.TargetType);
                 return invocation.Invoke(target);
             }
         }
