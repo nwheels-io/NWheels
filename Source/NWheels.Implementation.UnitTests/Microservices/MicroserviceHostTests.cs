@@ -1,4 +1,6 @@
 ﻿using FluentAssertions;
+using NWheels.Compilation;
+using NWheels.Execution;
 using NWheels.Injection;
 using NWheels.Injection.Adapters.Autofac;
 using NWheels.Microservices;
@@ -48,7 +50,7 @@ namespace NWheels.Implementation.UnitTests.Microservices
             handler.ContainerEventArgs.Destination.Count.Should().Be(1);
 
             handler.FeatureLoaderEventArgsList.Should().HaveCount(
-                config.MicroserviceConfig.FrameworkModules.Length + config.MicroserviceConfig.ApplicationModules.Length);
+                1 + config.MicroserviceConfig.FrameworkModules.Length + config.MicroserviceConfig.ApplicationModules.Length);
             handler.FeatureLoaderEventArgsList.Should().ContainSingle(
                 x => x.AssemblyName == config.MicroserviceConfig.ApplicationModules[0].Assembly);
             handler.FeatureLoaderEventArgsList.Should().ContainSingle(
@@ -467,6 +469,11 @@ namespace NWheels.Implementation.UnitTests.Microservices
                 }
                 if (e.ImplementedInterface == typeof(IFeatureLoader))
                 {
+                    if (e.AssemblyName == "NWheels.Implementation")
+                    {
+                        e.Destination.Add(typeof(CompilationFeatureLoader));
+                        e.Destination.Add(typeof(InvocationSchedulerFeatureLoader));
+                    }
                     if (e.AssemblyName == "FirstModuleAssembly")
                     {
                         e.Destination.Add(typeof(FirstFeatureLoader));

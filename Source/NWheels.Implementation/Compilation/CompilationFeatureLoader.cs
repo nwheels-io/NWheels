@@ -8,6 +8,7 @@ using NWheels.Compilation.Mechanism.Syntax.Members;
 
 namespace NWheels.Compilation
 {
+    [DefaultFeatureLoader]
     public class CompilationFeatureLoader : FeatureLoaderBase
     {
         public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
@@ -18,7 +19,8 @@ namespace NWheels.Compilation
 
             newComponents.RegisterComponentType<VoidTypeFactoryBackend>()
                 .SingleInstance()
-                .ForService<ITypeLibrary<IRuntimeTypeFactoryArtifact>>();
+                .ForService<ITypeLibrary<IRuntimeTypeFactoryArtifact>>()
+                .AsFallback();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

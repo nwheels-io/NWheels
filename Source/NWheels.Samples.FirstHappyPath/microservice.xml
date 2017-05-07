@@ -4,7 +4,7 @@
   <injection-adapter assembly="NWheels.Injection.Adapters.Autofac" />
 
   <framework-modules>
-    <module assembly="NWheels.Implementation" />
+    <!--module assembly="NWheels.Implementation" /-->
 
     <module assembly="NWheels.Platform.Rest.Implementation" />
     

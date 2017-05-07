@@ -1,17 +1,38 @@
-﻿using NWheels.Injection;                                                                                                                                                        
+﻿using FluentAssertions;
+using NWheels.Injection;                                                                                                                                                        
 using NWheels.Injection.Adapters.Autofac;
 using NWheels.Microservices;
+using NWheels.Microservices.Mocks;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using Xunit;
 
 namespace NWheels.Implementation.UnitTests.Microservices
 {
     public class MicroserviceHostTests2
     {
+        public MicroserviceHostTests2()
+        {
+            _s_featureLoaderMocks = new Dictionary<Type, FeatureLoaderMock>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void Dispose()
+        {
+            _s_featureLoaderMocks = null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         // Test matrix:
-        // -------+--------------------------------+----------------
+        // -------+-------------+------------------+----------------
         // Module | Type        | Default features | Named features
+        // -------+-------------+------------------+----------------
+        // KERNEL | Kernel      | 2                | 1
         // -------+-------------+------------------+----------------
         // A      | Framework   | 2                | 0
         // B      | Framework   | 2                | 2
@@ -23,58 +44,53 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Fact]
+        public void EmptyBootConfig_DefaultFeaturesLoaded()
+        {
+            //-- arrange
+
+            var bootConfig = CreateBootConfiguration(
+                frameworkModules: new MicroserviceConfig.ModuleConfig[0], 
+                applicationModules: new MicroserviceConfig.ModuleConfig[0]);
+
+            var assemlyLoadHandler = new AssemblyLoadEventHandler();
+            var logger = new MicroserviceHostLoggerMock();
+            var microserviceUnderTest = new MicroserviceHost(bootConfig, logger);
+            microserviceUnderTest.AssemblyLoad += assemlyLoadHandler.Handle;
+
+            var featureLog = new List<string>();
+            InterpeptAllFeatureLoadersLogs(featureLog);
+
+            //-- act
+
+            microserviceUnderTest.Configure();
+
+            //-- assert
+
+            assemlyLoadHandler.EventList.Count.Should().Be(2);
+
+            assemlyLoadHandler.EventList[0].ImplementedInterface.Should().Be(typeof(IComponentContainerBuilder));
+            assemlyLoadHandler.EventList[0].AssemblyName.Should().Be("InjectionAdapter");
+
+            assemlyLoadHandler.EventList[1].ImplementedInterface.Should().Be(typeof(IFeatureLoader));
+            assemlyLoadHandler.EventList[1].AssemblyName.Should().Be("NWheels.Implementation");
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private BootConfiguration CreateBootConfiguration()
+        private BootConfiguration CreateBootConfiguration(
+            MicroserviceConfig.ModuleConfig[] frameworkModules, 
+            MicroserviceConfig.ModuleConfig[] applicationModules)
         {
-            return new BootConfiguration()
-            {
+            return new BootConfiguration() {
                 ConfigsDirectory = "ConfigsDirectory",
-                MicroserviceConfig = new MicroserviceConfig()
-                {
+                MicroserviceConfig = new MicroserviceConfig() {
                     Name = "MicroserviceName",
-                    InjectionAdapter = new MicroserviceConfig.InjectionAdapterElement()
-                    {
+                    InjectionAdapter = new MicroserviceConfig.InjectionAdapterElement() {
                         Assembly = "InjectionAdapter"
                     },
-                    ApplicationModules = new MicroserviceConfig.ModuleConfig[]
-                    {
-                        new MicroserviceConfig.ModuleConfig()
-                        {
-                            Assembly = "FirstModuleAssembly",
-                            Features = new MicroserviceConfig.ModuleConfig.FeatureConfig[]
-                            {
-                                new MicroserviceConfig.ModuleConfig.FeatureConfig()
-                                {
-                                    Name = "ThirdFeatureLoader"
-                                },
-                                new MicroserviceConfig.ModuleConfig.FeatureConfig()
-                                {
-                                    Name = "NamedLoader"
-                                }
-                            }
-                        },
-                        new MicroserviceConfig.ModuleConfig()
-                        {
-                            Assembly = "SecondModuleAssembly",
-                            Features = new MicroserviceConfig.ModuleConfig.FeatureConfig[]
-                            {
-                                new MicroserviceConfig.ModuleConfig.FeatureConfig()
-                                {
-                                    Name = "FifthFeatureLoader"
-                                }
-                            }
-                        }
-                    },
-                    FrameworkModules = new MicroserviceConfig.ModuleConfig[]
-                    {
-                        new MicroserviceConfig.ModuleConfig()
-                        {
-                            Assembly = "FrameworkModule",
-                            Features = new MicroserviceConfig.ModuleConfig.FeatureConfig[]{ }
-                        }
-                    }
+                    ApplicationModules = applicationModules,
+                    FrameworkModules = frameworkModules
                 },
                 EnvironmentConfig = new EnvironmentConfig()
                 {
@@ -113,7 +129,32 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void AddFeatureLoaderLoggingInterceptor<TFeature>(List<string> log, Action<FeatureLoaderMock> setup = null)
+        private void InterpeptAllFeatureLoadersLogs(List<string> log, Action<FeatureLoaderMock> setup = null)
+        {
+            InterceptFeatureLoaderLogs<Kernel_FeatureOne>(log, setup);
+            InterceptFeatureLoaderLogs<Kernel_FeatureTwo>(log, setup);
+            InterceptFeatureLoaderLogs<Kernel_FeatureThree>(log, setup);
+            InterceptFeatureLoaderLogs<Framework_ModuleA_FeatureOne>(log, setup);
+            InterceptFeatureLoaderLogs<Framework_ModuleA_FeatureTwo>(log, setup);
+            InterceptFeatureLoaderLogs<Framework_ModuleB_FeatureOne>(log, setup);
+            InterceptFeatureLoaderLogs<Framework_ModuleB_FeatureTwo>(log, setup);
+            InterceptFeatureLoaderLogs<Framework_ModuleB_FeatureThree>(log, setup);
+            InterceptFeatureLoaderLogs<Framework_ModuleB_FeatureFour>(log, setup);
+            InterceptFeatureLoaderLogs<Framework_ModuleC_FeatureOne>(log, setup);
+            InterceptFeatureLoaderLogs<Framework_ModuleC_FeatureTwo>(log, setup);
+            InterceptFeatureLoaderLogs<Application_ModuleD_FeatureOne>(log, setup);
+            InterceptFeatureLoaderLogs<Application_ModuleD_FeatureTwo>(log, setup);
+            InterceptFeatureLoaderLogs<Application_ModuleE_FeatureOne>(log, setup);
+            InterceptFeatureLoaderLogs<Application_ModuleE_FeatureTwo>(log, setup);
+            InterceptFeatureLoaderLogs<Application_ModuleE_FeatureThree>(log, setup);
+            InterceptFeatureLoaderLogs<Application_ModuleE_FeatureFour>(log, setup);
+            InterceptFeatureLoaderLogs<Application_ModuleF_FeatureOne>(log, setup);
+            InterceptFeatureLoaderLogs<Application_ModuleF_FeatureTwo>(log, setup);
+        }
+     
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void InterceptFeatureLoaderLogs<TFeature>(List<string> log, Action<FeatureLoaderMock> setup = null)
             where TFeature : IFeatureLoader
         {
             var mock = new FeatureLoaderMock(typeof(TFeature))
@@ -278,6 +319,21 @@ namespace NWheels.Implementation.UnitTests.Microservices
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DefaultFeatureLoader]
+        private class Kernel_FeatureOne : TestFeatureLoaderBase
+        {
+        }
+
+        [DefaultFeatureLoader]
+        private class Kernel_FeatureTwo : TestFeatureLoaderBase
+        {
+        }
+
+        [FeatureLoader(Name = "K.3")]
+        private class Kernel_FeatureThree : TestFeatureLoaderBase
+        {
+        }
+
+        [DefaultFeatureLoader]
         private class Framework_ModuleA_FeatureOne : TestFeatureLoaderBase
         {
         }
@@ -362,6 +418,11 @@ namespace NWheels.Implementation.UnitTests.Microservices
         private class AssemblyLoadEventHandler
         {
             private readonly Dictionary<string, Type[]> _featureTypesByModuleName = new Dictionary<string, Type[]> {
+                ["NWheels.Implementation"] = new[] {
+                    typeof(Kernel_FeatureOne),
+                    typeof(Kernel_FeatureTwo),
+                    typeof(Kernel_FeatureThree),
+                },
                 ["Module_A"] = new[] {
                     typeof(Framework_ModuleA_FeatureOne),
                     typeof(Framework_ModuleA_FeatureTwo),
@@ -396,7 +457,7 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
             public AssemblyLoadEventHandler()
             {
-                FeatureLoaderEventArgsList = new List<AssemblyLoadEventArgs>();
+                EventList = new List<AssemblyLoadEventArgs>();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -405,7 +466,7 @@ namespace NWheels.Implementation.UnitTests.Microservices
             {
                 if (e.ImplementedInterface == typeof(IComponentContainerBuilder) || e.ImplementedInterface == typeof(IFeatureLoader))
                 {
-                    FeatureLoaderEventArgsList.Add(e);
+                    EventList.Add(e);
 
                     if (e.ImplementedInterface == typeof(IComponentContainerBuilder))
                     {
@@ -418,11 +479,15 @@ namespace NWheels.Implementation.UnitTests.Microservices
                         e.Destination.AddRange(featureLoaderTypes);
                     }
                 }
+                else
+                {
+                    Assert.True(false, "expected AssemblyLoadEventArgs.ImplementedInterface");
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public List<AssemblyLoadEventArgs> FeatureLoaderEventArgsList { get; }
+            public List<AssemblyLoadEventArgs> EventList { get; }
         }
     }
 }

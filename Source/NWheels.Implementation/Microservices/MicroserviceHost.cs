@@ -589,6 +589,10 @@ namespace NWheels.Microservices
         //      or instead, we can convert ForEach loops over feature loaders into ForEach'es of the revertable sequence.
         private class ConfigureSequenceCodeBehind : MicroserviceLifecycleSequenceBase, IRevertableSequenceCodeBehind
         {
+            private Type _componentContainerBuilderType;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public ConfigureSequenceCodeBehind(MicroserviceHost ownerHost)
                 : base(ownerHost)
             {
@@ -605,7 +609,9 @@ namespace NWheels.Microservices
 
             private void LoadFeatures()
             {
-                var rootBuilder = CreateComponentContainerBuilder();
+                _componentContainerBuilderType = LoadComponentContainerBuilderType();
+
+                var rootBuilder = CreateComponentContainerBuilder(rootContainer: null);
                 var rootContainer = rootBuilder.CreateComponentContainer(isRootContainer: true);
                 var featureLoaders = GetConfiguredFeatureLoaders();
 
@@ -616,18 +622,19 @@ namespace NWheels.Microservices
                 executeFeatureLoaderStep((feature, newComponents) => feature.ContributeConfiguration(rootContainer));
                 executeFeatureLoaderStep((feature, newComponents) => feature.ContributeComponents(rootContainer, newComponents));
                 executeFeatureLoaderStep((feature, newComponents) => feature.ContributeAdapterComponents(rootContainer, newComponents));
-                executeFeatureLoaderStep((feature, newComponents) => feature.CompileComponents(rootContainer));
 
-                var typeLibrary = rootContainer.Resolve<ITypeLibrary<IRuntimeTypeFactoryArtifact>>();
-                typeLibrary.CompileDeclaredTypeMembers();
-
-                executeFeatureLoaderStep((feature, newComponents) => feature.ContributeCompiledComponents(rootContainer, newComponents));
+                if (rootContainer.TryResolve<ITypeLibrary<IRuntimeTypeFactoryArtifact>>(out ITypeLibrary<IRuntimeTypeFactoryArtifact> typeLibrary))
+                {
+                    executeFeatureLoaderStep((feature, newComponents) => feature.CompileComponents(rootContainer));
+                    typeLibrary.CompileDeclaredTypeMembers();
+                    executeFeatureLoaderStep((feature, newComponents) => feature.ContributeCompiledComponents(rootContainer, newComponents));
+                }
 
                 OwnerHost.Container = rootContainer;
 
                 void executeFeatureLoaderStep(Action<IFeatureLoader, IComponentContainerBuilder> step)
                 {
-                    var newComponents = CreateComponentContainerBuilder();
+                    var newComponents = CreateComponentContainerBuilder(rootContainer);
 
                     foreach (var feature in featureLoaders) {
                         step(feature, newComponents);
@@ -670,14 +677,16 @@ namespace NWheels.Microservices
 
             private IEnumerable<IFeatureLoader> GetKernelDefaultFeatureLoaders()
             {
-                return new IFeatureLoader[] {
-                    new CompilationFeatureLoader()
+                var kernelModuleConfig = new MicroserviceConfig.ModuleConfig() {
+                    Assembly = typeof(MicroserviceHost).GetTypeInfo().Assembly.GetName().Name
                 };
+
+                return GetFeatureLoadersByModuleConfigs(kernelModuleConfig);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private IEnumerable<IFeatureLoader> GetFeatureLoadersByModuleConfigs(MicroserviceConfig.ModuleConfig[] configs)
+            private IEnumerable<IFeatureLoader> GetFeatureLoadersByModuleConfigs(params MicroserviceConfig.ModuleConfig[] configs)
             {
                 var types = new List<Type>();
 
@@ -704,11 +713,15 @@ namespace NWheels.Microservices
                     }
                 }
 
-                return types.Distinct().Select(x =>
-                {
-                    OwnerHost.Logger.FoundFeatureLoaderComponent(x.FriendlyName());
-                    return (IFeatureLoader)Activator.CreateInstance(x);
-                }).ToList();
+                var featureLoaderList = types
+                    .Distinct()
+                    .Select(x => {
+                        OwnerHost.Logger.FoundFeatureLoaderComponent(x.FriendlyName());
+                        return (IFeatureLoader)Activator.CreateInstance(x);
+                    })
+                    .ToList();
+
+                return featureLoaderList;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -746,23 +759,33 @@ namespace NWheels.Microservices
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private IInternalComponentContainerBuilder CreateComponentContainerBuilder()
+            private IInternalComponentContainerBuilder CreateComponentContainerBuilder(IInternalComponentContainer rootContainer)
             {
-                var containerBuilderType = OwnerHost.LoadAssembly(
-                    typeof(IComponentContainerBuilder), 
-                    OwnerHost.BootConfig.MicroserviceConfig.InjectionAdapter.Assembly);
-
-                if (containerBuilderType.Count != 1)
-                {
-                    throw new Exception($"{containerBuilderType.Count} IComponentContainerBuilder found.");
-                }
-
                 // component container builder constructor must have signature:
                 // ctor(IInternalComponentContainer rootContainer)
                 // where rootContainer can be passed null value
 
-                var containerBuilder = (IInternalComponentContainerBuilder)Activator.CreateInstance(containerBuilderType.First(), new object[] { null });
+                var containerBuilder = (IInternalComponentContainerBuilder)Activator.CreateInstance(
+                    _componentContainerBuilderType,
+                    new object[] { rootContainer });
+
                 return containerBuilder;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private Type LoadComponentContainerBuilderType()
+            {
+                var containerBuilderTypes = OwnerHost.LoadAssembly(
+                    typeof(IComponentContainerBuilder),
+                    OwnerHost.BootConfig.MicroserviceConfig.InjectionAdapter.Assembly);
+
+                if (containerBuilderTypes.Count != 1)
+                {
+                    throw new Exception($"{containerBuilderTypes.Count} IComponentContainerBuilder found.");
+                }
+
+                return containerBuilderTypes.First();
             }
         }
 

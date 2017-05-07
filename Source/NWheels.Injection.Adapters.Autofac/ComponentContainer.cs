@@ -25,6 +25,13 @@ namespace NWheels.Injection.Adapters.Autofac
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool TryResolve<TService>(out TService instance)
+        {
+            return _container.TryResolve<TService>(out instance);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TService Resolve<TService>()
         {
             return _container.Resolve<TService>();
