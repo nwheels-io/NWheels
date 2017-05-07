@@ -3,12 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using NWheels.Injection;
-using NWheels.Execution;
 
-namespace NWheels.Microservices
+namespace NWheels.Execution
 {
     [DefaultFeatureLoader]
-    public class FallbackComponentsFeatureLoader : FeatureLoaderBase
+    public class InvocationSchedulerFeatureLoader : FeatureLoaderBase
     {
         public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
