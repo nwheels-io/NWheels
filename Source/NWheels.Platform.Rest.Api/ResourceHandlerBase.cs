@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,14 +14,17 @@ namespace NWheels.Platform.Rest
     public abstract class ResourceHandlerBase : IResourceHandler
     {
         private readonly string _uriPath;
-        //private readonly ImmutableDictionary<ValueTuple<Type,>, IRestApiProtocol> _protocolByName;
+        private readonly ImmutableDictionary<ValueTuple<Type, string>, IResourceProtocolHandler> _protocolByTypeAndName;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected ResourceHandlerBase(string uriPath, IResourceProtocolHandler[] protocols)
         {
             _uriPath = uriPath;
-            //_protocolByName = protocols.ToImmutableDictionary(p => p.Name);
+            _protocolByTypeAndName = protocols.ToImmutableDictionary(
+                p => new ValueTuple<Type, string>(
+                    p.ProtocolInterface, 
+                    p.Name ?? string.Empty));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -31,7 +35,7 @@ namespace NWheels.Platform.Rest
 
         public IEnumerable<IResourceProtocolHandler> GetAllProtocolHandlers()
         {
-            throw new NotImplementedException();
+            return _protocolByTypeAndName.Values;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,7 +43,12 @@ namespace NWheels.Platform.Rest
         public TProtocolHandler GetProtocolHandler<TProtocolHandler>()
             where TProtocolHandler : class, IResourceProtocolHandler
         {
-            throw new NotImplementedException();
+            if (TryGetProtocolHandler<TProtocolHandler>(out TProtocolHandler handler))
+            {
+                return handler;
+            }
+
+            throw new KeyNotFoundException("Specified protocol handler does not exists.");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,7 +56,12 @@ namespace NWheels.Platform.Rest
         public TProtocolHandler GetProtocolHandler<TProtocolHandler>(string name)
             where TProtocolHandler : class, IResourceProtocolHandler
         {
-            throw new NotImplementedException();
+            if (TryGetProtocolHandler<TProtocolHandler>(name, out TProtocolHandler handler))
+            {
+                return handler;
+            }
+
+            throw new KeyNotFoundException("Specified protocol handler does not exists.");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -55,7 +69,7 @@ namespace NWheels.Platform.Rest
         public bool TryGetProtocolHandler<TProtocolHandler>(out TProtocolHandler handler)
             where TProtocolHandler : class, IResourceProtocolHandler
         {
-            throw new NotImplementedException();
+            return TryGetProtocolHandler<TProtocolHandler>(string.Empty, out handler);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -63,15 +77,15 @@ namespace NWheels.Platform.Rest
         public bool TryGetProtocolHandler<TProtocolHandler>(string name, out TProtocolHandler handler)
             where TProtocolHandler : class, IResourceProtocolHandler
         {
-            throw new NotImplementedException();
-            //if (_protocolByName.TryGetValue(name, out IRestApiProtocol anyProtocol))
-            //{
-            //    protocol = anyProtocol as TProtocol;
-            //    return (protocol != null);
-            //}
+            var key = new ValueTuple<Type, string>(typeof(TProtocolHandler), name);
+            if (_protocolByTypeAndName.TryGetValue(key, out IResourceProtocolHandler genericHandler))
+            {
+                handler = (TProtocolHandler)genericHandler;
+                return true;
+            }
 
-            //protocol = null;
-            //return false;
+            handler = null;
+            return false;
         }
     }
 }

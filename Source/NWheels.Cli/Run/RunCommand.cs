@@ -445,7 +445,12 @@ namespace NWheels.Cli.Run
 
             if (!map.ContainsKey(assemblyName))
             {
-                map.Add(assemblyName, directoryPart);
+                var directorySubParts = directoryPart.Split(';');
+                if (directorySubParts.Length > 1)
+                {
+                    directorySubParts = directorySubParts.OrderByDescending(s => s).ToArray();
+                }
+                map.Add(assemblyName, directorySubParts[0]);
             }
         }
 

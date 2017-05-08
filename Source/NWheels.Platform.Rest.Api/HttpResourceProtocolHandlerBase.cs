@@ -15,7 +15,7 @@ namespace NWheels.Platform.Rest
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected HttpResourceProtocolHandlerBase(string name)
-            : base(name)
+            : base(name, typeof(IHttpResourceProtocolHandler))
         {
         }
 
