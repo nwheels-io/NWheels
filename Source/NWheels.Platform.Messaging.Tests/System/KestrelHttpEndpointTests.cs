@@ -400,6 +400,21 @@ namespace NWheels.Platform.Messaging.Tests.System
                 this.Endpoints = new Dictionary<string, IEndpointConfig>();
             }
 
+            public IHttpEndpointConfig NewHttpEndpointConfig()
+            {
+                return new TestHttpEndpointConfiguration();
+            }
+
+            public IHttpsConfig NewHttpsConfig()
+            {
+                return new TestHttpsConfig();
+            }
+
+            public IHttpStaticFolderConfig NewHttpStaticFolderConfig()
+            {
+                return new TestHttpStaticFolderConfig();
+            }
+
             public IDictionary<string, IEndpointConfig> Endpoints { get; }
         }
 

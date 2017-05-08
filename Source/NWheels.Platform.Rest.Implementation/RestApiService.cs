@@ -20,7 +20,17 @@ namespace NWheels.Platform.Rest
         public RestApiService(IEnumerable<IResourceHandler> resources)
         {
             //TODO: catch duplicate key exception and throw a more informative one instead
-            _handlerByUriPath = resources.ToImmutableDictionary(x => x.UriPath);
+            _handlerByUriPath = resources.ToImmutableDictionary(x => ensureLeadSlash(x.UriPath), x => x, StringComparer.OrdinalIgnoreCase);
+
+            string ensureLeadSlash(string path)
+            {
+                if (path.Length > 0 && path[0] == '/')
+                {
+                    return path;
+                }
+
+                return ('/' + (path ?? string.Empty));
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

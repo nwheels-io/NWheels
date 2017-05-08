@@ -8,10 +8,10 @@ namespace NWheels.Frameworks.Ddd
 {
     public static class ComponentContainerBuilderExtensions
     {
-        public static void ContributeTransactionScript<TComponent>(this IComponentContainerBuilder containerBuilder)
+        public static IComponentRegistrationBuilder ContributeTransactionScript<TComponent>(this IComponentContainerBuilder containerBuilder)
             where TComponent : class
         {
-            containerBuilder.RegisterComponentInstance<TxRegistration>(new TxRegistration(typeof(TComponent)));
+            return containerBuilder.RegisterComponentType<TComponent>().InstancePerDependency();
         }
     }
 }

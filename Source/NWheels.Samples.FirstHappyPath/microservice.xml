@@ -17,6 +17,7 @@
     <module assembly="NWheels.Samples.FirstHappyPath">
       <!--REMOVED: <feature name="SpecificNamedFirstHappyPathFeatureLoader" /> -->
     </module>
+    <module assembly="NWheels.Samples.FirstHappyPath.CodeToGenerate" />
   </application-modules>
 
 </microservice>

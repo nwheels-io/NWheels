@@ -11,6 +11,10 @@ namespace NWheels.Platform.Messaging
     [ConfigSection]
     public interface IMessagingPlatformConfiguration
     {
+        IHttpEndpointConfig NewHttpEndpointConfig();
+        IHttpsConfig NewHttpsConfig();
+        IHttpStaticFolderConfig NewHttpStaticFolderConfig();
+
         /// <summary>
         /// Endpoints by name
         /// </summary>

@@ -105,12 +105,8 @@ namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
             private static readonly Dictionary<string, MessagePropertyPopulator<JsonTextReader, InputMessage>> _s_propertyPopulatorByName = 
                 new Dictionary<string, MessagePropertyPopulator<JsonTextReader, InputMessage>> {
                     ["name"] = new MessagePropertyPopulator<JsonTextReader, InputMessage>((JsonTextReader json, ref InputMessage target) => {
-                        if (json.TokenType == JsonToken.String)
-                        {
-                            target.Name = json.ReadAsString();
-                            return true;
-                        }
-                        return false;
+                        target.Name = json.ReadAsString();
+                        return true;
                     })
                 };
 
@@ -130,7 +126,7 @@ namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
                         return false;
                     }
                     if (!_s_propertyPopulatorByName.TryGetValue(
-                        json.ReadAsString(), 
+                        (string)json.Value, 
                         out MessagePropertyPopulator<JsonTextReader, InputMessage> deserializeProperty))
                     {
                         return false;

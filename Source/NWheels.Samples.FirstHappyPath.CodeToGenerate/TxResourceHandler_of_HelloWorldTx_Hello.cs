@@ -46,7 +46,7 @@ namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public Protocol_Http_Rest_NWheelsApi(IInvocationChannel invocationChannel) 
-                : base("http/rest/nwheels-api")
+                : base(string.Empty)// "http/rest/nwheels-api")
             {
                 _invocationChannel = invocationChannel;
             }
@@ -63,7 +63,7 @@ namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
                     {
                         using (var json = new JsonTextReader(reader))
                         {
-                            if (!InvocationMessage_of_HelloWorldTx_Hello.InputMessageSerializer.DeserializeFromJson(json, ref invocation.Input))
+                            if (!json.Read() || !InvocationMessage_of_HelloWorldTx_Hello.InputMessageSerializer.DeserializeFromJson(json, ref invocation.Input))
                             {
                                 //TODO: log error
                                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
@@ -85,12 +85,9 @@ namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
 
                     using (var writer = new StreamWriter(context.Response.Body))
                     {
-                        using (var json = new JsonTextWriter(writer))
-                        {
-                            InvocationMessage_of_HelloWorldTx_Hello.OutputMessageSerializer.SerializeToJson(json, ref invocation.Output);
-                            json.Flush();
-                        }
-
+                        var json = new JsonTextWriter(writer);
+                        InvocationMessage_of_HelloWorldTx_Hello.OutputMessageSerializer.SerializeToJson(json, ref invocation.Output);
+                        json.Flush();
                         writer.Flush();
                     }
                 }

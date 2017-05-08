@@ -16,7 +16,7 @@ namespace NWheels.Platform.Messaging
 
     public interface IHttpEndpointConfig : IEndpointConfig
     {
-        int Port { get; }
+        int Port { get; set; }
         IHttpsConfig Https { get; set; }
         IList<IHttpStaticFolderConfig> StaticFolders { get; set; }
     }
