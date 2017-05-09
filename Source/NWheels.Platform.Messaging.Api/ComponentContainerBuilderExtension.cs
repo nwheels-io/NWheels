@@ -18,5 +18,13 @@ namespace NWheels.Platform.Messaging
             containerBuilder.RegisterComponentInstance<HttpEndpointInjectorPort>(port);
             return port;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void ContributeMessageProtocol<TInterface>(this IComponentContainerBuilder containerBuilder, string protocolName)
+            where TInterface : IMessageProtocolInterface
+        {
+            containerBuilder.RegisterComponentInstance(new MessageProtocolRegistration(typeof(TInterface), protocolName));
+        }
     }
 }

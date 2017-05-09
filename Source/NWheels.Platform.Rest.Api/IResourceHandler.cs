@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using NWheels.Platform.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -9,19 +10,13 @@ namespace NWheels.Platform.Rest
 {
     public interface IResourceHandler
     {
-        TProtocolHandler GetProtocolHandler<TProtocolHandler>() 
-            where TProtocolHandler : class, IResourceProtocolHandler;
+        TProtocolInterface GetProtocol<TProtocolInterface>(string protocolName)
+            where TProtocolInterface : class, IMessageProtocolInterface;
 
-        TProtocolHandler GetProtocolHandler<TProtocolHandler>(string name)
-            where TProtocolHandler : class, IResourceProtocolHandler;
+        bool TryGetProtocol<TProtocolInterface>(string protocolName, out TProtocolInterface protocol)
+            where TProtocolInterface : class, IMessageProtocolInterface;
 
-        bool TryGetProtocolHandler<TProtocolHandler>(out TProtocolHandler handler)
-            where TProtocolHandler : class, IResourceProtocolHandler;
-
-        bool TryGetProtocolHandler<TProtocolHandler>(string name, out TProtocolHandler handler)
-            where TProtocolHandler : class, IResourceProtocolHandler;
-
-        IEnumerable<IResourceProtocolHandler> GetAllProtocolHandlers();
+        IEnumerable<IMessageProtocolInterface> GetAllProtocolHandlers();
 
         string UriPath { get; }
     }

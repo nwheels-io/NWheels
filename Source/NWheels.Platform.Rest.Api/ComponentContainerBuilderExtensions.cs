@@ -8,11 +8,13 @@ namespace NWheels.Platform.Rest
 {
     public static class ComponentContainerBuilderExtensions
     {
-        public static HttpEndpointInjectorPort RouteRequestsToRestApiService(this HttpEndpointInjectorPort port)
+        public static HttpEndpointInjectorPort RouteRequestsToRestApiService(this HttpEndpointInjectorPort port, string protocolName)
         {
+            var components = port.Components;
+
             port.Handler = (context) => {
-                var restApiService = port.Components.Resolve<IRestApiService>();
-                return restApiService.HandleHttpRequest(context);
+                var restApiService = components.Resolve<IRestApiService>();
+                return restApiService.HandleHttpRequest(context, protocolName);
             };
 
             return port;

@@ -5,23 +5,24 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System.Net;
 using System.Net.Http;
+using NWheels.Platform.Messaging;
 
 namespace NWheels.Platform.Rest
 {
-    public abstract class HttpResourceProtocolHandlerBase : ResourceProtocolHandlerBase, IHttpResourceProtocolHandler
+    public abstract class HttpResourceProtocolBase : MessageProtocolBase, IHttpMessageProtocolInterface
     {
         private static readonly HttpMethod _s_patchMethod = new HttpMethod("PATCH");
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected HttpResourceProtocolHandlerBase(string name)
-            : base(name, typeof(IHttpResourceProtocolHandler))
+        protected HttpResourceProtocolBase(string protocolName)
+            : base(typeof(IHttpMessageProtocolInterface), protocolName)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        Task IHttpResourceProtocolHandler.HandleHttpRequest(HttpContext context)
+        Task IHttpMessageProtocolInterface.HandleRequest(HttpContext context)
         {
             try
             {

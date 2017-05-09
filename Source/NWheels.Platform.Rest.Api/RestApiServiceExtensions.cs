@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using NWheels.Platform.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -9,13 +10,14 @@ namespace NWheels.Platform.Rest
 {
     public static class RestApiServiceExtensions
     {
-        public static Task HandleHttpRequest(this IRestApiService restApiService, HttpContext context)
+        public static Task HandleHttpRequest(this IRestApiService restApiService, HttpContext context, string protocolName)
         {
-            if (restApiService.TryGetProtocolHandler<IHttpResourceProtocolHandler>(
+            if (restApiService.TryGetHandlerProtocol<IHttpMessageProtocolInterface>(
                 context.Request.Path, 
-                out IHttpResourceProtocolHandler handler))
+                protocolName,
+                out IHttpMessageProtocolInterface protocol))
             {
-                return handler.HandleHttpRequest(context);
+                return protocol.HandleRequest(context);
             }
 
             context.Response.StatusCode = (int)HttpStatusCode.NotFound;
