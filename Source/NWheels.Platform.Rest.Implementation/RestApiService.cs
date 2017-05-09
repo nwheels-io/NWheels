@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using NWheels.Execution;
 using NWheels.Injection;
+using NWheels.Platform.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -35,57 +36,6 @@ namespace NWheels.Platform.Rest
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //public Task HandleHttpRequest(HttpContext context)
-        //{
-        //    IRestResourceHandler handler;
-
-        //    try
-        //    { 
-        //        //TODO AbsolutePath will be replaced by Fragment or will be method's argument
-        //        if (_handlerByUriPath.TryGetValue(context.Request.Path, out handler))
-        //        {
-        //            var method = context.Request.M ethod;
-
-        //            if (method == HttpMethod.Get.Method)
-        //            {
-        //                return handler.HttpGet(context);
-        //            }
-        //            else if (method == HttpMethod.Post.Method)
-        //            {
-        //                return handler.HttpPost(context);
-        //            }
-        //            else if (method == HttpMethod.Put.Method)
-        //            {
-        //                return handler.HttpPut(context);
-        //            }
-        //            else if (method == _s_patchMethod.Method)
-        //            {
-        //                return handler.HttpPatch(context);
-        //            }
-        //            else if (method == HttpMethod.Delete.Method)
-        //            {
-        //                return handler.HttpDelete(context);
-        //            }
-        //            else
-        //            {
-        //                context.Response.StatusCode = (int)HttpStatusCode.NotImplemented;
-        //            }
-        //        }
-        //        else
-        //        {
-        //            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-        //    }
-
-        //    return Task.CompletedTask;
-        //}
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public THandler GetHandler<THandler>(string uriPath)
             where THandler : class, IResourceHandler
         {
@@ -114,44 +64,21 @@ namespace NWheels.Platform.Rest
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TProtocolHandler GetProtocolHandler<TProtocolHandler>(string uriPath)
-            where TProtocolHandler : class, IResourceProtocolHandler
+        public TProtocolInterface GetHandlerProtocol<TProtocolInterface>(string uriPath, string protocolName)
+            where TProtocolInterface : class, IMessageProtocolInterface
         {
             var handler = GetHandler<IResourceHandler>(uriPath);
-            return handler.GetProtocolHandler<TProtocolHandler>();
+            return handler.GetProtocol<TProtocolInterface>(protocolName);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TProtocolHandler GetProtocolHandler<TProtocolHandler>(string uriPath, string protocolName)
-            where TProtocolHandler : class, IResourceProtocolHandler
-        {
-            var handler = GetHandler<IResourceHandler>(uriPath);
-            return handler.GetProtocolHandler<TProtocolHandler>(protocolName);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public bool TryGetProtocolHandler<TProtocolHandler>(string uriPath, out TProtocolHandler protocol)
-            where TProtocolHandler : class, IResourceProtocolHandler
+        public bool TryGetHandlerProtocol<TProtocolInterface>(string uriPath, string protocolName, out TProtocolInterface protocol)
+            where TProtocolInterface : class, IMessageProtocolInterface
         {
             if (TryGetHandler<IResourceHandler>(uriPath, out IResourceHandler handler))
             {
-                return handler.TryGetProtocolHandler<TProtocolHandler>(out protocol);
-            }
-
-            protocol = null;
-            return false;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public bool TryGetProtocolHandler<TProtocolHandler>(string uriPath, string protocolName, out TProtocolHandler protocol)
-            where TProtocolHandler : class, IResourceProtocolHandler
-        {
-            if (TryGetHandler<IResourceHandler>(uriPath, out IResourceHandler handler))
-            {
-                return handler.TryGetProtocolHandler<TProtocolHandler>(protocolName, out protocol);
+                return handler.TryGetProtocol<TProtocolInterface>(protocolName, out protocol);
             }
 
             protocol = null;

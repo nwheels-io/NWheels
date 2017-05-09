@@ -11,6 +11,7 @@ using NWheels.Execution;
 using System.IO;
 using Newtonsoft.Json;
 using System.Net;
+using NWheels.Platform.Messaging;
 
 namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
 {
@@ -28,25 +29,25 @@ namespace NWheels.Samples.FirstHappyPath.CodeToGenerate
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static IResourceProtocolHandler[] CreateProtocolHandlers(IInvocationScheduler scheduler)
+        private static IMessageProtocolInterface[] CreateProtocolHandlers(IInvocationScheduler scheduler)
         {
             var channel = scheduler.GetInvocationChannel(null, null);
 
-            return new IResourceProtocolHandler[] {
+            return new IMessageProtocolInterface[] {
                 new Protocol_Http_Rest_NWheelsApi(channel)
             };
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class Protocol_Http_Rest_NWheelsApi : HttpResourceProtocolHandlerBase
+        public class Protocol_Http_Rest_NWheelsApi : HttpResourceProtocolBase
         {
             private readonly IInvocationChannel _invocationChannel;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public Protocol_Http_Rest_NWheelsApi(IInvocationChannel invocationChannel) 
-                : base(string.Empty)// "http/rest/nwheels-api")
+                : base(protocolName: "http/rest/nwheels/v1")
             {
                 _invocationChannel = invocationChannel;
             }

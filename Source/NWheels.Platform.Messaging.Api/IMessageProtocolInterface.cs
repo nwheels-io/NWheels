@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NWheels.Platform.Rest
+namespace NWheels.Platform.Messaging
 {
-    public interface IResourceProtocolHandler
+    public interface IMessageProtocolInterface
     {
         Type ProtocolInterface { get; }
-        string Name { get; }
+        string ProtocolName { get; }
     }
 }

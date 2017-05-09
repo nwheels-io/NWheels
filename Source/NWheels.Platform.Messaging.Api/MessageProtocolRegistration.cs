@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NWheels.Platform.Rest
+namespace NWheels.Platform.Messaging
 {
-    public abstract class ResourceProtocolHandlerBase : IResourceProtocolHandler
+    public class MessageProtocolRegistration
     {
-        protected ResourceProtocolHandlerBase(string name, Type protocolInterface)
+        public MessageProtocolRegistration(Type protocolInterface, string protocolName)
         {
-            this.Name = name;
             this.ProtocolInterface = protocolInterface;
+            this.ProtocolName = protocolName ?? string.Empty;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string Name { get; }
         public Type ProtocolInterface { get; }
+        public string ProtocolName { get; }
     }
 }

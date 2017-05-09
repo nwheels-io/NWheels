@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using NWheels.Platform.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -14,17 +15,17 @@ namespace NWheels.Platform.Rest
     public abstract class ResourceHandlerBase : IResourceHandler
     {
         private readonly string _uriPath;
-        private readonly ImmutableDictionary<ValueTuple<Type, string>, IResourceProtocolHandler> _protocolByTypeAndName;
+        private readonly ImmutableDictionary<ValueTuple<Type, string>, IMessageProtocolInterface> _protocolByTypeAndName;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected ResourceHandlerBase(string uriPath, IResourceProtocolHandler[] protocols)
+        protected ResourceHandlerBase(string uriPath, IMessageProtocolInterface[] protocols)
         {
             _uriPath = uriPath;
             _protocolByTypeAndName = protocols.ToImmutableDictionary(
                 p => new ValueTuple<Type, string>(
                     p.ProtocolInterface, 
-                    p.Name ?? string.Empty));
+                    p.ProtocolName));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,58 +34,38 @@ namespace NWheels.Platform.Rest
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IEnumerable<IResourceProtocolHandler> GetAllProtocolHandlers()
+        public IEnumerable<IMessageProtocolInterface> GetAllProtocolHandlers()
         {
             return _protocolByTypeAndName.Values;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TProtocolHandler GetProtocolHandler<TProtocolHandler>()
-            where TProtocolHandler : class, IResourceProtocolHandler
+        public TProtocolInterface GetProtocol<TProtocolInterface>(string protocolName)
+            where TProtocolInterface : class, IMessageProtocolInterface
         {
-            if (TryGetProtocolHandler<TProtocolHandler>(out TProtocolHandler handler))
+            if (TryGetProtocol<TProtocolInterface>(protocolName, out TProtocolInterface protocol))
             {
-                return handler;
+                return protocol;
             }
 
-            throw new KeyNotFoundException("Specified protocol handler does not exists.");
+            throw new KeyNotFoundException(
+                $"Protocol '{protocolName}':{typeof(TProtocolInterface).Name} is not implemented by resource '{_uriPath}'.");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TProtocolHandler GetProtocolHandler<TProtocolHandler>(string name)
-            where TProtocolHandler : class, IResourceProtocolHandler
+        public bool TryGetProtocol<TProtocolInterface>(string name, out TProtocolInterface protocol)
+            where TProtocolInterface : class, IMessageProtocolInterface
         {
-            if (TryGetProtocolHandler<TProtocolHandler>(name, out TProtocolHandler handler))
+            var key = new ValueTuple<Type, string>(typeof(TProtocolInterface), name);
+            if (_protocolByTypeAndName.TryGetValue(key, out IMessageProtocolInterface genericProtocol))
             {
-                return handler;
-            }
-
-            throw new KeyNotFoundException("Specified protocol handler does not exists.");
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public bool TryGetProtocolHandler<TProtocolHandler>(out TProtocolHandler handler)
-            where TProtocolHandler : class, IResourceProtocolHandler
-        {
-            return TryGetProtocolHandler<TProtocolHandler>(string.Empty, out handler);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public bool TryGetProtocolHandler<TProtocolHandler>(string name, out TProtocolHandler handler)
-            where TProtocolHandler : class, IResourceProtocolHandler
-        {
-            var key = new ValueTuple<Type, string>(typeof(TProtocolHandler), name);
-            if (_protocolByTypeAndName.TryGetValue(key, out IResourceProtocolHandler genericHandler))
-            {
-                handler = (TProtocolHandler)genericHandler;
+                protocol = (TProtocolInterface)genericProtocol;
                 return true;
             }
 
-            handler = null;
+            protocol = null;
             return false;
         }
     }

@@ -13,8 +13,12 @@ namespace NWheels.Samples.FirstHappyPath
     {
         public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
-            newComponents.ContributeTransactionScript<HelloWorldTx>();
-            newComponents.ContributeHttpEndpoint(name: "rest-api").RouteRequestsToRestApiService();
+            newComponents
+                .ContributeTransactionScript<HelloWorldTx>();
+
+            newComponents
+                .ContributeHttpEndpoint(name: "rest-api")
+                .RouteRequestsToRestApiService(protocolName: MessageProtocolInfo.Select.HttpRestNWheelsV1().ProtocolName);
         }
     }
 }

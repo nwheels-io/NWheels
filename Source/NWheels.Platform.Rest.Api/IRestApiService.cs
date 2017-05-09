@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using NWheels.Platform.Messaging;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -12,16 +13,10 @@ namespace NWheels.Platform.Rest
         bool TryGetHandler<THandler>(string uriPath, out THandler handler)
             where THandler : class, IResourceHandler;
 
-        TProtocolHandler GetProtocolHandler<TProtocolHandler>(string uriPath)
-            where TProtocolHandler : class, IResourceProtocolHandler;
+        TProtocolInterface GetHandlerProtocol<TProtocolInterface>(string uriPath, string protocolName)
+            where TProtocolInterface : class, IMessageProtocolInterface;
 
-        TProtocolHandler GetProtocolHandler<TProtocolHandler>(string uriPath, string protocolName)
-            where TProtocolHandler : class, IResourceProtocolHandler;
-
-        bool TryGetProtocolHandler<TProtocolHandler>(string uriPath, out TProtocolHandler protocol)
-            where TProtocolHandler : class, IResourceProtocolHandler;
-
-        bool TryGetProtocolHandler<TProtocolHandler>(string uriPath, string protocolName, out TProtocolHandler protocol)
-            where TProtocolHandler : class, IResourceProtocolHandler;
+        bool TryGetHandlerProtocol<TProtocolInterface>(string uriPath, string protocolName, out TProtocolInterface protocol)
+            where TProtocolInterface : class, IMessageProtocolInterface;
     }
 }
