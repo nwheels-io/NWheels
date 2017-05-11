@@ -4,8 +4,6 @@ branches:
   - master
 image: Visual Studio 2017
 clone_folder: c:\projects\NWheels
-install:
-- cmd: npm install -g @angular/cli
 before_build:
 - cmd: >-
     cd c:\projects\NWheels\Source
