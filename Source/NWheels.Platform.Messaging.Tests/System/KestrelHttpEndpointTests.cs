@@ -290,7 +290,7 @@ namespace NWheels.Platform.Messaging.Tests.System
 
             public ClassFixture()
             {
-                _microservice = new MicroserviceHostBuilder(microserviceName: "AspNetKestrelTest")
+                _microservice = new MicroserviceHostControllerBuilder(microserviceName: "AspNetKestrelTest")
                     .UseCliDirectoryFromSource(relativeProjectDirectoryPath: "..", allowOverrideByEnvironmentVar: true)
                     .UseMicroserviceFromSource(relativeProjectDirectoryPath: "..")
                     .UseAutofacInjectionAdapter()

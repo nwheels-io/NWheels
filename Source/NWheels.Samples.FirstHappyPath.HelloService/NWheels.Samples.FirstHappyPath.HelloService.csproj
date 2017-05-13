@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <AssemblyName>hello</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Compilation.Adapters.Roslyn\NWheels.Compilation.Adapters.Roslyn.csproj" />
+    <ProjectReference Include="..\NWheels.Frameworks.Ddd.Api\NWheels.Frameworks.Ddd.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Frameworks.Ddd.Implementation\NWheels.Frameworks.Ddd.Implementation.csproj" />
+    <ProjectReference Include="..\NWheels.Implementation\NWheels.Implementation.csproj" />
+    <ProjectReference Include="..\NWheels.Injection.Adapters.Autofac\NWheels.Injection.Adapters.Autofac.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Messaging.Adapters.AspNetKestrel\NWheels.Platform.Messaging.Adapters.AspNetKestrel.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Messaging.Api\NWheels.Platform.Messaging.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Messaging.Implementation\NWheels.Platform.Messaging.Implementation.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Rest.Api\NWheels.Platform.Rest.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Rest.Implementation\NWheels.Platform.Rest.Implementation.csproj" />
+  </ItemGroup>
+
+</Project>

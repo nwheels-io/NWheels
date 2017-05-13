@@ -1,8 +1,7 @@
 {
   "profiles": {
     "NWheels.Samples.FirstHappyPath": {
-      "commandName": "Executable",
-      "executablePath": "C:\\Program Files\\dotnet\\dotnet.exe",
+      "commandName": "Project",
       "commandLineArgs": "C:\\Work\\Repo\\NWheelsFork\\Source\\Bin\\netstandard1.6\\NWheels.Host.dll --configPath C:\\Work\\Repo\\NWheelsFork\\Source\\NWheels.Samples.FirstHappyPath"
     }
   }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using NWheels.Injection;
+using NWheels.Microservices;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -21,10 +22,24 @@ namespace NWheels.Platform.Messaging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void ContributeMessageProtocol<TInterface>(this IComponentContainerBuilder containerBuilder, string protocolName)
-            where TInterface : IMessageProtocolInterface
+        public static void ContributeMessageProtocol<TProtocol>(this IComponentContainerBuilder containerBuilder)
+            where TProtocol : MessageProtocol
         {
-            containerBuilder.RegisterComponentInstance(new MessageProtocolRegistration(typeof(TInterface), protocolName));
+            containerBuilder.RegisterComponentType<TProtocol>()
+                .SingleInstance()
+                .ForService<MessageProtocol>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IMicroserviceHostBuilder UseMessageProtocol<TProtocol>(this IMicroserviceHostBuilder hostBuilder)
+            where TProtocol : MessageProtocol
+        {
+            hostBuilder.ContributeComponents((existingComponents, newComponents) => {
+                newComponents.ContributeMessageProtocol<TProtocol>();
+            });
+
+            return hostBuilder;
         }
     }
 }

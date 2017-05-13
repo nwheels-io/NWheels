@@ -8,13 +8,15 @@ namespace NWheels.Platform.Rest
 {
     public static class ComponentContainerBuilderExtensions
     {
-        public static HttpEndpointInjectorPort RouteRequestsToRestApiService(this HttpEndpointInjectorPort port, string protocolName)
+        public static HttpEndpointInjectorPort ServeRestApiRequests<TProtocol>(this HttpEndpointInjectorPort port)
+            where TProtocol : MessageProtocol
         {
             var components = port.Components;
+            var protocol = new LazySlim<TProtocol>(factory: () => components.Resolve<TProtocol>());
 
             port.Handler = (context) => {
                 var restApiService = components.Resolve<IRestApiService>();
-                return restApiService.HandleHttpRequest(context, protocolName);
+                return restApiService.HandleHttpRequest(context, protocol.Value.ProtocolName);
             };
 
             return port;
