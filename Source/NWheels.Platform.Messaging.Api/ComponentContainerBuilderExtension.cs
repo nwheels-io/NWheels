@@ -13,9 +13,18 @@ namespace NWheels.Platform.Messaging
         public static HttpEndpointInjectorPort ContributeHttpEndpoint(
             this IComponentContainerBuilder containerBuilder, 
             string name,
+            int? listenPortNumber = null,
+            Action<IHttpEndpointConfig> onConfiguration = null,
             Func<HttpContext, Task> onRequest = null)
         {
-            var port = new HttpEndpointInjectorPort(containerBuilder, name, onRequest);
+            if (listenPortNumber.HasValue)
+            {
+                onConfiguration += (http) => {
+                    http.Port = listenPortNumber.Value;
+                };
+            }
+
+            var port = new HttpEndpointInjectorPort(containerBuilder, name, onConfiguration, onRequest);
             containerBuilder.RegisterComponentInstance<HttpEndpointInjectorPort>(port);
             return port;
         }

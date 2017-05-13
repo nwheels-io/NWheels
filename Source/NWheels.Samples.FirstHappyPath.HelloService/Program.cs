@@ -16,11 +16,11 @@ namespace NWheels.Samples.FirstHappyPath.HelloService
                 .UseAutofac()
                 .UseKestrel()
                 .UseMessaging()
-                .UseRestApi()
+                .UseRest()
                 .UseMessageProtocol<HttpRestNWheelsV1Protocol>()
+                .UseRestApiHttpEndpoint<HttpRestNWheelsV1Protocol>(listenPortNumber: 5000)
                 .ContributeComponents((existingComponents, newComponents) => {
                     newComponents.ContributeTransactionScript<HelloWorldTx>();
-                    newComponents.ContributeHttpEndpoint("rest-api").ServeRestApiRequests<HttpRestNWheelsV1Protocol>();
                 })
                 .UseApplicationFeature<GeneratedCodeProrotypesFeatureLoader>()
                 .Build();
