@@ -9,15 +9,17 @@ namespace NWheels.Platform.Messaging.Adapters.AspNetKestrel
     [DefaultFeatureLoader]
     public class KestrelFeatureLoader : FeatureLoaderBase
     {
-        public override void ContributeAdapterComponents(IComponentContainer input, IComponentContainerBuilder output)
+        public override void ContributeAdapterComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
-            base.ContributeCompiledComponents(input, output);
+            base.ContributeCompiledComponents(existingComponents, newComponents);
 
-            var allPorts = input.ResolveAll<HttpEndpointInjectorPort>();
+            var allPorts = existingComponents.ResolveAll<HttpEndpointInjectorPort>();
 
             foreach (var port in allPorts)
             {
-                output.RegisterComponentType<KestrelHttpEndpoint>()
+                port.ConfigureHttpEndpoint(existingComponents);
+
+                newComponents.RegisterComponentType<KestrelHttpEndpoint>()
                     .WithParameter<HttpEndpointInjectorPort>(port)
                     .SingleInstance()
                     .ForServices<IEndpoint, ILifecycleListenerComponent>();

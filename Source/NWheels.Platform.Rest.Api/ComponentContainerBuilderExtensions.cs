@@ -14,7 +14,7 @@ namespace NWheels.Platform.Rest
             var components = port.Components;
             var protocol = new LazySlim<TProtocol>(factory: () => components.Resolve<TProtocol>());
 
-            port.Handler = (context) => {
+            port.OnRequest = (context) => {
                 var restApiService = components.Resolve<IRestApiService>();
                 return restApiService.HandleHttpRequest(context, protocol.Value.ProtocolName);
             };

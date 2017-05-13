@@ -23,20 +23,6 @@ namespace NWheels.Samples.FirstHappyPath.HelloService
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void ContributeConfiguration(IComponentContainer existingComponents)
-        {
-            base.ContributeConfiguration(existingComponents);
-
-            var messagingPlatformConfig = existingComponents.Resolve<IMessagingPlatformConfiguration>();
-            var httpEndpointConfig = messagingPlatformConfig.NewHttpEndpointConfig();
-            httpEndpointConfig.Name = "rest-api";
-            httpEndpointConfig.Port = 5000;
-
-            messagingPlatformConfig.Endpoints.Add("rest-api", httpEndpointConfig);
-        }
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
         public override void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
             base.ContributeCompiledComponents(existingComponents, newComponents);

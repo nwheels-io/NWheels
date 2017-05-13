@@ -32,7 +32,7 @@ namespace NWheels.Platform.Messaging.Adapters.AspNetKestrel
         {
             _name = port.Name;
             _configuration = (IHttpEndpointConfig)platformConfig.Endpoints[port.Name];
-            _handler = port.Handler;
+            _handler = port.OnRequest;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
