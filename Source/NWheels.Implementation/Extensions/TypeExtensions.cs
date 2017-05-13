@@ -85,5 +85,12 @@ namespace NWheels.Extensions
                 output.Append(type.Name);
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string AssemblyShortName(this Type type)
+        {
+            return type.GetTypeInfo().Assembly.GetName().Name;
+        }
     }
 }

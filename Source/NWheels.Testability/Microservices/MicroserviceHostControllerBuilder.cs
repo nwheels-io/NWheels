@@ -9,7 +9,7 @@ using System.Text;
 
 namespace NWheels.Testability.Microservices
 {
-    public class MicroserviceHostBuilder
+    public class MicroserviceHostControllerBuilder
     {
         private readonly MicroserviceConfig _microserviceConfig;
         private readonly EnvironmentConfig _environmentConfig;
@@ -18,7 +18,7 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder(string microserviceName)
+        public MicroserviceHostControllerBuilder(string microserviceName)
         {
             _microserviceConfig = new MicroserviceConfig {
                 Name = microserviceName,
@@ -34,7 +34,7 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder UseMicroserviceDirectory(string directoryPath)
+        public MicroserviceHostControllerBuilder UseMicroserviceDirectory(string directoryPath)
         {
             _microserviceDirectory = directoryPath;
             return this;
@@ -42,7 +42,7 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder UseMicroserviceFromSource(string relativeProjectDirectoryPath, [CallerFilePath] string sourceFilePath = "")
+        public MicroserviceHostControllerBuilder UseMicroserviceFromSource(string relativeProjectDirectoryPath, [CallerFilePath] string sourceFilePath = "")
         {
             relativeProjectDirectoryPath = relativeProjectDirectoryPath
                 .Replace('\\', Path.DirectorySeparatorChar)
@@ -55,7 +55,7 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder UseCliDirectoryFromSource(
+        public MicroserviceHostControllerBuilder UseCliDirectoryFromSource(
             string relativeProjectDirectoryPath, 
             string cliProjectConfiguration = null, 
             bool allowOverrideByEnvironmentVar = false,
@@ -88,7 +88,7 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder UseCliDirectoryFromEnvironment()
+        public MicroserviceHostControllerBuilder UseCliDirectoryFromEnvironment()
         {
             _cliDirectory = GetCliDirectoryFromEnvironment();
             return this;
@@ -96,7 +96,7 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder UseAutofacInjectionAdapter()
+        public MicroserviceHostControllerBuilder UseAutofacInjectionAdapter()
         {
             _microserviceConfig.InjectionAdapter = new MicroserviceConfig.InjectionAdapterElement {
                 Assembly = "NWheels.Injection.Adapters.Autofac"
@@ -107,7 +107,7 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder UseApplicationModuleFor<T>()
+        public MicroserviceHostControllerBuilder UseApplicationModuleFor<T>()
         {
             _microserviceConfig.ApplicationModules = EnsureModuleListed(
                 typeof(T),
@@ -119,7 +119,7 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder UseApplicationFeature<T>()
+        public MicroserviceHostControllerBuilder UseApplicationFeature<T>()
             where T : IFeatureLoader
         {
             _microserviceConfig.ApplicationModules = EnsureModuleListed(
@@ -134,7 +134,7 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder UseFrameworkFeature<T>() 
+        public MicroserviceHostControllerBuilder UseFrameworkFeature<T>() 
             where T : IFeatureLoader
         {
             _microserviceConfig.FrameworkModules = EnsureModuleListed(
@@ -149,7 +149,7 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder UseFrameworkModuleFor<T>()
+        public MicroserviceHostControllerBuilder UseFrameworkModuleFor<T>()
         {
             _microserviceConfig.FrameworkModules = EnsureModuleListed(
                 typeof(T), 

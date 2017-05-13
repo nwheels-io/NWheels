@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Compilation.Adapters.Roslyn\NWheels.Compilation.Adapters.Roslyn.csproj" />
+    <ProjectReference Include="..\NWheels.Frameworks.Ddd.Api\NWheels.Frameworks.Ddd.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Frameworks.Ddd.Implementation\NWheels.Frameworks.Ddd.Implementation.csproj" />
+    <ProjectReference Include="..\NWheels.Implementation\NWheels.Implementation.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Messaging.Api\NWheels.Platform.Messaging.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Messaging.Implementation\NWheels.Platform.Messaging.Implementation.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Rest.Api\NWheels.Platform.Rest.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Rest.Implementation\NWheels.Platform.Rest.Implementation.csproj" />
+    <ProjectReference Include="..\NWheels.Samples.FirstHappyPath.HelloService\NWheels.Samples.FirstHappyPath.HelloService.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="System.Reflection" Version="4.3.0" />
+  </ItemGroup>
+
+</Project>

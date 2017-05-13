@@ -26,7 +26,7 @@ namespace NWheels.SystemTests.Microservices
         [Fact]
         public void SmokeTest()
         {
-            var host = new MicroserviceHostBuilder(microserviceName: "SmokeTest")
+            var host = new MicroserviceHostControllerBuilder(microserviceName: "SmokeTest")
                 .UseCliDirectoryFromSource(relativeProjectDirectoryPath: "..", allowOverrideByEnvironmentVar: true)
                 .UseMicroserviceFromSource(relativeProjectDirectoryPath: "..")
                 .UseAutofacInjectionAdapter()

@@ -20,6 +20,7 @@ namespace NWheels.Microservices
     {
         private readonly BootConfiguration _bootConfig;
         private readonly IMicroserviceHostLogger _logger;
+        private readonly Action<IComponentContainerBuilder> _hostComponents;
         private readonly AssemblyLocationMap _assemblyMap;
         private readonly List<ILifecycleListenerComponent> _lifecycleComponents;
         private readonly RevertableSequence _configureSequence;
@@ -27,14 +28,22 @@ namespace NWheels.Microservices
         private readonly RevertableSequence _activateSequence;
         private int _initializationCount = 0;
         private IInternalComponentContainer _container;
-        private TransientStateMachine<MicroserviceState, MicroserviceTrigger> _stateMachine;        
+        private TransientStateMachine<MicroserviceState, MicroserviceTrigger> _stateMachine;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public MicroserviceHost(BootConfiguration bootConfig, IMicroserviceHostLogger logger)
+            : this(bootConfig, logger, null)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MicroserviceHost(BootConfiguration bootConfig, IMicroserviceHostLogger logger, Action<IComponentContainerBuilder> hostComponents)
         {
             _bootConfig = bootConfig;
             _logger = logger;
+            _hostComponents = hostComponents;
             _assemblyMap = GetAssemblyLocationMap();
             _configureSequence = new RevertableSequence(new ConfigureSequenceCodeBehind(this));
             _loadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
@@ -227,50 +236,6 @@ namespace NWheels.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IMicroserviceHostLogger Logger
-        {
-            get
-            {
-                return _logger;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private BootConfiguration BootConfig
-        {
-            get
-            {
-                return _bootConfig;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private List<ILifecycleListenerComponent> LifecycleComponents
-        {
-            get
-            {
-                return _lifecycleComponents;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private IInternalComponentContainer Container
-        {
-            get
-            {
-                return _container;
-            }
-            set
-            {
-                _container = value;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         private bool ExecuteConfigurePhase()
         {
             return ExecutePhase(_configureSequence.Perform, _logger.NodeConfigureError);
@@ -423,6 +388,57 @@ namespace NWheels.Microservices
                 string.Join(Environment.NewLine, _assemblyMap.Directories.Select((path, index) => $"[{index + 1}] {path}"));
 
             throw new FileNotFoundException(errorMessage);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void RegisterHostComponents(IComponentContainerBuilder containerBuilder)
+        {
+            _hostComponents?.Invoke(containerBuilder);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IMicroserviceHostLogger Logger
+        {
+            get
+            {
+                return _logger;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private BootConfiguration BootConfig
+        {
+            get
+            {
+                return _bootConfig;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private List<ILifecycleListenerComponent> LifecycleComponents
+        {
+            get
+            {
+                return _lifecycleComponents;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IInternalComponentContainer Container
+        {
+            get
+            {
+                return _container;
+            }
+            set
+            {
+                _container = value;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -612,6 +628,8 @@ namespace NWheels.Microservices
                 _componentContainerBuilderType = LoadComponentContainerBuilderType();
 
                 var rootBuilder = CreateComponentContainerBuilder(rootContainer: null);
+                OwnerHost.RegisterHostComponents(rootBuilder);
+
                 var rootContainer = rootBuilder.CreateComponentContainer(isRootContainer: true);
                 var featureLoaders = GetConfiguredFeatureLoaders();
 

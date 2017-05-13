@@ -9,96 +9,130 @@ using NWheels.Platform.Messaging;
 
 namespace NWheels.Platform.Rest
 {
-    public abstract class HttpResourceProtocolBase : MessageProtocolBase, IHttpMessageProtocolInterface
+    public abstract class HttpResourceProtocolBase : MessageProtocol<IHttpMessageProtocolInterface>
     {
-        private static readonly HttpMethod _s_patchMethod = new HttpMethod("PATCH");
+        public static readonly HttpMethod PatchMethod = new HttpMethod("PATCH");
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected HttpResourceProtocolBase(string protocolName)
-            : base(typeof(IHttpMessageProtocolInterface), protocolName)
+            : base(protocolName)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        Task IHttpMessageProtocolInterface.HandleRequest(HttpContext context)
+        public override IHttpMessageProtocolInterface GetConcreteInterface()
         {
-            try
-            {
-                var method = context.Request.Method;
+            throw new NotSupportedException(
+                "This is an abstract protocol. Generated resource handlers provide concrete implementation per speciifc resource.");
+        }
 
-                if (method == HttpMethod.Get.Method)
-                {
-                    return HttpGet(context);
-                }
-                else if (method == HttpMethod.Post.Method)
-                {
-                    return HttpPost(context);
-                }
-                else if (method == HttpMethod.Put.Method)
-                {
-                    return HttpPut(context);
-                }
-                else if (method == _s_patchMethod.Method)
-                {
-                    return HttpPatch(context);
-                }
-                else if (method == HttpMethod.Delete.Method)
-                {
-                    return HttpDelete(context);
-                }
-                else
-                {
-                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                }
-            }
-            catch (Exception)
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override bool IsConcreteProtocol => false;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public abstract class HttpInterfaceBase : IHttpMessageProtocolInterface
+        {
+            protected HttpInterfaceBase(string protocolName)
             {
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                this.ProtocolInterface = typeof(IHttpMessageProtocolInterface);
+                this.ProtocolName = protocolName;
             }
 
-            return Task.CompletedTask;
-        }
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            public Task HandleRequest(HttpContext context)
+            {
+                try
+                {
+                    var method = context.Request.Method;
 
-        protected virtual Task HttpDelete(HttpContext context)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            return Task.CompletedTask;
-        }
+                    if (method == HttpMethod.Get.Method)
+                    {
+                        return HttpGet(context);
+                    }
+                    else if (method == HttpMethod.Post.Method)
+                    {
+                        return HttpPost(context);
+                    }
+                    else if (method == HttpMethod.Put.Method)
+                    {
+                        return HttpPut(context);
+                    }
+                    else if (method == PatchMethod.Method)
+                    {
+                        return HttpPatch(context);
+                    }
+                    else if (method == HttpMethod.Delete.Method)
+                    {
+                        return HttpDelete(context);
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    }
+                }
+                catch (Exception)
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+                return Task.CompletedTask;
+            }
 
-        protected virtual Task HttpGet(HttpContext context)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            return Task.CompletedTask;
-        }
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            public Type ProtocolInterface { get; }
 
-        protected virtual Task HttpPatch(HttpContext context)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            return Task.CompletedTask;
-        }
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            public string ProtocolName { get; }
 
-        protected virtual Task HttpPost(HttpContext context)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            return Task.CompletedTask;
-        }
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            protected virtual Task HttpDelete(HttpContext context)
+            {
+                return BadRequest(context);
+            }
 
-        protected virtual Task HttpPut(HttpContext context)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            return Task.CompletedTask;
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected virtual Task HttpGet(HttpContext context)
+            {
+                return BadRequest(context);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected virtual Task HttpPatch(HttpContext context)
+            {
+                return BadRequest(context);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected virtual Task HttpPost(HttpContext context)
+            {
+                return BadRequest(context);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected virtual Task HttpPut(HttpContext context)
+            {
+                return BadRequest(context);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected virtual Task BadRequest(HttpContext context)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                return Task.CompletedTask;
+            }
         }
     }
 }
