@@ -61,6 +61,8 @@ after_test:
     
     npm --version
     
+    npm install
+    
     npm test
     
 ## Pause build until file from desktop will be removed
