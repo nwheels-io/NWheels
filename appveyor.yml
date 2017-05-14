@@ -18,7 +18,9 @@ install:
   - ps: Install-Product node $env:nodejs_version
   # install modules
   - npm install
-
+  # install angular CLI
+  - npm install -g @angular/cli
+  
 before_build:
 - cmd: >-
     cd c:\projects\NWheels\Source
