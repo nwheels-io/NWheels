@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.12
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Api", "NWheels.Api\NWheels.Api.csproj", "{2585169C-CCAE-4D0C-BDED-4BEEC4A8E011}"
 EndProject
@@ -94,6 +94,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Platform.Messaging.Tests", "NWheels.Platform.Messaging.Tests\NWheels.Platform.Messaging.Tests.csproj", "{AA89A40E-2E44-4ACD-B480-E73125AF1C4A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Samples.FirstHappyPath.HelloService", "NWheels.Samples.FirstHappyPath.HelloService\NWheels.Samples.FirstHappyPath.HelloService.csproj", "{3BE3BCF0-B87C-41DA-B241-3AA2A336CDAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Frameworks.Uidl.Api", "NWheels.Frameworks.Uidl.Api\NWheels.Frameworks.Uidl.Api.csproj", "{E9AD5278-4DDF-49BB-8E2F-E0BDB2E00A58}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Frameworks.Uidl.Adapters.WebAngular", "NWheels.Frameworks.Uidl.Adapters.WebAngular\NWheels.Frameworks.Uidl.Adapters.WebAngular.csproj", "{6B106E04-01BF-4520-8DC0-33A90F636B12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -357,6 +361,30 @@ Global
 		{3BE3BCF0-B87C-41DA-B241-3AA2A336CDAD}.Release|x64.Build.0 = Release|Any CPU
 		{3BE3BCF0-B87C-41DA-B241-3AA2A336CDAD}.Release|x86.ActiveCfg = Release|Any CPU
 		{3BE3BCF0-B87C-41DA-B241-3AA2A336CDAD}.Release|x86.Build.0 = Release|Any CPU
+		{E9AD5278-4DDF-49BB-8E2F-E0BDB2E00A58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9AD5278-4DDF-49BB-8E2F-E0BDB2E00A58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9AD5278-4DDF-49BB-8E2F-E0BDB2E00A58}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E9AD5278-4DDF-49BB-8E2F-E0BDB2E00A58}.Debug|x64.Build.0 = Debug|Any CPU
+		{E9AD5278-4DDF-49BB-8E2F-E0BDB2E00A58}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E9AD5278-4DDF-49BB-8E2F-E0BDB2E00A58}.Debug|x86.Build.0 = Debug|Any CPU
+		{E9AD5278-4DDF-49BB-8E2F-E0BDB2E00A58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9AD5278-4DDF-49BB-8E2F-E0BDB2E00A58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9AD5278-4DDF-49BB-8E2F-E0BDB2E00A58}.Release|x64.ActiveCfg = Release|Any CPU
+		{E9AD5278-4DDF-49BB-8E2F-E0BDB2E00A58}.Release|x64.Build.0 = Release|Any CPU
+		{E9AD5278-4DDF-49BB-8E2F-E0BDB2E00A58}.Release|x86.ActiveCfg = Release|Any CPU
+		{E9AD5278-4DDF-49BB-8E2F-E0BDB2E00A58}.Release|x86.Build.0 = Release|Any CPU
+		{6B106E04-01BF-4520-8DC0-33A90F636B12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B106E04-01BF-4520-8DC0-33A90F636B12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B106E04-01BF-4520-8DC0-33A90F636B12}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6B106E04-01BF-4520-8DC0-33A90F636B12}.Debug|x64.Build.0 = Debug|Any CPU
+		{6B106E04-01BF-4520-8DC0-33A90F636B12}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6B106E04-01BF-4520-8DC0-33A90F636B12}.Debug|x86.Build.0 = Debug|Any CPU
+		{6B106E04-01BF-4520-8DC0-33A90F636B12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B106E04-01BF-4520-8DC0-33A90F636B12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B106E04-01BF-4520-8DC0-33A90F636B12}.Release|x64.ActiveCfg = Release|Any CPU
+		{6B106E04-01BF-4520-8DC0-33A90F636B12}.Release|x64.Build.0 = Release|Any CPU
+		{6B106E04-01BF-4520-8DC0-33A90F636B12}.Release|x86.ActiveCfg = Release|Any CPU
+		{6B106E04-01BF-4520-8DC0-33A90F636B12}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -402,5 +430,7 @@ Global
 		{D4C21D20-CBBA-4BDA-B616-66E096050002} = {8CC4DEA7-567E-40A9-8CE8-51993E12AD51}
 		{AA89A40E-2E44-4ACD-B480-E73125AF1C4A} = {8CC4DEA7-567E-40A9-8CE8-51993E12AD51}
 		{3BE3BCF0-B87C-41DA-B241-3AA2A336CDAD} = {B340EE3D-8EFC-4906-AC98-F5B3EB6227AF}
+		{E9AD5278-4DDF-49BB-8E2F-E0BDB2E00A58} = {7FE33921-D959-45FA-952B-BDB8CC97EB82}
+		{6B106E04-01BF-4520-8DC0-33A90F636B12} = {7FE33921-D959-45FA-952B-BDB8CC97EB82}
 	EndGlobalSection
 EndGlobal

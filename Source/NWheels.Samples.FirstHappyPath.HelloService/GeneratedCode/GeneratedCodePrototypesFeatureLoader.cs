@@ -10,7 +10,7 @@ using NWheels.Platform.Messaging;
 namespace NWheels.Samples.FirstHappyPath.HelloService
 {
     [DefaultFeatureLoader]
-    public class GeneratedCodeProrotypesFeatureLoader : FeatureLoaderBase
+    public class GeneratedCodePrototypesFeatureLoader : FeatureLoaderBase
     {
         public override void ContributeConfigSections(IComponentContainerBuilder newComponents)
         {
