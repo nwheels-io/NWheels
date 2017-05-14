@@ -19,10 +19,11 @@ namespace NWheels.Samples.FirstHappyPath.HelloService
                 .UseRest()
                 .UseMessageProtocol<HttpRestNWheelsV1Protocol>()
                 .UseRestApiHttpEndpoint<HttpRestNWheelsV1Protocol>(listenPortNumber: 5000)
+                //.UseWebAppHttpEndpoint<HelloWorldApp>(listenPortNumber: 5500)
                 .ContributeComponents((existingComponents, newComponents) => {
                     newComponents.ContributeTransactionScript<HelloWorldTx>();
                 })
-                .UseApplicationFeature<GeneratedCodeProrotypesFeatureLoader>()
+                .UseApplicationFeature<GeneratedCodePrototypesFeatureLoader>()
                 .Build();
 
             return microservice.Run(args);
