@@ -8,10 +8,11 @@ branches:
   - master
 image: Visual Studio 2017
 
-environment:
-  nodejs_version: "LTS"
-  
 clone_folder: c:\projects\NWheels
+
+environment:
+  nodejs_version: "6"
+
 before_build:
 - cmd: >-
     cd c:\projects\NWheels\Source
