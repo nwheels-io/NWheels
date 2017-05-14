@@ -48,6 +48,8 @@ after_test:
 - cmd: >-
     cd c:\projects\NWheels\Source\Presentation\Web\AppVeyorPoc
 
+    node --version
+    
     npm --version
     
     npm test
