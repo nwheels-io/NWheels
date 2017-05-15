@@ -1,4 +1,5 @@
 ﻿using NWheels.Frameworks.Ddd;
+using NWheels.Frameworks.Uidl;
 using NWheels.Injection.Adapters.Autofac;
 using NWheels.Microservices;
 using NWheels.Platform.Messaging;
@@ -19,7 +20,7 @@ namespace NWheels.Samples.FirstHappyPath.HelloService
                 .UseRest()
                 .UseMessageProtocol<HttpRestNWheelsV1Protocol>()
                 .UseRestApiHttpEndpoint<HttpRestNWheelsV1Protocol>(listenPortNumber: 5000)
-                //.UseWebAppHttpEndpoint<HelloWorldApp>(listenPortNumber: 5500)
+                .UseWebAppHttpEndpoint<HelloWorldApp>(listenPortNumber: 5500)
                 .ContributeComponents((existingComponents, newComponents) => {
                     newComponents.ContributeTransactionScript<HelloWorldTx>();
                 })

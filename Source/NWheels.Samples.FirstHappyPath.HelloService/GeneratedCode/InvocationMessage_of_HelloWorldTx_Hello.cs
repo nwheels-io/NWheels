@@ -90,7 +90,6 @@ namespace NWheels.Samples.FirstHappyPath.HelloService
         public struct OutputMessage
         {
             public string ReturnValue;
-
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

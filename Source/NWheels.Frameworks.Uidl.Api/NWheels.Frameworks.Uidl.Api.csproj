@@ -14,4 +14,11 @@
     <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Desktop\" />
+    <Folder Include="Mobile\" />
+    <Folder Include="Voice\" />
+    <Folder Include="TV\" />
+  </ItemGroup>
+
 </Project>
