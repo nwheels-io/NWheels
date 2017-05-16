@@ -37,11 +37,11 @@ namespace NWheels.Platform.Messaging
     [ConfigElement]
     public interface IHttpStaticFolderConfig
     {
-        string RequestBasePath { get; }
-        string LocalRootPath { get; }
+        string RequestBasePath { get; set; }
+        string LocalRootPath { get; set; }
         IList<string> DefaultFiles { get; }
-        string CacheControl { get; }
-        string DefaultContentType { get; }
-        bool EnableDirectoryBrowsing { get; }
+        string CacheControl { get; set; }
+        string DefaultContentType { get; set; }
+        bool EnableDirectoryBrowsing { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using NWheels.Frameworks.Ddd;
 using NWheels.Frameworks.Uidl;
+using NWheels.Frameworks.Uidl.Adapters.WebAngular;
 using NWheels.Injection.Adapters.Autofac;
 using NWheels.Microservices;
 using NWheels.Platform.Messaging;
@@ -16,13 +17,15 @@ namespace NWheels.Samples.FirstHappyPath.HelloService
             var microservice = new MicroserviceHostBuilder("hello")
                 .UseAutofac()
                 .UseKestrel()
+                .UseAngular()
                 .UseMessaging()
                 .UseRest()
+                .UseUidl()
                 .UseMessageProtocol<HttpRestNWheelsV1Protocol>()
                 .UseRestApiHttpEndpoint<HttpRestNWheelsV1Protocol>(listenPortNumber: 5000)
-                .UseWebAppHttpEndpoint<HelloWorldApp>(listenPortNumber: 5500)
                 .ContributeComponents((existingComponents, newComponents) => {
                     newComponents.ContributeTransactionScript<HelloWorldTx>();
+                    newComponents.ContributeWebApp<HelloWorldApp>(urlPathBase: "/");
                 })
                 .UseApplicationFeature<GeneratedCodePrototypesFeatureLoader>()
                 .Build();

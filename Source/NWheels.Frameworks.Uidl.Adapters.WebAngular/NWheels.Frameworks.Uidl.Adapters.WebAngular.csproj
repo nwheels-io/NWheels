@@ -9,5 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
     <ProjectReference Include="..\NWheels.Frameworks.Uidl.Api\NWheels.Frameworks.Uidl.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Rest.Api\NWheels.Platform.Rest.Api.csproj" />
   </ItemGroup>
 </Project>
