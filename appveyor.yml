@@ -61,7 +61,7 @@ after_test:
     
     npm --version
     
-    npm install -g
+    npm install
     
     ng test --single-run=true
     
