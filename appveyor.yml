@@ -63,7 +63,7 @@ after_test:
     
     npm install
     
-    npm test
+    ng test --single-run=true
     
 ## Pause build until file from desktop will be removed
 #on_finish:
