@@ -10,6 +10,7 @@
     <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
     <ProjectReference Include="..\NWheels.Compilation.Adapters.Roslyn\NWheels.Compilation.Adapters.Roslyn.csproj" />
     <ProjectReference Include="..\NWheels.Frameworks.Uidl.Api\NWheels.Frameworks.Uidl.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Frameworks.Uidl.Adapters.WebAngular\NWheels.Frameworks.Uidl.Adapters.WebAngular.csproj" />
     <ProjectReference Include="..\NWheels.Frameworks.Ddd.Api\NWheels.Frameworks.Ddd.Api.csproj" />
     <ProjectReference Include="..\NWheels.Frameworks.Ddd.Implementation\NWheels.Frameworks.Ddd.Implementation.csproj" />
     <ProjectReference Include="..\NWheels.Implementation\NWheels.Implementation.csproj" />

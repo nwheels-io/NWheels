@@ -1,0 +1,78 @@
+body {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
+}
+
+h3 {
+    padding-left: 40px;
+    height: 40px;
+    line-height: 40px;
+    vertical-align: middle;
+}
+
+form {
+    margin-top: 20px;
+    margin-left: 40px;
+}
+
+label.field {
+    display: inline-block;
+    width: 150px
+}
+
+label.error {
+    margin-left: 8px;
+}
+
+input[type=text] {
+    width: 300px;
+    padding: 8px;
+    margin-bottom: 15px;
+}
+
+button {
+    padding: 8px;
+    width: 150px;
+    cursor: pointer;
+}
+
+button:disabled {
+    background: whitesmoke;
+    border: 1px solid lightgray;
+    color: lightgray;
+}
+
+.progress {
+    color: orange;
+}
+
+.primary {
+    color: navy;
+}
+
+.success {
+    color: green;
+}
+
+.warning {
+    color: orange;
+}
+
+.error {
+    color: red;
+}
+
+h3.progress {
+    background: url(spinner.gif) no-repeat left center;
+}
+
+h3.error {
+    background: url(error.png) no-repeat left center;
+}
+
+h3.success {
+    background: url(success.png) no-repeat left center;
+}
+
+h3.warning {
+    background: url(warning.png) no-repeat left center;
+}

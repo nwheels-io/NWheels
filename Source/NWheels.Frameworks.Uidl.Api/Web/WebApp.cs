@@ -5,7 +5,11 @@ using System.Text;
 
 namespace NWheels.Frameworks.Uidl.Web
 {
-    public class WebApp<TSessionState> : AbstractUIApp<TSessionState>
+    public class WebApp<TSessionState> : AbstractUIApp<TSessionState>, IWebApp
+    {
+    }
+
+    public interface IWebApp : IAbstractUIApp
     {
     }
 }

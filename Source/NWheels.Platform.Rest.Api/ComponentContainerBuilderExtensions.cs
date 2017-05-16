@@ -19,7 +19,32 @@ namespace NWheels.Platform.Rest
                 return restApiService.HandleHttpRequest(context, protocol.Value.ProtocolName);
             };
 
+            port.OnConfiguration += new Action<IHttpEndpointConfig>((endpointConfig) => {
+                var platformConfig = components.Resolve<IMessagingPlatformConfiguration>();
+                var staticFolders = components.ResolveAll<StaticResourceFolderDescription>();
+
+                foreach (var folder in staticFolders)
+                {
+                    endpointConfig.StaticFolders.Add(ConfigureStaticResourceFolder(folder, platformConfig.NewHttpStaticFolderConfig()));
+                }
+            });
+
             return port;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static IHttpStaticFolderConfig ConfigureStaticResourceFolder(StaticResourceFolderDescription description, IHttpStaticFolderConfig config)
+        {
+            config.RequestBasePath = description.FolderUriPath;
+            config.LocalRootPath = description.FolderLocalPath;
+
+            if (!string.IsNullOrEmpty(description.DefaultFileName))
+            {
+                config.DefaultFiles.Add(description.DefaultFileName);
+            }
+
+            return config;
         }
     }
 }
