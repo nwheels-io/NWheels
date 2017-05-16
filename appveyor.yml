@@ -65,6 +65,8 @@ after_test:
     
     ng test --single-run=true
     
+    ng e2e
+    
 ## Pause build until file from desktop will be removed
 #on_finish:
 #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))    
