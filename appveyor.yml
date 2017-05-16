@@ -65,6 +65,8 @@ after_test:
     
     ng test --single-run=true
     
+    echo export class Configuration{static appVeyorToken = 'token';} > configuration.ts
+    
     ng e2e
     
 ## Pause build until file from desktop will be removed
