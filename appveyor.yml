@@ -17,7 +17,7 @@ install:
   # Get the latest stable version of Node.js or io.js
   - ps: Install-Product node $env:nodejs_version
   # install modules
-  - npm install
+  - npm install -g
   # install angular CLI
   - npm install -g @angular/cli
   
@@ -61,7 +61,7 @@ after_test:
     
     npm --version
     
-    npm install
+    npm install -g
     
     ng test --single-run=true
     
