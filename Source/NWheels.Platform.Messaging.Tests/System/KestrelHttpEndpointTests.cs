@@ -122,6 +122,34 @@ namespace NWheels.Platform.Messaging.Tests.System
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void CanServeStaticDefaultFileAtRequestRootPath()
+        {
+            //-- act
+
+            var response1 = MakeHttpRequest(5500, HttpMethod.Get, "/");
+
+            //-- assert
+
+            AssertHttpResponse(response1, HttpStatusCode.OK, "text/html", "System/wwwroot/Static2/index.html");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanServeStaticFileAtRequestRootPath()
+        {
+            //-- act
+
+            var response1 = MakeHttpRequest(5500, HttpMethod.Get, "/data.json");
+
+            //-- assert
+
+            AssertHttpResponse(response1, HttpStatusCode.OK, "application/json", "System/wwwroot/Static2/data.json");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void CanHandleNonStaticRequest()
         {
             //-- act
@@ -346,6 +374,13 @@ namespace NWheels.Platform.Messaging.Tests.System
                             DefaultFiles = new string[] {
                                 "index.html"
                             }
+                        },
+                        new TestHttpStaticFolderConfig {
+                            LocalRootPath = Path.Combine(_s_binaryFolder, "System/wwwroot/Static2".ToPathString()),
+                            RequestBasePath = "/",
+                            DefaultFiles = new string[] {
+                                "index.html"
+                            }
                         }
                     }
                 };
@@ -422,6 +457,11 @@ namespace NWheels.Platform.Messaging.Tests.System
 
         private class TestHttpEndpointConfiguration : IHttpEndpointConfig
         {
+            public TestHttpEndpointConfiguration()
+            {
+                StaticFolders = new List<IHttpStaticFolderConfig>();
+            }
+
             public int Port { get; set; }
 
             public IHttpsConfig Https { get; set; }

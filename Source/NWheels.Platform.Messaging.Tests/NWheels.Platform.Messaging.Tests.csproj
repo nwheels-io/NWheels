@@ -20,7 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="System\wwwroot\Static2\" />
     <Folder Include="System\wwwroot\Static1\" />
   </ItemGroup>
 
@@ -33,6 +32,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="System\wwwroot\Static1\test.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="System\wwwroot\Static2\data.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="System\wwwroot\Static2\index.html">

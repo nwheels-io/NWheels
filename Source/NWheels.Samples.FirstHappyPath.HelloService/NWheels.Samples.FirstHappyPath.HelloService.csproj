@@ -22,4 +22,34 @@
     <ProjectReference Include="..\NWheels.Platform.Rest.Implementation\NWheels.Platform.Rest.Implementation.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="GeneratedDeployables\NWheels.Frameworks.Uidl.Adapters.WebAngular\HelloWorldApp\error.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="GeneratedDeployables\NWheels.Frameworks.Uidl.Adapters.WebAngular\HelloWorldApp\HelloScreen_Controller.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="GeneratedDeployables\NWheels.Frameworks.Uidl.Adapters.WebAngular\HelloWorldApp\index.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="GeneratedDeployables\NWheels.Frameworks.Uidl.Adapters.WebAngular\HelloWorldApp\jquery-3.2.1.min.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="GeneratedDeployables\NWheels.Frameworks.Uidl.Adapters.WebAngular\HelloWorldApp\jquery.validate.min.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="GeneratedDeployables\NWheels.Frameworks.Uidl.Adapters.WebAngular\HelloWorldApp\spinner.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="GeneratedDeployables\NWheels.Frameworks.Uidl.Adapters.WebAngular\HelloWorldApp\style.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="GeneratedDeployables\NWheels.Frameworks.Uidl.Adapters.WebAngular\HelloWorldApp\success.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="GeneratedDeployables\NWheels.Frameworks.Uidl.Adapters.WebAngular\HelloWorldApp\warning.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

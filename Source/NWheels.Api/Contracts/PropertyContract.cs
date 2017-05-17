@@ -16,6 +16,19 @@ namespace NWheels.Contracts
         {
         }
 
+        public static class Semantics
+        {
+            [AttributeUsage(AttributeTargets.Property)]
+            public class InputAttribute : Attribute
+            {
+            }
+
+            [AttributeUsage(AttributeTargets.Property)]
+            public class OutputAttribute : Attribute
+            {
+            }
+        }
+
         public static class Presentation
         {
             [AttributeUsage(AttributeTargets.Property)]

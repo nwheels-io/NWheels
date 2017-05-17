@@ -1,26 +1,27 @@
 <html>
 <head>
     <title>Hello World App</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
     <h1>Hello World App</h1>
     <hr />
-    <h3 class="progress" id="Transaction__Status">Please wait</h3>
     <form>
-        <label class="field" for="Transaction_ViewModel_Name">Name</label>
-        <input type="text" name="Transaction_ViewModel_Name" id="Transaction_ViewModel_Name__Input" required />
+        <label id="Transaction_ViewModel_Name__Label" class="field" for="Transaction_ViewModel_Name__Input">Name</label>
+        <input type="text" name="Transaction_ViewModel_Name" id="Transaction_ViewModel_Name__Input" required  disabled="true"/>
         <br />
-
-        <label class="field" for="save_button">&nbsp;</label>
+        
+        <label class="field">&nbsp;</label>
         <button id="Transaction_SubmitCommand__Button" disabled="true">GO</button>
         <br />
 
-        <label class="field" for="guid_field">Message</label>
-        <span id="Transaction_ViewModel_Message__Text"></span>
+        <label id="Transaction_ViewModel_Message__Label" class="field" for="Transaction_ViewModel_Message__Text" style="display:none">We say</label>
+        <span id="Transaction_ViewModel_Message__Text" class="field" style="display:none"></span>
     </form>
 
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+    <script src="jquery-3.2.1.min.js" ></script>
+    <script src="jquery.validate.min.js"></script>
     <script src="HelloScreen_Controller.js"></script>
 </body>
 </html>
+ 
