@@ -130,9 +130,14 @@ namespace NWheels.Platform.Messaging.Adapters.AspNetKestrel
         {
             foreach (var folder in _configuration.StaticFolders)
             {
+                var safeRequestPath = (
+                    folder.RequestBasePath == "/"
+                    ? string.Empty
+                    : folder.RequestBasePath.DefaultIfNullOrEmpty(string.Empty));
+
                 var folderOptions = new FileServerOptions {
                     FileProvider = new PhysicalFileProvider(GetStaticWebContentFolderPath(folder)),
-                    RequestPath = new PathString(folder.RequestBasePath.DefaultIfNullOrEmpty("/")),
+                    RequestPath = new PathString(safeRequestPath),
                     EnableDefaultFiles = (folder.DefaultFiles?.Count > 0),
                     EnableDirectoryBrowsing = folder.EnableDirectoryBrowsing
                 };
@@ -148,7 +153,7 @@ namespace NWheels.Platform.Messaging.Adapters.AspNetKestrel
                 if (folderOptions.EnableDefaultFiles)
                 {
                     folderOptions.DefaultFilesOptions.FileProvider = new PhysicalFileProvider(GetStaticWebContentFolderPath(folder));
-                    folderOptions.DefaultFilesOptions.RequestPath = new PathString(folder.RequestBasePath.DefaultIfNullOrEmpty("/"));
+                    folderOptions.DefaultFilesOptions.RequestPath = new PathString(safeRequestPath);
                     folderOptions.DefaultFilesOptions.DefaultFileNames = folder.DefaultFiles.ToArray();
                 }
 

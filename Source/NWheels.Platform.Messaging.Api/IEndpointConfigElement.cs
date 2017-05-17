@@ -18,7 +18,7 @@ namespace NWheels.Platform.Messaging
     {
         int Port { get; set; }
         IHttpsConfig Https { get; set; }
-        IList<IHttpStaticFolderConfig> StaticFolders { get; set; }
+        IList<IHttpStaticFolderConfig> StaticFolders { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

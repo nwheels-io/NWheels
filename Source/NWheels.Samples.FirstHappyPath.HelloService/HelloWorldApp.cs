@@ -42,10 +42,10 @@ namespace NWheels.Samples.FirstHappyPath.HelloService
 
             public class HelloWorldViewModel 
             {
-                [PropertyContract.Required]
+                [PropertyContract.Required, PropertyContract.Semantics.Input]
                 public string Name { get; set; }
          
-                [PropertyContract.ReadOnly, PropertyContract.Presentation.Label("WeSay")]
+                [PropertyContract.Semantics.Output, PropertyContract.Presentation.Label("WeSay")]
                 public string Message { get; set; }
             }
         }

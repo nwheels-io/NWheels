@@ -3,12 +3,12 @@
 $(document).ready(function () {
 
     var uiStates = {
-        New: { canEdit: true, canApply: false, text: 'New transaction', style: 'primary' },
-        Modified: { canEdit: true, canApply: true, text: 'Input modified. Click GO to apply changes.', style: 'warning' },
-        NotValid: { canEdit: true, canApply: false, text: 'Invalid entry', style: 'error' },
-        Saving: { canEdit: false, canApply: false, text: 'Applying changes...', style: 'progress' },
-        Saved: { canEdit: true, canApply: false, text: 'Changes successfully applied.', style: 'success' },
-        SaveFailed: { canEdit: true, canApply: true, text: 'Failed to apply changes', style: 'error' }
+        New: { canEdit: true, canApply: false, hasOutput: false },
+        Modified: { canEdit: true, canApply: true, hasOutput: false },
+        NotValid: { canEdit: true, canApply: false, hasOutput: false },
+        Saving: { canEdit: false, canApply: false, hasOutput: false },
+        Saved: { canEdit: true, canApply: false, hasOutput: true },
+        SaveFailed: { canEdit: true, canApply: true, hasOutput: false },
     };
 
     setUIState('New');
@@ -27,17 +27,17 @@ $(document).ready(function () {
         setUIState('Saving');
 
         var data = {
-            name: $('#Transaction_ViewModel_Name').val(),
+            name: $('#Transaction_ViewModel_Name__Input').val(),
         };
 
         $.ajax({
             type: 'POST',
-            url: '/tx/HelloWorldTx/Hello',
+            url: '/tx/HelloWorld/Hello',
             data: JSON.stringify(data),
             contentType: 'application/json',
             dataType: 'json',
             success: function (data) {
-                $('#Transaction__Status').text(data.result)
+                $('#Transaction_ViewModel_Message__Text').text(data.result)
             }
         })
         .done(function (data) {
@@ -62,7 +62,8 @@ $(document).ready(function () {
         var state = uiStates[name];
 
         $('#Transaction_SubmitCommand__Button').prop('disabled', !state.canApply);
-        $('#Transaction__Status').text(state.text).prop('class', state.style);
         $('input[type=text]').prop('disabled', !state.canEdit);
+        $('#Transaction_ViewModel_Message__Label').toggle(state.hasOutput);
+        $('#Transaction_ViewModel_Message__Text').toggle(state.hasOutput);
     }
 });

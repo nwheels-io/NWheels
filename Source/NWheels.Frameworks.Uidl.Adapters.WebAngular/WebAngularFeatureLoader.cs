@@ -1,11 +1,13 @@
 ﻿using NWheels.Microservices;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using NWheels.Injection;
 using NWheels.Frameworks.Uidl.Injection;
 using NWheels.Platform.Rest;
 using NWheels.Extensions;
+using NWheels.Platform.Messaging;
 
 namespace NWheels.Frameworks.Uidl.Adapters.WebAngular
 {
@@ -16,21 +18,40 @@ namespace NWheels.Frameworks.Uidl.Adapters.WebAngular
         {
             base.ContributeAdapterComponents(existingComponents, newComponents);
 
-            var allPorts = existingComponents.ResolveAll<WebAppInjectorPort>();
-            
-            foreach (var port in allPorts)
+            var platformConfig = existingComponents.Resolve<IMessagingPlatformConfiguration>();
+
+            var webAppPorts = existingComponents.ResolveAll<WebAppInjectorPort>();
+            var httpEndpointConfigs = existingComponents.ResolveAll<HttpEndpointInjectorPort>()
+                .Select(endpoint => platformConfig.Endpoints[endpoint.Name])
+                .Cast<IHttpEndpointConfig>()
+                .ToArray();
+
+            foreach (var appPort in webAppPorts)
             {
-                // more TODO here!
-                // TODO: register additional dynamic resources (e.g. server-side methods in view models)
-                // TODO: check for the case static resources are deployed to a CDN and not locally
-                newComponents.RegisterComponentInstance(new StaticResourceFolderDescription(
-                    folderUriPath: port.UriPathBase,
-                    folderLocalPath: PathUtility.ExpandPathFromBinary(
-                        "GeneratedDeployables",
-                        "NWheels.Frameworks.Uidl.Adapters.WebAngular", 
-                        port.ApplicationName),
-                    defaultFileName: "index.html"));
+                var assetFolderPath = PathUtility.ExpandPathFromBinary(
+                    "GeneratedDeployables",
+                    "NWheels.Frameworks.Uidl.Adapters.WebAngular",
+                    appPort.ApplicationName);
+
+                foreach (var endpointConfig in httpEndpointConfigs)
+                {
+                    endpointConfig.StaticFolders.Add(ConfigureStaticResourceFolder(
+                        appPort.UriPathBase,
+                        assetFolderPath,
+                        platformConfig.NewHttpStaticFolderConfig()));
+                }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static IHttpStaticFolderConfig ConfigureStaticResourceFolder(string urlPath, string localPath, IHttpStaticFolderConfig config)
+        {
+            config.RequestBasePath = urlPath;
+            config.LocalRootPath = localPath;
+            config.DefaultFiles.Add("index.html");
+
+            return config;
         }
     }
 }

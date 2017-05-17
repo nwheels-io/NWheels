@@ -41,6 +41,11 @@ namespace NWheels.Samples.FirstHappyPath.HelloService
 
     public class ConfigElement_HttpEndpointConfig : ConfigElement_IEndpointConfig, IHttpEndpointConfig
     {
+        public ConfigElement_HttpEndpointConfig()
+        {
+            StaticFolders = new List<IHttpStaticFolderConfig>();
+        }
+
         public int Port { get; set; }
         public IHttpsConfig Https { get; set; }
         public IList<IHttpStaticFolderConfig> StaticFolders { get; set; }
@@ -60,6 +65,11 @@ namespace NWheels.Samples.FirstHappyPath.HelloService
 
     public class ConfigElement_HttpStaticFolderConfig : IHttpStaticFolderConfig
     {
+        public ConfigElement_HttpStaticFolderConfig()
+        {
+            DefaultFiles = new List<string>();
+        }
+
         public string RequestBasePath { get; set; }
         public string LocalRootPath { get; set; }
         public IList<string> DefaultFiles { get; set; }
