@@ -12,7 +12,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Compilation.Adapters.Roslyn\NWheels.Compilation.Adapters.Roslyn.csproj" />
     <ProjectReference Include="..\NWheels.Implementation\NWheels.Implementation.csproj" />
+    <ProjectReference Include="..\NWheels.Injection.Adapters.Autofac\NWheels.Injection.Adapters.Autofac.csproj" />
     <ProjectReference Include="..\NWheels.Platform.Messaging.Adapters.AspNetKestrel\NWheels.Platform.Messaging.Adapters.AspNetKestrel.csproj" />
     <ProjectReference Include="..\NWheels.Platform.Messaging.Api\NWheels.Platform.Messaging.Api.csproj" />
     <ProjectReference Include="..\NWheels.Platform.Messaging.Implementation\NWheels.Platform.Messaging.Implementation.csproj" />

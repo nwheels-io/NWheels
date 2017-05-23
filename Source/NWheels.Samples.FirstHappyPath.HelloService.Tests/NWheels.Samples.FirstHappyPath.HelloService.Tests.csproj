@@ -8,17 +8,23 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
-    <PackageReference Include="FluentAssertions" Version="4.19.0" />
-    <PackageReference Include="Microsoft.AspNetCore" Version="1.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="1.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\NWheels.Api\NWheels.Api.csproj" />
     <ProjectReference Include="..\NWheels.Compilation.Adapters.Roslyn\NWheels.Compilation.Adapters.Roslyn.csproj" />
+    <ProjectReference Include="..\NWheels.Frameworks.Ddd.Api\NWheels.Frameworks.Ddd.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Frameworks.Ddd.Implementation\NWheels.Frameworks.Ddd.Implementation.csproj" />
+    <ProjectReference Include="..\NWheels.Frameworks.Uidl.Api\NWheels.Frameworks.Uidl.Api.csproj" />
     <ProjectReference Include="..\NWheels.Implementation\NWheels.Implementation.csproj" />
     <ProjectReference Include="..\NWheels.Injection.Adapters.Autofac\NWheels.Injection.Adapters.Autofac.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Messaging.Api\NWheels.Platform.Messaging.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Messaging.Implementation\NWheels.Platform.Messaging.Implementation.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Rest.Api\NWheels.Platform.Rest.Api.csproj" />
+    <ProjectReference Include="..\NWheels.Platform.Rest.Implementation\NWheels.Platform.Rest.Implementation.csproj" />
+    <ProjectReference Include="..\NWheels.Samples.FirstHappyPath.HelloService\NWheels.Samples.FirstHappyPath.HelloService.csproj" />
     <ProjectReference Include="..\NWheels.Testability\NWheels.Testability.csproj" />
+    <PackageReference Include="FluentAssertions" Version="4.19.0" />
   </ItemGroup>
 
   <ItemGroup>

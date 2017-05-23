@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using NWheels.Injection.Adapters.Autofac;
 
 namespace NWheels.SystemTests.Microservices
 {
@@ -26,14 +27,16 @@ namespace NWheels.SystemTests.Microservices
         [Fact]
         public void SmokeTest()
         {
-            var host = new MicroserviceHostControllerBuilder(microserviceName: "SmokeTest")
-                .UseCliDirectoryFromSource(relativeProjectDirectoryPath: "..", allowOverrideByEnvironmentVar: true)
-                .UseMicroserviceFromSource(relativeProjectDirectoryPath: "..")
-                .UseAutofacInjectionAdapter()
-                .UseApplicationFeature<SmokeTestFeatureLoader>()
+            var controller = new MicroserviceControllerBuilder(microserviceName: "SmokeTest")
+                .UseCliDirectoryFromSolution(relativeProjectDirectoryPath: "..", allowOverrideByEnvironmentVar: true)
+                .UseMicroserviceProjectDirectory(directoryPath: "..")
+                .Microservice(host => host
+                    .UseAutofac()
+                    .UseApplicationFeature<SmokeTestFeatureLoader>()
+                )
                 .Build();
 
-            host.Start();
+            controller.Start();
 
             using (var client = new HttpClient())
             {
@@ -47,8 +50,8 @@ namespace NWheels.SystemTests.Microservices
                 responseText.Should().Be("this-is-a-test");
             }
 
-            host.StopOrThrow(10000);
-            host.AssertNoErrors();
+            controller.StopOrThrow(10000);
+            controller.AssertNoErrors();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
