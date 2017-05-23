@@ -16,14 +16,15 @@ using Xunit;
 
 namespace NWheels.Testability.Microservices
 {
-    public class MicroserviceHostController
+    public class MicroserviceController
     {
+        private readonly RunMode _runMode;
         private readonly MicroserviceConfig _microserviceConfig;
         private readonly EnvironmentConfig _environmentConfig;
+        private string _microservicePath;
+        private string _microserviceXmlFilePath;
+        private string _environmentXmlFilePath;
         private string _cliDirectory;
-        private string _microserviceDirectory;
-        private string _microserviceFilePath;
-        private string _environmentFilePath;
         private Process _process;
         private OutputReader _stdOut;
         private OutputReader _stdErr;
@@ -32,16 +33,18 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostController(
-            string cliDirectory,
-            string microserviceDirectory,
+        public MicroserviceController(
+            RunMode runMode,
+            string microservicePath,
             MicroserviceConfig microserviceConfig,
-            EnvironmentConfig environmentConfig)
+            EnvironmentConfig environmentConfig,
+            string cliDirectory = null)
         {
-            _cliDirectory = cliDirectory;
-            _microserviceDirectory = microserviceDirectory;
+            _runMode = runMode;
+            _microservicePath = microservicePath;
             _microserviceConfig = microserviceConfig;
             _environmentConfig = environmentConfig;
+            _cliDirectory = cliDirectory;
             _exceptions = ImmutableList<Exception>.Empty;
         }
 
@@ -51,22 +54,28 @@ namespace NWheels.Testability.Microservices
         {
             _exceptions = ImmutableList<Exception>.Empty;
             _exitCode = null;
-            _microserviceFilePath = Path.Combine(Path.GetTempPath(), $"microservice_{Guid.NewGuid().ToString("N")}.xml");
-            _environmentFilePath = Path.Combine(Path.GetTempPath(), $"environment_{Guid.NewGuid().ToString("N")}.xml");
 
-            WriteConfigurationXml(_microserviceConfig, _microserviceFilePath);
-            WriteConfigurationXml(_environmentConfig, _environmentFilePath);
+            string arguments = GetBasicArguments();
+            
+            _microserviceXmlFilePath = UseConfigurationXmlIf(
+                _microserviceConfig, 
+                $"microservice_{Guid.NewGuid().ToString("N")}.xml", 
+                "--microservice-xml", 
+                ref arguments);
 
-            var arguments =
-                $"{Path.Combine(_cliDirectory, "nwheels.dll")} run --no-publish " +
-                _microserviceDirectory +
-                $" --microservice-xml {_microserviceFilePath}" +
-                $" --environment-xml {_environmentFilePath}";
+            _environmentXmlFilePath = UseConfigurationXmlIf(
+                _environmentConfig, 
+                $"environment_{Guid.NewGuid().ToString("N")}.xml", 
+                "--environment-xml", 
+                ref arguments);
 
             var info = new ProcessStartInfo() {
                 FileName = "dotnet",
                 Arguments = arguments,
-                WorkingDirectory = _microserviceDirectory,
+                WorkingDirectory = (
+                    _runMode != RunMode.DotNetCliAssembly 
+                    ? _microservicePath :
+                    Path.GetDirectoryName(_microservicePath)), 
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
@@ -112,8 +121,8 @@ namespace NWheels.Testability.Microservices
             _process.Dispose();
             _process = null;
 
-            File.Delete(_microserviceFilePath);
-            File.Delete(_environmentFilePath);
+            DeleteFileIf(_microserviceXmlFilePath);
+            DeleteFileIf(_environmentXmlFilePath);
 
             return exited;
         }
@@ -224,6 +233,40 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private string GetBasicArguments()
+        {
+            switch (_runMode)
+            {
+                case RunMode.NWheelsCli:
+                    return $"{Path.Combine(_cliDirectory, "nwheels.dll")} run --no-publish {_microservicePath}";
+                case RunMode.DotNetCliProject:
+                    return $"run {_microservicePath}";
+                case RunMode.DotNetCliAssembly:
+                    return _microservicePath;
+            }
+
+            throw new NotSupportedException($"Invalid value of run mode: {_runMode}");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string UseConfigurationXmlIf<TConfig>(TConfig config, string fileName, string argumentName, ref string arguments)
+            where TConfig : class
+        {
+            if (config == null)
+            {
+                return null;
+            }
+
+            var filePath = Path.Combine(Path.GetTempPath(), fileName);
+            WriteConfigurationXml(config, filePath);
+            arguments += $" {argumentName} {filePath}";
+
+            return filePath;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void WriteConfigurationXml<TConfig>(TConfig configuration, string filePath)
         {
             using (var file = File.Create(filePath))
@@ -289,6 +332,25 @@ namespace NWheels.Testability.Microservices
                     return true;
                 }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void DeleteFileIf(string filePath)
+        {
+            if (filePath != null)
+            {
+                File.Delete(filePath);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public enum RunMode
+        {
+            NWheelsCli,
+            DotNetCliProject,
+            DotNetCliAssembly
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

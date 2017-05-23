@@ -15,6 +15,7 @@ using System.Net;
 using FluentAssertions;
 using System.Threading;
 using System.Linq;
+using NWheels.Injection.Adapters.Autofac;
 
 namespace NWheels.Platform.Messaging.Tests.System
 {
@@ -312,34 +313,35 @@ namespace NWheels.Platform.Messaging.Tests.System
 
         public class ClassFixture : IDisposable
         {
-            private readonly MicroserviceHostController _microservice;
+            private readonly MicroserviceController _controller;
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public ClassFixture()
             {
-                _microservice = new MicroserviceHostControllerBuilder(microserviceName: "AspNetKestrelTest")
-                    .UseCliDirectoryFromSource(relativeProjectDirectoryPath: "..", allowOverrideByEnvironmentVar: true)
-                    .UseMicroserviceFromSource(relativeProjectDirectoryPath: "..")
-                    .UseAutofacInjectionAdapter()
-                    .UseFrameworkFeature<KestrelFeatureLoader>()
-                    .UseApplicationFeature<TestFeatureLoader>()
+                _controller = new MicroserviceControllerBuilder(microserviceName: "AspNetKestrelTest")
+                    .UseCliDirectoryFromSolution(relativeProjectDirectoryPath: "..", allowOverrideByEnvironmentVar: true)
+                    .UseMicroserviceProjectDirectory(directoryPath: "..")
+                    .Microservice(host => host
+                        .UseAutofac()
+                        .UseFrameworkFeature<KestrelFeatureLoader>()
+                        .UseApplicationFeature<TestFeatureLoader>())
                     .Build();
 
-                _microservice.Start();
+                _controller.Start();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public void Dispose()
             {
-                _microservice.StopOrThrow(10000);
-                _microservice.AssertNoErrors();
+                _controller.StopOrThrow(10000);
+                _controller.AssertNoErrors();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public MicroserviceHostController Microservice => _microservice;
+            public MicroserviceController Microservice => _controller;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

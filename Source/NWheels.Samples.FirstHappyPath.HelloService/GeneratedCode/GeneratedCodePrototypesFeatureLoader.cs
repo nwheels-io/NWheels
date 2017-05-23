@@ -20,7 +20,7 @@ namespace NWheels.Samples.FirstHappyPath.HelloService
                 .RegisterComponentInstance(new ConfigSection_MessagingPlatformConfiguration())
                 .ForService<IMessagingPlatformConfiguration>();
         }
-
+        
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
