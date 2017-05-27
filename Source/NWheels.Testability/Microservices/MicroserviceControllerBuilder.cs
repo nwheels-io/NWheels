@@ -33,7 +33,7 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceControllerBuilder UseMicroserviceAssembly(
+        public MicroserviceControllerBuilder RunMicroserviceAssembly(
             string assemblyFilePath, 
             [CallerFilePath] string sourceFilePath = "")
         {
@@ -50,7 +50,7 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceControllerBuilder UseMicroserviceProjectDirectory(
+        public MicroserviceControllerBuilder RunMicroserviceProject(
             string directoryPath, 
             [CallerFilePath] string sourceFilePath = "")
         {
@@ -70,7 +70,22 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceControllerBuilder UseCliDirectoryFromSolution(
+        public MicroserviceControllerBuilder SetMicroserviceDirectory(
+            string directoryPath,
+            [CallerFilePath] string sourceFilePath = "")
+        {
+            string absolutePath = (
+                Path.IsPathRooted(directoryPath)
+                ? directoryPath
+                : Path.Combine(Path.GetDirectoryName(sourceFilePath), directoryPath));
+
+            _microservicePath = absolutePath;
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MicroserviceControllerBuilder UseNWheelsCliFromSolution(
             string relativeProjectDirectoryPath, 
             string cliProjectConfiguration = null, 
             bool allowOverrideByEnvironmentVar = false,
@@ -105,7 +120,7 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceControllerBuilder UseCliDirectoryFromEnvironment()
+        public MicroserviceControllerBuilder UseNWheelsCliFromEnvironment()
         {
             _runMode = MicroserviceController.RunMode.NWheelsCli;
             _cliDirectory = GetCliDirectoryFromEnvironment();
@@ -114,7 +129,7 @@ namespace NWheels.Testability.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceControllerBuilder Microservice(Func<IMicroserviceHostBuilder, IMicroserviceHostBuilder> builder)
+        public MicroserviceControllerBuilder BuildMicroservice(Func<IMicroserviceHostBuilder, IMicroserviceHostBuilder> builder)
         {
             builder(_hostBuilder);
             return this;

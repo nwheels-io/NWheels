@@ -320,9 +320,9 @@ namespace NWheels.Platform.Messaging.Tests.System
             public ClassFixture()
             {
                 _controller = new MicroserviceControllerBuilder(microserviceName: "AspNetKestrelTest")
-                    .UseCliDirectoryFromSolution(relativeProjectDirectoryPath: "..", allowOverrideByEnvironmentVar: true)
-                    .UseMicroserviceProjectDirectory(directoryPath: "..")
-                    .Microservice(host => host
+                    .UseNWheelsCliFromSolution(relativeProjectDirectoryPath: "..", allowOverrideByEnvironmentVar: true)
+                    .SetMicroserviceDirectory(directoryPath: "..")
+                    .BuildMicroservice(host => host
                         .UseAutofac()
                         .UseFrameworkFeature<KestrelFeatureLoader>()
                         .UseApplicationFeature<TestFeatureLoader>())
@@ -341,7 +341,7 @@ namespace NWheels.Platform.Messaging.Tests.System
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public MicroserviceController Microservice => _controller;
+            public MicroserviceController Controller => _controller;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
