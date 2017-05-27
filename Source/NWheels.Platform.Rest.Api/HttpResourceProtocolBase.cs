@@ -36,6 +36,10 @@ namespace NWheels.Platform.Rest
 
         public abstract class HttpInterfaceBase : IHttpMessageProtocolInterface
         {
+            public static readonly string JsonContentTypeString = "application/json";
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             protected HttpInterfaceBase(string protocolName)
             {
                 this.ProtocolInterface = typeof(IHttpMessageProtocolInterface);

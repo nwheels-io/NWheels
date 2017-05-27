@@ -83,6 +83,7 @@ namespace NWheels.Samples.FirstHappyPath.HelloService
                 {
                     await _invocationChannel.ScheduledInvoke(invocation);
 
+                    context.Response.ContentType = JsonContentTypeString;
                     using (var writer = new StreamWriter(context.Response.Body))
                     {
                         var json = new JsonTextWriter(writer);
