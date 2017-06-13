@@ -20,6 +20,9 @@ namespace NWheels.Frameworks.Uidl.Generic
         }
 
         [NestedElement]
+        public FormElement<TViewModel> InputForm { get; set; }
+
+        [NestedElement]
         public CommandElement SubmitCommand { get; set; }
     }
 }

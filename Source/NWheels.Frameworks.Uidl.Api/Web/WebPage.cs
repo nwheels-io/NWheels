@@ -5,7 +5,11 @@ using System.Text;
 
 namespace NWheels.Frameworks.Uidl.Web
 {
-    public abstract class WebPage<TViewModel> : AbstractUIScreen<TViewModel>
+    public abstract class WebPage<TViewModel> : AbstractUIScreen<TViewModel>, IWebPage
+    {
+    }
+
+    public interface IWebPage : IAbstractUIScreen
     {
     }
 }
