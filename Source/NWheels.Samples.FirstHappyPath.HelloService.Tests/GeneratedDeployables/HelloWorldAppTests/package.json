@@ -11,7 +11,7 @@
     "grunt-webdriver": "^2.0.3",
     "should": "^11.2.1",
     "wdio-jasmine-framework": "^0.3.1",
-    "wdio-selenium-standalone-service": "0.0.8",
+    "wdio-selenium-standalone-service": "^0.0.8",
     "webdriverio": "^4.8.0"
   }
 }
