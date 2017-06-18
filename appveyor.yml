@@ -61,7 +61,7 @@ test_script:
     
     npm install
 
-    grunt e2e 
+    node_modules\.bin\grunt e2e 
 
 after_test:
 - cmd: >-
