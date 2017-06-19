@@ -53,15 +53,15 @@ test_script:
 
     dotnet test NWheels.Platform.Messaging.Tests\NWheels.Platform.Messaging.Tests.csproj --logger "trx;LogFileName=test-results-8.xml"
 
-    cd c:\projects\NWheels\Source\NWheels.Samples.FirstHappyPath.HelloService.Tests\GeneratedDeployables\HelloWorldAppTests
-
-    node --version
- 
-    npm --version
-    
-    npm install
-
-    node_modules\.bin\grunt e2e 
+#   cd c:\projects\NWheels\Source\NWheels.Samples.FirstHappyPath.HelloService.Tests\GeneratedDeployables\HelloWorldAppTests
+#
+#   node --version
+#
+#   npm --version
+#   
+#   npm install
+#
+#   node_modules\.bin\grunt e2e 
 
 after_test:
 - cmd: >-
@@ -80,5 +80,5 @@ after_test:
     ng e2e
     
 ## Pause build until file from desktop will be removed
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))    
+#on_finish:
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))    
