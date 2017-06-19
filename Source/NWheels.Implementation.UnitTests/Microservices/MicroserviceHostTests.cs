@@ -322,6 +322,30 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Fact]
+        public void AdapterInjectionNotImplementedInterfaceExceptionThrown()
+        {
+            //-- arrange
+
+            var logger = new MicroserviceHostLoggerMock();
+            var config = CreateBootConfiguration();
+            config.MicroserviceConfig.InjectionAdapter.Assembly = "AdapterInjectionNotImplementedInterface";
+            var host = new MicroserviceHost(config, logger);
+            var handler = new AssemblyLoadEventHandler();
+
+            host.AssemblyLoad += handler.Handle;
+
+            //-- act
+
+            Action act = () => host.Configure();
+
+            //-- assert
+
+            act.ShouldThrow<Exception>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private BootConfiguration CreateBootConfiguration()
         {
             return new BootConfiguration()
@@ -528,7 +552,14 @@ namespace NWheels.Implementation.UnitTests.Microservices
                 {
                     if (e.ImplementedInterface == typeof(IComponentContainerBuilder))
                     {
-                        e.Destination.Add(typeof(ComponentContainerBuilder));
+                        if (e.AssemblyName == "AdapterInjectionNotImplementedInterface")
+                        {
+                            e.Destination.Add(typeof(String));
+                        }
+                        else
+                        {
+                            e.Destination.Add(typeof(ComponentContainerBuilder));
+                        }
                         ContainerEventArgs = e;
                     }
                     if (e.ImplementedInterface == typeof(IFeatureLoader))
