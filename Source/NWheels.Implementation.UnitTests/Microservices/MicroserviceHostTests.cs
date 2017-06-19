@@ -6,6 +6,7 @@ using NWheels.Injection.Adapters.Autofac;
 using NWheels.Microservices;
 using NWheels.Microservices.Mocks;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Xunit;
 
@@ -266,6 +267,61 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Fact]
+        public void CheckThatInjectionAdapterLoadedFirst()
+        {
+            //-- arrange
+
+            var logger = new MicroserviceHostLoggerMock();
+            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
+            var handler = new AssemblyLoadEventHandler();
+
+            host.AssemblyLoad += handler.Handle;
+
+            //-- act
+
+            host.Configure();
+
+            //-- assert
+
+            var logs = logger.TakeLog();
+            var firstLoadedComponent = logs.FirstOrDefault(x => x.StartsWith("FoundFeatureLoaderComponent"));
+            firstLoadedComponent.Should().Be("FoundFeatureLoaderComponent(component=ComponentContainerBuilder)");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CheckThatInjectionAdapterModuleFeatureLoadersWereNotLoaded()
+        {
+            //-- arrange
+
+            var logger = new MicroserviceHostLoggerMock();
+            var config = CreateBootConfiguration();
+            var host = new MicroserviceHost(config, logger);
+            Func<AssemblyLoadEventArgs, bool> checkFunc = e =>
+            {
+                return
+                    (e.AssemblyName == config.MicroserviceConfig.InjectionAdapter.Assembly
+                        && e.ImplementedInterface == typeof(IComponentContainerBuilder))
+                    || (e.AssemblyName != config.MicroserviceConfig.InjectionAdapter.Assembly
+                        && e.ImplementedInterface != typeof(IComponentContainerBuilder));
+            };
+            var handler = new AssemblyLoadEventHandler(checkFunc);
+
+            host.AssemblyLoad += handler.Handle;
+
+            //-- act
+
+            Action act = () => host.Configure();
+
+            //-- assert
+
+            act.ShouldNotThrow<Exception>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private BootConfiguration CreateBootConfiguration()
         {
             return new BootConfiguration()
@@ -455,45 +511,58 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
         private class AssemblyLoadEventHandler
         {
-            public AssemblyLoadEventHandler()
-            {                                                                                                                                                                            
+            Func<AssemblyLoadEventArgs, bool> _checkFunc;
+
+            public AssemblyLoadEventHandler(Func<AssemblyLoadEventArgs, bool> checkFunc)
+            {
+                _checkFunc = checkFunc;
                 FeatureLoaderEventArgsList = new List<AssemblyLoadEventArgs>();
             }
 
+            public AssemblyLoadEventHandler() : this(x => true)
+            { }
+
             public void Handle(object sender, AssemblyLoadEventArgs e)
             {
-                if (e.ImplementedInterface == typeof(IComponentContainerBuilder))
+                if (_checkFunc(e))
                 {
-                    e.Destination.Add(typeof(ComponentContainerBuilder));
-                    ContainerEventArgs = e;
-                }
-                if (e.ImplementedInterface == typeof(IFeatureLoader))
-                {
-                    if (e.AssemblyName == "NWheels.Implementation")
+                    if (e.ImplementedInterface == typeof(IComponentContainerBuilder))
                     {
-                        e.Destination.Add(typeof(CompilationFeatureLoader));
-                        e.Destination.Add(typeof(InvocationSchedulerFeatureLoader));
+                        e.Destination.Add(typeof(ComponentContainerBuilder));
+                        ContainerEventArgs = e;
                     }
-                    if (e.AssemblyName == "FirstModuleAssembly")
+                    if (e.ImplementedInterface == typeof(IFeatureLoader))
                     {
-                        e.Destination.Add(typeof(FirstFeatureLoader));
-                        e.Destination.Add(typeof(SecondFeatureLoader));
-                        e.Destination.Add(typeof(ThirdFeatureLoader));
-                        e.Destination.Add(typeof(ForthFeatureLoader));
-                        e.Destination.Add(typeof(NamedFeatureLoader));
-                    }
-                    if (e.AssemblyName == "SecondModuleAssembly")
-                    {
-                        e.Destination.Add(typeof(FifthFeatureLoader));
-                        e.Destination.Add(typeof(SixthFeatureLoader));
-                    }
-                    if (e.AssemblyName == "FrameworkModule")
-                    {
-                        e.Destination.Add(typeof(SeventhFeatureLoader));
-                        e.Destination.Add(typeof(EighthFeatureLoader));
-                    }
+                        if (e.AssemblyName == "NWheels.Implementation")
+                        {
+                            e.Destination.Add(typeof(CompilationFeatureLoader));
+                            e.Destination.Add(typeof(InvocationSchedulerFeatureLoader));
+                        }
+                        if (e.AssemblyName == "FirstModuleAssembly")
+                        {
+                            e.Destination.Add(typeof(FirstFeatureLoader));
+                            e.Destination.Add(typeof(SecondFeatureLoader));
+                            e.Destination.Add(typeof(ThirdFeatureLoader));
+                            e.Destination.Add(typeof(ForthFeatureLoader));
+                            e.Destination.Add(typeof(NamedFeatureLoader));
+                        }
+                        if (e.AssemblyName == "SecondModuleAssembly")
+                        {
+                            e.Destination.Add(typeof(FifthFeatureLoader));
+                            e.Destination.Add(typeof(SixthFeatureLoader));
+                        }
+                        if (e.AssemblyName == "FrameworkModule")
+                        {
+                            e.Destination.Add(typeof(SeventhFeatureLoader));
+                            e.Destination.Add(typeof(EighthFeatureLoader));
+                        }
 
-                    FeatureLoaderEventArgsList.Add(e);
+                        FeatureLoaderEventArgsList.Add(e);
+                    }
+                }
+                else
+                {
+                    throw new Exception("AssemblyLoadEventHandler.Handle check haven't passed.");
                 }
             }
 
@@ -599,7 +668,7 @@ namespace NWheels.Implementation.UnitTests.Microservices
         
         private class ThirdFeatureLoader : TestFeatureLoaderBase
         {
-        }
+        }        
 
         private class ForthFeatureLoader : TestFeatureLoaderBase
         {

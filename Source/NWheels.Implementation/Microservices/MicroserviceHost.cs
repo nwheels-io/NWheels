@@ -787,6 +787,8 @@ namespace NWheels.Microservices
                     _componentContainerBuilderType,
                     new object[] { rootContainer });
 
+                OwnerHost.Logger.FoundFeatureLoaderComponent(_componentContainerBuilderType.FriendlyName());
+
                 return containerBuilder;
             }
 
