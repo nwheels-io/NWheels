@@ -334,6 +334,16 @@ namespace NWheels.Implementation.UnitTests.Microservices
             var handler = new AssemblyLoadEventHandler();
 
             host.AssemblyLoad += handler.Handle;
+            host.AssemblyLoad += (object sender, AssemblyLoadEventArgs e) =>
+            {
+                if (e.ImplementedInterface == typeof(IComponentContainerBuilder))
+                {
+                    if (e.AssemblyName == "AdapterInjectionNotImplementedInterface")
+                    {
+                        e.Destination.Add(typeof(String));
+                    }
+                }
+            };
 
             //-- act
 
@@ -342,6 +352,138 @@ namespace NWheels.Implementation.UnitTests.Microservices
             //-- assert
 
             act.ShouldThrow<Exception>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void AdapterInjectionCtorWithoutArgumentExceptionThrown()
+        {
+            //-- arrange
+
+            var logger = new MicroserviceHostLoggerMock();
+            var config = CreateBootConfiguration();
+            config.MicroserviceConfig.InjectionAdapter.Assembly = "AdapterInjectionCtorWithoutArgument";
+            var host = new MicroserviceHost(config, logger);
+            var handler = new AssemblyLoadEventHandler();
+
+            host.AssemblyLoad += handler.Handle;
+            host.AssemblyLoad += (object sender, AssemblyLoadEventArgs e) =>
+            {
+                if (e.ImplementedInterface == typeof(IComponentContainerBuilder))
+                {
+                    if (e.AssemblyName == "AdapterInjectionCtorWithoutArgument")
+                    {
+                        e.Destination.Add(typeof(ComponentContainerBuilderCtorWithoutArgument));
+                    }
+                }
+            };
+
+            //-- act
+
+            Action act = () => host.Configure();
+
+            //-- assert
+
+            act.ShouldThrow<Exception>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void KernelModulesDefaultFeatureLoadersLoaded()
+        {
+            //-- arrange
+
+            var logger = new MicroserviceHostLoggerMock();
+            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
+            var handler = new AssemblyLoadEventHandler();
+
+            host.AssemblyLoad += handler.Handle;
+
+            //-- act
+
+            host.Configure();
+
+            //-- assert
+
+            var logs = logger.TakeLog();
+            logs.Should().Contain(new string[] {
+                "FoundFeatureLoaderComponent(component=CompilationFeatureLoader)",
+                "FoundFeatureLoaderComponent(component=InvocationSchedulerFeatureLoader)",
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void KernelModulesDefaultFeatureLoadersLoadedFirstAfterInjectionAdapter()
+        {
+            //-- arrange
+
+            var logger = new MicroserviceHostLoggerMock();
+            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
+            var handler = new AssemblyLoadEventHandler();
+
+            host.AssemblyLoad += handler.Handle;
+
+            //-- act
+
+            host.Configure();
+
+            //-- assert
+
+            var logs = logger.TakeLog();
+            logs.Skip(1).Take(2).OrderBy(x => x).Should().Equal(new string[] {
+                "FoundFeatureLoaderComponent(component=CompilationFeatureLoader)",
+                "FoundFeatureLoaderComponent(component=InvocationSchedulerFeatureLoader)",
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void NamedKernelModuleLoadedFirstInFrameworkModules()
+        {
+            //-- arrange
+
+            var logger = new MicroserviceHostLoggerMock();
+            var config = CreateBootConfiguration();
+            config.MicroserviceConfig.FrameworkModules = new MicroserviceConfig.ModuleConfig[]
+            {
+                new MicroserviceConfig.ModuleConfig(){
+                    Assembly = "NWheels.Implementation",
+                    Features = new MicroserviceConfig.ModuleConfig.FeatureConfig[]{
+                        new MicroserviceConfig.ModuleConfig.FeatureConfig(){
+                            Name = "NamedKernelFeatureLoader"
+                        }
+                    }
+                }
+            };
+            var host = new MicroserviceHost(config, logger);
+            var handler = new AssemblyLoadEventHandler();
+            
+            host.AssemblyLoad += (object sender, AssemblyLoadEventArgs e) =>
+            {
+                if (e.ImplementedInterface == typeof(IFeatureLoader))
+                {
+                    if (e.AssemblyName == "NWheels.Implementation")
+                    {
+                        e.Destination.Add(typeof(NamedKernelFeatureLoader));
+                    }
+                }
+            };
+            host.AssemblyLoad += handler.Handle;
+
+            //-- act
+
+            host.Configure();
+
+            //-- assert
+
+            var logs = logger.TakeLog();
+            logs.Skip(1 + 2).First().Should().Be(
+                "FoundFeatureLoaderComponent(component=NamedKernelFeatureLoader)");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -552,11 +694,7 @@ namespace NWheels.Implementation.UnitTests.Microservices
                 {
                     if (e.ImplementedInterface == typeof(IComponentContainerBuilder))
                     {
-                        if (e.AssemblyName == "AdapterInjectionNotImplementedInterface")
-                        {
-                            e.Destination.Add(typeof(String));
-                        }
-                        else
+                        if(e.AssemblyName == "InjectionAdapter")
                         {
                             e.Destination.Add(typeof(ComponentContainerBuilder));
                         }
@@ -730,6 +868,29 @@ namespace NWheels.Implementation.UnitTests.Microservices
         [FeatureLoader(Name = "ThirdFeatureLoader")]
         private class DuplicatedFeatureLoader : TestFeatureLoaderBase
         {
+        }
+
+        [FeatureLoader(Name = "NamedKernelFeatureLoader")]
+        private class NamedKernelFeatureLoader : TestFeatureLoaderBase
+        {
+        }
+
+        public class ComponentContainerBuilderCtorWithoutArgument : IComponentContainerBuilder
+        {
+            public IComponentRegistrationBuilder RegisterComponentInstance<TComponent>(TComponent componentInstance) where TComponent : class
+            {
+                throw new NotImplementedException();
+            }
+
+            public IComponentInstantiationBuilder RegisterComponentType<TComponent>()
+            {
+                throw new NotImplementedException();
+            }
+
+            public IComponentInstantiationBuilder RegisterComponentType(Type componentType)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
