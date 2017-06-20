@@ -3,7 +3,9 @@ Welcome to NWheels
 
 [![Build status](https://ci.appveyor.com/api/projects/status/qcm23727dm8dplk5/branch/master?svg=true)](https://ci.appveyor.com/project/felix-b/nwheels-bk3vs/branch/master)
 
-According to our observations, commonality in the needs of enterprise application projects is significantly higher than variability. We take this as an opportunity to slash project costs and timeframes, improve software quality, and reduce technical risks. 
+Based on our experience, commonality in the needs of enterprise application projects is significantly higher than variability. We take this as an opportunity to slash project costs and timeframes, improve software quality, and reduce technical risks. 
+
+We aim to turn implementation of enterprise applications into an easy win.
 
 Learn more: [Vision, Metaphor, Ecosystem](https://github.com/felix-b/NWheels/wiki/background-vision-metaphor-ecosystem), [Optimization opportunities](https://github.com/felix-b/NWheels/wiki/background-optimization-opportunities)
 
