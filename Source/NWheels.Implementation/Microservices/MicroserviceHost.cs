@@ -684,22 +684,20 @@ namespace NWheels.Microservices
             {
                 var featureLoaders = new List<IFeatureLoader>();
 
-                featureLoaders.AddRange(GetKernelDefaultFeatureLoaders());
-                featureLoaders.AddRange(GetFeatureLoadersByModuleConfigs(OwnerHost.BootConfig.MicroserviceConfig.ApplicationModules));
+                var kernelAssembly = typeof(MicroserviceHost).GetTypeInfo().Assembly.GetName().Name;
+                if (!OwnerHost.BootConfig.MicroserviceConfig.FrameworkModules.Any(x => x.Assembly == kernelAssembly))
+                {
+                    var kernelModuleConfig = new MicroserviceConfig.ModuleConfig()
+                    {
+                        Assembly = kernelAssembly
+                    };
+                    featureLoaders.AddRange(GetFeatureLoadersByModuleConfigs(kernelModuleConfig));
+                }
+
                 featureLoaders.AddRange(GetFeatureLoadersByModuleConfigs(OwnerHost.BootConfig.MicroserviceConfig.FrameworkModules));
+                featureLoaders.AddRange(GetFeatureLoadersByModuleConfigs(OwnerHost.BootConfig.MicroserviceConfig.ApplicationModules));
 
                 return featureLoaders;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private IEnumerable<IFeatureLoader> GetKernelDefaultFeatureLoaders()
-            {
-                var kernelModuleConfig = new MicroserviceConfig.ModuleConfig() {
-                    Assembly = typeof(MicroserviceHost).GetTypeInfo().Assembly.GetName().Name
-                };
-
-                return GetFeatureLoadersByModuleConfigs(kernelModuleConfig);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -786,6 +784,8 @@ namespace NWheels.Microservices
                 var containerBuilder = (IInternalComponentContainerBuilder)Activator.CreateInstance(
                     _componentContainerBuilderType,
                     new object[] { rootContainer });
+
+                OwnerHost.Logger.FoundFeatureLoaderComponent(_componentContainerBuilderType.FriendlyName());
 
                 return containerBuilder;
             }
