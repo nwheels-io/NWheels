@@ -1,4 +1,4 @@
-## RDP connection details
+# RDP connection details
 #init:
 #  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
@@ -37,7 +37,6 @@ after_build:
     dotnet publish
 test_script:
 - cmd: >-
-      
     cd c:\projects\NWheels\Source
 
     dotnet test NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj --logger "trx;LogFileName=test-results-1.xml"
