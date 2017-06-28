@@ -10,6 +10,7 @@ image: Visual Studio 2017
 
 environment:
   nodejs_version: "LTS"
+  COVERALLS_REPO_TOKEN: "t2ICv0RcHszOpsCpakUcBH3rmOeRDWeTo"
   
 clone_folder: c:\projects\NWheels
   
@@ -67,7 +68,7 @@ after_test:
 - cmd: >-
     cd c:\projects\NWheels\Tools\OpenCover.4.6.519\tools
     
-    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj" -register:user -output:MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests"
+    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests"
 
     cd c:\projects\NWheels\Source\Presentation\Web\AppVeyorPoc
 
