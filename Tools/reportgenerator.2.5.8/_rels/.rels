@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-    <Relationship Type="http://schemas.microsoft.com/packaging/2010/07/manifest" Target="/ReportGenerator.nuspec" Id="R3200759d04d04862" />
-    <Relationship Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="/package/services/metadata/core-properties/ccad6821a35a479689051c3e29c8a749.psmdcp" Id="R724020d688fc408a" />
-</Relationships>
