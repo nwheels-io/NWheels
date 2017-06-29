@@ -3,13 +3,14 @@ using FluentAssertions;
 using NWheels.Injection;
 using NWheels.Microservices;
 using Xunit;
+using System.Reflection;
 
 namespace NWheels.Implementation.UnitTests.Microservices
 {
     public class MicroserviceHostBuilderTests
     {
         [Fact]
-        public void UseApplicationFeatureModifiesBootConfigAccordingly()
+        public void UseApplicationFeature_DefaultFeature_ModuleMissing_OnlyModuleAdded()
         {
             //-- arrange
 
@@ -17,47 +18,51 @@ namespace NWheels.Implementation.UnitTests.Microservices
 
             //-- act
 
-            microservice.UseApplicationFeature<TestFeatureLoader>();
+            microservice.UseApplicationFeature<DefaultFeatureLoader>();
 
             //-- assert
 
-            microservice.BootConfig.MicroserviceConfig.ApplicationModules[0].Features[0].Name
-                .Should().Be("TestFeatureLoader");
+            microservice.BootConfig.MicroserviceConfig.ApplicationModules.Length.Should().Be(1);
+
+            var module = microservice.BootConfig.MicroserviceConfig.ApplicationModules[0];
+
+            module.Assembly.Should().Be(this.GetType().GetTypeInfo().Assembly.GetName().Name);
+            module.Features.Length.Should().Be(0);                
         }
-        
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class TestFeatureLoader : IFeatureLoader
+        [Fact]
+        public void UseApplicationFeature_NamedFeature_ModuleMissing_ModuleAndFeatureAdded()
         {
-            public void CompileComponents(IComponentContainer existingComponents)
-            {
-                throw new NotImplementedException();
-            }
+            //-- arrange
 
-            public void ContributeAdapterComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
-            {
-                throw new NotImplementedException();
-            }
+            var microservice = new MicroserviceHostBuilder("test");
 
-            public void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
-            {
-                throw new NotImplementedException();
-            }
+            //-- act
 
-            public void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
-            {
-                throw new NotImplementedException();
-            }
+            microservice.UseApplicationFeature<NamedFeatureLoader>();
 
-            public void ContributeConfigSections(IComponentContainerBuilder newComponents)
-            {
-                throw new NotImplementedException();
-            }
+            //-- assert
 
-            public void ContributeConfiguration(IComponentContainer existingComponents)
-            {
-                throw new NotImplementedException();
-            }
+            microservice.BootConfig.MicroserviceConfig.ApplicationModules.Length.Should().Be(1);
+
+            var module = microservice.BootConfig.MicroserviceConfig.ApplicationModules[0];
+
+            module.Assembly.Should().Be(this.GetType().GetTypeInfo().Assembly.GetName().Name);
+            module.Features.Length.Should().Be(1);
+            module.Features[0].Name.Should().Be("Named");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class DefaultFeatureLoader : FeatureLoaderBase
+        {
+        }
+
+        [FeatureLoader(Name = "Named")]
+        private class NamedFeatureLoader : FeatureLoaderBase
+        {
         }
     }
 }
