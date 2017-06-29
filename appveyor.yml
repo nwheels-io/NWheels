@@ -38,6 +38,8 @@ after_build:
     dotnet publish
 test_script:
 - cmd: >-
+    nuget install -Verbosity quiet -OutputDirectory packages -Version 4.6.519 c:\projects\NWheels\Tools\OpenCover.4.6.519
+    
     cd c:\projects\NWheels\Source
 #
 #   dotnet test NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj --logger "trx;LogFileName=test-results-1.xml"
