@@ -72,7 +72,7 @@ after_test:
 - cmd: >-
     cd c:\projects\NWheels\Tools\OpenCover.4.6.519\tools
 
-    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj" -register:user -output:MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests"
+    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj" -register:path32 -output:MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests"
 
 #   cd c:\projects\NWheels\Source\Presentation\Web\AppVeyorPoc
 #
