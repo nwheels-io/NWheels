@@ -86,7 +86,7 @@ after_test:
     
     nuget install coveralls.net -Version 0.412.0 -OutputDirectory c:\projects\NWheels\Tools
     
-    cd c:\projects\NWheels\Tools\coveralls.net 0.412.0\tools
+    cd c:\projects\NWheels\Tools\coveralls.net.0.412\tools
     
     csmacnz.Coveralls.exe --opencover -i c:\projects\NWheels\Tools\MergedResult.xml
 #
