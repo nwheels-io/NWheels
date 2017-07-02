@@ -11,7 +11,7 @@ namespace NWheels.Implementation.UnitTests
         [Fact]
         public void Test()
         {
-            true.sh
+            true.Should().Be(false);
         }
 
         [Fact]
