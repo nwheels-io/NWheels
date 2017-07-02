@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <AssemblyName>hello</AssemblyName>
+    <DebugType>full</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

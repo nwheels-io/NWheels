@@ -4,6 +4,7 @@
     <TargetFramework>netstandard1.6</TargetFramework>
     <RootNamespace>NWheels.Platform.Rest</RootNamespace>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <DebugType>full</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
