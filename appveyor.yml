@@ -73,17 +73,17 @@ after_test:
     OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests"
     
     OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Injection.Adapters.Autofac.UnitTests\NWheels.Injection.Adapters.Autofac.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
-#    
-#    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Compilation.Adapters.Roslyn.UnitTests\NWheels.Compilation.Adapters.Roslyn.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
-#    
-#    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Platform.Rest.Implementation.UnitTests\NWheels.Platform.Rest.Implementation.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
-#    
-#    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Frameworks.Ddd.Implementation.UnitTests\NWheels.Frameworks.Ddd.Implementation.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
-#    
-#    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.SystemTests\NWheels.SystemTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
-#    
-#    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Platform.Messaging.Tests\NWheels.Platform.Messaging.Tests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
-#    
+    
+    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Compilation.Adapters.Roslyn.UnitTests\NWheels.Compilation.Adapters.Roslyn.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
+    
+    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Platform.Rest.Implementation.UnitTests\NWheels.Platform.Rest.Implementation.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
+    
+    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Frameworks.Ddd.Implementation.UnitTests\NWheels.Frameworks.Ddd.Implementation.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
+    
+    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.SystemTests\NWheels.SystemTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
+    
+    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Platform.Messaging.Tests\NWheels.Platform.Messaging.Tests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
+    
     nuget install coveralls.net -Version 0.412.0 -OutputDirectory c:\projects\NWheels\Tools
     
     cd c:\projects\NWheels\Tools\coveralls.net 0.412.0\tools
