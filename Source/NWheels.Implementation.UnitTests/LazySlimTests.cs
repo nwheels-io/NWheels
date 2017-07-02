@@ -1,19 +1,11 @@
 ﻿using FluentAssertions;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace NWheels.Implementation.UnitTests
 {
     public class LazySlimTests
     {
-        [Fact]
-        public void Test()
-        {
-            true.Should().Be(false);
-        }
-
         [Fact]
         public void CanInitializeWithValue()
         {
