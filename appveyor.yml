@@ -1,6 +1,6 @@
-# RDP connection details
-init:
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+## RDP connection details
+#init:
+#  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 version: 1.0.{build}-alpha1
 branches:
@@ -74,6 +74,10 @@ test_script:
 
 after_test:
 - cmd: >-
+    cd c:\projects\NWheels
+    
+    nuget install OpenCover -Version 4.6.519 -OutputDirectory Tools
+    
     cd c:\projects\NWheels\Tools\OpenCover.4.6.519\tools
 
 #   OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj" -register:user -output:MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests"
@@ -92,6 +96,6 @@ after_test:
 #    
 #   ng e2e
     
-# Pause build until file from desktop will be removed
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))    
+## Pause build until file from desktop will be removed
+#on_finish:
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))    
