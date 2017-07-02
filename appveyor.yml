@@ -38,6 +38,10 @@ after_build:
     dotnet publish
 test_script:
 - cmd: >-
+    cd c:\projects\NWheels
+    
+    nuget install OpenCover -Version 4.6.519 -OutputDirectory Tools
+    
     cd c:\projects\NWheels\Tools\OpenCover.4.6.519\tools
 
     OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj" -register:user -output:MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests"
@@ -74,10 +78,6 @@ test_script:
 
 after_test:
 - cmd: >-
-    cd c:\projects\NWheels
-    
-    nuget install OpenCover -Version 4.6.519 -OutputDirectory Tools
-    
     cd c:\projects\NWheels\Tools\OpenCover.4.6.519\tools
 
 #   OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj" -register:user -output:MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests"
