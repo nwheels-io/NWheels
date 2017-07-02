@@ -10,8 +10,9 @@ image: Visual Studio 2017
 
 environment:
   nodejs_version: "LTS"
-  COVERALLS_REPO_TOKEN: 
-    secure: "WSnzdH1x3Yyt3a+i3UlByl1p+YJ/M6dmzLJxZAB66s92CrNyOKJkaNu47Ljqct2i"
+  
+  COVERALLS_REPO_TOKEN:
+    secure: WSnzdH1x3Yyt3a+i3UlByl1p+YJ/M6dmzLJxZAB66s92CrNyOKJkaNu47Ljqct2i
   
 clone_folder: c:\projects\NWheels
   
