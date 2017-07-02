@@ -83,10 +83,10 @@ after_test:
 #    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.SystemTests\NWheels.SystemTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
 #    
 #    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Platform.Messaging.Tests\NWheels.Platform.Messaging.Tests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
-    
+#    
     nuget install coveralls.net -Version 0.412.0 -OutputDirectory c:\projects\NWheels\Tools
     
-    cd c:\Work\Repos\NWheelsFork\Tools\coveralls.net 0.412.0\tools
+    cd c:\projects\NWheels\Tools\coveralls.net 0.412.0\tools
     
     csmacnz.Coveralls.exe --opencover -i c:\projects\NWheels\Tools\MergedResult.xml
 #
