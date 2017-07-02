@@ -9,6 +9,12 @@ namespace NWheels.Implementation.UnitTests
     public class LazySlimTests
     {
         [Fact]
+        public void Test()
+        {
+            true.sh
+        }
+
+        [Fact]
         public void CanInitializeWithValue()
         {
             //-- arrange

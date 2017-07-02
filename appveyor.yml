@@ -46,10 +46,6 @@ test_script:
 
     OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj" -register:user -output:MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests"
 
-#    cd c:\projects\NWheels\Source
-#    
-#    nuget install -Verbosity quiet -OutputDirectory packages -Version 4.6.519 c:\projects\NWheels\Tools\OpenCover.4.6.519
-#    
 #   cd c:\projects\NWheels\Source
 #
 #   dotnet test NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj --logger "trx;LogFileName=test-results-1.xml"
