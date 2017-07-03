@@ -1,7 +1,9 @@
 Welcome to NWheels
 =======
 
-[![Build status](https://ci.appveyor.com/api/projects/status/qcm23727dm8dplk5/branch/master?svg=true)](https://ci.appveyor.com/project/felix-b/nwheels-bk3vs/branch/master)
+Linux|Windows|Coverage
+-----|-------|--------
+N/A|[![Build status](https://ci.appveyor.com/api/projects/status/qcm23727dm8dplk5/branch/master?svg=true)](https://ci.appveyor.com/project/felix-b/nwheels-bk3vs/branch/master)|[![Coverage Status](https://coveralls.io/repos/github/felix-b/NWheels/badge.svg?branch=master)](https://coveralls.io/github/felix-b/NWheels?branch=master)
 
 Based on our experience, commonality in the needs of enterprise application projects is significantly higher than variability. 
 
@@ -11,10 +13,11 @@ We put those parts together, and turn enterprise application development into an
 
 # How it works
 
-### application lifecycle management
+### A-to-Z solution
 
 - Development, customization, deployment, operation, and maintenance aspects are covered altogether.
-- Pre-implemented field-proven architectures, technology stacks, and automated toolchains are supplied, together with programming models for developers.
+- Pre-implemented field-proven architectures, technology stacks, and automated toolchains are supplied, together with programming models for developers. 
+- Unlike many other RAD platforms, user interface is fully covered and is first class citizen in  architecture and technology stack.
 - This toolbox is all extensible. Experiment and introduce support for new architectures, technologies, and programming models.
 
 ### cross-platform
@@ -27,7 +30,7 @@ We put those parts together, and turn enterprise application development into an
 
 ### technology abstraction & full control
 
-- Application code is abstracted from concrete technology. There is no need to gain expertise with numerous products and tools, or program against variety of platforms, languages, and frameworks that comprise technology stacks of a complete system. 
+- Application code is abstracted from concrete technology. There is no need to gain expertise with numerous products and tools, or program against variety of platforms, languages, and frameworks. 
 
 - Instead, technology-specific code generators transparently implement application C# models per concrete technology. These generators are supplied by pluggable _technology adapter modules_, contributed by experts in corresponding technologies.
 
@@ -162,42 +165,27 @@ Besides the web, we aim to support mobile native apps, desktop apps, SmartTV, IV
 
 # Getting Involved
 
-Community is a vital part of the NWheels project. We aim to build a friendly and welcoming contribution ecosystem around our project. 
+Impressed? We'd like having you onboard!
+
+Community is a vital part of the NWheels project. We are building a welcoming and friendly ecosystem for contributors.
 
 NWheels would benefit from contributions in many different areas:
+
+- software development in general 
+- software architecture
 - technology stack expertise
 - business domain expertise
 - infrastructure and DevOps
-- general quality software development
+- UX expertise
+- web front-end, mobile apps, desktop apps
+- graphics design
+- data mining, BI, artificial intelligence
+- and more....
 
+### Where to start
 
-
-
-# How it works
-
-- NWheels-based applications are developed in C# and target cross-platform .NET Core.
-- The [Hexagonal architectural approach](http://alistair.cockburn.us/Hexagonal+architecture) (aka _Ports and Adapters_) is at the heart of NWheels architecture
-- Application logic and declarative models are written solely in C#, abstracted from concrete technology stack
-  - Abstraction allows applications outlive underlying technologies they were originally built on.
-  - Nevertheless, abstraction can be bypassed wherever full control over underlying technology is required. 
-  - We aim to hit the 20/80 ratio, where 80% of requirements are implemented through declarative models, requiring only 20% of development effort.
-- Application problem domains can inherit and adapt pre-existing *_building block domains_*, contributed by experts in those domains.
-- Concrete technology stacks are pluggable through *_technology adapter modules_*. These modules are contributed by experts in corresponding technologies. 
-- C# declarative models are projected onto concrete technology stack at runtime or during deployment. At that moment, the models are translated into technology-specific code by technology-specific code generators. The code generators are supplied by technology adapter modules.
-
-
-## Demo
-
-The demo includes a simplest web application backed by one microservice. It runs on Linux, Windows, or macOS. 
-
-
-## How it Works
-
-- [Hexagonal architectural approach](http://alistair.cockburn.us/Hexagonal+architecture) (aka _Ports and Adapters_) is at the heart of NWheels architecture
-- Application logic and models are written solely in C#, abstracted from concrete technology stack
-  - Such abstraction can be bypassed wherever full control over underlying technology is required. 
-  - We aim to hit the 20/80 ratio, where 80% of requirements are implemented through declarative models, requiring only 20% of development effort.
-- Application problem domains can inherit and adapt from pre-existing _building blocks_, contributed by experts in corresponding domains.
-- Concrete technology stacks are pluggable through adapter modules. Technology adapter modules are contributed by experts in corresponding technologies. 
-- C# declarative models are projected onto concrete technology stack at runtime or during deployment. At that moment, the models are translated into technology-specific code by technology-specific code generators.
-
+1. Read Contribution Guidelines
+1. Read Coding Conventions
+1. Read Code of Conduct
+1. Join or team on Slack
+1. Look for issues labeled `first-timers` 
