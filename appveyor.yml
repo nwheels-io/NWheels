@@ -11,6 +11,9 @@ image: Visual Studio 2017
 environment:
   nodejs_version: "LTS"
   
+  COVERALLS_REPO_TOKEN:
+    secure: WSnzdH1x3Yyt3a+i3UlByl1p+YJ/M6dmzLJxZAB66s92CrNyOKJkaNu47Ljqct2i
+  
 clone_folder: c:\projects\NWheels
   
 install:
@@ -42,9 +45,9 @@ test_script:
     dotnet test NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj --logger "trx;LogFileName=test-results-1.xml"
 
     dotnet test NWheels.Injection.Adapters.Autofac.UnitTests\NWheels.Injection.Adapters.Autofac.UnitTests.csproj --logger "trx;LogFileName=test-results-2.xml"
-
+ 
     dotnet test NWheels.Compilation.Adapters.Roslyn.UnitTests\NWheels.Compilation.Adapters.Roslyn.UnitTests.csproj --logger "trx;LogFileName=test-results-3.xml"
-
+ 
     dotnet test NWheels.Platform.Rest.Implementation.UnitTests\NWheels.Platform.Rest.Implementation.UnitTests.csproj --logger "trx;LogFileName=test-results-4.xml"
 
     dotnet test NWheels.Frameworks.Ddd.Implementation.UnitTests\NWheels.Frameworks.Ddd.Implementation.UnitTests.csproj --logger "trx;LogFileName=test-results-6.xml"
@@ -65,18 +68,42 @@ test_script:
 
 after_test:
 - cmd: >-
-    cd c:\projects\NWheels\Source\Presentation\Web\AppVeyorPoc
+    nuget install OpenCover -Version 4.6.519 -OutputDirectory c:\projects\NWheels\Tools
+    
+    cd c:\projects\NWheels\Tools\OpenCover.4.6.519\tools
+    
+    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests"
+    
+    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Injection.Adapters.Autofac.UnitTests\NWheels.Injection.Adapters.Autofac.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
+    
+    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Compilation.Adapters.Roslyn.UnitTests\NWheels.Compilation.Adapters.Roslyn.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
+    
+    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Platform.Rest.Implementation.UnitTests\NWheels.Platform.Rest.Implementation.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
+    
+    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Frameworks.Ddd.Implementation.UnitTests\NWheels.Frameworks.Ddd.Implementation.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
+    
+    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.SystemTests\NWheels.SystemTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
+    
+    OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Platform.Messaging.Tests\NWheels.Platform.Messaging.Tests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput
+    
+    nuget install coveralls.net -Version 0.412.0 -OutputDirectory c:\projects\NWheels\Tools
+    
+    cd c:\projects\NWheels\Tools\coveralls.net.0.412\tools
+    
+    csmacnz.Coveralls.exe --opencover -i c:\projects\NWheels\Tools\MergedResult.xml
 
+    cd c:\projects\NWheels\Source\Presentation\Web\AppVeyorPoc
+ 
     node --version
  
     npm --version
     
     npm install
-    
+     
     ng test --single-run=true
     
     echo export class Configuration{static appVeyorToken = 'token';} > configuration.ts
-    
+   
     ng e2e
     
 ## Pause build until file from desktop will be removed

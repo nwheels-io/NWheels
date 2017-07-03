@@ -4,6 +4,7 @@
     <TargetFramework>netstandard1.6</TargetFramework>
     <RootNamespace>NWheels.Platform.Messaging.Adapters.AspNetKestrel</RootNamespace>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <DebugType>full</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
