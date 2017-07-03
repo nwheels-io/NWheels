@@ -7,23 +7,55 @@ Based on our experience, commonality in the needs of enterprise application proj
 
 We take this as an opportunity to build a community-based ecosystem, which creates A-to-Z architectural recipes, ready technology stacks, concise programming models, and adaptable domain designs. 
 
-When put together, those parts turn enterprise application development into an easy win.
+We put those parts together, and turn enterprise application development into an easy win.
 
-# Demo (C#)
+# How it works
+
+### application lifecycle management
+
+- Development, customization, deployment, operation, and maintenance aspects are covered altogether.
+- Pre-implemented field-proven architectures, technology stacks, and automated toolchains are supplied, together with programming models for developers.
+- This toolbox is all extensible. Experiment and introduce support for new architectures, technologies, and programming models.
+
+### cross-platform
+
+- NWheels-based applications are developed in C# and target cross-platform .NET Core (Linux/Windows/macOS servers). Legacy .NET Framework can also be targeted for Windows servers.
+
+### all-in-C#
+
+- Mechanical and repetitive coding is eliminated. Layers outside of core business logic are based on declarative and concise C# programming models. For instance, user interface, data access, claims-based authorization, and network communications including RESTful APIs are expressed through declarative models. 
+
+### technology abstraction & full control
+
+- Application code is abstracted from concrete technology. There is no need to gain expertise with numerous products and tools, or program against variety of platforms, languages, and frameworks that comprise technology stacks of a complete system. 
+
+- Instead, technology-specific code generators transparently implement application C# models per concrete technology. These generators are supplied by pluggable _technology adapter modules_, contributed by experts in corresponding technologies.
+
+- Manually-written technology-specific code is allowed where full control over the underlying technology is required.   
+
+### business logic & building blocks
+
+- Robust structuring of application problem domain is ensured by combination of microservice architecture and _domain objects framework_. This framework flexibly scales from anemic domain models to fully-fledged domain-driven design.
+
+- Many problem domains already have well established designs. These designs are captured in _domain building block_ modules, which can be reused by applications. Due to great vertical and horizontal composition features of the domain objects framework, domain building blocks can easily be inherited, extended, and flexibly adjusted to specific application requirements.  
+
+- Domain building blocks are contributed by developers with strong expertise in corresponding domains.
+
+# Demo
 
 Imagine a very simple application:
 - A single page web app, which lets user enter her name, and submit it with a button. 
-- A microservice, which exposes RESTful API invoked by the web app button. 
+- A microservice, which handles the submission. The microservice exposes RESTful API invoked by the web app button. 
 - Business logic (_transaction script_), which receives user's name, and responds with a greeting text. The greeting text is then displayed by the web app.
 
-NWheels-based implementation is below 50 lines of code, all layers included.
+NWheels-based implementation is below 50 lines of C# code, all layers included.
 
-## Running the demo
+## Running the demo locally
 
 ### System requirements
 
-- Linux, Windows, or macOS machine (see OSes supported by .NET Core)
-- .NET Core SDK 1.0 or later
+- Linux, Windows, or macOS machine (see list of OS versions supported by .NET Core)
+- .NET Core SDK 1.0 or later (download here)
 
 ### Run microservice
   ```
@@ -36,7 +68,7 @@ NWheels-based implementation is below 50 lines of code, all layers included.
 
 Browse to [http://localhost:5000](http://localhost:5000)
 
-## Demo source code
+## Source code explained
 
 #### Program.cs - microservice entry point
 
@@ -52,14 +84,14 @@ public static int Main(string[] args)
 
     return microservice.Run(args);
 }
-
 ```
 
 #### HelloWorldTx.cs - business logic
-Although business logic for this demo is trivial, there's more under the hood. Default web stack includes RESTful API endpoint. Based on the method signature, the endpoint transparently allows invocation through HTTP and other protocols.     
+
+Business logic for this demo is trivial. It is captured in a _transaction script component_ class. 
+
 ```
-[TransactionScriptComponent]
-[SecurityCheck.AllowAnonymous]
+[TransactionScriptComponent, SecurityCheck.AllowAnonymous]
 public class HelloWorldTx
 {
     [TransactionScriptMethod]
@@ -69,20 +101,28 @@ public class HelloWorldTx
     }
 }
 ```
-The above `Hello` method can be invoked through HTTP by a `POST` request to URL like `http://localhost:5000/tx/HelloWorld/Hello`, with JSON body:
+
+There's more under the hood. For instance, default web stack includes RESTful API endpoint, where transaction scripts are one type of supported resources. The endpoint transparently allows invocation of resources through HTTP and other protocols, subject to authorization requirements.
+
+Here, `Hello` method can be invoked through HTTP `POST` request to `http://localhost:5000/tx/HelloWorld/Hello`, with JSON body:
+
 ```
 {name: "nwheels"}
 ```
+
 The endpoint will reply with JSON:
+
 ```
 {result: "Hello world, from nwheels!"}
 ```
-Authorization requirements can either be declared in-place (e.g., with `[SecurityCheck.AllowAnonymous]` attribute), or separately through API. Those requirements are transparently enforced throughout the execution path.   
+
+Authorization requirements can either be declared in-place (the `[SecurityCheck.AllowAnonymous]` attribute in this example), or configured as sets of rules through authorization API. The rules can be hard-coded or loaded from a persistent storage (e.g. DB). Authorization rules are transparently enforced throughout all  execution paths.
 
 #### HelloWorldApp.cs - web app
-NWheels supports declarative user interface, which dramatically boosts developers productivity. Similar to business logic, the developer is not concerned with front-end/UX and client-server communication. 
 
-UI is declared on top of high-level conceptual models, abstracted from any concrete technology stack. The models concentrate on structure, navigation, and functionality. Lower-level presentation details are not concerned.
+The next piece is user interface. NWheels dramatically boosts development and maintenance productivity by supporting declarative UI. The UI is declared through high-level conceptual models, abstracted from concrete technology stacks. 
+
+The models focus on UI structure, navigation, and binding to business data and capabilities. Lower-level front-end/UX and client/server communication details are not concerned on this level.
 ```
 [WebAppComponent]
 public class HelloWorldApp : WebApp<Empty.SessionState>
@@ -114,31 +154,23 @@ public class HelloWorldApp : WebApp<Empty.SessionState>
     }
 }
 ```
-Stunning high-usability user interfaces are handled separately by UX experts in corresponding interaction platforms. The experts create UI technology stacks, and provide code generators that implement conceptual models for those stacks. Numerous themes and variations are allowed.   
+Stunning high-usability user interfaces are created separately by UX experts in corresponding interaction platforms. The experts build UI technology stacks, and provide code generators that implement UI models on top of those stacks. User interfaces are allowed to have numerous themes and variations. 
 
-Besides the web interaction platform, our goal is to support also mobile native apps, desktop apps, SmartTV, IVR, IoT, and more. 
+Sometimes though, all this is not enough. Certain UI areas demand unique touch. In such cases, parts of generated platform-specific code and assets can be manually adjusted or replaced. 
 
-# How it works
+Besides the web, we aim to support mobile native apps, desktop apps, SmartTV, IVR, and IoT platforms. 
 
-### cross-platform
+# Getting Involved
 
-- NWheels-based applications are developed in C# and target cross-platform .NET Core. The legacy .NET Framework can also be targeted on Windows only.
+Community is a vital part of the NWheels project. We aim to build a friendly and welcoming contribution ecosystem around our project. 
 
-### all-in-C#
+NWheels would benefit from contributions in many different areas:
+- technology stack expertise
+- business domain expertise
+- infrastructure and DevOps
+- general quality software development
 
-- Mechanical and repetitive coding is eliminated. Layers outside of core business logic are based on declarative and concise C# programming models. For example, user interface, data access, claims-based authorization, and network communications including RESTful APIs are expressed through declarative models. 
 
-### technology abstraction
-
-- Application code is abstracted from concrete technology. Usually, there is no need to program against variety of platforms, languages, and frameworks, which comprise technology stacks of a complete system. Instead, technology-specific code generators transparently implement application models per concrete technology. 
-
-- Nevertheless, manually-written technology-specific code is allowed for cases that require full control over the underlying technology.
-
-### domain design and building blocks
-
-- NWheels does not dictate how application problem domains should be coded. Yet, similar to technology abstractions, programming 
-
-inherit and adapt pre-existing *_building block domains_*, contributed by experts in those domains.
 
 
 # How it works
@@ -168,14 +200,4 @@ The demo includes a simplest web application backed by one microservice. It runs
 - Application problem domains can inherit and adapt from pre-existing _building blocks_, contributed by experts in corresponding domains.
 - Concrete technology stacks are pluggable through adapter modules. Technology adapter modules are contributed by experts in corresponding technologies. 
 - C# declarative models are projected onto concrete technology stack at runtime or during deployment. At that moment, the models are translated into technology-specific code by technology-specific code generators.
-
-## Getting Involved
-
-Community is a vital part of the NWheels project. We aim to build a friendly and welcoming contribution ecosystem around our project. 
-
-NWheels would benefit from contributions in many different areas:
-- technology stack expertise
-- business domain expertise
-- infrastructure and DevOps
-- general quality software development
 
