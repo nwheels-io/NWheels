@@ -18,7 +18,7 @@ We put those parts together, and turn enterprise application development into an
 - Development, customization, deployment, operation, and maintenance aspects are covered altogether.
 - Pre-implemented field-proven architectures, technology stacks, and automated toolchains are supplied, together with programming models for developers. 
 - Unlike many other RAD platforms, user interface is fully covered and is first class citizen in  architecture and technology stack.
-- This toolbox is all extensible. Experiment and introduce support for new architectures, technologies, and programming models.
+- This toolbox is all extensible. Experiment and introduce support for new architectures, technology stacks, and programming models.
 
 ### cross-platform
 
@@ -32,15 +32,15 @@ We put those parts together, and turn enterprise application development into an
 
 - Application code is abstracted from concrete technology. There is no need to gain expertise with numerous products and tools, or program against variety of platforms, languages, and frameworks. 
 
-- Instead, technology-specific code generators transparently implement application C# models per concrete technology. These generators are supplied by pluggable _technology adapter modules_, contributed by experts in corresponding technologies.
+- Instead, technology-specific code generators transparently implement C# application models per concrete technology. These generators are supplied by pluggable _technology adapter modules_, contributed by experts in corresponding technology stacks.
 
-- Manually-written technology-specific code is allowed where full control over the underlying technology is required.   
+- Manually-written technology-specific code is allowed where full control over the underlying technology stack is required.
 
 ### business logic & building blocks
 
 - Robust structuring of application problem domain is ensured by combination of microservice architecture and _domain objects framework_. This framework flexibly scales from anemic domain models to fully-fledged domain-driven design.
 
-- Many problem domains already have well established designs. These designs are captured in _domain building block_ modules, which can be reused by applications. Due to great vertical and horizontal composition features of the domain objects framework, domain building blocks can easily be inherited, extended, and flexibly adjusted to specific application requirements.  
+- Many problem domains have well-formed field-proven designs. Such designs can be captured in _domain building block_ modules. Often applications can reuse domain building blocks, instead of reinventing the wheels. Due to great vertical and horizontal composition features of the domain objects framework, domain building blocks can easily be inherited, extended, and flexibly adjusted to specific application requirements.  
 
 - Domain building blocks are contributed by developers with strong expertise in corresponding domains.
 
@@ -61,7 +61,7 @@ NWheels-based implementation is below 50 lines of C# code, all layers included.
 - .NET Core SDK 1.0 or later (download here)
 
 ### Run microservice
-  ```
+  ```bash
   $ git clone https://github.com/felix-b/NWheels.git nwheels
   $ cd nwheels
   $ dotnet build
@@ -77,7 +77,7 @@ Browse to [http://localhost:5000](http://localhost:5000)
 
 It is super simple to bootstrap a microservice. Most of the time, you're all set with the defaults. For advanced scenarios, extensible API of `MicroserviceHostBuilder` lets you tailor technology stack to your requirements. 
 
-```
+```csharp
 public static int Main(string[] args)
 {
     var microservice = new MicroserviceHostBuilder("hello")
@@ -93,40 +93,58 @@ public static int Main(string[] args)
 
 Business logic for this demo is trivial. It is captured in a _transaction script component_ class. 
 
-```
-[TransactionScriptComponent, SecurityCheck.AllowAnonymous]
+```csharp
+[TransactionScriptComponent]
+[SecurityCheck.AllowAnonymous]
 public class HelloWorldTx
 {
     [TransactionScriptMethod]
-    public async Task<string> Hello(string name)`
+    public async Task<string> Hello(string name)
     {
         return $"Hello world, from {name}!";
     }
 }
 ```
 
-There's more under the hood. For instance, default web stack includes RESTful API endpoint, where transaction scripts are one type of supported resources. The endpoint transparently allows invocation of resources through HTTP and other protocols, subject to authorization requirements.
+There's more under the hood, though. For instance, default web stack includes RESTful API endpoint, where transaction scripts are one type of supported resources. The endpoint transparently allows invocation of resources through HTTP and other protocols, subject to authorization requirements.
 
-Here, `Hello` method can be invoked through HTTP `POST` request to `http://localhost:5000/tx/HelloWorld/Hello`, with JSON body:
+Here, `Hello` method can be invoked through HTTP request:
 
+```HTTP
+POST http://localhost:5000/tx/HelloWorld/Hello HTTP/1.1
+User-Agent: Fiddler
+Host: localhost:5000
+Content-Length: 17
+
+{name: "NWheels"}
 ```
-{name: "nwheels"}
+The endpoint will reply as follows:
+
+```HTTP
+HTTP/1.1 200 OK
+Date: Wed, 05 Jul 2017 05:40:55 GMT
+Content-Type: application/json
+Server: Kestrel
+Content-Length: 39
+
+{"result":"Hello world, from NWheels!"}
 ```
 
-The endpoint will reply with JSON:
+### Authorization
 
-```
-{result: "Hello world, from nwheels!"}
-```
+It worths noting that `[SecurityCheck.AllowAnonymous]` attribute here is required to allow access without prior authentication and validation of claims. 
 
-Authorization requirements can either be declared in-place (the `[SecurityCheck.AllowAnonymous]` attribute in this example), or configured as sets of rules through authorization API. The rules can be hard-coded or loaded from a persistent storage (e.g. DB). Authorization rules are transparently enforced throughout all  execution paths.
+Authorization infrastructure of NWheels transparently enforces access control rules to resources, components, and data throughout all execution paths. The rules can either be declared with attributes (like in this example), or configured through access control API. Depending on application requirements, configuration through the API can either be hard-coded, or based on data in a persistent storage (e.g. DB).
 
 #### HelloWorldApp.cs - web app
 
 The next piece is user interface. NWheels dramatically boosts development and maintenance productivity by supporting declarative UI. The UI is declared through high-level conceptual models, abstracted from concrete technology stacks. 
 
-The models focus on UI structure, navigation, and binding to business data and capabilities. Lower-level front-end/UX and client/server communication details are not concerned on this level.
-```
+The models focus on UI structure, navigation, and binding to business data and capabilities. Lower-level front-end/UX and client/server communication details are not concerned on this level. 
+
+Auhtorization rules that control access to bound data and capabilities are automatically reflected in the user interface.
+
+```csharp
 [WebAppComponent]
 public class HelloWorldApp : WebApp<Empty.SessionState>
 {
@@ -176,6 +194,7 @@ Please make yourself familiar with our [Code of Conduct]().
 1. Run the demo (if you haven't yet done that)
 1. Read our [Contribution Guidelines]() and [Coding Conventions]()
 1. Join our team on Slack
+1. Look through contribution areas listed below
 1. Look for issues labeled `first-timers`
 
 ## Contribution areas
@@ -184,8 +203,8 @@ NWheels project would benefit from contributions in many different areas:
 
 - **Kernel**: maintain and enhance _NWheels Kernel_, which is the main module that provides common base services critical to any application.
 - **Architecture**: contribute _programming models_ and define interfaces with _technology adapter_ modules. This includes documentation, examples, and sample applications.
-- **Technology stacks**: contribute _technology adapter_ modules
-- **Domains**: contribute _domain building block_ modules for common domains, e.g. e-Commerce, CRM, 
+- **Technology stacks**: construct technology stacks, and contribute _technology adapter_ module for them.
+- **Domains**: contribute _domain building block_ modules for common business domains, e.g. e-commerce, CRM, booking, trading, and many more.
 - **UX**: contribute technology stacks related to user interaction platforms, including their corresponding _technology adapter_ modules.
 - **Creatives**: this includes technical writing, graphics design and UX themes/variations, voice/music, advertisement.
 
@@ -193,7 +212,8 @@ NWheels project would benefit from contributions in many different areas:
 
 - **Application Security**
   - analyzing source code, DevOps toolchain, and runtime environments generated by NWheels
-  - discovering and fixing secuirty vulnerabilities
+  - analyzing threats and defining mitigations
+  - discovering and fixing vulnerabilities
   - consluting on best application security practices  
 - **Artificial Intelligence**
   - contributing programming models that integrate artificial intelligence in enterprise applications. 
@@ -207,4 +227,32 @@ NWheels project would benefit from contributions in many different areas:
 
 # Status & Roadmap
 
+Starting from February 2017, we are developing our second take at NWheels. 
 
+## Current milestone: 01 - First Happy Path
+
+- [Milestone](https://github.com/felix-b/NWheels/milestone/2)
+- [Scrum board](https://github.com/felix-b/NWheels/projects/1)
+- [Issues](https://github.com/felix-b/NWheels/milestone/2)
+
+## Roadmap
+
+
+
+## History
+
+The first take at NWheels was named _Milestone Afra_. It is now in use by two proprietary real-world applications. Further development was abandoned for high technical debt, few architectural mistakes, and in favor of targeting cross-platform .NET Core.
+
+### Concept proven
+
+Applications built on top of NWheels milestone Afra shown us that the core concept is correct and robust. With that, we learned a lot of lessons, and faced few mistakes in architecture and implementation.
+
+### Timeline
+
+Year|Status
+-|-
+2013|Started development of Hapil library for code generation, which is an essential part of NWheels concept.
+2014|Hapil library gained enough features. Started development of NWheels milestone Afra. Implemented server bootstrapping and metadata-based composition of domain objects. Added support for data persistence through Entity Framework.
+2015|Development of NWheels milestone Afra continued. Added support for Mongo DB. Started development of model-based UI and web UI stack based on AngularJS and ASP.NET Web API.
+2016|NWheels milestone Afra reached enough maturity to support full-stack development. Two proprietary real-world applications developed on top of NWheels milestone Afra: one released to production, one is in the beta stage. These applications proved that the concept of NWheels works, but taught us a few lessons.
+2017|Further development of NWheels milestone Afra abandoned; started development of second take at NWheels, completely from scratch.
