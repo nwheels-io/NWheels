@@ -229,17 +229,17 @@ NWheels project would benefit from contributions in many different areas:
 
 Starting from February 2017, we are developing our second take at NWheels. 
 
-## Current milestone: 01 - First Happy Path
+### Current milestone: 01 - First Happy Path
 
 - [Milestone](https://github.com/felix-b/NWheels/milestone/2)
 - [Scrum board](https://github.com/felix-b/NWheels/projects/1)
 - [Issues](https://github.com/felix-b/NWheels/milestone/2)
 
-## Roadmap
+### Roadmap
 
+Please [find the Roadmap here]().
 
-
-## History
+### History
 
 The first take at NWheels was named _Milestone Afra_. It is now in use by two proprietary real-world applications. Further development was abandoned for high technical debt, few architectural mistakes, and in favor of targeting cross-platform .NET Core.
 
