@@ -9,9 +9,21 @@ Based on our experience, commonality in the needs of enterprise application proj
 
 We take this as an opportunity to build a community-based ecosystem, which creates A-to-Z architectural recipes, ready technology stacks, concise programming models, and adaptable domain designs. 
 
-We put those parts together, and turn enterprise application development into an easy win.
+We put those pieces together to turn enterprise application development into an easy win:
+
+You|NWheels
+---|-------
+Design your application as a set of microservices|Packages and deploys microservice containers to runtime environments. Handles scalability and fault tolerance independently of your cloud vendor.
+Code and annotate business domains of the application, abstracted from concrete technology stacks|Eliminates mechanical and repetitive coding of whole layers, replacing it with code generation. Examples: data persistence, serialization, network communication, RESTful APIs, GraphQL queries, etc.
+Code and annotate conceptual UI models in C#, abstracted from concrete technology stacks|Generates UI applications for target interaction platforms, including web, mobile, desktop, IVR, SmartTV, and IoT. Transparently handles model bindings to application data and business capabilities, including reflection and enforcement of authorization requirements. 
+Declare cross-cutting requirements like authorization and event logging in C#, through concise programming models|Transparently implements and reinforces the requirements throughout all execution paths. Authorization is claims-based. Event logging includes such advanced features as BI measurements, circuit breakers, and built-in costless performance profiling.  
+Pick technology stacks for each microservice|Generates adaptation of domain objects to concrete technology stack. Generates concrete implementations on declared programming models.
+
+
 
 # How it works
+
+
 
 ### A-to-Z solution
 
@@ -116,7 +128,7 @@ User-Agent: Fiddler
 Host: localhost:5000
 Content-Length: 17
 
-{name: "NWheels"}
+{"name": "NWheels"}
 ```
 The endpoint will reply as follows:
 
