@@ -1,9 +1,9 @@
-Welcome to NWheels
-=======
-
 Linux|Windows|Coverage
 -----|-------|--------
-N/A|[![Build status](https://ci.appveyor.com/api/projects/status/qcm23727dm8dplk5/branch/master?svg=true)](https://ci.appveyor.com/project/felix-b/nwheels-bk3vs/branch/master)|[![Coverage Status](https://coveralls.io/repos/github/felix-b/NWheels/badge.svg?branch=master)](https://coveralls.io/github/felix-b/NWheels?branch=master)
+TBD|[![Build status](https://ci.appveyor.com/api/projects/status/qcm23727dm8dplk5/branch/master?svg=true)](https://ci.appveyor.com/project/felix-b/nwheels-bk3vs/branch/master)|[![Coverage Status](https://coveralls.io/repos/github/felix-b/NWheels/badge.svg?branch=master)](https://coveralls.io/github/felix-b/NWheels?branch=master)
+
+Welcome to NWheels
+=======
 
 Based on our experience, commonality in the needs of enterprise application projects is significantly higher than variability. 
 
@@ -16,14 +16,11 @@ You|NWheels
 Design your application as a set of microservices|Packages and deploys microservice containers to runtime environments. Handles scalability and fault tolerance independently of your cloud vendor.
 Code and annotate business domains of the application, abstracted from concrete technology stacks|Eliminates mechanical and repetitive coding of whole layers, replacing it with code generation. Examples: data persistence, serialization, network communication, RESTful APIs, GraphQL queries, etc.
 Code and annotate conceptual UI models in C#, abstracted from concrete technology stacks|Generates UI applications for target interaction platforms, including web, mobile, desktop, IVR, SmartTV, and IoT. Transparently handles model bindings to application data and business capabilities, including reflection and enforcement of authorization requirements. 
-Declare cross-cutting requirements like authorization and event logging in C#, through concise programming models|Transparently implements and reinforces the requirements throughout all execution paths. Authorization is claims-based. Event logging includes such advanced features as BI measurements, circuit breakers, and built-in costless performance profiling.  
-Pick technology stacks for each microservice|Generates adaptation of domain objects to concrete technology stack. Generates concrete implementations on declared programming models.
-
+Declare cross-cutting requirements like authorization and event logging in C#, through concise programming models|Transparently implements and reinforces the requirements throughout all execution paths. For instance, event logging includes such advanced features as BI measurements, circuit breakers, and built-in cost-free performance profiling.  
+Pick or define technology stack for each microservice|Generates integration layers of domain objects with selected technology stacks. Generates concrete implementations of declarative models. Certain technology stacks transparently enable advanced distributed architectures, such as elastic scalability and actor computing grids. 
 
 
 # How it works
-
-
 
 ### A-to-Z solution
 
