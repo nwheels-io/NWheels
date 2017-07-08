@@ -9,49 +9,18 @@ Based on our experience, commonality in the needs of enterprise application proj
 
 We take this as an opportunity to build a community-based ecosystem, which creates A-to-Z architectural recipes, ready technology stacks, concise programming models, and adaptable domain designs. 
 
-We put those pieces together to turn enterprise application development into an easy win:
+We put those pieces together to turn enterprise application development into an easy win
+
+## How it works
 
 You|NWheels
 ---|-------
 Design your application as a set of microservices|Packages and deploys microservice containers to runtime environments. Handles scalability and fault tolerance independently of your cloud vendor.
-Code and annotate business domains of the application, abstracted from concrete technology stacks|Eliminates mechanical and repetitive coding of whole layers, replacing it with code generation. Examples: data persistence, serialization, network communication, RESTful APIs, GraphQL queries, etc.
-Code and annotate conceptual UI models in C#, abstracted from concrete technology stacks|Generates UI applications for target interaction platforms, including web, mobile, desktop, IVR, SmartTV, and IoT. Transparently handles model bindings to application data and business capabilities, including reflection and enforcement of authorization requirements. 
-Declare cross-cutting requirements like authorization and event logging in C#, through concise programming models|Transparently implements and reinforces the requirements throughout all execution paths. For instance, event logging includes such advanced features as BI measurements, circuit breakers, and built-in cost-free performance profiling.  
-Pick or define technology stack for each microservice|Generates integration layers of domain objects with selected technology stacks. Generates concrete implementations of declarative models. Certain technology stacks transparently enable advanced distributed architectures, such as elastic scalability and actor computing grids. 
-
-
-# How it works
-
-### A-to-Z solution
-
-- Development, customization, deployment, operation, and maintenance aspects are covered altogether.
-- Pre-implemented field-proven architectures, technology stacks, and automated toolchains are supplied, together with programming models for developers. 
-- Unlike many other RAD platforms, user interface is fully covered and is first class citizen in  architecture and technology stack.
-- This toolbox is all extensible. Experiment and introduce support for new architectures, technology stacks, and programming models.
-
-### cross-platform
-
-- NWheels-based applications are developed in C# and target cross-platform .NET Core (Linux/Windows/macOS servers). Legacy .NET Framework can also be targeted for Windows servers.
-
-### all-in-C#
-
-- Mechanical and repetitive coding is eliminated. Layers outside of core business logic are based on declarative and concise C# programming models. For instance, user interface, data access, claims-based authorization, and network communications including RESTful APIs are expressed through declarative models. 
-
-### technology abstraction & full control
-
-- Application code is abstracted from concrete technology. There is no need to gain expertise with numerous products and tools, or program against variety of platforms, languages, and frameworks. 
-
-- Instead, technology-specific code generators transparently implement C# application models per concrete technology. These generators are supplied by pluggable _technology adapter modules_, contributed by experts in corresponding technology stacks.
-
-- Manually-written technology-specific code is allowed where full control over the underlying technology stack is required.
-
-### business logic & building blocks
-
-- Robust structuring of application problem domain is ensured by combination of microservice architecture and _domain objects framework_. This framework flexibly scales from anemic domain models to fully-fledged domain-driven design.
-
-- Many problem domains have well-formed field-proven designs. Such designs can be captured in _domain building block_ modules. Often applications can reuse domain building blocks, instead of reinventing the wheels. Due to great vertical and horizontal composition features of the domain objects framework, domain building blocks can easily be inherited, extended, and flexibly adjusted to specific application requirements.  
-
-- Domain building blocks are contributed by developers with strong expertise in corresponding domains.
+Code and annotate business domains of the application, abstracted from concrete technology stacks.|Eliminates mechanical and repetitive coding of whole layers, replacing it with code generation. Examples: data persistence, serialization, network communication, RESTful APIs, GraphQL queries, etc.
+Code and annotate conceptual UI models in C#, abstracted from concrete technology stacks. Use numerous UI themes. Tweak UI code and assets where unique touch is necessary.|Generates UI applications for target interaction platforms, including web, mobile, desktop, IVR, SmartTV, and IoT. Transparently handles model bindings to application data and business capabilities, including reflection and enforcement of authorization requirements. 
+Declare cross-cutting requirements like authorization and event logging, through concise C# programming models|Transparently implements and enforces the requirements throughout all execution paths. For instance, event logging includes such advanced features as BI measurements, circuit breakers, and built-in cost-free performance profiling.  
+Pick technology stack for each microservice|Generates integration layers of domain objects with selected technology stacks. Generates concrete implementations of declarative models. Certain technology stacks automatically enable advanced distribution scenarios, such as elastic scalability and actor grids. 
+Compose the product out of pluggable features. Use features for both core product and multiple customization layers. In the features, extend or override all aspects of system presentation and behavior.|Allows flexible vertical and horizontal composition of domain objects and user interfaces. Packages product features and customizations into pluggable NuGet packages. Smoothly supports distributed development workflows and remote professional services outside of product vendor organization. 
 
 # Demo
 
@@ -189,6 +158,39 @@ Stunning high-usability user interfaces are created separately by UX experts in 
 Sometimes though, all this is not enough. Certain UI areas demand unique touch. In such cases, parts of generated platform-specific code and assets can be manually adjusted or replaced. 
 
 Besides the web, we aim to support mobile native apps, desktop apps, SmartTV, IVR, and IoT platforms. 
+
+# Architecture highlights
+
+### A-to-Z solution
+
+- Development, customization, deployment, operation, and maintenance aspects are covered altogether.
+- Pre-implemented field-proven architectures, technology stacks, and automated toolchains are supplied, together with programming models for developers. 
+- Unlike many other RAD platforms, user interface is fully covered and is first class citizen in  architecture and technology stack.
+- This toolbox is all extensible. Experiment and introduce support for new architectures, technology stacks, and programming models.
+
+### cross-platform
+
+- NWheels-based applications are developed in C# and target cross-platform .NET Core (Linux/Windows/macOS servers). Legacy .NET Framework can also be targeted for Windows servers.
+
+### all-in-C#
+
+- Mechanical and repetitive coding is eliminated. Layers outside of core business logic are based on declarative and concise C# programming models. For instance, user interface, data access, claims-based authorization, and network communications including RESTful APIs are expressed through declarative models. 
+
+### technology abstraction & full control
+
+- Application code is abstracted from concrete technology. There is no need to gain expertise with numerous products and tools, or program against variety of platforms, languages, and frameworks. 
+
+- Instead, technology-specific code generators transparently implement C# application models per concrete technology. These generators are supplied by pluggable _technology adapter modules_, contributed by experts in corresponding technology stacks.
+
+- Manually-written technology-specific code is allowed where full control over the underlying technology stack is required.
+
+### business logic & building blocks
+
+- Robust structuring of application problem domain is ensured by combination of microservice architecture and _domain objects framework_. This framework flexibly scales from anemic domain models to fully-fledged domain-driven design.
+
+- Many problem domains have well-formed field-proven designs. Such designs can be captured in _domain building block_ modules. Often applications can reuse domain building blocks, instead of reinventing the wheels. Due to great vertical and horizontal composition features of the domain objects framework, domain building blocks can easily be inherited, extended, and flexibly adjusted to specific application requirements.  
+
+- Domain building blocks are contributed by developers with strong expertise in corresponding domains.
 
 # Getting Involved
 
