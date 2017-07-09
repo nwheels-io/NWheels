@@ -87,11 +87,11 @@ namespace NWheels.Platform.Messaging.Adapters.AspNetKestrel
         {
             _listenUrls = ImmutableArray<string>
                 .Empty
-                .Add($"http://localhost:{_configuration.Port}");
+                .Add($"http://0.0.0.0:{_configuration.Port}");
 
             if (_configuration.Https != null)
             {
-                _listenUrls = _listenUrls.Add($"https://localhost:{_configuration.Https.Port}");
+                _listenUrls = _listenUrls.Add($"https://0.0.0.0:{_configuration.Https.Port}");
             }
         }
 
