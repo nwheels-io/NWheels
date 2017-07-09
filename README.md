@@ -36,8 +36,16 @@ NWheels-based implementation is below 50 lines of C# code, all layers included.
 
 ### System requirements
 
-- Linux, Windows, or macOS machine (see list of OS versions supported by .NET Core)
-- .NET Core SDK 1.0 or later (download here)
+- Linux, Windows, or macOS machine 
+- .NET Core SDK 1.1 
+
+Get it here: [.NET Core downloads and supported OS versions](https://www.microsoft.com/net/download/core)
+
+#### or
+
+  ```bash
+  $ docker run -it microsoft/dotnet:1.1-sdk
+  ```
 
 ### Run microservice
   ```bash
