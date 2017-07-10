@@ -13,6 +13,8 @@ We put those pieces together to turn enterprise application development into an 
 
 ### How it works
 
+_DISCLAIMER: we're in the middle of development. Some features listed below may not yet exist, or be unstable_. 
+
 You:|NWheels:
 ---|-------
 Design your application as a set of microservices|Packages and deploys microservice containers to runtime environments. Handles scalability and fault tolerance independently of your cloud vendor.
@@ -28,36 +30,49 @@ When coding business domains and UI, reuse ready domain building block modules s
 Imagine a very simple application:
 - A single page web app, which lets user enter her name, and submit it with a button. 
 - A microservice, which handles the submission. The microservice exposes RESTful API invoked by the web app button. 
-- Business logic (_transaction script_), which receives user's name, and responds with a greeting text. The greeting text is then displayed by the web app.
+- Business logic (_transaction script_), which receives user's name, and responds with a greeting text. The greeting text is then displayed in the web app.
 
 NWheels-based implementation is below 50 lines of C# code, all layers included.
 
-## Running the demo locally
+## Running the demo 
 
 ### System requirements
 
-- Linux, Windows, or macOS machine 
-- .NET Core SDK 1.1 
+- Running on your machine:
+  - Linux, Windows, or macOS machine 
+  - .NET Core SDK 1.1 or later ([download here](https://www.microsoft.com/net/download/core))
 
-Get it here: [.NET Core downloads and supported OS versions](https://www.microsoft.com/net/download/core)
+- Running in Docker (Linux container):
+  ```bash
+  $ docker run --name nwheels-demo -p 5000:5000 -it microsoft/dotnet:1.1-sdk /bin/bash
+  ```
 
-#### or
+### Get sources and build
 
   ```bash
-  $ docker run -it microsoft/dotnet:1.1-sdk
+  $ git clone https://github.com/felix-b/NWheels.git nwheels
+  $ cd nwheels/Source/
+  $ dotnet restore
+  $ dotnet build
   ```
 
 ### Run microservice
+
   ```bash
-  $ git clone https://github.com/felix-b/NWheels.git nwheels
-  $ cd nwheels
-  $ dotnet build
-  $ dotnet run Source/NWheels.Samples.FirstHappyPath/bin/debug/netcoreapp1.1/hello.dll
+  $ dotnet NWheels.Samples.FirstHappyPath.HelloService/bin/Debug/netcoreapp1.1/hello.dll
   ```
+  
 ### Open web application
 
-Browse to [http://localhost:5000](http://localhost:5000)
-
+- If running on your machine: 
+  - Browse to [http://localhost:5000](http://localhost:5000)
+- If running in docker container: 
+  - Retrieve container IP address:
+    ```bash
+    docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' nwdemo
+    ```
+  - Browse to http://_container_ip_address_:5000
+ 
 ## Source code explained
 
 #### Program.cs - microservice entry point
