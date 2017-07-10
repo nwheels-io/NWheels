@@ -15,24 +15,28 @@ We put those pieces together to turn enterprise application development into an 
 
 _DISCLAIMER: we're in the middle of development. Some features listed below may not yet exist, or be unstable_. 
 
-You:|NWheels:
----|-------
-Design your application as a set of microservices|Packages and deploys microservice containers to runtime environments. Handles scalability and fault tolerance independently of your cloud vendor.
-Code and annotate business domains of the application, abstracted from concrete technology stacks.|Implements [hexagonal architecture](http://alistair.cockburn.us/Hexagonal+architecture) with _convention-over-implementation_ approach. Eliminates mechanical and repetitive coding of whole layers, replacing it with pluggable code generation. Examples: data access, serialization, network communication, RESTful APIs, GraphQL queries, etc.
+Developers:|NWheels:
+---|---
+Design an application as a set of microservices|Packages and deploys microservice containers to runtime environments. Handles scalability and fault tolerance independently of your cloud vendor.
+Code and annotate business domains of the application, abstracted from concrete technology stacks.|Implements a mix of [hexagonal architecture](http://alistair.cockburn.us/Hexagonal+architecture) with _prefer convention over implementation_. Eliminates mechanical and repetitive coding of adapter layers, replacing it with pluggable code generation. Examples: data access, serialization, network communication, RESTful APIs, GraphQL queries, etc.
 Code and annotate conceptual UI models in C#, abstracted from concrete technology stacks. Use numerous UI themes. Directly tweak UI code and assets wherever unique touch is necessary.|Generates UI applications for target interaction platforms, including web, mobile, desktop, IVR, SmartTV, and IoT. Transparently handles UI model bindings to data and business capabilities, including reflection and enforcement of authorization requirements. 
-Declare cross-cutting requirements like authorization and event logging, through concise C# programming models|Transparently implements and enforces the requirements throughout all execution paths. For instance, event logging includes such advanced features as BI measurements, usage statistics, circuit breakers, and built-in cost-free performance profiling.  
+Declare cross-cutting requirements like authorization and event logging, through concise C# programming models|Transparently implements and enforces the requirements throughout all execution paths. For instance, event logging includes application-defined BI measurements, usage statistics, circuit breakers, and built-in cost-free performance profiling.  
 Pick technology stack for each microservice|Generates integration layers of domain objects with selected technology stacks. Generates concrete implementations of declarative models. Certain technology stacks automatically enable advanced distribution scenarios, such as elastic scalability and actor grids. 
 Compose the product out of pluggable features. Use features for both core product and multiple customization layers. In the features, extend or override all aspects of system presentation and behavior.|Allows flexible vertical and horizontal composition of domain objects and user interfaces. Releases product features and customizations as pluggable NuGet packages into your project NuGet repo. Smoothly supports distributed development workflows and remote professional services outside of product vendor organization. 
-When coding business domains and UI, reuse ready domain building block modules supplied by NWheels, and avoid reinventing the wheel.|Captures expertise in common problem domains (e.g. e-commerce, booking, CRM) into reusable _domain building block_ modules, based on well-established and field-proven designs. Makes building blocks inheriteble, extensible, and easily adjustable to specific application requirements.  
+When coding business domains and UI, reuse ready domain building blocks supplied by NWheels, and avoid reinventing the wheel.|Captures expertise in common problem domains (e.g. e-commerce, booking, marketing, CRM, ...) into reusable _domain building block_ modules, based on well-established and field-proven patterns and designs. Makes building blocks inheriteble, extensible, and easily adjustable to specific application requirements.  
 
 # Demo
+
+NWheels is already capable of bootstrapping a microservice with partially implemented web technology stack.
 
 Imagine a very simple application:
 - A single page web app, which lets user enter her name, and submit it with a button. 
 - A microservice, which handles the submission. The microservice exposes RESTful API invoked by the web app button. 
 - Business logic (_transaction script_), which receives user's name, and responds with a greeting text. The greeting text is then displayed in the web app.
 
-NWheels-based implementation is below 50 lines of C# code, all layers included.
+NWheels-based implementation is below 50 lines of C# code, all layers included. 
+
+_Note that web client implementation is a mockup prototype -- the real web client stack has yet to be developed._
 
 ## Running the demo 
 
@@ -183,84 +187,25 @@ Sometimes though, all this is not enough. Certain UI areas demand unique touch. 
 
 Besides the web, we aim to support mobile native apps, desktop apps, SmartTV, IVR, and IoT platforms. 
 
-# Architecture highlights
-
-### A-to-Z solution
-
-- Development, customization, deployment, operation, and maintenance aspects are covered altogether.
-- Pre-implemented field-proven architectures, technology stacks, and automated toolchains are supplied, together with programming models for developers. 
-- Unlike many other RAD platforms, user interface is fully covered and is first class citizen in  architecture and technology stack.
-- This toolbox is all extensible. Experiment and introduce support for new architectures, technology stacks, and programming models.
-
-### cross-platform
-
-- NWheels-based applications are developed in C# and target cross-platform .NET Core (Linux/Windows/macOS servers). Legacy .NET Framework can also be targeted for Windows servers.
-
-### all-in-C#
-
-- Mechanical and repetitive coding is eliminated. Layers outside of core business logic are based on declarative and concise C# programming models. For instance, user interface, data access, claims-based authorization, and network communications including RESTful APIs are expressed through declarative models. 
-
-### technology abstraction & full control
-
-- Application code is abstracted from concrete technology. There is no need to gain expertise with numerous products and tools, or program against variety of platforms, languages, and frameworks. 
-
-- Instead, technology-specific code generators transparently implement C# application models per concrete technology. These generators are supplied by pluggable _technology adapter modules_, contributed by experts in corresponding technology stacks.
-
-- Manually-written technology-specific code is allowed where full control over the underlying technology stack is required.
-
-### business logic & building blocks
-
-- Robust structuring of application problem domain is ensured by combination of microservice architecture and _domain objects framework_. This framework flexibly scales from anemic domain models to fully-fledged domain-driven design.
-
-- Many problem domains have well-formed field-proven designs. Such designs can be captured in _domain building block_ modules. Often applications can reuse domain building blocks, instead of reinventing the wheels. Due to great vertical and horizontal composition features of the domain objects framework, domain building blocks can easily be inherited, extended, and flexibly adjusted to specific application requirements.  
-
-- Domain building blocks are contributed by developers with strong expertise in corresponding domains.
-
 # Getting Involved
 
 Impressed? We'd like having you onboard!
 
 Community is a vital part of the NWheels project. Here we are building a welcoming and friendly ecosystem for contributors.
 
-Please make yourself familiar with our [Code of Conduct]().
+Please make yourself familiar with our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Where to start
 
-1. Run the demo (if you haven't yet done that)
-1. Read our [Contribution Guidelines]() and [Coding Conventions]()
-1. Join our team on Slack
-1. Look through contribution areas listed below
-1. Look for issues labeled `first-timers`
+1. Run the demo
+1. Carefully read our [Contribution Guidelines](CONTRIBUTING.md).
+1. Join our team on Slack:
+   - Send an email with subject `Join NWheels team` to [team@nwheels.io](mailto:nwheels.io). You will receive back an email from Slack with join link and instructions.
+1. Read our [Roadmap](docs/wiki/ROADMAP.md). Look through **Contribution Areas** section and choose areas you're interested in contributing to.
+1. Start from resolving some issues, preferably those labeled  `first-timers`. 
+1. Please feel free to communicate your thoughts and reach out for help.
 
-## Contribution areas
-
-NWheels project would benefit from contributions in many different areas:
-
-- **Kernel**: maintain and enhance _NWheels Kernel_, which is the main module that provides common base services critical to any application.
-- **Architecture**: contribute _programming models_ and define interfaces with _technology adapter_ modules. This includes documentation, examples, and sample applications.
-- **Technology stacks**: construct technology stacks, and contribute _technology adapter_ module for them.
-- **Domains**: contribute _domain building block_ modules for common business domains, e.g. e-commerce, CRM, booking, trading, and many more.
-- **UX**: contribute technology stacks related to user interaction platforms, including their corresponding _technology adapter_ modules.
-- **Creatives**: this includes technical writing, graphics design and UX themes/variations, voice/music, advertisement.
-
-#### On top of the above, we are especially interested in contributions to these areas:
-
-- **Application Security**
-  - analyzing source code, DevOps toolchain, and runtime environments generated by NWheels
-  - analyzing threats and defining mitigations
-  - discovering and fixing vulnerabilities
-  - consluting on best application security practices  
-- **Artificial Intelligence**
-  - contributing programming models that integrate artificial intelligence in enterprise applications. 
-  - architecting data collection for feeding AI models in reusable ways
-  - contributing AI decisioning engines
-  - expending UI programming models with AI-based interaction capabilities
-- **Internet of Things** 
-  - contributing specializations of UI programming models to different kinds of end-user devices
-  - providing technology stack for direct communication with devices, or integration with device cloud platforms
-  - contributing technology adapter modules for the above
-
-# Status & Roadmap
+# Current Status
 
 Starting from February 2017, we are developing our second take at NWheels. 
 
@@ -269,10 +214,6 @@ Starting from February 2017, we are developing our second take at NWheels.
 - [Milestone](https://github.com/felix-b/NWheels/milestone/2)
 - [Scrum board](https://github.com/felix-b/NWheels/projects/1)
 - [Issues](https://github.com/felix-b/NWheels/milestone/2)
-
-### Roadmap
-
-Please [find the Roadmap here]().
 
 ### History
 
@@ -291,3 +232,4 @@ Year|Status
 2015|Development of NWheels milestone Afra continued. Added support for Mongo DB. Started development of model-based UI and web UI stack based on AngularJS and ASP.NET Web API.
 2016|NWheels milestone Afra reached enough maturity to support full-stack development. Two proprietary real-world applications developed on top of NWheels milestone Afra: one released to production, one is in the beta stage. These applications proved that the concept of NWheels works, but taught us a few lessons.
 2017|Further development of NWheels milestone Afra abandoned; started development of second take at NWheels, completely from scratch.
+
