@@ -67,9 +67,9 @@ NWheels-based implementation is below 50 lines of C# code, all layers included.
 - If running on your machine: 
   - Browse to [http://localhost:5000](http://localhost:5000)
 - If running in docker container: 
-  - Retrieve container IP address:
+  - Print container IP address:
     ```bash
-    docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' nwdemo
+    docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' nwheels-demo
     ```
   - Browse to http://_container_ip_address_:5000
  
