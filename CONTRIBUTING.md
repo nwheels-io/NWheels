@@ -6,18 +6,19 @@ When contributing to this repository, please follow the guidelines below.
 
 - [Communication](#communication)
 - [Workflow](#workflow)
-- [Submitting changes](#submitting-changes)
 - [Version control structure](#version-control-structure)
-- [Source code structure](#source-code-structure)
+- [Repository structure](#repository-structure)
 - [Coding conventions](#coding-conventions)
+- [Peer reviews](#peer-reviews)
+- [Submitting changes](#submitting-changes)
 - [First-timers](#first-timers)
 
 ## Communication
 
 There are two channels of communication:
 
-- Slack
-- Issues on GitHub
+- [Slack](#slack)
+- [Issues on GitHub](#issues-on-github)
 
 ### Slack: 
 
@@ -36,7 +37,7 @@ All technical communication should be done in GitHub issues. Discussion thread o
 
 Issues are labeled in several dimensions:
 
-- **Issue type** - exactly one must be labeled: 
+- **Issue type** - one of: 
   - `new feature`: significant piece of new functionality  
   - `enhancement`: enhancement to an existing feature
   - `bug`: a bug :)
@@ -60,9 +61,9 @@ Issues are labeled in several dimensions:
 
 Bugs and enhancements can be reported by anyone. Please make sure you follow these rules: 
 
-- Always search existing issues first. Maybe your issue was already reported or suggested as part of another issue.
+- Always search for existing issues first. Maybe your issue was already reported or suggested as part of another issue.
 - If not found, create a new issue, and label it as explained above. If you're going to resolve it, please assign it to yourself right off. 
-- Project maintainers will review the issue and prioritize it. If you assigned the issue to yourself, it will be scheduled to current iteration. 
+- Project maintainers will review the issue and prioritize it. Regardless of the priority, if you assigned the issue to yourself, it will be scheduled to current iteration. 
 - In cases of critical issues, maintainers may take over and provide their own resolution. Take-overs will be communicated in the issue thread.  
 - Everyone is welcome to join the discussion in the issue thread at any stage. Technical clarifications and problem reproductions may be of great help to those who's working on the issue. 
 
@@ -79,7 +80,6 @@ Please follow these steps when introducing new features to NWheels:
 1. **Backlog**: here the issue is waiting to be assigned to an iteration milestone. Further discission and design are welcome at this stage. 
 1. **Iteration milestone** (explained below): here the issue is actively worked on to completion. A pull request must be created, which captures changes made in context of this specific issue. The goal is to resolve the issue and merge the pull request (see [Submitting changes](#submitting-changes) for more detials).
 
-
 ### Iteration milestones
 
 - All changes are introduced in context of iteration milestones. 
@@ -87,60 +87,183 @@ Please follow these steps when introducing new features to NWheels:
 - Iteration milestones are sequentially numbered, and added a title, which summaries milestone target. For example, "_01 First happy path_". 
 - Scope-wise, milestones are planned much like iterations: issues are picked from the backlog, and assigned to the milestone. 
 - Time-wise, milestones are defined a likely due date, but the date can change as we go. If a due date cannot be met, it is replaced with a new expected date.
-- **Backlog** and **Proposals** are also milestones, but they are not related to iterations.
+- **Backlog** and **Proposals** are also milestones, but they don't represent iterations.
 
 ### Scrum board
 
-We use GitHub _Project Boards_ feature to create Scrum boards
+We use GitHub _Project Boards_ feature to create [Scrum](https://en.wikipedia.org/wiki/Scrum_\(software_development\)) boards.
 
 - Read [GitHub Help on Project Boards](https://help.github.com/articles/about-project-boards/#)
 
-Every iteration milestone has an associated Scrum board, which visualizes milestone progress. Scrum boards are named after their associated milestones.
+Every iteration milestone has an associated Scrum board, which visualizes milestone progress. Scrum boards are named after the milestones.
 
 Scrum board has the following lanes:
 
-- **TODO**: issues planned for the iteration
-- **IN PROGRESS**: issues being actively worked on
+- **TODO**: issues planned for the iteration, usually not yet assigned
+- **IN PROGRESS**: assigned issues being actively worked on
 - **ON-HOLD**: issues whose resolution was impeded
 - **DONE**: resolved issues
 
-Every contributor is required to update the Scrum board as necessary, when she starts or stops working on an issue.
+## Version control structure
+
+- Current iteration milestone is in the `master` branch. 
+- Direct push to `master` is not allowed. The only way of introducing commits to `master` is by merging pull requests. 
+- Every completed milestone is labeled with an annotated tag containing milestone number, like this: `milestone-01`.
+- Branches starting with `pr-` represent pull requests created by repo owner (`felix-b`). Those branches are removed as soon as their corresponding PRs are merged.
+- Branch `afra` stores the _milestone Afra_ version of NWheels.
+
+## Repository structure
+
+The repo has three subfolders:
+- `Sources` - all sources of the NWheels project, including samples
+- `Docs` - documentation materials, including wiki markdown, presentations, and documentation-related creatives 
+- `Tools` - 3rd party utulities and tools used for NWheels development; stored as binaries, sources, or Git submodules.
+
+### Source folder structure
+
+- The sources are located in the `./Source` subfolder of the repo. 
+- Single solution file named `nwheels.sln` includes all projects. 
+- All projects reside in direct subfolders of the `./Source` folder. 
+- Project subfolders are named after the projects they contain. 
+
+```
+/Source
+ |
+ +-- nwheels.sln
+ |
+ +-- /NWheels.Api
+ |    |
+ |    +-- NWheels.Api.csproj
+ |    |
+ |   ...
+ |
+ +-- /NWheels.Implementation
+ |    |
+ |    +-- NWheels.Implementation.csproj
+ |    |
+ |   ...
+...
+```
+
+### Projects vs. modules
+
+NWheels modules are divided into two major categories:
+
+Category|Description|Projects
+---|---|---
+Core modules|Provide microservice facilities and programming models, abstracted from concrete technology stacks|Module is entirely encapsulated by a C# project.
+Technology adapter modules|Pluggable adapters to concrete technology stacks.|Module is encapsulated by a C# project. In addition, it may contain technology-specific projects or objects, which are developed with a different set of programming languages and tools.
+
+### Technology-specific projects and objects
+  
+Technology-specific projects and objects are placed in a subfolder under the C# project. 
+
+In the example below, module `NWheels.Uidl.Adapters.WebAngular` adapts UI port to web technology stack based on the Angular framework. Client-side projects and assets are located inside the `ClientSide` subfolder. 
+```
++-- /NWheels.Uidl.Adapters.WebAngular
+|    |
+|    +-- NWheels.Uidl.Adapters.WebAngular.csproj
+|    |
+|    +-- /ClientSide
+|         |
+|        ...
+```
+
+## Coding conventions
+
+These conventions apply to C# projects. 
+
+- Technology adapter modules may contain projects or objects, which are developed with a different set of programming languages and tools. They are beyond the scope of these guidelines. 
+
+### Development environment
+
+We currently develop on Windows, with the following tools installed on dev machine:
+
+- Visual Studio 2017 Community Edition or higher, v15.2 or later
+- .NET Core SDK 1.1 or later 
+- Docker or Docker Toolbox for Windows
+
+### Development on Linux and macOS
+
+We are looking forward to migrating to Visual Studio Code. This will allow development on either Windows, Linux, or macOS.
+
+Currently, the following features are missing in VSCode, stopping us from migrating right away:
+
+- Integrated test runner and result browser - [vscode issue #9505](https://github.com/Microsoft/vscode/issues/9505)
+- Support of Roslyn-based code analyzers and fixes, with a rich set of bug detectors and refactorings - [omnisharp-vscode issue #43](https://github.com/OmniSharp/omnisharp-vscode/issues/43)
+
+### Online services
+
+We use the following online services, provided for free:
+
+- [NuGet.org](https://www.nuget.org/) - package repository
+- [AppVeyor](https://ci.appveyor.com/project/felix-b/nwheels-bk3vs/branch/master) - continuous integration build on Windows
+- [Travis CI](https://travis-ci.org/) (planned) - continuous integration build on Linux
+- [Coveralls](https://coveralls.io/github/felix-b/NWheels?branch=master) - test coverage reports
+
+### Testing
+
+TBD...
+
+### Coding requirements
+
+- Follow [SOLID](https://en.wikipedia.org/wiki/SOLID_(object-oriented_design)) for object-oriented design
+- Prefer [convention over configuration](https://en.wikipedia.org/wiki/Convention_over_configuration)
+- Write code with no [smells](https://en.wikipedia.org/wiki/Code_smell); when changing existing code, [refactor](https://martinfowler.com/books/refactoring.html) as necessary
+- Write simple, readable, self-descriptive code
+  - when you code, don't think about writing the code; think about reading it.
+  - choose descriptive names
+  - write short methods; code of every single method should be trivial to understand
+  - prefer immutable objects, because they don't add side effects to the system. 
+  - prefer readability over optimization; do not optimize, unless you've measured a performance bottleneck.
+- Let compiler validate as much of your code as possible
+  - wherever possible, apply `readonly` to fields
+  - 
+- Cover production code with tests
+
+### C# coding style
+
+TBD...
+
+## Peer reviews
+
+- All code must pass a code review. 
+- Code reviews are done on pull requests.
+- Work-in-progress pull requests can be reviewed and commented by anyone. 
+- For completed PRs, at least one approved code review from one of project maintainers is required, before the PR can be merged. 
 
 ## Submitting changes
 
 All changes should be submitted through pull requests (PRs). 
 - Read [GitHub help on Pull Requests](https://help.github.com/categories/collaborating-with-issues-and-pull-requests/)
 
+### Work in progress
+
 We encourage submitting work-in-progress PRs, so that the community can review and react early. 
 
 - Please prefix names of  work-in-progress PRs with "_WIP_" - for example, "_WIP - listen on 0.0.0.0 instead of localhost_". We will know that it's an ongoing effort and give feedback accordingly.
 - Once you consider the PR ready, please remove the "_WIP_" prefix from its name. We will treat it as a candidate for merging. 
 
+### Walk-through
+
 Please only submit changes on issues which are assigned to you and scheduled for current iteration milestone. 
 
-1. Pick an unassigned issue from **TODO** lane of current iteration Scrum board.
+1. Pick an unassigned issue from the **TODO** lane of current iteration Scrum board.
 1. Leave a comment in the issue thread, stating that you are going to work on the issue. Make sure no one has left such comment already.
-1. Fork the repo, create a PR, and start working.
+1. Fork the repo, branch off `master`, create a work-in-progress PR, and start working. This step is explained in more detail in [First-timers](#first-timers) section.
 1. Project maintainers will assign the issue to you and move it to **IN PROGRESS** lane in the Scrum board.
 
-Before a PR can be merged, it must:
+### Requirements for merge
 
-- Pass CI builds
-- Have an approval from at least one peer reviewer
+Before a PR can be merged, it must meet the following requirements:
 
-## Version control structure
-
-_TBD..._
-
-
-## Source code structure
-
-_TBD..._
-
-## Coding conventions
-
-_TBD..._
-
+- The code must follow [coding conventions](#coding-convetions) (explained above).
+- The code must be covered by tests. 
+  - If the PR includes changes to existing functionality, the tests that cover changed functionality must be changed accordingly.
+  - Any appropriate combination of unit/integration/system tests is accepted, and their union coverage is counted. 
+  - Coverage of less than 100% must be justified - comment on the PR thread.
+- The PR must pass CI builds attached to NWheels repo. Their details appear on the PR issue thread after first commit.
+- The PR must have a review with approval by one of project maintainers.
 
 ## First-timers
 
@@ -156,7 +279,7 @@ Well, where should you start?
 1. Carefully read this guideline document.
 1. Read our [Roadmap](docs/Wiki/roadmap.md). Look through **Contribution Areas** section and choose areas you're interested in contributing to.
 1. Start from resolving some issues, preferably those labeled  `first-timers`: 
-    - Go to current interation Scrum board
+    - Go to current iteration Scrum board
     - Pick an unassigned issue from **TODO** lane, which matches your areas of interest. 
 1. Proceed as explained in [Submitting changes](#submitting-changes).
 1. Please feel free to communicate your thoughts and reach out for help.
