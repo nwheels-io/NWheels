@@ -1,6 +1,6 @@
 # Contribution guidelines
 
-When contributing to this repository, please follow the guidelines below.
+When contributing to this repository, please follow the guidelines below. 
 
 #### Table of contents
 
@@ -11,7 +11,7 @@ When contributing to this repository, please follow the guidelines below.
 - [Coding conventions](#coding-conventions)
 - [Peer reviews](#peer-reviews)
 - [Submitting changes](#submitting-changes)
-- [First-timers](#first-timers)
+- [First-timers read here](#first-timers-read-here)
 
 ## Communication
 
@@ -152,13 +152,13 @@ NWheels modules are divided into two major categories:
 Category|Description|Projects
 ---|---|---
 Core modules|Provide microservice facilities and programming models, abstracted from concrete technology stacks|Module is entirely encapsulated by a C# project.
-Technology adapter modules|Pluggable adapters to concrete technology stacks.|Module is encapsulated by a C# project. In addition, it may contain technology-specific projects or objects, which are developed with a different set of programming languages and tools.
+Technology adapter modules|Pluggable adapters to concrete technology stacks.|Module is encapsulated by a C# project. In addition, it may contain _technology-specific projects or objects_, which are developed with a different set of programming languages and tools.
 
 ### Technology-specific projects and objects
   
 Technology-specific projects and objects are placed in a subfolder under the C# project. 
 
-In the example below, module `NWheels.Uidl.Adapters.WebAngular` adapts UI port to web technology stack based on the Angular framework. Client-side projects and assets are located inside the `ClientSide` subfolder. 
+In the example below, module `NWheels.Uidl.Adapters.WebAngular` adapts UI port to web technology stack based on the Angular framework. Front-end projects and assets are located inside the `ClientSide` subfolder. 
 ```
 +-- /NWheels.Uidl.Adapters.WebAngular
 |    |
@@ -171,9 +171,9 @@ In the example below, module `NWheels.Uidl.Adapters.WebAngular` adapts UI port t
 
 ## Coding conventions
 
-These conventions apply to C# projects. 
+The following conventions apply to C# projects. 
 
-- Technology adapter modules may contain projects or objects, which are developed with a different set of programming languages and tools. They are beyond the scope of these guidelines. 
+- Technology adapter modules may contain projects or objects, which are developed with a different set of programming languages and tools. They are beyond the scope of these conventions. 
 
 ### Development environment
 
@@ -185,7 +185,7 @@ We currently develop on Windows, with the following tools installed on dev machi
 
 ### Development on Linux and macOS
 
-We are looking forward to migrating to Visual Studio Code. This will allow development on either Windows, Linux, or macOS.
+We are looking forward to migrating to Visual Studio Code. This will allow development to be done on Linux and macOS.
 
 Currently, the following features are missing in VSCode, stopping us from migrating right away:
 
@@ -216,18 +216,55 @@ TBD...
   - write short methods; code of every single method should be trivial to understand
   - prefer immutable objects, because they don't add side effects to the system. 
   - prefer readability over optimization; do not optimize, unless you've measured a performance bottleneck.
-- Let compiler validate as much of your code as possible
+- Delegate validation of your design intentions to compiler, as much as possible
   - wherever possible, apply `readonly` to fields
-  - 
+  - use least possible visibility for types and members 
 - Cover production code with tests
 
 ### C# coding style
 
-TBD...
+Many aspects of coding style are automatically enforced by Visual Studio. There are settings and snippet files that have to be imported - see [First-timers](#first-timers) for details.  
+
+1. **Common guidelines**. All types and members must follow common .NET guidelines for design and naming.
+    - Read [Framework Design Guidelines](https://docs.microsoft.com/en-us/dotnet/standard/design-guidelines/)
+
+1. **Fields**. Private fields naming convention:
+   - `_camelCase` for instance fields
+   - `_s_camelCase` for static fields
+   
+   Non-private fields are only allowed if they are `readonly`. Otherwise, they should be encapsulated in properties.
+
+1. Member separator lines. For better readability, we separate members, or groups of single-line members, with a horizontal separator line.
+   - A separator line is typed as line comment consisting of the dash character: `//---`.  It starts at current indent in code, and continues up to column 160. It is preceded and followed by an empty line.
+   - Example (read sources for more examples):
+     ```
+     public void MethodOne() 
+     {
+     } 
+ 
+     //---------------------------------------------------------
+     
+     public void MethodTwo() 
+     {
+     }
+     ```
+
+    - We defined code snippets for VS2017, as follows:
+      - `000 + TAB` - insert separator line at indent 0
+      - `111 + TAB` - insert separator line at indent 1
+      - `222 + TAB` - insert separator line at indent 2
+      - `333 + TAB` - insert separator line at indent 3
+      - `444 + TAB` - insert separator line at indent 4
+
+1. **Curly brackets**. Curly brackets are opened on the same line for inlined declarations:
+   - anonymous method
+   - collection initializer
+
+   In all other cases, curly brackets are opened on a new line.
 
 ## Peer reviews
 
-- All code must pass a code review. 
+- All code must pass review. 
 - Code reviews are done on pull requests.
 - Work-in-progress pull requests can be reviewed and commented by anyone. 
 - For completed PRs, at least one approved code review from one of project maintainers is required, before the PR can be merged. 
@@ -244,35 +281,51 @@ We encourage submitting work-in-progress PRs, so that the community can review a
 - Please prefix names of  work-in-progress PRs with "_WIP_" - for example, "_WIP - listen on 0.0.0.0 instead of localhost_". We will know that it's an ongoing effort and give feedback accordingly.
 - Once you consider the PR ready, please remove the "_WIP_" prefix from its name. We will treat it as a candidate for merging. 
 
-### Walk-through
+### Walkthrough
 
-Please only submit changes on issues which are assigned to you and scheduled for current iteration milestone. 
+Please only submit changes on issues which are assigned to you and scheduled for current iteration milestone. Below are step-by-step instructions.
 
 1. Pick an unassigned issue from the **TODO** lane of current iteration Scrum board.
 1. Leave a comment in the issue thread, stating that you are going to work on the issue. Make sure no one has left such comment already.
 1. Fork the repo, branch off `master`, create a work-in-progress PR, and start working. This step is explained in more detail in [First-timers](#first-timers) section.
 1. Project maintainers will assign the issue to you and move it to **IN PROGRESS** lane in the Scrum board.
+1. Commit & push frequently, and watch for feedback comments and reviews. They can appear on threads of either the PR, or the original issue. 
+1. When done, remove the _WIP_ prefix from PR name, and wait for a maintainer's review. Follow up with requested changes, if any.
+1. Once you get an approved review from a maintainer, you're done. Maintainers will merge the PR.   
 
 ### Requirements for merge
 
 Before a PR can be merged, it must meet the following requirements:
 
-- The code must follow [coding conventions](#coding-convetions) (explained above).
+- The code must follow [coding conventions](#coding-conventions) (explained above).
 - The code must be covered by tests. 
   - If the PR includes changes to existing functionality, the tests that cover changed functionality must be changed accordingly.
   - Any appropriate combination of unit/integration/system tests is accepted, and their union coverage is counted. 
   - Coverage of less than 100% must be justified - comment on the PR thread.
-- The PR must pass CI builds attached to NWheels repo. Their details appear on the PR issue thread after first commit.
+- The PR must pass CI builds attached to NWheels repo. Their details appear on the PR issue thread.
 - The PR must have a review with approval by one of project maintainers.
 
-## First-timers
+## First-timers Read Here
 
 Contributing to an open source project for the first time can be hard and little overwhelming. Here we attempt to make this first step easier, and provide all the information you may need.  
 
 - If you never contributed to an open source project before, you may find the following links useful:
   - http://www.firsttimersonly.com/
-  - ...
-  - ...
+  - https://opensource.guide/how-to-contribute/
+
+### Setting up development environment
+
+System requirements:
+
+- A Windows machine
+- Visual Studio 2017 Community Edition or higher, v15.2 or later
+  - Make sure you choose to install .NET Core development components
+  - NWheels currently requires .NET Core SDK v1.1 or later
+- Docker for Windows, or Docker Toolbox for Windows
+
+### Forking the repository
+
+Changes 
 
 Well, where should you start?
 
