@@ -181,7 +181,6 @@ We currently develop on Windows, with the following tools installed on dev machi
 
 - Visual Studio 2017 Community Edition or higher, v15.2 or later
 - .NET Core SDK 1.1 or later 
-- Docker or Docker Toolbox for Windows
 
 ### Development on Linux and macOS
 
@@ -225,6 +224,12 @@ TBD...
 
 Many aspects of coding style are automatically enforced by Visual Studio. There are settings and snippet files that have to be imported - see [First-timers](#first-timers) for details.  
 
+1. **Tabs and line endings**
+
+   - Indentation size is 4.
+   - Use spaces for indentation. No tabs please!
+   - Configure Git to checkout Windows-style, commit Unix-style line endings (set `core.autocrlf` to `true`).
+
 1. **Common guidelines**. All types and members must follow common .NET guidelines for design and naming.
     - Read [Framework Design Guidelines](https://docs.microsoft.com/en-us/dotnet/standard/design-guidelines/)
 
@@ -234,8 +239,8 @@ Many aspects of coding style are automatically enforced by Visual Studio. There 
    
    Non-private fields are only allowed if they are `readonly`. Otherwise, they should be encapsulated in properties.
 
-1. Member separator lines. For better readability, we separate members, or groups of single-line members, with a horizontal separator line.
-   - A separator line is typed as line comment consisting of the dash character: `//---`.  It starts at current indent in code, and continues up to column 160. It is preceded and followed by an empty line.
+1. **Member separator lines**. For better readability, we separate members, or groups of single-line members, with a horizontal separator line.
+   - Separator line is typed as a line comment consisting of the dash characters: `//---`.  It starts at current indent in code, and continues up to column 160. It is preceded and followed by an empty line.
    - Example (read sources for more examples):
      ```
      public void MethodOne() 
@@ -250,17 +255,17 @@ Many aspects of coding style are automatically enforced by Visual Studio. There 
      ```
 
     - We defined code snippets for VS2017, as follows:
-      - `000 + TAB` - insert separator line at indent 0
-      - `111 + TAB` - insert separator line at indent 1
-      - `222 + TAB` - insert separator line at indent 2
-      - `333 + TAB` - insert separator line at indent 3
-      - `444 + TAB` - insert separator line at indent 4
+      - `000 + TAB` - insert separator line at indent level 0
+      - `111 + TAB` - insert separator line at indent level 1
+      - `222 + TAB` - insert separator line at indent level 2
+      - `333 + TAB` - insert separator line at indent level 3
+      - `444 + TAB` - insert separator line at indent level 4
 
-1. **Curly brackets**. Curly brackets are opened on the same line for inlined declarations:
+1. **Curly braces**. Curly braces are opened on the same line for inlined declarations:
    - anonymous method
    - collection initializer
 
-   In all other cases, curly brackets are opened on a new line.
+   In all other cases, curly braces are opened on a new line.
 
 ## Peer reviews
 
@@ -274,6 +279,11 @@ Many aspects of coding style are automatically enforced by Visual Studio. There 
 All changes should be submitted through pull requests (PRs). 
 - Read [GitHub help on Pull Requests](https://help.github.com/categories/collaborating-with-issues-and-pull-requests/)
 
+Please comment in the PR thread, referring to the issue being handled by the PR. For example:
+```
+This PR handles #68 - listen on 0.0.0.0 instead of localhost
+```
+
 ### Work in progress
 
 We encourage submitting work-in-progress PRs, so that the community can review and react early. 
@@ -286,12 +296,12 @@ We encourage submitting work-in-progress PRs, so that the community can review a
 Please only submit changes on issues which are assigned to you and scheduled for current iteration milestone. Below are step-by-step instructions.
 
 1. Pick an unassigned issue from the **TODO** lane of current iteration Scrum board.
-1. Leave a comment in the issue thread, stating that you are going to work on the issue. Make sure no one has left such comment already.
+1. Leave comment "_Assign to me_" in the issue thread, which states that you are going to work on the issue. Make sure no one has left this comment already.
 1. Fork the repo, branch off `master`, create a work-in-progress PR, and start working. This step is explained in more detail in [First-timers](#first-timers) section.
 1. Project maintainers will assign the issue to you and move it to **IN PROGRESS** lane in the Scrum board.
 1. Commit & push frequently, and watch for feedback comments and reviews. They can appear on threads of either the PR, or the original issue. 
 1. When done, remove the _WIP_ prefix from PR name, and wait for a maintainer's review. Follow up with requested changes, if any.
-1. Once you get an approved review from a maintainer, you're done. Maintainers will merge the PR.   
+1. Once you get an approved review from a maintainer, you're done. Maintainers will merge the PR.
 
 ### Requirements for merge
 
@@ -313,26 +323,88 @@ Contributing to an open source project for the first time can be hard and little
   - http://www.firsttimersonly.com/
   - https://opensource.guide/how-to-contribute/
 
-### Setting up development environment
+### Installing development tools
 
-System requirements:
+You will need:
 
 - A Windows machine
 - Visual Studio 2017 Community Edition or higher, v15.2 or later
-  - Make sure you choose to install .NET Core development components
+  - Make sure .NET Core development components are selected in the installation
   - NWheels currently requires .NET Core SDK v1.1 or later
-- Docker for Windows, or Docker Toolbox for Windows
+
+In Visual Studio, import the following:
+
+- Language settings file
+  - location in repo: `Docs\CodingConventions\VisualStudioSettings\coding-conventions.vssettings`
+  - contents: naming conventions and code styling for C# language.
+  - how to import: go to main menu > Tools > Import and Export Settings
+- Code snippet files
+  - location in repo: `Docs\CodingConventions\VisualStudioCodeSnippets`
+  - contents: code snippets that insert member separator lines.
+  - how to import: go to main menu > Tools > Code Snippets Manager 
 
 ### Forking the repository
 
-Changes 
+All your work will be done on your fork of the main repository.
 
-Well, where should you start?
+- Read [GitHub Help on Forking a Repo](https://help.github.com/articles/fork-a-repo/)
 
-1. Carefully read this guideline document.
-1. Read our [Roadmap](docs/Wiki/roadmap.md). Look through **Contribution Areas** section and choose areas you're interested in contributing to.
-1. Start from resolving some issues, preferably those labeled  `first-timers`: 
-    - Go to current iteration Scrum board
-    - Pick an unassigned issue from **TODO** lane, which matches your areas of interest. 
-1. Proceed as explained in [Submitting changes](#submitting-changes).
-1. Please feel free to communicate your thoughts and reach out for help.
+Once you have the fork, clone the fork to your machine. For the following explanations, we assume the clone is located at `C:\NWheels\` - replace with your path as necessary.
+
+Now let's build the fork.
+```
+> C:
+> cd C:\NWheels\Source
+> git checkout master
+> dotnet restore
+> dotnet build
+```
+If your environment was set up correctly, the build should be successful.
+
+### Working on your first issue
+
+1. Carefully read all sections above.
+
+1. Pick an unassigned issue from the **TODO** lane of current iteration Scrum board. 
+    - Current iteration milestone is listed in the [main README](README.md#current-status) in the **Current Status** section.
+    - Go to [Projects](https://github.com/felix-b/NWheels/projects) and click on the project of the current milestone.
+    - If you are not sure what to choose, please read through our [Roadmap](Docs/Wiki/roadmap.md#contribution-areas), section **Contribution Areas**.
+    - Prefer issues that are labeled `beginners-friendly`.
+
+1. Leave comment "_Assign to me_" in the issue thread, which states that you are going to work on the issue. Make sure no one has left this comment already.
+   - One assignee is responsible for working on the issue at any given time. 
+   - Project maintainers will assign the issue to you, and move it to **IN PROGRESS** lane in the Scrum board.
+
+1. Create topic branch for the issue, as follows (replace _my-issue_ with a name that represents the issue):
+   ```
+   git checkout -b my-issue --track origin/master
+   ```
+
+1. After some initial work is done, create a pull request by pushing your changes to your fork repository. 
+   - Read [GitHub help on Pull Requests](https://help.github.com/categories/collaborating-with-issues-and-pull-requests/) 
+   - Push to a new remote branch, named the same as your local topic branch:
+      ```
+      git push origin HEAD:my-issue
+      ```     
+   - For subsequent pushes to go there automatically, set the upstream branch:
+      ```
+      git branch -u origin/my-issue
+      ```
+   - Go to your fork repo in the GitHub website, and create a pull request (PR). If you are going to do more commits for the issue, start the name of the PR with "_WIP_", which stands for _work in progress_. 
+   - Comment on the PR thread, referring to the issue being resolved by the PR. For example:
+     ```
+     This PR handles #68 - listen on 0.0.0.0 instead of localhost
+     ```
+
+1. Continuous integration builds will run on every push to the PR branch. The builds are listed under the Checks section in the end of PR thread. Fix build failures, if any occur.     
+
+1. Continue working and pushing more commits. Make sure your changes comply with the [coding conventions](#coding-conventions). Keep CI builds passing. Watch for comments and reviews from other contributors. Be responsive to them.
+   - Reviews will be posted on the PR thread. 
+   - Comments can be posted on either PR or the issue thread.
+
+1. When you consider the issue to be resolved, rename the pull request and remove the "_WIP_" prefix. Watch for a review from one of project maintainers. Follow up with answers and changes, if any are requested.
+
+1. Once you get an approved review from a project maintainer, you're done. Congratulations! Your changes will be merged into the main NWheels repo. The issue will be moved to **DONE** lane in the Scrum board. 
+
+1. The most important: please feel free to reach out for help. Post questions on the issue threads, or in Slack. Good luck!
+
