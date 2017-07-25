@@ -25,6 +25,7 @@ There are two channels of communication:
 - General announcements: channel `#general`
 - Proposal of new ideas: channel `#idea`
 - Overview of new technologies and enhancements, especially those that can be useful for NWheels: channel `#tech`.
+- Questions and answers, helping new (and not only) contributors: channel `#help`. 
 - Anything else: channel `#random`.
 
 Every contributor should be subscribed to NWheels project at Slack, [nwheels.slack.com](nwheels.slack.com).
@@ -45,9 +46,10 @@ Issues are labeled in several dimensions:
   - `question`: only answer is required; no changes need to be done 
   - `epic`: a parent issue that covers a large subject
 - **Issue flags** - multiple can be labeled:
-  - `tech debt`: something that should have been done, according to these guidelines and conventions, but was skipped or postponed.
+  - `tech debt`: something that should have been done, according to the guidelines and conventions, but was skipped or postponed.
   - `refactoring`: improvement in internal design of existing code, without change in public API or behavior.
   - `redesign`: revision of previous decisions, including changes of internal design, public APIs, and behavior.  
+  - `beginners-friendly`: an issue that is easy to handle for beginner contributors.
   - `duplicate`: the subject is already covered by an existing issue. Must have a comment that links to the existing issue.
   - `wontfix`: an issue we are not going to resolve. Must have a comment that states justification.
   - `invalid`: the issue is spam or violates guidelines. Such issues won't be handled. 
@@ -158,7 +160,7 @@ Technology adapter modules|Pluggable adapters to concrete technology stacks.|Mod
   
 Technology-specific projects and objects are placed in a subfolder under the C# project. 
 
-In the example below, module `NWheels.Uidl.Adapters.WebAngular` adapts UI port to web technology stack based on the Angular framework. Front-end projects and assets are located inside the `ClientSide` subfolder. 
+In the example below, module `NWheels.Uidl.Adapters.WebAngular` adapts UI port to web technology stack based on the Angular framework. Front-end projects and assets are located inside a subfolder named `ClientSide`. 
 ```
 +-- /NWheels.Uidl.Adapters.WebAngular
 |    |
@@ -202,7 +204,16 @@ We use the following online services, provided for free:
 
 ### Testing
 
-TBD...
+C# code must be covered with automatic tests. Coverage of 80% is the required minimum. Any combination of the following is counted:
+
+- **Unit tests**: testing parts of logic in isolation from their environment
+- **Integration tests**: testing connection between ports and adapters, with real techology stacks attached
+- **System tests**: running application microservices, testing them  through their endpoints (API calls or messages)
+- **End-to-end tests**: running a whole application including microservices and UI apps, while testing the application through UI automation. 
+
+The tests are developed with [xUnit framework](https://xunit.github.io/). Each kind of tests has dedicated helpers supplied by NWheels [TODO: provide link to wiki](). 
+
+Tests should reside in a separate twin project... TBD 
 
 ### Coding requirements
 
@@ -210,12 +221,12 @@ TBD...
 - Prefer [convention over configuration](https://en.wikipedia.org/wiki/Convention_over_configuration)
 - Write code with no [smells](https://en.wikipedia.org/wiki/Code_smell); when changing existing code, [refactor](https://martinfowler.com/books/refactoring.html) as necessary
 - Write simple, readable, self-descriptive code
-  - when you code, don't think about writing the code; think about reading it.
-  - choose descriptive names
+  - when you are coding, don't think about writing the code; think about reading it.
+  - choose self-explanatory names
   - write short methods; code of every single method should be trivial to understand
-  - prefer immutable objects, because they don't add side effects to the system. 
+  - whenever possible, make objects immutable; immutable objects don't add side effects to the system. 
   - prefer readability over optimization; do not optimize, unless you've measured a performance bottleneck.
-- Delegate validation of your design intentions to compiler, as much as possible
+- Delegate validation of your intentions to compiler, as much as possible
   - wherever possible, apply `readonly` to fields
   - use least possible visibility for types and members 
 - Cover production code with tests
@@ -406,5 +417,12 @@ If your environment was set up correctly, the build should be successful.
 
 1. Once you get an approved review from a project maintainer, you're done. Congratulations! Your changes will be merged into the main NWheels repo. The issue will be moved to **DONE** lane in the Scrum board. 
 
-1. The most important: please feel free to reach out for help. Post questions on the issue threads, or in Slack. Good luck!
+### Reaching out for help 
 
+Please feel free to reach out for help. We are building a  friendly and welcoming community. We'll be glad to assist you.
+
+- Post questions related to the issue on the issue thread
+- Post questions related to submitting and merging your changes on the PR thread
+- Post questions related to working procedures on Slack, channel `#help`. 
+   
+Good luck!
