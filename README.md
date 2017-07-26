@@ -7,9 +7,18 @@ Welcome to NWheels
 
 Based on our experience, commonality in the needs of enterprise application projects is significantly higher than variability. 
 
-We take this as an opportunity to build a community-based ecosystem, which implements A-to-Z architectural recipes, constructs technology stacks, creates concise programming models, and develops adjustable building blocks for common problem domains. 
+We take this as an opportunity to let software vendors build and operate way larger and flexible systems, with way smaller teams, within way shorter timeframes. 
 
-We put those pieces together to turn enterprise application development into an easy win.
+## How is that possible
+
+NWheels:|Software vendors:
+---|---
+Dramatically reduces amount of code to write and maintain. Automates DevOps workflows. Reduces variety of technology expertise for developers to master.|Develop and operate way larger and more flexible systems, with way smaller teams, within way shorter timeframes.
+Implements industrial-strength architectures that support all aspects of ALM. Supplies application developers with full-stack concise programming models, abstracted from concrete technology stacks.|Implement application requirements in C# on top of NWheels programming models, including UI apps, microservices, endpoints, data schemas, and more.
+Supples flexible building blocks for common problem domains, which have field-proven design patterns; such domains include: application security, e-commerce, CRM, booking, and many more.|Reuse domain building blocks, extend and adjust them according to application requirements; avoid reinventing the wheel.
+Supplies pluggable adapters to concrete technology stacks, including databases, messaging middleware, UI platforms, DevOps infrastructure, etc|Pick ready technology stacks to plug in, according to application requirements; save technology learning curve and beginner's mistakes
+Generates implementation of declarative programming models for selected technology stacks. Uses code generators included in technology stack adapters.|Neither develop nor maintain layers of mechanical and repetitive code; thus reduce timeframes and improve stability
+
 
 ### How it works
 
@@ -187,9 +196,19 @@ Sometimes though, all this is not enough. Certain UI areas demand unique touch. 
 
 Besides the web, we aim to support mobile native apps, desktop apps, SmartTV, IVR, and IoT platforms. 
 
+# More Info
+
+More info on NWheels can be found in resources listed below: 
+
+- Documentation (WIP) - [TODO: provide link to wiki]()
+- Architecture (WIP) - [TODO: provide link to wiki]()
+- Philosophy behind NWheels (WIP) - [TODO: provide link to wiki]()
+- Examples in Q&A format (WIP) - [TODO: provide link to Stack Overflow]()
+- Working procedures and conventions - see [Contribution Guidelines](CONTRIBUTING.md)
+
 # Getting Involved
 
-Impressed? We'd like having you onboard!
+Excited? We'd like having you onboard!
 
 Community is a vital part of the NWheels project. Here we are building a welcoming and friendly ecosystem for contributors.
 
@@ -202,7 +221,7 @@ Please make yourself familiar with our [Code of Conduct](CODE_OF_CONDUCT.md).
 1. Join our team on Slack:
    - Send an email with subject `Join NWheels team` to [team@nwheels.io](mailto:nwheels.io). You will receive back an email from Slack with join link and instructions.
 1. Read our [Roadmap](docs/Wiki/roadmap.md). Look through **Contribution Areas** section and choose areas you're interested in contributing to.
-1. Start from resolving some issues, preferably those labeled  `first-timers`. 
+1. Start from resolving some issues, preferably those labeled  `beginners-friendly`. 
 1. Please feel free to communicate your thoughts and reach out for help.
 
 # Current Status
