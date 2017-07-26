@@ -204,16 +204,87 @@ We use the following online services, provided for free:
 
 ### Testing
 
-C# code must be covered with automatic tests. Coverage of 80% is the required minimum. Any combination of the following is counted:
+C# code must be covered with automatic tests. We practice [test-driven development](
+https://en.wikipedia.org/wiki/Test-driven_development) (TDD). Testing is an integral part of any change made to production code. Coverage of at least 80% is a requirement. Any combination of the following is counted towards the total coverage:
 
-- **Unit tests**: testing parts of logic in isolation from their environment
+- **Unit tests**: testing pieces of logic in isolation from their environment
 - **Integration tests**: testing connection between ports and adapters, with real techology stacks attached
-- **System tests**: running application microservices, testing them  through their endpoints (API calls or messages)
-- **End-to-end tests**: running a whole application including microservices and UI apps, while testing the application through UI automation. 
+- **System tests**: running sample microservice(s), testing them  through their endpoints (API calls or messages)
+- **End-to-end tests**: running a whole sample application including microservices and UI apps, testing it through UI automation. 
 
-The tests are developed with [xUnit framework](https://xunit.github.io/). Each kind of tests has dedicated helpers supplied by NWheels [TODO: provide link to wiki](). 
+Note: additional kinds of tests include stress/load testing, penetration testing, etc. They are not part of the TDD methodology. Development and maintenance of such tests is tracked by separate task issues. 
 
-Tests should reside in a separate twin project... TBD 
+TDD tests are developed with [xUnit framework](https://xunit.github.io/). Each kind of tests has dedicated helpers supplied by NWheels [TODO: provide link to wiki](). According to test kind, each test class must be annotated with one of the following trait attributes:
+- `[Trait("Purpose", "UnitTest")]`
+- `[Trait("Purpose", "IntegrationTest")]`
+- `[Trait("Purpose", "SystemTest")]`
+- `[Trait("Purpose", "EndToEndTest")]`
+
+
+#### Structure of test projects
+
+Tests reside in dedicated projects, separate from production code. Each test projects is structured according to one of two conventions:
+- **Convention 1: All kinds of tests reside in one project**. 
+  - Naming 
+      - Add `.Tests` suffix to production project name. 
+      - Example: `NWheels.Domains.Crm` -> `NWheels.Domains.Crm.Tests` 
+  - Folder structure 
+     - Project root contains a folder for each test kind (`Unit`, `Integration`, `System`, `EndToEnd`)
+     - Inside test kind folder, the subfolders reproduce folder structure of the production project.
+     - Example:
+        ```
+        +-- /NWheels.Domains.Crm
+        |    |
+        |    +-- NWheels.Domains.Crm.csproj
+        |    |
+        |    +-- /Parties
+        |    +-- /Contacts
+        |    
+        +-- /NWheels.Domains.Crm.Tests
+        |    |
+        |    +-- NWheels.Domains.Crm.Tests.csproj
+        |    |
+        |    +-- /Unit
+        |    |    |
+        |    |    +-- /Parties
+        |    |    +-- /Contacts
+        |    |
+        |    +-- /EndToEnd
+        |    |    |
+        |    |    +-- /Parties
+        |    |    +-- /Contacts
+        |   ...
+        ```
+- **Convention 2: Each kind of tests resides in a separate project**. 
+  - Naming 
+      - Add test kind suffix to production project name (`.UnitTests`, `.IntegrationTests`, `.SystemTests`, `.EndToEndTests`)
+      - Example: `NWheels.Domains.Crm` -> `NWheels.Domains.Crm.UnitTests`, `NWheels.Domains.Crm.EndToEndTests`. 
+  - Folder structure 
+     - Project root contains subfolders that reproduce folder structure of the production project.
+     - Example:
+        ```
+        +-- /NWheels.Domains.Crm
+        |    |
+        |    +-- NWheels.Domains.Crm.csproj
+        |    |
+        |    +-- /Parties
+        |    +-- /Contacts
+        |    
+        +-- /NWheels.Domains.Crm.UnitTests
+        |    |
+        |    +-- NWheels.Domains.Crm.UnitTests.csproj
+        |    |
+        |    +-- /Parties
+        |    +-- /Contacts
+        |    
+        +-- /NWheels.Domains.Crm.EndToEndTests
+        |    |
+        |    +-- NWheels.Domains.Crm.EndToEndTests.csproj
+        |    |
+        |    +-- /Parties
+        |    +-- /Contacts
+        ```
+
 
 ### Coding requirements
 
@@ -229,7 +300,9 @@ Tests should reside in a separate twin project... TBD
 - Delegate validation of your intentions to compiler, as much as possible
   - wherever possible, apply `readonly` to fields
   - use least possible visibility for types and members 
-- Cover production code with tests
+- Beware of performance. Avoid performance killers (e.g. Reflection), especially in performance-sensitive parts of code
+  - Performance-sensitive parts are those standing on execution paths counted towards system throughput (e.g. request handling pipeline in a web server).
+- Cover production code with tests. Coverage of at least 80% is reuqired. 
 
 ### C# coding style
 
@@ -322,7 +395,7 @@ Before a PR can be merged, it must meet the following requirements:
 - The code must be covered by tests. 
   - If the PR includes changes to existing functionality, the tests that cover changed functionality must be changed accordingly.
   - Any appropriate combination of unit/integration/system tests is accepted, and their union coverage is counted. 
-  - Coverage of less than 100% must be justified - comment on the PR thread.
+  - Coverage of less than 80% must be justified - comment on the PR thread.
 - The PR must pass CI builds attached to NWheels repo. Their details appear on the PR issue thread.
 - The PR must have a review with approval by one of project maintainers.
 
