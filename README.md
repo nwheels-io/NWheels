@@ -5,6 +5,8 @@ TBD|[![Build status](https://ci.appveyor.com/api/projects/status/qcm23727dm8dplk
 Welcome to NWheels
 =======
 
+<img align="left" src="Docs/Images/logo-132.png"/>
+
 Based on our experience, commonality in the needs of enterprise application projects is significantly higher than variability. 
 
 We take this as an opportunity to let software vendors build and operate way larger and flexible systems, with way smaller teams, within way shorter timeframes. 
