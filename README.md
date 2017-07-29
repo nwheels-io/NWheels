@@ -9,7 +9,11 @@ Based on our experience, commonality in the needs of enterprise application proj
 
 We take this as an opportunity to let software vendors build and operate way larger and flexible systems, with way smaller teams, within way shorter timeframes. 
 
-## How is that possible
+![NWheels Concept](Docs/Images/nwheels-concept.png)
+
+## How it works
+
+_DISCLAIMER: we're in the middle of development. Some features listed below may not yet exist, or be unstable_. 
 
 NWheels:|Software vendors:
 ---|---
@@ -18,21 +22,6 @@ Implements industrial-strength architectures that support all aspects of ALM. Su
 Supples flexible building blocks for common problem domains, which have field-proven design patterns; such domains include: application security, e-commerce, CRM, booking, and many more.|Reuse domain building blocks, extend and adjust them according to application requirements; avoid reinventing the wheel.
 Supplies pluggable adapters to concrete technology stacks, including databases, messaging middleware, UI platforms, DevOps infrastructure, etc|Pick ready technology stacks to plug in, according to application requirements; save technology learning curve and beginner's mistakes
 Generates implementation of declarative programming models for selected technology stacks. Uses code generators included in technology stack adapters.|Neither develop nor maintain layers of mechanical and repetitive code; thus reduce timeframes and improve stability
-
-
-### How it works
-
-_DISCLAIMER: we're in the middle of development. Some features listed below may not yet exist, or be unstable_. 
-
-Developers:|NWheels:
----|---
-Design an application as a set of microservices|Packages and deploys microservice containers to runtime environments. Handles scalability and fault tolerance independently of your cloud vendor.
-Code and annotate business domains of the application in C#, abstracted from concrete technology stacks.|Implements a mix of [hexagonal architecture](http://alistair.cockburn.us/Hexagonal+architecture) with _prefer convention over implementation_. Eliminates mechanical and repetitive coding of adapter layers, replacing it with pluggable code generation. Examples: data access, serialization, network communication, RESTful APIs, GraphQL queries, etc.
-Code and annotate conceptual UI models in C#, abstracted from concrete technology stacks. Use numerous UI themes. Directly tweak UI code and assets wherever unique touch is necessary.|Generates UI applications for target interaction platforms, including web, mobile, desktop, IVR, SmartTV, and IoT. Transparently handles UI model bindings to data and business capabilities, including entry validation and enforcement of authorization requirements. Makes internationalization transparent and trivial for both developers and translators.    
-Declare cross-cutting requirements like authorization and event logging, through concise C# programming models|Transparently implements and enforces the requirements throughout all execution paths. For instance, event logging includes application-defined BI measurements, usage statistics, circuit breakers, alerts, and built-in cost-free performance profiling.  
-Pick technology stack for each microservice|Generates integration layers of domain objects with selected technology stacks. Generates concrete implementations of declarative models. Certain technology stacks enable advanced distribution scenarios, such as parallel execution, elastic scalability, and actor/data grids. 
-Compose the product out of pluggable features. Use features for both core product and customization layers. Through features, extend and override all aspects of system presentation, communication, and behavior.|Allows flexible vertical and horizontal composition of domain objects and user interfaces. Releases product features and customizations as pluggable NuGet packages into your project NuGet repo. Smoothly supports distributed development workflows and remote professional services outside of product vendor organization. 
-When coding business domains and UI, reuse ready domain building blocks supplied by NWheels, and avoid reinventing the wheel.|Captures expertise in common problem domains (e.g. e-commerce, booking, marketing, CRM, and many others) into reusable _domain building block_ modules, based on well established and field-proven patterns and designs. Makes building blocks inheriteble, extensible, and easily adjustable to specific application requirements.  
 
 # Demo
 
