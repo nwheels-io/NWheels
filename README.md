@@ -9,25 +9,33 @@ Welcome to NWheels
 
 Based on our experience, commonality in the needs of enterprise application projects is significantly higher than variability. 
 
-We take this as an opportunity to let software vendors build and operate way larger and flexible systems, with way smaller teams, within way shorter timeframes. 
+We take this as an opportunity to let software vendors build and operate way larger and flexible software, with way smaller teams, within way shorter timeframes. 
 
-![NWheels Concept](Docs/Images/nwheels-concept.png)
+With NWheels, applications are developed in C#, and target cross-platform .NET Standard.
+
+![NWheels Concept](Docs/Images/nwheels-concept.png)|
+
+## What NWheels does
+
+- Dramatically reduces size of application codebase
+- Relieves teams from the necessity of expertise in concrete technology stacks
+- Provides reusable application blocks and design patterns for common problem domains
+- Supplies ready, automated, customizable DevOps workflows
+- Allows projects to work both fast and right, starting on day one
 
 ## How it works
 
-_DISCLAIMER: we're in the middle of development. Some features listed below may not yet exist, or be unstable_. 
+_DISCLAIMER: we're in the beginning of redo-from-scratch phase. Many features listed below may not yet exist, or be unstable_. 
 
 NWheels:|Software vendors:
 ---|---
-Dramatically reduces amount of code to write and maintain. Automates DevOps workflows. Reduces variety of technology expertise for developers to master.|Develop and operate way larger and more flexible systems, with way smaller teams, within way shorter timeframes.
-Implements industrial-strength architectures that support all aspects of ALM. Supplies application developers with full-stack concise programming models, abstracted from concrete technology stacks.|Implement application requirements in C# on top of NWheels programming models, including UI apps, microservices, endpoints, data schemas, and more.
-Supples flexible building blocks for common problem domains, which have field-proven design patterns; such domains include: application security, e-commerce, CRM, booking, and many more.|Reuse domain building blocks, extend and adjust them according to application requirements; avoid reinventing the wheel.
-Supplies pluggable adapters to concrete technology stacks, including databases, messaging middleware, UI platforms, DevOps infrastructure, etc|Pick ready technology stacks to plug in, according to application requirements; save technology learning curve and beginner's mistakes
-Generates implementation of declarative programming models for selected technology stacks. Uses code generators included in technology stack adapters.|Neither develop nor maintain layers of mechanical and repetitive code; thus reduce timeframes and improve stability
+Implements industrial-strength architectures that support all aspects of ALM, and are ready to be hosted on premises or on cloud. Supplies application developers with full-stack concise programming models, abstracted from concrete technology stacks.|Implement application requirements in C# on top of NWheels programming models, including UI apps, microservices, communication endpoints, data persistence schemas, and more.
+Supples flexible building blocks for common problem domains, which have field-proven design patterns. Such domains include: application security, e-commerce, CRM, booking, and many more.|Reuse domain building blocks, extend and adjust them according to application requirements. Avoid reinvention of the wheel.
+Supplies pluggable adapters to concrete technology stacks, including databases, messaging middleware, UI platforms, DevOps infrastructure, etc|Pick ready technology stacks to plug in, according to application requirements. Save on technology learning curve, beginner's mistakes, and experts hiring. Afford changes in technology choices.
 
 # Demo
 
-NWheels is already capable of bootstrapping a microservice with partially implemented web technology stack.
+NWheels is already capable of bootstrapping a microservice with partially implemented web  stack.
 
 Imagine a very simple application:
 - A single page web app, which lets user enter her name, and submit it with a button. 
@@ -136,7 +144,7 @@ Content-Length: 39
 {"result":"Hello world, from NWheels!"}
 ```
 
-### Authorization
+#### Authorization
 
 It worths noting that `[SecurityCheck.AllowAnonymous]` attribute here is required to allow access without prior authentication and validation of claims. 
 
