@@ -15,6 +15,22 @@ namespace NWheels.Samples.FirstHappyPath.HelloService
         public static int Main(string[] args)
         {
             var microservice = new MicroserviceHostBuilder("hello")
+                .UseDefaultWebStack(listenPortNumber: 5000)
+                .AutoDiscoverComponents()
+                .Build();
+
+            return microservice.Run(args);
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    // the following is demo mockup code which should have real implementation in core and technology stack modules
+    public static class MicroserviceHostBuilderExtensions
+    {
+        public static IMicroserviceHostBuilder UseDefaultWebStack(this IMicroserviceHostBuilder builder, int listenPortNumber)
+        {
+            return builder
                 .UseAutofac()
                 .UseKestrel()
                 .UseAngular()
@@ -22,15 +38,19 @@ namespace NWheels.Samples.FirstHappyPath.HelloService
                 .UseRest()
                 .UseUidl()
                 .UseMessageProtocol<HttpRestNWheelsV1Protocol>()
-                .UseRestApiHttpEndpoint<HttpRestNWheelsV1Protocol>(listenPortNumber: 5000)
+                .UseRestApiHttpEndpoint<HttpRestNWheelsV1Protocol>(listenPortNumber);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IMicroserviceHostBuilder AutoDiscoverComponents(this IMicroserviceHostBuilder builder)
+        {
+            return builder
                 .ContributeComponents((existingComponents, newComponents) => {
                     newComponents.ContributeTransactionScript<HelloWorldTx>();
                     newComponents.ContributeWebApp<HelloWorldApp>(urlPathBase: "/");
                 })
-                .UseApplicationFeature<GeneratedCodePrototypesFeatureLoader>()
-                .Build();
-
-            return microservice.Run(args);
+                .UseApplicationFeature<GeneratedCodePrototypesFeatureLoader>();
         }
     }
 }
