@@ -30,8 +30,8 @@ _DISCLAIMER: we're in the beginning of redo-from-scratch phase. Many features li
 NWheels:|Software vendors:
 ---|---
 Implements industrial-strength architectures that support all aspects of ALM, and are ready to be hosted on premises or on cloud. Supplies application developers with full-stack concise programming models, abstracted from concrete technology stacks.|Implement application requirements in C# on top of NWheels programming models, including UI apps, microservices, communication endpoints, data persistence schemas, and more.
-Supples flexible building blocks for common problem domains, which have field-proven design patterns. Such domains include: application security, e-commerce, CRM, booking, and many more.|Reuse domain building blocks, extend and adjust them according to application requirements. Avoid reinvention of the wheel.
-Supplies pluggable adapters to concrete technology stacks, including databases, messaging middleware, UI platforms, DevOps infrastructure, etc|Pick ready technology stacks to plug in, according to application requirements. Save on technology learning curve, beginner's mistakes, and experts hiring. Afford changes in technology choices.
+Supplies flexible building blocks for common problem domains, which have field-proven design patterns. Such domains include: application security, e-commerce, CRM, booking, and many more.|Reuse domain building blocks, extend and adjust them according to application requirements. Avoid reinvention of the wheel.
+Supplies pluggable adapters to concrete technology stacks, including databases, messaging middleware, UI platforms, DevOps infrastructure, and more. Adapters generate implementations of application programming models on top of corresponding technologies, languages, and frameworks. Adapters also include required backend services and products into automated deployments.|Pick ready technology stacks to plug in, according to application requirements. Save on technology learning curve and beginner's mistakes, or technology expert services. Easily afford changes in technology choices.
 
 # Demo
 
