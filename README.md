@@ -11,27 +11,44 @@ Based on our experience, commonality in the needs of enterprise application proj
 
 We take this as an opportunity to let software vendors build and operate way larger and flexible software, with way smaller teams, within way shorter timeframes. 
 
-With NWheels, applications are developed in C#, and target cross-platform .NET Standard.
+<center>
+<br/>
+<img src="Docs/Images/nwheels-concept.png"/>
+</center>
 
-![NWheels Concept](Docs/Images/nwheels-concept.png)|
+_DISCLAIMER: we're in the beginning of redo-from-scratch phase. Many features listed here may not yet exist, or be unstable_. 
 
-## What NWheels does
 
+## Why NWheels
+
+Unlike other existing platforms and frameworks for enterprise application development, NWheels:
+
+- Implements full stack architectures that cover all typical aspects and concerns, without limiting application functionality, technology choices, or desired user experience.
+- Makes both UI and business tiers first-class citizens, decoupled in general, but synergic when necessary 
 - Dramatically reduces size of application codebase
-- Relieves teams from the necessity of expertise in concrete technology stacks
-- Provides reusable application blocks and design patterns for common problem domains
+- Relieves teams from the necessity of expertise in numerous technology stacks
+- Provides reusable building blocks, based on field-proven design patterns, for common business problem domains
 - Supplies ready, automated, customizable DevOps workflows
 - Allows projects to work both fast and right, starting on day one
 
-## How it works
 
-_DISCLAIMER: we're in the beginning of redo-from-scratch phase. Many features listed below may not yet exist, or be unstable_. 
+## How it works
 
 NWheels:|Software vendors:
 ---|---
-Implements industrial-strength architectures that support all aspects of ALM, and are ready to be hosted on premises or on cloud. Supplies application developers with full-stack concise programming models, abstracted from concrete technology stacks.|Implement application requirements in C# on top of NWheels programming models, including UI apps, microservices, communication endpoints, data persistence schemas, and more.
+Implements industrial-strength architectures that support all aspects of ALM, and are ready to be deployed on premises or on cloud. Supplies application developers with full-stack concise programming models, abstracted from concrete technology stacks.|Implement application requirements in C# on top of NWheels programming models, including UI apps, microservices, communication endpoints, data persistence schemas, and more.
 Supplies flexible building blocks for common problem domains, which have field-proven design patterns. Such domains include: application security, e-commerce, CRM, booking, and many more.|Reuse domain building blocks, extend and adjust them according to application requirements. Avoid reinvention of the wheel.
 Supplies pluggable adapters to concrete technology stacks, including databases, messaging middleware, UI platforms, DevOps infrastructure, and more. Adapters generate implementations of application programming models on top of corresponding technologies, languages, and frameworks. Adapters also include required backend services and products into automated deployments.|Pick ready technology stacks to plug in, according to application requirements. Save on technology learning curve and beginner's mistakes, or technology expert services. Easily afford changes in technology choices.
+
+## Feature highlights
+
+Question|Answer
+---|---
+What programming languages are supported?|Applications are developed in C#, and primarily target cross-plafrorm .NET Core or .NET Standard. Targeting Windows-only .NET Framework is also supported. 
+What kind of applications can be built?|Multi-tier systems consisting of UI apps, microservices, and databases; web/RESTful API backends, data processing middleware, B2B communications, actor/data grids; standalone UI apps that embed business logic and/or allow peer-to-peer communication; any combination of the above
+Where the applications will run?|Servers will run on Linux, Windows, or macOS. Any compatible IaaS/CaaS cloud, hybrid, and on-premises deployments will be supported. UI will run as native mobile apps, web single-page apps, desktop apps on Linux/Windows/macOS; user interaction will also be supported on top of IVR, SmartTV, and IoT platforms.
+Scalability and high availability?|NWheels implements scalable, fault-tolerant, containerized, microservice- and lambda-based architectures. This enables elastic scalability and high availability with zero-downtime deployments. Health monitoring, self-healing environments, and automatic switch to DR environments, possibly cross-cloud-vendor, enable creation of mission-critical systems. 
+
 
 # Demo
 
