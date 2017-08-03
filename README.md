@@ -11,48 +11,33 @@ Based on our experience, commonality in the needs of enterprise application proj
 
 We take this as an opportunity to let software vendors build and operate way larger and flexible software, with way smaller teams, within way shorter timeframes. 
 
-<center>
+<p align="center" style="text-align:center">
 <br/>
 <img src="Docs/Images/nwheels-concept.png"/>
-</center>
-
-_DISCLAIMER: we're in the beginning of redo-from-scratch phase. Many features listed here may not yet exist, or be unstable_. 
-
-
-## Why NWheels
-
-Unlike other existing platforms and frameworks for enterprise application development, NWheels:
-
-- Implements full stack architectures that cover all typical aspects and concerns, without limiting application functionality, technology choices, or desired user experience.
-- Makes both UI and business tiers first-class citizens, decoupled in general, but synergic when necessary 
-- Dramatically reduces size of application codebase
-- Relieves teams from the necessity of expertise in numerous technology stacks
-- Provides reusable building blocks, based on field-proven design patterns, for common business problem domains
-- Supplies ready, automated, customizable DevOps workflows
-- Allows projects to work both fast and right, starting on day one
-
+</p>
 
 ## How it works
 
+_DISCLAIMER: we are redoing from scratch after successful proof of concept. Features listed here may not yet exist, or be unstable_. 
+
 NWheels:|Software vendors:
 ---|---
-Implements industrial-strength architectures that support all aspects of ALM, and are ready to be deployed on premises or on cloud. Supplies application developers with full-stack concise programming models, abstracted from concrete technology stacks.|Implement application requirements in C# on top of NWheels programming models, including UI apps, microservices, communication endpoints, data persistence schemas, and more.
-Supplies flexible building blocks for common problem domains, which have field-proven design patterns. Such domains include: application security, e-commerce, CRM, booking, and many more.|Reuse domain building blocks, extend and adjust them according to application requirements. Avoid reinvention of the wheel.
-Supplies pluggable adapters to concrete technology stacks, including databases, messaging middleware, UI platforms, DevOps infrastructure, and more. Adapters generate implementations of application programming models on top of corresponding technologies, languages, and frameworks. Adapters also include required backend services and products into automated deployments.|Pick ready technology stacks to plug in, according to application requirements. Save on technology learning curve and beginner's mistakes, or technology expert services. Easily afford changes in technology choices.
+Implements industrial-strength, scalable, fault-tolerant architectures with full-stack coverage of typical requirements and DevOps/ALM aspects. Supplies application developers with concise programming models, abstracted from technology stacks.|Implement application requirements in C# on top of NWheels programming models, including UI apps, microservices, business logic, communication endpoints, data persistence schemas, and more. The code is short, testable, and clean; it expresses application requirements without mixing in details of underlying technology.
+Supplies flexible building blocks for common problem domains, which have field-proven design patterns. Such domains include: application security, e-commerce, CRM, booking, and many more.|Whenever possible, reuse domain building blocks, extend and adjust them according to application requirements. Save on development effort and design mistakes. Avoid reinvention of the wheel.
+Supplies pluggable adapters to concrete technology stacks, including databases, messaging middleware, UI platforms, DevOps infrastructure, and more. Adapters generate implementations of application programming models on top of corresponding technologies, languages, and frameworks. Adapters are also responsible for including and configuring necessary 3rd-party services and tools (e.g., MongoDB or Elastic) in automated deployments.|Pick ready technology stacks to plug in, according to application requirements. Save on technology learning curve and beginner's mistakes, or technology expert services. Easily afford changes in technology choices.
 
-## Feature highlights
+## Feature Q & A
 
 Question|Answer
 ---|---
 What programming languages are supported?|Applications are developed in C#, and primarily target cross-plafrorm .NET Core or .NET Standard. Targeting Windows-only .NET Framework is also supported. 
 What kind of applications can be built?|Multi-tier systems consisting of UI apps, microservices, and databases; web/RESTful API backends, data processing middleware, B2B communications, actor/data grids; standalone UI apps that embed business logic and/or allow peer-to-peer communication; any combination of the above
 Where the applications will run?|Servers will run on Linux, Windows, or macOS. Any compatible IaaS/CaaS cloud, hybrid, and on-premises deployments will be supported. UI will run as native mobile apps, web single-page apps, desktop apps on Linux/Windows/macOS; user interaction will also be supported on top of IVR, SmartTV, and IoT platforms.
-Scalability and high availability?|NWheels implements scalable, fault-tolerant, containerized, microservice- and lambda-based architectures. This enables elastic scalability and high availability with zero-downtime deployments. Health monitoring, self-healing environments, and automatic switch to DR environments, possibly cross-cloud-vendor, enable creation of mission-critical systems. 
-
+Scalability and high availability?|NWheels implements scalable, fault-tolerant, containerized, microservice- and lambda-based architectures. This enables elastic scalability and high availability with zero-downtime deployments. Health monitoring, self-healing environments, and support of cross-zone and cross-cloud-vendor DR environments, enable creation of mission-critical systems. 
 
 # Demo
 
-NWheels is already capable of bootstrapping a microservice with partially implemented web  stack.
+NWheels is already capable of bootstrapping a microservice with partially implemented web stack.
 
 Imagine a very simple application:
 - A single page web app, which lets user enter her name, and submit it with a button. 
