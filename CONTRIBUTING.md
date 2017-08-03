@@ -73,7 +73,7 @@ Bugs and enhancements can be reported by anyone. Please make sure you follow the
 
 Please follow these steps when introducing new features to NWheels:
 
-1. **Idea**: propose initial idea on Slack (`#idea` channel). 
+1. **Idea**: it is recommended to first propose initial idea on Slack (`#idea` channel). 
     - If the idea was in general accepted, move next.
 1. **Proposal**: create a new issue in GitHub. Summarize discussion that took place on Slack, and provide contents for further discussion. Label the issue as necessary, and assign it to `Proposals` milestone. 
     - From that moment on, all communications on the subject must go through the issue discussion thread.
@@ -207,10 +207,14 @@ We use the following online services, provided for free:
 C# code must be covered with automatic tests. We practice [test-driven development](
 https://en.wikipedia.org/wiki/Test-driven_development) (TDD). Testing is an integral part of any change made to production code. Coverage of at least 80% is a requirement. Any combination of the following is counted towards the total coverage:
 
-- **Unit tests**: testing pieces of logic in isolation from their environment
-- **Integration tests**: testing connection between ports and adapters, with real techology stacks attached
-- **System tests**: running sample microservice(s), testing them  through their endpoints (API calls or messages)
-- **End-to-end tests**: running a whole sample application including microservices and UI apps, testing it through UI automation. 
+- **Unit tests**: testing pieces of logic in isolation from their environment.
+  -  _Example: unit-testing of a string formatting utility is isolated from other components, let alone real microservice containers, databases, communication middleware, etc_.
+- **Integration tests**: testing connection between ports and adapters, with real techology stacks attached. 
+  - _Example: integration tests of an ORM adapter should run against a real database_.
+- **System tests**: running sample microservice(s), testing them  through their endpoints (API calls or messages).
+  -  _Example: system tests of an in-memory data grid platform should run a sample microservice implemented on top of the in-memory data grid. The microservice should run in real containers, with real communication endpoints and databases. The tests are performed by feeding the microservice with input messages, and validating its output messages through communication endpontss._
+- **End-to-end (e2e) tests**: running a whole sample application including microservices and UI apps, testing it through UI automation. E2e tests differ from sytstem tests in that the system is tested through user interface. 
+  - _Example: UI platform should be tested by running a sample application in a real UI environment (e.g. on a mobile device), with real microservice containers and databases. The tests are performed by automation of UI inputs and validation of UI outputs_. 
 
 Note: additional kinds of tests include stress/load testing, penetration testing, etc. They are not part of the TDD methodology. Development and maintenance of such tests is tracked by separate task issues. 
 
@@ -284,11 +288,12 @@ Tests reside in dedicated projects, separate from production code. Each test pro
         |    +-- /Parties
         |    +-- /Contacts
         ```
-
+Single-project convention is preferred when multiple projects separated by test kind are too thin.
 
 ### Coding requirements
 
 - Follow [SOLID](https://en.wikipedia.org/wiki/SOLID_(object-oriented_design)) for object-oriented design
+- Follow [KISS](https://en.wikipedia.org/wiki/KISS_principle), [YAGNI](https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it), [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself).
 - Prefer [convention over configuration](https://en.wikipedia.org/wiki/Convention_over_configuration)
 - Write code with no [smells](https://en.wikipedia.org/wiki/Code_smell); when changing existing code, [refactor](https://martinfowler.com/books/refactoring.html) as necessary
 - Write simple, readable, self-descriptive code
