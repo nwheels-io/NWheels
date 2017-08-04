@@ -22,8 +22,8 @@ _DISCLAIMER: we are redoing from scratch after successful proof of concept. Feat
 
 NWheels:|Software vendors:
 ---|---
-Implements industrial-strength architectures that provide full-stack coverage of typical requirements and DevOps/ALM aspects, such as information security, business intelligence, scalability, fault tolerance, and many more. Supplies application developers with concise programming models, abstracted from technology stacks. Delivers production-ready software system right off, which only misses unique features of your enterprise application.|Implement application requirements in C# on top of NWheels programming models, including UI, business logic, data access, communication endpoints, and more. The code is short and clean; it expresses application requirements without mixing in details of underlying technology.
-Supplies flexible building blocks for common problem domains, which have field-proven design patterns. Such domains may include: e-commerce, CRM, PRM, booking, marketing, point of sale, inventory management, shipping, accounting, transportation, stock exchange, CAD, HR, and many more.|Whenever possible, reuse domain building blocks, extending and adjusting them according to application requirements. Save on development effort and design mistakes. Avoid reinvention of the wheel.
+Implements industrial-strength architectures with full-stack coverage of typical requirements and DevOps/ALM aspects, such as information security, business intelligence, scalability, fault tolerance, SaaS, customization, and more. Supplies application developers with full stack of concise programming models, abstracted from technology. Delivers production-ready system right off, which only misses unique features of your enterprise application.|Implement application requirements in C# on top of NWheels programming models, including UI, business logic, data access, communication endpoints, and more. The code is short and clean; it expresses application requirements without mixing in details of underlying technology.
+Supplies flexible building blocks for common problem domains, which have field-proven patterns and designs. Such domains include: e-commerce, CRM, PRM, booking, marketing, point of sale, inventory management, shipping, accounting, transportation, stock exchange, CAD, HR, and many more.|Whenever possible, reuse domain building blocks, extending and adjusting them according to application requirements. Save on development effort and design mistakes. Avoid reinvention of the wheel.
 Supplies pluggable adapters to concrete technology stacks, including databases, scalability & high availability platforms, messaging middleware, UI platforms, DevOps infrastructure, and more. Adapters generate implementations of application programming models for  underlying technologies. Adapters also include and configure necessary 3rd-party services (e.g., MongoDB or Elastic) in automated deployments.|Pick ready technology stacks to plug in, according to application requirements. Save on technology learning curve and beginner's mistakes, or technology expert services. Easily afford changes in technology choices.
 
 ## Features
@@ -42,9 +42,18 @@ Supplies pluggable adapters to concrete technology stacks, including databases, 
 - **Runtime environments**
   - Servers will run on Linux, Windows, or macOS. Any compatible IaaS/CaaS cloud, hybrid, and on-premises deployments will be supported. 
   - UI will run as native mobile apps, web single-page apps, desktop apps on Linux/Windows/macOS
-  - User interaction through IVR, SmartTV, and IoT platforms will be supported
+  - UI through IVR, SmartTV, and IoT platforms will be supported
 
-- **Scalability and high availability** NWheels implements scalable, fault-tolerant, containerized, microservice- and lambda-based architectures. This enables elastic scalability and high availability with zero-downtime deployments. Health monitoring, self-healing environments, and support of cross-zone and cross-cloud-vendor DR environments, enable creation of mission-critical systems. 
+- **Scalability and high availability** 
+  - Scalable, fault-tolerant, containerized, microservice- and lambda-based architectures. 
+  - Elastic scalability and high availability with zero-downtime deployments
+  - Health monitoring, self-healing environments, and support of cross-zone and cross-cloud-vendor DR environments for mission-critical systems
+  
+- **Extensibility**: NWheels is extensible all the way; we welcome contributions by the community
+  - Technology stack adapters: new adapter modules can be developed to support more technology stacks
+  - Domain building blocks: new domain modules can be developed to cover more problem domains
+  - Programming models (the most advanced layer): new programming models can be developed to introduce new development concepts and paradigms.
+  - Modularity: both NWheels and NWheels-based applications are customizable and extensible through the mechanism of pluggable modules and features. For SaaS and off-the-shelf software products, this means out-of-the-box support for modular licensing and customer-specific solutions.    
 
 # Demo
 
