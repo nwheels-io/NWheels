@@ -22,7 +22,7 @@ _DISCLAIMER: we are redoing from scratch after successful proof of concept. Feat
 
 NWheels:|Software vendors:
 ---|---
-Implements industrial-strength architectures with full-stack coverage of typical requirements and DevOps/ALM aspects, such as information security, business intelligence, scalability, fault tolerance, SaaS, customization, and more. Supplies application developers with full stack of concise programming models, abstracted from technology. Delivers production-ready system right off, which only misses unique features of your enterprise application.|Implement application requirements in C# on top of NWheels programming models, including UI, business logic, data access, communication endpoints, and more. The code is short and clean; it expresses application requirements without mixing in details of underlying technology.
+Implements industrial-strength architectures with full-stack coverage of typical requirements and DevOps/ALM aspects, such as information security, business intelligence, scalability, fault tolerance, SaaS, customization, and more. Supplies application developers with full stack of concise programming models, abstracted from technology. Delivers production-ready system right off, which only misses unique features of your enterprise application.|Implement application requirements in C# on top of NWheels programming models, including UI, business logic, data access, communication endpoints, and more. The code is minimalistic and clean; it expresses application requirements without mixing in details of underlying technology.
 Supplies flexible building blocks for common problem domains, which have field-proven patterns and designs. Such domains include: e-commerce, CRM, PRM, booking, marketing, point of sale, inventory management, shipping, accounting, transportation, stock exchange, CAD, HR, and many more.|Whenever possible, reuse domain building blocks, extending and adjusting them according to application requirements. Save on development effort and design mistakes. Avoid reinvention of the wheel.
 Supplies pluggable adapters to concrete technology stacks, including databases, scalability & high availability platforms, messaging middleware, UI platforms, DevOps infrastructure, and more. Adapters generate implementations of application programming models for  underlying technologies. Adapters also include and configure necessary 3rd-party services (e.g., MongoDB or Elastic) in automated deployments.|Pick ready technology stacks to plug in, according to application requirements. Save on technology learning curve and beginner's mistakes, or technology expert services. Easily afford changes in technology choices.
 
@@ -33,7 +33,7 @@ Supplies pluggable adapters to concrete technology stacks, including databases, 
 - **Kinds of applications**: 
   - Multi-tier systems consisting of UI apps, microservices, and databases
   - Web/RESTful API backends
-  - Data processing middleware
+  - High throughput, low latency data processing middleware
   - B2B integration solutions 
   - Actor/data grids
   - Standalone UI apps that embed business logic and/or allow peer-to-peer communication
