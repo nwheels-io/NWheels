@@ -26,14 +26,25 @@ Implements industrial-strength architectures that provide full-stack coverage of
 Supplies flexible building blocks for common problem domains, which have field-proven design patterns. Such domains may include: e-commerce, CRM, PRM, booking, marketing, point of sale, inventory management, shipping, accounting, transportation, stock exchange, CAD, HR, and many more.|Whenever possible, reuse domain building blocks, extending and adjusting them according to application requirements. Save on development effort and design mistakes. Avoid reinvention of the wheel.
 Supplies pluggable adapters to concrete technology stacks, including databases, scalability & high availability platforms, messaging middleware, UI platforms, DevOps infrastructure, and more. Adapters generate implementations of application programming models for  underlying technologies. Adapters also include and configure necessary 3rd-party services (e.g., MongoDB or Elastic) in automated deployments.|Pick ready technology stacks to plug in, according to application requirements. Save on technology learning curve and beginner's mistakes, or technology expert services. Easily afford changes in technology choices.
 
-## Feature Q & A
+## Features
 
-Question|Answer
----|---
-What programming languages are supported?|Applications are developed in C#, and primarily target cross-plafrorm .NET Core or .NET Standard. Targeting Windows-only .NET Framework is also supported. 
-What kind of applications can be built?|Multi-tier systems consisting of UI apps, microservices, and databases; web/RESTful API backends, data processing middleware, B2B communications, actor/data grids; standalone UI apps that embed business logic and/or allow peer-to-peer communication; any combination of the above
-Where the applications will run?|Servers will run on Linux, Windows, or macOS. Any compatible IaaS/CaaS cloud, hybrid, and on-premises deployments will be supported. UI will run as native mobile apps, web single-page apps, desktop apps on Linux/Windows/macOS; user interaction will also be supported on top of IVR, SmartTV, and IoT platforms.
-Scalability and high availability?|NWheels implements scalable, fault-tolerant, containerized, microservice- and lambda-based architectures. This enables elastic scalability and high availability with zero-downtime deployments. Health monitoring, self-healing environments, and support of cross-zone and cross-cloud-vendor DR environments, enable creation of mission-critical systems. 
+- **Programming languages**: applications are developed in C#, and primarily target cross-plafrorm .NET Core or .NET Standard. Targeting Windows-only .NET Framework is also supported. 
+
+- **Kinds of applications**: 
+  - Multi-tier systems consisting of UI apps, microservices, and databases
+  - Web/RESTful API backends
+  - Data processing middleware
+  - B2B integration solutions 
+  - Actor/data grids
+  - Standalone UI apps that embed business logic and/or allow peer-to-peer communication
+  - Any combination of the above
+
+- **Runtime environments**
+  - Servers will run on Linux, Windows, or macOS. Any compatible IaaS/CaaS cloud, hybrid, and on-premises deployments will be supported. 
+  - UI will run as native mobile apps, web single-page apps, desktop apps on Linux/Windows/macOS
+  - User interaction through IVR, SmartTV, and IoT platforms will be supported
+
+- **Scalability and high availability** NWheels implements scalable, fault-tolerant, containerized, microservice- and lambda-based architectures. This enables elastic scalability and high availability with zero-downtime deployments. Health monitoring, self-healing environments, and support of cross-zone and cross-cloud-vendor DR environments, enable creation of mission-critical systems. 
 
 # Demo
 
