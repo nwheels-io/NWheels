@@ -25,7 +25,106 @@ NWheels:|Application developers:
 Implements industrial-strength architectures with full-stack coverage of typical requirements and DevOps/ALM aspects. Subjects covered include information security, business intelligence, testability, multitenancy, scalability, health monitoring with production profiling, fault tolerance, customizability, internationalization, continuous delivery, and more.|Get an automated customizable DevOps workflow, and a production-ready software system right off, which only misses unique features of the application being developed.   
 Provides application developers with full-stack concise programming models, abstracted from concrete technology stacks. Dramatically reduces size of application codebase. Allows writing code clean from underlying technology details. Enforces common conventions throughout the codebase. Allows projects to work both fast and right, starting on day one.|Implement application features in C# on top of NWheels programming models, including UI, business logic, data access, communication endpoints, and more.
 Supplies building blocks for common problem domains, based on field-proven patterns and designs. Such domains include e-commerce, CRM, booking, marketing, accounting, and many more. Flexible vertical and horizontal composability of NWheels domain models enables easy extension and adaptation of building blocks to application requirements.|Whenever possible, reuse domain building blocks; extend and adapt them to application requirements. Save on effort and mistakes. Avoid reinvention of the wheel.
-Supplies pluggable adapters to concrete technology stacks, including databases, provisioning/scalability platforms, messaging middleware, UI technologies, DevOps infrastructure, and many more. Adapters generate implementations of application programming models per underlying technologies, languages, and frameworks. Adapters also include and configure required 3rd-party services in automated deployments (e.g., Redis, MongoDB).|Pick ready technology stacks to plug in, according to application requirements. Save on technology learning curve and technology expert services. Easily afford changes in technology choices.
+Supplies pluggable adapters to concrete technology stacks, including databases, provisioning/scalability platforms, messaging middleware, UI technologies, DevOps infrastructure, and many more. Adapters generate implementations of application programming models per underlying technologies. Adapters also include and configure required 3rd-party services in automated deployments (e.g., Redis, MongoDB).|Pick ready technology stacks to plug in, according to application requirements. Save on technology learning curve and technology expert services. Easily afford changes in technology choices.
+
+# Demo
+
+NWheels is already capable of bootstrapping a microservice with partially implemented web stack.
+
+Imagine a very simple application:
+- A single page web app, which lets user enter her name, and submit it with a button. 
+- A microservice, which handles the submission. The microservice exposes RESTful API invoked by the web app button. 
+- Business logic (_transaction script_), which receives user's name, and responds with a greeting text. The greeting text is then displayed in the web app.
+
+NWheels-based implementation is below 50 lines of C# code, all layers included. 
+
+_Note that web client implementation is a mockup prototype -- the real web client stack has yet to be developed._
+
+## Source code explained
+
+#### Program.cs - microservice entry point
+
+```csharp
+public static int Main(string[] args)
+{
+    var microservice = new MicroserviceHostBuilder("hello")
+        .AutoDiscoverComponents()
+        .UseDefaultWebStack(listenPortNumber: 5000)
+        .Build();
+
+    return microservice.Run(args);
+}
+```
+
+#### HelloWorldTx.cs - business logic
+
+```csharp
+[TransactionScriptComponent]
+[SecurityCheck.AllowAnonymous]
+public class HelloWorldTx
+{
+    [TransactionScriptMethod]
+    public async Task<string> Hello(string name)
+    {
+        return $"Hello world, from {name}!";
+    }
+}
+```
+Here, `Hello` method can be invoked through HTTP request:
+
+```HTTP
+POST http://localhost:5000/tx/HelloWorld/Hello HTTP/1.1
+User-Agent: Fiddler
+Host: localhost:5000
+Content-Length: 17
+
+{"name": "NWheels"}
+```
+The endpoint will reply as follows:
+
+```HTTP
+HTTP/1.1 200 OK
+Date: Wed, 05 Jul 2017 05:40:55 GMT
+Content-Type: application/json
+Server: Kestrel
+Content-Length: 39
+
+{"result":"Hello world, from NWheels!"}
+```
+
+#### HelloWorldApp.cs - web app
+
+```csharp
+[WebAppComponent]
+public class HelloWorldApp : WebApp<Empty.SessionState>
+{
+    [DefaultPage]
+    public class HomePage : WebPage<Empty.ViewModel>
+    {
+        [ViewModelContract]
+        public class HelloWorldViewModel 
+        {
+            [FieldContract.Required]
+            public string Name;
+            [FieldContract.Semantics.Output, FieldContract.Presentation.Label("WeSay")]
+            public string Message;
+        }
+
+        [ContentElement] 
+        [TransactionWizard.Configure(SubmitCommandLabel = "Go")]
+        public TransactionWizard<HelloWorldViewModel> Transaction { get; set; }
+
+        protected override void ImplementController()
+        {
+            Transaction.OnSubmit.Invoke<HelloWorldTx>(
+                tx => tx.Hello(Transaction.Model.Name)
+            ).Then(
+                result => Script.Assign(Transaction.Model.Message, result)
+            );
+        }
+    }
+}
+```
 
 ## Features
 
@@ -33,22 +132,18 @@ Supplies pluggable adapters to concrete technology stacks, including databases, 
 
 - **Kinds of applications**: 
   - Multi-tier systems consisting of UI apps, microservices, and databases
-  - Web/RESTful API backends
-  - High throughput, low latency data processing middleware
+  - API backends and high-throughput low-latency data processing middleware, optionally based on in-memory data/actor grids
   - B2B integration solutions 
-  - Actor/data grids
-  - Standalone UI apps that embed business logic and/or allow peer-to-peer communication
+  - Fat standalone or peer-to-peer UI apps that include business logic
   - Any combination of the above
 
 - **Runtime environments**
-  - Servers will run on Linux, Windows, or macOS. Any compatible IaaS/CaaS cloud, hybrid, and on-premises deployments will be supported. 
-  - UI will run as native mobile apps, web single-page apps, desktop apps on Linux/Windows/macOS
-  - UI through IVR, SmartTV, and IoT platforms will be supported
+  - Servers will run on Linux, Windows, any macOS. Any compatible IaaS/CaaS cloud, hybrid, and on-premises deployments will be supported. 
+  - UI will run as native mobile apps, web single-page apps, desktop apps on Linux/Windows/macOS; UI on top of IVR, SmartTV, and IoT platforms will be supported.
 
 - **Scalability and high availability** 
   - Scalable, fault-tolerant, containerized, microservice- and lambda-based architectures. 
-  - Elastic scalability and high availability with zero-downtime deployments
-  - Health monitoring, self-healing environments, and support of cross-zone and cross-cloud-vendor DR environments for mission-critical systems
+  - Elastic scalability and high availability with zero-downtime deployments; cross-zone and cross-cloud-vendor DR environments will be supported for mission-critical systems.
   
 - **Extensibility**: NWheels is extensible all the way; we welcome contributions by the community
   - Technology stack adapters: new adapter modules can be developed to support more technology stacks
