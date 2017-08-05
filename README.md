@@ -29,7 +29,9 @@ Supplies pluggable adapters to concrete technology stacks, including databases, 
 
 # Demo
 
-NWheels is already capable of bootstrapping a microservice with partially implemented web stack.
+NWheels is already capable of bootstrapping a microservice which has some business logic and exposes a simple web app.
+
+![Demo data flow](Docs/Images/demo-1st-happy-path.png)
 
 Imagine a very simple application:
 - A single page web app, which lets user enter her name, and submit it with a button. 
