@@ -18,7 +18,7 @@ We take this as an opportunity to let software vendors build and operate way lar
 
 # How it works
 
-_DISCLAIMER: we are redoing from scratch after successful proof of concept. Features listed here may not yet exist, or be unstable_. 
+_ATTENTION: we are redoing from scratch after successful proof of concept. Features listed here may not yet exist, or be unstable_. 
 
 NWheels:|Application developers:
 ---|---
@@ -33,18 +33,20 @@ NWheels is already capable of bootstrapping a microservice which has business lo
 
 ![Demo data flow](Docs/Images/demo-1st-happy-path.png)
 
-Currently, microservice includes mockup assets for the single-page web app. Planned are pluggable SPA themes and code generation of web app assets on top of the theme.
+_Currently, the demo uses mockup assets for the single-page web app. Planned are pluggable SPA themes and code generation of assets on top of the theme. Implementation code listed below will not be affected by the change._
 
 ## Implementation
 
 #### Program.cs - microservice entry point
 ```csharp
-public static int Main(string[] args)
+public static int Main(string[] args)                          
 {
-    var microservice = new MicroserviceHostBuilder("hello")
+    // it is super simple to bootstrap a microservice; most of the time, you're all set with the defaults
+    var microservice = new MicroserviceHostBuilder("hello")  
         .AutoDiscoverComponents()
         .UseDefaultWebStack(listenPortNumber: 5000)
-        .Build();
+        // for advanced scenarios, here you can tailor technology stack to your requirements
+        .Build(); 
 
     return microservice.Run(args);
 }
@@ -94,45 +96,6 @@ public class HelloWorldApp : WebApp<Empty.SessionState>
     }
 }
 ```
-
-## Features
-
-- **Programming languages**: applications are developed in C#, and primarily target cross-plafrorm .NET Core or .NET Standard. Targeting Windows-only .NET Framework is also supported. 
-
-- **Kinds of applications**: 
-  - Multi-tier systems consisting of UI apps, microservices, and databases
-  - API backends and high-throughput low-latency data processing middleware, optionally based on in-memory data/actor grids
-  - B2B integration solutions 
-  - Fat standalone or peer-to-peer UI apps that include business logic
-  - Any combination of the above
-
-- **Runtime environments**
-  - Servers will run on Linux, Windows, any macOS. Any compatible IaaS/CaaS cloud, hybrid, and on-premises deployments will be supported. 
-  - UI will run as native mobile apps, web single-page apps, desktop apps on Linux/Windows/macOS; UI on top of IVR, SmartTV, and IoT platforms will be supported.
-
-- **Scalability and high availability** 
-  - Scalable, fault-tolerant, containerized, microservice- and lambda-based architectures. 
-  - Elastic scalability and high availability with zero-downtime deployments; cross-zone and cross-cloud-vendor DR environments will be supported for mission-critical systems.
-  
-- **Extensibility**: NWheels is extensible all the way; we welcome contributions by the community
-  - Technology stack adapters: new adapter modules can be developed to support more technology stacks
-  - Domain building blocks: new domain modules can be developed to cover more problem domains
-  - Programming models (the most advanced layer): new programming models can be developed to introduce new development concepts and paradigms.
-  - Modularity: both NWheels and NWheels-based applications are customizable and extensible through the mechanism of pluggable modules and features. For SaaS and off-the-shelf software products, this means out-of-the-box support for modular licensing and customer-specific solutions.    
-
-# Demo
-
-NWheels is already capable of bootstrapping a microservice with partially implemented web stack.
-
-Imagine a very simple application:
-- A single page web app, which lets user enter her name, and submit it with a button. 
-- A microservice, which handles the submission. The microservice exposes RESTful API invoked by the web app button. 
-- Business logic (_transaction script_), which receives user's name, and responds with a greeting text. The greeting text is then displayed in the web app.
-
-NWheels-based implementation is below 50 lines of C# code, all layers included. 
-
-_Note that web client implementation is a mockup prototype -- the real web client stack has yet to be developed._
-
 ## Running the demo 
 
 ### System requirements
@@ -171,116 +134,31 @@ _Note that web client implementation is a mockup prototype -- the real web clien
     $ docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' nwheels-demo
     ```
   - Browse to http://_container_ip_address_:5000
- 
-## Source code explained
 
-#### Program.cs - microservice entry point
+# Feature Highlights
 
-It is super simple to bootstrap a microservice. Most of the time, you're all set with the defaults. For advanced scenarios, extensible API of `MicroserviceHostBuilder` lets you tailor technology stack to your requirements. 
+- **Programming languages**: applications are developed in C#, and primarily target cross-plafrorm .NET Core or .NET Standard. Targeting Windows-only .NET Framework is also supported. 
 
-```csharp
-public static int Main(string[] args)
-{
-    var microservice = new MicroserviceHostBuilder("hello")
-        .AutoDiscoverComponents()
-        .UseDefaultWebStack(listenPortNumber: 5000)
-        .Build();
+- **Kinds of applications**: 
+  - Multi-tier systems consisting of UI apps, microservices, and databases
+  - API backends and high-throughput low-latency data processing middleware, optionally based on in-memory data/actor grids
+  - B2B integration solutions 
+  - Fat standalone or peer-to-peer UI apps that include business logic
+  - Any combination of the above
 
-    return microservice.Run(args);
-}
-```
+- **Runtime environments**
+  - Servers will run on Linux, Windows, any macOS. Any compatible IaaS/CaaS cloud, hybrid, and on-premises deployments will be supported. 
+  - UI will run as native mobile apps, web single-page apps, desktop apps on Linux/Windows/macOS; UI on top of IVR, SmartTV, and IoT platforms will be supported.
 
-#### HelloWorldTx.cs - business logic
-
-Business logic for this demo is trivial. It is captured in a _transaction script component_ class. 
-
-```csharp
-[TransactionScriptComponent]
-[SecurityCheck.AllowAnonymous]
-public class HelloWorldTx
-{
-    [TransactionScriptMethod]
-    public async Task<string> Hello(string name)
-    {
-        return $"Hello world, from {name}!";
-    }
-}
-```
-
-There's more under the hood, though. For instance, default web stack includes RESTful API endpoint, where transaction scripts are one type of supported resources. The endpoint transparently allows invocation of resources through HTTP and other protocols, subject to authorization requirements.
-
-Here, `Hello` method can be invoked through HTTP request:
-
-```HTTP
-POST http://localhost:5000/tx/HelloWorld/Hello HTTP/1.1
-User-Agent: Fiddler
-Host: localhost:5000
-Content-Length: 17
-
-{"name": "NWheels"}
-```
-The endpoint will reply as follows:
-
-```HTTP
-HTTP/1.1 200 OK
-Date: Wed, 05 Jul 2017 05:40:55 GMT
-Content-Type: application/json
-Server: Kestrel
-Content-Length: 39
-
-{"result":"Hello world, from NWheels!"}
-```
-
-#### Authorization
-
-It worths noting that `[SecurityCheck.AllowAnonymous]` attribute here is required to allow access without prior authentication and validation of claims. 
-
-Authorization infrastructure of NWheels transparently enforces access control rules to resources, components, and data throughout all execution paths. The rules can either be declared with attributes (like in this example), or configured through access control API. Depending on application requirements, configuration through the API can either be hard-coded, or based on data in a persistent storage (e.g. DB).
-
-#### HelloWorldApp.cs - web app
-
-The next piece is user interface. NWheels dramatically boosts development and maintenance productivity by supporting declarative UI. The UI is declared through high-level conceptual models, abstracted from concrete technology stacks. 
-
-The models focus on UI structure, navigation, and binding to business data and capabilities. Lower-level front-end/UX and client/server communication details are not concerned on this level. 
-
-Auhtorization rules that control access to bound data and capabilities are automatically reflected in the user interface.
-
-```csharp
-[WebAppComponent]
-public class HelloWorldApp : WebApp<Empty.SessionState>
-{
-    [DefaultPage]
-    public class HomePage : WebPage<Empty.ViewModel>
-    {
-        [ViewModelContract]
-        public class HelloWorldViewModel 
-        {
-            [FieldContract.Required]
-            public string Name;
-            [FieldContract.Semantics.Output, FieldContract.Presentation.Label("WeSay")]
-            public string Message;
-        }
-
-        [ContentElement] 
-        [TransactionWizard.Configure(SubmitCommandLabel = "Go")]
-        public TransactionWizard<HelloWorldViewModel> Transaction { get; set; }
-
-        protected override void ImplementController()
-        {
-            Transaction.OnSubmit.Invoke<HelloWorldTx>(
-                tx => tx.Hello(Transaction.Model.Name)
-            ).Then(
-                result => Script.Assign(Transaction.Model.Message, result)
-            );
-        }
-    }
-}
-```
-Stunning high-usability user interfaces are created separately by UX experts in corresponding interaction platforms. The experts build UI technology stacks, and provide code generators that implement UI models on top of those stacks. User interfaces are allowed to have numerous themes and variations. 
-
-Sometimes though, all this is not enough. Certain UI areas demand unique touch. In such cases, parts of generated platform-specific code and assets can be manually adjusted or replaced. 
-
-Besides the web, we aim to support mobile native apps, desktop apps, SmartTV, IVR, and IoT platforms. 
+- **Scalability and high availability** 
+  - Scalable, fault-tolerant, containerized, microservice- and lambda-based architectures. 
+  - Elastic scalability and high availability with zero-downtime deployments; cross-zone and cross-cloud-vendor DR environments will be supported for mission-critical systems.
+  
+- **Extensibility**: NWheels is extensible all the way; we welcome contributions by the community
+  - Technology stack adapters: new adapter modules can be developed to support more technology stacks
+  - Domain building blocks: new domain modules can be developed to cover more problem domains
+  - Programming models (the most advanced layer): new programming models can be developed to introduce new development concepts and paradigms.
+  - Modularity: both NWheels and NWheels-based applications are customizable and extensible through the mechanism of pluggable modules and features. For SaaS and off-the-shelf software products, this means out-of-the-box support for modular licensing and customer-specific solutions.    
 
 # More Info
 
