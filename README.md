@@ -16,7 +16,7 @@ We take this as an opportunity to let software vendors build and operate way lar
 <img src="Docs/Images/nwheels-concept.png"/>
 </p>
 
-## How it works
+# How it works
 
 _DISCLAIMER: we are redoing from scratch after successful proof of concept. Features listed here may not yet exist, or be unstable_. 
 
@@ -29,23 +29,15 @@ Supplies pluggable adapters to concrete technology stacks, including databases, 
 
 # Demo
 
-NWheels is already capable of bootstrapping a microservice which has some business logic and exposes a simple web app.
+NWheels is already capable of bootstrapping a microservice which has business logic and exposes a simple web app, as shown in the figure below. 
 
 ![Demo data flow](Docs/Images/demo-1st-happy-path.png)
 
-Imagine a very simple application:
-- A single page web app, which lets user enter her name, and submit it with a button. 
-- A microservice, which handles the submission. The microservice exposes RESTful API invoked by the web app button. 
-- Business logic (_transaction script_), which receives user's name, and responds with a greeting text. The greeting text is then displayed in the web app.
+Currently, microservice includes mockup assets for the single-page web app. Planned are pluggable SPA themes and code generation of web app assets on top of the theme.
 
-NWheels-based implementation is below 50 lines of C# code, all layers included. 
-
-_Note that web client implementation is a mockup prototype -- the real web client stack has yet to be developed._
-
-## Source code explained
+## Implementation
 
 #### Program.cs - microservice entry point
-
 ```csharp
 public static int Main(string[] args)
 {
@@ -57,9 +49,7 @@ public static int Main(string[] args)
     return microservice.Run(args);
 }
 ```
-
 #### HelloWorldTx.cs - business logic
-
 ```csharp
 [TransactionScriptComponent]
 [SecurityCheck.AllowAnonymous]
@@ -72,30 +62,7 @@ public class HelloWorldTx
     }
 }
 ```
-Here, `Hello` method can be invoked through HTTP request:
-
-```HTTP
-POST http://localhost:5000/tx/HelloWorld/Hello HTTP/1.1
-User-Agent: Fiddler
-Host: localhost:5000
-Content-Length: 17
-
-{"name": "NWheels"}
-```
-The endpoint will reply as follows:
-
-```HTTP
-HTTP/1.1 200 OK
-Date: Wed, 05 Jul 2017 05:40:55 GMT
-Content-Type: application/json
-Server: Kestrel
-Content-Length: 39
-
-{"result":"Hello world, from NWheels!"}
-```
-
 #### HelloWorldApp.cs - web app
-
 ```csharp
 [WebAppComponent]
 public class HelloWorldApp : WebApp<Empty.SessionState>
