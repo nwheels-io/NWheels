@@ -35,17 +35,17 @@ NWheels is already capable of bootstrapping a microservice which has business lo
 
 _Currently, the demo uses mockup assets for the single-page web app. Planned are pluggable SPA themes and code generation of assets on top of the theme. Implementation code listed below will not be affected by the change._
 
-## Implementation
+## Code
+
+NWheels-based implementation is about 50 lines of code in C#, all layers included. More details and explanations [can be found here](Docs/Wiki/demo.md).
 
 #### Program.cs - microservice entry point
 ```csharp
 public static int Main(string[] args)                          
 {
-    // it is super simple to bootstrap a microservice; most of the time, you're all set with the defaults
     var microservice = new MicroserviceHostBuilder("hello")  
         .AutoDiscoverComponents()
         .UseDefaultWebStack(listenPortNumber: 5000)
-        // for advanced scenarios, here you can tailor technology stack to your requirements
         .Build(); 
 
     return microservice.Run(args);
@@ -174,18 +174,14 @@ More info on NWheels can be found in resources listed below:
 
 Excited? We'd like having you onboard!
 
-Community is a vital part of the NWheels project. Here we are building a welcoming and friendly ecosystem for contributors.
-
-Please make yourself familiar with our [Code of Conduct](CODE_OF_CONDUCT.md).
+Community is a vital part of the NWheels project. Here we are building a welcoming and friendly ecosystem for expertise sharing and contribution.
 
 ## Where to start
 
-1. Run the demo
+1. Please make yourself familiar with our [Code of Conduct](CODE_OF_CONDUCT.md).
+1. Run the demo (if you haven't already done that)
 1. Carefully read our [Contribution Guidelines](CONTRIBUTING.md).
-1. Join our team on Slack:
-   - Send an email with subject `Join NWheels team` to [team@nwheels.io](mailto:nwheels.io). You will receive back an email from Slack with join link and instructions.
-1. Read our [Roadmap](docs/Wiki/roadmap.md). Look through **Contribution Areas** section and choose areas you're interested in contributing to.
-1. Start from resolving some issues, preferably those labeled  `beginners-friendly`. 
+   - Follow instructions in the [First-timers section](CONTRIBUTING.md#first-timers-read-here)
 1. Please feel free to communicate your thoughts and reach out for help.
 
 # Current Status
