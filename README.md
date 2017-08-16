@@ -29,9 +29,6 @@ We take this as an opportunity to let software vendors build and operate way lar
 <img src="Docs/Images/nwheels-concept.png"/>
 </p>
 
-# How it works
-
-
 _ATTENTION: we are redoing from scratch after successful proof of concept. Features listed here may not yet exist, or be unstable_. 
 
 ## Responsibility segregation 
