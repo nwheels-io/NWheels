@@ -18,7 +18,18 @@ We take this as an opportunity to let software vendors build and operate way lar
 
 # How it works
 
+## TL;DR
+
+- recurring and common requirements are covered out of the box
+- architecture is based on microservices, implemented by hexagonal ("ports-and-adapters") design pattern
+- technology stacks are abstracted with concise C# programming models; the models are translated into technology-specific implementations (manual overrides allowed). Example:
+  - UI model in C#, translated into an npm project of a single-page web app based on either React, Angular, or Polymer - depending on picked technology - saving thousands lines of code to write and maintain.
+- expertise in common problem domains is shared through reusable domain modules
+- everything is extensible and pluggable
+
 _ATTENTION: we are redoing from scratch after successful proof of concept. Features listed here may not yet exist, or be unstable_. 
+
+## Responsibility segregation 
 
 NWheels:|Application developers:
 ---|---
@@ -155,10 +166,10 @@ public class HelloWorldApp : WebApp<Empty.SessionState>
   - Elastic scalability and high availability with zero-downtime deployments; cross-zone and cross-cloud-vendor DR environments will be supported for mission-critical systems.
   
 - **Extensibility**: NWheels is extensible all the way; we welcome contributions by the community
-  - Technology stack adapters: new adapter modules can be developed to support more technology stacks
-  - Domain building blocks: new domain modules can be developed to cover more problem domains
-  - Programming models (the most advanced layer): new programming models can be developed to introduce new development concepts and paradigms.
-  - Modularity: both NWheels and NWheels-based applications are customizable and extensible through the mechanism of pluggable modules and features. For SaaS and off-the-shelf software products, this means out-of-the-box support for modular licensing and customer-specific solutions.    
+  - **Technology stack adapters**: adapter modules can be contributed to support wide range of technology stacks
+  - **Domain building blocks**: expertise in problem domains can be shared through contribution of domain building block modules
+  - **Programming models** (for the most advanced): new programming models can be developed to introduce new development concepts and paradigms.
+  - **Modularity all the way**: both NWheels and NWheels-based applications are customizable and extensible through the mechanism of pluggable modules and features. For SaaS and off-the-shelf software products, this means out-of-the-box support for modular licensing and customer-specific solutions.    
 
 # More Info
 
