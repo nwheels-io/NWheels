@@ -7,6 +7,17 @@ using System.Threading.Tasks;
 
 namespace NWheels.Frameworks.Uidl.Generic
 {
+    public static class TransactonWizard
+    {
+        [AttributeUsage(AttributeTargets.Property)]
+        public class ConfigureAttribute : Attribute
+        {
+            public string SubmitCommandLabel { get; set; }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
     public class TransactionWizard<TViewModel> : AbstractUIElement<TViewModel>
     {
         public PromiseBuilder OnSubmitCallTx<TTx>(Expression<Func<TTx, Task>> call)

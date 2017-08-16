@@ -5,26 +5,15 @@ using NWheels.Frameworks.Uidl.Web;
 
 namespace NWheels.Samples.FirstHappyPath.HelloService
 {
+    [WebAppComponent]
     public class HelloWorldApp : WebApp<Empty.SessionState>
     {
         [DefaultPage]
         public class HomePage : WebPage<Empty.ViewModel>
         {
             [ContentElement]
-            public DockLayoutElement Layout { get; set; }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            [NestedElement]
+            [TransactonWizard.Configure(SubmitCommandLabel = "Go")]
             public TransactionWizard<HelloWorldViewModel> Transaction { get; set; }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            protected override void ConfigureElements()
-            {
-                Transaction.SubmitCommand.Label = "Go";                
-                Layout.Fill.Add(Transaction);
-            }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -42,7 +31,7 @@ namespace NWheels.Samples.FirstHappyPath.HelloService
 
             public class HelloWorldViewModel 
             {
-                [PropertyContract.Required, PropertyContract.Semantics.Input]
+                [PropertyContract.Required]
                 public string Name { get; set; }
          
                 [PropertyContract.Semantics.Output, PropertyContract.Presentation.Label("WeSay")]

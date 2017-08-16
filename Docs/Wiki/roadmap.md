@@ -28,3 +28,5 @@ NWheels project would benefit from contributions in many different areas:
   - providing technology stack for direct communication with devices, or integration with device cloud platforms
   - contributing technology adapter modules for the above
 
+
+
