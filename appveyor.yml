@@ -65,10 +65,12 @@ test_script:
 
 after_test:
 - cmd: >-
-
-    choco install opencover.portable
+     
+    nuget install OpenCover -Version 4.6.519 -OutputDirectory c:\projects\NWheels\Tools
     
     choco install codecov
+    
+    cd c:\projects\NWheels\Tools\OpenCover.4.6.519\tools
     
     OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test c:\projects\NWheels\Source\NWheels.Implementation.UnitTests\NWheels.Implementation.UnitTests.csproj" -register:user -output:c:\projects\NWheels\Tools\MergedResult.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests"
     
