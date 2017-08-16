@@ -350,7 +350,7 @@ Many aspects of coding style are automatically enforced by Visual Studio. There 
       - `333 + TAB` - insert separator line at indent level 3
       - `444 + TAB` - insert separator line at indent level 4
 
-1. **Curly braces**. Curly braces are opened on the same line for inlined declarations:
+1. **Curly braces**. Curly braces are required for all flow control statements (`if`, `for`, etc), even when they enclose single statement.  Curly braces are opened on the same line for inlined declarations:
    - anonymous method
    - collection initializer
 
@@ -362,6 +362,7 @@ Many aspects of coding style are automatically enforced by Visual Studio. There 
 - Code reviews are done on pull requests.
 - Work-in-progress pull requests can be reviewed and commented by anyone. 
 - For completed PRs, at least one approved code review from one of project maintainers is required, before the PR can be merged. 
+  - _A note to maintainers: we should periodically look for completed PRs (those not starting with "WIP"), which have no assigned reviewer. Then one of us self-assigns as a reviewer_.
 
 ## Submitting changes
 
