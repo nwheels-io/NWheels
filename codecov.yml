@@ -1,0 +1,12 @@
+coverage:
+  precision: 1
+  round: down
+  range: "70...90"
+  status:
+    project:
+      default:
+        target: 50
+        threshold: 5
+
+ignore:
+  Source/*.*Tests
