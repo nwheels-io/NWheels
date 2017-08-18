@@ -197,10 +197,10 @@ Currently, the following features are missing in VSCode, stopping us from migrat
 
 We use the following online services, provided for free:
 
-- [NuGet.org](https://www.nuget.org/) - package repository
+- [NuGet.org](https://www.nuget.org/) - package repository (planned)
 - [AppVeyor](https://ci.appveyor.com/project/felix-b/nwheels-bk3vs/branch/master) - continuous integration build on Windows
 - [Travis CI](https://travis-ci.org/) (planned) - continuous integration build on Linux
-- [Coveralls](https://coveralls.io/github/felix-b/NWheels?branch=master) - test coverage reports
+- [CodeCov](https://codecov.io/github/felix-b/NWheels) - test coverage reporting
 
 ### Testing
 
@@ -376,7 +376,7 @@ This PR handles #68 - listen on 0.0.0.0 instead of localhost
 
 ### Work in progress
 
-We encourage submitting work-in-progress PRs, so that the community can review and react early. 
+We encourage submitting work-in-progress PRs, so that other contributors can review and react early. 
 
 - Please prefix names of  work-in-progress PRs with "_WIP_" - for example, "_WIP - listen on 0.0.0.0 instead of localhost_". We will know that it's an ongoing effort and give feedback accordingly.
 - Once you consider the PR ready, please remove the "_WIP_" prefix from its name. We will treat it as a candidate for merging. 
@@ -401,7 +401,10 @@ Before a PR can be merged, it must meet the following requirements:
 - The code must be covered by tests. 
   - If the PR includes changes to existing functionality, the tests that cover changed functionality must be changed accordingly.
   - Any appropriate combination of unit/integration/system tests is accepted, and their union coverage is counted. 
-  - Coverage of less than 80% must be justified - comment on the PR thread.
+  - Coverage summary is automatically posted by CodeCov on the PR thread. 
+  - Coverage of 80% is the required minimum (validated by CodeCov).
+  - Coverage of less than 100% must be justified - comment on the PR thread (e.g., a race condition that cannot be reliably reproduced).
+  - PR is not allowed to drop the coverage by more than 5% compared to its base in `master` (validated by CodeCov).  
 - The PR must pass CI builds attached to NWheels repo. Their details appear on the PR issue thread.
 - The PR must have a review with approval by one of project maintainers.
 
@@ -488,9 +491,10 @@ If your environment was set up correctly, the build should be successful.
 
 1. Continuous integration builds will run on every push to the PR branch. The builds are listed under the Checks section in the end of PR thread. Fix build failures, if any occur.     
 
-1. Continue working and pushing more commits. Make sure your changes comply with the [coding conventions](#coding-conventions). Keep CI builds passing. Watch for comments and reviews from other contributors. Be responsive to them.
+1. Continue working and pushing more commits. Make sure your changes comply with the [coding conventions](#coding-conventions). Keep CI builds passing. Keep test coverage above 80%. Watch for comments and reviews from other contributors. Be responsive to them.
    - Reviews will be posted on the PR thread. 
    - Comments can be posted on either PR or the issue thread.
+   - Test coverage summary will be automatically posted by CodeCov on the PR thread. 
 
 1. When you consider the issue to be resolved, rename the pull request and remove the "_WIP_" prefix. Watch for a review from one of project maintainers. Follow up with answers and changes, if any are requested.
 
