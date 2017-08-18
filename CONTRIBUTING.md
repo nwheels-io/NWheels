@@ -212,7 +212,7 @@ https://en.wikipedia.org/wiki/Test-driven_development) (TDD). Testing is an inte
 - **Integration tests**: testing connection between ports and adapters, with real techology stacks attached. 
   - _Example: integration tests of an ORM adapter should run against a real database_.
 - **System tests**: running sample microservice(s), testing them  through their endpoints (API calls or messages).
-  -  _Example: system tests of an in-memory data grid platform should run a sample microservice implemented on top of the in-memory data grid. The microservice should run in real containers, with real communication endpoints and databases. The tests are performed by feeding the microservice with input messages, and validating its output messages through communication endpontss._
+  -  _Example: system tests of an in-memory data grid platform should run a sample microservice implemented on top of the in-memory data grid. The microservice should run in real containers, with real communication endpoints and databases. The tests are performed by feeding the microservice with input messages, and validating its output messages through communication endpoints._
 - **End-to-end (e2e) tests**: running a whole sample application including microservices and UI apps, testing it through UI automation. E2e tests differ from sytstem tests in that the system is tested through user interface. 
   - _Example: UI platform should be tested by running a sample application in a real UI environment (e.g. on a mobile device), with real microservice containers and databases. The tests are performed by automation of UI inputs and validation of UI outputs_. 
 
