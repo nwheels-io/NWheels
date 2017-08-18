@@ -33,8 +33,7 @@ build:
 after_build:
 - cmd: >-
     cd c:\projects\NWheels\Source
-
-    #dotnet publish
+    
 test_script:
 - cmd: >-
     cd c:\projects\NWheels\Source
