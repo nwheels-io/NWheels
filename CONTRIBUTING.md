@@ -220,7 +220,7 @@ In particular, all C# code must be covered with automatic tests. We use code cov
 - **End-to-end (e2e) tests**: running a whole sample application including microservices and UI apps, testing it through UI automation. E2e tests differ from sytstem tests in that the system is tested through user interface. 
   - _Example: UI platform should be tested by running a sample application in a real UI environment (e.g. on a mobile device), with real microservice containers and databases. The tests are performed by automation of UI inputs and validation of UI outputs_. 
 
-We attempt to achieve 100% coverage. To account for corner cases that cannot be reliably tested in an automated way, we define the minimum of 80% coverage as the requirement. Automated testing is a vital part of NWheels project. 
+We attempt to achieve 100% coverage. To account for corner cases that cannot be reliably tested in an automated way, we define the minimum of 80% coverage as the requirement. 
 
 Note: additional kinds of tests include stress/load testing, penetration testing, etc. They are not part of the TDD methodology. Development and maintenance of such tests is tracked by separate task issues. 
 
