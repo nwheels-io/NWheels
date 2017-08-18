@@ -201,11 +201,24 @@ Community is a vital part of the NWheels project. Here we are building a welcomi
 
 Starting from February 2017, we are developing our second take at NWheels. 
 
-### Current milestone: 01 - First Happy Path
+### Current milestone: 02 - Convergence
 
-- [Milestone](https://github.com/felix-b/NWheels/milestone/2)
+PRIMARY GOAL: complete gaps in the core concept, and demonstrate productivity boost through short create-and-deploy cycle.
+
+1. Make NWheels consumable through NuGet packages
+1. Make server-side code generation work
+1. Support deployment in a cloud
+
+SECONDARY GOAL: upgrade to .NET Core 2.0 and provide compatibility with the legacy .NET Framework.
+
+1. Target .NET Standard 2.0 and .NET Core 2.0
+1. Allow developing NWheels-based applications on .NET Framework 4.6.1
+
+MILESTONE LINKS
+
+- [Milestone](https://github.com/felix-b/NWheels/milestone/5)
 - [Scrum board](https://github.com/felix-b/NWheels/projects/1)
-- [Issues](https://github.com/felix-b/NWheels/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aopen%20milestone%3A%2201%20First%20happy%20path%22%20)
+- [Issues](https://github.com/felix-b/NWheels/milestones/02%20Convergence)
 
 # History
 
