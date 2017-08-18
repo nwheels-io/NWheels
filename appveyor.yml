@@ -15,11 +15,11 @@ clone_folder: c:\projects\NWheels
   
 install:
   # Get the latest stable version of Node.js or io.js
-  #- ps: Install-Product node $env:nodejs_version
+  - ps: Install-Product node $env:nodejs_version
   # install modules
-  #- npm install
+  - npm install
   # install angular CLI
-  #- npm install -g @angular/cli
+  - npm install -g @angular/cli
   
 before_build:
 - cmd: >-
@@ -34,7 +34,7 @@ after_build:
 - cmd: >-
     cd c:\projects\NWheels\Source
 
-#   dotnet publish
+    #dotnet publish
 test_script:
 - cmd: >-
     cd c:\projects\NWheels\Source
@@ -88,19 +88,19 @@ after_test:
     
     codecov -f "c:\projects\NWheels\Tools\MergedResult.xml"
 
-#    cd c:\projects\NWheels\Source\Presentation\Web\AppVeyorPoc
-# 
-#    node --version
-# 
-#    npm --version
-#    
-#    npm install
-#     
-#    ng test --single-run=true
-#    
-#    echo export class Configuration{static appVeyorToken = 'token';} > configuration.ts
-#   
-#    ng e2e
+    cd c:\projects\NWheels\Source\Presentation\Web\AppVeyorPoc
+ 
+    node --version
+ 
+    npm --version
+    
+    npm install
+     
+    ng test --single-run=true
+    
+    echo export class Configuration{static appVeyorToken = 'token';} > configuration.ts
+   
+    ng e2e
     
 ## Pause build until file from desktop will be removed
 #on_finish:
