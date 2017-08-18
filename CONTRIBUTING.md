@@ -204,8 +204,12 @@ We use the following online services, provided for free:
 
 ### Testing
 
-C# code must be covered with automatic tests. We practice [test-driven development](
-https://en.wikipedia.org/wiki/Test-driven_development) (TDD). Testing is an integral part of any change made to production code. Coverage of at least 80% is a requirement. Any combination of the following is counted towards the total coverage:
+Automated testing is a vital part of the project. Number of subjects that NWheels covers is large enough to make manual testing impossible. Considering that NWheels is aimed to serve a basis for numerous applications, we cannot afford functionality that is not automatically verifiable by continuous delivery pipeline. 
+
+For this reason, we practice [test-driven development](
+https://en.wikipedia.org/wiki/Test-driven_development) (TDD). Testing is an integral part of any change made to production code. 
+
+In particular, all C# code must be covered with automatic tests. We use code coverage metric to validate that. Any combination of the following is counted towards the total coverage:
 
 - **Unit tests**: testing pieces of logic in isolation from their environment.
   -  _Example: unit-testing of a string formatting utility is isolated from other components, let alone real microservice containers, databases, communication middleware, etc_.
@@ -215,6 +219,8 @@ https://en.wikipedia.org/wiki/Test-driven_development) (TDD). Testing is an inte
   -  _Example: system tests of an in-memory data grid platform should run a sample microservice implemented on top of the in-memory data grid. The microservice should run in real containers, with real communication endpoints and databases. The tests are performed by feeding the microservice with input messages, and validating its output messages through communication endpoints._
 - **End-to-end (e2e) tests**: running a whole sample application including microservices and UI apps, testing it through UI automation. E2e tests differ from sytstem tests in that the system is tested through user interface. 
   - _Example: UI platform should be tested by running a sample application in a real UI environment (e.g. on a mobile device), with real microservice containers and databases. The tests are performed by automation of UI inputs and validation of UI outputs_. 
+
+We attempt to achieve 100% coverage. To account for corner cases that cannot be reliably tested in an automated way, we define the minimum of 80% coverage as the requirement. Automated testing is a vital part of NWheels project. 
 
 Note: additional kinds of tests include stress/load testing, penetration testing, etc. They are not part of the TDD methodology. Development and maintenance of such tests is tracked by separate task issues. 
 
@@ -307,7 +313,7 @@ Single-project convention is preferred when multiple projects separated by test 
   - use least possible visibility for types and members 
 - Beware of performance. Avoid performance killers (e.g. Reflection), especially in performance-sensitive parts of code
   - Performance-sensitive parts are those standing on execution paths counted towards system throughput (e.g. request handling pipeline in a web server).
-- Cover production code with tests. Coverage of at least 80% is reuqired. 
+- Cover production code with tests. Coverage of at least 80% is required. 
 
 ### C# coding style
 
