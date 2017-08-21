@@ -1,6 +1,6 @@
-Linux|Windows|Coverage
+Linux|Windows|Coverage `master`
 -----|-------|--------
-TBD|[![Build status](https://ci.appveyor.com/api/projects/status/qcm23727dm8dplk5/branch/master?svg=true)](https://ci.appveyor.com/project/felix-b/nwheels-bk3vs/branch/master)|[![Coverage Status](https://coveralls.io/repos/github/felix-b/NWheels/badge.svg?branch=master)](https://coveralls.io/github/felix-b/NWheels?branch=master)
+TBD|[![Build status](https://ci.appveyor.com/api/projects/status/qcm23727dm8dplk5/branch/master?svg=true)](https://ci.appveyor.com/project/felix-b/nwheels-bk3vs/branch/master)|[![codecov](https://codecov.io/gh/felix-b/NWheels/graph/badge.svg)](https://codecov.io/gh/felix-b/NWheels)
 
 Welcome to NWheels
 =======
