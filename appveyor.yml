@@ -35,9 +35,9 @@ after_test:
 - cmd: >-
     cd c:\projects\NWheels\Source2
 
-    echo Version=$Env:APPVEYOR_BUILD_VERSION
+    echo %APPVEYOR_BUILD_VERSION%
     
-    dotnet pack -c Release -p:Version=$Env:APPVEYOR_BUILD_VERSION
+    dotnet pack -c Release -p:Version=%APPVEYOR_BUILD_VERSION%
     
 ## Pause build until file from desktop will be removed
 #on_finish:
