@@ -179,3 +179,6 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+
+# Visual Studio caches
+Source2/.vs/NWheels/v15/sqlite3/*
