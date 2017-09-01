@@ -3,13 +3,33 @@
 #  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 version: 0.1.0-0.dev.{build}
+
 branches:
   only:
   - master
+
 image: Visual Studio 2017
 
 clone_folder: c:\projects\NWheels
-  
+
+assembly_info:
+  patch: true
+  file: AssemblyInfo.*
+  assembly_version: "0.1.0.{build}"
+  assembly_file_version: "0.1.0.{build}"
+  assembly_informational_version: "{version}"
+
+dotnet_csproj:
+  patch: true
+  file: "**\*.csproj"
+  version: "0.1.0.{build}"
+  package_version: "{version}"
+
+nuget:
+  account_feed: true
+  project_feed: true
+  disable_publish_on_pr: false
+
 before_build:
 - cmd: >-
     cd c:\projects\NWheels\Source2
@@ -17,9 +37,6 @@ before_build:
     dotnet --version
 
     dotnet restore
-build_script:
-- cmd: >-
-    dotnet build -c Release 
 
 test_script:
 - cmd: >-
@@ -31,22 +48,6 @@ test_script:
 
     dotnet test NWheels.MetaObjects.UnitTests    
 
-after_test:
-- cmd: >-
-    cd c:\projects\NWheels\Source2
-
-    echo %APPVEYOR_BUILD_VERSION%
-    
-    dotnet pack -c Release -p:Version=%APPVEYOR_BUILD_VERSION%
-
-on_success:
-- cmd: >-
-    appveyor PushArtifact NWheels.Kernel\bin\Release\NWheels.Kernel.%APPVEYOR_BUILD_VERSION%.nupkg
-    
-    appveyor PushArtifact NWheels.Compilation\bin\Release\NWheels.Compilation.%APPVEYOR_BUILD_VERSION%.nupkg
-    
-    appveyor PushArtifact NWheels.MetaObjects\bin\Release\NWheels.MetaObjects.%APPVEYOR_BUILD_VERSION%.nupkg
-    
 ## Pause build until file from desktop will be removed
 #on_finish:
 #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))    

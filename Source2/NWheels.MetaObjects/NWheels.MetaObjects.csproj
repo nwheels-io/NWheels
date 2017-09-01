@@ -13,9 +13,4 @@
     <ProjectReference Include="..\NWheels.Compilation\NWheels.Compilation.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NWheels.Kernel" Version="1.0.0" />
-    <PackageReference Include="NWheels.Compilation" Version="1.0.0" />
-  </ItemGroup>
-
 </Project>
