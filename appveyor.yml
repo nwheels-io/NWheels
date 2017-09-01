@@ -26,8 +26,6 @@ dotnet_csproj:
   package_version: "{version}"
 
 nuget:
-  account_feed: true
-  project_feed: true
   disable_publish_on_pr: false
 
 before_build:
@@ -37,6 +35,11 @@ before_build:
     dotnet --version
 
     dotnet restore
+
+build:
+  parallel: true
+  project: Source2\NWheels.sln
+  publish_nuget: true
 
 test_script:
 - cmd: >-
