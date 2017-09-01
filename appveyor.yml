@@ -25,7 +25,11 @@ test_script:
 - cmd: >-
     cd c:\projects\NWheels\Source2
     
-    dotnet test
+    dotnet test NWheels.Kernel.UnitTests
+    
+    dotnet test NWheels.Compilation.UnitTests    
+
+    dotnet test NWheels.MetaObjects.UnitTests    
 
 after_test:
 - cmd: >-
