@@ -39,7 +39,7 @@ after_test:
     
     dotnet pack -c Release -p:Version=%APPVEYOR_BUILD_VERSION%
 
-on_succeess:
+on_success:
 - cmd: >-
     appveyor PushArtifact NWheels.Kernel\bin\Release\NWheels.Kernel.%APPVEYOR_BUILD_VERSION%.nupkg
     
