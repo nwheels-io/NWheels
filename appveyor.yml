@@ -38,6 +38,14 @@ after_test:
     echo %APPVEYOR_BUILD_VERSION%
     
     dotnet pack -c Release -p:Version=%APPVEYOR_BUILD_VERSION%
+
+on_succeess:
+- cmd: >-
+    appveyor PushArtifact NWheels.Kernel\bin\Release\NWheels.Kernel.%APPVEYOR_BUILD_VERSION%.nupkg
+    
+    appveyor PushArtifact NWheels.Compilation\bin\Release\NWheels.Compilation.%APPVEYOR_BUILD_VERSION%.nupkg
+    
+    appveyor PushArtifact NWheels.MetaObjects\bin\Release\NWheels.MetaObjects.%APPVEYOR_BUILD_VERSION%.nupkg
     
 ## Pause build until file from desktop will be removed
 #on_finish:
