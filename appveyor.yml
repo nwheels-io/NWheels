@@ -12,22 +12,6 @@ image: Visual Studio 2017
 
 clone_folder: c:\projects\NWheels
 
-assembly_info:
-  patch: true
-  file: AssemblyInfo.*
-  assembly_version: "0.1.0.{build}"
-  assembly_file_version: "0.1.0.{build}"
-  assembly_informational_version: "{version}"
-
-dotnet_csproj:
-  patch: true
-  file: '**\*.csproj'
-  version: "0.1.0.{build}"
-  package_version: "{version}"
-
-nuget:
-  disable_publish_on_pr: false
-
 before_build:
 - cmd: >-
     cd c:\projects\NWheels\Source2
@@ -36,11 +20,10 @@ before_build:
 
     dotnet restore
 
-build:
-  parallel: true
-  project: Source2\NWheels.sln
-  publish_nuget: true
-
+build_script:
+- cmd: >-
+    dotnet build -c Release -p:Version=0.1.0.%APPVEYOR_BUILD_NUMBER%
+    
 test_script:
 - cmd: >-
     cd c:\projects\NWheels\Source2
@@ -51,6 +34,22 @@ test_script:
 
     dotnet test NWheels.MetaObjects.UnitTests    
 
+after_test:
+- cmd: >-
+    cd c:\projects\NWheels\Source2
+
+    echo %APPVEYOR_BUILD_VERSION%
+    
+    dotnet pack -c Release --no-build -p:Version=%APPVEYOR_BUILD_VERSION% -p:Authors="felix-b" -p:Copyright="Copyright © 2014 Felix Berman and contributors" -p:PackageLicenseUrl="https://github.com/felix-b/NWheels/blob/master/LICENSE" -p:PackageProjectUrl="http://nwheels.io" -p:PackageIconUrl="https://github.com/felix-b/NWheels/raw/master/Docs/Images/logo-132.png"
+
+on_success:
+- cmd: >-
+    appveyor PushArtifact NWheels.Kernel\bin\Release\NWheels.Kernel.%APPVEYOR_BUILD_VERSION%.nupkg
+    
+    appveyor PushArtifact NWheels.Compilation\bin\Release\NWheels.Compilation.%APPVEYOR_BUILD_VERSION%.nupkg
+    
+    appveyor PushArtifact NWheels.MetaObjects\bin\Release\NWheels.MetaObjects.%APPVEYOR_BUILD_VERSION%.nupkg
+    
 ## Pause build until file from desktop will be removed
 #on_finish:
-#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))    
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
