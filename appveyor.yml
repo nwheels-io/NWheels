@@ -32,7 +32,7 @@ build_script:
 
     echo --333-- $build_version_prefix
     
-    $assembly_build_version "$build_version_prefix.$env:APPVEYOR_BUILD_NUMBER"
+    $assembly_build_version = "$build_version_prefix.$env:APPVEYOR_BUILD_NUMBER"
     
     echo --444-- "Assembly build version: $assembly_build_version"
     
