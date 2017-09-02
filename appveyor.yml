@@ -22,17 +22,17 @@ before_build:
 
 build_script:
 - ps: >-
-    echo --111-- $APPVEYOR_BUILD_VERSION
+    echo --111-- $env:APPVEYOR_BUILD_VERSION
 
-    $version_prefix_match = $APPVEYOR_BUILD_VERSION -match '(\d+)\.(\d+)\.(\d+)'
+    $version_prefix_match = $env:APPVEYOR_BUILD_VERSION -match '(\d+)\.(\d+)\.(\d+)'
 
     echo --222-- $version_prefix_match
 
-    set build_version_prefix $matches[0]
+    $build_version_prefix = $matches[0]
 
     echo --333-- $build_version_prefix
     
-    set assembly_build_version "$build_version_prefix.$APPVEYOR_BUILD_NUMBER"
+    $assembly_build_version "$build_version_prefix.$env:APPVEYOR_BUILD_NUMBER"
     
     echo --444-- "Assembly build version: $assembly_build_version"
     
