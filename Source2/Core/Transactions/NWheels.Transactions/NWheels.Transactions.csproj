@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>
+      This package is part of NWheels, a super productive full-stack development platform.
+      The package contributes: transaction programming model (unit of work, commit, change set, 2-phase commit, transaction resource).
+    </Description>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Kernel\NWheels.Kernel\NWheels.Kernel.csproj" />
+    <ProjectReference Include="..\..\Logging\NWheels.Logging\NWheels.Logging.csproj" />
+  </ItemGroup>
+
+</Project>
