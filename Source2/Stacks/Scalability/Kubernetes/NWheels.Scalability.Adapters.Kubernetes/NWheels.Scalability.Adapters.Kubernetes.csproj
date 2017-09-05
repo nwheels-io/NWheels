@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>
+      This package is part of NWheels, a super productive full-stack development platform.
+      The package contributes: adapter of scalability and high availability deployment port to Kubernetes.
+    </Description>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Core\Kernel\NWheels.Kernel\NWheels.Kernel.csproj" />
+    <ProjectReference Include="..\..\..\..\Core\Microservices\NWheels.Microservices\NWheels.Microservices.csproj" />
+    <ProjectReference Include="..\..\..\..\Core\Logging\NWheels.Logging\NWheels.Logging.csproj" />
+    <ProjectReference Include="..\..\..\..\Core\Configuration\NWheels.Configuration\NWheels.Configuration.csproj" />
+    <ProjectReference Include="..\..\..\..\Core\Scalability\NWheels.Scalability\NWheels.Scalability.csproj" />
+  </ItemGroup>
+
+</Project>

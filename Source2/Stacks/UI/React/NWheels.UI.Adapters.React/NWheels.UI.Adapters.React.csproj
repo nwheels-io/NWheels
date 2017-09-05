@@ -22,4 +22,8 @@
     <ProjectReference Include="..\..\..\..\Core\UI\NWheels.UI\NWheels.UI.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ClientSide\" />
+  </ItemGroup>
+
 </Project>
