@@ -39,24 +39,34 @@ test_script:
 - ps: >-
     cd c:\projects\NWheels\Source2
     
+    $testRunStatus = "OK"
+    
     Get-ChildItem -Directory -Recurse -Include *.UnitTests,*.Tests | Foreach {
         echo --- "Running unit tests: project" $_.fullName ---; 
-        dotnet test $_.fullname --no-build --no-restore -с Release --filter Purpose=UnitTest
+        dotnet test $_.fullname --no-build --no-restore -c Release --filter Purpose=UnitTest;
+        if ($LastExitCode -ne 0) { $testRunStatus = "FAIL" }
     }
 
     Get-ChildItem -Directory -Recurse -Include *.IntegrationTests,*.Tests | Foreach {
         echo --- "Running integration tests: project" $_.fullName ---; 
-        dotnet test $_.fullname --no-build --no-restore -с Release --filter Purpose=IntegrationTest
+        dotnet test $_.fullname --no-build --no-restore -c Release --filter Purpose=IntegrationTest
+        if ($LastExitCode -ne 0) { $testRunStatus = "FAIL" }
     }
 
     Get-ChildItem -Directory -Recurse -Include *.SystemApiTests,*.Tests | Foreach {
         echo --- "Running system API tests: project" $_.fullName ---; 
-        dotnet test $_.fullname --no-build --no-restore -с Release --filter Purpose=SystemApiTest
+        dotnet test $_.fullname --no-build --no-restore -c Release --filter Purpose=SystemApiTest
+        if ($LastExitCode -ne 0) { $testRunStatus = "FAIL" }
     }
 
     Get-ChildItem -Directory -Recurse -Include *.SystemUITests,*.Tests | Foreach {
         echo --- "Running system UI tests: project" $_.fullName ---; 
-        dotnet test $_.fullname --no-build --no-restore -с Release --filter Purpose=SystemUITest
+        dotnet test $_.fullname --no-build --no-restore -c Release --filter Purpose=SystemUITest
+        if ($LastExitCode -ne 0) { $testRunStatus = "FAIL" }
+    }
+
+    if ($testRunStatus -ne "OK") {
+        throw "Test were not successfully passed"
     }
 
 after_test:
