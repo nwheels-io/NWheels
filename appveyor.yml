@@ -39,7 +39,13 @@ test_script:
 - ps: >-
     cd c:\projects\NWheels\Source2
     
-    Get-ChildItem -Directory -Recurse -Include *.UnitTests | Foreach {echo --- "Running test project" $_.fullName ---; dotnet test $_.fullname}
+    Get-ChildItem -Directory -Recurse -Include *.UnitTests,*.Tests | Foreach {echo --- "Running unit tests: project" $_.fullName ---; dotnet test $_.fullname --no-build --no-restore --filter Purpose=UnitTest}
+
+    Get-ChildItem -Directory -Recurse -Include *.IntegrationTests,*.Tests | Foreach {echo --- "Running integration tests: project" $_.fullName ---; dotnet test $_.fullname --no-build --no-restore --filter Purpose=IntegrationTest}
+
+    Get-ChildItem -Directory -Recurse -Include *.SystemApiTests,*.Tests | Foreach {echo --- "Running system API tests: project" $_.fullName ---; dotnet test $_.fullname --no-build --no-restore --filter Purpose=SystemApiTest}
+
+    Get-ChildItem -Directory -Recurse -Include *.SystemUITests,*.Tests | Foreach {echo --- "Running system UI tests: project" $_.fullName ---; dotnet test $_.fullname --no-build --no-restore --filter Purpose=SystemUITest}
 
 after_test:
 - cmd: >-

@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NWheels.Kernel\NWheels.Kernel.csproj" />
+    <ProjectReference Include="..\..\Testability\NWheels.Testability\NWheels.Testability.csproj" />
   </ItemGroup>
 
 </Project>
