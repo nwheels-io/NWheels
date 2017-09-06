@@ -1,10 +1,11 @@
 using FluentAssertions;
+using NWheels.Testability;
 using System;
 using Xunit;
 
 namespace NWheels.Logging.UnitTests
 {
-    public class ClassFromLoggingTests
+    public class ClassFromLoggingTests : TestBase.UnitTest
     {
         [Fact]
         public void TestL()

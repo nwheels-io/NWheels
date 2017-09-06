@@ -20,6 +20,7 @@
     <ProjectReference Include="..\..\Kernel\NWheels.Kernel\NWheels.Kernel.csproj" />
     <ProjectReference Include="..\..\Compilation\NWheels.Compilation\NWheels.Compilation.csproj" />
     <ProjectReference Include="..\..\MetaObjects\NWheels.MetaObjects\NWheels.MetaObjects.csproj" />
+    <ProjectReference Include="..\..\Testability\NWheels.Testability\NWheels.Testability.csproj" />
     <ProjectReference Include="..\NWheels.RestApi\NWheels.RestApi.csproj" />
   </ItemGroup>
 

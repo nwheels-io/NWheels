@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using NWheels.Samples.HelloWorld.HelloService;
+using NWheels.Testability;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +10,7 @@ using Xunit;
 
 namespace NWheels.Samples.HelloWorld.Tests.Unit
 {
-    public class ClassFromHelloServiceTests
+    public class ClassFromHelloServiceTests : TestBase.UnitTest
     {
         [Fact]
         public void TestH()

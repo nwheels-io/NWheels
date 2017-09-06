@@ -18,13 +18,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Core\Microservices\NWheels.Microservices\NWheels.Microservices.csproj" />
+    <ProjectReference Include="..\..\..\Core\Testability\NWheels.Testability\NWheels.Testability.csproj" />
     <ProjectReference Include="..\NWheels.Samples.HelloWorld.HelloService\NWheels.Samples.HelloWorld.HelloService.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Integration\" />
     <Folder Include="Unit\" />
-    <Folder Include="API\" />
-    <Folder Include="UI\" />
+    <Folder Include="SystemApi\" />
+    <Folder Include="SystemUI\" />
   </ItemGroup>
 
 </Project>

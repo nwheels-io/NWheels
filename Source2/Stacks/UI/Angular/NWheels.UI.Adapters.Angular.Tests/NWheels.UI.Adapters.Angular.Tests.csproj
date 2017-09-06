@@ -24,7 +24,14 @@
     <ProjectReference Include="..\..\..\..\Core\Logging\NWheels.Logging\NWheels.Logging.csproj" />
     <ProjectReference Include="..\..\..\..\Core\Configuration\NWheels.Configuration\NWheels.Configuration.csproj" />
     <ProjectReference Include="..\..\..\..\Core\UI\NWheels.UI\NWheels.UI.csproj" />
+    <ProjectReference Include="..\..\..\..\Core\Testability\NWheels.Testability\NWheels.Testability.csproj" />
     <ProjectReference Include="..\NWheels.UI.Adapters.Angular\NWheels.UI.Adapters.Angular.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Integration\" />
+    <Folder Include="SystemApi\" />
+    <Folder Include="SystemUI\" />
   </ItemGroup>
 
 </Project>

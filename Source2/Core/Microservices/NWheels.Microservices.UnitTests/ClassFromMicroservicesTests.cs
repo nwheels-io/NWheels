@@ -1,10 +1,11 @@
 using FluentAssertions;
+using NWheels.Testability;
 using System;
 using Xunit;
 
 namespace NWheels.Microservices.UnitTests
 {
-    public class ClassFromMicroservicesTests
+    public class ClassFromMicroservicesTests : TestBase.UnitTest
     {
         [Fact]
         public void TestM()

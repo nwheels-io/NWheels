@@ -21,6 +21,7 @@
     <ProjectReference Include="..\..\Logging\NWheels.Logging\NWheels.Logging.csproj" />
     <ProjectReference Include="..\..\Configuration\NWheels.Configuration\NWheels.Configuration.csproj" />
     <ProjectReference Include="..\..\Transactions\NWheels.Transactions\NWheels.Transactions.csproj" />
+    <ProjectReference Include="..\..\Testability\NWheels.Testability\NWheels.Testability.csproj" />
     <ProjectReference Include="..\NWheels.Scalability\NWheels.Scalability.csproj" />
   </ItemGroup>
 

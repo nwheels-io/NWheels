@@ -23,6 +23,7 @@
     <ProjectReference Include="..\..\..\Core\Configuration\NWheels.Configuration\NWheels.Configuration.csproj" />
     <ProjectReference Include="..\..\..\Core\Ddd\NWheels.Ddd\NWheels.Ddd.csproj" />
     <ProjectReference Include="..\..\..\Core\UI\NWheels.UI\NWheels.UI.csproj" />
+    <ProjectReference Include="..\..\..\Core\Testability\NWheels.Testability\NWheels.Testability.csproj" />
     <ProjectReference Include="..\NWheels.Domains.Crm\NWheels.Domains.Crm.csproj" />
   </ItemGroup>
 

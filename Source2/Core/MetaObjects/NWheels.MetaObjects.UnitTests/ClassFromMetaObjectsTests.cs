@@ -1,10 +1,11 @@
 using FluentAssertions;
+using NWheels.Testability;
 using System;
 using Xunit;
 
 namespace NWheels.MetaObjects.UnitTests
 {
-    public class ClassFromMetaObjectsTests
+    public class ClassFromMetaObjectsTests : TestBase.UnitTest
     {
         [Fact]
         public void TestMC()

@@ -1,10 +1,11 @@
 using FluentAssertions;
+using NWheels.Testability;
 using System;
 using Xunit;
 
 namespace NWheels.Compilation.UnitTests
 {
-    public class ClassFromCompilationTests
+    public class ClassFromCompilationTests : TestBase.UnitTest
     {
         [Fact]
         public void TestC()

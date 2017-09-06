@@ -1,10 +1,11 @@
 using FluentAssertions;
+using NWheels.Testability;
 using System;
 using Xunit;
 
 namespace NWheels.Communication.UnitTests
 {
-    public class ClassFromCommunicationTests
+    public class ClassFromCommunicationTests : TestBase.UnitTest
     {
         [Fact]
         public void TestMC()

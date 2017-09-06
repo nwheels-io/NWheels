@@ -19,7 +19,14 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Core\Kernel\NWheels.Kernel\NWheels.Kernel.csproj" />
     <ProjectReference Include="..\..\..\..\Core\Compilation\NWheels.Compilation\NWheels.Compilation.csproj" />
+    <ProjectReference Include="..\..\..\..\Core\Testability\NWheels.Testability\NWheels.Testability.csproj" />
     <ProjectReference Include="..\NWheels.Compilation.Adapters.Roslyn\NWheels.Compilation.Adapters.Roslyn.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Integration\" />
+    <Folder Include="SystemApi\" />
+    <Folder Include="SystemUI\" />
   </ItemGroup>
 
 </Project>
