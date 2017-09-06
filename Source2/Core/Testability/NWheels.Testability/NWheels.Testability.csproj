@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>
+      This package is part of NWheels, a super productive full-stack development platform.
+      The package contributes: testing helpers for all parts of the framework. 
+      Only test projects should depend on this package - not production ones.
+    </Description>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="FluentAssertions" Version="4.19.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Kernel\NWheels.Kernel\NWheels.Kernel.csproj" />
+    <ProjectReference Include="..\..\MetaObjects\NWheels.MetaObjects\NWheels.MetaObjects.csproj" />
+    <ProjectReference Include="..\..\Compilation\NWheels.Compilation\NWheels.Compilation.csproj" />
+    <ProjectReference Include="..\..\Microservices\NWheels.Microservices\NWheels.Microservices.csproj" />
+    <ProjectReference Include="..\..\Logging\NWheels.Logging\NWheels.Logging.csproj" />
+    <ProjectReference Include="..\..\Configuration\NWheels.Configuration\NWheels.Configuration.csproj" />
+    <ProjectReference Include="..\..\Transactions\NWheels.Transactions\NWheels.Transactions.csproj" />
+    <ProjectReference Include="..\..\DB\NWheels.DB\NWheels.DB.csproj" />
+    <ProjectReference Include="..\..\Ddd\NWheels.Ddd\NWheels.Ddd.csproj" />
+    <ProjectReference Include="..\..\Communication\NWheels.Communication\NWheels.Communication.csproj" />
+    <ProjectReference Include="..\..\RestApi\NWheels.RestApi\NWheels.RestApi.csproj" />
+    <ProjectReference Include="..\..\UI\NWheels.UI\NWheels.UI.csproj" />
+    <ProjectReference Include="..\..\Scalability\NWheels.Scalability\NWheels.Scalability.csproj" />
+  </ItemGroup>
+
+</Project>

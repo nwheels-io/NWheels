@@ -22,9 +22,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="UITests\" />
-    <Folder Include="SystemTests\" />
-    <Folder Include="UnitTests\" />
+    <Folder Include="Unit\" />
+    <Folder Include="API\" />
+    <Folder Include="UI\" />
   </ItemGroup>
 
 </Project>
