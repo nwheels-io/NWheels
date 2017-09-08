@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>
+      This package is part of NWheels, a super productive full-stack development platform.
+      The package implements programming models and APIs defined by NWheels.Communication package.
+      This package shouldn't be directly consumed by application projects. 
+    </Description>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RootNamespace>NWheels.Communication</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Kernel\NWheels.Kernel\NWheels.Kernel.csproj" />
+    <ProjectReference Include="..\..\Compilation\NWheels.Compilation\NWheels.Compilation.csproj" />
+    <ProjectReference Include="..\..\MetaObjects\NWheels.MetaObjects\NWheels.MetaObjects.csproj" />
+    <ProjectReference Include="..\..\Microservices\NWheels.Microservices\NWheels.Microservices.csproj" />
+    <ProjectReference Include="..\..\Logging\NWheels.Logging\NWheels.Logging.csproj" />
+    <ProjectReference Include="..\..\Configuration\NWheels.Configuration\NWheels.Configuration.csproj" />
+    <ProjectReference Include="..\NWheels.Communication\NWheels.Communication.csproj" />
+  </ItemGroup>
+
+</Project>

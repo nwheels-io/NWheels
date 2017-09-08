@@ -1,5 +1,4 @@
 ﻿using NWheels.Compilation;
-using NWheels.Kernel;
 using System;
 
 namespace NWheels.MetaObjects
@@ -8,8 +7,7 @@ namespace NWheels.MetaObjects
     {
         public string MK()
         {
-            var k = new ClassFromKernel();
-            return "MMM" + k.K();
+            return "MMMKKK";
         }
 
         public string MC()

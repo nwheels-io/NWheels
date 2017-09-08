@@ -1,5 +1,4 @@
-﻿using NWheels.Kernel;
-using System;
+﻿using System;
 
 namespace NWheels.Compilation
 {
@@ -7,8 +6,7 @@ namespace NWheels.Compilation
     {
         public string C()
         {
-            var k = new ClassFromKernel();
-            return k.K() + "CCC";
+            return "KKKCCC";
         }
     }
 }
