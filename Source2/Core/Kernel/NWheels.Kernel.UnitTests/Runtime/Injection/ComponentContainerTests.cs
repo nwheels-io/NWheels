@@ -3,10 +3,11 @@ using NWheels.Injection;
 using NWheels.Runtime.Injection;
 using Xunit;
 using FluentAssertions;
+using NWheels.Testability;
 
 namespace NWheels.Kernel.UnitTests.Runtime.Injection
 {
-    public class ComponentContainerTests
+    public class ComponentContainerTests : TestBase.UnitTest
     {
         [Fact]
         public void CanResolveAll()
