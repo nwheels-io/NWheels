@@ -12,6 +12,10 @@ image: Visual Studio 2017
 
 clone_folder: c:\projects\NWheels
 
+install:
+- cmd: nuget install OpenCover -Version 4.6.519 -OutputDirectory c:\projects\NWheels\Tools
+- cmd: choco install codecov
+
 nuget:
   project_feed: true
 
@@ -43,7 +47,7 @@ test_script:
     
     Get-ChildItem -Directory -Recurse -Include *.UnitTests,*.IntegrationTests,*.SystemApiTests,*.SystemUITests,*.Tests | Foreach {
         echo --- "Running test project" $_.fullName ---; 
-        dotnet test $_.fullname --no-build --no-restore -c Release --filter "(Purpose!=ManualTest)&(Purpose!=StressLoadTest)";
+        c:\projects\NWheels\Tools\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:"dotnet.exe" -targetargs:"test $_.fullname --no-build --no-restore -c Release --filter '(Purpose!=ManualTest)&(Purpose!=StressLoadTest)'" -register:user -output:c:\projects\NWheels\Tools\CoverageResults.xml -oldStyle -filter:"+[*]* -[*FluentAssertions*]* -[*]*UnitTests" -mergeoutput        
         if ($LastExitCode -ne 0) { $testRunStatus = "FAIL" }
     }
 
@@ -53,6 +57,10 @@ test_script:
 
 after_test:
 - cmd: >-
+    cd c:\projects\NWheels
+
+    codecov -f "c:\projects\NWheels\Tools\CoverageResults.xml"
+    
     cd c:\projects\NWheels\Source2
 
     echo %APPVEYOR_BUILD_VERSION%
