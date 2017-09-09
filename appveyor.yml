@@ -37,6 +37,8 @@ build_script:
     
     echo "Assembly build version: $assembly_build_version"
     
+    dotnet build -c Debug -p:Version=$assembly_build_version
+
     dotnet build -c Release -p:Version=$assembly_build_version
     
 test_script:
