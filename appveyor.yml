@@ -44,14 +44,11 @@ test_script:
     cd c:\projects\NWheels\Source2
     
     $testRunStatus = "OK"
-    
-    Get-ChildItem -Directory -Recurse -Include *.UnitTests,*.IntegrationTests,*.SystemApiTests,*.SystemUITests,*.Tests | Foreach {
-        echo --- ""Running test project"" $_.fullName ---; 
-        
-        $dotnetTestArgs = "dotnet test $_.fullname --no-build --no-restore -c Release --filter " + '"(Purpose!=ManualTest)&(Purpose!=StressLoadTest)"';
-        $openCoverArgs = '-target:dotnet.exe -targetargs:"' + $dotnetTestArgs + '"';
-        & c:\projects\NWheels\Tools\OpenCover.4.6.519\tools\OpenCover.Console.exe $openCoverArgs
 
+    Get-ChildItem -Directory -Recurse -Include *.UnitTests,*.IntegrationTests,*.SystemApiTests,*.SystemUITests,*.Tests | Foreach { 
+        echo --- "Running test project" $_.fullName ---;     
+        $dotnetArgs = '"-targetargs:test ' + $_.fullname + ' --no-build --no-restore -c Debug --filter ""(Purpose!=ManualTest)&(Purpose!=StressLoadTest)"""';
+        c:\projects\NWheels\Tools\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:dotnet.exe $dotnetArgs -oldStyle -register:user -filter:"+[NWheels.*]* -[*.*Tests]*"
         if ($LastExitCode -ne 0) { $testRunStatus = "FAIL" }
     }
 

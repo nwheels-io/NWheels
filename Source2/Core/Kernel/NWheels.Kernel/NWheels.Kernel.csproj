@@ -14,9 +14,15 @@
     <RootNamespace>NWheels</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DebugType>Full</DebugType>
+    <DebugSymbols>True</DebugSymbols>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.6.1" />
   </ItemGroup>
+  
   <ItemGroup>
     <Folder Include="Generators\" />
   </ItemGroup>
