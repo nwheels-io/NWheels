@@ -50,7 +50,7 @@ test_script:
     Get-ChildItem -Directory -Recurse -Include *.UnitTests,*.IntegrationTests,*.SystemApiTests,*.SystemUITests,*.Tests | Foreach { 
         echo --- "Running test project" $_.fullName ---;     
         $dotnetArgs = '"-targetargs:test ' + $_.fullname + ' --no-build --no-restore -c Debug --filter ""(Purpose!=ManualTest)&(Purpose!=StressLoadTest)"""';
-        c:\projects\NWheels\Tools\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:dotnet.exe $dotnetArgs -oldStyle -register:user -filter:"+[NWheels.*]* -[*.*Tests]*"
+        c:\projects\NWheels\Tools\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:dotnet.exe $dotnetArgs -oldStyle -register:user -filter:"+[NWheels.*]* -[*.*Tests]*" -output:c:\projects\NWheels\Source2\CoverageResults.xml -mergeoutput
         if ($LastExitCode -ne 0) { $testRunStatus = "FAIL" }
     }
 
@@ -62,7 +62,7 @@ after_test:
 - cmd: >-
     cd c:\projects\NWheels
 
-    codecov -f "c:\projects\NWheels\Tools\CoverageResults.xml"
+    codecov -f "c:\projects\NWheels\Source2\CoverageResults.xml"
     
     cd c:\projects\NWheels\Source2
 
