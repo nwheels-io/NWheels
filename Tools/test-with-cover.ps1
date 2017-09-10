@@ -1,15 +1,28 @@
-$scriptpath = $MyInvocation.MyCommand.Path
-$dir = Split-Path $scriptpath
-Write-host "My directory is $dir"
+param (
+    [string]$subFolder = ""
+)
 
-Set-Location $dir\..\Source2
+$scriptPath = $MyInvocation.MyCommand.Path
+$scriptDir = Split-Path $scriptPath
+Write-host "Script directory is $scriptDir"
+
+$topDir = "$scriptDir\..\Source2";
+
+If ($subFolder) {
+    $topDir = "$topDir\$subFolder";
+}
+
+Write-host "Top test directory is $topDir"
 
 $testRunStatus = "OK"
 
-Get-ChildItem -Directory -Recurse -Include *.UnitTests,*.IntegrationTests,*.SystemApiTests,*.SystemUITests,*.Tests | Foreach { 
+Remove-Item -Recurse -Force $topDir\TestResults
+New-Item -ItemType Directory -Force -Path $topDir\TestResults | Out-Null
+
+Get-ChildItem -Path $topDir -Directory -Recurse -Include *.UnitTests,*.IntegrationTests,*.SystemApiTests,*.SystemUITests,*.Tests | Foreach { 
     echo --- "Running test project" $_.fullName ---;     
     $dotnetArgs = '"-targetargs:test ' + $_.fullname + ' --no-build --no-restore -c Debug --filter ""(Purpose!=ManualTest)&(Purpose!=StressLoadTest)"""';
-    ..\Tools\Installed\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:dotnet.exe $dotnetArgs -oldStyle -register:user -filter:"+[NWheels.*]* -[*.*Tests]*" -output:$dir\TestResults\CoverageResults.xml -mergeoutput
+    & $scriptDir\Installed\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:dotnet.exe $dotnetArgs -oldStyle -register:user -filter:"+[NWheels.*]* -[*.*Tests]*" -output:$topDir\TestResults\CoverageResults.xml -mergeoutput
     if ($LastExitCode -ne 0) { $testRunStatus = "FAIL" }
 }
 
@@ -17,6 +30,6 @@ if ($testRunStatus -ne "OK") {
     throw "Some test runs FAILED"
 }
 
-..\Tools\Installed\ReportGenerator.2.5.11\tools\ReportGenerator.exe -reports:$dir\TestResults\CoverageResults.xml -targetdir:$dir\TestResults\CoverageReport
+& "$scriptDir\Installed\ReportGenerator.2.5.11\tools\ReportGenerator.exe" -reports:$topDir\TestResults\CoverageResults.xml -targetdir:$topDir\TestResults\CoverageReport
 
-Invoke-Item $dir\TestResults\CoverageReport\index.html
+Invoke-Item $topDir\TestResults\CoverageReport\index.htm
