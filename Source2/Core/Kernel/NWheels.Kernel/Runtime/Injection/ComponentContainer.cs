@@ -88,10 +88,12 @@ namespace NWheels.Runtime.Injection
         public IEnumerable<Type> GetAllServiceTypes(Type baseType)
         {
             return _container
-                .ComponentRegistry.RegistrationsFor(new TypedService(baseType))
+                .ComponentRegistry
+                .Registrations
                 .SelectMany(r => r.Services)
                 .OfType<IServiceWithType>()
                 .Select(s => s.ServiceType)
+                .Where(type => baseType.IsAssignableFrom(type))
                 .Distinct();
         }
 

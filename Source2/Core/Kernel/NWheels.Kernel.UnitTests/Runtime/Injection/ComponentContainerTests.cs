@@ -35,6 +35,31 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void CanResolveAll_NonGeneric()
+        {
+            //-- arrange
+
+            var builder = new ComponentContainerBuilder();
+
+            builder.RegisterComponentType<ComponentA>().ForService<IAnyComponent>();
+            builder.RegisterComponentType<ComponentB>().ForService<IAnyComponent>();
+
+            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+
+            //-- act
+
+            var resolved = containerUnderTest.ResolveAll(typeof(IAnyComponent)).ToArray();
+
+            //-- assert
+
+            resolved.Length.Should().Be(2);
+            resolved.OfType<ComponentA>().Count().Should().Be(1);
+            resolved.OfType<ComponentB>().Count().Should().Be(1);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void CanResolveSelf()
         {
             //-- arrange
@@ -110,21 +135,20 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void CanRegisterComponentForTwoServices()
+        public void CanResolveComponent_NonGeneric()
         {
             //-- arrange
 
             var builder = new ComponentContainerBuilder();
-            builder.RegisterComponentType<ComponentA>().ForServices<IServiceA, IAnyComponent>();
-            builder.RegisterComponentType<ComponentB>().ForServices<IServiceB, IAnyComponent>();
+            builder.RegisterComponentType<ComponentA>().ForService<IServiceA>();
+            builder.RegisterComponentType<ComponentB>().ForService<IServiceB>();
 
             var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
 
             //-- act
 
-            var resolvedA = containerUnderTest.Resolve<IServiceA>();
-            var resolvedB = containerUnderTest.Resolve<IServiceB>();
-            var resolvedAny = containerUnderTest.ResolveAll<IAnyComponent>().ToArray();
+            var resolvedA = containerUnderTest.Resolve(typeof(IServiceA));
+            var resolvedB = containerUnderTest.Resolve(typeof(IServiceB));
 
             //-- assert
 
@@ -133,180 +157,6 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
 
             resolvedB.Should().NotBeNull();
             resolvedB.Should().BeOfType<ComponentB>();
-
-            resolvedAny.Should().NotBeNull();
-            resolvedAny.Select(r => r.GetType()).Should().BeEquivalentTo(typeof(ComponentA), typeof(ComponentB));
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void CanRegisterComponentForThreeServices()
-        {
-            //-- arrange
-
-            var builder = new ComponentContainerBuilder();
-            builder.RegisterComponentType<ComponentA>().ForServices<IServiceA, IAnyComponent>();
-            builder.RegisterComponentType<ComponentB>().ForServices<IServiceB, ISpecialComponent, IAnyComponent>();
-            builder.RegisterComponentType<ComponentC>().ForServices<IServiceC, ISpecialComponent, IAnyComponent>();
-
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
-
-            //-- act
-
-            var resolvedA = containerUnderTest.Resolve<IServiceA>();
-            var resolvedB = containerUnderTest.Resolve<IServiceB>();
-            var resolvedSpecial = containerUnderTest.ResolveAll<ISpecialComponent>().ToArray();
-
-            //-- assert
-
-            resolvedA.Should().NotBeNull();
-            resolvedA.Should().BeOfType<ComponentA>();
-
-            resolvedB.Should().NotBeNull();
-            resolvedB.Should().BeOfType<ComponentB>();
-
-            resolvedSpecial.Should().NotBeNull();
-            resolvedSpecial.Select(r => r.GetType()).Should().BeEquivalentTo(typeof(ComponentB), typeof(ComponentC));
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void CanRegisterComponentForMultipleServices_NonGeneric()
-        {
-            //-- arrange
-
-            var builder = new ComponentContainerBuilder();
-            builder.RegisterComponentType<ComponentA>().ForServices(typeof(IServiceA), typeof(IAnyComponent));
-            builder.RegisterComponentType<ComponentB>().ForServices(typeof(IServiceB), typeof(IAnyComponent));
-
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
-
-            //-- act
-
-            var resolvedA = containerUnderTest.Resolve<IServiceA>();
-            var resolvedB = containerUnderTest.Resolve<IServiceB>();
-            var resolvedAny = containerUnderTest.ResolveAll<IAnyComponent>().ToArray();
-
-            //-- assert
-
-            resolvedA.Should().NotBeNull();
-            resolvedA.Should().BeOfType<ComponentA>();
-
-            resolvedB.Should().NotBeNull();
-            resolvedB.Should().BeOfType<ComponentB>();
-
-            resolvedAny.Should().NotBeNull();
-            resolvedAny.Select(r => r.GetType()).Should().BeEquivalentTo(typeof(ComponentA), typeof(ComponentB));
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void CanRegisterComponentType_NonGeneric()
-        {
-            //-- arrange
-
-            var builder = new ComponentContainerBuilder();
-            builder.RegisterComponentType(typeof(ComponentA)).ForService<IServiceA>();
-            builder.RegisterComponentType(typeof(ComponentB)).ForService<IServiceB>();
-
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
-
-            //-- act
-
-            var resolvedA = containerUnderTest.Resolve<IServiceA>();
-            var resolvedB = containerUnderTest.Resolve<IServiceB>();
-
-            //-- assert
-
-            resolvedA.Should().NotBeNull();
-            resolvedA.Should().BeOfType<ComponentA>();
-
-            resolvedB.Should().NotBeNull();
-            resolvedB.Should().BeOfType<ComponentB>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void CanRegisterNamedComponentForTwoServices()
-        {
-            //-- arrange
-
-            var builder = new ComponentContainerBuilder();
-            builder.RegisterComponentType<ComponentB>().NamedForServices<ISpecialComponent, IAnyComponent>("BBB");
-            builder.RegisterComponentType<ComponentC>().NamedForServices<ISpecialComponent, IAnyComponent>("CCC");
-
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
-
-            //-- act
-
-            var resolvedB = containerUnderTest.ResolveNamed<ISpecialComponent>("BBB");
-            var resolvedC = containerUnderTest.ResolveNamed<IAnyComponent>("CCC");
-
-            //-- assert
-
-            resolvedB.Should().NotBeNull();
-            resolvedB.Should().BeOfType<ComponentB>();
-
-            resolvedC.Should().NotBeNull();
-            resolvedC.Should().BeOfType<ComponentC>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void CanRegisterNamedComponentForThreeServices()
-        {
-            //-- arrange
-
-            var builder = new ComponentContainerBuilder();
-            builder.RegisterComponentType<ComponentB>().NamedForServices<IServiceB, ISpecialComponent, IAnyComponent>("BBB");
-            builder.RegisterComponentType<ComponentC>().NamedForServices<IServiceC, ISpecialComponent, IAnyComponent>("CCC");
-
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
-
-            //-- act
-
-            var resolvedB = containerUnderTest.ResolveNamed<IServiceB>("BBB");
-            var resolvedC = containerUnderTest.ResolveNamed<ISpecialComponent>("CCC");
-
-            //-- assert
-
-            resolvedB.Should().NotBeNull();
-            resolvedB.Should().BeOfType<ComponentB>();
-
-            resolvedC.Should().NotBeNull();
-            resolvedC.Should().BeOfType<ComponentC>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void CanRegisterNamedComponentForMultipleServices_NonGeneric()
-        {
-            //-- arrange
-
-            var builder = new ComponentContainerBuilder();
-            builder.RegisterComponentType<ComponentB>().NamedForServices("BBB", typeof(ISpecialComponent), typeof(IAnyComponent));
-            builder.RegisterComponentType<ComponentC>().NamedForServices("CCC", typeof(ISpecialComponent), typeof(IAnyComponent));
-
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
-
-            //-- act
-
-            var resolvedB = containerUnderTest.ResolveNamed<ISpecialComponent>("BBB");
-            var resolvedC = containerUnderTest.ResolveNamed<IAnyComponent>("CCC");
-
-            //-- assert
-
-            resolvedB.Should().NotBeNull();
-            resolvedB.Should().BeOfType<ComponentB>();
-
-            resolvedC.Should().NotBeNull();
-            resolvedC.Should().BeOfType<ComponentC>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -379,6 +229,29 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void CanResolveNamedComponent_NonGeneric()
+        {
+            //-- arrange
+
+            var builder = new ComponentContainerBuilder();
+            builder.RegisterComponentType<ComponentA>().NamedForService<IAnyComponent>("AAA");
+            builder.RegisterComponentType<ComponentB>().NamedForService<IAnyComponent>("BBB");
+
+            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+
+            //-- act
+
+            var resolved = containerUnderTest.ResolveNamed(typeof(IAnyComponent), "BBB");
+
+            //-- assert
+
+            resolved.Should().NotBeNull();
+            resolved.Should().BeOfType<ComponentB>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void TryResolve_ComponentRegistered_Resolved()
         {
             //-- arrange
@@ -416,6 +289,53 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
 
             IServiceB resolved;
             var result = containerUnderTest.TryResolve<IServiceB>(out resolved);
+
+            //-- assert
+
+            result.Should().BeFalse();
+            resolved.Should().BeNull();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void TryResolveNonGeneric_ComponentRegistered_Resolved()
+        {
+            //-- arrange
+
+            var builder = new ComponentContainerBuilder();
+            builder.RegisterComponentType<ComponentA>().ForService<IServiceA>();
+
+            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+
+            //-- act
+
+            object resolved;
+            var result = containerUnderTest.TryResolve(typeof(IServiceA), out resolved);
+
+            //-- assert
+
+            result.Should().BeTrue();
+            resolved.Should().NotBeNull();
+            resolved.Should().BeOfType<ComponentA>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void TryResolveNonGeneric_ComponentNotRegistered_NullReturned()
+        {
+            //-- arrange
+
+            var builder = new ComponentContainerBuilder();
+            builder.RegisterComponentType<ComponentA>().ForService<IServiceA>();
+
+            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+
+            //-- act
+
+            object resolved;
+            var result = containerUnderTest.TryResolve(typeof(IServiceB), out resolved);
 
             //-- assert
 
@@ -474,6 +394,39 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             resolved.Length.Should().Be(2);
             resolved.OfType<ComponentA>().Count().Should().Be(1);
             resolved.OfType<ComponentB>().Count().Should().Be(1);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanGetAllServiceTypes()
+        {
+            //-- arrange
+
+            var builder = new ComponentContainerBuilder();
+            builder.RegisterComponentType<ComponentA>().ForService<IServiceA>();
+            builder.RegisterComponentType<ComponentB>().ForServices<IServiceB, IAnyComponent>();
+            builder.RegisterComponentType<ComponentC>().NamedForServices<IServiceC, IAnyComponent>("CCC");
+
+            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+
+            //-- act
+
+            var allBasedOnObject = containerUnderTest.GetAllServiceTypes(typeof(object));
+            var allBasedOnServiceC = containerUnderTest.GetAllServiceTypes(typeof(IServiceC));
+
+            //-- assert
+
+            allBasedOnObject.Should().BeEquivalentTo(
+                typeof(Autofac.ILifetimeScope), typeof(Autofac.IComponentContext),
+                typeof(IComponentContainer), typeof(IInternalComponentContainer),
+                typeof(ComponentA), typeof(IServiceA), 
+                typeof(ComponentB), typeof(IServiceB), 
+                typeof(ComponentC), typeof(IServiceC), 
+                typeof(IAnyComponent));
+
+            allBasedOnServiceC.Should().BeEquivalentTo(
+                typeof(ComponentC), typeof(IServiceC));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
