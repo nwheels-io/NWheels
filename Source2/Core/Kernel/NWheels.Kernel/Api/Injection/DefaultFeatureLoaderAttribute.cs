@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NWheels.Injection
+namespace NWheels.Kernel.Api.Injection
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class DefaultFeatureLoaderAttribute : Attribute

@@ -1,9 +1,10 @@
 ﻿using System.Linq;
-using NWheels.Injection;
-using NWheels.Runtime.Injection;
+using NWheels.Kernel.Api.Injection;
+using NWheels.Kernel.Runtime.Injection;
 using Xunit;
 using FluentAssertions;
 using NWheels.Testability;
+using System;
 
 namespace NWheels.Kernel.UnitTests.Runtime.Injection
 {
@@ -431,6 +432,33 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Fact]
+        public void Dispose_DisposableComponentsAreDisposed()
+        {
+            //-- arrange
+
+            var builder = new ComponentContainerBuilder();
+            builder.RegisterComponentType<ComponentB>();
+
+            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var component = containerUnderTest.Resolve<ComponentB>();
+
+            //-- act
+
+            var disposeCount0 = component.DisposeCount;
+
+            containerUnderTest.Dispose();
+
+            var disposeCount1 = component.DisposeCount;
+
+            //-- assert
+
+            disposeCount0.Should().Be(0);
+            disposeCount1.Should().Be(1);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public interface IAnyComponent
         {
         }
@@ -449,8 +477,13 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
         public class ComponentA : IServiceA, IAnyComponent
         {
         }
-        public class ComponentB : IServiceB, ISpecialComponent, IAnyComponent
+        public class ComponentB : IServiceB, ISpecialComponent, IAnyComponent, IDisposable
         {
+            public void Dispose()
+            {
+                DisposeCount++;
+            }
+            public int DisposeCount { get; private set; }
         }
         public class ComponentC : IServiceC, ISpecialComponent, IAnyComponent
         {

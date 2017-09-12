@@ -1,6 +1,4 @@
-﻿using NWheels.Injection;
-
-namespace NWheels.Injection
+﻿namespace NWheels.Kernel.Api.Injection
 {
     public interface IInternalComponentContainerBuilder : IComponentContainerBuilder
     {

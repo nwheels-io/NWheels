@@ -11,7 +11,7 @@
 
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <RootNamespace>NWheels</RootNamespace>
+    <RootNamespace>NWheels.Kernel</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -24,7 +24,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Folder Include="Generators\" />
+    <Folder Include="Compilation\" />
   </ItemGroup>
 
 </Project>

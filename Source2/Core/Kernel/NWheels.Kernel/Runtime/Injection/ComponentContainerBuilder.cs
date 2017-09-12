@@ -6,9 +6,9 @@ using Autofac.Core.Lifetime;
 using Autofac.Core.Registration;
 using System;
 using System.Collections.Generic;
-using NWheels.Injection;
+using NWheels.Kernel.Api.Injection;
 
-namespace NWheels.Runtime.Injection
+namespace NWheels.Kernel.Runtime.Injection
 {
     public class ComponentContainerBuilder : IInternalComponentContainerBuilder
     {

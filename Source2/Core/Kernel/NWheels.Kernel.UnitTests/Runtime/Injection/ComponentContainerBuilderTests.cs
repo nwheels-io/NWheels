@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
-using NWheels.Injection;
-using NWheels.Runtime.Injection;
+using NWheels.Kernel.Api.Injection;
+using NWheels.Kernel.Runtime.Injection;
 using NWheels.Testability;
 using System;
 using System.Collections.Generic;

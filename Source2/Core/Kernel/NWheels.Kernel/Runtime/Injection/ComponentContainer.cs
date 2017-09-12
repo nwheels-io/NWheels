@@ -4,9 +4,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using NWheels.Injection;
+using NWheels.Kernel.Api.Injection;
 
-namespace NWheels.Runtime.Injection
+namespace NWheels.Kernel.Runtime.Injection
 {
     public class ComponentContainer : IInternalComponentContainer
     {

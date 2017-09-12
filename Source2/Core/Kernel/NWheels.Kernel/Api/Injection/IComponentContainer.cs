@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NWheels.Injection
+namespace NWheels.Kernel.Api.Injection
 {
     public interface IComponentContainer : IDisposable
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NWheels.Injection
+namespace NWheels.Kernel.Api.Injection
 {
     public interface IComponentRegistrationBuilder
     {

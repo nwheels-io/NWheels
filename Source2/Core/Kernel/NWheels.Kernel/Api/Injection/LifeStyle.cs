@@ -1,4 +1,4 @@
-﻿namespace NWheels.Injection
+﻿namespace NWheels.Kernel.Api.Injection
 {
     public enum LifeStyle
     {
