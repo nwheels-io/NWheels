@@ -26,7 +26,6 @@
   <ItemGroup>
     <Folder Include="Api\Extensions\" />
     <Folder Include="Api\Authorization\" />
-    <Folder Include="Api\Execution\" />
     <Folder Include="Runtime\Authorization\" />
     <Folder Include="Runtime\Execution\" />
   </ItemGroup>
