@@ -22,4 +22,8 @@
     <ProjectReference Include="..\NWheels.Microservices\NWheels.Microservices.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Runtime\" />
+  </ItemGroup>
+
 </Project>

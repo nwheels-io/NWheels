@@ -7,9 +7,6 @@ namespace NWheels.Samples.HelloWorld.HelloService
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-            var m = new ClassFromMicroservices();
-            Console.WriteLine(m.M());
         }
     }
 }
