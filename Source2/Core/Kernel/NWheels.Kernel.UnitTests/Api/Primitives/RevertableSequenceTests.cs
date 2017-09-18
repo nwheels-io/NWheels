@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Xunit;
 
-namespace NWheels.Implementation.UnitTests.Microservices.Primitives
+namespace NWheels.Kernel.UnitTests.Api.Primitives
 {
     public class RevertableSequenceTests
     {

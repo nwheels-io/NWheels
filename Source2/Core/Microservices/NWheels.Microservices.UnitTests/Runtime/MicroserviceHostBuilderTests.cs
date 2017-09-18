@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if false
+
+using System;
 using FluentAssertions;
 using NWheels.Microservices;
 using Xunit;
@@ -27,7 +29,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
             var module = microservice.BootConfig.MicroserviceConfig.ApplicationModules[0];
 
-            module.Assembly.Should().Be(this.GetType().GetTypeInfo().Assembly.GetName().Name);
+            module.AssemblyName.Should().Be(this.GetType().GetTypeInfo().Assembly.GetName().Name);
             module.Features.Length.Should().Be(0);                
         }
 
@@ -50,7 +52,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
             var module = microservice.BootConfig.MicroserviceConfig.ApplicationModules[0];
 
-            module.Assembly.Should().Be(this.GetType().GetTypeInfo().Assembly.GetName().Name);
+            module.AssemblyName.Should().Be(this.GetType().GetTypeInfo().Assembly.GetName().Name);
             module.Features.Length.Should().Be(1);
             module.Features[0].Name.Should().Be("Named");
         }
@@ -61,9 +63,13 @@ namespace NWheels.Microservices.UnitTests.Runtime
         {
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [FeatureLoader(Name = "Named")]
         private class NamedFeatureLoader : FeatureLoaderBase
         {
         }
     }
 }
+
+#endif

@@ -1,19 +1,339 @@
-﻿#if false
-
-using FluentAssertions;
-using NWheels.Injection;                                                                                                                                                        
-using NWheels.Injection.Adapters.Autofac;
-using NWheels.Microservices;
-using NWheels.Microservices.Mocks;
+﻿using FluentAssertions;
+using NWheels.Kernel.Api;
+using NWheels.Microservices.Api;
+using NWheels.Microservices.Runtime.Mocks;
+using NWheels.Testability;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Xunit;
+using NWheels.Microservices.Runtime;
+using NWheels.Kernel.Api.Injection;
 
-namespace NWheels.Implementation.UnitTests.Microservices
+namespace NWheels.Microservices.UnitTests.Runtime
 {
+    public class DefaultModuleLoaderTests : TestBase.UnitTest 
+    {
+        [Fact]
+        public void GetBootFeatureLoaders_ModuleNotConfigured_NotLoaded()
+        {
+            // F{}, A{M2}, C{} -> M2.D1, M2.D2
+
+            //-- arrange
+
+            var loaderUnderTest = new BootFeatureTestModuleLoader();
+            var bootConfig = MakeBootConfig(
+                applicationModules: MakeModuleConfigList(
+                    (Module: "M2", Features: null)
+                )
+            );
+
+            //-- act
+
+            var featureLoaders = loaderUnderTest.GetBootFeatureLoaders(bootConfig);
+
+            //-- assert
+
+            var featureList = MakeFeatureListString(featureLoaders);
+            featureList.Should().Be("M2_D1;M2_D2");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void GetBootFeatureLoaders_MultipleModulesConfigured_LoadedInConfiguredOrder()
+        {
+            // F{}, A{M2, M1}, C{} -> M2.D1, M2.D2, M1.D1, M1.D2
+
+            //-- arrange
+
+            var loaderUnderTest = new BootFeatureTestModuleLoader();
+            var bootConfig = MakeBootConfig(
+                applicationModules: MakeModuleConfigList(
+                    (Module: "M2", Features: null), 
+                    (Module: "M1", Features: null)
+                )
+            );
+
+            //-- act
+
+            var featureLoaders = loaderUnderTest.GetBootFeatureLoaders(bootConfig);
+
+            //-- assert
+
+            var featureList = MakeFeatureListString(featureLoaders);
+            featureList.Should().Be("M2_D1;M2_D2;M1_D1;M1_D2");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void GetBootFeatureLoaders_ModuleConfiguredWithFeatures_DefaultThenNamedFeaturesLoadedInConfiguredOrder()
+        {
+            // F{}, A{M1{N2, N1}, M2{N1, N2}}, C{} -> M1.D1, M1.D2, M1.N2, M1.N1, M2.D1, M2.D2, M2.N1, M2.N2
+
+            //-- arrange
+
+            var loaderUnderTest = new BootFeatureTestModuleLoader();
+            var bootConfig = MakeBootConfig(
+                applicationModules: MakeModuleConfigList(
+                    (Module: "M1", Features: new[] { "N2", "N1" }),
+                    (Module: "M2", Features: new[] { "N1", "N2" })
+                )
+            );
+
+            //-- act
+
+            var featureLoaders = loaderUnderTest.GetBootFeatureLoaders(bootConfig);
+
+            //-- assert
+
+            var featureList = MakeFeatureListString(featureLoaders);
+            featureList.Should().Be("M1_D1;M1_D2;M1_N2;M1_N1;M2_D1;M2_D2;M2_N1;M2_N2");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void GetBootFeatureLoaders_NamedFeatureListedTwice_Throw()
+        {
+            // F{}, A{M1{N1, N1}}, C{} -> X
+
+            //-- arrange
+
+            var loaderUnderTest = new BootFeatureTestModuleLoader();
+            var bootConfig = MakeBootConfig(
+                applicationModules: MakeModuleConfigList(
+                    (Module: "M1", Features: new[] { "N1", "N1" })
+                )
+            );
+
+            //-- act
+
+            Action act = () => loaderUnderTest.GetBootFeatureLoaders(bootConfig);
+
+            //-- assert
+
+            act.ShouldThrow<Exception>(); //TODO: verify correct exception
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void GetBootFeatureLoaders_NamedFeatureDoesNotExist_Throw()
+        {
+            // F{}, A{M1{ZZZ}}, C{} -> X
+
+            //-- arrange
+
+            var loaderUnderTest = new BootFeatureTestModuleLoader();
+            var bootConfig = MakeBootConfig(
+                applicationModules: MakeModuleConfigList(
+                    (Module: "M1", Features: new[] { "ZZZ" })
+                )
+            );
+
+            //-- act
+
+            Action act = () => loaderUnderTest.GetBootFeatureLoaders(bootConfig);
+
+            //-- assert
+
+            act.ShouldThrow<Exception>(); //TODO: verify correct exception
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void GetBootFeatureLoaders_ModuleCollectionLoadOrder_FrameworkApplicationCustomization()
+        {
+            // F{M3}, A{M2}, C{M1} -> M3.D1, M3.D2, M2.D1, M2.D2, M1.D1, M1.D2
+
+            //-- arrange
+
+            var loaderUnderTest = new BootFeatureTestModuleLoader();
+            var bootConfig = MakeBootConfig(
+                frameworkModules: MakeModuleConfigList(
+                    (Module: "M3", Features: null)
+                ),
+                applicationModules: MakeModuleConfigList(
+                    (Module: "M2", Features: null)
+                ),
+                customizationModules: MakeModuleConfigList(
+                    (Module: "M1", Features: null)
+                )
+            );
+
+            //-- act
+
+            var featureLoaders = loaderUnderTest.GetBootFeatureLoaders(bootConfig);
+
+            //-- assert
+
+            var featureList = MakeFeatureListString(featureLoaders);
+            featureList.Should().Be("M3_D1;M3_D2;M2_D1;M2_D2;M1_D1;M1_D2");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IBootConfiguration MakeBootConfig(
+            MutableBootConfiguration.ModuleConfiguration[] frameworkModules = null,
+            MutableBootConfiguration.ModuleConfiguration[] applicationModules = null,
+            MutableBootConfiguration.ModuleConfiguration[] customizationModules = null)
+        {
+            var bootConfig = new MutableBootConfiguration();
+
+            if (frameworkModules != null)
+            {
+                bootConfig.FrameworkModules.AddRange(frameworkModules);
+            }
+
+            if (applicationModules != null)
+            {
+                bootConfig.ApplicationModules.AddRange(applicationModules);
+            }
+
+            if (customizationModules != null)
+            {
+                bootConfig.CustomizationModules.AddRange(customizationModules);
+            }
+
+            return bootConfig;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private MutableBootConfiguration.ModuleConfiguration[] MakeModuleConfigList(params (string Module, string[] Features)[] modulesAndFeatures)
+        {
+            return modulesAndFeatures.Select(m => {
+                var assemblyName = (m.Module != "KR" ? m.Module : MutableBootConfiguration.KernelAssemblyName);
+                var moduleConfig = new MutableBootConfiguration.ModuleConfiguration(assemblyName);
+
+                if (m.Features != null)
+                {
+                    moduleConfig.Features.AddRange(m.Features.Select(f => new MutableBootConfiguration.FeatureConfiguration(f)));
+                }
+
+                return moduleConfig;
+            }).ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string MakeFeatureListString(IEnumerable<IFeatureLoader> features)
+        {
+            return string.Join(
+                ";", 
+                features.Select(f => f.GetType().Name.Split('+').Last()));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class BootFeatureTestModuleLoader : DefaultModuleLoader
+        {
+            public override IEnumerable<Type> GetModulePublicTypes(IModuleConfiguration moduleConfig)
+            {
+                // each module has two default feature loaders (D1 and D2), and two named feature loaders (N1 and N2)
+                // each module has also JustAClassXX that mimics types which are not feature loaders
+                // we intentionally mimic different order of types in each module
+
+                if (moduleConfig.IsKernelModule)
+                {
+                    return new[] { typeof(JustAClassKR), typeof(KR_N2), typeof(KR_D1), typeof(KR_N1), typeof(KR_D2) };
+                }
+
+                switch (moduleConfig.ModuleName)
+                {
+                    case "M1": // module M1
+                        return new[] { typeof(JustAClassM1), typeof(M1_D1), typeof(M1_N1), typeof(M1_N2), typeof(M1_D2) };
+                    case "M2": // module M2
+                        return new[] { typeof(JustAClassM2), typeof(M2_N2), typeof(M2_N1), typeof(M2_D1), typeof(M2_D2) };
+                    case "M3": // module M3
+                        return new[] { typeof(JustAClassM3), typeof(M3_D1), typeof(M3_D2), typeof(M3_N1), typeof(M3_N2) };
+                }
+
+                throw new Exception($"Unexpected mock module name: {moduleConfig.ModuleName}");
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DefaultFeatureLoader]
+        public class KR_D1 : FeatureLoaderBase
+        {
+        }
+        [DefaultFeatureLoader]
+        public class KR_D2 : FeatureLoaderBase
+        {
+        }
+        [FeatureLoader(Name = "N1")]
+        public class KR_N1 : FeatureLoaderBase
+        {
+        }
+        [FeatureLoader(Name = "N2")]
+        public class KR_N2 : FeatureLoaderBase
+        {
+        }
+        [DefaultFeatureLoader]
+        public class M1_D1 : FeatureLoaderBase
+        {
+        }
+        [DefaultFeatureLoader]
+        public class M1_D2 : FeatureLoaderBase
+        {
+        }
+        [FeatureLoader(Name = "N1")]
+        public class M1_N1 : FeatureLoaderBase
+        {
+        }
+        [FeatureLoader(Name = "N2")]
+        public class M1_N2 : FeatureLoaderBase
+        {
+        }
+        [DefaultFeatureLoader]
+        public class M2_D1 : FeatureLoaderBase
+        {
+        }
+        [DefaultFeatureLoader]
+        public class M2_D2 : FeatureLoaderBase
+        {
+        }
+        [FeatureLoader(Name = "N1")]
+        public class M2_N1 : FeatureLoaderBase
+        {
+        }
+        [FeatureLoader(Name = "N2")]
+        public class M2_N2 : FeatureLoaderBase
+        {
+        }
+        [DefaultFeatureLoader]
+        public class M3_D1 : FeatureLoaderBase
+        {
+        }
+        [DefaultFeatureLoader]
+        public class M3_D2 : FeatureLoaderBase
+        {
+        }
+        [FeatureLoader(Name = "N1")]
+        public class M3_N1 : FeatureLoaderBase
+        {
+        }
+        [FeatureLoader(Name = "N2")]
+        public class M3_N2 : FeatureLoaderBase
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class JustAClassKR { }
+        public class JustAClassM1 { }
+        public class JustAClassM2 { }
+        public class JustAClassM3 { }
+    }
+
+#if false
     public class MicroserviceHostTests2
     {
         public MicroserviceHostTests2()
@@ -549,6 +869,5 @@ namespace NWheels.Implementation.UnitTests.Microservices
             public List<AssemblyLoadEventArgs> EventList { get; }
         }
     }
-}
-
 #endif
+}

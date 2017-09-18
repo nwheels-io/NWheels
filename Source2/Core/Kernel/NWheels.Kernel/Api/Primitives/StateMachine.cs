@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace NWheels.Kernel.Api.Primitives
 {
@@ -8,21 +10,7 @@ namespace NWheels.Kernel.Api.Primitives
         private readonly IStateMachineCodeBehind<TState, TTrigger> _codeBehind;
         private readonly ILogger _logger;
         private readonly Dictionary<TState, MachineState> _states;
-        private volatile MachineState _currentState;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        /*public TransientStateMachine(IStateMachineCodeBehind<TState, TTrigger> codeBehind, IComponentContext components)
-            : this(codeBehind, components.ResolveAuto<ILogger>())
-        {
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public TransientStateMachine(IStateMachineCodeBehind<TState, TTrigger> codeBehind, Auto<ILogger> logger)
-            : this(codeBehind, logger.Instance)
-        {
-        }*/
+        private MachineState _currentState;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -209,14 +197,15 @@ namespace NWheels.Kernel.Api.Primitives
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            IStateMachineStateBuilder<TState, TTrigger> IStateMachineStateBuilder<TState, TTrigger>.OnTimeout(
-                TimeSpan timeout,
-                EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> handler,
-                bool recurring)
-            {
-                //TODO: implement timeout
-                return this;
-            }
+            //TODO: implement timeout
+            //IStateMachineStateBuilder<TState, TTrigger> IStateMachineStateBuilder<TState, TTrigger>.OnTimeout(
+            //    TimeSpan timeout,
+            //    EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> handler,
+            //    bool recurring)
+            //{
+            //    //TODO: implement timeout
+            //    return this;
+            //}
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 

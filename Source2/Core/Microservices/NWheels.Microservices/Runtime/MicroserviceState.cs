@@ -1,4 +1,4 @@
-﻿namespace NWheels.Microservices
+﻿namespace NWheels.Microservices.Runtime
 {
     public enum MicroserviceState
     {

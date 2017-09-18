@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿#if false
+
+using FluentAssertions;
 using NWheels.Compilation;
 using NWheels.Microservices;
 using System;
@@ -943,3 +945,5 @@ namespace NWheels.Microservices.UnitTests.Runtime
         }
     }
 }
+
+#endif

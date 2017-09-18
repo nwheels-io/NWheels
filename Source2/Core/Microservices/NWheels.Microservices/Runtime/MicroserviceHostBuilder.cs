@@ -3,27 +3,22 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 using System.Linq;
-using NWheels.Microservices.Api;
 using NWheels.Kernel.Api.Injection;
+using System.Xml.Linq;
 
 namespace NWheels.Microservices.Runtime
 {
-    public class MicroserviceHostBuilder : IMicroserviceHostBuilder
+    public class MicroserviceHostBuilder
     {
+        private readonly MutableBootConfiguration _bootConfig;
         private readonly List<Action<IComponentContainer, IComponentContainerBuilder>> _componentContributions;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder(string name)
+        public MicroserviceHostBuilder(string microserviceName)
         {
-            this.BootConfig = new BootConfiguration() {
-                MicroserviceConfig = new MicroserviceConfig {
-                    Name = name,
-                    ApplicationModules = new MicroserviceConfig.ModuleConfig[0],
-                    FrameworkModules = new MicroserviceConfig.ModuleConfig[0]
-                },
-                EnvironmentConfig = new EnvironmentConfig() {
-                },
+            _bootConfig = new MutableBootConfiguration() {
+                MicroserviceName = microserviceName
             };
 
             _componentContributions = new List<Action<IComponentContainer, IComponentContainerBuilder>>();
@@ -31,40 +26,45 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IMicroserviceHostBuilder UseFrameworkFeature<TFeature>()
-            where TFeature : IFeatureLoader
+        public MicroserviceHostBuilder UseFrameworkFeature<TFeature>()
+            where TFeature : class, IFeatureLoader, new()
         {
-            BootConfig.MicroserviceConfig.FrameworkModules = EnsureModuleListed(
-                typeof(TFeature),
-                BootConfig.MicroserviceConfig.FrameworkModules,
-                out MicroserviceConfig.ModuleConfig module);
-
-            EnsureFeatureListed(typeof(TFeature), module);
-
+            _bootConfig.AddFeatures(_bootConfig.FrameworkModules, typeof(TFeature).Assembly, typeof(TFeature));
             return this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IMicroserviceHostBuilder UseApplicationFeature<TFeature>()
-            where TFeature : IFeatureLoader
+        public MicroserviceHostBuilder UseApplicationFeature<TFeature>()
+            where TFeature : class, IFeatureLoader, new()
         {
-            BootConfig.MicroserviceConfig.ApplicationModules = EnsureModuleListed(
-                typeof(TFeature),
-                BootConfig.MicroserviceConfig.ApplicationModules,
-                out MicroserviceConfig.ModuleConfig module);
-
-            EnsureFeatureListed(typeof(TFeature), module);
-
+            _bootConfig.AddFeatures(_bootConfig.ApplicationModules, typeof(TFeature).Assembly, typeof(TFeature));
             return this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IMicroserviceHostBuilder ContributeComponents(Action<IComponentContainer, IComponentContainerBuilder> contributor)
+        public MicroserviceHostBuilder UseCustomizationFeature<TFeature>()
+            where TFeature : class, IFeatureLoader, new()
+        {
+            _bootConfig.AddFeatures(_bootConfig.CustomizationModules, typeof(TFeature).Assembly, typeof(TFeature));
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MicroserviceHostBuilder ContributeComponents(Action<IComponentContainer, IComponentContainerBuilder> contributor)
         {
             _componentContributions.Add(contributor);
-            UseApplicationFeature<MicroserviceHostBuilderContributionsFeatureLoader>();
+            UseApplicationFeature<ContributionsFeatureLoader>();
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MicroserviceHostBuilder UseMicroserviceXml(XElement xml)
+        {
+            MicroserviceXmlReader.PopulateBootConfiguration(xml, _bootConfig);
             return this;
         }
 
@@ -72,12 +72,12 @@ namespace NWheels.Microservices.Runtime
 
         public MicroserviceHost Build()
         {
-            return new MicroserviceHost(this.BootConfig, new Mocks.MicroserviceHostLoggerMock(), OnRegisterHostComponents);
+            return new MicroserviceHost(this.BootConfig);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public BootConfiguration BootConfig { get; }
+        public IBootConfiguration BootConfig => _bootConfig;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -91,61 +91,16 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void OnRegisterHostComponents(IComponentContainerBuilder containerBuilder)
+        [FeatureLoader(Name = "MicroserviceHostBuilderContributions")]
+        public class ContributionsFeatureLoader : FeatureLoaderBase
         {
-            containerBuilder.RegisterComponentInstance<MicroserviceHostBuilder>(this);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private MicroserviceConfig.ModuleConfig[] EnsureModuleListed(
-            Type typeFromModuleAssembly,
-            MicroserviceConfig.ModuleConfig[] moduleList,
-            out MicroserviceConfig.ModuleConfig module)
-        {
-            var assemblyName = typeFromModuleAssembly.GetTypeInfo().Assembly.GetName().Name;
-            module = moduleList.FirstOrDefault(m => m.Assembly.Equals(assemblyName, StringComparison.OrdinalIgnoreCase));
-
-            if (module != null)
+            public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
             {
-                return moduleList;
+                base.ContributeComponents(existingComponents, newComponents);
+
+                var hostBuilder = existingComponents.Resolve<MicroserviceHostBuilder>();
+                hostBuilder.ApplyComponentContributions(existingComponents, newComponents);
             }
-
-            module = new MicroserviceConfig.ModuleConfig {
-                Assembly = assemblyName,
-                Features = Array.Empty<MicroserviceConfig.ModuleConfig.FeatureConfig>()
-            };
-
-            return moduleList.Append(module).ToArray();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void EnsureFeatureListed(Type featureLoaderType, MicroserviceConfig.ModuleConfig moduleConfig)
-        {
-            var namedFeatureAttribute = featureLoaderType.GetTypeInfo().GetCustomAttribute<FeatureLoaderAttribute>();
-
-            if (namedFeatureAttribute != null)
-            {
-                var feature = moduleConfig.Features.FirstOrDefault(f => f.Name == namedFeatureAttribute.Name);
-
-                if (feature == null)
-                {
-                    moduleConfig.Features = moduleConfig.Features.Append(new MicroserviceConfig.ModuleConfig.FeatureConfig() {
-                        Name = namedFeatureAttribute.Name
-                    }).ToArray();
-                }
-            }
-        }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public static class MicroserviceHostBuilderExtensions
-    {
-        public static MicroserviceHost Build(this IMicroserviceHostBuilder hostBuilder)
-        {
-            return ((MicroserviceHostBuilder)hostBuilder).Build();
         }
     }
 }

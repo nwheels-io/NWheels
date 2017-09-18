@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using NWheels.Microservices.Api;
 
 namespace NWheels.Microservices.Runtime
 {
-    public class AssemblyLocationMap
+    public class AssemblyLocationMap : IAssemblyLocationMap
     {
         private ImmutableArray<string> _directories = ImmutableArray<string>.Empty;
         private ImmutableDictionary<string, string> _filePathByAssemblyName = ImmutableDictionary<string, string>.Empty;

@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Runtime\" />
+    <Folder Include="Api\" />
   </ItemGroup>
 
 </Project>

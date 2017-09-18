@@ -3,8 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Xunit;
+using FluentAssertions;
 
-namespace NWheels.Implementation.UnitTests.Microservices.Primitives
+namespace NWheels.Kernel.UnitTests.Api.Primitives
 {
     public class StateMachineTests
     {
@@ -13,13 +14,13 @@ namespace NWheels.Implementation.UnitTests.Microservices.Primitives
         {
             //-- Arrange, Act
 
-            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
                 new PhilisopherCodeBehind(), 
                 null);
 
             //-- Assert
 
-            Assert.Equal(machine.CurrentState, PhilisopherState.Thinking);
+            Assert.Equal(machine.CurrentState, PhilosopherState.Thinking);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -29,22 +30,71 @@ namespace NWheels.Implementation.UnitTests.Microservices.Primitives
         {
             //-- Arrange
 
-            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
                 new PhilisopherCodeBehind(),
                 null);
 
             //-- Act
 
-            machine.ReceiveTrigger(PhilisopherTrigger.Hungry);
+            machine.ReceiveTrigger(PhilosopherTrigger.Hungry);
             var state1 = machine.CurrentState;
 
-            machine.ReceiveTrigger(PhilisopherTrigger.GotForks);
+            machine.ReceiveTrigger(PhilosopherTrigger.GotForks);
             var state2 = machine.CurrentState;
 
             //-- Assert
 
-            Assert.Equal(state1, PhilisopherState.AcquiringForks);
-            Assert.Equal(state2, PhilisopherState.Eating);
+            Assert.Equal(state1, PhilosopherState.AcquiringForks);
+            Assert.Equal(state2, PhilosopherState.Eating);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void ReceiveTrigger_NotDefinedForCurrentState_Throw()
+        {
+            //-- Arrange
+
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
+                new PhilisopherCodeBehind(),
+                null);
+
+            Action act = () => machine.ReceiveTrigger(PhilosopherTrigger.GotForks);
+
+            //-- Act  & assert
+
+            act.ShouldThrow<Exception>(); //TODO: verify correct exception
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void TransitionState_CurrentStateChangedRaised()
+        {
+            //-- Arrange
+
+            var codeBehind = new PhilisopherCodeBehindWithEvents();
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
+                codeBehind,
+                null);
+
+            machine.CurrentStateChanged += (sender, args) => {
+                codeBehind.AddLog($"CurrentStateChanged:{machine.CurrentState}");
+            };
+
+            //-- Act
+
+            machine.ReceiveTrigger(PhilosopherTrigger.Hungry);
+
+            //-- Assert
+
+            codeBehind.TakeLog().Should().Equal(new[] {
+                "ThinkingEntered(to[Thinking])",
+                "ThinkingLeaving(from[Thinking]to[AcquiringForks]by[Hungry])",
+                "TransitioningFromThinkingToAcquiringForks(from[Thinking]to[AcquiringForks]by[Hungry])",
+                "AcquiringForksEntered(from[Thinking]to[AcquiringForks]by[Hungry])",
+                "CurrentStateChanged:AcquiringForks"
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,18 +108,18 @@ namespace NWheels.Implementation.UnitTests.Microservices.Primitives
 
             //-- Act
 
-            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
                 codeBehind,
                 null);
             var log1 = codeBehind.TakeLog();
 
-            machine.ReceiveTrigger(PhilisopherTrigger.Hungry);
+            machine.ReceiveTrigger(PhilosopherTrigger.Hungry);
             var log2 = codeBehind.TakeLog();
 
-            machine.ReceiveTrigger(PhilisopherTrigger.GotForks);
+            machine.ReceiveTrigger(PhilosopherTrigger.GotForks);
             var log3 = codeBehind.TakeLog();
 
-            machine.ReceiveTrigger(PhilisopherTrigger.Full);
+            machine.ReceiveTrigger(PhilosopherTrigger.Full);
             var log4 = codeBehind.TakeLog();
 
             //-- Assert
@@ -104,25 +154,24 @@ namespace NWheels.Implementation.UnitTests.Microservices.Primitives
         {
             //-- Arrange
 
-            var codeBehind = new PhilisopherCodeBehindWithEvents()
-            {
+            var codeBehind = new PhilisopherCodeBehindWithEvents() {
                 ThrowFromThinkingLeaving = true
             };
 
-            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
                 codeBehind,
                 null);
 
             //-- Act
 
             var exception = Assert.Throws<TestCodeBehindException>(() => {
-                machine.ReceiveTrigger(PhilisopherTrigger.Hungry);
+                machine.ReceiveTrigger(PhilosopherTrigger.Hungry);
             });
 
             //-- Assert
 
             Assert.Equal(exception.Message, "ThinkingLeaving");
-            Assert.Equal(machine.CurrentState, PhilisopherState.Thinking);
+            Assert.Equal(machine.CurrentState, PhilosopherState.Thinking);
             Assert.Equal(codeBehind.TakeLog(), new[] {
                 "ThinkingEntered(to[Thinking])",
                 "THROWING-FROM:ThinkingLeaving(from[Thinking]to[AcquiringForks]by[Hungry])",
@@ -141,23 +190,23 @@ namespace NWheels.Implementation.UnitTests.Microservices.Primitives
                 ThrowFromTransitioningFromAcquiringForksToEating = true
             };
 
-            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
                 codeBehind,
                 null);
 
             //-- Act
 
-            machine.ReceiveTrigger(PhilisopherTrigger.Hungry);
+            machine.ReceiveTrigger(PhilosopherTrigger.Hungry);
             codeBehind.TakeLog();
 
             var exception = Assert.Throws<TestCodeBehindException>(() => {
-                machine.ReceiveTrigger(PhilisopherTrigger.GotForks);
+                machine.ReceiveTrigger(PhilosopherTrigger.GotForks);
             });
 
             //-- Assert
 
             Assert.Equal(exception.Message, "TransitioningFromAcquiringForksToEating");
-            Assert.Equal(machine.CurrentState, PhilisopherState.AcquiringForks);
+            Assert.Equal(machine.CurrentState, PhilosopherState.AcquiringForks);
             Assert.Equal(codeBehind.TakeLog(), new[] {
                 "AcquiringForksLeaving(from[AcquiringForks]to[Eating]by[GotForks])",
                 "THROWING-FROM:TransitioningFromAcquiringForksToEating(from[AcquiringForks]to[Eating]by[GotForks])",
@@ -172,12 +221,11 @@ namespace NWheels.Implementation.UnitTests.Microservices.Primitives
         {
             //-- Arrange
 
-            var codeBehind = new PhilisopherCodeBehindWithEvents()
-            {
+            var codeBehind = new PhilisopherCodeBehindWithEvents() {
                 ThrowFromAcquiringForksEntered = true
             };
 
-            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
                 codeBehind,
                 null);
 
@@ -186,13 +234,13 @@ namespace NWheels.Implementation.UnitTests.Microservices.Primitives
             //-- Act
 
             var exception = Assert.Throws<TestCodeBehindException>(() => {
-                machine.ReceiveTrigger(PhilisopherTrigger.Hungry);
+                machine.ReceiveTrigger(PhilosopherTrigger.Hungry);
             });
 
             //-- Assert
 
             Assert.Equal(exception.Message, "AcquiringForksEntered");
-            Assert.Equal(machine.CurrentState, PhilisopherState.AcquiringForks);
+            Assert.Equal(machine.CurrentState, PhilosopherState.AcquiringForks);
             Assert.Equal(codeBehind.TakeLog(), new[] {
                 "ThinkingLeaving(from[Thinking]to[AcquiringForks]by[Hungry])",
                 "TransitioningFromThinkingToAcquiringForks(from[Thinking]to[AcquiringForks]by[Hungry])",
@@ -207,25 +255,24 @@ namespace NWheels.Implementation.UnitTests.Microservices.Primitives
         {
             //-- Arrange
 
-            var codeBehind = new PhilisopherCodeBehindWithEvents()
-            {
+            var codeBehind = new PhilisopherCodeBehindWithEvents() {
                 FeedBackFromEating = true
             };
 
-            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
                 codeBehind,
                 null);
 
-            machine.ReceiveTrigger(PhilisopherTrigger.Hungry);
+            machine.ReceiveTrigger(PhilosopherTrigger.Hungry);
             codeBehind.TakeLog();
 
             //-- Act
 
-            machine.ReceiveTrigger(PhilisopherTrigger.GotForks); // will receive feedback Full from EatingEntered
+            machine.ReceiveTrigger(PhilosopherTrigger.GotForks); // will receive feedback Full from EatingEntered
 
             //-- Assert
 
-            Assert.Equal(machine.CurrentState, PhilisopherState.Thinking);
+            Assert.Equal(machine.CurrentState, PhilosopherState.Thinking);
             Assert.Equal(codeBehind.TakeLog(), new[] {
                 "AcquiringForksLeaving(from[AcquiringForks]to[Eating]by[GotForks])",
                 "TransitioningFromAcquiringForksToEating(from[AcquiringForks]to[Eating]by[GotForks])",
@@ -238,7 +285,124 @@ namespace NWheels.Implementation.UnitTests.Microservices.Primitives
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public enum PhilisopherState
+        [Fact]
+        public void InitialState_OnEnteredSendsFeedback_TransitionByFeedback()
+        {
+            //-- Arrange
+
+            var codeBehind = new PhilisopherCodeBehindWithEvents() {
+                FeedBackFromThinking = true
+            };
+
+            //-- Act
+
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
+                codeBehind,
+                null);
+
+            //-- Assert
+
+            machine.CurrentState.Should().Be(PhilosopherState.AcquiringForks);
+            codeBehind.TakeLog().Should().Equal(new[] {
+                "ThinkingEntered(to[Thinking])",
+                "ThinkingLeaving(from[Thinking]to[AcquiringForks]by[Hungry])",
+                "TransitioningFromThinkingToAcquiringForks(from[Thinking]to[AcquiringForks]by[Hungry])",
+                "AcquiringForksEntered(from[Thinking]to[AcquiringForks]by[Hungry])"
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void RestoreState_RestoredStateEntered()
+        {
+            //-- Arrange
+
+            var codeBehind = new PhilisopherCodeBehindWithEvents() {
+                RestoreStateTo = PhilosopherState.Eating
+            };
+
+            //-- Act
+
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
+                codeBehind,
+                null);
+
+            //-- Assert
+
+            machine.CurrentState.Should().Be(PhilosopherState.Eating);
+            codeBehind.TakeLog().Should().Equal(new[] {
+                "EatingEntered(to[Eating])",
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CodeBdehind_NoInitialStateDefined_Throw()
+        {
+            //-- Arrange
+
+            Action act = () => new StateMachine<PhilosopherState, PhilosopherTrigger>(
+                new NoInitialStateCodeBehind(),
+                null);
+
+            //-- Act & Assert
+
+            act.ShouldThrow<Exception>(); //TODO: verify correct exception
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CodeBdehind_AttemptDefineStateTwice_Throw()
+        {
+            //-- Arrange
+
+            Action act = () => new StateMachine<PhilosopherState, PhilosopherTrigger>(
+                new DoubleStateCodeBehind(),
+                null);
+
+            //-- Act & Assert
+
+            act.ShouldThrow<Exception>(); //TODO: verify correct exception
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CodeBdehind_AttemptRedefineInitialState_Throw()
+        {
+            //-- Arrange
+
+            Action act = () => new StateMachine<PhilosopherState, PhilosopherTrigger>(
+                new RedefiningInitialStateCodeBehind(),
+                null);
+
+            //-- Act & Assert
+
+            act.ShouldThrow<Exception>(); //TODO: verify correct exception
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CodeBdehind_AttemptRedefineTriggerOnState_Throw()
+        {
+            //-- Arrange
+
+            Action act = () => new StateMachine<PhilosopherState, PhilosopherTrigger>(
+                new DoubleTriggerCodeBehind(),
+                null);
+
+            //-- Act & Assert
+
+            act.ShouldThrow<Exception>(); //TODO: verify correct exception
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public enum PhilosopherState
         {
             Thinking,
             AcquiringForks,
@@ -247,59 +411,72 @@ namespace NWheels.Implementation.UnitTests.Microservices.Primitives
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public enum PhilisopherTrigger
+        public enum PhilosopherTrigger
         {
             Hungry,
             GotForks,
             Deadlocked,
-            Full
+            Full,
+            SomeBadTrigger
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class PhilisopherCodeBehind : IStateMachineCodeBehind<PhilisopherState, PhilisopherTrigger>
+        internal class PhilisopherCodeBehind : IStateMachineCodeBehind<PhilosopherState, PhilosopherTrigger>
         {
-            public void BuildStateMachine(IStateMachineBuilder<PhilisopherState, PhilisopherTrigger> machine)
+            public void BuildStateMachine(IStateMachineBuilder<PhilosopherState, PhilosopherTrigger> machine)
             {
-                machine.State(PhilisopherState.Thinking)
+                machine.State(PhilosopherState.Thinking)
                     .SetAsInitial()
-                    .OnTrigger(PhilisopherTrigger.Hungry).TransitionTo(PhilisopherState.AcquiringForks);
+                    .OnTrigger(PhilosopherTrigger.Hungry).TransitionTo(PhilosopherState.AcquiringForks);
 
-                machine.State(PhilisopherState.AcquiringForks)
-                    .OnTrigger(PhilisopherTrigger.GotForks).TransitionTo(PhilisopherState.Eating)
-                    .OnTrigger(PhilisopherTrigger.Deadlocked).TransitionTo(PhilisopherState.Thinking);
+                machine.State(PhilosopherState.AcquiringForks)
+                    .OnTrigger(PhilosopherTrigger.GotForks).TransitionTo(PhilosopherState.Eating)
+                    .OnTrigger(PhilosopherTrigger.Deadlocked).TransitionTo(PhilosopherState.Thinking);
 
-                machine.State(PhilisopherState.Eating)
-                    .OnTrigger(PhilisopherTrigger.Full).TransitionTo(PhilisopherState.Thinking);
+                machine.State(PhilosopherState.Eating)
+                    .OnTrigger(PhilosopherTrigger.Full).TransitionTo(PhilosopherState.Thinking);
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class PhilisopherCodeBehindWithEvents : IStateMachineCodeBehind<PhilisopherState, PhilisopherTrigger>
+        internal class PhilisopherCodeBehindWithEvents : IStateMachineCodeBehind<PhilosopherState, PhilosopherTrigger>
         {
             private readonly List<string> _log = new List<string>();
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void BuildStateMachine(IStateMachineBuilder<PhilisopherState, PhilisopherTrigger> machine)
+            public void BuildStateMachine(IStateMachineBuilder<PhilosopherState, PhilosopherTrigger> machine)
             {
-                machine.State(PhilisopherState.Thinking)
+                machine.State(PhilosopherState.Thinking)
                     .SetAsInitial()
                     .OnEntered(ThinkingEntered)
                     .OnLeaving(ThinkingLeaving)
-                    .OnTrigger(PhilisopherTrigger.Hungry).TransitionTo(PhilisopherState.AcquiringForks, TransitioningFromThinkingToAcquiringForks);
+                    .OnTrigger(PhilosopherTrigger.Hungry).TransitionTo(PhilosopherState.AcquiringForks, TransitioningFromThinkingToAcquiringForks);
 
-                machine.State(PhilisopherState.AcquiringForks)
+                machine.State(PhilosopherState.AcquiringForks)
                     .OnEntered(AcquiringForksEntered)
                     .OnLeaving(AcquiringForksLeaving)
-                    .OnTrigger(PhilisopherTrigger.GotForks).TransitionTo(PhilisopherState.Eating, TransitioningFromAcquiringForksToEating)
-                    .OnTrigger(PhilisopherTrigger.Deadlocked).TransitionTo(PhilisopherState.Thinking, TransitioningFromAcquiringForksToThinking);
+                    .OnTrigger(PhilosopherTrigger.GotForks).TransitionTo(PhilosopherState.Eating, TransitioningFromAcquiringForksToEating)
+                    .OnTrigger(PhilosopherTrigger.Deadlocked).TransitionTo(PhilosopherState.Thinking, TransitioningFromAcquiringForksToThinking);
 
-                machine.State(PhilisopherState.Eating)
+                machine.State(PhilosopherState.Eating)
                     .OnEntered(EatingEntered)
                     .OnLeaving(EatingLeaving)
-                    .OnTrigger(PhilisopherTrigger.Full).TransitionTo(PhilisopherState.Thinking, TransitioningFromEatingToThinking);
+                    .OnTrigger(PhilosopherTrigger.Full).TransitionTo(PhilosopherState.Thinking, TransitioningFromEatingToThinking);
+
+                if (RestoreStateTo.HasValue)
+                {
+                    machine.RestoreState(RestoreStateTo.Value);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void AddLog(string message)
+            {
+                _log.Add(message);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -313,6 +490,7 @@ namespace NWheels.Implementation.UnitTests.Microservices.Primitives
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public PhilosopherState? RestoreStateTo { get; set; }
             public bool ThrowFromThinkingEntered { get; set; }
             public bool ThrowFromThinkingLeaving { get; set; }
             public bool ThrowFromAcquiringForksEntered { get; set; }
@@ -323,13 +501,14 @@ namespace NWheels.Implementation.UnitTests.Microservices.Primitives
             public bool ThrowFromEatingEntered { get; set; }
             public bool ThrowFromEatingLeaving { get; set; }
             public bool ThrowFromTransitioningFromEatingToThinking { get; set; }
+            public bool FeedBackFromThinking { get; set; }
             public bool FeedBackFromEating { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private void LogAndThrow(
                 bool shouldThrow,
-                StateMachineEventArgs<PhilisopherState, PhilisopherTrigger> args,
+                StateMachineEventArgs<PhilosopherState, PhilosopherTrigger> args,
                 [CallerMemberName] string methodName = null)
             {
                 _log.Add(
@@ -350,77 +529,162 @@ namespace NWheels.Implementation.UnitTests.Microservices.Primitives
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void ThinkingEntered(object sender, StateMachineFeedbackEventArgs<PhilisopherState, PhilisopherTrigger> e)
+            private void ThinkingEntered(object sender, StateMachineFeedbackEventArgs<PhilosopherState, PhilosopherTrigger> e)
             {
                 LogAndThrow(ThrowFromThinkingEntered, e);
+
+                if (FeedBackFromThinking)
+                {
+                    e.ReceiveFeedback(PhilosopherTrigger.Hungry);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void ThinkingLeaving(object sender, StateMachineEventArgs<PhilisopherState, PhilisopherTrigger> e)
+            private void ThinkingLeaving(object sender, StateMachineEventArgs<PhilosopherState, PhilosopherTrigger> e)
             {
                 LogAndThrow(ThrowFromThinkingLeaving, e);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void AcquiringForksEntered(object sender, StateMachineFeedbackEventArgs<PhilisopherState, PhilisopherTrigger> e)
+            private void AcquiringForksEntered(object sender, StateMachineFeedbackEventArgs<PhilosopherState, PhilosopherTrigger> e)
             {
                 LogAndThrow(ThrowFromAcquiringForksEntered, e);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void AcquiringForksLeaving(object sender, StateMachineEventArgs<PhilisopherState, PhilisopherTrigger> e)
+            private void AcquiringForksLeaving(object sender, StateMachineEventArgs<PhilosopherState, PhilosopherTrigger> e)
             {
                 LogAndThrow(ThrowFromAcquiringForksLeaving, e);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void TransitioningFromThinkingToAcquiringForks(object sender, StateMachineEventArgs<PhilisopherState, PhilisopherTrigger> e)
+            private void TransitioningFromThinkingToAcquiringForks(object sender, StateMachineEventArgs<PhilosopherState, PhilosopherTrigger> e)
             {
                 LogAndThrow(ThrowFromTransitioningFromThinkingToAcquiringForks, e);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void TransitioningFromAcquiringForksToEating(object sender, StateMachineEventArgs<PhilisopherState, PhilisopherTrigger> e)
+            private void TransitioningFromAcquiringForksToEating(object sender, StateMachineEventArgs<PhilosopherState, PhilosopherTrigger> e)
             {
                 LogAndThrow(ThrowFromTransitioningFromAcquiringForksToEating, e);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void TransitioningFromAcquiringForksToThinking(object sender, StateMachineEventArgs<PhilisopherState, PhilisopherTrigger> e)
+            private void TransitioningFromAcquiringForksToThinking(object sender, StateMachineEventArgs<PhilosopherState, PhilosopherTrigger> e)
             {
                 LogAndThrow(ThrowFromTransitioningFromAcquiringForksToThinking, e);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void EatingEntered(object sender, StateMachineFeedbackEventArgs<PhilisopherState, PhilisopherTrigger> e)
+            private void EatingEntered(object sender, StateMachineFeedbackEventArgs<PhilosopherState, PhilosopherTrigger> e)
             {
                 LogAndThrow(ThrowFromEatingEntered, e);
 
                 if (FeedBackFromEating)
                 {
-                    e.ReceiveFeedback(PhilisopherTrigger.Full);
+                    e.ReceiveFeedback(PhilosopherTrigger.Full);
                 }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void EatingLeaving(object sender, StateMachineEventArgs<PhilisopherState, PhilisopherTrigger> e)
+            private void EatingLeaving(object sender, StateMachineEventArgs<PhilosopherState, PhilosopherTrigger> e)
             {
                 LogAndThrow(ThrowFromEatingLeaving, e);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void TransitioningFromEatingToThinking(object sender, StateMachineEventArgs<PhilisopherState, PhilisopherTrigger> e)
+            private void TransitioningFromEatingToThinking(object sender, StateMachineEventArgs<PhilosopherState, PhilosopherTrigger> e)
             {
                 LogAndThrow(ThrowFromTransitioningFromEatingToThinking, e);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class NoInitialStateCodeBehind : IStateMachineCodeBehind<PhilosopherState, PhilosopherTrigger>
+        {
+            public void BuildStateMachine(IStateMachineBuilder<PhilosopherState, PhilosopherTrigger> machine)
+            {
+                machine.State(PhilosopherState.Thinking)
+                    .OnTrigger(PhilosopherTrigger.Hungry).TransitionTo(PhilosopherState.AcquiringForks);
+
+                machine.State(PhilosopherState.AcquiringForks)
+                    .OnTrigger(PhilosopherTrigger.GotForks).TransitionTo(PhilosopherState.Eating)
+                    .OnTrigger(PhilosopherTrigger.Deadlocked).TransitionTo(PhilosopherState.Thinking);
+
+                machine.State(PhilosopherState.Eating)
+                    .OnTrigger(PhilosopherTrigger.Full).TransitionTo(PhilosopherState.Thinking);
+
+                // this should throw: not initial state was defined
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class RedefiningInitialStateCodeBehind : IStateMachineCodeBehind<PhilosopherState, PhilosopherTrigger>
+        {
+            public void BuildStateMachine(IStateMachineBuilder<PhilosopherState, PhilosopherTrigger> machine)
+            {
+                machine.State(PhilosopherState.Thinking)
+                    .SetAsInitial()
+                    .OnTrigger(PhilosopherTrigger.Hungry).TransitionTo(PhilosopherState.AcquiringForks);
+
+                machine.State(PhilosopherState.AcquiringForks)
+                    .SetAsInitial() // this should throw: attempt to define initial state twice
+                    .OnTrigger(PhilosopherTrigger.GotForks).TransitionTo(PhilosopherState.Eating)
+                    .OnTrigger(PhilosopherTrigger.Deadlocked).TransitionTo(PhilosopherState.Thinking);
+
+                machine.State(PhilosopherState.Eating)
+                    .OnTrigger(PhilosopherTrigger.Full).TransitionTo(PhilosopherState.Thinking);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class DoubleStateCodeBehind : IStateMachineCodeBehind<PhilosopherState, PhilosopherTrigger>
+        {
+            public void BuildStateMachine(IStateMachineBuilder<PhilosopherState, PhilosopherTrigger> machine)
+            {
+                machine.State(PhilosopherState.Thinking)
+                    .SetAsInitial()
+                    .OnTrigger(PhilosopherTrigger.Hungry).TransitionTo(PhilosopherState.AcquiringForks);
+
+                machine.State(PhilosopherState.AcquiringForks)
+                    .OnTrigger(PhilosopherTrigger.GotForks).TransitionTo(PhilosopherState.Eating)
+                    .OnTrigger(PhilosopherTrigger.Deadlocked).TransitionTo(PhilosopherState.Thinking);
+
+                machine.State(PhilosopherState.Eating)
+                    .OnTrigger(PhilosopherTrigger.Full).TransitionTo(PhilosopherState.Thinking);
+
+                machine.State(PhilosopherState.Thinking); // this should throw: attempt to define same state twice
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class DoubleTriggerCodeBehind : IStateMachineCodeBehind<PhilosopherState, PhilosopherTrigger>
+        {
+            public void BuildStateMachine(IStateMachineBuilder<PhilosopherState, PhilosopherTrigger> machine)
+            {
+                machine.State(PhilosopherState.Thinking)
+                    .SetAsInitial()
+                    .OnTrigger(PhilosopherTrigger.Hungry).TransitionTo(PhilosopherState.AcquiringForks);
+
+                machine.State(PhilosopherState.AcquiringForks)
+                    .OnTrigger(PhilosopherTrigger.GotForks).TransitionTo(PhilosopherState.Eating)
+                    .OnTrigger(PhilosopherTrigger.GotForks).TransitionTo(PhilosopherState.Thinking); // this should throw: redifinition of GotForks trigger
+
+                machine.State(PhilosopherState.Eating)
+                    .OnTrigger(PhilosopherTrigger.Full).TransitionTo(PhilosopherState.Thinking);
             }
         }
 

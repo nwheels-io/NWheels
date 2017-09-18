@@ -14,9 +14,11 @@ namespace NWheels.Kernel.Api.Primitives
     {
         IStateMachineStateBuilder<TState, TTrigger> SetAsInitial();
         IStateMachineStateBuilder<TState, TTrigger> OnEntered(EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> handler);
-        IStateMachineStateBuilder<TState, TTrigger> OnTimeout(TimeSpan timeout, EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> handler, bool recurring = false);
         IStateMachineStateBuilder<TState, TTrigger> OnLeaving(EventHandler<StateMachineEventArgs<TState, TTrigger>> handler);
         IStateMachineTransitionBuilder<TState, TTrigger> OnTrigger(TTrigger trigger);
+
+        //TODO: implement timeout
+        //IStateMachineStateBuilder<TState, TTrigger> OnTimeout(TimeSpan timeout, EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> handler, bool recurring = false);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
