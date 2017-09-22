@@ -8,7 +8,7 @@ namespace NWheels.Microservices.Runtime
 {
     public interface IModuleLoader
     {
-        IEnumerable<IFeatureLoader> GetBootFeatureLoaders(IBootConfiguration bootConfig);
+        IEnumerable<IFeatureLoader> GetBootFeatureLoaders();
         IEnumerable<Type> GetModulePublicTypes(IModuleConfiguration moduleConfig);
     }
 }

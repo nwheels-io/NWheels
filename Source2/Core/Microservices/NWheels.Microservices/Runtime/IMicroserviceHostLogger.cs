@@ -1,92 +1,190 @@
 ﻿using NWheels.Kernel.Api.Execution;
 using System;
+using NWheels.Kernel.Api.Logging;
 
 namespace NWheels.Microservices.Runtime
 {
+    [LoggerComponent]
     public interface IMicroserviceHostLogger
     {
-        IExecutionPathActivity NodeConfiguring();
+        [LogVerbose]
+        void StartingInState(MicroserviceState state);
 
-        IExecutionPathActivity NodeLoading();
+        [LogVerbose]
+        void EnteredState(MicroserviceState state);
 
-        void NodeHasFailedToConfigure(Exception e);
+        [LogCritical]
+        void Faulted();
 
-        Exception NodeHasFailedToConfigure();
+        [LogVerbose]
+        IExecutionPathActivity Configuring();
 
-        void NodeHasFailedToLoad(Exception e);
+        [LogInfo]
+        void Configured();
 
-        Exception NodeHasFailedToLoad();
+        [LogCritical]
+        void FailedToConfigure(Exception error);
 
-        void NodeSuccessfullyLoaded();
+        [LogVerbose]
+        IExecutionPathActivity Compiling();
 
-        IExecutionPathActivity NodeActivating();
+        [LogInfo]
+        void Compiled();
 
-        void NodeHasFailedToActivate(Exception e);
+        [LogCritical]
+        void FailedToCompile(Exception error);
 
-        Exception NodeHasFailedToActivate();
+        [LogVerbose]
+        IExecutionPathActivity Loading();
 
-        void NodeSuccessfullyActivated();
+        [LogInfo]
+        void Loaded();
 
-        IExecutionPathActivity NodeStartingUp();
+        [LogCritical]
+        void FailedToLoad(Exception error);
 
-        IExecutionPathActivity NodeDeactivating();
+        [LogVerbose]
+        IExecutionPathActivity Activating();
 
-        Exception NodeHasFailedToDeactivate();
+        [LogInfo]
+        void Activated();
 
-        void NodeDeactivated();
+        [LogCritical]
+        void FailedToActivate(Exception error);
 
-        IExecutionPathActivity NodeShuttingDown();
+        [LogVerbose]
+        IExecutionPathActivity Deactivating();
 
-        IExecutionPathActivity NodeUnloading();
+        [LogInfo]
+        void Deactivated();
 
-        Exception NodeHasFailedToUnload();
+        [LogCritical]
+        void FailedToDeactivate(Exception error);
 
-        void NodeUnloaded();
+        [LogVerbose]
+        IExecutionPathActivity Unloading();
 
-        void NodeConfigureError(Exception e);
+        [LogInfo]
+        void Unloaded();
 
-        void NodeLoadError(Exception e);
+        [LogCritical]
+        void FailedToUnload(Exception error);
 
-        void NodeActivationError(Exception e);
+        [LogVerbose]
+        void UsingFeatureLoader(Type type);
 
-        void NodeDeactivationError(Exception e);
+        [LogVerbose]
+        IExecutionPathActivity FeaturesContributingConfigSections();
 
-        void NodeUnloadError(Exception e);
+        [LogVerbose]
+        IExecutionPathActivity FeatureContributingConfigSections(Type loader);
 
-        IExecutionPathActivity LookingForLifecycleComponents();
+        [LogVerbose]
+        IExecutionPathActivity FeaturesContributingConfiguration();
 
-        void FoundLifecycleComponent(string component);
+        [LogVerbose]
+        IExecutionPathActivity FeatureContributingConfiguration(Type loader);
 
-        void FoundFeatureLoaderComponent(string component);
+        [LogVerbose]
+        IExecutionPathActivity FeaturesContributingComponents();
 
-        void NoLifecycleComponentsFound();
+        [LogVerbose]
+        IExecutionPathActivity FeatureContributingComponents(Type loader);
 
-        void FailedToLoadLifecycleComponents(Exception e);
+        [LogVerbose]
+        IExecutionPathActivity FeaturesContributingAdapterComponents();
 
-        void ComponentsEventFailed(Type component, string @event, Exception error);
+        [LogVerbose]
+        IExecutionPathActivity FeatureContributingAdapterComponents(Type loader);
 
-        IExecutionPathActivity MicroserviceLoading(string component);
+        [LogVerbose]
+        IExecutionPathActivity FeaturesCompilingComponents();
 
-        IExecutionPathActivity MicroserviceUnloaded(string component);
+        [LogVerbose]
+        IExecutionPathActivity FeatureCompilingComponents(Type loader);
 
-        IExecutionPathActivity MicroserviceLoad(string component);
+        [LogVerbose]
+        IExecutionPathActivity FeaturesContributingCompiledComponents();
 
-        IExecutionPathActivity MicroserviceUnload(string component);
+        [LogVerbose]
+        IExecutionPathActivity FeatureContributingCompiledComponents(Type loader);
 
-        IExecutionPathActivity MicroserviceLoaded(string component);
+        [LogVerbose]
+        IExecutionPathActivity ExecutingFeatureLoaderPhaseExtension(Type loaderType, string phase);
 
-        IExecutionPathActivity MicroserviceUnloading(string component);
+        [LogError]
+        void FeatureLoaderFailed(Type loaderType, string phase, Exception error);
 
-        IExecutionPathActivity MicroserviceActivating(string component);
+        [LogError]
+        void FeatureLoaderPhaseExtensionFailed(Type loaderType, string phase, Exception error);
 
-        IExecutionPathActivity MicroserviceDeactivated(string component);
+        [LogVerbose]
+        IExecutionPathActivity LoadingLifecycleComponents();
 
-        IExecutionPathActivity MicroserviceActivate(string component);
+        [LogVerbose]
+        void LoadedLifecycleComponent(Type type);
 
-        IExecutionPathActivity MicroserviceDeactivate(string component);
+        [LogCritical]
+        void FailedToLoadLifecycleComponents(Exception error);
 
-        IExecutionPathActivity MicroserviceActivated(string component);
+        [LogWarning]
+        void NoLifecycleComponentsLoaded();
 
-        IExecutionPathActivity MicroserviceDeactivating(string component);
+        [LogVerbose]
+        IExecutionPathActivity LifecycleComponentsMicroserviceLoading();
+
+        [LogVerbose]
+        IExecutionPathActivity LifecycleComponentsLoad();
+
+        [LogVerbose]
+        IExecutionPathActivity LifecycleComponentsMicroserviceLoaded();
+
+        [LogVerbose]
+        IExecutionPathActivity LifecycleComponentsMicroserviceActivating();
+
+        [LogVerbose]
+        IExecutionPathActivity LifecycleComponentsActivate();
+
+        [LogVerbose]
+        IExecutionPathActivity LifecycleComponentsMicroserviceActivated();
+
+        [LogVerbose]
+        IExecutionPathActivity LifecycleComponentsMicroserviceMaybeDeactivating();
+
+        [LogVerbose]
+        IExecutionPathActivity LifecycleComponentsMayDeactivate();
+
+        [LogVerbose]
+        IExecutionPathActivity LifecycleComponentsMicroserviceMaybeDeactivated();
+
+        [LogVerbose]
+        IExecutionPathActivity LifecycleComponentsMicroserviceMaybeUnloading();
+
+        [LogVerbose]
+        IExecutionPathActivity LifecycleComponentsMayUnload();
+
+        [LogVerbose]
+        IExecutionPathActivity LifecycleComponentsMicroserviceMaybeUnloaded();
+
+        [LogError]
+        void LifecycleComponentFailed(Type componentType, string lifecycleMethod, Exception error);
+
+        [LogInfo]
+        void RunningAsDaemon();
+
+        [LogInfo]
+        void StoppingDaemon();
+
+        [LogInfo]
+        void RunningInBatchJobMode();
+
+        [LogInfo]
+        void BatchJobCompleted();
+
+        [LogWarning]
+        void BatchJobCanceled();
+
+        [LogError]
+        void BatchJobFailed(Exception error);
     }
 }

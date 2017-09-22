@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using NWheels.Kernel.Api.Injection;
+using NWheels.Kernel.Api.Primitives;
 
 namespace NWheels.Microservices.Runtime
 {
@@ -26,6 +27,21 @@ namespace NWheels.Microservices.Runtime
         {
             throw new NotImplementedException();
         }
+
+        //TODO: move to MutableBootConfiguration.Validate
+        //private IAssemblyLocationMap GetAssemblyLocationMap()
+        //{
+        //    if (_bootConfig.AssemblyLocationMap != null)
+        //    {
+        //        return _bootConfig.AssemblyLocationMap;
+        //    }
+
+        //    var defaultMap = new AssemblyLocationMap();
+        //    //defaultMap.AddDirectory(_bootConfig.ConfigsDirectory);
+        //    defaultMap.AddDirectory(AppContext.BaseDirectory);
+        //    return defaultMap;
+        //}
+
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -81,7 +97,15 @@ namespace NWheels.Microservices.Runtime
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public string MicroserviceName { get; set; }
+        public bool IsPrecompiledMode { get; set; }
+        public bool IsBatchJobMode { get; set; }
+        public bool IsClusteredMode { get; set; }
         public IAssemblyLocationMap AssemblyLocationMap { get; set; }
+        public MicroserviceModuleLoaderFactory ModuleLoaderFactory { get; set; }
+        public MicroserviceHostLoggerFactory LoggerFactory { get; set; }
+        public MicroserviceStateCodeBehindFactory StateCodeBehindFactory { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         IReadOnlyList<IModuleConfiguration> IBootConfiguration.FrameworkModules => _frameworkModules;
         IReadOnlyList<IModuleConfiguration> IBootConfiguration.ApplicationModules => _applicationModules;
@@ -99,6 +123,13 @@ namespace NWheels.Microservices.Runtime
 
         public static readonly Assembly KernelAssembly = typeof(IFeatureLoader).Assembly;
         public static readonly string KernelAssemblyName = typeof(IFeatureLoader).Assembly.GetName().Name;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IStateMachineCodeBehind<MicroserviceState, MicroserviceTrigger> DefaultStateCodeBehindFactory(MicroserviceStateMachineOptions options)
+        {
+            return new DefaultMicroserviceStateCodeBehind(options);
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

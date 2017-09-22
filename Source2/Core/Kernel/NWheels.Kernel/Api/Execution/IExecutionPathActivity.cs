@@ -8,5 +8,6 @@ namespace NWheels.Kernel.Api.Execution
     {
         void Fail(Exception error);
         void Fail(string reason);
+        string Text { get; }
     }
 }

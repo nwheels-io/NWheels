@@ -20,7 +20,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             builder.RegisterComponentType<ComponentA>().ForService<IAnyComponent>();
             builder.RegisterComponentType<ComponentB>().ForService<IAnyComponent>();
 
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder.CreateComponentContainer();
 
             //-- act
 

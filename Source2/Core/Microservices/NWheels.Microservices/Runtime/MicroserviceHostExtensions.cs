@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if false
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -61,3 +63,5 @@ namespace NWheels.Microservices.Runtime
         }
     }
 }
+
+#endif

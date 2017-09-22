@@ -2,21 +2,35 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using NWheels.Kernel.Api.Exceptions;
 
 namespace NWheels.Kernel.Api.Primitives
 {
-    public class StateMachine<TState, TTrigger> : IStateMachine<TState, TTrigger>, IStateMachineBuilder<TState, TTrigger>
+    public static class StateMachine
+    {
+        public static StateMachine<TState, TTrigger> CreateFrom<TState, TTrigger>(IStateMachineCodeBehind<TState, TTrigger> codeBehind)
+        {
+            return new StateMachine<TState, TTrigger>(codeBehind);
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class StateMachine<TState, TTrigger> : IStateMachineBuilder<TState, TTrigger>
     {
         private readonly IStateMachineCodeBehind<TState, TTrigger> _codeBehind;
-        private readonly ILogger _logger;
         private readonly Dictionary<TState, MachineState> _states;
         private MachineState _currentState;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public StateMachine(IStateMachineCodeBehind<TState, TTrigger> codeBehind, ILogger logger)
+        public StateMachine(IStateMachineCodeBehind<TState, TTrigger> codeBehind)
         {
-            _logger = logger;
+            if (codeBehind == null)
+            {
+                throw new ArgumentNullException(nameof(codeBehind));
+            }
+
             _codeBehind = codeBehind;
             _states = new Dictionary<TState, MachineState>();
 
@@ -24,7 +38,7 @@ namespace NWheels.Kernel.Api.Primitives
 
             if (_currentState == null)
             {
-                throw _logger.InitialStateNotSet(_codeBehind.GetType());
+                throw StateMachineException.InitialStateNotSet(_codeBehind.GetType());
             }
 
             var eventArgs = new StateMachineFeedbackEventArgs<TState, TTrigger>(_currentState.Value);
@@ -40,9 +54,9 @@ namespace NWheels.Kernel.Api.Primitives
 
         IStateMachineStateBuilder<TState, TTrigger> IStateMachineBuilder<TState, TTrigger>.State(TState value)
         {
-            if (_states.ContainsKey(value))
+            if (_states.TryGetValue(value, out MachineState existingState))
             {
-                throw _logger.StateAlreadyDefined(_codeBehind.GetType(), value);
+                return existingState;
             }
 
             var newState = new MachineState(this, value);
@@ -111,7 +125,7 @@ namespace NWheels.Kernel.Api.Primitives
         {
             if (_currentState != null)
             {
-                throw _logger.InitialStateAlreadyDefined(_codeBehind.GetType(), _currentState.Value, machineState.Value);
+                throw StateMachineException.InitialStateAlreadyDefined(_codeBehind.GetType(), _currentState.Value.ToString(), machineState.Value.ToString());
             }
 
             _currentState = machineState;
@@ -122,11 +136,11 @@ namespace NWheels.Kernel.Api.Primitives
         private StateMachineFeedbackEventArgs<TState, TTrigger> PerformTrigger(TTrigger trigger, object context)
         {
             var currentState = _currentState;
-            var transition = currentState.ValidateTransition(trigger);
+            var transition = currentState.TryGetTransition(trigger);
 
             if (transition == null)
             {
-                throw _logger.TransitionNotDefined(_codeBehind.GetType(), currentState.Value, trigger);
+                throw StateMachineException.TriggetNotValidInCurrentState(_codeBehind.GetType(), currentState.Value.ToString(), trigger.ToString());
             }
 
             var eventArgs = new StateMachineFeedbackEventArgs<TState, TTrigger>(_currentState.Value, transition.DestinationStateValue, trigger, context);
@@ -222,7 +236,7 @@ namespace NWheels.Kernel.Api.Primitives
             {
                 if (_transitions.ContainsKey(trigger))
                 {
-                    throw _ownerMachine._logger.TransitionAlreadyDefined(_ownerMachine._codeBehind.GetType(), _value, trigger);
+                    throw StateMachineException.TransitionAlreadyDefined(_ownerMachine._codeBehind.GetType(), _value.ToString(), trigger.ToString());
                 }
 
                 return new StateTransition(_ownerMachine, this, trigger);
@@ -230,7 +244,7 @@ namespace NWheels.Kernel.Api.Primitives
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public StateTransition ValidateTransition(TTrigger trigger)
+            public StateTransition TryGetTransition(TTrigger trigger)
             {
                 StateTransition transition;
 
@@ -337,21 +351,6 @@ namespace NWheels.Kernel.Api.Primitives
             {
                 get { return _destinationStateValue; }
             }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public interface ILogger
-        {
-            Exception InitialStateNotSet(Type codeBehind);
-
-            Exception StateAlreadyDefined(Type codeBehind, TState state);
-
-            Exception InitialStateAlreadyDefined(Type codeBehind, TState initialState, TState attemptedState);
-
-            Exception TransitionAlreadyDefined(Type codeBehind, TState state, TTrigger trigger);
-
-            Exception TransitionNotDefined(Type codeBehind, TState state, TTrigger trigger);
         }
     }
 }

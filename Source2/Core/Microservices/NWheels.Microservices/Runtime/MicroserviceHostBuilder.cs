@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Linq;
 using NWheels.Kernel.Api.Injection;
 using System.Xml.Linq;
+using NWheels.Kernel.Api.Primitives;
 
 namespace NWheels.Microservices.Runtime
 {

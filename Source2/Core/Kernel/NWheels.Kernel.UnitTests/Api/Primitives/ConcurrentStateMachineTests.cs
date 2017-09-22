@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using NWheels.Testability;
 using NWheels.Kernel.Api.Primitives;
 using Xunit;
+using FluentAssertions;
 
 using PhilosopherState = NWheels.Kernel.UnitTests.Api.Primitives.StateMachineTests.PhilosopherState;
 using PhilosopherTrigger = NWheels.Kernel.UnitTests.Api.Primitives.StateMachineTests.PhilosopherTrigger;
 using PhilisopherCodeBehindWithEvents = NWheels.Kernel.UnitTests.Api.Primitives.StateMachineTests.PhilisopherCodeBehindWithEvents;
-using System.Threading;
-using FluentAssertions;
 
 namespace NWheels.Kernel.UnitTests.Api.Primitives
 {
@@ -21,9 +21,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new ConcurrentStateMachine<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(codeBehind);
 
             //-- Act
 
@@ -64,7 +62,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new ConcurrentStateMachine<PhilosopherState, PhilosopherTrigger>(
+            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(
                 codeBehind,
                 null);
 
@@ -107,7 +105,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new ConcurrentStateMachine<PhilosopherState, PhilosopherTrigger>(
+            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(
                 codeBehind,
                 null);
 
@@ -159,7 +157,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new ConcurrentStateMachine<PhilosopherState, PhilosopherTrigger>(
+            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(
                 codeBehind,
                 null);
 
@@ -208,7 +206,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new ConcurrentStateMachine<PhilosopherState, PhilosopherTrigger>(
+            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(
                 codeBehind,
                 null);
 
@@ -252,7 +250,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new ConcurrentStateMachine<PhilosopherState, PhilosopherTrigger>(
+            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(
                 codeBehind,
                 null);
             var cancellation = new CancellationTokenSource();
@@ -308,7 +306,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new ConcurrentStateMachine<PhilosopherState, PhilosopherTrigger>(
+            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(
                 codeBehind,
                 null);
 

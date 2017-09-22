@@ -1,6 +1,6 @@
 ﻿namespace NWheels.Microservices.Api
 {
-    public class LifecycleListenerComponentBase : ILifecycleListenerComponent
+    public class LifecycleComponentBase : ILifecycleComponent
     {
         public virtual void MicroserviceLoading()
         {

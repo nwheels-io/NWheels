@@ -1,14 +1,14 @@
 ﻿namespace NWheels.Microservices.Runtime
 {
-    internal enum MicroserviceTrigger
+    public enum MicroserviceTrigger
     {
-        Configure,
-        Failed,
         OK,
-        Unload,
+        Failed,
+        Configure,
+        Compile,
         Load,
         Activate,
         Deactivate,
-        Done
+        Unload
     }
 }

@@ -3,7 +3,7 @@ using System;
 
 namespace NWheels.Microservices.Runtime.Mocks
 {
-    internal class TransientStateMachineLoggerMock<TState, TTrigger> : StateMachine<TState, TTrigger>.ILogger
+    internal class TransientStateMachineLoggerMock<TState, TTrigger> 
     {
         public Exception InitialStateAlreadyDefined(Type codeBehind, TState initialState, TState attemptedState)
         {

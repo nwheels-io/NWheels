@@ -50,10 +50,11 @@ namespace NWheels.Kernel.Runtime.Injection
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IInternalComponentContainer CreateComponentContainer(bool isRootContainer)
+        public IInternalComponentContainer CreateComponentContainer()
         {
             var underlyingContainer = _containerBuilder.Build();
             var wrappingContainer = new ComponentContainer(underlyingContainer);
+            var isRootContainer = (_rootContainer == null);
 
             if (isRootContainer)
             {

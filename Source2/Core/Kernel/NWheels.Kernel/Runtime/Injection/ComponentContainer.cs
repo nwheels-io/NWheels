@@ -101,7 +101,7 @@ namespace NWheels.Kernel.Runtime.Injection
 
         public void Merge(IInternalComponentContainerBuilder containerBuilder)
         {
-            var componentContainer = (ComponentContainer)containerBuilder.CreateComponentContainer(isRootContainer: false);
+            var componentContainer = (ComponentContainer)containerBuilder.CreateComponentContainer();
 
             foreach (var componentRegistration in componentContainer._container.ComponentRegistry.Registrations)
             {
