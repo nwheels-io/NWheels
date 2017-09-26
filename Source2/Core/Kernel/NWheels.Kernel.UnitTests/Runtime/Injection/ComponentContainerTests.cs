@@ -66,7 +66,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             //-- arrange
 
             var builder = new ComponentContainerBuilder();
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder.CreateComponentContainer();
 
             //-- act
 
@@ -117,7 +117,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             builder.RegisterComponentType<ComponentA>().ForService<IServiceA>();
             builder.RegisterComponentType<ComponentB>().ForService<IServiceB>();
 
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder.CreateComponentContainer();
 
             //-- act
 
@@ -144,7 +144,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             builder.RegisterComponentType<ComponentA>().ForService<IServiceA>();
             builder.RegisterComponentType<ComponentB>().ForService<IServiceB>();
 
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder.CreateComponentContainer();
 
             //-- act
 
@@ -170,7 +170,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             var builder = new ComponentContainerBuilder();
             builder.RegisterComponentType<ComponentB>().ForService<ISpecialComponent>().AsFallback();
 
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder.CreateComponentContainer();
 
             //-- act
 
@@ -193,7 +193,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             builder.RegisterComponentType<ComponentB>().ForService<ISpecialComponent>().AsFallback();
             builder.RegisterComponentType<ComponentC>().ForService<ISpecialComponent>();
 
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder.CreateComponentContainer();
 
             //-- act
 
@@ -215,7 +215,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             builder.RegisterComponentType<ComponentA>().NamedForService<IAnyComponent>("AAA");
             builder.RegisterComponentType<ComponentB>().NamedForService<IAnyComponent>("BBB");
 
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder.CreateComponentContainer();
 
             //-- act
 
@@ -238,7 +238,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             builder.RegisterComponentType<ComponentA>().NamedForService<IAnyComponent>("AAA");
             builder.RegisterComponentType<ComponentB>().NamedForService<IAnyComponent>("BBB");
 
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder.CreateComponentContainer();
 
             //-- act
 
@@ -260,7 +260,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             var builder = new ComponentContainerBuilder();
             builder.RegisterComponentType<ComponentA>().ForService<IServiceA>();
 
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder.CreateComponentContainer();
 
             //-- act
 
@@ -284,7 +284,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             var builder = new ComponentContainerBuilder();
             builder.RegisterComponentType<ComponentA>().ForService<IServiceA>();
 
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder.CreateComponentContainer();
 
             //-- act
 
@@ -307,7 +307,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             var builder = new ComponentContainerBuilder();
             builder.RegisterComponentType<ComponentA>().ForService<IServiceA>();
 
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder.CreateComponentContainer();
 
             //-- act
 
@@ -331,7 +331,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             var builder = new ComponentContainerBuilder();
             builder.RegisterComponentType<ComponentA>().ForService<IServiceA>();
 
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder.CreateComponentContainer();
 
             //-- act
 
@@ -354,7 +354,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             var builder1 = new ComponentContainerBuilder();
             builder1.RegisterComponentType<ComponentA>().ForService<IAnyComponent>();
 
-            var containerUnderTest = builder1.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder1.CreateComponentContainer();
 
             //-- act
 
@@ -380,7 +380,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             var builder1 = new ComponentContainerBuilder();
             builder1.RegisterComponentType<ComponentA>().ForService<IAnyComponent>();
 
-            var containerUnderTest = builder1.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder1.CreateComponentContainer();
 
             //-- act
 
@@ -409,7 +409,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             builder.RegisterComponentType<ComponentB>().ForServices<IServiceB, IAnyComponent>();
             builder.RegisterComponentType<ComponentC>().NamedForServices<IServiceC, IAnyComponent>("CCC");
 
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder.CreateComponentContainer();
 
             //-- act
 
@@ -440,7 +440,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             var builder = new ComponentContainerBuilder();
             builder.RegisterComponentType<ComponentB>();
 
-            var containerUnderTest = builder.CreateComponentContainer(isRootContainer: true);
+            var containerUnderTest = builder.CreateComponentContainer();
             var component = containerUnderTest.Resolve<ComponentB>();
 
             //-- act

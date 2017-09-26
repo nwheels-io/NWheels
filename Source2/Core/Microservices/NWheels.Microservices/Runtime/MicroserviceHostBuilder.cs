@@ -102,13 +102,7 @@ namespace NWheels.Microservices.Runtime
             {
                 try
                 {
-                    _bootConfig.HostComponents.Register(builder => {
-                        builder.RegisterComponentType<ConsoleMicroserviceHostLogger>().SingleInstance().ForService<IMicroserviceHostLogger>();
-                        builder.RegisterComponentType<InspectCommand>().ForService<ICliCommand>();
-                        builder.RegisterComponentType<CompileCommand>().ForService<ICliCommand>();
-                        builder.RegisterComponentType<JobCommand>().ForService<ICliCommand>();
-                        builder.RegisterComponentType<RunCommand>().ForService<ICliCommand>();
-                    });
+                    _bootConfig.HostComponents.Register(RegisterCliHostComponents);
 
                     var host = Build();
                     return cli.Run(host, args);
@@ -133,6 +127,31 @@ namespace NWheels.Microservices.Runtime
             {
                 contributor(existingComponents, newComponents);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void RegisterCliHostComponents(IComponentContainerBuilder builder)
+        {
+            builder.RegisterComponentType<ConsoleMicroserviceHostLogger>()
+                .SingleInstance()
+                .ForService<IMicroserviceHostLogger>()
+                .AsFallback();
+
+            builder.RegisterComponentType<DefaultModuleLoader>()
+                .SingleInstance()
+                .ForService<IModuleLoader>()
+                .AsFallback();
+
+            builder.RegisterComponentType<DefaultMicroserviceStateCodeBehind>()
+                .InstancePerDependency()
+                .ForService<IStateMachineCodeBehind<MicroserviceState, MicroserviceTrigger>>()
+                .AsFallback();
+
+            builder.RegisterComponentType<InspectCommand>().ForService<ICliCommand>();
+            builder.RegisterComponentType<CompileCommand>().ForService<ICliCommand>();
+            builder.RegisterComponentType<JobCommand>().ForService<ICliCommand>();
+            builder.RegisterComponentType<RunCommand>().ForService<ICliCommand>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

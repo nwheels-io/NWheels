@@ -21,10 +21,6 @@ namespace NWheels.Microservices.Runtime.Cli
 
     public class CliProgram : IDisposable
     {
-        private const string BootLogOption = "boot-log";
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         private readonly CancellationTokenSource _cancellation;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -67,7 +63,7 @@ namespace NWheels.Microservices.Runtime.Cli
         /// </remarks>
         public int Run(MicroserviceHost host, string[] args)
         {
-            var commands = host.GetContainer().ResolveAll<ICliCommand>().ToArray();
+            var commands = host.GetHostComponents().ResolveAll<ICliCommand>().ToArray();
             var parsedArgs = ParseCommandLine(commands, args);             // will Environment.Exit(1) if not parsed
             var activeCommand = FindActiveCommand(commands, parsedArgs);   // will Environment.Exit(1) if not found
             activeCommand.ValidateArguments(parsedArgs);                   // will Environment.Exit(1) if not valid
@@ -130,8 +126,6 @@ namespace NWheels.Microservices.Runtime.Cli
             var safeArgs = args.DefaultIfEmpty("--help");
 
             return ArgumentSyntax.Parse(safeArgs, syntax => {
-                syntax.DefineOption(BootLogOption, defaultValue: false);
-
                 foreach (var command in commands)
                 {
                     command.BindToCommandLine(syntax);

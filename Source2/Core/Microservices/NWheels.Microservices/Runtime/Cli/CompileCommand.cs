@@ -8,7 +8,7 @@ namespace NWheels.Microservices.Runtime.Cli
 {
     public class CompileCommand : CliCommandBase
     {
-        protected CompileCommand() 
+        public CompileCommand() 
             : base("compile", "Create precompiled version of the service")
         {
         }

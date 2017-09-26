@@ -8,7 +8,7 @@ namespace NWheels.Microservices.Runtime.Cli
 {
     public class JobCommand : CliCommandBase
     {
-        protected JobCommand() 
+        public JobCommand() 
             : base("job", "Execute a service job ad-hoc, and exit")
         {
         }

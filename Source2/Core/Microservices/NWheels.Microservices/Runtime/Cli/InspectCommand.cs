@@ -20,7 +20,7 @@ namespace NWheels.Microservices.Runtime.Cli
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected InspectCommand(MicroserviceHost host, MutableBootConfiguration bootConfig) 
+        public InspectCommand(MicroserviceHost host, MutableBootConfiguration bootConfig) 
             : base("inspect", "Inspect modules, features, components, and configuration")
         {
             _host = host;

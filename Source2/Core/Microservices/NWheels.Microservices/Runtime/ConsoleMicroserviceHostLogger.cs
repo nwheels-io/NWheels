@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using NWheels.Kernel.Api.Execution;
+using NWheels.Kernel.Api.Extensions;
 using NWheels.Kernel.Api.Logging;
+using NWheels.Microservices.Runtime.Cli;
 
 namespace NWheels.Microservices.Runtime
 {
@@ -21,421 +23,472 @@ namespace NWheels.Microservices.Runtime
 
         public void Activated()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Info, nameof(Activated));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity Activating()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(Activating));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void BatchJobCanceled()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Warning, nameof(BatchJobCanceled));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void BatchJobCompleted()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Info, nameof(BatchJobCompleted));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void BatchJobFailed(Exception error)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Error, $"{nameof(BatchJobFailed)}: {error}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Compiled()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Info, nameof(Compiled));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity Compiling()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(Compiling));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Configured()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Info, nameof(Configured));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity Configuring()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(Configuring));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Deactivated()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Info, nameof(Deactivated));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity Deactivating()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(Deactivating));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void EnteredState(MicroserviceState state)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, $"{nameof(EnteredState)}: {state}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity ExecutingFeatureLoaderPhaseExtension(Type loaderType, string phase)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, $"{nameof(ExecutingFeatureLoaderPhaseExtension)}: {loaderType.FriendlyName()}, phase: {phase}");
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void FailedToActivate(Exception error)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Critical, $"{nameof(FailedToActivate)}: {error}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void FailedToCompile(Exception error)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Critical, $"{nameof(FailedToCompile)}: {error}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void FailedToConfigure(Exception error)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Critical, $"{nameof(FailedToConfigure)}: {error}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void FailedToDeactivate(Exception error)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Critical, $"{nameof(FailedToDeactivate)}: {error}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void FailedToLoad(Exception error)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Critical, $"{nameof(FailedToLoad)}: {error}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void FailedToLoadLifecycleComponents(Exception error)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Critical, $"{nameof(FailedToLoadLifecycleComponents)}: {error}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void FailedToUnload(Exception error)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Critical, $"{nameof(FailedToUnload)}: {error}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Faulted()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Critical, nameof(Faulted));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity FeatureCompilingComponents(Type loader)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, $"{nameof(FeatureCompilingComponents)}: {loader.FriendlyName()}");
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity FeatureContributingAdapterComponents(Type loader)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, $"{nameof(FeatureContributingAdapterComponents)}: {loader.FriendlyName()}");
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity FeatureContributingCompiledComponents(Type loader)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, $"{nameof(FeatureContributingCompiledComponents)}: {loader.FriendlyName()}");
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity FeatureContributingComponents(Type loader)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, $"{nameof(FeatureContributingComponents)}: {loader.FriendlyName()}");
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity FeatureContributingConfigSections(Type loader)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, $"{nameof(FeatureContributingConfigSections)}: {loader.FriendlyName()}");
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity FeatureContributingConfiguration(Type loader)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, $"{nameof(FeatureContributingConfiguration)}: {loader.FriendlyName()}");
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void FeatureLoaderFailed(Type loaderType, string phase, Exception error)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Error, $"{nameof(FeatureLoaderFailed)}: phase={phase}, {error}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void FeatureLoaderPhaseExtensionFailed(Type loaderType, string phase, Exception error)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Error, $"{nameof(FeatureLoaderPhaseExtensionFailed)}: phase={phase}, {error}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity FeaturesCompilingComponents()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(FeaturesCompilingComponents));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity FeaturesContributingAdapterComponents()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(FeaturesContributingAdapterComponents));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity FeaturesContributingCompiledComponents()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(FeaturesContributingCompiledComponents));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity FeaturesContributingComponents()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(FeaturesContributingComponents));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity FeaturesContributingConfigSections()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(FeaturesContributingConfigSections));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity FeaturesContributingConfiguration()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(FeaturesContributingConfiguration));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void LifecycleComponentFailed(Type componentType, string lifecycleMethod, Exception error)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Error, $"{nameof(LifecycleComponentFailed)}: {componentType.FriendlyName()}, method={lifecycleMethod}, {error}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity LifecycleComponentsActivate()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsActivate));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity LifecycleComponentsLoad()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsLoad));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity LifecycleComponentsMayDeactivate()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMayDeactivate));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity LifecycleComponentsMayUnload()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMayUnload));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity LifecycleComponentsMicroserviceActivated()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceActivated));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity LifecycleComponentsMicroserviceActivating()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceActivating));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity LifecycleComponentsMicroserviceLoaded()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceLoaded));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity LifecycleComponentsMicroserviceLoading()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceLoading));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity LifecycleComponentsMicroserviceMaybeDeactivated()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceMaybeDeactivated));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity LifecycleComponentsMicroserviceMaybeDeactivating()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceMaybeDeactivating));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity LifecycleComponentsMicroserviceMaybeUnloaded()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceMaybeUnloaded));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity LifecycleComponentsMicroserviceMaybeUnloading()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceMaybeUnloading));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Loaded()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(Loaded));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void LoadedLifecycleComponent(Type type)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, $"{nameof(LoadedLifecycleComponent)}: {type.FriendlyName()}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity Loading()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(Loading));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity LoadingLifecycleComponents()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(LoadingLifecycleComponents));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void NoLifecycleComponentsLoaded()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Warning, nameof(NoLifecycleComponentsLoaded));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void RunningAsDaemon()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Info, nameof(RunningAsDaemon));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void RunningInBatchJobMode()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Info, nameof(RunningInBatchJobMode));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void StartingInState(MicroserviceState state)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, $"{nameof(StartingInState)}: {state}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void StoppingDaemon()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Info, nameof(StoppingDaemon));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Unloaded()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Info, nameof(Unloaded));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IExecutionPathActivity Unloading()
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, nameof(Unloading));
+            return _s_stubActivity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void UsingFeatureLoader(Type type)
         {
-            throw new NotImplementedException();
+            ColorConsole.Log(LogLevel.Verbose, $"{nameof(UsingFeatureLoader)}: {type.FriendlyName()}");
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly StubActivity _s_stubActivity = new StubActivity();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class StubActivity : IExecutionPathActivity
+        {
+            public void Dispose()
+            {
+            }
+            public void Fail(Exception error)
+            {
+            }
+            public void Fail(string reason)
+            {
+            }
+            public string Text => null;
+        }
     }
 }

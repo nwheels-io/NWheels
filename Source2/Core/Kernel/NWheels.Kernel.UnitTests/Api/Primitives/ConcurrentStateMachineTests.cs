@@ -153,7 +153,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(codeBehind);
+            var machine = StateMachineScheduler.CreateFrom(new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind));
 
             //-- Act
 
@@ -166,8 +166,8 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             var log0 = codeBehind.TakeLog();
 
             machine.RunOnCurrentThread(
-                exitWhen: m => m.CurrentState == PhilosopherState.Eating,
-                onError: err => {
+                exitWhen: state => state == PhilosopherState.Eating,
+                onError: (state, err) => {
                     errorCount++;
                     codeBehind.AddLog("ERROR");
                     return false;
@@ -200,27 +200,25 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var scheduler = StateMachineScheduler.CreateFrom(new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind));
 
             //-- Act
 
-            machine.QueueTrigger(PhilosopherTrigger.Hungry);
-            machine.QueueTrigger(PhilosopherTrigger.Hungry); // error: Hungry trigger is invalid in AcquiringForks state
-            machine.QueueTrigger(PhilosopherTrigger.GotForks);
+            scheduler.QueueTrigger(PhilosopherTrigger.Hungry);
+            scheduler.QueueTrigger(PhilosopherTrigger.Hungry); // error: Hungry trigger is invalid in AcquiringForks state
+            scheduler.QueueTrigger(PhilosopherTrigger.GotForks);
 
             var log0 = codeBehind.TakeLog();
 
-            machine.RunOnCurrentThread(
-                exitWhen: m => m.CurrentState == PhilosopherState.Eating,
+            scheduler.RunOnCurrentThread(
+                exitWhen: state => state == PhilosopherState.Eating,
                 onError: null);
 
             var log1 = codeBehind.TakeLog();
 
             //-- Assert
 
-            machine.CurrentState.Should().Be(PhilosopherState.Eating);
+            scheduler.CurrentState.Should().Be(PhilosopherState.Eating);
 
             log0.Should().Equal(new[] {
                 "ThinkingEntered(to[Thinking])"
@@ -244,13 +242,11 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var scheduler = StateMachineScheduler.CreateFrom(new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind));
             var cancellation = new CancellationTokenSource();
 
-            machine.CurrentStateChanged += (sender, args) => {
-                if (machine.CurrentState == PhilosopherState.AcquiringForks)
+            scheduler.CurrentStateChanged += (sender, args) => {
+                if (scheduler.CurrentState == PhilosopherState.AcquiringForks)
                 {
                     cancellation.Cancel();
                 }
@@ -260,14 +256,14 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
 
             var errorCount = 0;
 
-            machine.QueueTrigger(PhilosopherTrigger.Hungry);
-            machine.QueueTrigger(PhilosopherTrigger.GotForks); // should not execute
+            scheduler.QueueTrigger(PhilosopherTrigger.Hungry);
+            scheduler.QueueTrigger(PhilosopherTrigger.GotForks); // should not execute
 
             var log0 = codeBehind.TakeLog();
 
-            machine.RunOnCurrentThread(
-                exitWhen: m => m.CurrentState == PhilosopherState.Eating,
-                onError: err => {
+            scheduler.RunOnCurrentThread(
+                exitWhen: state => state == PhilosopherState.Eating,
+                onError: (state, err) => {
                     errorCount++;
                     codeBehind.AddLog("ERROR");
                     return true;
@@ -278,7 +274,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
 
             //-- Assert
 
-            machine.CurrentState.Should().Be(PhilosopherState.AcquiringForks);
+            scheduler.CurrentState.Should().Be(PhilosopherState.AcquiringForks);
             errorCount.Should().Be(0);
 
             log0.Should().Equal(new[] {
@@ -300,22 +296,20 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var scheduler = StateMachineScheduler.CreateFrom(new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind));
 
             //-- Act
 
             var errorCount = 0;
 
-            machine.QueueTrigger(PhilosopherTrigger.Hungry);
-            machine.QueueTrigger(PhilosopherTrigger.GotForks); // should not execute
+            scheduler.QueueTrigger(PhilosopherTrigger.Hungry);
+            scheduler.QueueTrigger(PhilosopherTrigger.GotForks); // should not execute
 
             var log0 = codeBehind.TakeLog();
 
-            machine.RunOnCurrentThread(
-                exitWhen: m => m.CurrentState == PhilosopherState.AcquiringForks,
-                onError: err => {
+            scheduler.RunOnCurrentThread(
+                exitWhen: state => state == PhilosopherState.AcquiringForks,
+                onError: (state, err) => {
                     errorCount++;
                     codeBehind.AddLog("ERROR");
                     return true;
@@ -325,7 +319,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
 
             //-- Assert
 
-            machine.CurrentState.Should().Be(PhilosopherState.AcquiringForks);
+            scheduler.CurrentState.Should().Be(PhilosopherState.AcquiringForks);
             errorCount.Should().Be(0);
 
             log0.Should().Equal(new[] {

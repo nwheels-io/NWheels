@@ -7,12 +7,6 @@ namespace NWheels.Kernel.Runtime.Injection
 {
     public abstract class FeatureLoaderWithPhaseExtensionBase : FeatureLoaderBase, IFeatureLoaderPhaseExtension
     {
-        public virtual void ContributeHostComponents(IComponentContainerBuilder newComponents)
-        {
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public virtual void BeforeContributeConfigSections(IComponentContainer components)
         {
         }

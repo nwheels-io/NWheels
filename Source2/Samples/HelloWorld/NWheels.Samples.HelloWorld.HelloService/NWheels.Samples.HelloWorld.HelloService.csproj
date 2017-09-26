@@ -10,6 +10,11 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <RuntimeIdentifiers>win10-x64;linux-x64</RuntimeIdentifiers>
+    <AssemblyName>hello</AssemblyName> 
+  </PropertyGroup>
+    
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <DebugType>Full</DebugType>
     <DebugSymbols>True</DebugSymbols>

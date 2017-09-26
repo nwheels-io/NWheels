@@ -12,7 +12,7 @@ namespace NWheels.Microservices.Runtime.Cli
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected RunCommand(MicroserviceHost host) 
+        public RunCommand(MicroserviceHost host) 
             : base("run", "Run microservice in the daemon mode")
         {
             _host = host;

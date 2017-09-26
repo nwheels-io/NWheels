@@ -7,7 +7,6 @@ namespace NWheels.Kernel.Runtime.Injection
 {
     public interface IFeatureLoaderPhaseExtension
     {
-        void ContributeHostComponents(IComponentContainerBuilder newComponents);
         void BeforeContributeConfigSections(IComponentContainer components);
         void BeforeContributeConfiguration(IComponentContainer components);
         void BeforeContributeComponents(IComponentContainer components);

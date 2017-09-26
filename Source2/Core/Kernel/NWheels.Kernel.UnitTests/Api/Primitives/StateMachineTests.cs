@@ -14,9 +14,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
         {
             //-- Arrange, Act
 
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                new PhilisopherCodeBehind(), 
-                null);
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(new PhilisopherCodeBehind());
 
             //-- Assert
 
@@ -53,10 +51,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
         {
             //-- Arrange
 
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                new PhilisopherCodeBehind(),
-                null);
-
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(new PhilisopherCodeBehind());
             Action act = () => machine.ReceiveTrigger(PhilosopherTrigger.GotForks);
 
             //-- Act  & assert
@@ -72,9 +67,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind);
 
             machine.CurrentStateChanged += (sender, args) => {
                 codeBehind.AddLog($"CurrentStateChanged:{machine.CurrentState}");
@@ -106,9 +99,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
 
             //-- Act
 
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind);
             var log1 = codeBehind.TakeLog();
 
             machine.ReceiveTrigger(PhilosopherTrigger.Hungry);
@@ -156,9 +147,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
                 ThrowFromThinkingLeaving = true
             };
 
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind);
 
             //-- Act
 
@@ -188,9 +177,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
                 ThrowFromTransitioningFromAcquiringForksToEating = true
             };
 
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind);
 
             //-- Act
 
@@ -223,9 +210,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
                 ThrowFromAcquiringForksEntered = true
             };
 
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind);
 
             codeBehind.TakeLog();
 
@@ -257,9 +242,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
                 FeedBackFromEating = true
             };
 
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind);
 
             machine.ReceiveTrigger(PhilosopherTrigger.Hungry);
             codeBehind.TakeLog();
@@ -294,9 +277,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
 
             //-- Act
 
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind);
 
             //-- Assert
 
@@ -322,9 +303,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
 
             //-- Act
 
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind);
 
             //-- Assert
 
@@ -341,9 +320,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
         {
             //-- Arrange
 
-            Action act = () => new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                new NoInitialStateCodeBehind(),
-                null);
+            Action act = () => new StateMachine<PhilosopherState, PhilosopherTrigger>(new NoInitialStateCodeBehind());
 
             //-- Act & Assert
 
@@ -353,17 +330,20 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void CodeBdehind_AttemptDefineStateTwice_Throw()
+        public void CodeBdehind_ReferToStateTwice_SameStateObject()
         {
             //-- Arrange
 
-            Action act = () => new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                new DoubleStateCodeBehind(),
-                null);
+            var codeBehind = new DoubleStateCodeBehind();
 
-            //-- Act & Assert
+            //-- Act
 
-            act.ShouldThrow<Exception>(); //TODO: verify correct exception
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind);
+
+            //-- Assert
+
+            codeBehind.ThinkingState2.Should().NotBeNull();
+            codeBehind.ThinkingState2.Should().BeSameAs(codeBehind.ThinkingState1);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -373,9 +353,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
         {
             //-- Arrange
 
-            Action act = () => new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                new RedefiningInitialStateCodeBehind(),
-                null);
+            Action act = () => new StateMachine<PhilosopherState, PhilosopherTrigger>(new RedefiningInitialStateCodeBehind());
 
             //-- Act & Assert
 
@@ -389,9 +367,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
         {
             //-- Arrange
 
-            Action act = () => new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                new DoubleTriggerCodeBehind(),
-                null);
+            Action act = () => new StateMachine<PhilosopherState, PhilosopherTrigger>(new DoubleTriggerCodeBehind());
 
             //-- Act & Assert
 
@@ -652,7 +628,8 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
         {
             public void BuildStateMachine(IStateMachineBuilder<PhilosopherState, PhilosopherTrigger> machine)
             {
-                machine.State(PhilosopherState.Thinking)
+                ThinkingState1 = machine.State(PhilosopherState.Thinking);
+                ThinkingState1
                     .SetAsInitial()
                     .OnTrigger(PhilosopherTrigger.Hungry).TransitionTo(PhilosopherState.AcquiringForks);
 
@@ -663,8 +640,13 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
                 machine.State(PhilosopherState.Eating)
                     .OnTrigger(PhilosopherTrigger.Full).TransitionTo(PhilosopherState.Thinking);
 
-                machine.State(PhilosopherState.Thinking); // this should throw: attempt to define same state twice
+                ThinkingState2 = machine.State(PhilosopherState.Thinking); // this should return the same state builder object defined earlier
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IStateMachineStateBuilder<PhilosopherState, PhilosopherTrigger> ThinkingState1 { get; private set; }
+            public IStateMachineStateBuilder<PhilosopherState, PhilosopherTrigger> ThinkingState2 { get; private set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

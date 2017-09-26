@@ -12,7 +12,7 @@ namespace NWheels.Microservices.Runtime
 {
     public class DefaultModuleLoader : IModuleLoader
     {
-        private readonly MicroserviceHost _host;
+        private readonly IBootConfiguration _bootConfig;
         private readonly Dictionary<string, Type[]> _publicTypeCache = new Dictionary<string, Type[]>();
         private readonly Dictionary<string, Assembly> _assemblyCache = new Dictionary<string, Assembly>();
 
@@ -21,9 +21,9 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DefaultModuleLoader(MicroserviceHost host)
+        public DefaultModuleLoader(IBootConfiguration bootConfig)
         {
-            _host = host;
+            _bootConfig = bootConfig;
             //_bootConfig = bootConfig;
             //_assemblyLoadContext = new ModuleAssemblyLoadContext(bootConfig.AssemblyLocationMap);
         }
@@ -32,7 +32,7 @@ namespace NWheels.Microservices.Runtime
 
         public virtual IEnumerable<IFeatureLoader> GetBootFeatureLoaders()
         {
-            var bootConfig = _host.BootConfig;
+            var bootConfig = _bootConfig;
             var allModuleConfigs = 
                 bootConfig.FrameworkModules
                 .Concat(bootConfig.ApplicationModules)

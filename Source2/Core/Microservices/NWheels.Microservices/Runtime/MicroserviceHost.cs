@@ -58,11 +58,11 @@ namespace NWheels.Microservices.Runtime
                     //TODO: kill unresponsive threads
                 }
 
-                if (Container != null)
+                if (ModuleComponents != null)
                 {
-                    var oldContainer = Container;
+                    var oldContainer = ModuleComponents;
 
-                    Container = null;
+                    ModuleComponents = null;
                     LifecycleComponents = null;
 
                     oldContainer.Dispose();
@@ -234,9 +234,16 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IComponentContainer GetContainer()
+        public IComponentContainer GetHostComponents()
         {
-            return this.Container;
+            return this.HostComponents;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IComponentContainer GetModuleComponents()
+        {
+            return this.ModuleComponents;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -255,7 +262,7 @@ namespace NWheels.Microservices.Runtime
         protected IModuleLoader ModuleLoader { get; }
         protected StateMachineScheduler<MicroserviceState, MicroserviceTrigger> StateScheduler { get; }
         protected SafeLock StateLock { get; } 
-        protected IInternalComponentContainer Container { get; private set; }
+        protected IInternalComponentContainer ModuleComponents { get; private set; }
         protected List<IFeatureLoader> FeatureLoaders { get; private set; }
         protected List<ILifecycleComponent> LifecycleComponents { get; private set; }
         protected RevertableSequence LoadSequence { get; }
@@ -336,7 +343,7 @@ namespace NWheels.Microservices.Runtime
         {
             logPhase().RunActivityOrThrow(phaseActivity => {
 
-                var newComponents = new ComponentContainerBuilder(this.Container);
+                var newComponents = new ComponentContainerBuilder(this.ModuleComponents);
 
                 foreach (var feature in featureLoaders)
                 {
@@ -348,7 +355,7 @@ namespace NWheels.Microservices.Runtime
                     }
                 }
 
-                this.Container.Merge(newComponents);
+                this.ModuleComponents.Merge(newComponents);
 
             });
         }
@@ -367,7 +374,7 @@ namespace NWheels.Microservices.Runtime
                 {
                     try
                     {
-                        action(this.Container);
+                        action(this.ModuleComponents);
                     }
                     catch (Exception e)
                     {
@@ -400,7 +407,7 @@ namespace NWheels.Microservices.Runtime
             {
                 try
                 {
-                    this.LifecycleComponents = Container.ResolveAll<ILifecycleComponent>().ToList();
+                    this.LifecycleComponents = ModuleComponents.ResolveAll<ILifecycleComponent>().ToList();
 
                     foreach (var compolonent in this.LifecycleComponents)
                     {
@@ -429,7 +436,7 @@ namespace NWheels.Microservices.Runtime
             {
                 var rootBuilder = new ComponentContainerBuilder(rootContainer: null);
 
-                this.Container = rootBuilder.CreateComponentContainer();
+                this.ModuleComponents = rootBuilder.CreateComponentContainer();
                 this.FeatureLoaders = ModuleLoader.GetBootFeatureLoaders().ToList();
 
                 doFeatureLoaderPhases();
@@ -447,19 +454,19 @@ namespace NWheels.Microservices.Runtime
 
                 ExecuteFeatureLoaderPhase(
                     FeatureLoaders, Logger.FeaturesContributingConfiguration, Logger.FeatureContributingConfiguration,
-                    (feature, newComponents) => feature.ContributeConfiguration(this.Container));
+                    (feature, newComponents) => feature.ContributeConfiguration(this.ModuleComponents));
 
                 ExecuteFeatureLoaderPhaseExtensions(FeatureLoaders, extension => extension.BeforeContributeComponents);
 
                 ExecuteFeatureLoaderPhase(
                     FeatureLoaders, Logger.FeaturesContributingComponents, Logger.FeatureContributingComponents,
-                    (feature, newComponents) => feature.ContributeComponents(this.Container, newComponents));
+                    (feature, newComponents) => feature.ContributeComponents(this.ModuleComponents, newComponents));
 
                 ExecuteFeatureLoaderPhaseExtensions(FeatureLoaders, extension => extension.BeforeContributeAdapterComponents);
 
                 ExecuteFeatureLoaderPhase(
                     FeatureLoaders, Logger.FeaturesContributingAdapterComponents, Logger.FeatureContributingAdapterComponents,
-                    (feature, newComponents) => feature.ContributeAdapterComponents(this.Container, newComponents));
+                    (feature, newComponents) => feature.ContributeAdapterComponents(this.ModuleComponents, newComponents));
             }
 
             return ExecuteStateTransitionPhase(doConfigure, Logger.Configuring, Logger.Configured, Logger.FailedToConfigure);
@@ -475,13 +482,13 @@ namespace NWheels.Microservices.Runtime
 
                 ExecuteFeatureLoaderPhase(
                     FeatureLoaders, Logger.FeaturesCompilingComponents, Logger.FeatureCompilingComponents,
-                    (feature, newComponents) => feature.CompileComponents(this.Container));
+                    (feature, newComponents) => feature.CompileComponents(this.ModuleComponents));
 
                 ExecuteFeatureLoaderPhaseExtensions(FeatureLoaders, extension => extension.BeforeContributeCompiledComponents);
 
                 ExecuteFeatureLoaderPhase(
                     FeatureLoaders, Logger.FeaturesContributingCompiledComponents, Logger.FeatureContributingCompiledComponents,
-                    (feature, newComponents) => feature.ContributeCompiledComponents(this.Container, newComponents));
+                    (feature, newComponents) => feature.ContributeCompiledComponents(this.ModuleComponents, newComponents));
 
                 ExecuteFeatureLoaderPhaseExtensions(FeatureLoaders, extension => extension.AfterContributeCompiledComponents);
             }
@@ -493,7 +500,7 @@ namespace NWheels.Microservices.Runtime
 
         protected virtual void OnCompiledStopped()
         {
-            Container = null;
+            ModuleComponents = null;
             FeatureLoaders = null;
             LifecycleComponents = null;
         }
@@ -558,6 +565,7 @@ namespace NWheels.Microservices.Runtime
             var builder = new ComponentContainerBuilder();
 
             builder.RegisterComponentInstance(this);
+            builder.RegisterComponentInstance(BootConfig).ForService<IBootConfiguration>();
             builder.RegisterComponentInstance(CreateStateCodeBehindOptions());
             BootConfig.HostComponents.Contribute(builder);
 

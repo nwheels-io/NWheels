@@ -28,7 +28,7 @@ namespace NWheels.Microservices.Runtime
 
         public void Validate()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         //TODO: move to MutableBootConfiguration.Validate

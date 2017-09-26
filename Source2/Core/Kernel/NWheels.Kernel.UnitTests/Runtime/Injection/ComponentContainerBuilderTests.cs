@@ -47,7 +47,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
 
             var one1 = container.Resolve<ComponentOne>();
             var one2 = container.Resolve<ComponentOne>();
@@ -76,7 +76,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
             var asService = container.Resolve<IServiceOne>();
             var asSelf = container.Resolve<ComponentOne>();
 
@@ -99,7 +99,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
             var asService = container.Resolve<IServiceOne>();
             var asSelf = container.Resolve<ComponentOne>();
 
@@ -123,7 +123,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
             var asService1 = container.Resolve<IServiceOne>();
             var asService2 = container.Resolve<ITestComponent>();
             var asSelf = container.Resolve<ComponentOne>();
@@ -152,7 +152,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
             var asService1 = container.Resolve<IServiceOne>();
             var asService2 = container.Resolve<ITestComponent>();
             var asService3 = container.Resolve<IAnyComponent>();
@@ -185,7 +185,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
             var asService1 = container.Resolve<IServiceOne>();
             var asService2 = container.Resolve<IAnyComponent>();
             var asSelf = container.Resolve<ComponentOne>();
@@ -215,7 +215,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
             var resolved = container.Resolve<ComponentThree>();
 
             resolved.Should().NotBeNull();
@@ -239,7 +239,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
             var resolved = container.Resolve<ComponentOne>();
 
             resolved.Should().NotBeNull();
@@ -262,7 +262,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
             var asService1 = container.Resolve<IServiceOne>();
             var asService2 = container.Resolve<IAnyComponent>();
             var asSelf = container.Resolve<ComponentOne>();
@@ -285,7 +285,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
 
             builderUnderTest.RegisterComponentType<ComponentFour>();
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
             var resolved = container.Resolve<ComponentFour>();
 
             //-- assert
@@ -310,7 +310,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             builderUnderTest.RegisterComponentType<ComponentTwo>().ForService<ITestComponent>().AsFallback();
 
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
             var resolved = container.Resolve<ITestComponent>();
 
             //-- assert
@@ -334,7 +334,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             builderUnderTest.RegisterComponentType<ComponentTwo>().NamedForService<ITestComponent>("B");
 
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
 
             var resolved1 = container.ResolveNamed<ITestComponent>("A");
             var resolved2 = container.ResolveNamed<ITestComponent>("B");
@@ -360,7 +360,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             builderUnderTest.RegisterComponentType<ComponentTwo>().NamedForServices<ITestComponent, IAnyComponent>("B");
 
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
 
             var resolved1a = container.ResolveNamed<IAnyComponent>("A");
             var resolved1b = container.ResolveNamed<ITestComponent>("A");
@@ -432,7 +432,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             builderUnderTest.RegisterComponentInstance(instanceA).NamedForServices("A", typeof(IServiceOne), typeof(ITestComponent));
             builderUnderTest.RegisterComponentInstance(instanceB).NamedForServices("B", typeof(IServiceOne), typeof(ITestComponent));
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
 
             var resolvedA1 = container.ResolveNamed<IServiceOne>("A");
             var resolvedA2 = container.ResolveNamed<ITestComponent>("A");

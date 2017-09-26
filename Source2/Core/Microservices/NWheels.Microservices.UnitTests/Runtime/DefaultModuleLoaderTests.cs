@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using NWheels.Kernel.Api;
 using NWheels.Microservices.Api;
-using NWheels.Microservices.Runtime.Mocks;
 using NWheels.Testability;
 using System;
 using System.Collections.Generic;
@@ -23,16 +22,17 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
             //-- arrange
 
-            var loaderUnderTest = new BootFeatureTestModuleLoader();
             var bootConfig = MakeBootConfig(
                 applicationModules: MakeModuleConfigList(
                     (Module: "M2", Features: null)
                 )
             );
 
+            var loaderUnderTest = new BootFeatureTestModuleLoader(bootConfig);
+
             //-- act
 
-            var featureLoaders = loaderUnderTest.GetBootFeatureLoaders(bootConfig);
+            var featureLoaders = loaderUnderTest.GetBootFeatureLoaders();
 
             //-- assert
 
@@ -49,7 +49,6 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
             //-- arrange
 
-            var loaderUnderTest = new BootFeatureTestModuleLoader();
             var bootConfig = MakeBootConfig(
                 applicationModules: MakeModuleConfigList(
                     (Module: "M2", Features: null), 
@@ -57,9 +56,11 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 )
             );
 
+            var loaderUnderTest = new BootFeatureTestModuleLoader(bootConfig);
+
             //-- act
 
-            var featureLoaders = loaderUnderTest.GetBootFeatureLoaders(bootConfig);
+            var featureLoaders = loaderUnderTest.GetBootFeatureLoaders();
 
             //-- assert
 
@@ -76,7 +77,6 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
             //-- arrange
 
-            var loaderUnderTest = new BootFeatureTestModuleLoader();
             var bootConfig = MakeBootConfig(
                 applicationModules: MakeModuleConfigList(
                     (Module: "M1", Features: new[] { "N2", "N1" }),
@@ -84,9 +84,11 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 )
             );
 
+            var loaderUnderTest = new BootFeatureTestModuleLoader(bootConfig);
+
             //-- act
 
-            var featureLoaders = loaderUnderTest.GetBootFeatureLoaders(bootConfig);
+            var featureLoaders = loaderUnderTest.GetBootFeatureLoaders();
 
             //-- assert
 
@@ -103,16 +105,17 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
             //-- arrange
 
-            var loaderUnderTest = new BootFeatureTestModuleLoader();
             var bootConfig = MakeBootConfig(
                 applicationModules: MakeModuleConfigList(
                     (Module: "M1", Features: new[] { "N1", "N1" })
                 )
             );
 
+            var loaderUnderTest = new BootFeatureTestModuleLoader(bootConfig);
+
             //-- act
 
-            Action act = () => loaderUnderTest.GetBootFeatureLoaders(bootConfig);
+            Action act = () => loaderUnderTest.GetBootFeatureLoaders();
 
             //-- assert
 
@@ -128,16 +131,17 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
             //-- arrange
 
-            var loaderUnderTest = new BootFeatureTestModuleLoader();
             var bootConfig = MakeBootConfig(
                 applicationModules: MakeModuleConfigList(
                     (Module: "M1", Features: new[] { "ZZZ" })
                 )
             );
 
+            var loaderUnderTest = new BootFeatureTestModuleLoader(bootConfig);
+
             //-- act
 
-            Action act = () => loaderUnderTest.GetBootFeatureLoaders(bootConfig);
+            Action act = () => loaderUnderTest.GetBootFeatureLoaders();
 
             //-- assert
 
@@ -153,7 +157,6 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
             //-- arrange
 
-            var loaderUnderTest = new BootFeatureTestModuleLoader();
             var bootConfig = MakeBootConfig(
                 frameworkModules: MakeModuleConfigList(
                     (Module: "M3", Features: null)
@@ -166,9 +169,11 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 )
             );
 
+            var loaderUnderTest = new BootFeatureTestModuleLoader(bootConfig);
+
             //-- act
 
-            var featureLoaders = loaderUnderTest.GetBootFeatureLoaders(bootConfig);
+            var featureLoaders = loaderUnderTest.GetBootFeatureLoaders();
 
             //-- assert
 
@@ -233,6 +238,13 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
         public class BootFeatureTestModuleLoader : DefaultModuleLoader
         {
+            public BootFeatureTestModuleLoader(IBootConfiguration bootConfig) 
+                : base(bootConfig)
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public override IEnumerable<Type> GetModulePublicTypes(IModuleConfiguration moduleConfig)
             {
                 // each module has two default feature loaders (D1 and D2), and two named feature loaders (N1 and N2)
