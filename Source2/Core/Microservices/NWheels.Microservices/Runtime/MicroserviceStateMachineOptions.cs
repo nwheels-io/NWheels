@@ -4,7 +4,7 @@ using System.Text;
 
 namespace NWheels.Microservices.Runtime
 {
-    public struct MicroserviceStateMachineOptions
+    public class MicroserviceStateMachineOptions
     {
         public MicroserviceHost Host { get; set; }
         public IBootConfiguration BootConfig { get; set; }

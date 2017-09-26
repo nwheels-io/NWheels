@@ -78,6 +78,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.UI.UnitTests", "Core\UI\NWheels.UI.UnitTests\NWheels.UI.UnitTests.csproj", "{D8245D83-1B6D-4B32-A25B-011A10CB2523}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Stacks", "Stacks", "{2015961E-11BD-458C-AB4D-548C2A825F5B}"
+	ProjectSection(SolutionItems) = preProject
+		NuGet.Config = NuGet.Config
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domains", "Domains", "{36782BC6-C1E1-4423-A445-F60A017DDC3C}"
 EndProject
@@ -209,9 +212,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Domains.Merchant.Un
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testability", "Testability", "{92E77194-209A-4701-A66F-699F6A33D077}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Testability", "Core\Testability\NWheels.Testability\NWheels.Testability.csproj", "{589953DB-BA52-4577-91B7-40D958180B99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Testability", "Core\Testability\NWheels.Testability\NWheels.Testability.csproj", "{589953DB-BA52-4577-91B7-40D958180B99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Testability.Tests", "Core\Testability\NWheels.Testability.Tests\NWheels.Testability.Tests.csproj", "{9CF51369-C196-4103-B551-68FB3ACDD70F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NWheels.Testability.Tests", "Core\Testability\NWheels.Testability.Tests\NWheels.Testability.Tests.csproj", "{9CF51369-C196-4103-B551-68FB3ACDD70F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D247F4FF-8F62-4CB9-8387-094F8EB48607}"
+	ProjectSection(SolutionItems) = preProject
+		NuGet.Config = NuGet.Config
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

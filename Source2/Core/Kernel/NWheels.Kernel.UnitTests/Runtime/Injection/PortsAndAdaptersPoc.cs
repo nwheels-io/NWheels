@@ -18,7 +18,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
         {
             //-- arrange
 
-            var container = new ComponentContainerBuilder().CreateComponentContainer(isRootContainer: true);
+            var container = new ComponentContainerBuilder().CreateComponentContainer();
             var builder = new ComponentContainerBuilder();
             var features = new List<IFeatureLoader> {
                 new ExampleDependencyFeatureLoader(),

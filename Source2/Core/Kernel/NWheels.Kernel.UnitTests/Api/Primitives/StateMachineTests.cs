@@ -30,9 +30,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
         {
             //-- Arrange
 
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(
-                new PhilisopherCodeBehind(),
-                null);
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(new PhilisopherCodeBehind());
 
             //-- Act
 

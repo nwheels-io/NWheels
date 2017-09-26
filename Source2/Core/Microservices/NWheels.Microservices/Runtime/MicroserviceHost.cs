@@ -25,25 +25,16 @@ namespace NWheels.Microservices.Runtime
             BootConfig = bootConfig ?? throw new ArgumentNullException(nameof(bootConfig));
             BootConfig.Validate();
 
-            ModuleLoader = bootConfig.ModuleLoaderFactory(this);
-            Logger = bootConfig.LoggerFactory(this);
+            HostComponents = BuildHostComponentContainer();
+
+            ModuleLoader = HostComponents.Resolve<IModuleLoader>();
+            Logger = HostComponents.Resolve<IMicroserviceHostLogger>();
+            var stateCodeBehind = HostComponents.Resolve<IStateMachineCodeBehind<MicroserviceState, MicroserviceTrigger>>();
+
             LoadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
             ActivateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
             StateLock = new SafeLock("MicroserviceHost/State");
 
-            var stateCodeBehindOptions = new MicroserviceStateMachineOptions {
-                BootConfig = bootConfig,
-                Host = this,
-                OnConfiguring = this.OnConfiguring,
-                OnCompiling = this.OnCompiling,
-                OnCompiledStopped = this.OnCompiledStopped,
-                OnLoading = this.OnLoading,
-                OnActivating = this.OnActivating,
-                OnDeactivating = this.OnDeactivating,
-                OnUnloading = this.OnUnloading
-            };
-
-            var stateCodeBehind = bootConfig.StateCodeBehindFactory(stateCodeBehindOptions);
             var stateMachine = StateMachine.CreateFrom(stateCodeBehind);
             StateScheduler = StateMachineScheduler.CreateFrom(stateMachine);
             StateScheduler.CurrentStateChanged += OnCurrentStateChanged;
@@ -260,6 +251,7 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected IComponentContainer HostComponents { get; }
         protected IModuleLoader ModuleLoader { get; }
         protected StateMachineScheduler<MicroserviceState, MicroserviceTrigger> StateScheduler { get; }
         protected SafeLock StateLock { get; } 
@@ -540,6 +532,36 @@ namespace NWheels.Microservices.Runtime
         {
             Logger.EnteredState(StateScheduler.CurrentState);
             CurrentStateChanged?.Invoke(sender, args);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private MicroserviceStateMachineOptions CreateStateCodeBehindOptions()
+        {
+            return new MicroserviceStateMachineOptions {
+                Host = this,
+                BootConfig = this.BootConfig,
+                OnConfiguring = this.OnConfiguring,
+                OnCompiling = this.OnCompiling,
+                OnCompiledStopped = this.OnCompiledStopped,
+                OnLoading = this.OnLoading,
+                OnActivating = this.OnActivating,
+                OnDeactivating = this.OnDeactivating,
+                OnUnloading = this.OnUnloading
+            };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IComponentContainer BuildHostComponentContainer()
+        {
+            var builder = new ComponentContainerBuilder();
+
+            builder.RegisterComponentInstance(this);
+            builder.RegisterComponentInstance(CreateStateCodeBehindOptions());
+            BootConfig.HostComponents.Contribute(builder);
+
+            return builder.CreateComponentContainer();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -5,6 +5,8 @@ using System.Xml.Serialization;
 using System;
 using System.Reflection;
 using NWheels.Kernel.Api.Primitives;
+using NWheels.Kernel.Api.Logging;
+using NWheels.Kernel.Api.Injection;
 
 namespace NWheels.Microservices.Runtime
 {
@@ -15,14 +17,23 @@ namespace NWheels.Microservices.Runtime
         bool IsPrecompiledMode { get; }
         bool IsBatchJobMode { get; }
         bool IsClusteredMode { get; }
+        bool IsDebugMode { get; }
+        string ClusterName { get; }
+        string ClusterPartition { get; }
+        LogLevel LogLevel { get; }
         IReadOnlyDictionary<string, string> EnvironmentVariables { get; }
         IAssemblyLocationMap AssemblyLocationMap { get; }
-        MicroserviceModuleLoaderFactory ModuleLoaderFactory { get; }
-        MicroserviceHostLoggerFactory LoggerFactory { get; }
-        MicroserviceStateCodeBehindFactory StateCodeBehindFactory { get; }
+        IHostComponentsRegistration HostComponents { get; }
         IReadOnlyList<IModuleConfiguration> FrameworkModules { get; }
         IReadOnlyList<IModuleConfiguration> ApplicationModules { get; }
         IReadOnlyList<IModuleConfiguration> CustomizationModules { get; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface IHostComponentsRegistration
+    {
+        void Contribute(IComponentContainerBuilder builder);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -43,10 +54,4 @@ namespace NWheels.Microservices.Runtime
         string FeatureName { get; }
         Type FeatureLoaderRuntimeType { get; }
     }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public delegate IModuleLoader MicroserviceModuleLoaderFactory(MicroserviceHost host);
-    public delegate IMicroserviceHostLogger MicroserviceHostLoggerFactory(MicroserviceHost host);
-    public delegate IStateMachineCodeBehind<MicroserviceState, MicroserviceTrigger> MicroserviceStateCodeBehindFactory(MicroserviceStateMachineOptions options);
 }

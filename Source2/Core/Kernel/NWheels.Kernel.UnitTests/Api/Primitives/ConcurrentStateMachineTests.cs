@@ -21,7 +21,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(codeBehind);
+            var machine = StateMachineScheduler.CreateFrom(new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind));
 
             //-- Act
 
@@ -30,8 +30,8 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
 
             var log0 = codeBehind.TakeLog();
 
-            machine.RunOnCurrentThread(exitWhen: m => {
-                return m.CurrentState == PhilosopherState.Eating;
+            machine.RunOnCurrentThread(exitWhen: state => {
+                return state == PhilosopherState.Eating;
             });
 
             var log1 = codeBehind.TakeLog();
@@ -62,9 +62,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var machine = StateMachineScheduler.CreateFrom(new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind));
 
             //-- Act
 
@@ -74,7 +72,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             var log0 = codeBehind.TakeLog();
 
             machine.RunOnCurrentThread(exitWhen: m => {
-                return m.CurrentState == PhilosopherState.Eating;
+                return m == PhilosopherState.Eating;
             });
 
             var log1 = codeBehind.TakeLog();
@@ -105,9 +103,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var machine = StateMachineScheduler.CreateFrom(new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind));
 
             //-- Act
 
@@ -120,8 +116,8 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             var log0 = codeBehind.TakeLog();
 
             machine.RunOnCurrentThread(
-                exitWhen: m => m.CurrentState == PhilosopherState.Eating,
-                onError: err => {
+                exitWhen: state => state == PhilosopherState.Eating,
+                onError: (state, err) => {
                     errorCount++;
                     codeBehind.AddLog("ERROR");
                     return true;
@@ -157,9 +153,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(
-                codeBehind,
-                null);
+            var machine = new StateMachineScheduler<PhilosopherState, PhilosopherTrigger>(codeBehind);
 
             //-- Act
 

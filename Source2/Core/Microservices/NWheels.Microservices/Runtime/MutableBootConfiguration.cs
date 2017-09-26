@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using NWheels.Kernel.Api.Injection;
+using NWheels.Kernel.Api.Logging;
 using NWheels.Kernel.Api.Primitives;
 
 namespace NWheels.Microservices.Runtime
@@ -14,12 +15,14 @@ namespace NWheels.Microservices.Runtime
         private readonly List<ModuleConfiguration> _applicationModules = new List<ModuleConfiguration>();
         private readonly List<ModuleConfiguration> _customizationModules = new List<ModuleConfiguration>();
         private readonly Dictionary<string, string> _environmentVariables = new Dictionary<string, string>();
+        private readonly HostComponentsRegistration _hostComponents = new HostComponentsRegistration();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public MutableBootConfiguration()
         {
-        }
+
+        } 
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -99,11 +102,15 @@ namespace NWheels.Microservices.Runtime
         public string MicroserviceName { get; set; }
         public bool IsPrecompiledMode { get; set; }
         public bool IsBatchJobMode { get; set; }
-        public bool IsClusteredMode { get; set; }
+        public string ClusterName { get; }
+        public string ClusterPartition { get; }
+        public LogLevel LogLevel { get; set; }
         public IAssemblyLocationMap AssemblyLocationMap { get; set; }
-        public MicroserviceModuleLoaderFactory ModuleLoaderFactory { get; set; }
-        public MicroserviceHostLoggerFactory LoggerFactory { get; set; }
-        public MicroserviceStateCodeBehindFactory StateCodeBehindFactory { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsDebugMode => (this.LogLevel == LogLevel.Debug);
+        public bool IsClusteredMode => !string.IsNullOrEmpty(this.ClusterName);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -111,6 +118,7 @@ namespace NWheels.Microservices.Runtime
         IReadOnlyList<IModuleConfiguration> IBootConfiguration.ApplicationModules => _applicationModules;
         IReadOnlyList<IModuleConfiguration> IBootConfiguration.CustomizationModules => _customizationModules;
         IReadOnlyDictionary<string, string> IBootConfiguration.EnvironmentVariables => _environmentVariables;
+        IHostComponentsRegistration IBootConfiguration.HostComponents => _hostComponents;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -118,6 +126,7 @@ namespace NWheels.Microservices.Runtime
         public List<ModuleConfiguration> ApplicationModules => _applicationModules;
         public List<ModuleConfiguration> CustomizationModules => _customizationModules;
         public Dictionary<string, string> EnvironmentVariables => _environmentVariables;
+        public HostComponentsRegistration HostComponents => _hostComponents;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -126,9 +135,26 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static IStateMachineCodeBehind<MicroserviceState, MicroserviceTrigger> DefaultStateCodeBehindFactory(MicroserviceStateMachineOptions options)
+        public class HostComponentsRegistration : IHostComponentsRegistration
         {
-            return new DefaultMicroserviceStateCodeBehind(options);
+            private readonly List<Action<IComponentContainerBuilder>> _registrations = new List<Action<IComponentContainerBuilder>>();
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            void IHostComponentsRegistration.Contribute(IComponentContainerBuilder builder)
+            {
+                foreach (var registration in _registrations)
+                {
+                    registration(builder);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Register(Action<IComponentContainerBuilder> registration)
+            {
+                _registrations.Add(registration);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

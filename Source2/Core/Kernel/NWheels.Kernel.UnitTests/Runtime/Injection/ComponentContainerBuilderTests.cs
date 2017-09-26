@@ -24,7 +24,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
 
             //-- assert
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
             var resolved1 = container.Resolve<ComponentOne>();
             var resolved2 = container.Resolve<ComponentOne>();
 
@@ -394,7 +394,7 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
             builderUnderTest.RegisterComponentInstance(instanceA).NamedForServices<IServiceOne, ITestComponent, IAnyComponent>("A");
             builderUnderTest.RegisterComponentInstance(instanceB).NamedForServices<IServiceOne, ITestComponent, IAnyComponent>("B");
 
-            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer(isRootContainer: true);
+            var container = ((IInternalComponentContainerBuilder)builderUnderTest).CreateComponentContainer();
 
             var resolvedA1 = container.ResolveNamed<IServiceOne>("A");
             var resolvedA2 = container.ResolveNamed<IAnyComponent>("A");
