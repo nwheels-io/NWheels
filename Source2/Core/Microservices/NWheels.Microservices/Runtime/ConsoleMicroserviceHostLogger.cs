@@ -4,6 +4,7 @@ using System.Text;
 using NWheels.Kernel.Api.Execution;
 using NWheels.Kernel.Api.Extensions;
 using NWheels.Kernel.Api.Logging;
+using NWheels.Microservices.Api.Exceptions;
 using NWheels.Microservices.Runtime.Cli;
 
 namespace NWheels.Microservices.Runtime
@@ -306,12 +307,13 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void FeatureLoaderFailed(Type loaderType, string phase, Exception error)
+        public MicroserviceHostException FeatureLoaderFailed(Type loaderType, string phase, Exception error)
         {
             if (_logLevel <= LogLevel.Error)
             {
                 ColorConsole.Log(LogLevel.Error, $"{nameof(FeatureLoaderFailed)}: phase={phase}, {error}");
             }
+            return MicroserviceHostException.FeatureLoaderFailed(loaderType, phase, error);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

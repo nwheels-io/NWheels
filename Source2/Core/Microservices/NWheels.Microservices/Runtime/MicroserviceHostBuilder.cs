@@ -14,7 +14,6 @@ namespace NWheels.Microservices.Runtime
     public class MicroserviceHostBuilder
     {
         private readonly MutableBootConfiguration _bootConfig;
-        private readonly List<Action<IComponentContainer, IComponentContainerBuilder>> _componentContributions;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -23,8 +22,6 @@ namespace NWheels.Microservices.Runtime
             _bootConfig = new MutableBootConfiguration() {
                 MicroserviceName = microserviceName
             };
-
-            _componentContributions = new List<Action<IComponentContainer, IComponentContainerBuilder>>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,8 +55,10 @@ namespace NWheels.Microservices.Runtime
 
         public MicroserviceHostBuilder ContributeComponents(Action<IComponentContainer, IComponentContainerBuilder> contributor)
         {
-            _componentContributions.Add(contributor);
+            var contribution = new ComponentContribution(contributor);
+            _bootConfig.BootComponents.Register(builder => builder.RegisterComponentInstance(contribution));
             UseApplicationFeature<ContributionsFeatureLoader>();
+
             return this;
         }
 
@@ -125,16 +124,6 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal void ApplyComponentContributions(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
-        {
-            foreach (var contributor in _componentContributions)
-            {
-                contributor(existingComponents, newComponents);
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         private static void RegisterCliHostComponents(IComponentContainerBuilder builder)
         {
             builder.RegisterComponentType<ConsoleMicroserviceHostLogger>()
@@ -167,9 +156,28 @@ namespace NWheels.Microservices.Runtime
             {
                 base.ContributeComponents(existingComponents, newComponents);
 
-                var hostBuilder = existingComponents.Resolve<MicroserviceHostBuilder>();
-                hostBuilder.ApplyComponentContributions(existingComponents, newComponents);
+                var host = existingComponents.Resolve<MicroserviceHost>();
+                var contributions = host.GetBootComponents().ResolveAll<ComponentContribution>();
+
+                foreach (var contribution in contributions)
+                {
+                    contribution.Apply(existingComponents, newComponents);
+                }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+    
+        public class ComponentContribution
+        {
+            public ComponentContribution(Action<IComponentContainer, IComponentContainerBuilder> apply)
+            {
+                this.Apply = apply;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Action<IComponentContainer, IComponentContainerBuilder> Apply { get; }
         }
     }
 }

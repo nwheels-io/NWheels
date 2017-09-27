@@ -351,12 +351,11 @@ namespace NWheels.Microservices.Runtime
 
                     if (!featureActivity.RunActivityOrCatch(() => action(feature, newComponents), out Exception error))
                     {
-                        Logger.FeatureLoaderFailed(feature.GetType(), phase: phaseActivity.Text, error: error);
+                        throw Logger.FeatureLoaderFailed(feature.GetType(), phase: phaseActivity.Text, error: error);
                     }
                 }
 
                 this.ModuleComponents.Merge(newComponents);
-
             });
         }
 
@@ -436,7 +435,7 @@ namespace NWheels.Microservices.Runtime
             {
                 var rootBuilder = new ComponentContainerBuilder(rootContainer: null);
 
-                this.ModuleComponents = rootBuilder.CreateComponentContainer();
+                this.ModuleComponents = InitializeModuleComponentContainer();
                 this.FeatureLoaders = ModuleLoader.GetBootFeatureLoaders().ToList();
 
                 doFeatureLoaderPhases();
@@ -509,7 +508,6 @@ namespace NWheels.Microservices.Runtime
 
         protected virtual MicroserviceTrigger OnLoading()
         {
-            ModuleComponents = InitializeModuleComponentContainer();
             return ExecuteStateTransitionPhase(LoadSequence.Perform, Logger.Loading, Logger.Loaded, Logger.FailedToLoad);
         }
 

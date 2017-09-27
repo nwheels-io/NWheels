@@ -67,6 +67,9 @@ namespace NWheels.Microservices.Runtime
                 .OnTrigger(MicroserviceTrigger.OK).TransitionTo(MicroserviceState.CompiledStopped)
                 .OnTrigger(MicroserviceTrigger.Failed).TransitionTo(MicroserviceState.Faulted);
 
+            machine.State(MicroserviceState.Faulted)
+                .OnEntered(FaultedgEntered);
+
             var initialState = (_options.BootConfig.IsPrecompiledMode ? MicroserviceState.CompiledStopped : MicroserviceState.Source);
             machine.State(initialState).SetAsInitial();
         }
@@ -144,6 +147,16 @@ namespace NWheels.Microservices.Runtime
             {
                 var result = _options.OnUnloading();
                 e.ReceiveFeedback(result);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void FaultedgEntered(object sender, StateMachineFeedbackEventArgs<MicroserviceState, MicroserviceTrigger> e)
+        {
+            if (_options.OnFaulted != null)
+            {
+                _options.OnFaulted();
             }
         }
     }

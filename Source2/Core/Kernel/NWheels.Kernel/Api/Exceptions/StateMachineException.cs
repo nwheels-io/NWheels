@@ -58,6 +58,7 @@ namespace NWheels.Kernel.Api.Exceptions
         private static readonly string _s_reasonInitialStateAlreadyDefined = nameof(InitialStateAlreadyDefined);
         private static readonly string _s_reasonTransitionAlreadyDefined = nameof(TransitionAlreadyDefined);
         private static readonly string _s_reasonTriggerNotValidInCurrentState = nameof(TriggetNotValidInCurrentState);
+        private static readonly string _s_reasonDestinationStateNotDefined = nameof(DestinationStateNotDefined);
         private static readonly string _s_keyCodeBehind = "codeBehind";
         private static readonly string _s_keyState = "state";
         private static readonly string _s_keyInitialState = "initialState";
@@ -90,6 +91,13 @@ namespace NWheels.Kernel.Api.Exceptions
         public static StateMachineException TriggetNotValidInCurrentState(Type codeBehind, string state, string trigger)
         {
             return new StateMachineException(_s_reasonTriggerNotValidInCurrentState, codeBehind, state: state, trigger: trigger);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static StateMachineException DestinationStateNotDefined(Type codeBehind, string state)
+        {
+            return new StateMachineException(_s_reasonDestinationStateNotDefined, codeBehind, state: state);
         }
     }
 }

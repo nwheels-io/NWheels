@@ -15,9 +15,6 @@ namespace NWheels.Samples.HelloWorld.Tests.Unit
         [Fact]
         public void TestH()
         {
-            var h = new ClassFromHelloService();
-            var result = h.H();
-            result.Should().Be("HHH");
         }
     }
 }

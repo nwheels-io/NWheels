@@ -157,8 +157,15 @@ namespace NWheels.Kernel.Api.Primitives
                 throw;
             }
 
-            _currentState = _states[transition.DestinationStateValue];
-            _currentState.Enter(eventArgs);
+            if (_states.TryGetValue(transition.DestinationStateValue, out MachineState destinationState))
+            {
+                _currentState = destinationState;
+                _currentState.Enter(eventArgs);
+            }
+            else
+            {
+                throw StateMachineException.DestinationStateNotDefined(_codeBehind.GetType(), currentState.Value.ToString());
+            }
 
             return eventArgs;
         }

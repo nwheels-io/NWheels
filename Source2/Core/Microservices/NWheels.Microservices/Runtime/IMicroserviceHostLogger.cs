@@ -1,6 +1,7 @@
 ﻿using NWheels.Kernel.Api.Execution;
 using System;
 using NWheels.Kernel.Api.Logging;
+using NWheels.Microservices.Api.Exceptions;
 
 namespace NWheels.Microservices.Runtime
 {
@@ -113,7 +114,7 @@ namespace NWheels.Microservices.Runtime
         IExecutionPathActivity ExecutingFeatureLoaderPhaseExtension(Type loaderType, string phase);
 
         [LogError]
-        void FeatureLoaderFailed(Type loaderType, string phase, Exception error);
+        MicroserviceHostException FeatureLoaderFailed(Type loaderType, string phase, Exception error);
 
         [LogError]
         void FeatureLoaderPhaseExtensionFailed(Type loaderType, string phase, Exception error);

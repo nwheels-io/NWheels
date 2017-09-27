@@ -42,7 +42,7 @@ namespace NWheels.Microservices.Runtime.Cli
                 case LogLevel.Warning:
                     return ConsoleColor.Yellow;
                 case LogLevel.Error:
-                    return ConsoleColor.DarkRed;
+                    return ConsoleColor.Red;
                 case LogLevel.Critical:
                     return ConsoleColor.Red;
                 default:

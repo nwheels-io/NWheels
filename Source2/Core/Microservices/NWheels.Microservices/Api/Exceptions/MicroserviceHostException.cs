@@ -48,5 +48,10 @@ namespace NWheels.Microservices.Api.Exceptions
         {
             return new MicroserviceHostException(nameof(NotConfiguredToRunInBatchJobMode));
         }
+
+        internal static MicroserviceHostException FeatureLoaderFailed(Type loaderType, string phase, Exception error)
+        {
+            return new MicroserviceHostException(nameof(FeatureLoaderFailed)); //TODO: include parameter values
+        }
     }
 }

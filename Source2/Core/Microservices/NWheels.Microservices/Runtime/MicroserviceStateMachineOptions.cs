@@ -15,5 +15,6 @@ namespace NWheels.Microservices.Runtime
         public Func<MicroserviceTrigger> OnActivating { get; set; }
         public Func<MicroserviceTrigger> OnDeactivating { get; set; }
         public Func<MicroserviceTrigger> OnUnloading { get; set; }
+        public Action OnFaulted { get; set; }
     }
 }

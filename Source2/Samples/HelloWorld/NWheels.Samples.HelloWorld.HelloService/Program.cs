@@ -10,9 +10,7 @@ namespace NWheels.Samples.HelloWorld.HelloService
         static int Main(string[] args)
         {
             return new MicroserviceHostBuilder("HelloService")
-                .ContributeComponents((components, builder) => {
-                    builder.RegisterComponentType<HelloComponent>().ForService<ILifecycleComponent>();
-                })
+                .UseLifecycleComponent<HelloComponent>()
                 .RunCli(args);
         }
 

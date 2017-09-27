@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Xunit;
 using FluentAssertions;
+using NWheels.Kernel.Api.Exceptions;
 
 namespace NWheels.Kernel.UnitTests.Api.Primitives
 {
@@ -57,6 +58,22 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Act  & assert
 
             act.ShouldThrow<Exception>(); //TODO: verify correct exception
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Transition_DestinationStateNotDefined_Throw()
+        {
+            //-- Arrange
+
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(new MissingStateCodeBehind());
+            Action act = () => machine.ReceiveTrigger(PhilosopherTrigger.Hungry);
+
+            //-- Act  & assert
+
+            act.ShouldThrow<StateMachineException>()
+                .Which.Reason.Should().Be(nameof(StateMachineException.DestinationStateNotDefined));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -380,7 +397,8 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
         {
             Thinking,
             AcquiringForks,
-            Eating
+            Eating,
+            SomeBadState
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -665,6 +683,18 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
 
                 machine.State(PhilosopherState.Eating)
                     .OnTrigger(PhilosopherTrigger.Full).TransitionTo(PhilosopherState.Thinking);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class MissingStateCodeBehind : IStateMachineCodeBehind<PhilosopherState, PhilosopherTrigger>
+        {
+            public void BuildStateMachine(IStateMachineBuilder<PhilosopherState, PhilosopherTrigger> machine)
+            {
+                machine.State(PhilosopherState.Thinking)
+                    .SetAsInitial()
+                    .OnTrigger(PhilosopherTrigger.Hungry).TransitionTo(PhilosopherState.AcquiringForks);
             }
         }
 
