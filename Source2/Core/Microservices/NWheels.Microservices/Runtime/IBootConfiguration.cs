@@ -23,7 +23,7 @@ namespace NWheels.Microservices.Runtime
         LogLevel LogLevel { get; }
         IReadOnlyDictionary<string, string> EnvironmentVariables { get; }
         IAssemblyLocationMap AssemblyLocationMap { get; }
-        IHostComponentsRegistration HostComponents { get; }
+        IBootComponentRegistrations BootComponents { get; }
         IReadOnlyList<IModuleConfiguration> FrameworkModules { get; }
         IReadOnlyList<IModuleConfiguration> ApplicationModules { get; }
         IReadOnlyList<IModuleConfiguration> CustomizationModules { get; }
@@ -31,7 +31,7 @@ namespace NWheels.Microservices.Runtime
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IHostComponentsRegistration
+    public interface IBootComponentRegistrations
     {
         void Contribute(IComponentContainerBuilder builder);
     }

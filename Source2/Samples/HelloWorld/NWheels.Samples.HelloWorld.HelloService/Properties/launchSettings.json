@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "NWheels.Samples.HelloWorld.HelloService": {
+      "commandName": "Project",
+      "commandLineArgs": "run --debug"
+    }
+  }
+}

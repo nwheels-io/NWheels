@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using NWheels.Kernel.Api.Logging;
 
@@ -7,10 +8,25 @@ namespace NWheels.Microservices.Runtime.Cli
 {
     public static class ColorConsole
     {
+        private static readonly DateTime _timeSeed = DateTime.Now;
+        private static readonly Stopwatch _clock = Stopwatch.StartNew();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static void Log(LogLevel level, string message)
         {
-            ConsoleColor color = GetLogLevelColor(level);
-            WriteLine(color, message);
+            var color = GetLogLevelColor(level);
+            var timestamp = _timeSeed.Add(_clock.Elapsed);
+
+            WriteLine(color, $"{timestamp:dd-MMM HH:mm:ss.fff} {message}");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void LogHeading(string text)
+        {
+            var timestamp = _timeSeed.Add(_clock.Elapsed);
+            WriteLine(ConsoleColor.Magenta, $"{timestamp:dd-MMM HH:mm:ss.fff} --- {text} ---");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

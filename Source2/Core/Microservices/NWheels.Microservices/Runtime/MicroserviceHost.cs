@@ -25,11 +25,11 @@ namespace NWheels.Microservices.Runtime
             BootConfig = bootConfig ?? throw new ArgumentNullException(nameof(bootConfig));
             BootConfig.Validate();
 
-            HostComponents = BuildHostComponentContainer();
+            BootComponents = BuildBootComponentContainer();
 
-            ModuleLoader = HostComponents.Resolve<IModuleLoader>();
-            Logger = HostComponents.Resolve<IMicroserviceHostLogger>();
-            var stateCodeBehind = HostComponents.Resolve<IStateMachineCodeBehind<MicroserviceState, MicroserviceTrigger>>();
+            ModuleLoader = BootComponents.Resolve<IModuleLoader>();
+            Logger = BootComponents.Resolve<IMicroserviceHostLogger>();
+            var stateCodeBehind = BootComponents.Resolve<IStateMachineCodeBehind<MicroserviceState, MicroserviceTrigger>>();
 
             LoadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
             ActivateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
@@ -171,7 +171,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ValidateNotDisposed();
                 Start(cancellation);
-                Logger.RunningAsDaemon();
+                Logger.RunningInDaemonMode();
 
                 cancellation.WaitHandle.WaitOne();
 
@@ -234,9 +234,9 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IComponentContainer GetHostComponents()
+        public IComponentContainer GetBootComponents()
         {
-            return this.HostComponents;
+            return this.BootComponents;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -258,7 +258,7 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected IComponentContainer HostComponents { get; }
+        protected IComponentContainer BootComponents { get; }
         protected IModuleLoader ModuleLoader { get; }
         protected StateMachineScheduler<MicroserviceState, MicroserviceTrigger> StateScheduler { get; }
         protected SafeLock StateLock { get; } 
@@ -509,6 +509,7 @@ namespace NWheels.Microservices.Runtime
 
         protected virtual MicroserviceTrigger OnLoading()
         {
+            ModuleComponents = InitializeModuleComponentContainer();
             return ExecuteStateTransitionPhase(LoadSequence.Perform, Logger.Loading, Logger.Loaded, Logger.FailedToLoad);
         }
 
@@ -560,14 +561,26 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IComponentContainer BuildHostComponentContainer()
+        private IComponentContainer BuildBootComponentContainer()
         {
             var builder = new ComponentContainerBuilder();
 
             builder.RegisterComponentInstance(this);
             builder.RegisterComponentInstance(BootConfig).ForService<IBootConfiguration>();
             builder.RegisterComponentInstance(CreateStateCodeBehindOptions());
-            BootConfig.HostComponents.Contribute(builder);
+            BootConfig.BootComponents.Contribute(builder);
+
+            return builder.CreateComponentContainer();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IInternalComponentContainer InitializeModuleComponentContainer()
+        {
+            var builder = new ComponentContainerBuilder();
+
+            builder.RegisterComponentInstance(this);
+            builder.RegisterComponentInstance(BootConfig).ForService<IBootConfiguration>();
 
             return builder.CreateComponentContainer();
         }

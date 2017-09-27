@@ -15,13 +15,13 @@ namespace NWheels.Microservices.Runtime
         private readonly List<ModuleConfiguration> _applicationModules = new List<ModuleConfiguration>();
         private readonly List<ModuleConfiguration> _customizationModules = new List<ModuleConfiguration>();
         private readonly Dictionary<string, string> _environmentVariables = new Dictionary<string, string>();
-        private readonly HostComponentsRegistration _hostComponents = new HostComponentsRegistration();
+        private readonly BootComponentRegistrations _bootComponents = new BootComponentRegistrations();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public MutableBootConfiguration()
         {
-
+            this.LogLevel = LogLevel.Info;
         } 
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -118,7 +118,7 @@ namespace NWheels.Microservices.Runtime
         IReadOnlyList<IModuleConfiguration> IBootConfiguration.ApplicationModules => _applicationModules;
         IReadOnlyList<IModuleConfiguration> IBootConfiguration.CustomizationModules => _customizationModules;
         IReadOnlyDictionary<string, string> IBootConfiguration.EnvironmentVariables => _environmentVariables;
-        IHostComponentsRegistration IBootConfiguration.HostComponents => _hostComponents;
+        IBootComponentRegistrations IBootConfiguration.BootComponents => _bootComponents;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -126,7 +126,7 @@ namespace NWheels.Microservices.Runtime
         public List<ModuleConfiguration> ApplicationModules => _applicationModules;
         public List<ModuleConfiguration> CustomizationModules => _customizationModules;
         public Dictionary<string, string> EnvironmentVariables => _environmentVariables;
-        public HostComponentsRegistration HostComponents => _hostComponents;
+        public BootComponentRegistrations BootComponents => _bootComponents;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -135,13 +135,13 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class HostComponentsRegistration : IHostComponentsRegistration
+        public class BootComponentRegistrations : IBootComponentRegistrations
         {
             private readonly List<Action<IComponentContainerBuilder>> _registrations = new List<Action<IComponentContainerBuilder>>();
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            void IHostComponentsRegistration.Contribute(IComponentContainerBuilder builder)
+            void IBootComponentRegistrations.Contribute(IComponentContainerBuilder builder)
             {
                 foreach (var registration in _registrations)
                 {

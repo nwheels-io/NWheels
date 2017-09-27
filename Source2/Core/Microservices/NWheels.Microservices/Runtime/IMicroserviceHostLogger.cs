@@ -10,7 +10,7 @@ namespace NWheels.Microservices.Runtime
         [LogVerbose]
         void StartingInState(MicroserviceState state);
 
-        [LogVerbose]
+        [LogDebug]
         void EnteredState(MicroserviceState state);
 
         [LogCritical]
@@ -170,7 +170,7 @@ namespace NWheels.Microservices.Runtime
         void LifecycleComponentFailed(Type componentType, string lifecycleMethod, Exception error);
 
         [LogInfo]
-        void RunningAsDaemon();
+        void RunningInDaemonMode();
 
         [LogInfo]
         void StoppingDaemon();

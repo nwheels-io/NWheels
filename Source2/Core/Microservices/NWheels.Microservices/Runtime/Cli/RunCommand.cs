@@ -3,33 +3,46 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.Text;
 using System.Threading;
+using NWheels.Kernel.Api.Logging;
 
 namespace NWheels.Microservices.Runtime.Cli
 {
     public class RunCommand : CliCommandBase
     {
         private readonly MicroserviceHost _host;
+        private readonly MutableBootConfiguration _bootConfig;
+        private bool _debugLogLevel;
+        private bool _verboseLogLevel;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public RunCommand(MicroserviceHost host) 
+        public RunCommand(MicroserviceHost host, MutableBootConfiguration bootConfig) 
             : base("run", "Run microservice in the daemon mode")
         {
             _host = host;
+            _bootConfig = bootConfig;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void DefineArguments(ArgumentSyntax syntax)
         {
-            //TBD
+            syntax.DefineOption("d|debug", ref _debugLogLevel, "Set log level to Debug");
+            syntax.DefineOption("v|verbose", ref _verboseLogLevel, "Set log level to Verbose");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void ValidateArguments(ArgumentSyntax arguments)
         {
-            //TBD
+            if (_debugLogLevel)
+            {
+                _bootConfig.LogLevel = LogLevel.Debug;
+            }
+            else if (_verboseLogLevel)
+            {
+                _bootConfig.LogLevel = LogLevel.Verbose;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

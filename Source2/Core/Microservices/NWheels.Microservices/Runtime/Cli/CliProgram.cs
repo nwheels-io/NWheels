@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using NWheels.Kernel.Api.Logging;
@@ -63,7 +64,7 @@ namespace NWheels.Microservices.Runtime.Cli
         /// </remarks>
         public int Run(MicroserviceHost host, string[] args)
         {
-            var commands = host.GetHostComponents().ResolveAll<ICliCommand>().ToArray();
+            var commands = host.GetBootComponents().ResolveAll<ICliCommand>().ToArray();
             var parsedArgs = ParseCommandLine(commands, args);             // will Environment.Exit(1) if not parsed
             var activeCommand = FindActiveCommand(commands, parsedArgs);   // will Environment.Exit(1) if not found
             activeCommand.ValidateArguments(parsedArgs);                   // will Environment.Exit(1) if not valid

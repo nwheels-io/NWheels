@@ -7,6 +7,7 @@ using NWheels.Kernel.Api.Injection;
 using System.Xml.Linq;
 using NWheels.Kernel.Api.Primitives;
 using NWheels.Microservices.Runtime.Cli;
+using NWheels.Kernel.Api.Logging;
 
 namespace NWheels.Microservices.Runtime
 {
@@ -102,7 +103,10 @@ namespace NWheels.Microservices.Runtime
             {
                 try
                 {
-                    _bootConfig.HostComponents.Register(RegisterCliHostComponents);
+                    var version = Assembly.GetEntryAssembly().GetName().Version;
+                    ColorConsole.LogHeading($"Service '{_bootConfig.MicroserviceName}' version {version}");
+
+                    _bootConfig.BootComponents.Register(RegisterCliHostComponents);
 
                     var host = Build();
                     return cli.Run(host, args);
