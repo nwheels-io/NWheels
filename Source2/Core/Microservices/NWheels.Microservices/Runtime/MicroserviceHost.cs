@@ -497,7 +497,7 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual void OnCompiledStopped()
+        protected virtual void OnUnloaded()
         {
             ModuleComponents = null;
             FeatureLoaders = null;
@@ -549,11 +549,11 @@ namespace NWheels.Microservices.Runtime
                 BootConfig = this.BootConfig,
                 OnConfiguring = this.OnConfiguring,
                 OnCompiling = this.OnCompiling,
-                OnCompiledStopped = this.OnCompiledStopped,
                 OnLoading = this.OnLoading,
                 OnActivating = this.OnActivating,
                 OnDeactivating = this.OnDeactivating,
-                OnUnloading = this.OnUnloading
+                OnUnloading = this.OnUnloading,
+                OnUnloaded = this.OnUnloaded
             };
         }
 

@@ -100,9 +100,9 @@ namespace NWheels.Microservices.Runtime
 
         protected virtual void CompiledStoppedEntered(object sender, StateMachineFeedbackEventArgs<MicroserviceState, MicroserviceTrigger> e)
         {
-            if (_options.OnCompiledStopped != null)
+            if (e.HasFromState && e.FromState == MicroserviceState.Unloading && _options.OnUnloaded != null)
             {
-                _options.OnCompiledStopped();
+                _options.OnUnloaded();
             }
         }
 
