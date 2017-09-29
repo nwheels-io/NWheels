@@ -59,20 +59,21 @@ test_script:
     }
 
 after_test:
-- sh: >-
-    echo Begin patching template package
-    
-    echo sed --in-place s/0.0.0-REPLACE/%APPVEYOR_BUILD_VERSION%/ c:\projects\NWheels\Source2\Templates\NWheels.Template\content\My.Service.csproj
-    
-    sed --quiet s/0.0.0-REPLACE/%APPVEYOR_BUILD_VERSION%/gp c:\projects\NWheels\Source2\Templates\NWheels.Template\content\My.Service.csproj
+- ps: >-
+    echo BEGIN PATCH TEMPLATE
 
-    sed --in-place s/0.0.0-REPLACE/%APPVEYOR_BUILD_VERSION%/ c:\projects\NWheels\Source2\Templates\NWheels.Template\content\My.Service.csproj
-    
-    echo $?
+    dir -Path c:\projects\NWheels\Source2\Templates\NWheels.Template\ -Recurse -Filter *.csproj | ForEach-Object {    
+        echo "Patching: $($_.FullName)"
+        (Get-Content -Path $_.FullName) -replace "0.0.0-REPLACE", $env:APPVEYOR_BUILD_VERSION | Set-Content $_.FullName
+        echo "AFTER PATCH:"
+        cat $_.FullName
+    }                                                                                               
 
-    echo End patching template package
-    
+    echo END PATCH TEMPLATE
+
 - cmd: >-
+    echo BEGIN GENERATE ARTIFACTS
+
     cd c:\projects\NWheels
 
     codecov -f "c:\projects\NWheels\Source2\CoverageResults.xml"
@@ -84,6 +85,8 @@ after_test:
     dotnet pack -c Release --no-build -p:Version=%APPVEYOR_BUILD_VERSION% -p:Authors="felix-b" -p:Copyright="Copyright 2014 Felix Berman and contributors" -p:PackageLicenseUrl="https://github.com/felix-b/NWheels/blob/master/LICENSE" -p:PackageProjectUrl="http://nwheels.io" -p:PackageIconUrl="https://github.com/felix-b/NWheels/raw/master/Docs/Images/logo-132.png"
 
     nuget pack c:\projects\NWheels\Source2\Templates\NWheels.Template\NWheels.Template.nuspec -Properties Version=%APPVEYOR_BUILD_VERSION%
+
+    echo END GENERATE ARTIFACTS
     
 on_success:
 - ps: >-
