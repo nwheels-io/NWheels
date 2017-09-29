@@ -1,0 +1,19 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "NWheels Project",
+    "identity": "NWheels.Microservice",
+    "name": "NWheels Microservice",
+    "shortName": "nwheels",
+    "classifications": [ "Microservice", "NWheels" ],
+    "tags": {
+        "language": "C#"
+    },
+    "sourceName": "My.Service",
+    "symbols": {
+        "service": {
+            "type": "parameter",
+            "defaultValue": "MyService",
+            "replaces": "ServiceName"
+        }
+    }
+}

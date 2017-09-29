@@ -59,6 +59,7 @@ test_script:
     }
 
 after_test:
+- sh: sed s/0.0.0-REPLACE/%APPVEYOR_BUILD_VERSION%/ --in-place c:\projects\NWheels\Source2\Templates\NWheels.Template\content\My.Service.csproj
 - cmd: >-
     cd c:\projects\NWheels
 
@@ -70,6 +71,8 @@ after_test:
     
     dotnet pack -c Release --no-build -p:Version=%APPVEYOR_BUILD_VERSION% -p:Authors="felix-b" -p:Copyright="Copyright 2014 Felix Berman and contributors" -p:PackageLicenseUrl="https://github.com/felix-b/NWheels/blob/master/LICENSE" -p:PackageProjectUrl="http://nwheels.io" -p:PackageIconUrl="https://github.com/felix-b/NWheels/raw/master/Docs/Images/logo-132.png"
 
+    nuget pack c:\projects\NWheels\Source2\Templates\NWheels.Template\NWheels.Template.nuspec -Properties Version=%APPVEYOR_BUILD_VERSION%
+    
 on_success:
 - ps: >-
     cd c:\projects\NWheels\Source2

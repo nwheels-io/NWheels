@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>NWheels.Template</id>
+    <!-- set version when packing: nuget pack -Properties Version=VERSION_VALUE -->
+    <version>$version$</version>
+    <description>
+      Creates microservice with NWheels framework
+    </description>
+    <authors>felix-b</authors>
+    <packageTypes>
+      <packageType name="Template" />
+    </packageTypes>
+    <contentFiles>
+      <files include="content\*.csproj" />
+      <files include="content\*.cs" />
+      <files include="content\.template.config/**/*" />
+    </contentFiles>
+  </metadata>
+  <files>
+    <file src="content\*.csproj" target="content" />
+    <file src="content\*.cs" target="content" />
+    <file src="content\.template.config\**" target="content\.template.config" />
+  </files>
+</package>
