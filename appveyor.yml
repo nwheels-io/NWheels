@@ -59,7 +59,19 @@ test_script:
     }
 
 after_test:
-- sh: sed s/0.0.0-REPLACE/%APPVEYOR_BUILD_VERSION%/ --in-place c:\projects\NWheels\Source2\Templates\NWheels.Template\content\My.Service.csproj
+- sh: >-
+    echo Begin patching template package
+    
+    echo sed --in-place s/0.0.0-REPLACE/%APPVEYOR_BUILD_VERSION%/ c:\projects\NWheels\Source2\Templates\NWheels.Template\content\My.Service.csproj
+    
+    sed --quiet s/0.0.0-REPLACE/%APPVEYOR_BUILD_VERSION%/gp c:\projects\NWheels\Source2\Templates\NWheels.Template\content\My.Service.csproj
+
+    sed --in-place s/0.0.0-REPLACE/%APPVEYOR_BUILD_VERSION%/ c:\projects\NWheels\Source2\Templates\NWheels.Template\content\My.Service.csproj
+    
+    echo $?
+
+    echo End patching template package
+    
 - cmd: >-
     cd c:\projects\NWheels
 
