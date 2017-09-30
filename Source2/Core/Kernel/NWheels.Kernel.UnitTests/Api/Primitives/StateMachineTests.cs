@@ -68,12 +68,15 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(new MissingStateCodeBehind());
-            Action act = () => machine.ReceiveTrigger(PhilosopherTrigger.Hungry);
+
+            Action act = () => {
+                machine.ReceiveTrigger(PhilosopherTrigger.Hungry);
+            };
 
             //-- Act  & assert
 
             act.ShouldThrow<StateMachineException>()
-                .Which.Reason.Should().Be(nameof(StateMachineException.DestinationStateNotDefined));
+                .Where(exc => exc.Reason == nameof(StateMachineException.DestinationStateNotDefined));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
