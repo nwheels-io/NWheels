@@ -50,7 +50,7 @@ test_script:
     Get-ChildItem -Directory -Recurse -Include *.UnitTests,*.IntegrationTests,*.SystemApiTests,*.SystemUITests,*.Tests | Foreach { 
         echo --- "Running test project" $_.fullName ---;     
         $dotnetArgs = '"-targetargs:test ' + $_.fullname + ' --no-build --no-restore -c Debug --filter ""(Purpose!=ManualTest)&(Purpose!=StressLoadTest)"""';
-        c:\projects\NWheels\Tools\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:dotnet.exe $dotnetArgs -oldStyle -register:user -filter:"+[NWheels.*]* -[*.*Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -output:c:\projects\NWheels\Source2\CoverageResults.xml -mergeoutput
+        c:\projects\NWheels\Tools\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:dotnet.exe $dotnetArgs -oldStyle -register:user -filter:"+[NWheels.*]* -[*.*Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -output:c:\projects\NWheels\Source2\CoverageResults.xml -mergeoutput -returntargetcode:1000
         if ($LastExitCode -ne 0) { $testRunStatus = "FAIL" }
     }
 
@@ -60,8 +60,6 @@ test_script:
 
 after_test:
 - ps: >-
-    echo BEGIN PATCH TEMPLATE
-
     dir -Path c:\projects\NWheels\Source2\Templates\NWheels.Template\ -Recurse -Filter *.csproj | ForEach-Object {    
         echo "Patching: $($_.FullName)"
         (Get-Content -Path $_.FullName) -replace "0.0.0-REPLACE", $env:APPVEYOR_BUILD_VERSION | Set-Content $_.FullName
@@ -69,11 +67,7 @@ after_test:
         cat $_.FullName
     }                                                                                               
 
-    echo END PATCH TEMPLATE
-
 - cmd: >-
-    echo BEGIN GENERATE ARTIFACTS
-
     cd c:\projects\NWheels
 
     codecov -f "c:\projects\NWheels\Source2\CoverageResults.xml"
@@ -85,9 +79,7 @@ after_test:
     dotnet pack -c Release --no-build -p:Version=%APPVEYOR_BUILD_VERSION% -p:Authors="felix-b" -p:Copyright="Copyright 2014 Felix Berman and contributors" -p:PackageLicenseUrl="https://github.com/felix-b/NWheels/blob/master/LICENSE" -p:PackageProjectUrl="http://nwheels.io" -p:PackageIconUrl="https://github.com/felix-b/NWheels/raw/master/Docs/Images/logo-132.png"
 
     nuget pack c:\projects\NWheels\Source2\Templates\NWheels.Template\NWheels.Template.nuspec -Properties Version=%APPVEYOR_BUILD_VERSION%
-
-    echo END GENERATE ARTIFACTS
-    
+   
 on_success:
 - ps: >-
     cd c:\projects\NWheels\Source2
