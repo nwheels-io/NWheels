@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using NWheels.Kernel.Api.Exceptions;
 
 namespace NWheels.Kernel.Api.Injection
 {
@@ -17,7 +18,7 @@ namespace NWheels.Kernel.Api.Injection
 
             if (string.IsNullOrEmpty(name))
             {
-                throw new Exception(); //TODO: throw correct exception
+                throw FeatureLoaderException.FeatureNameMissingOrInvalid(type);
             }
 
             return name;

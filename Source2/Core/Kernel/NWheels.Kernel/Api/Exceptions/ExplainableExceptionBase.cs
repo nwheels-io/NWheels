@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Web;
+using NWheels.Kernel.Api.Extensions;
 
 namespace NWheels.Kernel.Api.Exceptions
 {
@@ -62,19 +63,22 @@ namespace NWheels.Kernel.Api.Exceptions
 
         protected string BuildExplanationPathAndQuery()
         {
-            var minimalPath = $"{this.GetType().FullName}?Reason={HttpUtility.UrlEncode(this.Message)}";
+            var typeName = this.GetType().FriendlyFullName(fullNameGenericArgs: false);
+            var path = $"{typeName}/{Uri.EscapeUriString(this.Reason)}";
             var keyValuePairs = BuildKeyValuePairs();
 
             if (keyValuePairs == null || keyValuePairs.Length == 0)
             {
-                return minimalPath;
+                return path;
             }
 
-            var builder = new StringBuilder(minimalPath);
+            var builder = new StringBuilder(path);
+            var pairSeparator = '?'; 
 
-            for (int i = 0 ; i < keyValuePairs.Length - 1 ; i++)
+            for (int i = 0 ; i < keyValuePairs.Length - 1 ; i += 2)
             {
-                builder.Append($"&{keyValuePairs[i]}={HttpUtility.UrlEncode(keyValuePairs[i+1] ?? string.Empty)}");
+                builder.Append($"{pairSeparator}{keyValuePairs[i]}={HttpUtility.UrlEncode(keyValuePairs[i+1] ?? string.Empty)}");
+                pairSeparator = '&';
             }
 
             return builder.ToString();
