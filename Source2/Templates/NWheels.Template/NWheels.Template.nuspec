@@ -14,12 +14,14 @@
     <contentFiles>
       <files include="content\*.csproj" />
       <files include="content\*.cs" />
+      <files include="content\*.config" />
       <files include="content\.template.config/**/*" />
     </contentFiles>
   </metadata>
   <files>
     <file src="content\*.csproj" target="content" />
     <file src="content\*.cs" target="content" />
+    <file src="content\*.config" target="content" />
     <file src="content\.template.config\**" target="content\.template.config" />
   </files>
 </package>
