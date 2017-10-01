@@ -1,4 +1,4 @@
-﻿namespace NWheels.Microservices.Runtime
+﻿namespace NWheels.Microservices.Api
 {
     public enum MicroserviceTrigger
     {

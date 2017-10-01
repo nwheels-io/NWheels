@@ -4,6 +4,7 @@ using System.Text;
 using NWheels.Kernel.Api.Execution;
 using NWheels.Kernel.Api.Extensions;
 using NWheels.Kernel.Api.Logging;
+using NWheels.Microservices.Api;
 using NWheels.Microservices.Api.Exceptions;
 using NWheels.Microservices.Runtime.Cli;
 

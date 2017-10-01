@@ -1,7 +1,5 @@
 ﻿using System;
-using NWheels.Microservices;
 using NWheels.Microservices.Api;
-using NWheels.Microservices.Runtime;
 
 namespace My.Service
 {
@@ -9,9 +7,11 @@ namespace My.Service
     {
         static int Main(string[] args)
         {
-            return new MicroserviceHostBuilder("ServiceName")
+            var cli = new MicroserviceHostBuilder("ServiceName")
                 .UseLifecycleComponent<HelloWorldComponent>()
-                .RunCli(args);
+                .BuildCli();
+
+            return cli.Run(args);
         }
 
         public class HelloWorldComponent : LifecycleComponentBase

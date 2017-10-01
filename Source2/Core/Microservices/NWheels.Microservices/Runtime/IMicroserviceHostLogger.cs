@@ -2,6 +2,7 @@
 using System;
 using NWheels.Kernel.Api.Logging;
 using NWheels.Microservices.Api.Exceptions;
+using NWheels.Microservices.Api;
 
 namespace NWheels.Microservices.Runtime
 {

@@ -6,6 +6,7 @@ using System.Text;
 using NWheels.Kernel.Api.Injection;
 using NWheels.Kernel.Api.Logging;
 using NWheels.Kernel.Api.Primitives;
+using NWheels.Microservices.Api;
 
 namespace NWheels.Microservices.Runtime
 {

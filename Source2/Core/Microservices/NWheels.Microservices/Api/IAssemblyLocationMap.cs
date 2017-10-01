@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace NWheels.Microservices.Runtime
+namespace NWheels.Microservices.Api
 {
     public interface IAssemblyLocationMap
     {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using NWheels.Kernel.Api.Injection;
+using NWheels.Microservices.Api;
 
 namespace NWheels.Microservices.Runtime
 {

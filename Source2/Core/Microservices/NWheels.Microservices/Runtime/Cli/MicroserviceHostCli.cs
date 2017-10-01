@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using NWheels.Kernel.Api.Logging;
+using NWheels.Microservices.Api;
 
 namespace NWheels.Microservices.Runtime.Cli
 {
@@ -20,13 +21,14 @@ namespace NWheels.Microservices.Runtime.Cli
     //   myservice.exe deploy --env <env_name> --env-type <env_type> --to <cloud_provider_name> --credentials <cloud_provider_credentials_kvps>
     //   ...and more...
 
-    public class CliProgram : IDisposable
+    public class MicroserviceHostCli : IMicroserviceHostCli
     {
         private readonly CancellationTokenSource _cancellation;
+        private MicroserviceHost _host;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CliProgram()
+        public MicroserviceHostCli()
         {
             _cancellation = new CancellationTokenSource();
 
@@ -46,12 +48,26 @@ namespace NWheels.Microservices.Runtime.Cli
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void UseHost(MicroserviceHost host)
+        {
+            if (host == null)
+            {
+                throw new ArgumentNullException(nameof(host));
+            }
+
+            if (_host != null)
+            {
+                throw new InvalidCastException("Host was already set.");
+            }
+
+            _host = host;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         /// <summary>
         /// Runs command-line interface for a microservice
         /// </summary>
-        /// <param name="host">
-        /// An instance of MicroserviceHost to run
-        /// </param>
         /// <param name="args">
         /// Command line arguments
         /// </param>
@@ -62,9 +78,14 @@ namespace NWheels.Microservices.Runtime.Cli
         /// If command line arguments are invalid, or help is requested with -h, -?, or --help option, 
         /// this method will print appropriate output, then terminate the process with exit code 1.
         /// </remarks>
-        public int Run(MicroserviceHost host, string[] args)
+        public int Run(string[] args)
         {
-            var commands = host.GetBootComponents().ResolveAll<ICliCommand>().ToArray();
+            if (_host == null)
+            {
+                throw new InvalidOperationException("Host was not set.");
+            }
+
+            var commands = _host.GetBootComponents().ResolveAll<ICliCommand>().ToArray();
             var parsedArgs = ParseCommandLine(commands, args);             // will Environment.Exit(1) if not parsed
             var activeCommand = FindActiveCommand(commands, parsedArgs);   // will Environment.Exit(1) if not found
             activeCommand.ValidateArguments(parsedArgs);                   // will Environment.Exit(1) if not valid
@@ -96,6 +117,10 @@ namespace NWheels.Microservices.Runtime.Cli
             File.AppendAllText(crashLogFilePath, crashLogMessage);
             ColorConsole.Log(LogLevel.Critical, crashLogMessage);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IMicroserviceHost IMicroserviceHostCli.Host => _host;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

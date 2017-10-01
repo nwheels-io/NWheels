@@ -8,8 +8,9 @@ using System.Xml.Linq;
 using NWheels.Kernel.Api.Primitives;
 using NWheels.Microservices.Runtime.Cli;
 using NWheels.Kernel.Api.Logging;
+using NWheels.Microservices.Runtime;
 
-namespace NWheels.Microservices.Runtime
+namespace NWheels.Microservices.Api
 {
     public class MicroserviceHostBuilder
     {
@@ -72,50 +73,26 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHost Build()
+        public IMicroserviceHost BuildHost()
         {
             return new MicroserviceHost(this.BootConfig);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        /// <summary>
-        /// Runs command-line interface for the microservice
-        /// </summary>
-        /// <param name="args">
-        /// Command line arguments
-        /// </param>
-        /// <returns>
-        /// Exit code to return to the OS: 
-        ///    0 = success, 
-        ///   -1 = failure during initialization, 
-        ///   -2 = failure during execution
-        ///   -3 = daemon didn't stop within allotted timeout
-        /// </returns>
-        /// <remarks>
-        /// If command line arguments are invalid, or help is requested with -h, -?, or --help option, 
-        /// this method will print appropriate output, then terminate the process with exit code 1.
-        /// </remarks>
-        public int RunCli(string[] args)
+        public IMicroserviceHostCli BuildCli()
         {
-            using (var cli = new CliProgram())
-            {
-                try
-                {
-                    var version = Assembly.GetEntryAssembly().GetName().Version;
-                    ColorConsole.LogHeading($"Service '{_bootConfig.MicroserviceName}' version {version}");
+            var cli = new MicroserviceHostCli();
 
-                    _bootConfig.BootComponents.Register(RegisterCliHostComponents);
+            var version = Assembly.GetEntryAssembly().GetName().Version;
+            ColorConsole.LogHeading($"Service '{_bootConfig.MicroserviceName}' version {version}");
 
-                    var host = Build();
-                    return cli.Run(host, args);
-                }
-                catch (Exception e)
-                {
-                    cli.LogCrash(e, isTerminating: true);
-                    return -1;
-                }
-            }
+            _bootConfig.BootComponents.Register(RegisterCliHostComponents);
+
+            var host = new MicroserviceHost(this.BootConfig);
+            cli.UseHost(host);
+
+            return cli;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

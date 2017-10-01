@@ -18,7 +18,7 @@ using NWheels.Kernel.Api.Exceptions;
 
 namespace NWheels.Microservices.Runtime
 {
-    public class MicroserviceHost : IDisposable
+    public class MicroserviceHost : IDisposable, IMicroserviceHost
     {
         public MicroserviceHost(IBootConfiguration bootConfig)
         {

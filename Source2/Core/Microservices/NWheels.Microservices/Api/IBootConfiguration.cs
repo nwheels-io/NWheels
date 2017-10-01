@@ -8,7 +8,7 @@ using NWheels.Kernel.Api.Primitives;
 using NWheels.Kernel.Api.Logging;
 using NWheels.Kernel.Api.Injection;
 
-namespace NWheels.Microservices.Runtime
+namespace NWheels.Microservices.Api
 {
     public interface IBootConfiguration
     {
