@@ -19,7 +19,7 @@ namespace NWheels.Kernel.Api.Extensions
             if (type.GetTypeInfo().IsGenericType)
             {
                 var nameBuilder = new StringBuilder();
-                AppendFriendlyName(type, nameBuilder);
+                AppendFriendlyName(type, nameBuilder, fullNameThis: false, fullNameGenericArgs: false);
 
                 return nameBuilder.ToString();
             }
@@ -27,6 +27,17 @@ namespace NWheels.Kernel.Api.Extensions
             {
                 return type.Name;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string FriendlyFullName(this Type type, bool fullNameGenericArgs)
+        {
+            var nameBuilder = new StringBuilder();
+
+            AppendFriendlyName(type, nameBuilder, fullNameThis: true, fullNameGenericArgs: fullNameGenericArgs);
+
+            return nameBuilder.ToString();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -55,13 +66,18 @@ namespace NWheels.Kernel.Api.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void AppendFriendlyName(Type type, StringBuilder output)
+        private static void AppendFriendlyName(Type type, StringBuilder output, bool fullNameThis, bool fullNameGenericArgs)
         {
             Type[] nestedTypeArguments = null;
 
             if (type.IsNested && type.DeclaringType != null)
             {
-                AppendFriendlyName(type.GetClosedDeclaringType(out nestedTypeArguments), output);
+                AppendFriendlyName(type.GetClosedDeclaringType(out nestedTypeArguments), output, fullNameThis, fullNameGenericArgs);
+                output.Append(".");
+            }
+            else if (fullNameThis && !string.IsNullOrEmpty(type.Namespace))
+            {
+                output.Append(type.Namespace);
                 output.Append(".");
             }
 
@@ -77,7 +93,7 @@ namespace NWheels.Kernel.Api.Extensions
 
                 for (int i = 0; i < typeArguments.Length; i++)
                 {
-                    AppendFriendlyName(typeArguments[i], output);
+                    AppendFriendlyName(typeArguments[i], output, fullNameGenericArgs, fullNameGenericArgs);
 
                     if (i < typeArguments.Length - 1)
                     {
