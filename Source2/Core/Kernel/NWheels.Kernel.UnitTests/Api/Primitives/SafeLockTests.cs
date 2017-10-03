@@ -102,5 +102,43 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             exception.ResourceName.Should().Be("TestResource");
             exception.Timeout.Should().Be(TimeSpan.FromMilliseconds(100));
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void Constructor_ResourceNameNullOrEmpty_Throw(string resourceName)
+        {
+            //-- arrange
+
+            Action act = () => {
+                new SafeLock(resourceName);
+            };
+
+            //-- act & assert
+
+            act.ShouldThrow<ArgumentNullException>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void Acquire_PurposeNullOrEmpty_Throw(string purpose)
+        {
+            //-- arrange
+
+            var lockUnderTest = new SafeLock("TestResource");
+
+            Action act = () => {
+                lockUnderTest.Acquire(TimeSpan.FromSeconds(1), purpose);
+            };
+
+            //-- act & assert
+
+            act.ShouldThrow<ArgumentNullException>();
+        }
     }
 }
