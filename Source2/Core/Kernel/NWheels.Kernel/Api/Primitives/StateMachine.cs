@@ -140,7 +140,7 @@ namespace NWheels.Kernel.Api.Primitives
 
             if (transition == null)
             {
-                throw StateMachineException.TriggetNotValidInCurrentState(_codeBehind.GetType(), currentState.Value.ToString(), trigger.ToString());
+                throw StateMachineException.TriggerNotValidInCurrentState(_codeBehind.GetType(), currentState.Value.ToString(), trigger.ToString());
             }
 
             var eventArgs = new StateMachineFeedbackEventArgs<TState, TTrigger>(_currentState.Value, transition.DestinationStateValue, trigger, context);

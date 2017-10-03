@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using NWheels.Kernel.Api.Injection;
 
 namespace NWheels.Kernel.Runtime.Injection
 {
+    [ExcludeFromCodeCoverage]
     public abstract class FeatureLoaderWithPhaseExtensionBase : FeatureLoaderBase, IFeatureLoaderPhaseExtension
     {
         public virtual void BeforeContributeConfigSections(IComponentContainer components)

@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
+using NWheels.Kernel.Api.Extensions;
 
 namespace NWheels.Kernel.Api.Exceptions
 {
     [Serializable]
     public class StateMachineException : ExplainableExceptionBase
     {
-        private readonly Type _codeBehind;
-        private readonly string _state;
-        private readonly string _initialState;
-        private readonly string _attemptedState;
-        private readonly string _trigger;
+        public Type CodeBehind { get; }
+        public string State { get; }
+        public string InitialState { get; }
+        public string AttemptedState { get; }
+        public string Trigger { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -25,11 +26,11 @@ namespace NWheels.Kernel.Api.Exceptions
             string trigger = null)
             : base(reason)
         {
-            _codeBehind = codeBehind;
-            _state = state;
-            _initialState = initialState;
-            _attemptedState = attemptedState;
-            _trigger = trigger;
+            this.CodeBehind = codeBehind;
+            this.State = state;
+            this.InitialState = initialState;
+            this.AttemptedState = attemptedState;
+            this.Trigger = trigger;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -44,11 +45,11 @@ namespace NWheels.Kernel.Api.Exceptions
         protected override IEnumerable<KeyValuePair<string, string>> BuildKeyValuePairs()
         {
             return new[] {
-                new KeyValuePair<string, string>(_s_keyCodeBehind, _codeBehind.FullName),
-                new KeyValuePair<string, string>(_s_keyState, _state),
-                new KeyValuePair<string, string>(_s_keyInitialState, _initialState),
-                new KeyValuePair<string, string>(_s_keyAttemptedState, _attemptedState),
-                new KeyValuePair<string, string>(_s_keyTrigger, _trigger)
+                new KeyValuePair<string, string>(_s_keyCodeBehind, this.CodeBehind.FriendlyFullName()),
+                new KeyValuePair<string, string>(_s_keyState, this.State),
+                new KeyValuePair<string, string>(_s_keyInitialState, this.InitialState),
+                new KeyValuePair<string, string>(_s_keyAttemptedState, this.AttemptedState),
+                new KeyValuePair<string, string>(_s_keyTrigger, this.Trigger)
             };
         }
 
@@ -57,13 +58,13 @@ namespace NWheels.Kernel.Api.Exceptions
         private static readonly string _s_reasonInitialStateNotSet = nameof(InitialStateNotSet);
         private static readonly string _s_reasonInitialStateAlreadyDefined = nameof(InitialStateAlreadyDefined);
         private static readonly string _s_reasonTransitionAlreadyDefined = nameof(TransitionAlreadyDefined);
-        private static readonly string _s_reasonTriggerNotValidInCurrentState = nameof(TriggetNotValidInCurrentState);
+        private static readonly string _s_reasonTriggerNotValidInCurrentState = nameof(TriggerNotValidInCurrentState);
         private static readonly string _s_reasonDestinationStateNotDefined = nameof(DestinationStateNotDefined);
-        private static readonly string _s_keyCodeBehind = "codeBehind";
-        private static readonly string _s_keyState = "state";
-        private static readonly string _s_keyInitialState = "initialState";
-        private static readonly string _s_keyAttemptedState = "attemptedState";
-        private static readonly string _s_keyTrigger = "trigger";
+        private static readonly string _s_keyCodeBehind = nameof(CodeBehind);
+        private static readonly string _s_keyState = nameof(State);
+        private static readonly string _s_keyInitialState = nameof(InitialState);
+        private static readonly string _s_keyAttemptedState = nameof(AttemptedState);
+        private static readonly string _s_keyTrigger = nameof(Trigger);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -88,7 +89,7 @@ namespace NWheels.Kernel.Api.Exceptions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static StateMachineException TriggetNotValidInCurrentState(Type codeBehind, string state, string trigger)
+        public static StateMachineException TriggerNotValidInCurrentState(Type codeBehind, string state, string trigger)
         {
             return new StateMachineException(_s_reasonTriggerNotValidInCurrentState, codeBehind, state: state, trigger: trigger);
         }

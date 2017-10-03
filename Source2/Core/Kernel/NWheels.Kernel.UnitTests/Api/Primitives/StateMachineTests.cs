@@ -15,7 +15,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
         {
             //-- Arrange, Act
 
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(new PhilisopherCodeBehind());
+            var machine = StateMachine.CreateFrom(new PhilisopherCodeBehind());
 
             //-- Assert
 
@@ -29,7 +29,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
         {
             //-- Arrange
 
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(new PhilisopherCodeBehind());
+            var machine = StateMachine.CreateFrom(new PhilisopherCodeBehind());
 
             //-- Act
 
@@ -52,7 +52,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
         {
             //-- Arrange
 
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(new PhilisopherCodeBehind());
+            var machine = StateMachine.CreateFrom(new PhilisopherCodeBehind());
             Action act = () => machine.ReceiveTrigger(PhilosopherTrigger.GotForks);
 
             //-- Act  & assert
@@ -67,7 +67,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
         {
             //-- Arrange
 
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(new MissingStateCodeBehind());
+            var machine = StateMachine.CreateFrom(new MissingStateCodeBehind());
 
             Action act = () => {
                 machine.ReceiveTrigger(PhilosopherTrigger.Hungry);
@@ -87,7 +87,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- Arrange
 
             var codeBehind = new PhilisopherCodeBehindWithEvents();
-            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind);
+            var machine = StateMachine.CreateFrom(codeBehind);
 
             machine.CurrentStateChanged += (sender, args) => {
                 codeBehind.AddLog($"CurrentStateChanged:{machine.CurrentState}");

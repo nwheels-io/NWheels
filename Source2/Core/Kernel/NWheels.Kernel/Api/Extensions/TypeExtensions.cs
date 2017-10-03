@@ -31,7 +31,7 @@ namespace NWheels.Kernel.Api.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static string FriendlyFullName(this Type type, bool fullNameGenericArgs)
+        public static string FriendlyFullName(this Type type, bool fullNameGenericArgs = false)
         {
             var nameBuilder = new StringBuilder();
 
