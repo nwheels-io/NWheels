@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 using System.Web;
 using NWheels.Kernel.Api.Extensions;
 
@@ -11,7 +14,9 @@ namespace NWheels.Kernel.Api.Exceptions
     public abstract class ExplainableExceptionBase : Exception, IExplainableException
     {
         private readonly string _reason;
-        private string _explanationPathAndQuery = null;
+        private string _explanationPath = null;
+        private string _explanationQuery = null;
+        private KeyValuePair<string, string>[] _keyValuePairs = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -38,16 +43,42 @@ namespace NWheels.Kernel.Api.Exceptions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string ExplanationPathAndQuery 
+        public string ExplanationPath
         {
             get
             {
-                if (_explanationPathAndQuery == null)
+                if (_explanationPath == null)
                 {
-                    _explanationPathAndQuery = BuildExplanationPathAndQuery();
+                    _explanationPath = this.GetType().FriendlyFullName(fullNameGenericArgs: false);
                 }
 
-                return _explanationPathAndQuery;
+                return _explanationPath;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string ExplanationQuery
+        {
+            get
+            {
+                if (_explanationQuery == null)
+                {
+                    _explanationQuery = BuildExplanationQuery();
+                }
+
+                return _explanationQuery;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEnumerable<KeyValuePair<string, string>> KeyValuePairs
+        {
+            get
+            {
+                EnsureKeyValuePairs();
+                return _keyValuePairs;
             }
         }
 
@@ -57,31 +88,44 @@ namespace NWheels.Kernel.Api.Exceptions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected abstract string[] BuildKeyValuePairs();
+        protected abstract IEnumerable<KeyValuePair<string, string>> BuildKeyValuePairs();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected string BuildExplanationPathAndQuery()
+        protected string BuildExplanationQuery()
         {
-            var typeName = this.GetType().FriendlyFullName(fullNameGenericArgs: false);
-            var path = $"{typeName}/{Uri.EscapeUriString(this.Reason)}";
-            var keyValuePairs = BuildKeyValuePairs();
+            EnsureKeyValuePairs();
 
-            if (keyValuePairs == null || keyValuePairs.Length == 0)
+            var minimalQuery = $"Reason={_s_urlEncoder.Encode(this.Reason)}";
+            var keyValuePairs = this.KeyValuePairs;
+
+            if (_keyValuePairs == null || _keyValuePairs.Length == 0)
             {
-                return path;
+                return minimalQuery;
             }
 
-            var builder = new StringBuilder(path);
-            var pairSeparator = '?'; 
+            var builder = new StringBuilder(minimalQuery);
 
-            for (int i = 0 ; i < keyValuePairs.Length - 1 ; i += 2)
+            for (int i = 0 ; i < _keyValuePairs.Length ; i++)
             {
-                builder.Append($"{pairSeparator}{keyValuePairs[i]}={HttpUtility.UrlEncode(keyValuePairs[i+1] ?? string.Empty)}");
-                pairSeparator = '&';
+                builder.Append($"&{_keyValuePairs[i].Key}={_s_urlEncoder.Encode(_keyValuePairs[i].Value ?? string.Empty)}");
             }
 
             return builder.ToString();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void EnsureKeyValuePairs()
+        {
+            if (_keyValuePairs == null)
+            {
+                _keyValuePairs = BuildKeyValuePairs()?.ToArray();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly UrlEncoder _s_urlEncoder = UrlEncoder.Default;
     }
 }

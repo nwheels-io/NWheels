@@ -19,7 +19,7 @@ namespace NWheels.Microservices.Api.Exceptions
         {
         }
 
-        protected override string[] BuildKeyValuePairs()
+        protected override IEnumerable<KeyValuePair<string, string>> BuildKeyValuePairs()
         {
             throw new NotImplementedException();
         }

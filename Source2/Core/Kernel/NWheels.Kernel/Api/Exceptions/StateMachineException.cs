@@ -41,14 +41,14 @@ namespace NWheels.Kernel.Api.Exceptions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string[] BuildKeyValuePairs()
+        protected override IEnumerable<KeyValuePair<string, string>> BuildKeyValuePairs()
         {
             return new[] {
-                _s_keyCodeBehind, _codeBehind.FullName,
-                _s_keyState, _state,
-                _s_keyInitialState, _initialState,
-                _s_keyAttemptedState, _attemptedState,
-                _s_keyTrigger, _trigger
+                new KeyValuePair<string, string>(_s_keyCodeBehind, _codeBehind.FullName),
+                new KeyValuePair<string, string>(_s_keyState, _state),
+                new KeyValuePair<string, string>(_s_keyInitialState, _initialState),
+                new KeyValuePair<string, string>(_s_keyAttemptedState, _attemptedState),
+                new KeyValuePair<string, string>(_s_keyTrigger, _trigger)
             };
         }
 

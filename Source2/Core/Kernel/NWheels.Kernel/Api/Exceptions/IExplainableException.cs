@@ -19,6 +19,6 @@ namespace NWheels.Kernel.Api.Exceptions
         /// <returns>
         ///     Path and query part of explanation page URL
         /// </returns>
-        string ExplanationPathAndQuery { get; }
+        string ExplanationQuery { get; }
     }
 }

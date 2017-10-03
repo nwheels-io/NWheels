@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
+using NWheels.Kernel.Api.Extensions;
 
 namespace NWheels.Kernel.Api.Exceptions
 {
@@ -27,9 +28,9 @@ namespace NWheels.Kernel.Api.Exceptions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string[] BuildKeyValuePairs()
+        protected override IEnumerable<KeyValuePair<string, string>> BuildKeyValuePairs()
         {
-            throw new NotImplementedException();
+            yield return new KeyValuePair<string, string>("featureLoaderType", this.FeatureLoaderType.FriendlyFullName(fullNameGenericArgs: false));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
