@@ -7,6 +7,7 @@ using NWheels.Kernel.Api.Injection;
 using NWheels.Kernel.Api.Logging;
 using NWheels.Kernel.Api.Primitives;
 using NWheels.Microservices.Api;
+using NWheels.Microservices.Api.Exceptions;
 
 namespace NWheels.Microservices.Runtime
 {
@@ -29,7 +30,14 @@ namespace NWheels.Microservices.Runtime
 
         public void Validate()
         {
-            //throw new NotImplementedException();
+            if (FrameworkModules.Count == 0)
+            {
+                FrameworkModules.Add(new ModuleConfiguration(KernelAssembly));
+            }
+            else if (FrameworkModules[0].RuntimeAssembly != KernelAssembly)
+            {
+                throw BootConfigurationException.KernelModuleWrongOrder();
+            }
         }
 
         //TODO: move to MutableBootConfiguration.Validate
@@ -93,7 +101,7 @@ namespace NWheels.Microservices.Runtime
 
                 if (!moduleItem.Features.Any(f => f.FeatureLoaderRuntimeType == loaderType || f.FeatureName == featureName))
                 {
-                    moduleItem.Features.Add(new FeatureConfiguration(featureName));
+                    moduleItem.Features.Add(new FeatureConfiguration(loaderType));
                 }
             }
         }
@@ -103,8 +111,8 @@ namespace NWheels.Microservices.Runtime
         public string MicroserviceName { get; set; }
         public bool IsPrecompiledMode { get; set; }
         public bool IsBatchJobMode { get; set; }
-        public string ClusterName { get; }
-        public string ClusterPartition { get; }
+        public string ClusterName { get; set; }
+        public string ClusterPartition { get; set; }
         public LogLevel LogLevel { get; set; }
         public IAssemblyLocationMap AssemblyLocationMap { get; set; }
 
