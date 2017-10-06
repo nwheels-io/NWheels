@@ -39,10 +39,18 @@ namespace NWheels.Microservices.Api.Exceptions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private readonly static string _s_stringMicroserviceNameNotSpecified = nameof(MicroserviceNameNotSpecified);
         private readonly static string _s_stringKernelModuleItemInvalidLocation = nameof(KernelModuleItemInvalidLocation);
         private readonly static string _s_stringModuleListedMultipleTimes = nameof(ModuleListedMultipleTimes);
         private readonly static string _s_stringModuleName = nameof(ModuleName);
         private readonly static string _s_stringFeatureName = nameof(FeatureName);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static BootConfigurationException MicroserviceNameNotSpecified()
+        {
+            return new BootConfigurationException(_s_stringMicroserviceNameNotSpecified);
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

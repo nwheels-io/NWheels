@@ -317,6 +317,53 @@ namespace NWheels.Microservices.UnitTests.Runtime
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void Validate_MicroserviceNameSpecified_Success()
+        {
+            //-- arrange
+
+            var bootConfig = new MutableBootConfiguration();
+            bootConfig.MicroserviceName = "TestService";
+
+            //-- act & assert
+
+            bootConfig.Validate();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Validate_MicroserviceNameNull_Throw()
+        {
+            //-- arrange
+
+            var bootConfig = new MutableBootConfiguration();
+            Action act = () => bootConfig.Validate();
+
+            //-- act & assert
+
+            act.ShouldThrow<BootConfigurationException>().Where(exc => exc.Reason == nameof(BootConfigurationException.MicroserviceNameNotSpecified));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Validate_MicroserviceNameEmpty_Throw()
+        {
+            //-- arrange
+
+            var bootConfig = new MutableBootConfiguration();
+            bootConfig.MicroserviceName = string.Empty;
+
+            Action act = () => bootConfig.Validate();
+
+            //-- act & assert
+
+            act.ShouldThrow<BootConfigurationException>().Where(exc => exc.Reason == nameof(BootConfigurationException.MicroserviceNameNotSpecified));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void Validate_NoFrameworkModules_KernelModuleAdded()
         {
             //-- arrange

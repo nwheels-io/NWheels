@@ -8,6 +8,8 @@ using System.Xml.Linq;
 using NWheels.Kernel.Api.Injection;
 using NWheels.Testability;
 using NWheels.Microservices.Runtime;
+using System;
+using NWheels.Microservices.Api.Exceptions;
 
 namespace NWheels.Microservices.UnitTests.Runtime
 {
@@ -84,6 +86,66 @@ namespace NWheels.Microservices.UnitTests.Runtime
             bootConfig.CustomizationModules[1].RuntimeAssembly.Should().BeNull();
             bootConfig.CustomizationModules[1].Features.Count.Should().Be(1);
             bootConfig.CustomizationModules[1].Features[0].FeatureName.Should().Be("custom-m6-f4");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        [Fact]
+        public void RootElementInvalid_Throw()
+        {
+            //-- arrange
+
+            var xml = @"
+                <bad-element name='MyService'>
+                </bad-element>";
+
+            var parsedXml = XElement.Parse(xml);
+            var bootConfig = new MutableBootConfiguration();
+
+            //-- act
+
+            Action act = () => {
+                MicroserviceXmlReader.PopulateBootConfiguration(parsedXml, bootConfig);
+            };
+            
+            var exception = act.ShouldThrow<InvalidMicroserviceXmlException>().Which;
+            
+            //-- assert
+            
+            exception.Reason.Should().Be(nameof(InvalidMicroserviceXmlException.RootElementInvalid));
+            exception.ExpectedElement.Should().Be(MicroserviceXmlReader.MicroserviceElementName);
+            exception.FoundElement.Should().Be("bad-element");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        [Fact]
+        public void ModuleElementInvalid_Throw()
+        {
+            //-- arrange
+
+            var xml = @"
+                <microservice name='MyService'>
+                    <framework-modules>
+                    </framework-modules>
+                </microservice>";
+
+            var parsedXml = XElement.Parse(xml);
+            var bootConfig = new MutableBootConfiguration();
+
+            //-- act
+
+            Action act = () => {
+                MicroserviceXmlReader.PopulateBootConfiguration(parsedXml, bootConfig);
+            };
+            
+            var exception = act.ShouldThrow<InvalidMicroserviceXmlException>().Which;
+            
+            //-- assert
+            
+            exception.Reason.Should().Be(nameof(InvalidMicroserviceXmlException.RootElementInvalid));
+            exception.ExpectedElement.Should().Be(MicroserviceXmlReader.MicroserviceElementName);
+            exception.FoundElement.Should().Be("bad-element");
         }
     }
 }

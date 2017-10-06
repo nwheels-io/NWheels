@@ -30,9 +30,18 @@ namespace NWheels.Microservices.Runtime
 
         public void Validate()
         {
+            ValidateMicroserviceName();
             ValidateKernelModule();
             ValidateUniqueModuleNames();
             ValidateAssemblyLocationMap();
+
+            void ValidateMicroserviceName()
+            {
+                if (string.IsNullOrEmpty(this.MicroserviceName))
+                {
+                    throw BootConfigurationException.MicroserviceNameNotSpecified();
+                }
+            }
 
             void ValidateKernelModule()
             {

@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 using NWheels.Kernel.Api.Injection;
+using NWheels.Microservices.Api.Exceptions;
 
 namespace NWheels.Microservices.Runtime
 {
@@ -11,12 +12,16 @@ namespace NWheels.Microservices.Runtime
     {
         public static readonly string DefaultFileName = "microservice.xml";
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static readonly string MicroserviceElementName = "microservice";
         public static readonly string FrameworkModulesElementName = "framework-modules";
         public static readonly string ApplicationModulesElementName = "application-modules";
         public static readonly string CustomizationModulesElementName = "customization-modules";
         public static readonly string ModuleElementName = "module";
         public static readonly string FeatureElementName = "feature";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static readonly string MicroserviceNameAttribute = "name";
         public static readonly string ModuleAssemblyAttribute = "assembly";
@@ -38,14 +43,14 @@ namespace NWheels.Microservices.Runtime
         {
             if (element.Name != MicroserviceElementName)
             {
-                throw new InvalidMicroserviceXmlException(); //TODO: provide correct reason
+                throw InvalidMicroserviceXmlException.RootElementInvalid(element);
             }
 
             var microserviceName = element.Attribute(MicroserviceNameAttribute)?.Value;
 
             if (string.IsNullOrEmpty(microserviceName) && string.IsNullOrEmpty(bootConfig.MicroserviceName))
             {
-                throw new InvalidMicroserviceXmlException(); //TODO: provide correct reason
+                throw InvalidMicroserviceXmlException.MicroserviceNameNotSpecified(element);
             }
 
             if (string.IsNullOrEmpty(bootConfig.MicroserviceName))
@@ -54,7 +59,7 @@ namespace NWheels.Microservices.Runtime
             }
             else if (microserviceName != bootConfig.MicroserviceName)
             {
-                throw new InvalidMicroserviceXmlException(); //TODO: provide correct reason
+                throw InvalidMicroserviceXmlException.MicroserviceNameConflict(element, microserviceName, bootConfig.MicroserviceName);
             }
         }
 
@@ -85,14 +90,14 @@ namespace NWheels.Microservices.Runtime
         {
             if (element.Name != ModuleElementName)
             {
-                throw new InvalidMicroserviceXmlException(); //TODO: provide correct reason
+                throw InvalidMicroserviceXmlException.ModuleElementInvalid(element);
             }
 
             var assemblyName = element.Attribute(ModuleAssemblyAttribute)?.Value;
 
             if (string.IsNullOrEmpty(assemblyName))
             {
-                throw new InvalidMicroserviceXmlException(); //TODO: provide correct reason
+                throw InvalidMicroserviceXmlException.FeatureElementInvalid(element);
             }
 
             var features = new List<string>();
@@ -112,21 +117,15 @@ namespace NWheels.Microservices.Runtime
         {
             if (element.Name != FeatureElementName)
             {
-                throw new InvalidMicroserviceXmlException(); //TODO: provide correct reason
+                throw InvalidMicroserviceXmlException.FeatureElementInvalid(element);
             }
 
             featureName = element.Attribute(FeatureNameAttribute)?.Value;
 
             if (string.IsNullOrEmpty(featureName))
             {
-                throw new InvalidMicroserviceXmlException(); //TODO: provide correct reason
+                throw InvalidMicroserviceXmlException.FeatureNameNotSpecified(element);
             }
         }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public class InvalidMicroserviceXmlException : Exception
-    {
     }
 }
