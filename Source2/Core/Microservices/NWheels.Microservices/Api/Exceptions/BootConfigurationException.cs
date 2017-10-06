@@ -39,17 +39,27 @@ namespace NWheels.Microservices.Api.Exceptions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private readonly static string _s_stringKernelModuleWrongOrder = nameof(KernelModuleWrongOrder);
+        private readonly static string _s_stringKernelModuleItemInvalidLocation = nameof(KernelModuleItemInvalidLocation);
+        private readonly static string _s_stringModuleListedMultipleTimes = nameof(ModuleListedMultipleTimes);
         private readonly static string _s_stringModuleName = nameof(ModuleName);
         private readonly static string _s_stringFeatureName = nameof(FeatureName);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static BootConfigurationException KernelModuleWrongOrder()
+        public static BootConfigurationException KernelModuleItemInvalidLocation()
         {
             return new BootConfigurationException(
-                reason: _s_stringKernelModuleWrongOrder, 
+                reason: _s_stringKernelModuleItemInvalidLocation, 
                 moduleName: MutableBootConfiguration.KernelAssemblyName);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static BootConfigurationException ModuleListedMultipleTimes(string moduleName)
+        {
+            return new BootConfigurationException(
+                reason: _s_stringModuleListedMultipleTimes, 
+                moduleName: moduleName);
         }
     }
 }

@@ -30,30 +30,52 @@ namespace NWheels.Microservices.Runtime
 
         public void Validate()
         {
-            if (FrameworkModules.Count == 0)
+            ValidateKernelModule();
+            ValidateUniqueModuleNames();
+            ValidateAssemblyLocationMap();
+
+            void ValidateKernelModule()
             {
-                FrameworkModules.Add(new ModuleConfiguration(KernelAssembly));
+                if (FrameworkModules.Count == 0)
+                {
+                    FrameworkModules.Add(new ModuleConfiguration(KernelAssembly));
+                }
+                else if (FrameworkModules[0].RuntimeAssembly != KernelAssembly)
+                {
+                    if (FrameworkModules.Any(m => m.IsKernelModule))
+                    {
+                        throw BootConfigurationException.KernelModuleItemInvalidLocation();
+                    }
+
+                    FrameworkModules.Insert(0, new ModuleConfiguration(KernelAssembly));
+                }
             }
-            else if (FrameworkModules[0].RuntimeAssembly != KernelAssembly)
+
+            void ValidateUniqueModuleNames()
             {
-                throw BootConfigurationException.KernelModuleWrongOrder();
+                var uniqueModuleNames = new HashSet<string>();
+                var allListedModules = FrameworkModules.Concat(ApplicationModules).Concat(CustomizationModules);
+
+                foreach (var module in allListedModules)
+                {
+                    if (!uniqueModuleNames.Add(module.ModuleName))
+                    {
+                        throw BootConfigurationException.ModuleListedMultipleTimes(module.ModuleName);
+                    }
+                }
+            }
+
+            void ValidateAssemblyLocationMap()
+            {
+                if (this.AssemblyLocationMap == null)
+                {
+                    var defaultMap = new AssemblyLocationMap();
+                    defaultMap.AddDirectory(AppDomain.CurrentDomain.BaseDirectory);
+
+                    this.AssemblyLocationMap = defaultMap;
+                }
             }
         }
-
-        //TODO: move to MutableBootConfiguration.Validate
-        //private IAssemblyLocationMap GetAssemblyLocationMap()
-        //{
-        //    if (_bootConfig.AssemblyLocationMap != null)
-        //    {
-        //        return _bootConfig.AssemblyLocationMap;
-        //    }
-
-        //    var defaultMap = new AssemblyLocationMap();
-        //    //defaultMap.AddDirectory(_bootConfig.ConfigsDirectory);
-        //    defaultMap.AddDirectory(AppContext.BaseDirectory);
-        //    return defaultMap;
-        //}
-
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

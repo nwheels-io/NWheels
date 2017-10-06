@@ -1,5 +1,8 @@
-﻿namespace NWheels.Microservices.Api
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace NWheels.Microservices.Api
 {
+    [ExcludeFromCodeCoverage]
     public class LifecycleComponentBase : ILifecycleComponent
     {
         public virtual void MicroserviceLoading()

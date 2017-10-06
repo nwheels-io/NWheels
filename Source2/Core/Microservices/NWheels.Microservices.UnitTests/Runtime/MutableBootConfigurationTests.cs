@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using FluentAssertions;
 using NWheels.Microservices;
 using NWheels.Microservices.Api;
@@ -32,6 +33,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             bootConfig.IsBatchJobMode.Should().BeFalse();
             bootConfig.ClusterName.Should().BeNull();
             bootConfig.ClusterPartition.Should().BeNull();
+            bootConfig.AssemblyLocationMap.Should().BeNull();
             bootConfig.LogLevel.Should().Be(LogLevel.Info);
 
             bootConfig.EnvironmentVariables.Should().NotBeNull();
@@ -334,6 +336,28 @@ namespace NWheels.Microservices.UnitTests.Runtime
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void Validate_KernelModuleNotListed_InsertedFirst()
+        {
+            //-- arrange
+
+            var bootConfig = new MutableBootConfiguration();
+            bootConfig.MicroserviceName = "TestService";
+            bootConfig.AddFeatures(bootConfig.FrameworkModules, this.GetType().Assembly);
+
+            //-- act
+
+            bootConfig.Validate();
+
+            //-- assert
+
+            bootConfig.FrameworkModules.Count.Should().Be(2);
+            bootConfig.FrameworkModules[0].RuntimeAssembly.Should().BeSameAs(MutableBootConfiguration.KernelAssembly);
+            bootConfig.FrameworkModules[1].RuntimeAssembly.Should().BeSameAs(this.GetType().Assembly);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void Validate_KernelModuleNotListedFirst_Throw()
         {
             //-- arrange
@@ -351,8 +375,153 @@ namespace NWheels.Microservices.UnitTests.Runtime
             //-- assert
 
             exception.Should().NotBeNull();
-            exception.Reason.Should().Be(nameof(BootConfigurationException.KernelModuleWrongOrder));
+            exception.Reason.Should().Be(nameof(BootConfigurationException.KernelModuleItemInvalidLocation));
             exception.ModuleName.Should().Be(MutableBootConfiguration.KernelAssemblyName);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Theory]
+        [InlineData(nameof(MutableBootConfiguration.FrameworkModules), nameof(MutableBootConfiguration.ApplicationModules))]
+        [InlineData(nameof(MutableBootConfiguration.FrameworkModules), nameof(MutableBootConfiguration.CustomizationModules))]
+        [InlineData(nameof(MutableBootConfiguration.ApplicationModules), nameof(MutableBootConfiguration.CustomizationModules))]
+        public void Validate_ModuleListedInMultipleCollections_Throw(string collectionName1, string collectionName2)
+        {
+            //-- arrange
+
+            var assembly1 = typeof(NWheels.Microservices.Api.ILifecycleComponent).Assembly;
+            var assembly2 = typeof(NWheels.Testability.TestBase).Assembly;
+            var assembly3 = this.GetType().Assembly;
+
+            var bootConfig = new MutableBootConfiguration();
+            
+            var collection1 = (List<MutableBootConfiguration.ModuleConfiguration>)
+                bootConfig.GetType().GetProperty(collectionName1).GetValue(bootConfig);
+            var collection2 = (List<MutableBootConfiguration.ModuleConfiguration>)
+                bootConfig.GetType().GetProperty(collectionName2).GetValue(bootConfig);
+
+            bootConfig.MicroserviceName = "TestService";
+
+            bootConfig.AddFeatures(collection1, assembly1);
+            bootConfig.AddFeatures(collection1, assembly3);
+
+            bootConfig.AddFeatures(collection2, assembly2); 
+            bootConfig.AddFeatures(collection2, assembly3); // assembly3 is listed twice 
+
+            //-- act & assert
+
+            Action act = () => bootConfig.Validate();
+            var exception = act.ShouldThrow<BootConfigurationException>().Which;
+
+            //-- assert
+
+            exception.Should().NotBeNull();
+            exception.Reason.Should().Be(nameof(BootConfigurationException.ModuleListedMultipleTimes));
+            exception.ModuleName.Should().Be(assembly3.GetName().Name);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Validate_KernelModuleListedFirst_NoChange()
+        {
+            //-- arrange
+
+            var bootConfig = new MutableBootConfiguration();
+            bootConfig.MicroserviceName = "TestService";
+            bootConfig.AddFeatures(bootConfig.FrameworkModules, MutableBootConfiguration.KernelAssembly);
+            bootConfig.AddFeatures(bootConfig.FrameworkModules, this.GetType().Assembly);
+
+            //-- act
+
+            bootConfig.Validate();
+
+            //-- assert
+
+            bootConfig.FrameworkModules.Select(m => m.RuntimeAssembly).Should().Equal(
+                MutableBootConfiguration.KernelAssembly,
+                this.GetType().Assembly);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Validate_AssemblyMapAssigned_NoChange()
+        {
+            //-- arrange
+
+            var bootConfig = new MutableBootConfiguration();
+            bootConfig.MicroserviceName = "TestService";
+
+            var customAssemblyMap = new AssemblyLocationMap();
+            customAssemblyMap.AddDirectory("dir1");
+            customAssemblyMap.AddDirectory("dir2");
+
+            bootConfig.AssemblyLocationMap = customAssemblyMap;
+
+            //-- act
+
+            bootConfig.Validate();
+
+            //-- assert
+
+            bootConfig.AssemblyLocationMap.Should().NotBeNull();
+            bootConfig.AssemblyLocationMap.Should().BeSameAs(customAssemblyMap);
+            bootConfig.AssemblyLocationMap.Directories.Should().Equal("dir1", "dir2");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Validate_NoAssemblyMap_DefaultMapSupplied()
+        {
+            //-- arrange
+
+            var bootConfig = new MutableBootConfiguration();
+            bootConfig.MicroserviceName = "TestService";
+
+            //-- act
+
+            bootConfig.Validate();
+
+            //-- assert
+
+            bootConfig.AssemblyLocationMap.Should().NotBeNull();
+            bootConfig.AssemblyLocationMap.FilePathByAssemblyName.Should().NotBeNull();
+            bootConfig.AssemblyLocationMap.FilePathByAssemblyName.Should().BeEmpty();
+            bootConfig.AssemblyLocationMap.Directories.Should().NotBeNull();
+            bootConfig.AssemblyLocationMap.Directories.Should().Contain(AppDomain.CurrentDomain.BaseDirectory);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Theory]
+        [InlineData(typeof(IFeatureLoader), null, true)]
+        [InlineData(typeof(FeatureLoader1), null, false)]
+        [InlineData(null, "NWheels.Kernel", true)]
+        [InlineData(null, "My.Assembly", false)]
+        public void ModuleConfiguration_IsKernelAssembly(Type typeFromAssembly, string assemblyName, bool expectedIsKernelModule)
+        {
+            //-- arrange
+
+            MutableBootConfiguration.ModuleConfiguration module;
+
+            if (typeFromAssembly != null)
+            {
+                module = new MutableBootConfiguration.ModuleConfiguration(typeFromAssembly.Assembly);
+            }
+            else
+            {
+                module = new MutableBootConfiguration.ModuleConfiguration(assemblyName);
+            }
+
+            //-- act
+
+            var actualIsKernelModule = module.IsKernelModule;
+
+            //-- assert
+
+            actualIsKernelModule.Should().Be(expectedIsKernelModule);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
