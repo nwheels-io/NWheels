@@ -10,6 +10,7 @@ using NWheels.Testability;
 using NWheels.Microservices.Runtime;
 using System;
 using NWheels.Microservices.Api.Exceptions;
+using System.Linq;
 
 namespace NWheels.Microservices.UnitTests.Runtime
 {
@@ -403,6 +404,73 @@ namespace NWheels.Microservices.UnitTests.Runtime
             exception.FoundElement.Should().Be("microservice");
             exception.MicroserviceNameInXml.Should().Be("MyService");
             exception.MicroserviceNameInBootConfig.Should().Be("YourService");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        [Fact]
+        public void PopulateBootConfiguration_ModulesAndFeaturesAddedUp()
+        {
+            //-- arrange
+
+            var bootConfig = new MutableBootConfiguration();
+
+            bootConfig.AddFeatures(bootConfig.FrameworkModules, "FX.M1");
+            bootConfig.AddFeatures(bootConfig.FrameworkModules, "FX.M2", "FX-M2-F1", "FX-M2-F2");
+
+            bootConfig.AddFeatures(bootConfig.ApplicationModules, "App.M1");
+            bootConfig.AddFeatures(bootConfig.ApplicationModules, "App.M2", "App-M2-F1", "App-M2-F2");
+
+            bootConfig.AddFeatures(bootConfig.CustomizationModules, "Custom.M1");
+            bootConfig.AddFeatures(bootConfig.CustomizationModules, "Custom.M2", "Custom-M2-F1", "Custom-M2-F2");
+
+            var xml = @"
+                <microservice name='MyService'>
+                    <framework-modules>
+                        <module assembly='FX.M2'>
+                            <feature name='FX-M2-F2' />
+                            <feature name='FX-M2-F3' />
+                        </module>
+                        <module assembly='FX.M3' />
+                    </framework-modules>
+                    <application-modules>
+                        <module assembly='App.M2'>
+                            <feature name='App-M2-F2' />
+                            <feature name='App-M2-F3' />
+                        </module>
+                        <module assembly='App.M3' />
+                    </application-modules>
+                    <customization-modules>
+                        <module assembly='Custom.M2'>
+                            <feature name='Custom-M2-F2' />
+                            <feature name='Custom-M2-F3' />
+                        </module>
+                        <module assembly='Custom.M3' />
+                    </customization-modules>
+                </microservice>";
+
+            var parsedXml = XElement.Parse(xml);
+
+            //-- act
+
+            MicroserviceXmlReader.PopulateBootConfiguration(parsedXml, bootConfig);
+            
+            //-- assert
+
+            bootConfig.FrameworkModules.Select(m => m.AssemblyName).Should().Equal("FX.M1", "FX.M2", "FX.M3");
+            bootConfig.FrameworkModules[0].Features.Select(f => f.FeatureName).Should().BeEmpty();
+            bootConfig.FrameworkModules[1].Features.Select(f => f.FeatureName).Should().Equal("FX-M2-F1", "FX-M2-F2", "FX-M2-F3");
+            bootConfig.FrameworkModules[2].Features.Select(f => f.FeatureName).Should().BeEmpty();
+            
+            bootConfig.ApplicationModules.Select(m => m.AssemblyName).Should().Equal("App.M1", "App.M2", "App.M3");
+            bootConfig.ApplicationModules[0].Features.Select(f => f.FeatureName).Should().BeEmpty();
+            bootConfig.ApplicationModules[1].Features.Select(f => f.FeatureName).Should().Equal("App-M2-F1", "App-M2-F2", "App-M2-F3");
+            bootConfig.ApplicationModules[2].Features.Select(f => f.FeatureName).Should().BeEmpty();
+
+            bootConfig.CustomizationModules.Select(m => m.AssemblyName).Should().Equal("Custom.M1", "Custom.M2", "Custom.M3");
+            bootConfig.CustomizationModules[0].Features.Select(f => f.FeatureName).Should().BeEmpty();
+            bootConfig.CustomizationModules[1].Features.Select(f => f.FeatureName).Should().Equal("Custom-M2-F1", "Custom-M2-F2", "Custom-M2-F3");
+            bootConfig.CustomizationModules[2].Features.Select(f => f.FeatureName).Should().BeEmpty();
         }
     }
 }
