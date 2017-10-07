@@ -127,6 +127,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             var xml = @"
                 <microservice name='MyService'>
                     <framework-modules>
+                        <bad-element assembly='FX.M1'></bad-element>
                     </framework-modules>
                 </microservice>";
 
@@ -143,9 +144,265 @@ namespace NWheels.Microservices.UnitTests.Runtime
             
             //-- assert
             
-            exception.Reason.Should().Be(nameof(InvalidMicroserviceXmlException.RootElementInvalid));
-            exception.ExpectedElement.Should().Be(MicroserviceXmlReader.MicroserviceElementName);
+            exception.Reason.Should().Be(nameof(InvalidMicroserviceXmlException.ModuleElementInvalid));
+            exception.ExpectedElement.Should().Be(MicroserviceXmlReader.ModuleElementName);
             exception.FoundElement.Should().Be("bad-element");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        [Theory]
+        [InlineData("<module />")]
+        [InlineData("<module assembly='' />")]
+        [InlineData("<module assembly='  ' />")]
+        [InlineData("<module name='M1' />")]
+        public void ModuleAssemblyNotSpecified_Throw(string badModuleElement)
+        {
+            //-- arrange
+
+            var xml = @"
+                <microservice name='MyService'>
+                    <framework-modules>
+                        " + badModuleElement + @"
+                    </framework-modules>
+                </microservice>";
+
+            var parsedXml = XElement.Parse(xml);
+            var bootConfig = new MutableBootConfiguration();
+
+            //-- act
+
+            Action act = () => {
+                MicroserviceXmlReader.PopulateBootConfiguration(parsedXml, bootConfig);
+            };
+            
+            var exception = act.ShouldThrow<InvalidMicroserviceXmlException>().Which;
+            
+            //-- assert
+            
+            exception.Reason.Should().Be(nameof(InvalidMicroserviceXmlException.ModuleAssemblyNotSpecified));
+            exception.FoundElement.Should().Be("module");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        [Fact]
+        public void FeatureElementInvalid_Throw()
+        {
+            //-- arrange
+
+            var xml = @"
+                <microservice name='MyService'>
+                    <application-modules>
+                        <module assembly='FX.M1'>
+                            <bad-feature name='FX-M1-F1' />
+                        </module>
+                    </application-modules>
+                </microservice>";
+
+            var parsedXml = XElement.Parse(xml);
+            var bootConfig = new MutableBootConfiguration();
+
+            //-- act
+
+            Action act = () => {
+                MicroserviceXmlReader.PopulateBootConfiguration(parsedXml, bootConfig);
+            };
+            
+            var exception = act.ShouldThrow<InvalidMicroserviceXmlException>().Which;
+            
+            //-- assert
+            
+            exception.Reason.Should().Be(nameof(InvalidMicroserviceXmlException. FeatureElementInvalid));
+            exception.ExpectedElement.Should().Be(MicroserviceXmlReader.FeatureElementName);
+            exception.FoundElement.Should().Be("bad-feature");
+            exception.ModuleName.Should().Be("FX.M1");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Theory]
+        [InlineData("<feature />")]
+        [InlineData("<feature name='' />")]
+        [InlineData("<feature name='  ' />")]
+        [InlineData("<feature title='F1' />")]
+        public void FeatureNameNotSpecified_Throw(string badFeatureElement)
+        {
+            //-- arrange
+
+            var xml = @"
+                <microservice name='MyService'>
+                    <customization-modules>
+                        <module assembly='ModuleOne'>
+                            " + badFeatureElement + @"
+                        </module>
+                    </customization-modules>
+                </microservice>";
+
+            var parsedXml = XElement.Parse(xml);
+            var bootConfig = new MutableBootConfiguration();
+
+            //-- act
+
+            Action act = () => {
+                MicroserviceXmlReader.PopulateBootConfiguration(parsedXml, bootConfig);
+            };
+            
+            var exception = act.ShouldThrow<InvalidMicroserviceXmlException>().Which;
+            
+            //-- assert
+            
+            exception.Reason.Should().Be(nameof(InvalidMicroserviceXmlException.FeatureNameNotSpecified));
+            exception.FoundElement.Should().Be("feature");
+            exception.ModuleName.Should().Be("ModuleOne");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        [Fact]
+        public void MicroserviceName_NotSpecfied_Throw()
+        {
+            //-- arrange
+
+            var xml = @"
+                <microservice>
+                    <application-modules>
+                        <module assembly='App.M1' />
+                    </application-modules>
+                </microservice>";
+
+            var parsedXml = XElement.Parse(xml);
+            var bootConfig = new MutableBootConfiguration();
+
+            //-- act
+
+            Action act = () => {
+                MicroserviceXmlReader.PopulateBootConfiguration(parsedXml, bootConfig);
+            };
+            
+            var exception = act.ShouldThrow<InvalidMicroserviceXmlException>().Which;
+            
+            //-- assert
+            
+            exception.Reason.Should().Be(nameof(InvalidMicroserviceXmlException.MicroserviceNameNotSpecified));
+            exception.FoundElement.Should().Be("microservice");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        [Fact]
+        public void MicroserviceName_SpecfiedOnlyInBootConfig_NoChange()
+        {
+            //-- arrange
+
+            var xml = @"
+                <microservice>
+                    <application-modules>
+                        <module assembly='App.M1' />
+                    </application-modules>
+                </microservice>";
+
+            var parsedXml = XElement.Parse(xml);
+            var bootConfig = new MutableBootConfiguration();
+
+            bootConfig.MicroserviceName = "MyService";
+
+            //-- act
+
+            MicroserviceXmlReader.PopulateBootConfiguration(parsedXml, bootConfig);
+            
+            //-- assert
+
+            bootConfig.MicroserviceName.Should().Be("MyService");            
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        [Fact]
+        public void MicroserviceName_SpecfiedOnlyInXml_NameFromXmlIsUsed()
+        {
+            //-- arrange
+
+            var xml = @"
+                <microservice name='MyService'>
+                    <application-modules>
+                        <module assembly='App.M1' />
+                    </application-modules>
+                </microservice>";
+
+            var parsedXml = XElement.Parse(xml);
+            var bootConfig = new MutableBootConfiguration();
+
+            //-- act
+
+            MicroserviceXmlReader.PopulateBootConfiguration(parsedXml, bootConfig);
+            
+            //-- assert
+
+            bootConfig.MicroserviceName.Should().Be("MyService");            
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        [Fact]
+        public void MicroserviceName_SameInXmlAndBootConfig_NoError()
+        {
+            //-- arrange
+
+            var xml = @"
+                <microservice name='MyService'>
+                    <application-modules>
+                        <module assembly='App.M1' />
+                    </application-modules>
+                </microservice>";
+
+            var parsedXml = XElement.Parse(xml);
+            var bootConfig = new MutableBootConfiguration();
+
+            bootConfig.MicroserviceName = "MyService";
+
+            //-- act
+
+            MicroserviceXmlReader.PopulateBootConfiguration(parsedXml, bootConfig);
+            
+            //-- assert
+
+            bootConfig.MicroserviceName.Should().Be("MyService");            
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        [Fact]
+        public void MicroserviceName_DifferentInXmlAndBootConfig_Throw()
+        {
+            //-- arrange
+
+            var xml = @"
+                <microservice name='MyService'>
+                    <application-modules>
+                        <module assembly='App.M1' />
+                    </application-modules>
+                </microservice>";
+
+            var parsedXml = XElement.Parse(xml);
+            var bootConfig = new MutableBootConfiguration();
+
+            bootConfig.MicroserviceName = "YourService";
+
+            //-- act
+
+            Action act = () => {
+                MicroserviceXmlReader.PopulateBootConfiguration(parsedXml, bootConfig);
+            };
+            
+            var exception = act.ShouldThrow<InvalidMicroserviceXmlException>().Which;
+            
+            //-- assert
+            
+            exception.Reason.Should().Be(nameof(InvalidMicroserviceXmlException.MicroserviceNameConflict));
+            exception.FoundElement.Should().Be("microservice");
+            exception.MicroserviceNameInXml.Should().Be("MyService");
+            exception.MicroserviceNameInBootConfig.Should().Be("YourService");
         }
     }
 }

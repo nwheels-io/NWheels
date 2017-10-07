@@ -78,7 +78,7 @@ namespace NWheels.Microservices.Api.Exceptions
         private readonly static string _s_stringFeatureElementInvalid = nameof(FeatureElementInvalid);
         private readonly static string _s_stringMicroserviceNameNotSpecified = nameof(MicroserviceNameNotSpecified);
         private readonly static string _s_stringMicroserviceNameConflict = nameof(MicroserviceNameConflict);
-        private readonly static string _s_stringModuleNameNotSpecified = nameof(ModuleNameNotSpecified);
+        private readonly static string _s_stringModuleAssemblyNotSpecified = nameof(ModuleAssemblyNotSpecified);
         private readonly static string _s_stringFeatureNameNotSpecified = nameof(FeatureNameNotSpecified);
         private readonly static string _s_stringFileName = nameof(FileName);
         private readonly static string _s_stringLineNumber = nameof(LineNumber);
@@ -112,19 +112,22 @@ namespace NWheels.Microservices.Api.Exceptions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static InvalidMicroserviceXmlException FeatureElementInvalid(XElement element)
+        public static InvalidMicroserviceXmlException FeatureElementInvalid(string moduleName, XElement element)
         {
             return new InvalidMicroserviceXmlException(
                 reason: _s_stringFeatureElementInvalid, 
                 element: element,
-                expectedElement: MicroserviceXmlReader.FeatureElementName);
+                expectedElement: MicroserviceXmlReader.FeatureElementName,
+                moduleName: moduleName);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static InvalidMicroserviceXmlException MicroserviceNameNotSpecified(XElement element)
         {
-            return new InvalidMicroserviceXmlException(_s_stringMicroserviceNameNotSpecified, element);
+            return new InvalidMicroserviceXmlException(
+                reason: _s_stringMicroserviceNameNotSpecified, 
+                element: element);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -140,20 +143,21 @@ namespace NWheels.Microservices.Api.Exceptions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        public static InvalidMicroserviceXmlException ModuleNameNotSpecified(XElement element)
+        public static InvalidMicroserviceXmlException ModuleAssemblyNotSpecified(XElement element)
         {
             return new InvalidMicroserviceXmlException(
-                reason: _s_stringModuleNameNotSpecified,
+                reason: _s_stringModuleAssemblyNotSpecified,
                 element: element);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        public static InvalidMicroserviceXmlException FeatureNameNotSpecified(XElement element)
+        public static InvalidMicroserviceXmlException FeatureNameNotSpecified(string moduleName, XElement element)
         {
             return new InvalidMicroserviceXmlException(
                 reason: _s_stringFeatureNameNotSpecified,
-                element: element);
+                element: element,
+                moduleName: moduleName);
         }
     }
 }

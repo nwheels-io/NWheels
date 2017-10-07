@@ -48,18 +48,23 @@ namespace NWheels.Microservices.Runtime
 
             var microserviceName = element.Attribute(MicroserviceNameAttribute)?.Value;
 
-            if (string.IsNullOrEmpty(microserviceName) && string.IsNullOrEmpty(bootConfig.MicroserviceName))
+            if (string.IsNullOrEmpty(microserviceName))
             {
-                throw InvalidMicroserviceXmlException.MicroserviceNameNotSpecified(element);
+                if (string.IsNullOrEmpty(bootConfig.MicroserviceName))
+                {
+                    throw InvalidMicroserviceXmlException.MicroserviceNameNotSpecified(element);
+                }
             }
-
-            if (string.IsNullOrEmpty(bootConfig.MicroserviceName))
+            else
             {
-                bootConfig.MicroserviceName = microserviceName;
-            }
-            else if (microserviceName != bootConfig.MicroserviceName)
-            {
-                throw InvalidMicroserviceXmlException.MicroserviceNameConflict(element, microserviceName, bootConfig.MicroserviceName);
+                if (string.IsNullOrEmpty(bootConfig.MicroserviceName))
+                {
+                    bootConfig.MicroserviceName = microserviceName;
+                }
+                else if (microserviceName != bootConfig.MicroserviceName)
+                {
+                    throw InvalidMicroserviceXmlException.MicroserviceNameConflict(element, microserviceName, bootConfig.MicroserviceName);
+                }
             }
         }
 
@@ -95,16 +100,16 @@ namespace NWheels.Microservices.Runtime
 
             var assemblyName = element.Attribute(ModuleAssemblyAttribute)?.Value;
 
-            if (string.IsNullOrEmpty(assemblyName))
+            if (string.IsNullOrWhiteSpace(assemblyName))
             {
-                throw InvalidMicroserviceXmlException.FeatureElementInvalid(element);
+                throw InvalidMicroserviceXmlException.ModuleAssemblyNotSpecified(element);
             }
 
             var features = new List<string>();
 
             foreach (var featureElement in element.Elements())
             {
-                ReadFeatureElement(featureElement, out string featureName);
+                ReadFeatureElement(assemblyName, featureElement, out string featureName);
                 features.Add(featureName);
             }
 
@@ -113,18 +118,18 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void ReadFeatureElement(XElement element, out string featureName)
+        private static void ReadFeatureElement(string moduleName, XElement element, out string featureName)
         {
             if (element.Name != FeatureElementName)
             {
-                throw InvalidMicroserviceXmlException.FeatureElementInvalid(element);
+                throw InvalidMicroserviceXmlException.FeatureElementInvalid(moduleName, element);
             }
 
             featureName = element.Attribute(FeatureNameAttribute)?.Value;
 
-            if (string.IsNullOrEmpty(featureName))
+            if (string.IsNullOrWhiteSpace(featureName))
             {
-                throw InvalidMicroserviceXmlException.FeatureNameNotSpecified(element);
+                throw InvalidMicroserviceXmlException.FeatureNameNotSpecified(moduleName, element);
             }
         }
     }
