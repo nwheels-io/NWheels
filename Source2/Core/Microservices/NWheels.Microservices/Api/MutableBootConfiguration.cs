@@ -9,7 +9,7 @@ using NWheels.Kernel.Api.Primitives;
 using NWheels.Microservices.Api;
 using NWheels.Microservices.Api.Exceptions;
 
-namespace NWheels.Microservices.Runtime
+namespace NWheels.Microservices.Api
 {
     public class MutableBootConfiguration : IBootConfiguration
     {
@@ -24,7 +24,7 @@ namespace NWheels.Microservices.Runtime
         public MutableBootConfiguration()
         {
             this.LogLevel = LogLevel.Info;
-        } 
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

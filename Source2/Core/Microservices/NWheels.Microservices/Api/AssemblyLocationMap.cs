@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using NWheels.Microservices.Api;
 
-namespace NWheels.Microservices.Runtime
+namespace NWheels.Microservices.Api
 {
     public class AssemblyLocationMap : IAssemblyLocationMap
     {

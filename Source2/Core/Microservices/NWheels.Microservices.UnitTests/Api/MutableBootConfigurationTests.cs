@@ -14,8 +14,9 @@ using System.Linq;
 using NWheels.Kernel.Api.Injection;
 using NWheels.Kernel.Runtime.Injection;
 using NWheels.Microservices.Api.Exceptions;
+using NWheels.Kernel.Api.Primitives;
 
-namespace NWheels.Microservices.UnitTests.Runtime
+namespace NWheels.Microservices.UnitTests.Api
 {
     public class MutableBootConfigurationTests : TestBase.UnitTest
     {

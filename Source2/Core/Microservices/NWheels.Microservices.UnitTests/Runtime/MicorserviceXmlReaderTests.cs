@@ -472,5 +472,40 @@ namespace NWheels.Microservices.UnitTests.Runtime
             bootConfig.CustomizationModules[1].Features.Select(f => f.FeatureName).Should().Equal("Custom-M2-F1", "Custom-M2-F2", "Custom-M2-F3");
             bootConfig.CustomizationModules[2].Features.Select(f => f.FeatureName).Should().BeEmpty();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        [Fact]
+        public void CanIncludeLineInfoInErrors()
+        {
+            //-- arrange
+            
+            var microserviceXmlFilePath = Path.Combine(
+                Path.GetDirectoryName(this.GetType().Assembly.Location),
+                "TestFiles",
+                "bad-microservice.xml");
+
+            var microserviceXml = XElement.Load(
+                microserviceXmlFilePath, 
+                LoadOptions.PreserveWhitespace | LoadOptions.SetBaseUri | LoadOptions.SetLineInfo);
+
+            var bootConfig = new MutableBootConfiguration();
+
+            Action act = () => {
+                MicroserviceXmlReader.PopulateBootConfiguration(microserviceXml, bootConfig);
+            };
+
+            //-- act
+
+            var exception = act.ShouldThrow<InvalidMicroserviceXmlException>().Which;
+
+            //-- assert
+
+            exception.Reason.Should().Be(nameof(InvalidMicroserviceXmlException.ModuleAssemblyNotSpecified));
+            exception.FoundElement.Should().Be("module");
+            exception.FileName.Should().EndWith("bad-microservice.xml");
+            exception.LineNumber.Should().Be(3);
+            exception.LinePosition.Should().BeGreaterThan(0);
+        }
     }
 }

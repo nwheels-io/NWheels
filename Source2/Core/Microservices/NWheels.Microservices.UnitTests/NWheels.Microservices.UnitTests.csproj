@@ -26,4 +26,8 @@
     <Folder Include="Api\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="TestFiles\bad-microservice.xml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

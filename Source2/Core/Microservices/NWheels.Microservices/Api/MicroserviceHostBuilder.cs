@@ -14,13 +14,9 @@ namespace NWheels.Microservices.Api
 {
     public class MicroserviceHostBuilder
     {
-        private readonly MutableBootConfiguration _bootConfig;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public MicroserviceHostBuilder(string microserviceName)
         {
-            _bootConfig = new MutableBootConfiguration() {
+            BootConfig = new MutableBootConfiguration() {
                 MicroserviceName = microserviceName
             };
         }
@@ -30,7 +26,15 @@ namespace NWheels.Microservices.Api
         public MicroserviceHostBuilder UseFrameworkFeature<TFeature>()
             where TFeature : class, IFeatureLoader, new()
         {
-            _bootConfig.AddFeatures(_bootConfig.FrameworkModules, typeof(TFeature).Assembly, typeof(TFeature));
+            if (FeatureLoaderAttribute.IsNamedFeature(typeof(TFeature)))
+            {
+                BootConfig.AddFeatures(BootConfig.FrameworkModules, typeof(TFeature).Assembly, typeof(TFeature));
+            }
+            else
+            {
+                BootConfig.AddFeatures(BootConfig.FrameworkModules, typeof(TFeature).Assembly);
+            }
+
             return this;
         }
 
@@ -39,7 +43,15 @@ namespace NWheels.Microservices.Api
         public MicroserviceHostBuilder UseApplicationFeature<TFeature>()
             where TFeature : class, IFeatureLoader, new()
         {
-            _bootConfig.AddFeatures(_bootConfig.ApplicationModules, typeof(TFeature).Assembly, typeof(TFeature));
+            if (FeatureLoaderAttribute.IsNamedFeature(typeof(TFeature)))
+            {
+                BootConfig.AddFeatures(BootConfig.ApplicationModules, typeof(TFeature).Assembly, typeof(TFeature));
+            }
+            else
+            {
+                BootConfig.AddFeatures(BootConfig.ApplicationModules, typeof(TFeature).Assembly);
+            }
+
             return this;
         }
 
@@ -48,7 +60,15 @@ namespace NWheels.Microservices.Api
         public MicroserviceHostBuilder UseCustomizationFeature<TFeature>()
             where TFeature : class, IFeatureLoader, new()
         {
-            _bootConfig.AddFeatures(_bootConfig.CustomizationModules, typeof(TFeature).Assembly, typeof(TFeature));
+            if (FeatureLoaderAttribute.IsNamedFeature(typeof(TFeature)))
+            {
+                BootConfig.AddFeatures(BootConfig.CustomizationModules, typeof(TFeature).Assembly, typeof(TFeature));
+            }
+            else
+            {
+                BootConfig.AddFeatures(BootConfig.CustomizationModules, typeof(TFeature).Assembly);
+            }
+
             return this;
         }
 
@@ -57,7 +77,7 @@ namespace NWheels.Microservices.Api
         public MicroserviceHostBuilder ContributeComponents(Action<IComponentContainer, IComponentContainerBuilder> contributor)
         {
             var contribution = new ComponentContribution(contributor);
-            _bootConfig.BootComponents.Register(builder => builder.RegisterComponentInstance(contribution));
+            BootConfig.BootComponents.Register(builder => builder.RegisterComponentInstance(contribution));
             UseApplicationFeature<ContributionsFeatureLoader>();
 
             return this;
@@ -67,7 +87,7 @@ namespace NWheels.Microservices.Api
 
         public MicroserviceHostBuilder UseMicroserviceXml(XElement xml)
         {
-            MicroserviceXmlReader.PopulateBootConfiguration(xml, _bootConfig);
+            MicroserviceXmlReader.PopulateBootConfiguration(xml, BootConfig);
             return this;
         }
 
@@ -85,9 +105,9 @@ namespace NWheels.Microservices.Api
             var cli = new MicroserviceHostCli();
 
             var version = Assembly.GetEntryAssembly().GetName().Version;
-            ColorConsole.LogHeading($"Service '{_bootConfig.MicroserviceName}' version {version}");
+            ColorConsole.LogHeading($"Service '{BootConfig.MicroserviceName}' version {version}");
 
-            _bootConfig.BootComponents.Register(RegisterCliHostComponents);
+            BootConfig.BootComponents.Register(RegisterCliHostComponents);
 
             var host = new MicroserviceHost(this.BootConfig);
             cli.UseHost(host);
@@ -97,27 +117,12 @@ namespace NWheels.Microservices.Api
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IBootConfiguration BootConfig => _bootConfig;
+        public MutableBootConfiguration BootConfig { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static void RegisterCliHostComponents(IComponentContainerBuilder builder)
         {
-            builder.RegisterComponentType<ConsoleMicroserviceHostLogger>()
-                .SingleInstance()
-                .ForService<IMicroserviceHostLogger>()
-                .AsFallback();
-
-            builder.RegisterComponentType<DefaultModuleLoader>()
-                .SingleInstance()
-                .ForService<IModuleLoader>()
-                .AsFallback();
-
-            builder.RegisterComponentType<DefaultMicroserviceStateCodeBehind>()
-                .InstancePerDependency()
-                .ForService<IStateMachineCodeBehind<MicroserviceState, MicroserviceTrigger>>()
-                .AsFallback();
-
             builder.RegisterComponentType<InspectCommand>().ForService<ICliCommand>();
             builder.RegisterComponentType<CompileCommand>().ForService<ICliCommand>();
             builder.RegisterComponentType<JobCommand>().ForService<ICliCommand>();

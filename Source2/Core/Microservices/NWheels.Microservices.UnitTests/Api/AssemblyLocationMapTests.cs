@@ -6,8 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
+using NWheels.Microservices.Api;
 
-namespace NWheels.Microservices.UnitTests.Runtime
+namespace NWheels.Microservices.UnitTests.Api
 {
     public class AssemblyLocationMapTests
     {

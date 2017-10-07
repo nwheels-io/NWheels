@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 using NWheels.Kernel.Api.Injection;
+using NWheels.Microservices.Api;
 using NWheels.Microservices.Api.Exceptions;
 
 namespace NWheels.Microservices.Runtime

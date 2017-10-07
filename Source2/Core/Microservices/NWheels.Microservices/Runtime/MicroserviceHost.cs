@@ -563,6 +563,21 @@ namespace NWheels.Microservices.Runtime
         {
             var builder = new ComponentContainerBuilder();
 
+            builder.RegisterComponentType<ConsoleMicroserviceHostLogger>()
+                .SingleInstance()
+                .ForService<IMicroserviceHostLogger>()
+                .AsFallback();
+
+            builder.RegisterComponentType<DefaultModuleLoader>()
+                .SingleInstance()
+                .ForService<IModuleLoader>()
+                .AsFallback();
+
+            builder.RegisterComponentType<DefaultMicroserviceStateCodeBehind>()
+                .InstancePerDependency()
+                .ForService<IStateMachineCodeBehind<MicroserviceState, MicroserviceTrigger>>()
+                .AsFallback();
+
             builder.RegisterComponentInstance(this);
             builder.RegisterComponentInstance(BootConfig).ForService<IBootConfiguration>();
             builder.RegisterComponentInstance(CreateStateCodeBehindOptions());

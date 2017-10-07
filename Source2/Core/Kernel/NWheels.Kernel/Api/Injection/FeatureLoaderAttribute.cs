@@ -11,17 +11,27 @@ namespace NWheels.Kernel.Api.Injection
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static string GetFeatureNameOrThrow(Type type)
+        public static string GetFeatureNameOrThrow(Type featureLoaderType)
         {
-            var attribute = type.GetCustomAttribute<FeatureLoaderAttribute>();
+            var attribute = featureLoaderType.GetCustomAttribute<FeatureLoaderAttribute>();
             var name = attribute?.Name;
 
             if (string.IsNullOrEmpty(name))
             {
-                throw FeatureLoaderException.FeatureNameMissingOrInvalid(type);
+                throw FeatureLoaderException.FeatureNameMissingOrInvalid(featureLoaderType);
             }
 
             return name;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool IsNamedFeature(Type featureLoaderType)
+        {
+            var attribute = featureLoaderType.GetCustomAttribute<FeatureLoaderAttribute>();
+            var name = attribute?.Name;
+
+            return !string.IsNullOrEmpty(name);
         }
     }
 }

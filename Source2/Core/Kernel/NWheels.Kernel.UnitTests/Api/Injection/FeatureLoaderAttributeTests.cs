@@ -46,6 +46,26 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Theory]
+        [InlineData(typeof(UnnamedFeature), false)]
+        [InlineData(typeof(EmptyNamedFeature), false)]
+        [InlineData(typeof(NullNamedFeature), false)]
+        [InlineData(typeof(GoodNamedFeature), true)]
+        public void TestIsNamedFeature(Type featureLoaderType, bool expectedResult)
+        {
+            //-- act
+
+            var actualResult = FeatureLoaderAttribute.IsNamedFeature(featureLoaderType);
+
+            //-- assert
+
+            actualResult.Should().Be(expectedResult);
+        }
+
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [FeatureLoader(Name = "Good")]
         public class GoodNamedFeature
         {

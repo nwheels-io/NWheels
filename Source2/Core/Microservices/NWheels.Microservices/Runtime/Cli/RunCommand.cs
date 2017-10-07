@@ -4,6 +4,7 @@ using System.CommandLine;
 using System.Text;
 using System.Threading;
 using NWheels.Kernel.Api.Logging;
+using NWheels.Microservices.Api;
 
 namespace NWheels.Microservices.Runtime.Cli
 {
