@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using NWheels.Kernel.Runtime.Injection;
 using System.Threading;
 using System.Xml.Linq;
+using NWheels.Microservices.Runtime.Cli;
+using System.CommandLine;
 
 namespace NWheels.Microservices.UnitTests.Api
 {
@@ -182,7 +184,31 @@ namespace NWheels.Microservices.UnitTests.Api
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void CanContributeComponents()
+        public void CanUseBootComponents()
+        {
+            //-- arrange
+
+            var builder = new MicroserviceHostBuilder("TestService");
+            var component = new TestComponentOne();
+            
+            builder.UseBootComponents(hostComponents => {
+                hostComponents.RegisterComponentInstance(component);
+            });
+
+            //-- act
+
+            var host = builder.BuildHost();
+
+            //-- assert
+
+            var resolvedComponent = host.GetBootComponents().Resolve<TestComponentOne>();
+            resolvedComponent.Should().BeSameAs(component);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanContributeModuleComponents()
         {
             //-- arrange
 
@@ -211,6 +237,47 @@ namespace NWheels.Microservices.UnitTests.Api
             resolvedComponentOne.Should().BeSameAs(componentOne);
             resolvedComponentTwo.Should().BeSameAs(componentTwo);
             resolvedComponentThree.Should().BeSameAs(componentThree);
+
+            host.BootConfig.ApplicationModules
+                .SelectMany(m => m.Features).Where(IsContributionsFeatureLoader).Count().Should().Be(1);
+            host.BootConfig.FrameworkModules
+                .SelectMany(m => m.Features).Where(IsContributionsFeatureLoader).Count().Should().Be(0);
+            host.BootConfig.CustomizationModules
+                .SelectMany(m => m.Features).Where(IsContributionsFeatureLoader).Count().Should().Be(0);
+
+            bool IsContributionsFeatureLoader(IFeatureConfiguration feature)
+            {
+                return (feature.FeatureLoaderRuntimeType == typeof(MicroserviceHostBuilder.ContributionsFeatureLoader));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanBuildAndRunCli()
+        {
+            //-- arrange
+
+            var builder = new MicroserviceHostBuilder("TestService");
+            builder.UseBootComponents(bootComponents => bootComponents.RegisterComponentType<TestCommandOne>().SingleInstance().ForService<ICliCommand>());
+
+            //-- act
+
+            var cli = builder.BuildCli();
+            var exitCode = cli.Run(new[] { "test1", "--test-message", "TEST_MESSAGE_1" });
+            
+            //-- assert
+
+            exitCode.Should().Be(123);
+            
+            var command = cli.Host.GetBootComponents().Resolve<TestCommandOne>();
+            command.TestMessage.Should().Be("TEST_MESSAGE_1");
+            command.Log.Should().Equal(
+                ".ctor",
+                nameof(ICliCommand.DefineArguments), 
+                nameof(ICliCommand.ValidateArguments), 
+                nameof(ICliCommand.Execute) 
+            );
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -242,6 +309,60 @@ namespace NWheels.Microservices.UnitTests.Api
 
         private class TestComponentThree
         {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class TestCommandOne : CliCommandBase
+        {
+            private readonly List<string> _log;
+            private string _testMessage;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TestCommandOne(
+                MicroserviceHost host,
+                MutableBootConfiguration bootConfig,
+                IModuleLoader moduleLoader,
+                IMicroserviceHostLogger logger)
+                : base(name: "test1", helpText: "This is test command 1")
+            {
+                _log = new List<string>();
+                _log.Add(".ctor");
+
+                host.Should().NotBeNull();
+                bootConfig.Should().NotBeNull();
+                moduleLoader.Should().NotBeNull();
+                logger.Should().NotBeNull();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void DefineArguments(ArgumentSyntax syntax)
+            {
+                _log.Add(nameof(DefineArguments));
+                syntax.DefineOption("z|test-message", ref _testMessage, "The test message");
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void ValidateArguments(ArgumentSyntax arguments)
+            {
+                _log.Add(nameof(ValidateArguments));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override int Execute(CancellationToken cancellation)
+            {
+                _log.Add(nameof(Execute));
+                return 123;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string TestMessage => _testMessage;
+            public IReadOnlyList<string> Log => _log;
         }
     }
 }

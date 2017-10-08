@@ -74,6 +74,14 @@ namespace NWheels.Microservices.Api
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public MicroserviceHostBuilder UseBootComponents(Action<IComponentContainerBuilder> registration)
+        {
+            BootConfig.BootComponents.Register(registration);
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public MicroserviceHostBuilder ContributeComponents(Action<IComponentContainer, IComponentContainerBuilder> contributor)
         {
             var contribution = new ComponentContribution(contributor);
