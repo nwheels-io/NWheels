@@ -15,4 +15,9 @@ namespace NWheels.Kernel.Runtime.Injection
         void BeforeContributeCompiledComponents(IComponentContainer comcomponents);
         void AfterContributeCompiledComponents(IComponentContainer comcomponents);
     }
+
+    public interface IFeatureLoaderWithPhaseExtension : IFeatureLoader
+    {
+        IFeatureLoaderPhaseExtension PhaseExtension { get; }
+    }
 }

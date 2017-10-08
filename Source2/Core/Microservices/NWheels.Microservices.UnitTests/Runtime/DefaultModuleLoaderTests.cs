@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using Xunit;
 using NWheels.Microservices.Runtime;
 using NWheels.Kernel.Api.Injection;
+using NWheels.Microservices.Api.Exceptions;
 
 namespace NWheels.Microservices.UnitTests.Runtime
 {
@@ -119,7 +120,11 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
             //-- assert
 
-            act.ShouldThrow<Exception>(); //TODO: verify correct exception
+            var exception = act.ShouldThrow<ModuleLoaderException>().Which;
+
+            exception.Reason.Should().Be(nameof(ModuleLoaderException.DuplicateNamedFeature));
+            exception.ModuleName.Should().Be("M1");
+            exception.FeatureName.Should().Be("N1");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -145,7 +150,11 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
             //-- assert
 
-            act.ShouldThrow<Exception>(); //TODO: verify correct exception
+            var exception = act.ShouldThrow<ModuleLoaderException>().Which;
+
+            exception.Reason.Should().Be(nameof(ModuleLoaderException.NamedFeatureDoesNotExist));
+            exception.ModuleName.Should().Be("M1");
+            exception.FeatureName.Should().Be("ZZZ");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

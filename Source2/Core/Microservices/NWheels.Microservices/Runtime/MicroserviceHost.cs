@@ -365,9 +365,9 @@ namespace NWheels.Microservices.Runtime
             IEnumerable<IFeatureLoader> featureLoaders,
             Func<IFeatureLoaderPhaseExtension, Action<IComponentContainer>> actionSelector)
         {
-            foreach (var loader in featureLoaders.OfType<IFeatureLoaderPhaseExtension>())
+            foreach (var loader in featureLoaders.OfType<IFeatureLoaderWithPhaseExtension>())
             {
-                var action = actionSelector(loader);
+                var action = actionSelector(loader.PhaseExtension);
 
                 using (var activity = Logger.ExecutingFeatureLoaderPhaseExtension(loader.GetType(), phase: action.Method.Name))
                 {

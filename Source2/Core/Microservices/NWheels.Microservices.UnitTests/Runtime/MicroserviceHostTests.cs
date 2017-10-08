@@ -1,949 +1,352 @@
-﻿#if false
-
-using FluentAssertions;
-using NWheels.Compilation;
-using NWheels.Microservices;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Xunit;
-using NWheels.Microservices.Runtime;
-using NWheels.Microservices.Runtime.Mocks;
 using NWheels.Kernel.Api.Injection;
 using NWheels.Kernel.Runtime.Injection;
 using NWheels.Microservices.Api;
+using NWheels.Microservices.Runtime;
+using NWheels.Testability;
+using Xunit;
+using FluentAssertions;
+using System.Threading;
+using System.Xml.Linq;
 
 namespace NWheels.Microservices.UnitTests.Runtime
 {
-    public class MicroserviceHostTests : IDisposable
+    public class MicroserviceHostTests : TestBase.UnitTest
     {
-        public MicroserviceHostTests()
-        {
-            _s_featureLoaderMocks = new Dictionary<Type, FeatureLoaderMock>();
-        }
-        
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void Dispose()
-        {
-            _s_featureLoaderMocks = null;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void MicroserviceConfigOnConfiguring()
+        //[Fact]
+        public void CanConfigure()
         {
             //-- arrange
 
-            var host = new MicroserviceHost(CreateBootConfiguration(), new MicroserviceHostLoggerMock());
-            var handler = new AssemblyLoadEventHandler();
-            
-            host.AssemblyLoad += handler.Handle;
+            var featureLoadersLog = new TestFeatureLoaderLog();
+            var host = new MicroserviceHostBuilder("Test")
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(featureLoadersLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1'><feature name='FX2'/><feature name='FX3'/></module>
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1'><feature name='A2'/></module>
+                            <module assembly='AppM2'><feature name='A3'/></module>
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1'><feature name='C2'/><feature name='C3'/></module>
+                        </customization-modules>
+                    </microservice>
+                "))
+                .BuildHost();
 
             //-- act
 
-            host.Configure();
+            host.Configure(CancellationToken.None);
 
             //-- assert
 
-            var config = CreateBootConfiguration();
+            featureLoadersLog.Messages.Should().Equal(
 
-            handler.ContainerEventArgs.Should().NotBeNull();
-            handler.ContainerEventArgs.AssemblyName.Should().Be(config.MicroserviceConfig.InjectionAdapter.Assembly);
-            handler.ContainerEventArgs.Destination.Count.Should().Be(1);
-
-            handler.FeatureLoaderEventArgsList.Should().HaveCount(
-                1 + config.MicroserviceConfig.FrameworkModules.Length + config.MicroserviceConfig.ApplicationModules.Length);
-            handler.FeatureLoaderEventArgsList.Should().ContainSingle(
-                x => x.AssemblyName == config.MicroserviceConfig.ApplicationModules[0].Assembly);
-            handler.FeatureLoaderEventArgsList.Should().ContainSingle(
-                x => x.AssemblyName == config.MicroserviceConfig.ApplicationModules[1].Assembly);
-            handler.FeatureLoaderEventArgsList.Should().ContainSingle(
-                x => x.AssemblyName == config.MicroserviceConfig.FrameworkModules[0].Assembly);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void OnlySpecifiedModulesLoaded()
-        {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
-            var handler = new AssemblyLoadEventHandler();
-            var assemblies = new List<string>();
-
-            host.AssemblyLoad += handler.Handle;
-            host.AssemblyLoad += (object sender, AssemblyScanLoadEventArgs e) =>
-            {
-                assemblies.Add(e.AssemblyName);
-            };
-
-            //-- act
-
-            host.Configure();
-
-            //-- assert
-
-            assemblies.ToArray().Should().OnlyContain(x => new string[] { 
-                "InjectionAdapter",
-                "NWheels.Implementation",
-                "FrameworkModule",
-                "FirstModuleAssembly",
-                "SecondModuleAssembly",
-            }.Contains(x));
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void ModulesLoadedInOrder()
-        {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
-            var handler = new AssemblyLoadEventHandler();
-            var assemblies = new List<string>();
-
-            host.AssemblyLoad += handler.Handle;
-            host.AssemblyLoad += (object sender, AssemblyScanLoadEventArgs e) => {
-                assemblies.Add(e.AssemblyName);
-            };
-
-            //-- act
-
-            host.Configure();
-
-            //-- assert
-
-            assemblies.ToArray().Should().Equal(new string[] {
-                "InjectionAdapter",
-                "NWheels.Implementation",
-                "FrameworkModule",
-                "FirstModuleAssembly",
-                "SecondModuleAssembly",
-            });
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void DefaultFeatureLoadersDiscoveredOnConfiguring()
-        {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
-            var handler = new AssemblyLoadEventHandler();
-
-            host.AssemblyLoad += handler.Handle;
-
-            //-- act
-
-            host.Configure();
-
-            //-- assert
-
-            var logs = logger.TakeLog();
-            logs.Should().Contain(new string[] {
-                "FoundFeatureLoaderComponent(component=FirstFeatureLoader)",
-                "FoundFeatureLoaderComponent(component=SecondFeatureLoader)",
-
-                "FoundFeatureLoaderComponent(component=SeventhFeatureLoader)",
-            });
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void NamedByAttributeFeatureLoadersDiscoveredOnConfiguring()
-        {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
-            var handler = new AssemblyLoadEventHandler();
-
-            host.AssemblyLoad += handler.Handle;
-
-            //-- act
-
-            host.Configure();
-
-            //-- assert
-
-            var logs = logger.TakeLog();
-            logs.Should().Contain(new string[] {
-                "FoundFeatureLoaderComponent(component=NamedFeatureLoader)"
-            });
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void NamedByConventionFeatureLoadersDiscoveredOnConfiguring()
-        {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
-            var handler = new AssemblyLoadEventHandler();
-
-            host.AssemblyLoad += handler.Handle;
-
-            //-- act
-
-            host.Configure();
-
-            //-- assert
-
-            var logs = logger.TakeLog();
-            logs.Should().Contain(new string[] {
-                "FoundFeatureLoaderComponent(component=ThirdFeatureLoader)",
-
-                "FoundFeatureLoaderComponent(component=FifthFeatureLoader)",
-            });
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void TryDiscoverUnexistedFeatureLoaderOnConfiguring()
-        {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var config = CreateBootConfiguration();
-            config.MicroserviceConfig.ApplicationModules[0].Features[0].Name = "Abracadabra";
-            var host = new MicroserviceHost(config, logger);
-            var handler = new AssemblyLoadEventHandler();
-
-            host.AssemblyLoad += handler.Handle;
-
-            //-- act
-
-            Action configuring = () => host.Configure();
-
-            //-- assert
-
-            configuring.ShouldThrow<Exception>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void TryDiscoverDuplicatedFeatureLoaderOnConfiguring()
-        {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var config = CreateBootConfiguration();
-            var host = new MicroserviceHost(config, logger);
-            var handler = new AssemblyLoadEventHandler();
-
-            host.AssemblyLoad += handler.Handle;
-            host.AssemblyLoad += (object sender, AssemblyScanLoadEventArgs e) => {
-                if (e.ImplementedInterface == typeof(IFeatureLoader))
-                {
-                    if (e.AssemblyName == "FirstModuleAssembly")
-                    {
-                        e.Destination.Add(typeof(DuplicatedFeatureLoader));
-                    }
-                }
-            };
-
-            //-- act
-
-            Action configuring = () => host.Configure();
-
-            //-- assert
-
-            configuring.ShouldThrow<Exception>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void GetCompileRegistredComponentAfterConfiguring()
-        {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
-            var handler = new AssemblyLoadEventHandler();
-
-            host.AssemblyLoad += handler.Handle;
-
-            //-- act
-
-            host.Configure();
-            var container = host.GetContainer();
-            var component = container.Resolve<ICompileRegistered>();
-
-            //-- assert
-
-            component.Should().NotBeNull();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void CanExecuteFeatureLoadersLifecycle()
-        {
-            //-- arrange
-
-            var host = new MicroserviceHost(CreateBootConfiguration(), new MicroserviceHostLoggerMock());
-            var handler = new AssemblyLoadEventHandler();
-
-            host.AssemblyLoad += handler.Handle;
-
-            var featureLoaderLog = new List<string>();
-
-            AddFeatureLoaderLoggingInterceptor<FirstFeatureLoader>(featureLoaderLog);
-            AddFeatureLoaderLoggingInterceptor<SecondFeatureLoader>(featureLoaderLog);
-
-            //-- act
-
-            host.Configure();
-
-            //-- assert
-
-            featureLoaderLog.Should().Equal(
-                $"{typeof(FirstFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeConfigSections)}",
-                $"{typeof(SecondFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeConfigSections)}",
-
-                $"{typeof(FirstFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeConfiguration)}",
-                $"{typeof(SecondFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeConfiguration)}",
-
-                $"{typeof(FirstFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeComponents)}",
-                $"{typeof(SecondFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeComponents)}",
-
-                $"{typeof(FirstFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeAdapterComponents)}",
-                $"{typeof(SecondFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeAdapterComponents)}",
-
-                $"{typeof(FirstFeatureLoader).Name}.{nameof(IFeatureLoader.CompileComponents)}",
-                $"{typeof(SecondFeatureLoader).Name}.{nameof(IFeatureLoader.CompileComponents)}",
-
-                $"{typeof(FirstFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeCompiledComponents)}",
-                $"{typeof(SecondFeatureLoader).Name}.{nameof(IFeatureLoader.ContributeCompiledComponents)}"
             );
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Fact]
-        public void InjectionAdapterLoadedFirst()
+        public class TestModuleLoader : DefaultModuleLoader
         {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
-            var handler = new AssemblyLoadEventHandler();
-
-            host.AssemblyLoad += handler.Handle;
-
-            //-- act
-
-            host.Configure();
-
-            //-- assert
-
-            var logs = logger.TakeLog();
-            var firstLoadedComponent = logs.FirstOrDefault(x => x.StartsWith("FoundFeatureLoaderComponent"));
-            firstLoadedComponent.Should().Be("FoundFeatureLoaderComponent(component=ComponentContainerBuilder)");
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void InjectionAdapterModuleFeatureLoadersWereNotLoaded()
-        {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var config = CreateBootConfiguration();
-            var host = new MicroserviceHost(config, logger);
-            
-            var handler = new AssemblyLoadEventHandler();
-            host.AssemblyLoad += handler.Handle;
-            host.AssemblyLoad += (object sender, AssemblyScanLoadEventArgs e) => {
-                if ((e.AssemblyName == config.MicroserviceConfig.InjectionAdapter.Assembly
-                        && e.ImplementedInterface != typeof(IComponentContainerBuilder))
-                    || (e.AssemblyName != config.MicroserviceConfig.InjectionAdapter.Assembly
-                        && e.ImplementedInterface == typeof(IComponentContainerBuilder)))
-                {
-                    throw new Exception("AssemblyLoadEventHandler.Handle check haven't passed.");
-                }
-            };
-
-            //-- act
-
-            Action act = () => host.Configure();
-
-            //-- assert
-
-            act.ShouldNotThrow<Exception>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void InjectionAdapterNotImplementedInterfaceExceptionThrown()
-        {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var config = CreateBootConfiguration();
-            config.MicroserviceConfig.InjectionAdapter.Assembly = "AdapterInjectionNotImplementedInterface";
-            var host = new MicroserviceHost(config, logger);
-            var handler = new AssemblyLoadEventHandler();
-
-            host.AssemblyLoad += handler.Handle;
-            host.AssemblyLoad += (object sender, AssemblyScanLoadEventArgs e) => {
-                if (e.ImplementedInterface == typeof(IComponentContainerBuilder))
-                {
-                    if (e.AssemblyName == "AdapterInjectionNotImplementedInterface")
-                    {
-                        e.Destination.Add(typeof(String));
-                    }
-                }
-            };
-
-            //-- act
-
-            Action act = () => host.Configure();
-
-            //-- assert
-
-            act.ShouldThrow<Exception>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void InjectionAdapterCtorWithoutArgumentExceptionThrown()
-        {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var config = CreateBootConfiguration();
-            config.MicroserviceConfig.InjectionAdapter.Assembly = "AdapterInjectionCtorWithoutArgument";
-            var host = new MicroserviceHost(config, logger);
-            var handler = new AssemblyLoadEventHandler();
-
-            host.AssemblyLoad += handler.Handle;
-            host.AssemblyLoad += (object sender, AssemblyScanLoadEventArgs e) => {
-                if (e.ImplementedInterface == typeof(IComponentContainerBuilder))
-                {
-                    if (e.AssemblyName == "AdapterInjectionCtorWithoutArgument")
-                    {
-                        e.Destination.Add(typeof(ComponentContainerBuilderCtorWithoutArgument));
-                    }
-                }
-            };
-
-            //-- act
-
-            Action act = () => host.Configure();
-
-            //-- assert
-
-            act.ShouldThrow<Exception>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void KernelModulesDefaultFeatureLoadersLoaded()
-        {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
-            var handler = new AssemblyLoadEventHandler();
-
-            host.AssemblyLoad += handler.Handle;
-
-            //-- act
-
-            host.Configure();
-
-            //-- assert
-
-            var logs = logger.TakeLog();
-            logs.Should().Contain(new string[] {
-                "FoundFeatureLoaderComponent(component=CompilationFeatureLoader)",
-                "FoundFeatureLoaderComponent(component=InvocationSchedulerFeatureLoader)",
-            });
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void KernelModulesDefaultFeatureLoadersLoadedFirstAfterInjectionAdapter()
-        {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var host = new MicroserviceHost(CreateBootConfiguration(), logger);
-            var handler = new AssemblyLoadEventHandler();
-
-            host.AssemblyLoad += handler.Handle;
-
-            //-- act
-
-            host.Configure();
-
-            //-- assert
-
-            var logs = logger.TakeLog();
-            logs.Skip(1).Take(2).OrderBy(x => x).Should().Equal(new string[] {
-                "FoundFeatureLoaderComponent(component=CompilationFeatureLoader)",
-                "FoundFeatureLoaderComponent(component=InvocationSchedulerFeatureLoader)",
-            });
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Fact]
-        public void NamedKernelModuleLoadedFirstInFrameworkModules()
-        {
-            //-- arrange
-
-            var logger = new MicroserviceHostLoggerMock();
-            var config = CreateBootConfiguration();
-            config.MicroserviceConfig.FrameworkModules = new MicroserviceConfig.ModuleConfig[] {
-                new MicroserviceConfig.ModuleConfig() {
-                    Assembly = "NWheels.Implementation",
-                    Features = new MicroserviceConfig.ModuleConfig.FeatureConfig[] {
-                        new MicroserviceConfig.ModuleConfig.FeatureConfig() {
-                            Name = "NamedKernelFeatureLoader"
-                        }
-                    }
-                }
-            };
-            var host = new MicroserviceHost(config, logger);
-            var handler = new AssemblyLoadEventHandler();
-            
-            host.AssemblyLoad += (object sender, AssemblyScanLoadEventArgs e) => {
-                if (e.ImplementedInterface == typeof(IFeatureLoader))
-                {
-                    if (e.AssemblyName == "NWheels.Implementation")
-                    {
-                        e.Destination.Add(typeof(NamedKernelFeatureLoader));
-                    }
-                }
-            };
-            host.AssemblyLoad += handler.Handle;
-
-            //-- act
-
-            host.Configure();
-
-            //-- assert
-
-            var logs = logger.TakeLog();
-            logs.Skip(1 + 2).First().Should().Be(
-                "FoundFeatureLoaderComponent(component=NamedKernelFeatureLoader)");
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private BootConfiguration CreateBootConfiguration()
-        {
-            return new BootConfiguration()
+            public TestModuleLoader(IBootConfiguration bootConfig) 
+                : base(bootConfig)
             {
-                ConfigsDirectory = "ConfigsDirectory",
-                MicroserviceConfig = new MicroserviceConfig()
-                {
-                    Name = "MicroserviceName",
-                    InjectionAdapter = new MicroserviceConfig.InjectionAdapterElement()
-                    {
-                        Assembly = "InjectionAdapter"
-                    },
-                    ApplicationModules = new MicroserviceConfig.ModuleConfig[] 
-                    {
-                        new MicroserviceConfig.ModuleConfig()
-                        {
-                            Assembly = "FirstModuleAssembly",
-                            Features = new MicroserviceConfig.ModuleConfig.FeatureConfig[]
-                            {
-                                new MicroserviceConfig.ModuleConfig.FeatureConfig()
-                                {
-                                    Name = "ThirdFeatureLoader"
-                                },
-                                new MicroserviceConfig.ModuleConfig.FeatureConfig()
-                                {
-                                    Name = "NamedLoader"
-                                }
-                            }
-                        },
-                        new MicroserviceConfig.ModuleConfig()
-                        {
-                            Assembly = "SecondModuleAssembly",
-                            Features = new MicroserviceConfig.ModuleConfig.FeatureConfig[]
-                            {
-                                new MicroserviceConfig.ModuleConfig.FeatureConfig()
-                                {
-                                    Name = "FifthFeatureLoader"
-                                }
-                            }
-                        }
-                    },
-                    FrameworkModules = new MicroserviceConfig.ModuleConfig[] 
-                    {
-                        new MicroserviceConfig.ModuleConfig()
-                        {
-                            Assembly = "FrameworkModule",
-                            Features = new MicroserviceConfig.ModuleConfig.FeatureConfig[]{ }
-                        }
-                    }
-                },
-                EnvironmentConfig = new EnvironmentConfig()
-                {
-                    Name = "EnvironmentName",
-                    Variables = new EnvironmentConfig.VariableConfig[] 
-                    {
-                        new EnvironmentConfig.VariableConfig()
-                        {
-                            Name = "FirstVariable",
-                            Value = "FirstValue"
-                        },
-                        new EnvironmentConfig.VariableConfig()
-                        {
-                            Name = "SecondVariable",
-                            Value = "SecondValue"
-                        },
-                        new EnvironmentConfig.VariableConfig()
-                        {
-                            Name = "ThirdVariable",
-                            Value = "ThirdValue"
-                        }
-                    }
-                }
-            };
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void AddFeatureLoaderMock<TFeature>(Action<FeatureLoaderMock> setup) 
-            where TFeature : IFeatureLoader
-        {
-            var mock = new FeatureLoaderMock(typeof(TFeature));
-            setup(mock);
-            _s_featureLoaderMocks[typeof(TFeature)] = mock;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void AddFeatureLoaderLoggingInterceptor<TFeature>(List<string> log, Action<FeatureLoaderMock> setup = null)
-            where TFeature : IFeatureLoader
-        {
-            var mock = new FeatureLoaderMock(typeof(TFeature)) {
-                OnContributeConfigSections = (t, from) => {
-                    log.Add($"{typeof(TFeature).Name}.{nameof(IFeatureLoader.ContributeConfigSections)}");
-                },
-                OnContributeConfiguration = (t, from) => {
-                    log.Add($"{typeof(TFeature).Name}.{nameof(IFeatureLoader.ContributeConfiguration)}");
-                },
-                OnContributeComponents = (t, from, to) => {
-                    log.Add($"{typeof(TFeature).Name}.{nameof(IFeatureLoader.ContributeComponents)}");
-                },
-                OnContributeAdapterComponents = (t, from, to) => {
-                    log.Add($"{typeof(TFeature).Name}.{nameof(IFeatureLoader.ContributeAdapterComponents)}");
-                },
-                OnCompileComponents = (t, from) => {
-                    log.Add($"{typeof(TFeature).Name}.{nameof(IFeatureLoader.CompileComponents)}");
-                },
-                OnContributeCompiledComponents = (t, from, to) => {
-                    log.Add($"{typeof(TFeature).Name}.{nameof(IFeatureLoader.ContributeCompiledComponents)}");
-                },
-            };
-
-            setup?.Invoke(mock);
-            _s_featureLoaderMocks[typeof(TFeature)] = mock;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class FeatureLoaderMock : FeatureLoaderBase
-        {
-            private readonly Type _featureLoaderType;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public FeatureLoaderMock(Type featureLoaderType)
-            {
-                _featureLoaderType = featureLoaderType;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public override void ContributeConfigSections(IComponentContainerBuilder newComponents)
+            public override IEnumerable<Type> GetModulePublicTypes(IModuleConfiguration moduleConfig)
             {
-                OnContributeConfigSections?.Invoke(_featureLoaderType, newComponents);
+                if (moduleConfig.IsKernelModule)
+                {
+                    return new[] { typeof(FrameworkFeatureOne) };
+                }
+
+                switch (moduleConfig.ModuleName)
+                {
+                    case "FxM1": // module M1
+                        return new[] { typeof(FrameworkFeatureTwo), typeof(FrameworkFeatureThree) };
+                    case "AppM1": // module M1
+                        return new[] { typeof(ApplicationFeatureOne), typeof(ApplicationFeatureTwo) };
+                    case "AppM2": // module M1
+                        return new[] { typeof(ApplicationFeatureThree) };
+                    case "CustM1": // module M1
+                        return new[] { typeof(CustomizationFeatureOne), typeof(ApplicationFeatureTwo), typeof(ApplicationFeatureThree) };
+                }
+
+                throw new Exception($"Unexpected mock module name: {moduleConfig.ModuleName}");
             }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override void ContributeConfiguration(IComponentContainer existingComponents)
-            {
-                OnContributeConfiguration?.Invoke(_featureLoaderType, existingComponents);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
-            {
-                OnContributeComponents?.Invoke(_featureLoaderType, existingComponents, newComponents);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override void ContributeAdapterComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
-            {
-                OnContributeAdapterComponents?.Invoke(_featureLoaderType, existingComponents, newComponents);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override void CompileComponents(IComponentContainer existingComponents)
-            {
-                OnCompileComponents?.Invoke(_featureLoaderType, existingComponents);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
-            {
-                OnContributeCompiledComponents?.Invoke(_featureLoaderType, existingComponents, newComponents);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public Action<Type, IComponentContainerBuilder> OnContributeConfigSections { get; set; }
-            public Action<Type, IComponentContainer> OnContributeConfiguration { get; set; }
-            public Action<Type, IComponentContainer, IComponentContainerBuilder> OnContributeComponents { get; set; }
-            public Action<Type, IComponentContainer, IComponentContainerBuilder> OnContributeAdapterComponents { get; set; }
-            public Action<Type, IComponentContainer> OnCompileComponents { get; set; }
-            public Action<Type, IComponentContainer, IComponentContainerBuilder> OnContributeCompiledComponents { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [ThreadStatic]
-        private static Dictionary<Type, FeatureLoaderMock> _s_featureLoaderMocks;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class AssemblyLoadEventHandler
+        public class TestFeatureLoaderLog
         {
-            public AssemblyLoadEventHandler()
+            private readonly List<string> _messages = new List<string>();
+            public void Add(object source, string message)
             {
-                FeatureLoaderEventArgsList = new List<AssemblyScanLoadEventArgs>();
+                _messages.Add($"{source.GetType().Name}:{message}");
             }
-
-            public void Handle(object sender, AssemblyScanLoadEventArgs e)
+            public string[] Take()
             {
-                if (e.ImplementedInterface == typeof(IComponentContainerBuilder))
-                {
-                    if(e.AssemblyName == "InjectionAdapter")
-                    {
-                        e.Destination.Add(typeof(ComponentContainerBuilder));
-                    }
-                    ContainerEventArgs = e;
-                }
-                if (e.ImplementedInterface == typeof(IFeatureLoader))
-                {
-                    if (e.AssemblyName == "NWheels.Implementation")
-                    {
-                        //e.Destination.Add(typeof(CompilationFeatureLoader));
-                        //e.Destination.Add(typeof(InvocationSchedulerFeatureLoader));
-                    }
-                    if (e.AssemblyName == "FirstModuleAssembly")
-                    {
-                        e.Destination.Add(typeof(FirstFeatureLoader));
-                        e.Destination.Add(typeof(SecondFeatureLoader));
-                        e.Destination.Add(typeof(ThirdFeatureLoader));
-                        e.Destination.Add(typeof(ForthFeatureLoader));
-                        e.Destination.Add(typeof(NamedFeatureLoader));
-                    }
-                    if (e.AssemblyName == "SecondModuleAssembly")
-                    {
-                        e.Destination.Add(typeof(FifthFeatureLoader));
-                        e.Destination.Add(typeof(SixthFeatureLoader));
-                    }
-                    if (e.AssemblyName == "FrameworkModule")
-                    {
-                        e.Destination.Add(typeof(SeventhFeatureLoader));
-                        e.Destination.Add(typeof(EighthFeatureLoader));
-                    }
-
-                    FeatureLoaderEventArgsList.Add(e);
-                }
+                var messageArray = _messages.ToArray();
+                _messages.Clear();
+                return messageArray;
             }
-
-            public AssemblyScanLoadEventArgs ContainerEventArgs { get; private set; }
-
-            public List<AssemblyScanLoadEventArgs> FeatureLoaderEventArgsList { get; private set; }
+            public void Clear()
+            {
+                _messages.Clear();
+            }
+            public IReadOnlyList<string> Messages => _messages;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class TestFeatureLoaderBase : FeatureLoaderBase
-        {
-            public override void ContributeConfigSections(IComponentContainerBuilder newComponents)
-            {
-                if (_s_featureLoaderMocks.TryGetValue(this.GetType(), out FeatureLoaderMock mock))
-                {
-                    mock.ContributeConfigSections(newComponents);
-                }
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override void ContributeConfiguration(IComponentContainer existingComponents)
-            {
-                if (_s_featureLoaderMocks.TryGetValue(this.GetType(), out FeatureLoaderMock mock))
-                {
-                    mock.ContributeConfiguration(existingComponents);
-                }
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
-            {
-                if (_s_featureLoaderMocks.TryGetValue(this.GetType(), out FeatureLoaderMock mock))
-                {
-                    mock.ContributeComponents(existingComponents, newComponents);
-                }
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override void ContributeAdapterComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
-            {
-                if (_s_featureLoaderMocks.TryGetValue(this.GetType(), out FeatureLoaderMock mock))
-                {
-                    mock.ContributeAdapterComponents(existingComponents, newComponents);
-                }
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override void CompileComponents(IComponentContainer existingComponents)
-            {
-                if (_s_featureLoaderMocks.TryGetValue(this.GetType(), out FeatureLoaderMock mock))
-                {
-                    mock.CompileComponents(existingComponents);
-                }
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
-            {
-                if (_s_featureLoaderMocks.TryGetValue(this.GetType(), out FeatureLoaderMock mock))
-                {
-                    mock.ContributeCompiledComponents(existingComponents, newComponents);
-                }
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private interface ICompileRegistered
-        { }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class CompileRegistered : ICompileRegistered
-        { }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [DefaultFeatureLoader]
-        private class FirstFeatureLoader : TestFeatureLoaderBase
-        {
-            public override void CompileComponents(IComponentContainer existingComponents)
-            {
-                base.CompileComponents(existingComponents);
-            }
-
-            public override void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
-            {
-                newComponents.RegisterComponentType<CompileRegistered>().ForService<ICompileRegistered>();
-                base.ContributeCompiledComponents(existingComponents, newComponents);
-            }
-        }
-
-        [DefaultFeatureLoader]
-        private class SecondFeatureLoader : TestFeatureLoaderBase
-        {
-        }
         
-        private class ThirdFeatureLoader : TestFeatureLoaderBase
+        public abstract class TestFeatureLoader : IFeatureLoader
         {
-        }        
+            private TestFeatureLoaderLog _log;
 
-        private class ForthFeatureLoader : TestFeatureLoaderBase
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public virtual void InjectBootComponents(IComponentContainer bootComponents)
+            {
+                _log = bootComponents.Resolve<TestFeatureLoaderLog>();
+                _log.Add(this, nameof(InjectBootComponents));
+                OnInjectBootComponents?.Invoke(bootComponents);
+            }
+            public virtual void ContributeConfigSections(IComponentContainerBuilder newComponents)
+            {
+                _log.Add(this, nameof(ContributeConfigSections));
+                OnContributeConfigSections?.Invoke(newComponents);
+            }
+            public virtual void ContributeConfiguration(IComponentContainer existingComponents)
+            {
+                _log.Add(this, nameof(ContributeConfiguration));
+                OnContributeConfiguration?.Invoke(existingComponents);
+            }
+            public virtual void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
+            {
+                _log.Add(this, nameof(ContributeComponents));
+                OnContributeComponents?.Invoke(existingComponents, newComponents);
+            }
+            public virtual void ContributeAdapterComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
+            {
+                _log.Add(this, nameof(ContributeAdapterComponents));
+                OnContributeAdapterComponents?.Invoke(existingComponents, newComponents);
+            }
+            public virtual void CompileComponents(IComponentContainer existingComponents)
+            {
+                _log.Add(this, nameof(CompileComponents));
+                OnCompileComponents?.Invoke(existingComponents);
+            }
+            public virtual void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
+            {
+                _log.Add(this, nameof(ContributeCompiledComponents));
+                OnContributeCompiledComponents?.Invoke(existingComponents, newComponents);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public Action<IComponentContainer> OnInjectBootComponents { get; set; }
+            public Action<IComponentContainerBuilder> OnContributeConfigSections { get; set; }
+            public Action<IComponentContainer> OnContributeConfiguration { get; set; }
+            public Action<IComponentContainer, IComponentContainerBuilder> OnContributeComponents { get; set; }
+            public Action<IComponentContainer, IComponentContainerBuilder> OnContributeAdapterComponents { get; set; }
+            public Action<IComponentContainer> OnCompileComponents { get; set; }
+            public Action<IComponentContainer, IComponentContainerBuilder> OnContributeCompiledComponents { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public abstract class TestFeatureLoaderWithPhaseExtension : TestFeatureLoader, IFeatureLoaderWithPhaseExtension
+        {
+            private TestFeatureLoaderPhaseExtension _phaseExtension;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void InjectBootComponents(IComponentContainer bootComponents)
+            {
+                base.InjectBootComponents(bootComponents);
+                
+                _phaseExtension = CreatePhaseExtension(bootComponents);
+                OnInitPhaseExtension?.Invoke(_phaseExtension);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Action<TestFeatureLoaderPhaseExtension> OnInitPhaseExtension { get; set; }
+            public IFeatureLoaderPhaseExtension PhaseExtension => _phaseExtension;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected abstract TestFeatureLoaderPhaseExtension CreatePhaseExtension(IComponentContainer bootComponents);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public abstract class TestFeatureLoaderPhaseExtension : IFeatureLoaderPhaseExtension
+        {
+            private readonly TestFeatureLoader _featureLoader;
+            private readonly TestFeatureLoaderLog _log;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public TestFeatureLoaderPhaseExtension(TestFeatureLoader featureLoader, TestFeatureLoaderLog log)
+            {
+                _featureLoader = featureLoader;
+                _log = log;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void AfterContributeCompiledComponents(IComponentContainer components)
+            {
+                _log.Add(this, nameof(AfterContributeCompiledComponents));
+                OnAfterContributeCompiledComponents?.Invoke(components);
+            }
+            public void BeforeCompileComponents(IComponentContainer components)
+            {
+                _log.Add(this, nameof(BeforeCompileComponents));
+                OnBeforeCompileComponents?.Invoke(components);
+            }
+            public void BeforeContributeAdapterComponents(IComponentContainer components)
+            {
+                _log.Add(this, nameof(BeforeContributeAdapterComponents));
+                OnBeforeContributeAdapterComponents?.Invoke(components);
+            }
+            public void BeforeContributeCompiledComponents(IComponentContainer components)
+            {
+                _log.Add(this, nameof(BeforeContributeCompiledComponents));
+                OnBeforeContributeCompiledComponents?.Invoke(components);
+            }
+            public void BeforeContributeComponents(IComponentContainer components)
+            {
+                _log.Add(this, nameof(BeforeContributeComponents));
+                OnBeforeContributeComponents?.Invoke(components);
+            }
+            public void BeforeContributeConfigSections(IComponentContainer components)
+            {
+                _log.Add(this, nameof(BeforeContributeConfigSections));
+                OnBeforeContributeConfigSections?.Invoke(components);
+            }
+            public void BeforeContributeConfiguration(IComponentContainer components)
+            {
+                _log.Add(this, nameof(BeforeContributeConfiguration));
+                OnBeforeContributeConfiguration?.Invoke(components);
+            }
+
+            public Action<IComponentContainer> OnAfterContributeCompiledComponents { get; set; }
+            public Action<IComponentContainer> OnBeforeCompileComponents { get; set; }
+            public Action<IComponentContainer> OnBeforeContributeAdapterComponents { get; set; }
+            public Action<IComponentContainer> OnBeforeContributeCompiledComponents { get; set; }
+            public Action<IComponentContainer> OnBeforeContributeComponents { get; set; }
+            public Action<IComponentContainer> OnBeforeContributeConfigSections { get; set; }
+            public Action<IComponentContainer> OnBeforeContributeConfiguration { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        [DefaultFeatureLoader]
+        public class FrameworkFeatureOne : TestFeatureLoader
         {
         }
 
-        [FeatureLoader(Name = "NamedLoader")]
-        private class NamedFeatureLoader : TestFeatureLoaderBase
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [FeatureLoader(Name = "FX2")]
+        public class FrameworkFeatureTwo : TestFeatureLoaderWithPhaseExtension
+        {
+            protected override TestFeatureLoaderPhaseExtension CreatePhaseExtension(IComponentContainer bootComponents)
+            {
+                return new FrameworkFeatureOnePhaseExtension(this, bootComponents.Resolve<TestFeatureLoaderLog>());
+            }
+            private class FrameworkFeatureOnePhaseExtension : TestFeatureLoaderPhaseExtension
+            {
+                public FrameworkFeatureOnePhaseExtension(TestFeatureLoader featureLoader, TestFeatureLoaderLog log) 
+                    : base(featureLoader, log)
+                {
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [FeatureLoader(Name = "FX3")]
+        public class FrameworkFeatureThree : TestFeatureLoader
         {
         }
 
-        private class FifthFeatureLoader : TestFeatureLoaderBase
-        {
-        }
-
-        private class SixthFeatureLoader : TestFeatureLoaderBase
-        {
-        }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DefaultFeatureLoader]
-        private class SeventhFeatureLoader : TestFeatureLoaderBase
+        public class ApplicationFeatureOne : TestFeatureLoader
         {
         }
 
-        private class EighthFeatureLoader : TestFeatureLoaderBase
-        {
-        }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [FeatureLoader(Name = "ThirdFeatureLoader")]
-        private class DuplicatedFeatureLoader : TestFeatureLoaderBase
+        [FeatureLoader(Name = "A2")]
+        public class ApplicationFeatureTwo : TestFeatureLoaderWithPhaseExtension
         {
-        }
-
-        [FeatureLoader(Name = "NamedKernelFeatureLoader")]
-        private class NamedKernelFeatureLoader : TestFeatureLoaderBase
-        {
-        }
-
-        public class ComponentContainerBuilderCtorWithoutArgument : IComponentContainerBuilder
-        {
-            public IComponentRegistrationBuilder RegisterComponentInstance<TComponent>(TComponent componentInstance) where TComponent : class
+            protected override TestFeatureLoaderPhaseExtension CreatePhaseExtension(IComponentContainer bootComponents)
             {
-                throw new NotImplementedException();
+                return new ApplicationFeatureTwoPhaseExtension(this, bootComponents.Resolve<TestFeatureLoaderLog>());
             }
-
-            public IComponentInstantiationBuilder RegisterComponentType<TComponent>()
+            private class ApplicationFeatureTwoPhaseExtension : TestFeatureLoaderPhaseExtension
             {
-                throw new NotImplementedException();
+                public ApplicationFeatureTwoPhaseExtension(TestFeatureLoader featureLoader, TestFeatureLoaderLog log) 
+                    : base(featureLoader, log)
+                {
+                }
             }
+        }
 
-            public IComponentInstantiationBuilder RegisterComponentType(Type componentType)
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [FeatureLoader(Name = "A3")]
+        public class ApplicationFeatureThree : TestFeatureLoader
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DefaultFeatureLoader]
+        public class CustomizationFeatureOne : TestFeatureLoader
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [FeatureLoader(Name = "C2")]
+        public class CustomizationFeatureTwo : TestFeatureLoaderWithPhaseExtension
+        {
+            protected override TestFeatureLoaderPhaseExtension CreatePhaseExtension(IComponentContainer bootComponents)
             {
-                throw new NotImplementedException();
+                return new CustomizationFeatureTwoPhaseExtension(this, bootComponents.Resolve<TestFeatureLoaderLog>());
             }
+            private class CustomizationFeatureTwoPhaseExtension : TestFeatureLoaderPhaseExtension
+            {
+                public CustomizationFeatureTwoPhaseExtension(TestFeatureLoader featureLoader, TestFeatureLoaderLog log) 
+                    : base(featureLoader, log)
+                {
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [FeatureLoader(Name = "C3")]
+        public class CustomizationFeatureThree : TestFeatureLoader
+        {
         }
     }
 }
-
-#endif

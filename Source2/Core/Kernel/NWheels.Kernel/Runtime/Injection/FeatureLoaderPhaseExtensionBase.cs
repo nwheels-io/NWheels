@@ -7,7 +7,7 @@ using NWheels.Kernel.Api.Injection;
 namespace NWheels.Kernel.Runtime.Injection
 {
     [ExcludeFromCodeCoverage]
-    public abstract class FeatureLoaderWithPhaseExtensionBase : FeatureLoaderBase, IFeatureLoaderPhaseExtension
+    public abstract class FeatureLoaderPhaseExtensionBase : IFeatureLoaderPhaseExtension
     {
         public virtual void BeforeContributeConfigSections(IComponentContainer components)
         {

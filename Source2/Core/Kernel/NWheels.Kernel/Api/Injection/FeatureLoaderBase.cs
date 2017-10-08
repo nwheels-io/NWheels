@@ -6,6 +6,12 @@ namespace NWheels.Kernel.Api.Injection
     [ExcludeFromCodeCoverage]
     public abstract class FeatureLoaderBase : IFeatureLoader
     {
+        public virtual void InjectBootComponents(IComponentContainer bootComponents)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public virtual void ContributeConfigSections(IComponentContainerBuilder newComponents)
         {
         }

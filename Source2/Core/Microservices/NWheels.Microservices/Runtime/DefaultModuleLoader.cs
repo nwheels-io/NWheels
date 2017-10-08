@@ -7,6 +7,7 @@ using System.Runtime.Loader;
 using System.Text;
 using NWheels.Kernel.Api.Injection;
 using NWheels.Microservices.Api;
+using NWheels.Microservices.Api.Exceptions;
 
 namespace NWheels.Microservices.Runtime
 {
@@ -67,12 +68,6 @@ namespace NWheels.Microservices.Runtime
                 else
                 {
                     var name = FeatureLoaderAttribute.GetFeatureNameOrThrow(type);
-
-                    if (string.IsNullOrEmpty(name))
-                    {
-                        throw new Exception(); //TODO: throw correct exception
-                    }
-
                     namedFeatureLoaderTypeMap.Add(name, type);
                 }
             }
@@ -83,14 +78,14 @@ namespace NWheels.Microservices.Runtime
                 {
                     if (namedFeatureLoaderTypes.Contains(type))
                     {
-                        throw new Exception(); //TODO: throw correct exception
+                        throw ModuleLoaderException.DuplicateNamedFeature(moduleConfig.ModuleName, feature.FeatureName);
                     }
 
                     namedFeatureLoaderTypes.Add(type);
                 }
                 else
                 {
-                    throw new Exception(); //TODO: throw correct exception
+                    throw ModuleLoaderException.NamedFeatureDoesNotExist(moduleConfig.ModuleName, feature.FeatureName);
                 }
             }
 
