@@ -268,6 +268,7 @@ namespace NWheels.Microservices.Runtime
         protected RevertableSequence LoadSequence { get; }
         protected RevertableSequence ActivateSequence { get; }
         protected bool Disposed { get; set; }
+        protected Exception TransitionLastError { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -291,14 +292,15 @@ namespace NWheels.Microservices.Runtime
                 },
                 onError: (state, e) => {
                     error = e;
+                    TransitionLastError = e;
                     return false; // exit on error
                 },
                 cancellation: cancellation
             );
 
-            if (error != null || finalState == MicroserviceState.Faulted)
+            if (error != null || TransitionLastError != null || finalState == MicroserviceState.Faulted)
             {
-                throw MicroserviceHostException.MicroserviceFaulted(error);
+                throw MicroserviceHostException.MicroserviceFaulted(error ?? TransitionLastError);
             }
 
             if (finalState != targetState && (!cancellation.IsCancellationRequested || !throwOnCancellation))
@@ -317,6 +319,8 @@ namespace NWheels.Microservices.Runtime
             Action logSuccess, 
             Action<Exception> logError)
         {
+            TransitionLastError = null;
+
             using (logActivity())
             {
                 try
@@ -328,6 +332,7 @@ namespace NWheels.Microservices.Runtime
                 catch (Exception e)
                 {
                     logError(e);
+                    TransitionLastError = e;
                     return MicroserviceTrigger.Failed;
                 }
             }
@@ -367,7 +372,13 @@ namespace NWheels.Microservices.Runtime
         {
             foreach (var loader in featureLoaders.OfType<IFeatureLoaderWithPhaseExtension>())
             {
-                var action = actionSelector(loader.PhaseExtension);
+                var extension = loader.PhaseExtension;
+                if (extension == null)
+                {
+                    continue;
+                }
+
+                var action = actionSelector(extension);
 
                 using (var activity = Logger.ExecutingFeatureLoaderPhaseExtension(loader.GetType(), phase: action.Method.Name))
                 {

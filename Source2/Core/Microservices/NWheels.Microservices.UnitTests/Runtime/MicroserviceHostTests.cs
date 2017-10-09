@@ -15,7 +15,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
 {
     public class MicroserviceHostTests : TestBase.UnitTest
     {
-        //[Fact]
+        [Fact]
         public void CanConfigure()
         {
             //-- arrange
@@ -80,7 +80,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
                     case "AppM2": // module M1
                         return new[] { typeof(ApplicationFeatureThree) };
                     case "CustM1": // module M1
-                        return new[] { typeof(CustomizationFeatureOne), typeof(ApplicationFeatureTwo), typeof(ApplicationFeatureThree) };
+                        return new[] { typeof(CustomizationFeatureOne), typeof(CustomizationFeatureTwo), typeof(CustomizationFeatureThree) };
                 }
 
                 throw new Exception($"Unexpected mock module name: {moduleConfig.ModuleName}");

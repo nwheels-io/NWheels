@@ -64,5 +64,54 @@ namespace NWheels.Kernel.Api.Extensions
                 .Replace('/', Path.DirectorySeparatorChar)
                 .Replace('\\', Path.DirectorySeparatorChar);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string PascalCaseToHumanReadableText(this string s, char delimiter = ' ')
+        {
+            if (s == null)
+            {
+                return null;
+            }
+
+            var length = s.Length;
+
+            if (length <= 1)
+            {
+                return s;
+            }
+
+            var output = new StringBuilder(length * 2);
+
+            output.Append(s[0]);
+
+            for (int i = 1; i < s.Length; i++)
+            {
+                if (char.IsDigit(s[i]))
+                {
+                    var isNewWord = !char.IsDigit(s[i - 1]);
+
+                    if (isNewWord)
+                    {
+                        output.Append(delimiter);
+                    }
+                }
+                else if (char.IsUpper(s[i]))
+                {
+                    var isNewWord = (!char.IsUpper(s[i - 1]) || (i < s.Length - 1 && char.IsLower(s[i + 1])));
+
+                    if (isNewWord)
+                    {
+                        output.Append(delimiter);
+                        output.Append((i < s.Length - 1 && char.IsUpper(s[i + 1])) ? s[i] : char.ToLower(s[i]));
+                        continue;
+                    }
+                }
+
+                output.Append(s[i]);
+            }
+
+            return output.ToString();
+        }
     }
 }

@@ -15,6 +15,90 @@ namespace NWheels.Kernel.UnitTests.Api.Exceptions
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Theory]
+        [InlineData("TestReason", null, "Test reason")]
+        [InlineData("TestReason", "", "Test reason")]
+        [InlineData("TestReason", "K1,V1", "Test reason: K1=V1")]
+        [InlineData("TestReason", "K1,V1,K2,V2", "Test reason: K1=V1, K2=V2")]
+        public void Message_HumanReadable(string reason, string keyValues, string expectedMessage)
+        {
+            //-- arrange
+
+            var exception = new UnderTest.TestException(reason, keyValues);
+
+            //-- act
+
+            var actualMessage = exception.Message;
+
+            //-- assert
+
+            actualMessage.Should().Be(expectedMessage);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Message_Cached()
+        {
+            //-- arrange
+
+            var exception = new UnderTest.TestException("TestReason", "K1,V1");
+
+            //-- act
+
+            var message1 = exception.Message;
+            var message2 = exception.Message;
+
+            //-- assert
+
+            message2.Should().BeSameAs(message1);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Theory]
+        [InlineData("TestReason", null, "Reason=TestReason")]
+        [InlineData("TestReason", "", "Reason=TestReason")]
+        [InlineData("TestReason", "K1,V1", "Reason=TestReason&K1=V1")]
+        [InlineData("TestReason", "K1,V1,K2,V2", "Reason=TestReason&K1=V1&K2=V2")]
+        public void HelpLink_AbsoluteHelpUrl(string reason, string keyValues, string expectedExplanationQuery)
+        {
+            //-- arrange
+
+            var exception = new UnderTest.TestException(reason, keyValues);
+            var expectedHelpLink = 
+                $"{ExplainableExceptionBase.DefaultHelpLinkBaseUri}{UnderTestNamespace}.{nameof(UnderTest.TestException)}?{expectedExplanationQuery}";
+
+            //-- act
+
+            var actualHelpLink = exception.HelpLink;
+
+            //-- assert
+
+            actualHelpLink.Should().Be(expectedHelpLink);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void HelpLink_Cached()
+        {
+            //-- arrange
+
+            var exception = new UnderTest.TestException("TestReason", "K1,V1");
+
+            //-- act
+
+            var helpLink1 = exception.HelpLink;
+            var helpLink2 = exception.HelpLink;
+
+            //-- assert
+
+            helpLink2.Should().BeSameAs(helpLink1);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Theory]
         [InlineData(
             typeof(UnderTest.TestException), 
             UnderTestNamespace + ".TestException")]
@@ -68,18 +152,7 @@ namespace NWheels.Kernel.UnitTests.Api.Exceptions
         {
             //-- arrange
 
-            var keyValuePairs = keyValues?.Split(",", StringSplitOptions.RemoveEmptyEntries);
-            
-            if (keyValues == null)
-            {
-                keyValuePairs.Should().BeNull();
-            }
-            if (keyValues == "")
-            {
-                keyValuePairs.Should().BeEmpty();
-            }
-
-            var exception = new UnderTest.TestException(reason, keyValuePairs);
+            var exception = new UnderTest.TestException(reason, keyValues);
 
             //-- act 
 
@@ -131,7 +204,7 @@ namespace NWheels.Kernel.UnitTests.Api.Exceptions
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void ConstructorWithInnerException()
+        public void InnerException_Constructor()
         {
             //-- arrange
 
@@ -145,6 +218,28 @@ namespace NWheels.Kernel.UnitTests.Api.Exceptions
 
             exception.InnerException.Should().BeSameAs(innerException);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Theory]
+        [InlineData("TestReason", null, "Test reason {Object reference not set to an instance of an object.}")]
+        [InlineData("TestReason", "K1,V1", "Test reason: K1=V1 {Object reference not set to an instance of an object.}")]
+        [InlineData("TestReason", "K1,V1,K2,V2", "Test reason: K1=V1, K2=V2 {Object reference not set to an instance of an object.}")]
+        public void InnerException_IncludedInMessage(string reason, string keyValues, string expectedMessage)
+        {
+            //-- arrange
+
+            var innerException = new NullReferenceException();
+            var exception = new UnderTest.WithInnerException(reason, keyValues, innerException);
+
+            //-- act
+
+            var message = exception.Message;
+
+            //-- assert
+
+            message.Should().Be(expectedMessage);
+        }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -153,29 +248,68 @@ namespace NWheels.Kernel.UnitTests.Api.Exceptions
     {
         public class TestException : ExplainableExceptionBase
         {
-            private readonly string[] _keyValuePairs;
+            private readonly KeyValuePair<string, string>[] _keyValuePairs;
 
-            public TestException(string reason, string[] keyValuePairs) 
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TestException(string reason, string commaSeparatedKeyValues)
+                : this(reason, ParseCommaSeparatedKeyValues(commaSeparatedKeyValues))
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TestException(string reason, string[] flatKeyValuesArray) 
                 : base(reason)
             {
-                _keyValuePairs = keyValuePairs;
+                _keyValuePairs = BuildKeyValuePairs(flatKeyValuesArray);
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             protected override IEnumerable<KeyValuePair<string, string>> BuildKeyValuePairs()
             {
-                if (_keyValuePairs == null)
+                return _keyValuePairs;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal static string[] ParseCommaSeparatedKeyValues(string commaSeparatedKeyValues)
+            {
+                var keyValuesArray = commaSeparatedKeyValues?.Split(",", StringSplitOptions.RemoveEmptyEntries);
+
+                if (commaSeparatedKeyValues == null)
+                {
+                    keyValuesArray.Should().BeNull();
+                }
+
+                if (commaSeparatedKeyValues == "")
+                {
+                    keyValuesArray.Should().BeEmpty();
+                }
+
+                return keyValuesArray;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal static KeyValuePair<string, string>[] BuildKeyValuePairs(string[] flatKeyValuesArray)
+            {
+                if (flatKeyValuesArray == null)
                 {
                     return null;
                 }
 
-                var pairs = new List<KeyValuePair<string, string>>();
+                var keyValuePairs = new KeyValuePair<string, string>[flatKeyValuesArray.Length / 2];
 
-                for (int i = 0 ; i < _keyValuePairs.Length - 1 ; i += 2)
+                for (int i = 0; i < keyValuePairs.Length; i++)
                 {
-                    pairs.Add(new KeyValuePair<string, string>(_keyValuePairs[i], _keyValuePairs[i + 1]));
+                    keyValuePairs[i] = new KeyValuePair<string, string>(
+                        key: flatKeyValuesArray[i * 2],
+                        value: flatKeyValuesArray[i * 2 + 1]);
                 }
 
-                return pairs;
+                return keyValuePairs;
             }
         }
 
@@ -183,14 +317,22 @@ namespace NWheels.Kernel.UnitTests.Api.Exceptions
 
         public class WithInnerException : ExplainableExceptionBase
         {
+            private readonly KeyValuePair<string, string>[] _keyValuePairs;
+
             public WithInnerException(string reason, Exception innerException)
                 : base(reason, innerException)
             {
             }
 
+            public WithInnerException(string reason, string commaSeparatedKeyValues, Exception innerException)
+                : base(reason, innerException)
+            {
+                _keyValuePairs = TestException.BuildKeyValuePairs(TestException.ParseCommaSeparatedKeyValues(commaSeparatedKeyValues));
+            }
+
             protected override IEnumerable<KeyValuePair<string, string>> BuildKeyValuePairs()
             {
-                return null;
+                return _keyValuePairs;
             }
         }
 

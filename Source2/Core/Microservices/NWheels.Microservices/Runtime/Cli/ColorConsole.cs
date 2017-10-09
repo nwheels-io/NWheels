@@ -19,6 +19,11 @@ namespace NWheels.Microservices.Runtime.Cli
             var timestamp = _timeSeed.Add(_clock.Elapsed);
 
             WriteLine(color, $"{timestamp:dd-MMM HH:mm:ss.fff} {message}");
+
+            if (level >= LogLevel.Warning)
+            {
+                Debug.WriteLine(message);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

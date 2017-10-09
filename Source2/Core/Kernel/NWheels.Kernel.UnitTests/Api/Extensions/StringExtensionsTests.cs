@@ -82,6 +82,39 @@ namespace NWheels.Kernel.UnitTests.Api.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Theory]
+        [InlineData("One", "One")]
+        [InlineData("OneTwo", "One two")]
+        [InlineData("OneTwoThree", "One two three")]
+        [InlineData("HTTP", "HTTP")]
+        [InlineData("HTTPProtocol", "HTTP protocol")]
+        [InlineData("OneABBR", "One ABBR")]
+        [InlineData("OneABBRTwo", "One ABBR two")]
+        [InlineData("1234", "1234")]
+        [InlineData("One1234", "One 1234")]
+        [InlineData("One1234Two", "One 1234 two")]
+        [InlineData("OneABBR1234", "One ABBR 1234")]
+        [InlineData("OneABBR1234Two", "One ABBR 1234 two")]
+        [InlineData("ABBR1", "ABBR 1")]
+        [InlineData("One1", "One 1")]
+        [InlineData("1ABBR", "1 ABBR")]
+        [InlineData("1One", "1 one")]
+        [InlineData(" ", " ")]
+        [InlineData("", "")]
+        [InlineData(null, null)]
+        public void TestPascalCaseToHumanReadableText(string input, string expectedOutput)
+        {
+            //-- act
+
+            var actualOutput = input.PascalCaseToHumanReadableText();
+
+            //-- assert
+
+            actualOutput.Should().Be(expectedOutput);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static IEnumerable<object[]> TestCases_TestToPathString = new object[][] {
             #region Test cases
             new object[] { @"abc", "abc" },

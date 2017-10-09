@@ -13,7 +13,13 @@ namespace NWheels.Kernel.Api.Exceptions
     [Serializable]
     public abstract class ExplainableExceptionBase : Exception, IExplainableException
     {
+        public readonly static string DefaultHelpLinkBaseUri = "https://nwheels.io/explain/";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private readonly string _reason;
+        private string _message = null;
+        private string _helpLink = null;
         private string _explanationPath = null;
         private string _explanationQuery = null;
         private KeyValuePair<string, string>[] _keyValuePairs = null;
@@ -88,7 +94,72 @@ namespace NWheels.Kernel.Api.Exceptions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override string Message
+        {
+            get
+            {
+                if (_message == null)
+                {
+                    _message = BuildMessage();
+                }
+
+                return _message;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string HelpLink
+        {
+            get
+            {
+                if (_helpLink == null || _helpLink == _message)
+                {
+                    _helpLink = GetHelpLinkBaseUri() + ExplanationPath + '?' + ExplanationQuery;
+                }
+
+                return _helpLink;
+            }   
+            set
+            {
+                _helpLink = value;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected abstract IEnumerable<KeyValuePair<string, string>> BuildKeyValuePairs();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual string BuildMessage()
+        {
+            EnsureKeyValuePairs();
+
+            string messsageText;
+
+            if (_keyValuePairs == null || _keyValuePairs.Length == 0)
+            {
+                messsageText = _reason.PascalCaseToHumanReadableText();
+            }
+            else
+            {
+                var keyValueStrings = _keyValuePairs.Select(kvp => kvp.Key + '=' + kvp.Value);
+                messsageText =
+                    _reason.PascalCaseToHumanReadableText() +
+                    _s_messagsFirstParamSeparator +
+                    string.Join(_s_messagsNextParamSeparator, keyValueStrings);
+            }
+
+            if (InnerException != null)
+            {
+                return messsageText + _s_messagsInnerExceptionSeparator + InnerException.Message + '}';
+            }
+            else
+            {
+                return messsageText;
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -116,6 +187,13 @@ namespace NWheels.Kernel.Api.Exceptions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected virtual string GetHelpLinkBaseUri()
+        {
+            return DefaultHelpLinkBaseUri;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void EnsureKeyValuePairs()
         {
             if (_keyValuePairs == null)
@@ -127,5 +205,8 @@ namespace NWheels.Kernel.Api.Exceptions
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static readonly UrlEncoder _s_urlEncoder = UrlEncoder.Default;
+        private static readonly string _s_messagsFirstParamSeparator = ": ";
+        private static readonly string _s_messagsNextParamSeparator = ", ";
+        private static readonly string _s_messagsInnerExceptionSeparator = " {";
     }
 }
