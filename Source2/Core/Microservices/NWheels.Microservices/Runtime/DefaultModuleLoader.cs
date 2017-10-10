@@ -5,7 +5,9 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
+using NWheels.Kernel.Api.Extensions;
 using NWheels.Kernel.Api.Injection;
+using NWheels.Kernel.Runtime.Injection;
 using NWheels.Microservices.Api;
 using NWheels.Microservices.Api.Exceptions;
 
@@ -14,6 +16,7 @@ namespace NWheels.Microservices.Runtime
     public class DefaultModuleLoader : IModuleLoader
     {
         private readonly IBootConfiguration _bootConfig;
+        private readonly IComponentContainer _bootComponents;
         private readonly Dictionary<string, Type[]> _publicTypeCache = new Dictionary<string, Type[]>();
         private readonly Dictionary<string, Assembly> _assemblyCache = new Dictionary<string, Assembly>();
 
@@ -22,9 +25,10 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DefaultModuleLoader(IBootConfiguration bootConfig)
+        public DefaultModuleLoader(IBootConfiguration bootConfig, IComponentContainer bootComponents)
         {
             _bootConfig = bootConfig;
+            _bootComponents = bootComponents;
             //_bootConfig = bootConfig;
             //_assemblyLoadContext = new ModuleAssemblyLoadContext(bootConfig.AssemblyLocationMap);
         }
@@ -39,12 +43,14 @@ namespace NWheels.Microservices.Runtime
                 .Concat(bootConfig.ApplicationModules)
                 .Concat(bootConfig.CustomizationModules);
 
-            var bootFeatureLoaderTypes = allModuleConfigs.SelectMany(m => GetModuleBootFeatureLoaderTypes(m));
+            var bootFeatureLoaderTypes = allModuleConfigs.SelectMany(m => GetModuleBootFeatureLoaderTypes(m)).ToArray();
             var bootFeatureLoaders = new List<IFeatureLoader>();
+
+            RegisterFeatureLoadersInBootContainer(bootFeatureLoaderTypes);
 
             foreach (var type in bootFeatureLoaderTypes)
             {
-                bootFeatureLoaders.Add((IFeatureLoader)Activator.CreateInstance(type));
+                bootFeatureLoaders.Add((IFeatureLoader)_bootComponents.Resolve(type));
             }
 
             return bootFeatureLoaders;
@@ -94,19 +100,6 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual IEnumerable<Type> GetModuleAllFeatureLoaderTypes(IModuleConfiguration moduleConfig)
-        {
-            var featureLoaderTypes = GetModulePublicTypes(moduleConfig)
-                .Where(type =>
-                    type.IsClass &&
-                    !type.IsAbstract &&
-                    typeof(IFeatureLoader).IsAssignableFrom(type));
-
-            return featureLoaderTypes;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public virtual IEnumerable<Type> GetModulePublicTypes(IModuleConfiguration moduleConfig)
         {
             var moduleName = moduleConfig.ModuleName;
@@ -121,6 +114,19 @@ namespace NWheels.Microservices.Runtime
 
             _publicTypeCache.Add(moduleName, publicTypes);
             return publicTypes;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual IEnumerable<Type> GetModuleAllFeatureLoaderTypes(IModuleConfiguration moduleConfig)
+        {
+            var featureLoaderTypes = GetModulePublicTypes(moduleConfig)
+                .Where(type =>
+                    type.IsClass &&
+                    !type.IsAbstract &&
+                    typeof(IFeatureLoader).IsAssignableFrom(type));
+
+            return featureLoaderTypes;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -146,6 +152,20 @@ namespace NWheels.Microservices.Runtime
 
             _assemblyCache.Add(name, foundAssembly);
             return foundAssembly;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void RegisterFeatureLoadersInBootContainer(Type[] featureLoaderTypes)
+        {
+            var builder = new ComponentContainerBuilder(_bootComponents.AsInternal());
+
+            foreach (var type in featureLoaderTypes)
+            {
+                builder.RegisterComponentType(type).ForService<IFeatureLoader>();
+            }
+
+            _bootComponents.AsInternal().Merge(builder); 
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

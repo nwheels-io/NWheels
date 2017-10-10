@@ -2,8 +2,6 @@
 {
     public interface IFeatureLoader
     {
-        void InjectBootComponents(IComponentContainer bootComponents);
-
         void ContributeConfigSections(IComponentContainerBuilder newComponents);
 
         void ContributeConfiguration(IComponentContainer existingComponents);

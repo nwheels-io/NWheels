@@ -11,6 +11,7 @@ using Xunit;
 using NWheels.Microservices.Runtime;
 using NWheels.Kernel.Api.Injection;
 using NWheels.Microservices.Api.Exceptions;
+using NWheels.Kernel.Runtime.Injection;
 
 namespace NWheels.Microservices.UnitTests.Runtime
 {
@@ -248,7 +249,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
         public class BootFeatureTestModuleLoader : DefaultModuleLoader
         {
             public BootFeatureTestModuleLoader(IBootConfiguration bootConfig) 
-                : base(bootConfig)
+                : base(bootConfig, CreateEmptyBootComponentsContainer())
             {
             }
 
@@ -276,6 +277,13 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 }
 
                 throw new Exception($"Unexpected mock module name: {moduleConfig.ModuleName}");
+            }
+            
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static IComponentContainer CreateEmptyBootComponentsContainer()
+            {
+                return new ComponentContainerBuilder().CreateComponentContainer();
             }
         }
 

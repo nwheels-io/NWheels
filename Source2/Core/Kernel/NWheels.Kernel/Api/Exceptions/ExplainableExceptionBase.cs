@@ -151,14 +151,7 @@ namespace NWheels.Kernel.Api.Exceptions
                     string.Join(_s_messagsNextParamSeparator, keyValueStrings);
             }
 
-            if (InnerException != null)
-            {
-                return messsageText + _s_messagsInnerExceptionSeparator + InnerException.Message + '}';
-            }
-            else
-            {
-                return messsageText;
-            }
+            return messsageText;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -207,6 +200,5 @@ namespace NWheels.Kernel.Api.Exceptions
         private static readonly UrlEncoder _s_urlEncoder = UrlEncoder.Default;
         private static readonly string _s_messagsFirstParamSeparator = ": ";
         private static readonly string _s_messagsNextParamSeparator = ", ";
-        private static readonly string _s_messagsInnerExceptionSeparator = " {";
     }
 }

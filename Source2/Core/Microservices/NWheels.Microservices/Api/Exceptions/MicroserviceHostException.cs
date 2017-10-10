@@ -45,10 +45,22 @@ namespace NWheels.Microservices.Api.Exceptions
 
         protected override IEnumerable<KeyValuePair<string, string>> BuildKeyValuePairs()
         {
-            yield return new KeyValuePair<string, string>(_s_stringState, State.ToString());
-            yield return new KeyValuePair<string, string>(_s_stringRequiredState, RequiredState.ToString());
-            yield return new KeyValuePair<string, string>(_s_stringFeatureLoaderType, FeatureLoaderType?.FriendlyName());
-            yield return new KeyValuePair<string, string>(_s_stringFeatureLoaderPhase, FeatureLoaderPhase);
+            if (State.HasValue)
+            {
+                yield return new KeyValuePair<string, string>(_s_stringState, State.ToString());
+            }
+            if (RequiredState.HasValue)
+            {
+                yield return new KeyValuePair<string, string>(_s_stringRequiredState, RequiredState.ToString());
+            }
+            if (FeatureLoaderType != null)
+            {
+                yield return new KeyValuePair<string, string>(_s_stringFeatureLoaderType, FeatureLoaderType?.FriendlyName());
+            }
+            if (!string.IsNullOrEmpty(FeatureLoaderPhase))
+            {
+                yield return new KeyValuePair<string, string>(_s_stringFeatureLoaderPhase, FeatureLoaderPhase);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -108,6 +120,7 @@ namespace NWheels.Microservices.Api.Exceptions
         {
             return new MicroserviceHostException(
                 reason: _s_stringFeatureLoaderFailed,
+                featureLoaderType: loaderType,
                 featureLoaderPhase: phase,
                 innerException: error);
         }

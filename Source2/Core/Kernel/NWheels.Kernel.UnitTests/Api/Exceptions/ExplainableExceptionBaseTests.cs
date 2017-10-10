@@ -222,10 +222,10 @@ namespace NWheels.Kernel.UnitTests.Api.Exceptions
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Theory]
-        [InlineData("TestReason", null, "Test reason {Object reference not set to an instance of an object.}")]
-        [InlineData("TestReason", "K1,V1", "Test reason: K1=V1 {Object reference not set to an instance of an object.}")]
-        [InlineData("TestReason", "K1,V1,K2,V2", "Test reason: K1=V1, K2=V2 {Object reference not set to an instance of an object.}")]
-        public void InnerException_IncludedInMessage(string reason, string keyValues, string expectedMessage)
+        [InlineData("TestReason", null, "Test reason")]
+        [InlineData("TestReason", "K1,V1", "Test reason: K1=V1")]
+        [InlineData("TestReason", "K1,V1,K2,V2", "Test reason: K1=V1, K2=V2")]
+        public void InnerException_NotIncludedInMessage(string reason, string keyValues, string expectedMessage)
         {
             //-- arrange
 

@@ -344,6 +344,27 @@ namespace NWheels.Microservices.Runtime
             IEnumerable<IFeatureLoader> featureLoaders,
             Func<IExecutionPathActivity> logPhase,
             Func<Type, IExecutionPathActivity> logFeature,
+            Action<IFeatureLoader> action)
+        {
+            logPhase().RunActivityOrThrow(phaseActivity => {
+                foreach (var feature in featureLoaders)
+                {
+                    var featureActivity = logFeature(feature.GetType());
+
+                    if (!featureActivity.RunActivityOrCatch(() => action(feature), out Exception error))
+                    {
+                        throw Logger.FeatureLoaderFailed(feature.GetType(), phase: phaseActivity.Text, error: error);
+                    }
+                }
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected void ExecuteFeatureLoaderPhase(
+            IEnumerable<IFeatureLoader> featureLoaders,
+            Func<IExecutionPathActivity> logPhase,
+            Func<Type, IExecutionPathActivity> logFeature,
             Action<IFeatureLoader, IComponentContainerBuilder> action)
         {
             logPhase().RunActivityOrThrow(phaseActivity => {
@@ -464,7 +485,7 @@ namespace NWheels.Microservices.Runtime
 
                 ExecuteFeatureLoaderPhase(
                     FeatureLoaders, Logger.FeaturesContributingConfiguration, Logger.FeatureContributingConfiguration,
-                    (feature, newComponents) => feature.ContributeConfiguration(this.ModuleComponents));
+                    (feature) => feature.ContributeConfiguration(this.ModuleComponents));
 
                 ExecuteFeatureLoaderPhaseExtensions(FeatureLoaders, extension => extension.BeforeContributeComponents);
 
