@@ -12,11 +12,6 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <DebugType>Full</DebugType>
-    <DebugSymbols>True</DebugSymbols>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />

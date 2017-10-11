@@ -1,5 +1,6 @@
 param (
-    [string]$subFolder = ""
+    [string]$subFolder = "",
+    [switch]$noBuild
 )
 
 $scriptPath = $MyInvocation.MyCommand.Path
@@ -21,8 +22,14 @@ New-Item -ItemType Directory -Force -Path $topDir\TestResults | Out-Null
 
 Get-ChildItem -Path $topDir -Directory -Recurse -Include *.UnitTests,*.IntegrationTests,*.SystemApiTests,*.SystemUITests,*.Tests | Foreach { 
     echo --- "Running test project" $_.fullName ---;     
+
+    if (!$noBuild) {
+        & dotnet build $_.fullname --no-incremental -c Debug -p:DebugType=Full -p:DebugSymbols=True
+    }
+    
     $dotnetArgs = '"-targetargs:test ' + $_.fullname + ' --no-build --no-restore -c Debug --filter ""(Purpose!=ManualTest)&(Purpose!=StressLoadTest)"""';
     & $scriptDir\Installed\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:dotnet.exe $dotnetArgs -oldStyle -register:user -filter:"+[NWheels.*]* -[*.*Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -output:$topDir\TestResults\CoverageResults.xml -mergeoutput -returntargetcode:1000
+
     if ($LastExitCode -ne 0) { $testRunStatus = "FAIL" }
 }
 
