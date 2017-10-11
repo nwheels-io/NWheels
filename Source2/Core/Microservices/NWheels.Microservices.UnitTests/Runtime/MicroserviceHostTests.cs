@@ -20,11 +20,11 @@ namespace NWheels.Microservices.UnitTests.Runtime
         {
             //-- arrange
 
-            var featureLoadersLog = new TestFeatureLoaderLog();
+            var bootLog = new TestLog();
             var host = new MicroserviceHostBuilder("Test")
                 .UseBootComponents(builder => {
                     builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
-                    builder.RegisterComponentInstance(featureLoadersLog);
+                    builder.RegisterComponentInstance(bootLog);
                 })
                 .UseMicroserviceXml(XElement.Parse(@"
                     <microservice>
@@ -42,6 +42,8 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 "))
                 .BuildHost();
 
+            host.CurrentStateChanged += (sender, args) => bootLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+
             //-- act
 
             host.Configure(CancellationToken.None);
@@ -50,8 +52,10 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
             host.CurrentState.Should().Be(MicroserviceState.Configured);
 
-            featureLoadersLog.Messages.Should().Equal(
-                #region Expected log messages
+            bootLog.Messages.Should().Equal(
+            #region Expected log messages
+                // state change -> Configuring
+                "MicroserviceHost:CurrentStateChanged->Configuring",
                 // step 1: feature loaders are instantiated
                 "FrameworkFeatureOne:.ctor",        // Default from Kernel
                 "FrameworkFeatureTwo:.ctor",        // FX2 from FxM1
@@ -121,7 +125,9 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 "ApplicationFeatureThree:ContributeAdapterComponents",
                 "CustomizationFeatureOne:ContributeAdapterComponents",
                 "CustomizationFeatureTwo:ContributeAdapterComponents",
-                "CustomizationFeatureThree:ContributeAdapterComponents"
+                "CustomizationFeatureThree:ContributeAdapterComponents",
+                // state change -> Configured
+                "MicroserviceHost:CurrentStateChanged->Configured"
                 #endregion
             );
         }
@@ -133,11 +139,11 @@ namespace NWheels.Microservices.UnitTests.Runtime
         {
             //-- arrange
 
-            var featureLoadersLog = new TestFeatureLoaderLog();
+            var bootLog = new TestLog();
             var host = new MicroserviceHostBuilder("Test")
                 .UseBootComponents(builder => {
                     builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
-                    builder.RegisterComponentInstance(featureLoadersLog);
+                    builder.RegisterComponentInstance(bootLog);
                 })
                 .UseMicroserviceXml(XElement.Parse(@"
                     <microservice>
@@ -156,9 +162,13 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 .BuildHost();
 
             host.CurrentStateChanged += (sender, args) => {
-                if (host.CurrentState == MicroserviceState.Configured)
+                if (host.CurrentState <= MicroserviceState.Configured)
                 {
-                    featureLoadersLog.Clear();
+                    bootLog.Clear();
+                }
+                else
+                {
+                    bootLog.Add(host, $"CurrentStateChanged:{host.CurrentState}");
                 }
             };
 
@@ -170,8 +180,10 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
             host.CurrentState.Should().Be(MicroserviceState.CompiledStopped);
 
-            featureLoadersLog.Messages.Should().Equal(
+            bootLog.Messages.Should().Equal(
                 #region Expected log messages
+                // state change -> Compiling
+                "MicroserviceHost:CurrentStateChanged:Compiling",
                 // step pre-6: BeforeCompileComponents is invoked on feature loader phase extensions
                 // this only applies to feature loaders that have phase extension
                 "FrameworkFeatureTwoPhaseExtension:BeforeCompileComponents",
@@ -206,7 +218,9 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 // this only applies to feature loaders that have phase extension
                 "FrameworkFeatureTwoPhaseExtension:AfterContributeCompiledComponents",
                 "ApplicationFeatureTwoPhaseExtension:AfterContributeCompiledComponents",
-                "CustomizationFeatureTwoPhaseExtension:AfterContributeCompiledComponents"
+                "CustomizationFeatureTwoPhaseExtension:AfterContributeCompiledComponents",
+                // state change -> CompiledStopped
+                "MicroserviceHost:CurrentStateChanged:CompiledStopped" 
                 #endregion
             );
         }
@@ -218,13 +232,13 @@ namespace NWheels.Microservices.UnitTests.Runtime
         {
             //-- arrange
 
-            var testLog = new TestFeatureLoaderLog();
+            var bootLog = new TestLog();
             var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
                 .UseBootComponents(builder => {
                     builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
-                    builder.RegisterComponentInstance(testLog);
+                    builder.RegisterComponentInstance(bootLog);
 
-                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestFeatureLoaderLog>(builder, testLog);
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, bootLog);
                     FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
                     FeatureWillContributeLifecycleComponent<FrameworkFeatureTwo, FrameworkComponentTwo>(builder);
                     FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
@@ -266,6 +280,400 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 typeof(CustomizationComponentOne),
                 typeof(CustomizationComponentTwo)
             });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void StartFromSource_NotInCluster_GoesIntoActiveState()
+        {
+            //-- arrange
+
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1'><feature name='FX2'/></module>
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1'><feature name='A2'/></module>
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1'><feature name='C2'/></module>
+                        </customization-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureTwo, FrameworkComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureTwo, ApplicationComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureOne, CustomizationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureTwo, CustomizationComponentTwo>(builder);
+                })
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+
+            //-- act
+
+            host.Start(CancellationToken.None);
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.Active);
+
+            runLog.Messages.Should().Equal(
+                #region expected log messages
+                "MicroserviceHost:CurrentStateChanged->Configuring",
+                "MicroserviceHost:CurrentStateChanged->Configured",
+                "MicroserviceHost:CurrentStateChanged->Compiling",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped",
+                "MicroserviceHost:CurrentStateChanged->Loading",
+                // step 0: lifecycle components are instantiated
+                "FrameworkComponentOne:.ctor",
+                "FrameworkComponentTwo:.ctor",
+                "ApplicationComponentOne:.ctor",
+                "ApplicationComponentTwo:.ctor",
+                "CustomizationComponentOne:.ctor",
+                "CustomizationComponentTwo:.ctor",
+                // step 1: MicroserviceLoading
+                "FrameworkComponentOne:MicroserviceLoading",
+                "FrameworkComponentTwo:MicroserviceLoading",
+                "ApplicationComponentOne:MicroserviceLoading",
+                "ApplicationComponentTwo:MicroserviceLoading",
+                "CustomizationComponentOne:MicroserviceLoading",
+                "CustomizationComponentTwo:MicroserviceLoading",
+                // step 2: Load
+                "FrameworkComponentOne:Load",
+                "FrameworkComponentTwo:Load",
+                "ApplicationComponentOne:Load",
+                "ApplicationComponentTwo:Load",
+                "CustomizationComponentOne:Load",
+                "CustomizationComponentTwo:Load",
+                // step 3: MicroserviceLoaded
+                "FrameworkComponentOne:MicroserviceLoaded",
+                "FrameworkComponentTwo:MicroserviceLoaded",
+                "ApplicationComponentOne:MicroserviceLoaded",
+                "ApplicationComponentTwo:MicroserviceLoaded",
+                "CustomizationComponentOne:MicroserviceLoaded",
+                "CustomizationComponentTwo:MicroserviceLoaded",
+                // state changed -> Standby -> Activating
+                "MicroserviceHost:CurrentStateChanged->Standby",
+                "MicroserviceHost:CurrentStateChanged->Activating",
+                // step 4: MicroserviceActivating
+                "FrameworkComponentOne:MicroserviceActivating",
+                "FrameworkComponentTwo:MicroserviceActivating",
+                "ApplicationComponentOne:MicroserviceActivating",
+                "ApplicationComponentTwo:MicroserviceActivating",
+                "CustomizationComponentOne:MicroserviceActivating",
+                "CustomizationComponentTwo:MicroserviceActivating",
+                // step 5: Activate
+                "FrameworkComponentOne:Activate",
+                "FrameworkComponentTwo:Activate",
+                "ApplicationComponentOne:Activate",
+                "ApplicationComponentTwo:Activate",
+                "CustomizationComponentOne:Activate",
+                "CustomizationComponentTwo:Activate",
+                // step 6: MicroserviceActivated
+                "FrameworkComponentOne:MicroserviceActivated",
+                "FrameworkComponentTwo:MicroserviceActivated",
+                "ApplicationComponentOne:MicroserviceActivated",
+                "ApplicationComponentTwo:MicroserviceActivated",
+                "CustomizationComponentOne:MicroserviceActivated",
+                "CustomizationComponentTwo:MicroserviceActivated",
+                // state changed -> Active
+                "MicroserviceHost:CurrentStateChanged->Active"
+                #endregion
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void StartFromSource_InCluster_GoesIntoStandbyState()
+        {
+            //-- arrange
+
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .Configure(bootConfig => {
+                    bootConfig.ClusterName = "C1";
+                })
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1'><feature name='FX2'/></module>
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1'><feature name='A2'/></module>
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1'><feature name='C2'/></module>
+                        </customization-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureTwo, FrameworkComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureTwo, ApplicationComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureOne, CustomizationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureTwo, CustomizationComponentTwo>(builder);
+                })
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+
+            //-- act
+
+            host.Start(CancellationToken.None);
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.Standby);
+
+            runLog.Messages.Should().Equal(
+                #region expected log messages
+                "MicroserviceHost:CurrentStateChanged->Configuring",
+                "MicroserviceHost:CurrentStateChanged->Configured",
+                "MicroserviceHost:CurrentStateChanged->Compiling",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped",
+                "MicroserviceHost:CurrentStateChanged->Loading",
+                // step 0: lifecycle components are instantiated
+                "FrameworkComponentOne:.ctor",
+                "FrameworkComponentTwo:.ctor",
+                "ApplicationComponentOne:.ctor",
+                "ApplicationComponentTwo:.ctor",
+                "CustomizationComponentOne:.ctor",
+                "CustomizationComponentTwo:.ctor",
+                // step 1: MicroserviceLoading
+                "FrameworkComponentOne:MicroserviceLoading",
+                "FrameworkComponentTwo:MicroserviceLoading",
+                "ApplicationComponentOne:MicroserviceLoading",
+                "ApplicationComponentTwo:MicroserviceLoading",
+                "CustomizationComponentOne:MicroserviceLoading",
+                "CustomizationComponentTwo:MicroserviceLoading",
+                // step 2: Load
+                "FrameworkComponentOne:Load",
+                "FrameworkComponentTwo:Load",
+                "ApplicationComponentOne:Load",
+                "ApplicationComponentTwo:Load",
+                "CustomizationComponentOne:Load",
+                "CustomizationComponentTwo:Load",
+                // step 3: MicroserviceLoaded
+                "FrameworkComponentOne:MicroserviceLoaded",
+                "FrameworkComponentTwo:MicroserviceLoaded",
+                "ApplicationComponentOne:MicroserviceLoaded",
+                "ApplicationComponentTwo:MicroserviceLoaded",
+                "CustomizationComponentOne:MicroserviceLoaded",
+                "CustomizationComponentTwo:MicroserviceLoaded",
+                // state changed -> Standby
+                "MicroserviceHost:CurrentStateChanged->Standby"
+                #endregion
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Stop_FromActive()
+        {
+            //-- arrange
+
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1'><feature name='FX2'/></module>
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1'><feature name='A2'/></module>
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1'><feature name='C2'/></module>
+                        </customization-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureTwo, FrameworkComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureTwo, ApplicationComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureOne, CustomizationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureTwo, CustomizationComponentTwo>(builder);
+                })
+                .BuildHost();
+
+            host.Start(CancellationToken.None);
+
+            runLog.Clear();
+            host.CurrentStateChanged += (sender, args) => runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+
+            //-- act
+
+            var stopped = host.Stop(TimeSpan.FromSeconds(1));
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.CompiledStopped);
+
+            runLog.Messages.Should().Equal(
+                #region expected log messages
+                // state changed -> Deactivating
+                "MicroserviceHost:CurrentStateChanged->Deactivating",
+                // step 1: MicroserviceMaybeDeactivating
+                "CustomizationComponentTwo:MicroserviceMaybeDeactivating",
+                "CustomizationComponentOne:MicroserviceMaybeDeactivating",
+                "ApplicationComponentTwo:MicroserviceMaybeDeactivating",
+                "ApplicationComponentOne:MicroserviceMaybeDeactivating",
+                "FrameworkComponentTwo:MicroserviceMaybeDeactivating",
+                "FrameworkComponentOne:MicroserviceMaybeDeactivating",
+                // step 2: MayDeactivate
+                "CustomizationComponentTwo:MayDeactivate",
+                "CustomizationComponentOne:MayDeactivate",
+                "ApplicationComponentTwo:MayDeactivate",
+                "ApplicationComponentOne:MayDeactivate",
+                "FrameworkComponentTwo:MayDeactivate",
+                "FrameworkComponentOne:MayDeactivate",
+                // step 3: MicroserviceMaybeDeactivated
+                "CustomizationComponentTwo:MicroserviceMaybeDeactivated",
+                "CustomizationComponentOne:MicroserviceMaybeDeactivated",
+                "ApplicationComponentTwo:MicroserviceMaybeDeactivated",
+                "ApplicationComponentOne:MicroserviceMaybeDeactivated",
+                "FrameworkComponentTwo:MicroserviceMaybeDeactivated",
+                "FrameworkComponentOne:MicroserviceMaybeDeactivated",
+                // state changed -> Standby -> Unloading
+                "MicroserviceHost:CurrentStateChanged->Standby",
+                "MicroserviceHost:CurrentStateChanged->Unloading",
+                // step 4: MicroserviceMaybeUnloading
+                "CustomizationComponentTwo:MicroserviceMaybeUnloading",
+                "CustomizationComponentOne:MicroserviceMaybeUnloading",
+                "ApplicationComponentTwo:MicroserviceMaybeUnloading",
+                "ApplicationComponentOne:MicroserviceMaybeUnloading",
+                "FrameworkComponentTwo:MicroserviceMaybeUnloading",
+                "FrameworkComponentOne:MicroserviceMaybeUnloading",
+                // step 5: MayUnload
+                "CustomizationComponentTwo:MayUnload",
+                "CustomizationComponentOne:MayUnload",
+                "ApplicationComponentTwo:MayUnload",
+                "ApplicationComponentOne:MayUnload",
+                "FrameworkComponentTwo:MayUnload",
+                "FrameworkComponentOne:MayUnload",
+                // step 3: MicroserviceMaybeUnloaded
+                "CustomizationComponentTwo:MicroserviceMaybeUnloaded",
+                "CustomizationComponentOne:MicroserviceMaybeUnloaded",
+                "ApplicationComponentTwo:MicroserviceMaybeUnloaded",
+                "ApplicationComponentOne:MicroserviceMaybeUnloaded",
+                "FrameworkComponentTwo:MicroserviceMaybeUnloaded",
+                "FrameworkComponentOne:MicroserviceMaybeUnloaded",
+                // state changed -> CompiledStopped
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped"
+                #endregion
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Stop_FromStandby()
+        {
+            //-- arrange
+
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .Configure(bootConfig => bootConfig.ClusterName = "C1")
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1'><feature name='FX2'/></module>
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1'><feature name='A2'/></module>
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1'><feature name='C2'/></module>
+                        </customization-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureTwo, FrameworkComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureTwo, ApplicationComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureOne, CustomizationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureTwo, CustomizationComponentTwo>(builder);
+                })
+                .BuildHost();
+
+            host.Start(CancellationToken.None);
+            host.CurrentState.Should().Be(MicroserviceState.Standby);
+
+            runLog.Clear();
+            host.CurrentStateChanged += (sender, args) => runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+
+            //-- act
+
+            var stopped = host.Stop(TimeSpan.FromSeconds(1));
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.CompiledStopped);
+
+            runLog.Messages.Should().Equal(
+                #region expected log messages
+                "MicroserviceHost:CurrentStateChanged->Unloading",
+                // step 1: MicroserviceMaybeUnloading
+                "CustomizationComponentTwo:MicroserviceMaybeUnloading",
+                "CustomizationComponentOne:MicroserviceMaybeUnloading",
+                "ApplicationComponentTwo:MicroserviceMaybeUnloading",
+                "ApplicationComponentOne:MicroserviceMaybeUnloading",
+                "FrameworkComponentTwo:MicroserviceMaybeUnloading",
+                "FrameworkComponentOne:MicroserviceMaybeUnloading",
+                // step 2: MayUnload
+                "CustomizationComponentTwo:MayUnload",
+                "CustomizationComponentOne:MayUnload",
+                "ApplicationComponentTwo:MayUnload",
+                "ApplicationComponentOne:MayUnload",
+                "FrameworkComponentTwo:MayUnload",
+                "FrameworkComponentOne:MayUnload",
+                // step 3: MicroserviceMaybeUnloaded
+                "CustomizationComponentTwo:MicroserviceMaybeUnloaded",
+                "CustomizationComponentOne:MicroserviceMaybeUnloaded",
+                "ApplicationComponentTwo:MicroserviceMaybeUnloaded",
+                "ApplicationComponentOne:MicroserviceMaybeUnloaded",
+                "FrameworkComponentTwo:MicroserviceMaybeUnloaded",
+                "FrameworkComponentOne:MicroserviceMaybeUnloaded",
+                // state changed -> CompiledStopped
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped"
+                #endregion
+            );
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -330,7 +738,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class TestFeatureLoaderLog
+        public class TestLog
         {
             private readonly List<string> _messages = new List<string>();
             public void Add(object source, string message)
@@ -354,13 +762,13 @@ namespace NWheels.Microservices.UnitTests.Runtime
         
         public abstract class TestFeatureLoader : IFeatureLoader
         {
-            private TestFeatureLoaderLog _log;
+            private TestLog _log;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
             
             protected TestFeatureLoader(IComponentContainer bootComponents)
             {
-                _log = bootComponents.Resolve<TestFeatureLoaderLog>();
+                _log = bootComponents.Resolve<TestLog>();
                 _log.Add(this, ".ctor");
             }
             public virtual void ContributeConfigSections(IComponentContainerBuilder newComponents)
@@ -432,11 +840,11 @@ namespace NWheels.Microservices.UnitTests.Runtime
         public abstract class TestFeatureLoaderPhaseExtension : IFeatureLoaderPhaseExtension
         {
             private readonly TestFeatureLoader _featureLoader;
-            private readonly TestFeatureLoaderLog _log;
+            private readonly TestLog _log;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
             
-            public TestFeatureLoaderPhaseExtension(TestFeatureLoader featureLoader, TestFeatureLoaderLog log)
+            public TestFeatureLoaderPhaseExtension(TestFeatureLoader featureLoader, TestLog log)
             {
                 _featureLoader = featureLoader;
                 _log = log;
@@ -525,11 +933,11 @@ namespace NWheels.Microservices.UnitTests.Runtime
             }
             protected override TestFeatureLoaderPhaseExtension CreatePhaseExtension(IComponentContainer bootComponents)
             {
-                return new FrameworkFeatureTwoPhaseExtension(this, bootComponents.Resolve<TestFeatureLoaderLog>());
+                return new FrameworkFeatureTwoPhaseExtension(this, bootComponents.Resolve<TestLog>());
             }
             private class FrameworkFeatureTwoPhaseExtension : TestFeatureLoaderPhaseExtension
             {
-                public FrameworkFeatureTwoPhaseExtension(TestFeatureLoader featureLoader, TestFeatureLoaderLog log) 
+                public FrameworkFeatureTwoPhaseExtension(TestFeatureLoader featureLoader, TestLog log) 
                     : base(featureLoader, log)
                 {
                 }
@@ -581,11 +989,11 @@ namespace NWheels.Microservices.UnitTests.Runtime
             }
             protected override TestFeatureLoaderPhaseExtension CreatePhaseExtension(IComponentContainer bootComponents)
             {
-                return new ApplicationFeatureTwoPhaseExtension(this, bootComponents.Resolve<TestFeatureLoaderLog>());
+                return new ApplicationFeatureTwoPhaseExtension(this, bootComponents.Resolve<TestLog>());
             }
             private class ApplicationFeatureTwoPhaseExtension : TestFeatureLoaderPhaseExtension
             {
-                public ApplicationFeatureTwoPhaseExtension(TestFeatureLoader featureLoader, TestFeatureLoaderLog log) 
+                public ApplicationFeatureTwoPhaseExtension(TestFeatureLoader featureLoader, TestLog log) 
                     : base(featureLoader, log)
                 {
                 }
@@ -637,11 +1045,11 @@ namespace NWheels.Microservices.UnitTests.Runtime
             }
             protected override TestFeatureLoaderPhaseExtension CreatePhaseExtension(IComponentContainer bootComponents)
             {
-                return new CustomizationFeatureTwoPhaseExtension(this, bootComponents.Resolve<TestFeatureLoaderLog>());
+                return new CustomizationFeatureTwoPhaseExtension(this, bootComponents.Resolve<TestLog>());
             }
             private class CustomizationFeatureTwoPhaseExtension : TestFeatureLoaderPhaseExtension
             {
-                public CustomizationFeatureTwoPhaseExtension(TestFeatureLoader featureLoader, TestFeatureLoaderLog log) 
+                public CustomizationFeatureTwoPhaseExtension(TestFeatureLoader featureLoader, TestLog log) 
                     : base(featureLoader, log)
                 {
                 }
@@ -667,11 +1075,11 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
         public abstract class TestLifecycleComponent : LifecycleComponentBase
         {
-            private readonly TestFeatureLoaderLog _log;
+            private readonly TestLog _log;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected TestLifecycleComponent(TestFeatureLoaderLog log)
+            protected TestLifecycleComponent(TestLog log)
             {
                 _log = log;
             }
@@ -732,38 +1140,44 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
         public class FrameworkComponentOne : TestLifecycleComponent
         {
-            public FrameworkComponentOne(TestFeatureLoaderLog log) : base(log)
+            public FrameworkComponentOne(TestLog log) : base(log)
             {
+                log.Add(this, ".ctor");
             }
         }
         public class FrameworkComponentTwo : TestLifecycleComponent
         {
-            public FrameworkComponentTwo(TestFeatureLoaderLog log) : base(log)
+            public FrameworkComponentTwo(TestLog log) : base(log)
             {
+                log.Add(this, ".ctor");
             }
         }
         public class ApplicationComponentOne : TestLifecycleComponent
         {
-            public ApplicationComponentOne(TestFeatureLoaderLog log) : base(log)
+            public ApplicationComponentOne(TestLog log) : base(log)
             {
+                log.Add(this, ".ctor");
             }
         }
         public class ApplicationComponentTwo : TestLifecycleComponent
         {
-            public ApplicationComponentTwo(TestFeatureLoaderLog log) : base(log)
+            public ApplicationComponentTwo(TestLog log) : base(log)
             {
+                log.Add(this, ".ctor");
             }
         }
         public class CustomizationComponentOne : TestLifecycleComponent
         {
-            public CustomizationComponentOne(TestFeatureLoaderLog log) : base(log)
+            public CustomizationComponentOne(TestLog log) : base(log)
             {
+                log.Add(this, ".ctor");
             }
         }
         public class CustomizationComponentTwo : TestLifecycleComponent
         {
-            public CustomizationComponentTwo(TestFeatureLoaderLog log) : base(log)
+            public CustomizationComponentTwo(TestLog log) : base(log)
             {
+                log.Add(this, ".ctor");
             }
         }
     }

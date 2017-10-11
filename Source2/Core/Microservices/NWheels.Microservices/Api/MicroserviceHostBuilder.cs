@@ -23,6 +23,14 @@ namespace NWheels.Microservices.Api
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public MicroserviceHostBuilder Configure(Action<MutableBootConfiguration> configurator)
+        {
+            configurator(BootConfig);
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public MicroserviceHostBuilder UseFrameworkFeature<TFeature>()
             where TFeature : class, IFeatureLoader, new()
         {

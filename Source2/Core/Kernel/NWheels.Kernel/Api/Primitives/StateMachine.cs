@@ -83,26 +83,13 @@ namespace NWheels.Kernel.Api.Primitives
 
         public void ReceiveTrigger(TTrigger trigger, object context)
         {
-            var stateChanged = false;
+            StateMachineFeedbackEventArgs<TState, TTrigger> eventArgs;
 
-            try
+            do
             {
-                StateMachineFeedbackEventArgs<TState, TTrigger> eventArgs;
-
-                do
-                {
-                    eventArgs = PerformTrigger(trigger, context);
-                    trigger = eventArgs.Feedback;
-                    stateChanged = true;
-                } while (eventArgs.HasFeedback);
-            }
-            finally
-            {
-                if (stateChanged)
-                {
-                    RaiseCurrentStateChanged();
-                }
-            }
+                eventArgs = PerformTrigger(trigger, context);
+                trigger = eventArgs.Feedback;
+            } while (eventArgs.HasFeedback);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -160,7 +147,15 @@ namespace NWheels.Kernel.Api.Primitives
             if (_states.TryGetValue(transition.DestinationStateValue, out MachineState destinationState))
             {
                 _currentState = destinationState;
-                _currentState.Enter(eventArgs);
+
+                try
+                {
+                    RaiseCurrentStateChanged();
+                }
+                finally
+                {
+                    _currentState.Enter(eventArgs);
+                }
             }
             else
             {

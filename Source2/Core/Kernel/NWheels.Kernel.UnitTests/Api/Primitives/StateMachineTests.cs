@@ -103,8 +103,43 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
                 "ThinkingEntered(to[Thinking])",
                 "ThinkingLeaving(from[Thinking]to[AcquiringForks]by[Hungry])",
                 "TransitioningFromThinkingToAcquiringForks(from[Thinking]to[AcquiringForks]by[Hungry])",
-                "AcquiringForksEntered(from[Thinking]to[AcquiringForks]by[Hungry])",
-                "CurrentStateChanged:AcquiringForks"
+                "CurrentStateChanged:AcquiringForks", // <-- CurrentStateChanged is raised right before invoking new state's Entered callback
+                "AcquiringForksEntered(from[Thinking]to[AcquiringForks]by[Hungry])"
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void TransitionState_CurrentStateChangedThrows_StateEntered()
+        {
+            //-- Arrange
+
+            var codeBehind = new PhilisopherCodeBehindWithEvents();
+            var machine = StateMachine.CreateFrom(codeBehind);
+            var exception = new Exception("Test");
+
+            machine.CurrentStateChanged += (sender, args) => {
+                codeBehind.AddLog($"CurrentStateChanged:{machine.CurrentState}:THROWING!");
+                throw exception;
+            };
+
+            //-- Act
+
+            Action act = () => {
+                machine.ReceiveTrigger(PhilosopherTrigger.Hungry);
+            };
+
+            act.ShouldThrow<Exception>().Which.Should().BeSameAs(exception);
+
+            //-- Assert
+
+            codeBehind.TakeLog().Should().Equal(new[] {
+                "ThinkingEntered(to[Thinking])",
+                "ThinkingLeaving(from[Thinking]to[AcquiringForks]by[Hungry])",
+                "TransitioningFromThinkingToAcquiringForks(from[Thinking]to[AcquiringForks]by[Hungry])",
+                "CurrentStateChanged:AcquiringForks:THROWING!",                     // <-- CurrentStateChanged throws an exception
+                "AcquiringForksEntered(from[Thinking]to[AcquiringForks]by[Hungry])" // <-- AcquiringForksEntered is invoked regardless of the exception
             });
         }
 
@@ -192,8 +227,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
         {
             //-- Arrange
 
-            var codeBehind = new PhilisopherCodeBehindWithEvents()
-            {
+            var codeBehind = new PhilisopherCodeBehindWithEvents() {
                 ThrowFromTransitioningFromAcquiringForksToEating = true
             };
 
@@ -282,6 +316,105 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
                 "TransitioningFromEatingToThinking(from[Eating]to[Thinking]by[Full])",
                 "ThinkingEntered(from[Eating]to[Thinking]by[Full])",
             });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void MultipleTransitionsByFeedback_CurrentStateChangedRaisedOnEveryChange()
+        {
+            //-- Arrange
+
+            var codeBehind = new PhilisopherCodeBehindWithEvents() {
+                FeedBackFromFromAcquiringForks = true,
+                FeedBackFromEating = true
+            };
+
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind);
+
+            machine.CurrentStateChanged += (sender, args) => {
+                codeBehind.AddLog($"CurrentStateChanged:{machine.CurrentState}");
+            };
+
+            codeBehind.TakeLog();
+
+            //-- Act
+
+            machine.ReceiveTrigger(PhilosopherTrigger.Hungry); // will further transition by feedback -> AcquiringForks -> Eating -> Thinking
+
+            //-- Assert
+
+            machine.CurrentState.Should().Be(PhilosopherState.Thinking);
+            codeBehind.TakeLog().Should().Equal(
+                "ThinkingLeaving(from[Thinking]to[AcquiringForks]by[Hungry])",
+                "TransitioningFromThinkingToAcquiringForks(from[Thinking]to[AcquiringForks]by[Hungry])",
+                // CurrentStateChanged -> AcquiringForks
+                "CurrentStateChanged:AcquiringForks",
+                "AcquiringForksEntered(from[Thinking]to[AcquiringForks]by[Hungry])",
+                "AcquiringForksLeaving(from[AcquiringForks]to[Eating]by[GotForks])",
+                "TransitioningFromAcquiringForksToEating(from[AcquiringForks]to[Eating]by[GotForks])",
+                // CurrentStateChanged -> Eating
+                "CurrentStateChanged:Eating",
+                "EatingEntered(from[AcquiringForks]to[Eating]by[GotForks])",
+                "EatingLeaving(from[Eating]to[Thinking]by[Full])",
+                "TransitioningFromEatingToThinking(from[Eating]to[Thinking]by[Full])",
+                // CurrentStateChanged -> Thinking
+                "CurrentStateChanged:Thinking",
+                "ThinkingEntered(from[Eating]to[Thinking]by[Full])"
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void MultipleTransitionsByFeedback_CurrentStateChangedThrows_StateEnteredThenReThrown()
+        {
+            //-- Arrange
+
+            var codeBehind = new PhilisopherCodeBehindWithEvents() {
+                FeedBackFromFromAcquiringForks = true,
+                FeedBackFromEating = true
+            };
+
+            var machine = new StateMachine<PhilosopherState, PhilosopherTrigger>(codeBehind);
+            var exception = new Exception("Test");
+
+            machine.CurrentStateChanged += (sender, args) => {
+                codeBehind.AddLog($"CurrentStateChanged:{machine.CurrentState}");
+                if (machine.CurrentState == PhilosopherState.Eating)
+                {
+                    codeBehind.AddLog($"CurrentStateChanged:THROWING!");
+                    throw exception;
+                }
+            };
+
+            codeBehind.TakeLog();
+
+            //-- Act
+
+            Action act = () => {
+                machine.ReceiveTrigger(PhilosopherTrigger.Hungry); // will throw while transitioning AcquiringForks -> Eating
+            };
+
+            act.ShouldThrow<Exception>().Which.Should().BeSameAs(exception);
+
+            //-- Assert
+
+            machine.CurrentState.Should().Be(PhilosopherState.Eating);
+            codeBehind.TakeLog().Should().Equal(
+                "ThinkingLeaving(from[Thinking]to[AcquiringForks]by[Hungry])",
+                "TransitioningFromThinkingToAcquiringForks(from[Thinking]to[AcquiringForks]by[Hungry])",
+                // CurrentStateChanged -> AcquiringForks
+                "CurrentStateChanged:AcquiringForks",
+                "AcquiringForksEntered(from[Thinking]to[AcquiringForks]by[Hungry])",
+                "AcquiringForksLeaving(from[AcquiringForks]to[Eating]by[GotForks])",
+                "TransitioningFromAcquiringForksToEating(from[AcquiringForks]to[Eating]by[GotForks])",
+                // CurrentStateChanged -> Eating
+                "CurrentStateChanged:Eating",
+                "CurrentStateChanged:THROWING!",
+                "EatingEntered(from[AcquiringForks]to[Eating]by[GotForks])" // <-- EatingEntered is invoked regardless of the exception
+                // further transitioning is aborted due to the exception
+            );
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -497,6 +630,7 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             public bool ThrowFromEatingLeaving { get; set; }
             public bool ThrowFromTransitioningFromEatingToThinking { get; set; }
             public bool FeedBackFromThinking { get; set; }
+            public bool FeedBackFromFromAcquiringForks { get; set; }
             public bool FeedBackFromEating { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -546,6 +680,11 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             private void AcquiringForksEntered(object sender, StateMachineFeedbackEventArgs<PhilosopherState, PhilosopherTrigger> e)
             {
                 LogAndThrow(ThrowFromAcquiringForksEntered, e);
+
+                if (FeedBackFromFromAcquiringForks)
+                {
+                    e.ReceiveFeedback(PhilosopherTrigger.GotForks);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
