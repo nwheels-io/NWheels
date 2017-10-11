@@ -10,13 +10,14 @@ using Xunit;
 using FluentAssertions;
 using System.Threading;
 using System.Xml.Linq;
+using NWheels.Microservices.Api.Exceptions;
 
 namespace NWheels.Microservices.UnitTests.Runtime
 {
     public class MicroserviceHostTests : TestBase.UnitTest
     {
         [Fact]
-        public void CanConfigure()
+        public void Configure_Success_ConfiguredState()
         {
             //-- arrange
 
@@ -53,7 +54,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             host.CurrentState.Should().Be(MicroserviceState.Configured);
 
             bootLog.Messages.Should().Equal(
-            #region Expected log messages
+                #region Expected log messages
                 // state change -> Configuring
                 "MicroserviceHost:CurrentStateChanged->Configuring",
                 // step 1: feature loaders are instantiated
@@ -135,7 +136,118 @@ namespace NWheels.Microservices.UnitTests.Runtime
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void CanCompile()
+        public void Configure_FeatureLoaderFailed_FaultedState()
+        {
+            //-- arrange
+
+            var rootCauseException = new FailureTestException();
+            var bootLog = new TestLog();
+            var host = new MicroserviceHostBuilder("Test")
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                    FeatureWillDo<ApplicationFeatureOne>(builder, feature => feature.OnContributeComponents += (cc, cb) => throw rootCauseException);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1'><feature name='FX2'/><feature name='FX3'/></module>
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1'><feature name='A2'/></module>
+                            <module assembly='AppM2'><feature name='A3'/></module>
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1'><feature name='C2'/><feature name='C3'/></module>
+                        </customization-modules>
+                    </microservice>
+                "))
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => bootLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+
+            //-- act
+
+            Action act = () => {
+                host.Configure(CancellationToken.None);
+            };
+
+            var hostException = act.ShouldThrow<MicroserviceHostException>().Which;
+            var featureException = hostException.InnerException as MicroserviceHostException;
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.Faulted);
+            hostException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFaulted));
+            hostException.InnerException.Should().BeOfType<MicroserviceHostException>().Which.Reason.Should().Be(nameof(MicroserviceHostException.FeatureLoaderFailed));
+            featureException.FeatureLoaderType.Should().Be(typeof(ApplicationFeatureOne));
+            featureException.FeatureLoaderPhase.Should().Be(nameof(IMicroserviceHostLogger.FeaturesContributingComponents));
+            featureException.InnerException.Should().BeSameAs(rootCauseException);
+
+            bootLog.Messages.Should().Equal(
+                #region Expected log messages
+                // state change -> Configuring
+                "MicroserviceHost:CurrentStateChanged->Configuring",
+                // step 1: feature loaders are instantiated
+                "FrameworkFeatureOne:.ctor",        // Default from Kernel
+                "FrameworkFeatureTwo:.ctor",        // FX2 from FxM1
+                "FrameworkFeatureThree:.ctor",      // FX3 from FxM1
+                "ApplicationFeatureOne:.ctor",      // Default from AppM1
+                "ApplicationFeatureTwo:.ctor",      // A2 from AppM1 
+                "ApplicationFeatureThree:.ctor",    // A3 from AppM2
+                "CustomizationFeatureOne:.ctor",    // C1 from CustM1
+                "CustomizationFeatureTwo:.ctor",    // C2 from CustM1
+                "CustomizationFeatureThree:.ctor",  // C3 from CustM1
+                // step pre-2: BeforeContributeConfigSections is invoked on feature loader phase extensions
+                // this only applies to feature loaders that have phase extension
+                "FrameworkFeatureTwoPhaseExtension:BeforeContributeConfigSections",
+                "ApplicationFeatureTwoPhaseExtension:BeforeContributeConfigSections",
+                "CustomizationFeatureTwoPhaseExtension:BeforeContributeConfigSections",
+                // step 2: ContributeConfigSections is invoked on feature loaders
+                "FrameworkFeatureOne:ContributeConfigSections",
+                "FrameworkFeatureTwo:ContributeConfigSections",
+                "FrameworkFeatureThree:ContributeConfigSections",
+                "ApplicationFeatureOne:ContributeConfigSections",
+                "ApplicationFeatureTwo:ContributeConfigSections",
+                "ApplicationFeatureThree:ContributeConfigSections",
+                "CustomizationFeatureOne:ContributeConfigSections",
+                "CustomizationFeatureTwo:ContributeConfigSections",
+                "CustomizationFeatureThree:ContributeConfigSections",
+                // step pre-3: BeforeContributeConfiguration is invoked on feature loader phase extensions
+                // this only applies to feature loaders that have phase extension
+                "FrameworkFeatureTwoPhaseExtension:BeforeContributeConfiguration",
+                "ApplicationFeatureTwoPhaseExtension:BeforeContributeConfiguration",
+                "CustomizationFeatureTwoPhaseExtension:BeforeContributeConfiguration",
+                // step 3: ContributeConfiguration is invoked on feature loaders
+                "FrameworkFeatureOne:ContributeConfiguration",
+                "FrameworkFeatureTwo:ContributeConfiguration",
+                "FrameworkFeatureThree:ContributeConfiguration",
+                "ApplicationFeatureOne:ContributeConfiguration",
+                "ApplicationFeatureTwo:ContributeConfiguration",
+                "ApplicationFeatureThree:ContributeConfiguration",
+                "CustomizationFeatureOne:ContributeConfiguration",
+                "CustomizationFeatureTwo:ContributeConfiguration",
+                "CustomizationFeatureThree:ContributeConfiguration",
+                // step pre-4: BeforeContributeComponents is invoked on feature loader phase extensions
+                // this only applies to feature loaders that have phase extension
+                "FrameworkFeatureTwoPhaseExtension:BeforeContributeComponents",
+                "ApplicationFeatureTwoPhaseExtension:BeforeContributeComponents",
+                "CustomizationFeatureTwoPhaseExtension:BeforeContributeComponents",
+                // step 3: ContributeComponents is invoked on feature loaders
+                "FrameworkFeatureOne:ContributeComponents",
+                "FrameworkFeatureTwo:ContributeComponents",
+                "FrameworkFeatureThree:ContributeComponents",
+                "ApplicationFeatureOne:ContributeComponents", // <-- will throw exception
+                // state change -> Faulted
+                "MicroserviceHost:CurrentStateChanged->Faulted"
+                #endregion
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Compile_Success_CompiledStoppedState()
         {
             //-- arrange
 
@@ -221,6 +333,87 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 "CustomizationFeatureTwoPhaseExtension:AfterContributeCompiledComponents",
                 // state change -> CompiledStopped
                 "MicroserviceHost:CurrentStateChanged:CompiledStopped" 
+                #endregion
+            );
+        }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Compile_FeatureLoaderFailed_FaultedState()
+        {
+            //-- arrange
+
+            var rootCauseException = new FailureTestException();
+            var bootLog = new TestLog();
+            var host = new MicroserviceHostBuilder("Test")
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                    FeatureWillDo<ApplicationFeatureOne>(builder, feature => feature.OnCompileComponents += (cb) => throw rootCauseException);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1'><feature name='FX2'/><feature name='FX3'/></module>
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1'><feature name='A2'/></module>
+                            <module assembly='AppM2'><feature name='A3'/></module>
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1'><feature name='C2'/><feature name='C3'/></module>
+                        </customization-modules>
+                    </microservice>
+                "))
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => {
+                if (host.CurrentState == MicroserviceState.Configured)
+                {
+                    bootLog.Clear();
+                }
+                else
+                {
+                    bootLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+                }
+            };
+
+            //-- act
+
+            Action act = () => {
+                host.Compile(CancellationToken.None);
+            };
+
+            var hostException = act.ShouldThrow<MicroserviceHostException>().Which;
+            var featureException = hostException.InnerException as MicroserviceHostException;
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.Faulted);
+            hostException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFaulted));
+            hostException.InnerException.Should().BeOfType<MicroserviceHostException>().Which.Reason.Should().Be(nameof(MicroserviceHostException.FeatureLoaderFailed));
+            featureException.FeatureLoaderType.Should().Be(typeof(ApplicationFeatureOne));
+            featureException.FeatureLoaderPhase.Should().Be(nameof(IMicroserviceHostLogger.FeaturesCompilingComponents));
+            featureException.InnerException.Should().BeSameAs(rootCauseException);
+
+            bootLog.Messages.Should().Equal(
+                #region Expected log messages
+                // state change -> Compiling
+                "MicroserviceHost:CurrentStateChanged->Compiling",
+                // step pre-6: BeforeCompileComponents is invoked on feature loader phase extensions
+                // this only applies to feature loaders that have phase extension
+                "FrameworkFeatureTwoPhaseExtension:BeforeCompileComponents",
+                "ApplicationFeatureTwoPhaseExtension:BeforeCompileComponents",
+                "CustomizationFeatureTwoPhaseExtension:BeforeCompileComponents",
+                // step 6: CompileComponents is invoked on feature loaders
+                "FrameworkFeatureOne:CompileComponents",
+                "FrameworkFeatureTwo:CompileComponents",
+                "FrameworkFeatureThree:CompileComponents",
+                "ApplicationFeatureOne:CompileComponents", // <-- will throw exception
+                // state change -> Faulted
+                "MicroserviceHost:CurrentStateChanged->Faulted"
                 #endregion
             );
         }
@@ -678,6 +871,14 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static void FeatureWillDo<TFeature>(IComponentContainerBuilder builder, Action<TFeature> action)
+            where TFeature : TestFeatureLoader
+        {
+            builder.RegisterComponentInstance(new FeatureLoaderInitializer<TFeature>(action));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static void FeatureWillContributeLifecycleComponent<TFeature, TComponent>(IComponentContainerBuilder builder)
             where TFeature : TestFeatureLoader
             where TComponent : TestLifecycleComponent
@@ -902,6 +1103,15 @@ namespace NWheels.Microservices.UnitTests.Runtime
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public delegate void FeatureLoaderInitializer<T>(T loader) where T : TestFeatureLoader;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class FailureTestException : Exception
+        {
+            public FailureTestException() : base("TEST-FAILURE")
+            {
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

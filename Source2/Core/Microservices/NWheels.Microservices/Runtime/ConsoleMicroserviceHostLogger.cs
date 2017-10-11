@@ -92,7 +92,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(Compiling));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(Compiling));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(Configuring));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(Configuring));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -136,7 +136,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(Deactivating));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(Deactivating));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -157,7 +157,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, $"{nameof(ExecutingFeatureLoaderPhaseExtension)}: {loaderType.FriendlyName()}, phase: {phase}");
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(ExecutingFeatureLoaderPhaseExtension));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -248,7 +248,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, $"{nameof(FeatureCompilingComponents)}: {loader.FriendlyName()}");
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(FeatureCompilingComponents));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -259,7 +259,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, $"{nameof(FeatureContributingAdapterComponents)}: {loader.FriendlyName()}");
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(FeatureContributingAdapterComponents));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -270,7 +270,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, $"{nameof(FeatureContributingCompiledComponents)}: {loader.FriendlyName()}");
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(FeatureContributingCompiledComponents));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -281,7 +281,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, $"{nameof(FeatureContributingComponents)}: {loader.FriendlyName()}");
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(FeatureContributingComponents));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -292,7 +292,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, $"{nameof(FeatureContributingConfigSections)}: {loader.FriendlyName()}");
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(FeatureContributingConfigSections));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -303,7 +303,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, $"{nameof(FeatureContributingConfiguration)}: {loader.FriendlyName()}");
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(FeatureContributingConfiguration));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -335,7 +335,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(FeaturesCompilingComponents));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(FeaturesCompilingComponents));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -346,7 +346,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(FeaturesContributingAdapterComponents));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(FeaturesContributingAdapterComponents));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -357,7 +357,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(FeaturesContributingCompiledComponents));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(FeaturesContributingCompiledComponents));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -368,7 +368,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(FeaturesContributingComponents));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(FeaturesContributingComponents));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -379,7 +379,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(FeaturesContributingConfigSections));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(FeaturesContributingConfigSections));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -390,7 +390,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(FeaturesContributingConfiguration));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(FeaturesContributingConfiguration));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -411,7 +411,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsActivate));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(LifecycleComponentsActivate));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -422,7 +422,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsLoad));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(LifecycleComponentsLoad));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -433,7 +433,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMayDeactivate));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(LifecycleComponentsMayDeactivate));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -444,7 +444,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMayUnload));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(LifecycleComponentsMayUnload));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -455,7 +455,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceActivated));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(LifecycleComponentsMicroserviceActivated));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -466,7 +466,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceActivating));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(LifecycleComponentsMicroserviceActivating));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -477,7 +477,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceLoaded));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(LifecycleComponentsMicroserviceLoaded));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -488,7 +488,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceLoading));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(LifecycleComponentsMicroserviceLoading));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -499,7 +499,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceMaybeDeactivated));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(LifecycleComponentsMicroserviceMaybeDeactivated));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -510,7 +510,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceMaybeDeactivating));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(LifecycleComponentsMicroserviceMaybeDeactivating));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -521,7 +521,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceMaybeUnloaded));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(LifecycleComponentsMicroserviceMaybeUnloaded));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -532,7 +532,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(LifecycleComponentsMicroserviceMaybeUnloading));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(LifecycleComponentsMicroserviceMaybeUnloading));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -563,7 +563,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(Loading));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(Loading));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -574,7 +574,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(LoadingLifecycleComponents));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(LoadingLifecycleComponents));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -645,7 +645,7 @@ namespace NWheels.Microservices.Runtime
             {
                 ColorConsole.Log(LogLevel.Verbose, nameof(Unloading));
             }
-            return new StubActivity(nameof(Activating));
+            return new StubActivity(nameof(Unloading));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
