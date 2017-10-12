@@ -169,7 +169,7 @@ namespace NWheels.Microservices.Runtime
         IExecutionPathActivity LifecycleComponentsMicroserviceMaybeUnloaded();
 
         [LogError]
-        void LifecycleComponentFailed(Type componentType, string lifecycleMethod, Exception error);
+        MicroserviceHostException LifecycleComponentFailed(Type componentType, string lifecycleMethod, Exception error);
 
         [LogInfo]
         void RunningInDaemonMode();

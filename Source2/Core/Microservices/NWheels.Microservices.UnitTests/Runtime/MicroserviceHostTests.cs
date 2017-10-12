@@ -17,6 +17,111 @@ namespace NWheels.Microservices.UnitTests.Runtime
     public class MicroserviceHostTests : TestBase.UnitTest
     {
         [Fact]
+        public void InitialState_Source()
+        {
+            //-- arrange
+            
+            var bootLog = new TestLog();
+            
+            //-- act
+            
+            var host = new MicroserviceHostBuilder("Test")
+                .UseBootComponents(builder => builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>())
+                .BuildHost();
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.Source);
+            host.GetBootComponents().Should().NotBeNull();
+            host.GetModuleComponents().Should().BeNull();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Dispose_TransitionedToDisposedState()
+        {
+            //-- arrange
+            
+            var bootLog = new TestLog();
+            var host = new MicroserviceHostBuilder("Test")
+                .UseBootComponents(builder => builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>())
+                .BuildHost();
+            
+            //-- act
+            
+            host.Dispose();
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.Disposed);
+            host.GetBootComponents().Should().NotBeNull();
+            host.GetModuleComponents().Should().BeNull();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Dispose_BootComponentsDisposed()
+        {
+            //-- arrange
+            
+            var bootLog = new TestLog();
+            var host = new MicroserviceHostBuilder("Test")
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentType<DisposableBootComponent>().SingleInstance();
+                })
+                .BuildHost();
+
+            var disposableComponent = host.GetBootComponents().Resolve<DisposableBootComponent>();
+            
+            //-- act
+
+            var wasDisposed0 = disposableComponent.WasDisposed;
+            
+            host.Dispose();
+
+            var wasDisposed1 = disposableComponent.WasDisposed;
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.Disposed);
+            host.GetBootComponents().Should().NotBeNull();
+            host.GetModuleComponents().Should().BeNull();
+
+            wasDisposed0.Should().BeFalse();
+            wasDisposed1.Should().BeTrue();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void DisposeFromSource_MultipleTimes_NothingHappens()
+        {
+            //-- arrange
+            
+            var bootLog = new TestLog();
+            var host = new MicroserviceHostBuilder("Test")
+                .UseBootComponents(builder => builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>())
+                .BuildHost();
+            
+            //-- act
+            
+            host.Dispose();
+            host.Dispose();
+            host.Dispose();
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.Disposed);
+            host.GetBootComponents().Should().NotBeNull();
+            host.GetModuleComponents().Should().BeNull();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void Configure_Success_ConfiguredState()
         {
             //-- arrange
@@ -180,8 +285,8 @@ namespace NWheels.Microservices.UnitTests.Runtime
             host.CurrentState.Should().Be(MicroserviceState.Faulted);
             hostException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFaulted));
             hostException.InnerException.Should().BeOfType<MicroserviceHostException>().Which.Reason.Should().Be(nameof(MicroserviceHostException.FeatureLoaderFailed));
-            featureException.FeatureLoaderType.Should().Be(typeof(ApplicationFeatureOne));
-            featureException.FeatureLoaderPhase.Should().Be(nameof(IMicroserviceHostLogger.FeaturesContributingComponents));
+            featureException.FailedClass.Should().Be(typeof(ApplicationFeatureOne));
+            featureException.FailedPhase.Should().Be(nameof(IMicroserviceHostLogger.FeaturesContributingComponents));
             featureException.InnerException.Should().BeSameAs(rootCauseException);
 
             bootLog.Messages.Should().Equal(
@@ -337,7 +442,6 @@ namespace NWheels.Microservices.UnitTests.Runtime
             );
         }
 
-
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
@@ -394,8 +498,8 @@ namespace NWheels.Microservices.UnitTests.Runtime
             host.CurrentState.Should().Be(MicroserviceState.Faulted);
             hostException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFaulted));
             hostException.InnerException.Should().BeOfType<MicroserviceHostException>().Which.Reason.Should().Be(nameof(MicroserviceHostException.FeatureLoaderFailed));
-            featureException.FeatureLoaderType.Should().Be(typeof(ApplicationFeatureOne));
-            featureException.FeatureLoaderPhase.Should().Be(nameof(IMicroserviceHostLogger.FeaturesCompilingComponents));
+            featureException.FailedClass.Should().Be(typeof(ApplicationFeatureOne));
+            featureException.FailedPhase.Should().Be(nameof(IMicroserviceHostLogger.FeaturesCompilingComponents));
             featureException.InnerException.Should().BeSameAs(rootCauseException);
 
             bootLog.Messages.Should().Equal(
@@ -416,6 +520,50 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 "MicroserviceHost:CurrentStateChanged->Faulted"
                 #endregion
             );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CompiledStopped_Dispose_DisposedState()
+        {
+            //-- arrange
+
+            var bootLog = new TestLog();
+            var host = new MicroserviceHostBuilder("Test")
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1' />
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1' />
+                        </application-modules>
+                    </microservice>
+                "))
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => {
+                bootLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+            };
+            host.Compile(CancellationToken.None);
+            bootLog.Clear();
+
+            //-- act
+
+            host.Dispose();
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.Disposed);
+            bootLog.Messages.Should().Equal("MicroserviceHost:CurrentStateChanged->Disposed");
+
+            host.GetBootComponents().Should().NotBeNull();
+            host.GetModuleComponents().Should().BeNull();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -473,6 +621,205 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 typeof(CustomizationComponentOne),
                 typeof(CustomizationComponentTwo)
             });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void StartFromSource_InCluster_GoesIntoStandbyState()
+        {
+            //-- arrange
+
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .Configure(bootConfig => {
+                    bootConfig.ClusterName = "C1";
+                })
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1'><feature name='FX2'/></module>
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1'><feature name='A2'/></module>
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1'><feature name='C2'/></module>
+                        </customization-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureTwo, FrameworkComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureTwo, ApplicationComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureOne, CustomizationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureTwo, CustomizationComponentTwo>(builder);
+                })
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+
+            //-- act
+
+            host.Start(CancellationToken.None);
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.Standby);
+
+            runLog.Messages.Should().Equal(
+                #region expected log messages
+                "MicroserviceHost:CurrentStateChanged->Configuring",
+                "MicroserviceHost:CurrentStateChanged->Configured",
+                "MicroserviceHost:CurrentStateChanged->Compiling",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped",
+                "MicroserviceHost:CurrentStateChanged->Loading",
+                // step 0: lifecycle components are instantiated
+                "FrameworkComponentOne:.ctor",
+                "FrameworkComponentTwo:.ctor",
+                "ApplicationComponentOne:.ctor",
+                "ApplicationComponentTwo:.ctor",
+                "CustomizationComponentOne:.ctor",
+                "CustomizationComponentTwo:.ctor",
+                // step 1: MicroserviceLoading
+                "FrameworkComponentOne:MicroserviceLoading",
+                "FrameworkComponentTwo:MicroserviceLoading",
+                "ApplicationComponentOne:MicroserviceLoading",
+                "ApplicationComponentTwo:MicroserviceLoading",
+                "CustomizationComponentOne:MicroserviceLoading",
+                "CustomizationComponentTwo:MicroserviceLoading",
+                // step 2: Load
+                "FrameworkComponentOne:Load",
+                "FrameworkComponentTwo:Load",
+                "ApplicationComponentOne:Load",
+                "ApplicationComponentTwo:Load",
+                "CustomizationComponentOne:Load",
+                "CustomizationComponentTwo:Load",
+                // step 3: MicroserviceLoaded
+                "FrameworkComponentOne:MicroserviceLoaded",
+                "FrameworkComponentTwo:MicroserviceLoaded",
+                "ApplicationComponentOne:MicroserviceLoaded",
+                "ApplicationComponentTwo:MicroserviceLoaded",
+                "CustomizationComponentOne:MicroserviceLoaded",
+                "CustomizationComponentTwo:MicroserviceLoaded",
+                // state changed -> Standby
+                "MicroserviceHost:CurrentStateChanged->Standby"
+                #endregion
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void LoadPhase_ComponentFailed_SuccessfulStepsReverted_FaultedState()
+        {
+            //-- arrange
+
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var rootCauseException = new FailureTestException();
+
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1'><feature name='FX2'/></module>
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1'><feature name='A2'/></module>
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1'><feature name='C2'/></module>
+                        </customization-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureTwo, FrameworkComponentTwo>(builder);
+
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    ComponentWillDo<ApplicationComponentOne>(builder, component => component.OnLoad += () => throw rootCauseException);
+
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureTwo, ApplicationComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureOne, CustomizationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureTwo, CustomizationComponentTwo>(builder);
+                })
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+
+            //-- act
+
+            Action act = () => {
+                host.Start(CancellationToken.None);
+            };
+
+            var hostException = act.ShouldThrow<MicroserviceHostException>().Which;
+            var componentException = hostException.InnerException as MicroserviceHostException;
+
+            //-- assert
+
+            hostException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFaulted));
+            hostException.InnerException.Should().BeOfType<MicroserviceHostException>().Which.Reason.Should().Be(nameof(MicroserviceHostException.LifecycleComponentFailed));
+            componentException.FailedClass.Should().Be(typeof(ApplicationComponentOne));
+            componentException.FailedPhase.Should().Be(nameof(ILifecycleComponent.Load));
+            componentException.InnerException.Should().BeSameAs(rootCauseException);
+
+            host.CurrentState.Should().Be(MicroserviceState.Faulted);
+            host.GetBootComponents().Should().NotBeNull();
+            host.GetModuleComponents().Should().NotBeNull();
+
+            runLog.Messages.Should().Equal(
+                #region expected log messages
+                "MicroserviceHost:CurrentStateChanged->Configuring",
+                "MicroserviceHost:CurrentStateChanged->Configured",
+                "MicroserviceHost:CurrentStateChanged->Compiling",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped",
+                "MicroserviceHost:CurrentStateChanged->Loading",
+                // step 0: lifecycle components are instantiated
+                "FrameworkComponentOne:.ctor",
+                "FrameworkComponentTwo:.ctor",
+                "ApplicationComponentOne:.ctor",
+                "ApplicationComponentTwo:.ctor",
+                "CustomizationComponentOne:.ctor",
+                "CustomizationComponentTwo:.ctor",
+                // step 1: MicroserviceLoading
+                "FrameworkComponentOne:MicroserviceLoading",
+                "FrameworkComponentTwo:MicroserviceLoading",
+                "ApplicationComponentOne:MicroserviceLoading",
+                "ApplicationComponentTwo:MicroserviceLoading",
+                "CustomizationComponentOne:MicroserviceLoading",
+                "CustomizationComponentTwo:MicroserviceLoading",
+                // step 2: Load
+                "FrameworkComponentOne:Load",
+                "FrameworkComponentTwo:Load",
+                "ApplicationComponentOne:Load", // <-- will throw exception
+                // revert step 2: MayUnload
+                "FrameworkComponentTwo:MayUnload",
+                "FrameworkComponentOne:MayUnload",
+                // revert step 1: MicroserviceMaybeUnloaded
+                "CustomizationComponentTwo:MicroserviceMaybeUnloaded",
+                "CustomizationComponentOne:MicroserviceMaybeUnloaded",
+                "ApplicationComponentTwo:MicroserviceMaybeUnloaded",
+                "ApplicationComponentOne:MicroserviceMaybeUnloaded",
+                "FrameworkComponentTwo:MicroserviceMaybeUnloaded",
+                "FrameworkComponentOne:MicroserviceMaybeUnloaded",
+                // state changed -> Faulted
+                "MicroserviceHost:CurrentStateChanged->Faulted"
+                #endregion
+            );
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -591,16 +938,15 @@ namespace NWheels.Microservices.UnitTests.Runtime
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void StartFromSource_InCluster_GoesIntoStandbyState()
+        public void ActivatePhase_ComponentFailed_SuccessfulStepsReverted_FaultedState()
         {
             //-- arrange
 
             var bootLog = new TestLog();
             var runLog = new TestLog();
+            var rootCauseException = new FailureTestException();
+
             var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
-                .Configure(bootConfig => {
-                    bootConfig.ClusterName = "C1";
-                })
                 .UseBootComponents(builder => {
                     builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
                     builder.RegisterComponentInstance(bootLog);
@@ -622,7 +968,10 @@ namespace NWheels.Microservices.UnitTests.Runtime
                     FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
                     FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
                     FeatureWillContributeLifecycleComponent<FrameworkFeatureTwo, FrameworkComponentTwo>(builder);
+
                     FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    ComponentWillDo<ApplicationComponentOne>(builder, component => component.OnActivate += () => throw rootCauseException);
+
                     FeatureWillContributeLifecycleComponent<ApplicationFeatureTwo, ApplicationComponentTwo>(builder);
                     FeatureWillContributeLifecycleComponent<CustomizationFeatureOne, CustomizationComponentOne>(builder);
                     FeatureWillContributeLifecycleComponent<CustomizationFeatureTwo, CustomizationComponentTwo>(builder);
@@ -633,11 +982,24 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
             //-- act
 
-            host.Start(CancellationToken.None);
+            Action act = () => {
+                host.Start(CancellationToken.None);
+            };
+
+            var hostException = act.ShouldThrow<MicroserviceHostException>().Which;
+            var componentException = hostException.InnerException as MicroserviceHostException;
 
             //-- assert
 
-            host.CurrentState.Should().Be(MicroserviceState.Standby);
+            hostException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFaulted));
+            hostException.InnerException.Should().BeOfType<MicroserviceHostException>().Which.Reason.Should().Be(nameof(MicroserviceHostException.LifecycleComponentFailed));
+            componentException.FailedClass.Should().Be(typeof(ApplicationComponentOne));
+            componentException.FailedPhase.Should().Be(nameof(ILifecycleComponent.Activate));
+            componentException.InnerException.Should().BeSameAs(rootCauseException);
+
+            host.CurrentState.Should().Be(MicroserviceState.Faulted);
+            host.GetBootComponents().Should().NotBeNull();
+            host.GetModuleComponents().Should().NotBeNull();
 
             runLog.Messages.Should().Equal(
                 #region expected log messages
@@ -674,8 +1036,32 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 "ApplicationComponentTwo:MicroserviceLoaded",
                 "CustomizationComponentOne:MicroserviceLoaded",
                 "CustomizationComponentTwo:MicroserviceLoaded",
-                // state changed -> Standby
-                "MicroserviceHost:CurrentStateChanged->Standby"
+                // state changed -> Standby -> Activating
+                "MicroserviceHost:CurrentStateChanged->Standby",
+                "MicroserviceHost:CurrentStateChanged->Activating",
+                // step 4: MicroserviceActivating
+                "FrameworkComponentOne:MicroserviceActivating",
+                "FrameworkComponentTwo:MicroserviceActivating",
+                "ApplicationComponentOne:MicroserviceActivating",
+                "ApplicationComponentTwo:MicroserviceActivating",
+                "CustomizationComponentOne:MicroserviceActivating",
+                "CustomizationComponentTwo:MicroserviceActivating",
+                // step 5: Activate
+                "FrameworkComponentOne:Activate",
+                "FrameworkComponentTwo:Activate",
+                "ApplicationComponentOne:Activate", // <-- will throw exception
+                // revert step 5: MayDeactivate
+                "FrameworkComponentTwo:MayDeactivate",
+                "FrameworkComponentOne:MayDeactivate",
+                // revert step 4: MicroserviceMaybeDeactivated
+                "CustomizationComponentTwo:MicroserviceMaybeDeactivated",
+                "CustomizationComponentOne:MicroserviceMaybeDeactivated",
+                "ApplicationComponentTwo:MicroserviceMaybeDeactivated",
+                "ApplicationComponentOne:MicroserviceMaybeDeactivated",
+                "FrameworkComponentTwo:MicroserviceMaybeDeactivated",
+                "FrameworkComponentOne:MicroserviceMaybeDeactivated",
+                // state changed -> Faulted
+                "MicroserviceHost:CurrentStateChanged->Faulted"
                 #endregion
             );
         }
@@ -874,7 +1260,15 @@ namespace NWheels.Microservices.UnitTests.Runtime
         private static void FeatureWillDo<TFeature>(IComponentContainerBuilder builder, Action<TFeature> action)
             where TFeature : TestFeatureLoader
         {
-            builder.RegisterComponentInstance(new FeatureLoaderInitializer<TFeature>(action));
+            builder.RegisterComponentInstance(new TestObjectInitializer<TFeature>(action));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void ComponentWillDo<TComponent>(IComponentContainerBuilder builder, Action<TComponent> action)
+            where TComponent : TestLifecycleComponent
+        {
+            builder.RegisterComponentInstance(new TestObjectInitializer<TComponent>(action));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -883,7 +1277,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             where TFeature : TestFeatureLoader
             where TComponent : TestLifecycleComponent
         {
-            builder.RegisterComponentInstance(new FeatureLoaderInitializer<TFeature>(feature => {
+            builder.RegisterComponentInstance(new TestObjectInitializer<TFeature>(feature => {
                 feature.OnContributeComponents += (existingComponents, newComponents) => {
                     newComponents.ContributeLifecycleComponent<TComponent>();
                 };
@@ -896,7 +1290,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             where TFeature : TestFeatureLoader
             where TComponent : class
         {
-            builder.RegisterComponentInstance(new FeatureLoaderInitializer<TFeature>(feature => {
+            builder.RegisterComponentInstance(new TestObjectInitializer<TFeature>(feature => {
                 feature.OnContributeComponents += (existingComponents, newComponents) => {
                     newComponents.RegisterComponentInstance<TComponent>(instance);
                 };
@@ -1102,7 +1496,18 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public delegate void FeatureLoaderInitializer<T>(T loader) where T : TestFeatureLoader;
+        public delegate void TestObjectInitializer<T>(T loader) where T : class;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class DisposableBootComponent : IDisposable
+        {
+            public void Dispose()
+            {
+                WasDisposed = true;
+            }
+            public bool WasDisposed { get; private set; }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1121,7 +1526,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             public FrameworkFeatureOne(IComponentContainer bootComponents) 
                 : base(bootComponents)
             {
-                foreach (var initializer in bootComponents.ResolveAll<FeatureLoaderInitializer<FrameworkFeatureOne>>())
+                foreach (var initializer in bootComponents.ResolveAll<TestObjectInitializer<FrameworkFeatureOne>>())
                 {
                     initializer(this);
                 }
@@ -1136,7 +1541,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             public FrameworkFeatureTwo(IComponentContainer bootComponents) 
                 : base(bootComponents)
             {
-                if (bootComponents.TryResolve(out FeatureLoaderInitializer<FrameworkFeatureTwo> initializer))
+                foreach (var initializer in bootComponents.ResolveAll<TestObjectInitializer<FrameworkFeatureTwo>>())
                 {
                     initializer(this);
                 }
@@ -1162,7 +1567,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             public FrameworkFeatureThree(IComponentContainer bootComponents) 
                 : base(bootComponents)
             {
-                if (bootComponents.TryResolve(out FeatureLoaderInitializer<FrameworkFeatureThree> initializer))
+                foreach (var initializer in bootComponents.ResolveAll<TestObjectInitializer<FrameworkFeatureThree>>())
                 {
                     initializer(this);
                 }
@@ -1177,7 +1582,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             public ApplicationFeatureOne(IComponentContainer bootComponents) 
                 : base(bootComponents)
             {
-                if (bootComponents.TryResolve(out FeatureLoaderInitializer<ApplicationFeatureOne> initializer))
+                foreach (var initializer in bootComponents.ResolveAll<TestObjectInitializer<ApplicationFeatureOne>>())
                 {
                     initializer(this);
                 }
@@ -1192,7 +1597,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             public ApplicationFeatureTwo(IComponentContainer bootComponents) 
                 : base(bootComponents)
             {
-                if (bootComponents.TryResolve(out FeatureLoaderInitializer<ApplicationFeatureTwo> initializer))
+                foreach (var initializer in bootComponents.ResolveAll<TestObjectInitializer<ApplicationFeatureTwo>>())
                 {
                     initializer(this);
                 }
@@ -1218,7 +1623,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             public ApplicationFeatureThree(IComponentContainer bootComponents) 
                 : base(bootComponents)
             {
-                if (bootComponents.TryResolve(out FeatureLoaderInitializer<ApplicationFeatureThree> initializer))
+                foreach (var initializer in bootComponents.ResolveAll<TestObjectInitializer<ApplicationFeatureThree>>())
                 {
                     initializer(this);
                 }
@@ -1233,7 +1638,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             public CustomizationFeatureOne(IComponentContainer bootComponents) 
                 : base(bootComponents)
             {
-                if (bootComponents.TryResolve(out FeatureLoaderInitializer<CustomizationFeatureOne> initializer))
+                foreach (var initializer in bootComponents.ResolveAll<TestObjectInitializer<CustomizationFeatureOne>>())
                 {
                     initializer(this);
                 }
@@ -1248,7 +1653,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             public CustomizationFeatureTwo(IComponentContainer bootComponents) 
                 : base(bootComponents)
             {
-                if (bootComponents.TryResolve(out FeatureLoaderInitializer<CustomizationFeatureTwo> initializer))
+                foreach (var initializer in bootComponents.ResolveAll<TestObjectInitializer<CustomizationFeatureTwo>>())
                 {
                     initializer(this);
                 }
@@ -1274,7 +1679,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             public CustomizationFeatureThree(IComponentContainer bootComponents) 
                 : base(bootComponents)
             {
-                if (bootComponents.TryResolve(out FeatureLoaderInitializer<CustomizationFeatureThree> initializer))
+                foreach (var initializer in bootComponents.ResolveAll<TestObjectInitializer<CustomizationFeatureThree>>())
                 {
                     initializer(this);
                 }
@@ -1292,6 +1697,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             protected TestLifecycleComponent(TestLog log)
             {
                 _log = log;
+                _log.Add(this, ".ctor");
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1299,95 +1705,140 @@ namespace NWheels.Microservices.UnitTests.Runtime
             public override void MicroserviceLoading()
             {
                 _log.Add(this, nameof(MicroserviceLoading));
+                OnMicroserviceLoading?.Invoke();
             }
             public override void Load()
             {
                 _log.Add(this, nameof(Load));
+                OnLoad?.Invoke();
             }
             public override void MicroserviceLoaded()
             {
                 _log.Add(this, nameof(MicroserviceLoaded));
+                OnMicroserviceLoaded?.Invoke();
             }
             public override void MicroserviceActivating()
             {
                 _log.Add(this, nameof(MicroserviceActivating));
+                OnMicroserviceActivating?.Invoke();
             }
             public override void Activate()
             {
                 _log.Add(this, nameof(Activate));
+                OnActivate?.Invoke();
             }
             public override void MicroserviceActivated()
             {
                 _log.Add(this, nameof(MicroserviceActivated));
+                OnMicroserviceActivated?.Invoke();
             }
             public override void MicroserviceMaybeDeactivating()
             {
                 _log.Add(this, nameof(MicroserviceMaybeDeactivating));
+                OnMicroserviceMaybeDeactivating?.Invoke();
             }
             public override void MayDeactivate()
             {
                 _log.Add(this, nameof(MayDeactivate));
+                OnMayDeactivate?.Invoke();
             }
             public override void MicroserviceMaybeDeactivated()
             {
                 _log.Add(this, nameof(MicroserviceMaybeDeactivated));
+                OnMicroserviceMaybeDeactivated?.Invoke();
             }
             public override void MicroserviceMaybeUnloading()
             {
                 _log.Add(this, nameof(MicroserviceMaybeUnloading));
+                OnMicroserviceMaybeUnloading?.Invoke();
             }
             public override void MayUnload()
             {
                 _log.Add(this, nameof(MayUnload));
+                OnMayUnload?.Invoke();
             }
             public override void MicroserviceMaybeUnloaded()
             {
                 _log.Add(this, nameof(MicroserviceMaybeUnloaded));
+                OnMicroserviceMaybeUnloaded?.Invoke();
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public event Action OnMicroserviceLoading;
+            public event Action OnLoad;
+            public event Action OnMicroserviceLoaded;
+            public event Action OnMicroserviceActivating;
+            public event Action OnActivate;
+            public event Action OnMicroserviceActivated;
+            public event Action OnMicroserviceMaybeDeactivating;
+            public event Action OnMayDeactivate;
+            public event Action OnMicroserviceMaybeDeactivated;
+            public event Action OnMicroserviceMaybeUnloading;
+            public event Action OnMayUnload;
+            public event Action OnMicroserviceMaybeUnloaded;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class FrameworkComponentOne : TestLifecycleComponent
         {
-            public FrameworkComponentOne(TestLog log) : base(log)
+            public FrameworkComponentOne(TestLog log, MicroserviceHost host) : base(log)
             {
-                log.Add(this, ".ctor");
+                foreach (var initializer in host.GetBootComponents().ResolveAll<TestObjectInitializer<FrameworkComponentOne>>())
+                {
+                    initializer(this);
+                }
             }
         }
         public class FrameworkComponentTwo : TestLifecycleComponent
         {
-            public FrameworkComponentTwo(TestLog log) : base(log)
+            public FrameworkComponentTwo(TestLog log, MicroserviceHost host) : base(log)
             {
-                log.Add(this, ".ctor");
+                foreach (var initializer in host.GetBootComponents().ResolveAll<TestObjectInitializer<FrameworkComponentTwo>>())
+                {
+                    initializer(this);
+                }
             }
         }
         public class ApplicationComponentOne : TestLifecycleComponent
         {
-            public ApplicationComponentOne(TestLog log) : base(log)
+            public ApplicationComponentOne(TestLog log, MicroserviceHost host) : base(log)
             {
-                log.Add(this, ".ctor");
+                foreach (var initializer in host.GetBootComponents().ResolveAll<TestObjectInitializer<ApplicationComponentOne>>())
+                {
+                    initializer(this);
+                }
             }
         }
         public class ApplicationComponentTwo : TestLifecycleComponent
         {
-            public ApplicationComponentTwo(TestLog log) : base(log)
+            public ApplicationComponentTwo(TestLog log, MicroserviceHost host) : base(log)
             {
-                log.Add(this, ".ctor");
+                foreach (var initializer in host.GetBootComponents().ResolveAll<TestObjectInitializer<ApplicationComponentTwo>>())
+                {
+                    initializer(this);
+                }
             }
         }
         public class CustomizationComponentOne : TestLifecycleComponent
         {
-            public CustomizationComponentOne(TestLog log) : base(log)
+            public CustomizationComponentOne(TestLog log, MicroserviceHost host) : base(log)
             {
-                log.Add(this, ".ctor");
+                foreach (var initializer in host.GetBootComponents().ResolveAll<TestObjectInitializer<CustomizationComponentOne>>())
+                {
+                    initializer(this);
+                }
             }
         }
         public class CustomizationComponentTwo : TestLifecycleComponent
         {
-            public CustomizationComponentTwo(TestLog log) : base(log)
+            public CustomizationComponentTwo(TestLog log, MicroserviceHost host) : base(log)
             {
-                log.Add(this, ".ctor");
+                foreach (var initializer in host.GetBootComponents().ResolveAll<TestObjectInitializer<CustomizationComponentTwo>>())
+                {
+                    initializer(this);
+                }
             }
         }
     }

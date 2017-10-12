@@ -395,12 +395,13 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void LifecycleComponentFailed(Type componentType, string lifecycleMethod, Exception error)
+        public MicroserviceHostException LifecycleComponentFailed(Type componentType, string lifecycleMethod, Exception error)
         {
             if (_logLevel <= LogLevel.Error)
             {
                 ColorConsole.Log(LogLevel.Error, $"{nameof(LifecycleComponentFailed)}: {componentType.FriendlyName()}, method={lifecycleMethod}, {error}");
             }
+            return MicroserviceHostException.LifecycleComponentFailed(componentType, lifecycleMethod, error);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

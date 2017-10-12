@@ -51,12 +51,12 @@ namespace NWheels.Microservices.Runtime
                     return;
                 }
 
-                Disposed = true;
-
                 if (!Stop(TimeSpan.FromSeconds(30)))
                 {
                     //TODO: kill unresponsive threads
                 }
+
+                Disposed = true;
 
                 if (ModuleComponents != null)
                 {
@@ -67,6 +67,9 @@ namespace NWheels.Microservices.Runtime
 
                     oldContainer.Dispose();
                 }
+
+                BootComponents.Dispose();
+                CurrentStateChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -253,7 +256,10 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceState CurrentState => StateScheduler.CurrentState;
+        public MicroserviceState CurrentState => (this.Disposed ? MicroserviceState.Disposed : StateScheduler.CurrentState);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public event EventHandler CurrentStateChanged;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -569,7 +575,7 @@ namespace NWheels.Microservices.Runtime
         protected virtual void OnCurrentStateChanged(object sender, EventArgs args)
         {
             Logger.EnteredState(StateScheduler.CurrentState);
-            CurrentStateChanged?.Invoke(sender, args);
+            CurrentStateChanged?.Invoke(this, args);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -653,8 +659,7 @@ namespace NWheels.Microservices.Runtime
                 }
                 catch (Exception error)
                 {
-                    OwnerHost.Logger.LifecycleComponentFailed(component.GetType(), lifecycleMethod.Method.Name, error);
-                    throw;
+                    throw OwnerHost.Logger.LifecycleComponentFailed(component.GetType(), lifecycleMethod.Method.Name, error);
                 }
             }
 

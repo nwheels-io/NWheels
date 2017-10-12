@@ -15,14 +15,14 @@ namespace NWheels.Microservices.Api.Exceptions
             Exception innerException = null,
             MicroserviceState? state = null,
             MicroserviceState? requiredState = null,
-            Type featureLoaderType = null,
-            string featureLoaderPhase = null)
+            Type failedClass = null,
+            string failedPhase = null)
             : base(reason, innerException)
         {
             State = state;
             RequiredState = requiredState;
-            FeatureLoaderType = featureLoaderType;
-            FeatureLoaderPhase = featureLoaderPhase;
+            FailedClass = failedClass;
+            FailedPhase = failedPhase;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -38,8 +38,8 @@ namespace NWheels.Microservices.Api.Exceptions
 
         public MicroserviceState? State { get; }
         public MicroserviceState? RequiredState { get; }
-        public Type FeatureLoaderType { get; }
-        public string FeatureLoaderPhase { get; }
+        public Type FailedClass { get; }
+        public string FailedPhase { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -53,13 +53,13 @@ namespace NWheels.Microservices.Api.Exceptions
             {
                 yield return new KeyValuePair<string, string>(_s_stringRequiredState, RequiredState.ToString());
             }
-            if (FeatureLoaderType != null)
+            if (FailedClass != null)
             {
-                yield return new KeyValuePair<string, string>(_s_stringFeatureLoaderType, FeatureLoaderType?.FriendlyName());
+                yield return new KeyValuePair<string, string>(_s_stringFailedClass, FailedClass.FriendlyName());
             }
-            if (!string.IsNullOrEmpty(FeatureLoaderPhase))
+            if (!string.IsNullOrEmpty(FailedPhase))
             {
-                yield return new KeyValuePair<string, string>(_s_stringFeatureLoaderPhase, FeatureLoaderPhase);
+                yield return new KeyValuePair<string, string>(_s_stringFailedPhase, FailedPhase);
             }
         }
 
@@ -71,10 +71,11 @@ namespace NWheels.Microservices.Api.Exceptions
         private static readonly string _s_stringNotConfiguredToRunInDaemonMode = nameof(NotConfiguredToRunInDaemonMode);
         private static readonly string _s_stringNotConfiguredToRunInBatchJobMode = nameof(NotConfiguredToRunInBatchJobMode);
         private static readonly string _s_stringFeatureLoaderFailed = nameof(FeatureLoaderFailed);
+        private static readonly string _s_stringLifecycleComponentFailed = nameof(LifecycleComponentFailed);
         private static readonly string _s_stringState = nameof(State);
         private static readonly string _s_stringRequiredState = nameof(RequiredState);
-        private static readonly string _s_stringFeatureLoaderType = nameof(FeatureLoaderType);
-        private static readonly string _s_stringFeatureLoaderPhase = nameof(FeatureLoaderPhase);
+        private static readonly string _s_stringFailedClass = nameof(FailedClass);
+        private static readonly string _s_stringFailedPhase = nameof(FailedPhase);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -120,8 +121,19 @@ namespace NWheels.Microservices.Api.Exceptions
         {
             return new MicroserviceHostException(
                 reason: _s_stringFeatureLoaderFailed,
-                featureLoaderType: loaderType,
-                featureLoaderPhase: phase,
+                failedClass: loaderType,
+                failedPhase: phase,
+                innerException: error);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static MicroserviceHostException LifecycleComponentFailed(Type componentType, string phase, Exception error)
+        {
+            return new MicroserviceHostException(
+                reason: _s_stringLifecycleComponentFailed,
+                failedClass: componentType,
+                failedPhase: phase,
                 innerException: error);
         }
     }

@@ -7,6 +7,10 @@
         /// </summary>
         Faulted,
         /// <summary>
+        /// The state set after calling Dispose on MicroserviceHost instance.
+        /// </summary>
+        Disposed,
+        /// <summary>
         /// Original state of source project, after `dotnet build` or `dotnet publish`.
         /// </summary>
         Source,
