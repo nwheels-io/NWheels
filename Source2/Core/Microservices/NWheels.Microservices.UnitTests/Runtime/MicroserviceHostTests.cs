@@ -1175,6 +1175,107 @@ namespace NWheels.Microservices.UnitTests.Runtime
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void DeactivatePhase_ComponentFailed_AllComponentsDeactivated_FaultedState()
+        {
+            //-- arrange
+
+            var rootCauseException = new FailureTestException();
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1'><feature name='FX2'/></module>
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1'><feature name='A2'/></module>
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1'><feature name='C2'/></module>
+                        </customization-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureTwo, FrameworkComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureTwo, ApplicationComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureOne, CustomizationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureTwo, CustomizationComponentTwo>(builder);
+                    ComponentWillDo<ApplicationComponentOne>(builder, component => component.OnMayDeactivate += () => throw rootCauseException);
+                })
+                .BuildHost();
+
+            host.Start(CancellationToken.None);
+
+            runLog.Clear();
+            host.CurrentStateChanged += (sender, args) => runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+
+            //-- act
+
+            Action act = () => {
+                host.Stop(TimeSpan.FromSeconds(1));
+            };
+
+            var hostException = act.ShouldThrow<MicroserviceHostException>().Which;
+
+            //-- assert
+
+            hostException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFaulted));
+
+            var aggregateException = hostException.InnerException.Should().BeOfType<AggregateException>().Which;
+            aggregateException.InnerExceptions.Count.Should().Be(1);
+
+            var componentException = aggregateException.InnerExceptions.Single().Should().BeOfType<MicroserviceHostException>().Which;
+            componentException.Reason.Should().Be(nameof(MicroserviceHostException.LifecycleComponentFailed));
+            componentException.FailedClass.Should().Be(typeof(ApplicationComponentOne));
+            componentException.FailedPhase.Should().Be(nameof(ILifecycleComponent.MayDeactivate));
+            componentException.InnerException.Should().BeSameAs(rootCauseException);
+
+            host.CurrentState.Should().Be(MicroserviceState.Faulted);
+            host.GetBootComponents().Should().NotBeNull();
+            host.GetModuleComponents().Should().NotBeNull();
+
+            runLog.Messages.Should().Equal(
+                #region expected log messages
+                // state changed -> Deactivating
+                "MicroserviceHost:CurrentStateChanged->Deactivating",
+                // step 1: MicroserviceMaybeDeactivating
+                "CustomizationComponentTwo:MicroserviceMaybeDeactivating",
+                "CustomizationComponentOne:MicroserviceMaybeDeactivating",
+                "ApplicationComponentTwo:MicroserviceMaybeDeactivating",
+                "ApplicationComponentOne:MicroserviceMaybeDeactivating", 
+                "FrameworkComponentTwo:MicroserviceMaybeDeactivating",
+                "FrameworkComponentOne:MicroserviceMaybeDeactivating",
+                // step 2: MayDeactivate
+                "CustomizationComponentTwo:MayDeactivate",
+                "CustomizationComponentOne:MayDeactivate",
+                "ApplicationComponentTwo:MayDeactivate",
+                "ApplicationComponentOne:MayDeactivate", // <-- will throw exception
+                "FrameworkComponentTwo:MayDeactivate",
+                "FrameworkComponentOne:MayDeactivate",
+                // step 3: MicroserviceMaybeDeactivated
+                "CustomizationComponentTwo:MicroserviceMaybeDeactivated",
+                "CustomizationComponentOne:MicroserviceMaybeDeactivated",
+                "ApplicationComponentTwo:MicroserviceMaybeDeactivated",
+                "ApplicationComponentOne:MicroserviceMaybeDeactivated",
+                "FrameworkComponentTwo:MicroserviceMaybeDeactivated",
+                "FrameworkComponentOne:MicroserviceMaybeDeactivated",
+                // state changed -> Faulted
+                "MicroserviceHost:CurrentStateChanged->Faulted"
+                #endregion
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void Stop_FromStandby()
         {
             //-- arrange
@@ -1251,6 +1352,108 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 "FrameworkComponentOne:MicroserviceMaybeUnloaded",
                 // state changed -> CompiledStopped
                 "MicroserviceHost:CurrentStateChanged->CompiledStopped"
+                #endregion
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void UnloadPhase_ComponentFailed_AllComponentsUnloaded_FaultedState()
+        {
+            //-- arrange
+
+            var rootCauseException = new FailureTestException();
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .Configure(bootConfig => bootConfig.ClusterName = "C1") // in order to Start into Standby state 
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1'><feature name='FX2'/></module>
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1'><feature name='A2'/></module>
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1'><feature name='C2'/></module>
+                        </customization-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureTwo, FrameworkComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureTwo, ApplicationComponentTwo>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureOne, CustomizationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureTwo, CustomizationComponentTwo>(builder);
+                    ComponentWillDo<ApplicationComponentOne>(builder, component => component.OnMayUnload += () => throw rootCauseException);
+                })
+                .BuildHost();
+
+            host.Start(CancellationToken.None);
+            host.CurrentState.Should().Be(MicroserviceState.Standby);
+
+            runLog.Clear();
+            host.CurrentStateChanged += (sender, args) => runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+
+            //-- act
+
+            Action act = () => {
+                host.Stop(TimeSpan.FromSeconds(1));
+            };
+
+            var hostException = act.ShouldThrow<MicroserviceHostException>().Which;
+
+            //-- assert
+
+            hostException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFaulted));
+
+            var aggregateException = hostException.InnerException.Should().BeOfType<AggregateException>().Which;
+            aggregateException.InnerExceptions.Count.Should().Be(1);
+
+            var componentException = aggregateException.InnerExceptions.Single().Should().BeOfType<MicroserviceHostException>().Which;
+            componentException.Reason.Should().Be(nameof(MicroserviceHostException.LifecycleComponentFailed));
+            componentException.FailedClass.Should().Be(typeof(ApplicationComponentOne));
+            componentException.FailedPhase.Should().Be(nameof(ILifecycleComponent.MayUnload));
+            componentException.InnerException.Should().BeSameAs(rootCauseException);
+
+            host.CurrentState.Should().Be(MicroserviceState.Faulted);
+            host.GetBootComponents().Should().NotBeNull();
+            host.GetModuleComponents().Should().NotBeNull();
+
+            runLog.Messages.Should().Equal(
+                #region expected log messages
+                "MicroserviceHost:CurrentStateChanged->Unloading",
+                // step 1: MicroserviceMaybeUnloading
+                "CustomizationComponentTwo:MicroserviceMaybeUnloading",
+                "CustomizationComponentOne:MicroserviceMaybeUnloading",
+                "ApplicationComponentTwo:MicroserviceMaybeUnloading",
+                "ApplicationComponentOne:MicroserviceMaybeUnloading",
+                "FrameworkComponentTwo:MicroserviceMaybeUnloading",
+                "FrameworkComponentOne:MicroserviceMaybeUnloading",
+                // step 2: MayUnload
+                "CustomizationComponentTwo:MayUnload",
+                "CustomizationComponentOne:MayUnload",
+                "ApplicationComponentTwo:MayUnload",
+                "ApplicationComponentOne:MayUnload", // <-- will throw exception
+                "FrameworkComponentTwo:MayUnload",
+                "FrameworkComponentOne:MayUnload",
+                // step 3: MicroserviceMaybeUnloaded
+                "CustomizationComponentTwo:MicroserviceMaybeUnloaded",
+                "CustomizationComponentOne:MicroserviceMaybeUnloaded",
+                "ApplicationComponentTwo:MicroserviceMaybeUnloaded",
+                "ApplicationComponentOne:MicroserviceMaybeUnloaded",
+                "FrameworkComponentTwo:MicroserviceMaybeUnloaded",
+                "FrameworkComponentOne:MicroserviceMaybeUnloaded",
+                // state changed -> Faulted
+                "MicroserviceHost:CurrentStateChanged->Faulted"
                 #endregion
             );
         }
