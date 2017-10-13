@@ -212,13 +212,14 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void FailedToLoadLifecycleComponents(Exception error)
+        public MicroserviceHostException FailedToLoadLifecycleComponents(Exception error)
         {
             if (_logLevel <= LogLevel.Critical)
             {
                 ColorConsole.Log(LogLevel.Critical, $"{nameof(FailedToLoadLifecycleComponents)}: {error}");
             }
-        }
+            return MicroserviceHostException.LifecycleComponentConstructorFailed(error);
+        } 
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -319,12 +320,13 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void FeatureLoaderPhaseExtensionFailed(Type loaderType, string phase, Exception error)
+        public MicroserviceHostException FeatureLoaderPhaseExtensionFailed(Type loaderType, string phase, Exception error)
         {
             if (_logLevel <= LogLevel.Error)
             {
                 ColorConsole.Log(LogLevel.Error, $"{nameof(FeatureLoaderPhaseExtensionFailed)}: phase={phase}, {error}");
             }
+            return MicroserviceHostException.FeatureLoaderFailed(loaderType, phase, error);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

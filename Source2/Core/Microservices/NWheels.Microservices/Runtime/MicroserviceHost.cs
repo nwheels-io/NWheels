@@ -31,8 +31,8 @@ namespace NWheels.Microservices.Runtime
             Logger = BootComponents.Resolve<IMicroserviceHostLogger>();
             var stateCodeBehind = BootComponents.Resolve<IStateMachineCodeBehind<MicroserviceState, MicroserviceTrigger>>();
 
-            LoadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
-            ActivateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
+            LoadSequence = CreateLoadSequence(); // new RevertableSequence(new LoadSequenceCodeBehind(this));
+            ActivateSequence = CreateActivateSequence(); // new RevertableSequence(new ActivateSequenceCodeBehind(this));
             StateLock = new SafeLock("MicroserviceHost/State");
 
             var stateMachine = StateMachine.CreateFrom(stateCodeBehind);
@@ -416,7 +416,7 @@ namespace NWheels.Microservices.Runtime
                     catch (Exception e)
                     {
                         activity.Fail(e);
-                        Logger.FeatureLoaderPhaseExtensionFailed(loader.GetType(), phase: action.Method.Name, error: e);
+                        throw Logger.FeatureLoaderPhaseExtensionFailed(loader.GetType(), phase: action.Method.Name, error: e);
                     }
                 }
             }
@@ -459,8 +459,7 @@ namespace NWheels.Microservices.Runtime
                 catch (Exception e)
                 {
                     activity.Fail(e);
-                    Logger.FailedToLoadLifecycleComponents(e);
-                    throw;
+                    throw Logger.FailedToLoadLifecycleComponents(e);
                 }
             }
         }
@@ -665,21 +664,20 @@ namespace NWheels.Microservices.Runtime
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected void JoinSystemSession()
-            {
-                // TODO: grant root permissions to current execution path
+            // TODO: grant root permissions to current execution path
+            // protected void JoinSystemSession()
+            // {
                 //_systemSession = _ownerLifetime.LifetimeContainer.Resolve<ISessionManager>().JoinGlobalSystem();
-            }
+            // }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected void LeaveSystemSession()
-            {
-                // TODO: revoke root permissions from current execution path
-
+            // TODO: revoke root permissions from current execution path
+            // protected void LeaveSystemSession()
+            // {
                 //_systemSession.Dispose();
                 //_systemSession = null;
-            }
+            // }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 

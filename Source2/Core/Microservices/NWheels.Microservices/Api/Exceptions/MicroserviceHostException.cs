@@ -71,6 +71,7 @@ namespace NWheels.Microservices.Api.Exceptions
         private static readonly string _s_stringNotConfiguredToRunInDaemonMode = nameof(NotConfiguredToRunInDaemonMode);
         private static readonly string _s_stringNotConfiguredToRunInBatchJobMode = nameof(NotConfiguredToRunInBatchJobMode);
         private static readonly string _s_stringFeatureLoaderFailed = nameof(FeatureLoaderFailed);
+        private static readonly string _s_stringLifecycleComponentConstructorFailed = nameof(LifecycleComponentConstructorFailed);
         private static readonly string _s_stringLifecycleComponentFailed = nameof(LifecycleComponentFailed);
         private static readonly string _s_stringState = nameof(State);
         private static readonly string _s_stringRequiredState = nameof(RequiredState);
@@ -123,6 +124,15 @@ namespace NWheels.Microservices.Api.Exceptions
                 reason: _s_stringFeatureLoaderFailed,
                 failedClass: loaderType,
                 failedPhase: phase,
+                innerException: error);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static MicroserviceHostException LifecycleComponentConstructorFailed(Exception error)
+        {
+            return new MicroserviceHostException(
+                reason: _s_stringLifecycleComponentConstructorFailed,
                 innerException: error);
         }
 

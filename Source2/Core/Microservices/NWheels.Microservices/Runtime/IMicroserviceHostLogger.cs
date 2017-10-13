@@ -118,7 +118,7 @@ namespace NWheels.Microservices.Runtime
         MicroserviceHostException FeatureLoaderFailed(Type loaderType, string phase, Exception error);
 
         [LogError]
-        void FeatureLoaderPhaseExtensionFailed(Type loaderType, string phase, Exception error);
+        MicroserviceHostException FeatureLoaderPhaseExtensionFailed(Type loaderType, string phase, Exception error);
 
         [LogVerbose]
         IExecutionPathActivity LoadingLifecycleComponents();
@@ -127,7 +127,7 @@ namespace NWheels.Microservices.Runtime
         void LoadedLifecycleComponent(Type type);
 
         [LogCritical]
-        void FailedToLoadLifecycleComponents(Exception error);
+        MicroserviceHostException FailedToLoadLifecycleComponents(Exception error);
 
         [LogWarning]
         void NoLifecycleComponentsLoaded();
