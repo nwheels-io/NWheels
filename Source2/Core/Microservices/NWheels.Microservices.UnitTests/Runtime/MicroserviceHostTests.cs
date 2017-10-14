@@ -124,6 +124,237 @@ namespace NWheels.Microservices.UnitTests.Runtime
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void Disposed_AttemptRunDaemon_Throw()
+        {
+            //-- arrange
+            
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = new MicroserviceHostBuilder("Test")
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1' />
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1' />
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1' />
+                        </customization-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureOne, CustomizationComponentOne>(builder);
+                })
+                .BuildHost();
+
+            runLog.Clear();
+            host.CurrentStateChanged += (sender, args) => runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+
+            host.Dispose();
+
+            //-- act
+
+            Action act = () => {
+                host.RunDaemon(CancellationToken.None, TimeSpan.FromMinutes(1), out bool stoppedWithinTimeout);
+            };          
+
+            act.ShouldThrow<ObjectDisposedException>();
+
+            //-- assert
+
+            runLog.Messages.Should().Equal(
+                "MicroserviceHost:CurrentStateChanged->Disposed"
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Disposed_AttemptRunBatchJob_Throw()
+        {
+            //-- arrange
+            
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = new MicroserviceHostBuilder("Test")
+                .Configure(bootConfig => bootConfig.IsBatchJobMode = true)
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1' />
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1' />
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1' />
+                        </customization-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureOne, CustomizationComponentOne>(builder);
+                })
+                .BuildHost();
+
+            Action batchJob = () => {
+                runLog.Add(null, "TEST-BATCH-JOB");
+            };
+
+            runLog.Clear();
+            host.CurrentStateChanged += (sender, args) => runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+            host.Dispose();
+
+            //-- act
+
+            Action act = () => {
+                host.RunBatchJob(batchJob, CancellationToken.None, TimeSpan.FromMinutes(1), out bool stoppedWithinTimeout);
+            };          
+
+            act.ShouldThrow<ObjectDisposedException>();
+
+            //-- assert
+
+            runLog.Messages.Should().Equal(
+                "MicroserviceHost:CurrentStateChanged->Disposed"
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void ConfiguredInBatchJobMode_AttemptRunDaemon_Throw()
+        {
+            //-- arrange
+            
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = new MicroserviceHostBuilder("Test")
+                .Configure(bootConfig => bootConfig.IsBatchJobMode = true)
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1' />
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1' />
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1' />
+                        </customization-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureOne, CustomizationComponentOne>(builder);
+                })
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+
+            runLog.Clear();
+            runLog.Add(null, "BEGIN-TEST");
+
+            //-- act
+
+            Action act = () => {
+                host.RunDaemon(CancellationToken.None, TimeSpan.FromMinutes(1), out bool stoppedWithinTimeout);
+            };          
+
+            //-- assert
+
+            act.ShouldThrow<MicroserviceHostException>()
+                .Which.Reason.Should().Be(nameof(MicroserviceHostException.NotConfiguredToRunInDaemonMode));
+
+            runLog.Messages.Should().Equal(
+                ":BEGIN-TEST"
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void ConfiguredInDaemonMode_AttemptRunBatchJob_Throw()
+        {
+            //-- arrange
+            
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = new MicroserviceHostBuilder("Test")
+                .Configure(bootConfig => bootConfig.IsBatchJobMode = false)
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1' />
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1' />
+                        </application-modules>
+                        <customization-modules>
+                            <module assembly='CustM1' />
+                        </customization-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<CustomizationFeatureOne, CustomizationComponentOne>(builder);
+                })
+                .BuildHost();
+
+            Action batchJob = () => {
+                runLog.Add(null, "TEST-BATCH-JOB");
+            };
+
+            runLog.Clear();
+            runLog.Add(null, "BEGIN-TEST");
+            host.CurrentStateChanged += (sender, args) => runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+
+            //-- act
+
+            Action act = () => {
+                host.RunBatchJob(batchJob, CancellationToken.None, TimeSpan.FromMinutes(1), out bool stoppedWithinTimeout);
+            };          
+
+            //-- assert
+
+            act.ShouldThrow<MicroserviceHostException>()
+                .Which.Reason.Should().Be(nameof(MicroserviceHostException.NotConfiguredToRunInBatchJobMode));
+
+            runLog.Messages.Should().Equal(
+                ":BEGIN-TEST"
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void Configure_Success_ConfiguredState()
         {
             //-- arrange
@@ -1315,6 +1546,47 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 "FrameworkComponentOne:MicroserviceMaybeDeactivated",
                 // state changed -> Faulted
                 "MicroserviceHost:CurrentStateChanged->Faulted"
+                #endregion
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanStartWithNoLifecycleComponentsRegistered()
+        {
+            //-- arrange
+
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                })
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+
+            //-- act
+
+            host.Start(CancellationToken.None);
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.Active);
+
+            runLog.Messages.Should().Equal(
+                #region expected log messages
+                "MicroserviceHost:CurrentStateChanged->Configuring",
+                "MicroserviceHost:CurrentStateChanged->Configured",
+                "MicroserviceHost:CurrentStateChanged->Compiling",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped",
+                "MicroserviceHost:CurrentStateChanged->Loading",
+                "MicroserviceHost:CurrentStateChanged->Standby",
+                "MicroserviceHost:CurrentStateChanged->Activating",
+                "MicroserviceHost:CurrentStateChanged->Active"
                 #endregion
             );
         }
