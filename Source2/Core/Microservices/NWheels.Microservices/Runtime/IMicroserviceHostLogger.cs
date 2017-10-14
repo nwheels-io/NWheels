@@ -184,9 +184,12 @@ namespace NWheels.Microservices.Runtime
         void BatchJobCompleted();
 
         [LogWarning]
-        void BatchJobCanceled();
+        OperationCanceledException BatchJobCanceled();
+
+        [LogWarning]
+        OperationCanceledException BatchJobCanceled(OperationCanceledException exception);
 
         [LogError]
-        void BatchJobFailed(Exception error);
+        MicroserviceHostException BatchJobFailed(Exception error);
     }
 }

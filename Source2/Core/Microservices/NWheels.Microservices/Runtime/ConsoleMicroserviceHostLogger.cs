@@ -46,12 +46,24 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void BatchJobCanceled()
+        public OperationCanceledException BatchJobCanceled()
         {
             if (_logLevel <= LogLevel.Warning)
             {
                 ColorConsole.Log(LogLevel.Warning, nameof(BatchJobCanceled));
             }
+            return new OperationCanceledException("Batch job has been cancelled.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public OperationCanceledException BatchJobCanceled(OperationCanceledException exception)
+        {
+            if (_logLevel <= LogLevel.Warning)
+            {
+                ColorConsole.Log(LogLevel.Warning, $"{nameof(BatchJobCanceled)}: {exception.Message}");
+            }
+            return exception;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -66,12 +78,13 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void BatchJobFailed(Exception error)
+        public MicroserviceHostException BatchJobFailed(Exception error)
         {
             if (_logLevel <= LogLevel.Error)
             {
                 ColorConsole.Log(LogLevel.Error, $"{nameof(BatchJobFailed)}: {error}");
             }
+            return MicroserviceHostException.BatchJobFailed(error);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

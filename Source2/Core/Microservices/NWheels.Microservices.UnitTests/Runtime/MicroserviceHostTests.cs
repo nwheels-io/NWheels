@@ -1766,7 +1766,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void CanRunDaemon()
+        public void RunDaemon_Success()
         {
             //-- arrange
 
@@ -1786,16 +1786,12 @@ namespace NWheels.Microservices.UnitTests.Runtime
                         <application-modules>
                             <module assembly='AppM1' />
                         </application-modules>
-                        <customization-modules>
-                            <module assembly='CustM1' />
-                        </customization-modules>
                     </microservice>
                 "))
                 .UseBootComponents(builder => {
                     FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
                     FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
                     FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
-                    FeatureWillContributeLifecycleComponent<CustomizationFeatureOne, CustomizationComponentOne>(builder);
                 })
                 .BuildHost();
 
@@ -1811,8 +1807,9 @@ namespace NWheels.Microservices.UnitTests.Runtime
 
             //-- act
 
+            bool stoppedWithinTimeout = false;
             var daemonTask = Task.Factory.StartNew(() => {
-                host.RunDaemon(cancellation.Token, stopTimeout: TimeSpan.FromSeconds(1), stoppedWithinTimeout: out bool stoppedWithinTimeout);
+                host.RunDaemon(cancellation.Token, stopTimeout: TimeSpan.FromSeconds(1), stoppedWithinTimeout: out stoppedWithinTimeout);
             });
 
             microserviceActivated.WaitOne(TimeSpan.FromSeconds(10)).Should().BeTrue();
@@ -1823,6 +1820,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             //-- assert
 
             host.CurrentState.Should().Be(MicroserviceState.CompiledStopped);
+            stoppedWithinTimeout.Should().BeTrue();
 
             runLog.Messages.Where(s => s.StartsWith("MicroserviceHost:CurrentStateChanged->") || s.StartsWith(":")).Should().Equal(
                 #region expected log messages
@@ -1842,6 +1840,463 @@ namespace NWheels.Microservices.UnitTests.Runtime
                 #endregion
             );
 
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void RunBatchJob_Success()
+        {
+            //-- arrange
+
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .Configure(bootConfig => bootConfig.IsBatchJobMode = true)
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1' />
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1' />
+                        </application-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                })
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => {
+                runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+            };
+
+            Action batchJob = () => {
+                runLog.Add(null, "TEST-BATCH-JOB");
+            };
+
+            //-- act
+
+            host.RunBatchJob(batchJob, CancellationToken.None, stopTimeout: TimeSpan.FromSeconds(1), stoppedWithinTimeout: out bool stoppedWithinTimeout);
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.CompiledStopped);
+            stoppedWithinTimeout.Should().BeTrue();
+
+            runLog.Messages.Where(s => s.StartsWith("MicroserviceHost:CurrentStateChanged->") || s.StartsWith(":")).Should().Equal(
+                #region expected log messages
+                "MicroserviceHost:CurrentStateChanged->Configuring",
+                "MicroserviceHost:CurrentStateChanged->Configured",
+                "MicroserviceHost:CurrentStateChanged->Compiling",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped",
+                "MicroserviceHost:CurrentStateChanged->Loading",
+                "MicroserviceHost:CurrentStateChanged->Standby",
+                ":TEST-BATCH-JOB",
+                "MicroserviceHost:CurrentStateChanged->Unloading",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped"
+                #endregion
+            );
+
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void RunBatchJob_JobFailed_Throw()
+        {
+            //-- arrange
+
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .Configure(bootConfig => bootConfig.IsBatchJobMode = true)
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1' />
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1' />
+                        </application-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                })
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => {
+                runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+            };
+
+            var rootCauseException = new FailureTestException();
+
+            Action batchJob = () => {
+                runLog.Add(null, "TEST-BATCH-JOB");
+                throw rootCauseException;
+            };
+
+            //-- act
+
+            Action act = () => {
+                host.RunBatchJob(batchJob, CancellationToken.None, stopTimeout: TimeSpan.FromSeconds(1), stoppedWithinTimeout: out bool stoppedWithinTimeout);
+            };
+
+            var hostException = act.ShouldThrow<MicroserviceHostException>().Which;
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.CompiledStopped);
+            hostException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFaulted));
+            
+            var jobException = hostException.InnerException.Should().BeOfType<MicroserviceHostException>().Which;
+            jobException.Reason.Should().Be(nameof(MicroserviceHostException.BatchJobFailed));
+            jobException.InnerException.Should().BeSameAs(rootCauseException);
+
+            runLog.Messages.Where(s => s.StartsWith("MicroserviceHost:CurrentStateChanged->") || s.StartsWith(":")).Should().Equal(
+                #region expected log messages
+                "MicroserviceHost:CurrentStateChanged->Configuring",
+                "MicroserviceHost:CurrentStateChanged->Configured",
+                "MicroserviceHost:CurrentStateChanged->Compiling",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped",
+                "MicroserviceHost:CurrentStateChanged->Loading",
+                "MicroserviceHost:CurrentStateChanged->Standby",
+                ":TEST-BATCH-JOB",
+                "MicroserviceHost:CurrentStateChanged->Unloading",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped"
+                #endregion
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void RunBatchJob_JobThrowsOperationCanceledException_Throw()
+        {
+            //-- arrange
+
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .Configure(bootConfig => bootConfig.IsBatchJobMode = true)
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1' />
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1' />
+                        </application-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                })
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => {
+                runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+            };
+
+            var rootCauseException = new OperationCanceledException("TEST-JOB-CANCEL");
+
+            Action batchJob = () => {
+                runLog.Add(null, "TEST-BATCH-JOB");
+                throw rootCauseException;
+            };
+
+            //-- act
+
+            Action act = () => {
+                host.RunBatchJob(batchJob, CancellationToken.None, stopTimeout: TimeSpan.FromSeconds(1), stoppedWithinTimeout: out bool stoppedWithinTimeout);
+            };
+
+            var hostException = act.ShouldThrow<MicroserviceHostException>().Which;
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.CompiledStopped);
+            hostException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFaulted));
+            hostException.InnerException.Should().BeSameAs(rootCauseException);
+
+            runLog.Messages.Where(s => s.StartsWith("MicroserviceHost:CurrentStateChanged->") || s.StartsWith(":")).Should().Equal(
+                #region expected log messages
+                "MicroserviceHost:CurrentStateChanged->Configuring",
+                "MicroserviceHost:CurrentStateChanged->Configured",
+                "MicroserviceHost:CurrentStateChanged->Compiling",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped",
+                "MicroserviceHost:CurrentStateChanged->Loading",
+                "MicroserviceHost:CurrentStateChanged->Standby",
+                ":TEST-BATCH-JOB", // <-- will throw OperationCanceledException
+                "MicroserviceHost:CurrentStateChanged->Unloading",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped"
+                #endregion
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void RunBatchJob_JobCancelledByToken_Throw()
+        {
+            //-- arrange
+
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .Configure(bootConfig => bootConfig.IsBatchJobMode = true)
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1' />
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1' />
+                        </application-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                })
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => {
+                runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+            };
+
+            var cancellation = new CancellationTokenSource();
+
+            Action batchJob = () => {
+                runLog.Add(null, "TEST-BATCH-JOB");
+                cancellation.Cancel();
+            };
+
+            //-- act
+
+            Action act = () => {
+                host.RunBatchJob(batchJob, cancellation.Token, stopTimeout: TimeSpan.FromSeconds(1), stoppedWithinTimeout: out bool stoppedWithinTimeout);
+            };
+
+            var hostException = act.ShouldThrow<MicroserviceHostException>().Which;
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.CompiledStopped);
+            hostException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFaulted));
+            hostException.InnerException.Should().BeOfType<OperationCanceledException>();
+
+            runLog.Messages.Where(s => s.StartsWith("MicroserviceHost:CurrentStateChanged->") || s.StartsWith(":")).Should().Equal(
+                #region expected log messages
+                "MicroserviceHost:CurrentStateChanged->Configuring",
+                "MicroserviceHost:CurrentStateChanged->Configured",
+                "MicroserviceHost:CurrentStateChanged->Compiling",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped",
+                "MicroserviceHost:CurrentStateChanged->Loading",
+                "MicroserviceHost:CurrentStateChanged->Standby",
+                ":TEST-BATCH-JOB",
+                "MicroserviceHost:CurrentStateChanged->Unloading",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped"
+                #endregion
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void RunBatchJob_StopFailed_Throw()
+        {
+            //-- arrange
+
+            var rootCauseException = new FailureTestException();
+
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .Configure(bootConfig => bootConfig.IsBatchJobMode = true)
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1' />
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1' />
+                        </application-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    ComponentWillDo<ApplicationComponentOne>(builder, component => component.OnMayUnload += () => throw rootCauseException);
+                })
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => {
+                runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+            };
+
+            Action batchJob = () => {
+                runLog.Add(null, "TEST-BATCH-JOB");
+            };
+
+            //-- act
+
+            Action act = () => {
+                host.RunBatchJob(batchJob, CancellationToken.None, stopTimeout: TimeSpan.FromSeconds(1), stoppedWithinTimeout: out bool stoppedWithinTimeout);
+            };
+
+            var stopException = act.ShouldThrow<MicroserviceHostException>().Which;
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.Faulted);
+            stopException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFailedToProperlyStop));
+
+            var hostException = stopException.InnerException.Should().BeOfType<MicroserviceHostException>().Which;
+            hostException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFaulted));
+            
+            var componentAggregateException = hostException.InnerException.Should().BeOfType<AggregateException>().Which;
+            var componentException = componentAggregateException.InnerException.Should().BeOfType<MicroserviceHostException>().Which;
+            componentException.Reason.Should().Be(nameof(MicroserviceHostException.LifecycleComponentFailed));
+            componentException.FailedClass.Should().Be(typeof(ApplicationComponentOne));
+            componentException.FailedPhase.Should().Be(nameof(ILifecycleComponent.MayUnload));
+            
+            componentException.InnerException.Should().BeSameAs(rootCauseException);
+
+            runLog.Messages.Where(s => s.StartsWith("MicroserviceHost:CurrentStateChanged->") || s.StartsWith(":")).Should().Equal(
+                #region expected log messages
+                "MicroserviceHost:CurrentStateChanged->Configuring",
+                "MicroserviceHost:CurrentStateChanged->Configured",
+                "MicroserviceHost:CurrentStateChanged->Compiling",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped",
+                "MicroserviceHost:CurrentStateChanged->Loading",
+                "MicroserviceHost:CurrentStateChanged->Standby",
+                ":TEST-BATCH-JOB",
+                "MicroserviceHost:CurrentStateChanged->Unloading",
+                "MicroserviceHost:CurrentStateChanged->Faulted"
+                #endregion
+            );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void RunBatchJob_BothJobAndStopFailed_ThrowAggregateException()
+        {
+            //-- arrange
+
+            var jobRootCauseException = new FailureTestException("JOB-TEST-FAILURE");
+            var stopRootCauseException = new FailureTestException("STOP-TEST-FAILURE");
+
+            var bootLog = new TestLog();
+            var runLog = new TestLog();
+            var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .Configure(bootConfig => bootConfig.IsBatchJobMode = true)
+                .UseBootComponents(builder => {
+                    builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
+                    builder.RegisterComponentInstance(bootLog);
+                })
+                .UseMicroserviceXml(XElement.Parse(@"
+                    <microservice>
+                        <framework-modules>
+                            <module assembly='FxM1' />
+                        </framework-modules>
+                        <application-modules>
+                            <module assembly='AppM1' />
+                        </application-modules>
+                    </microservice>
+                "))
+                .UseBootComponents(builder => {
+                    FeatureWillContributeComponentInstance<FrameworkFeatureOne, TestLog>(builder, runLog);
+                    FeatureWillContributeLifecycleComponent<FrameworkFeatureOne, FrameworkComponentOne>(builder);
+                    FeatureWillContributeLifecycleComponent<ApplicationFeatureOne, ApplicationComponentOne>(builder);
+                    ComponentWillDo<ApplicationComponentOne>(builder, component => component.OnMayUnload += () => throw stopRootCauseException);
+                })
+                .BuildHost();
+
+            host.CurrentStateChanged += (sender, args) => {
+                runLog.Add(host, $"CurrentStateChanged->{host.CurrentState}");
+            };
+
+            Action batchJob = () => {
+                runLog.Add(null, "TEST-BATCH-JOB");
+                throw jobRootCauseException;
+            };
+
+            //-- act
+
+            Action act = () => {
+                host.RunBatchJob(batchJob, CancellationToken.None, stopTimeout: TimeSpan.FromSeconds(1), stoppedWithinTimeout: out bool stoppedWithinTimeout);
+            };
+
+            var hostException = act.ShouldThrow<MicroserviceHostException>().Which;
+
+            //-- assert
+
+            host.CurrentState.Should().Be(MicroserviceState.Faulted);
+            hostException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFaulted));
+
+            var hostInnerAggregateException = hostException.InnerException.Should().BeOfType<AggregateException>().Which;
+            hostInnerAggregateException.InnerExceptions.Count.Should().Be(2);
+
+            hostInnerAggregateException.InnerExceptions[0].Should().BeOfType<MicroserviceHostException>()
+                .Which.Reason.Should().Be(nameof(MicroserviceHostException.BatchJobFailed));
+            hostInnerAggregateException.InnerExceptions[0].InnerException.Should().BeSameAs(jobRootCauseException);
+            
+            var stopHostException = hostInnerAggregateException.InnerExceptions[1].Should().BeOfType<MicroserviceHostException>().Which;
+            stopHostException.Reason.Should().Be(nameof(MicroserviceHostException.MicroserviceFaulted));
+            
+            var stopAggregateException = stopHostException.InnerException.Should().BeOfType<AggregateException>().Which;
+            var componentException = stopAggregateException.InnerException.Should().BeOfType<MicroserviceHostException>().Which;
+            componentException.Reason.Should().Be(nameof(MicroserviceHostException.LifecycleComponentFailed));
+            componentException.FailedClass.Should().Be(typeof(ApplicationComponentOne));
+            componentException.FailedPhase.Should().Be(nameof(ILifecycleComponent.MayUnload));
+            
+            componentException.InnerException.Should().BeSameAs(stopRootCauseException);
+
+            runLog.Messages.Where(s => s.StartsWith("MicroserviceHost:CurrentStateChanged->") || s.StartsWith(":")).Should().Equal(
+                #region expected log messages
+                "MicroserviceHost:CurrentStateChanged->Configuring",
+                "MicroserviceHost:CurrentStateChanged->Configured",
+                "MicroserviceHost:CurrentStateChanged->Compiling",
+                "MicroserviceHost:CurrentStateChanged->CompiledStopped",
+                "MicroserviceHost:CurrentStateChanged->Loading",
+                "MicroserviceHost:CurrentStateChanged->Standby",
+                ":TEST-BATCH-JOB",
+                "MicroserviceHost:CurrentStateChanged->Unloading",
+                "MicroserviceHost:CurrentStateChanged->Faulted"
+                #endregion
+            );
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -2107,6 +2562,9 @@ namespace NWheels.Microservices.UnitTests.Runtime
         public class FailureTestException : Exception
         {
             public FailureTestException() : base("TEST-FAILURE")
+            {
+            }
+            public FailureTestException(string message) : base(message)
             {
             }
         }

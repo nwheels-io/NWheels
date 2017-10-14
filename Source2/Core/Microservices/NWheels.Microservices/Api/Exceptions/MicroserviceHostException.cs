@@ -66,6 +66,8 @@ namespace NWheels.Microservices.Api.Exceptions
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static readonly string _s_stringMicroserviceFaulted = nameof(MicroserviceFaulted);
+        private static readonly string _s_stringBatchJobFailed = nameof(BatchJobFailed);
+        private static readonly string _s_stringMicroserviceFailedToProperlyStop = nameof(MicroserviceFailedToProperlyStop);
         private static readonly string _s_stringMicroserviceDidNotReachRequiredState = nameof(MicroserviceDidNotReachRequiredState);
         private static readonly string _s_stringInvalidStateForStop = nameof(InvalidStateForStop);
         private static readonly string _s_stringNotConfiguredToRunInDaemonMode = nameof(NotConfiguredToRunInDaemonMode);
@@ -83,6 +85,20 @@ namespace NWheels.Microservices.Api.Exceptions
         public static MicroserviceHostException MicroserviceFaulted(Exception innerException)
         {
             return new MicroserviceHostException(_s_stringMicroserviceFaulted, innerException);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static MicroserviceHostException BatchJobFailed(Exception innerException)
+        {
+            return new MicroserviceHostException(_s_stringBatchJobFailed, innerException);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static MicroserviceHostException MicroserviceFailedToProperlyStop(Exception innerException)
+        {
+            return new MicroserviceHostException(_s_stringMicroserviceFailedToProperlyStop, innerException);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

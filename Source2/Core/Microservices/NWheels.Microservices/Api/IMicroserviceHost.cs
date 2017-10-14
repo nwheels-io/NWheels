@@ -8,7 +8,7 @@ namespace NWheels.Microservices.Api
     {
         void Compile(CancellationToken cancellation);
         void Configure(CancellationToken cancellation);
-        bool RunBatchJob(Action batchJob, CancellationToken cancellation, TimeSpan stopTimeout, out bool stoppedWithinTimeout);
+        void RunBatchJob(Action batchJob, CancellationToken cancellation, TimeSpan stopTimeout, out bool stoppedWithinTimeout);
         void RunDaemon(CancellationToken cancellation, TimeSpan stopTimeout, out bool stoppedWithinTimeout);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

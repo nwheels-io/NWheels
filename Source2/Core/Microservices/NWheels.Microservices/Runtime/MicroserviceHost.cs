@@ -185,54 +185,80 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public virtual bool RunBatchJob(Action batchJob, CancellationToken cancellation, TimeSpan stopTimeout, out bool stoppedWithinTimeout)
+        public virtual void RunBatchJob(Action batchJob, CancellationToken cancellation, TimeSpan stopTimeout, out bool stoppedWithinTimeout)
         {
-            bool invokeBatchJob()
-            {
-                Logger.RunningInBatchJobMode();
-
-                try
-                {
-                    batchJob();
-
-                    if (!cancellation.IsCancellationRequested)
-                    {
-                        Logger.BatchJobCompleted();
-                        return true;
-                    }
-
-                    Logger.BatchJobCanceled();
-                }
-                catch (OperationCanceledException)
-                {
-                    Logger.BatchJobCanceled();
-                }
-                catch (Exception error)
-                {
-                    Logger.BatchJobFailed(error);
-                }
-
-                return false;
-            }
-
             if (!BootConfig.IsBatchJobMode)
             {
                 throw MicroserviceHostException.NotConfiguredToRunInBatchJobMode();
             }
 
-            bool success;
+            Exception jobError = null;
 
             using (StateLock.Acquire(TimeSpan.FromSeconds(10), nameof(RunBatchJob)))
             {
                 ValidateNotDisposed();
                 Start(cancellation);
 
-                success = invokeBatchJob();
+                try
+                {
+                    invokeBatchJob();
+                }
+                catch (Exception e)
+                {
+                    jobError = e;
+                }
 
-                stoppedWithinTimeout = Stop(stopTimeout);
+                stoppedWithinTimeout = stopProperlyOrThrow();
+
+                if (jobError != null)
+                {
+                    throw MicroserviceHostException.MicroserviceFaulted(jobError);
+                }
             }
 
-            return success;
+            void invokeBatchJob()
+            {
+                Logger.RunningInBatchJobMode();
+
+                try
+                {
+                    batchJob();
+                }
+                catch (OperationCanceledException cancel)
+                {
+                    Logger.BatchJobCanceled(cancel);
+                    throw;
+                }
+                catch (Exception error)
+                {
+                    throw Logger.BatchJobFailed(error);
+                }
+
+                if (!cancellation.IsCancellationRequested)
+                {
+                    Logger.BatchJobCompleted();
+                }
+                else
+                {
+                    throw Logger.BatchJobCanceled();
+                }
+            }
+
+            bool stopProperlyOrThrow()
+            {
+                try
+                {
+                    return Stop(stopTimeout);
+                }
+                catch (Exception stopError) when (jobError == null)
+                {
+                    throw MicroserviceHostException.MicroserviceFailedToProperlyStop(stopError);
+                }
+                catch (Exception stopError) when (jobError != null)
+                {
+                    throw MicroserviceHostException.MicroserviceFaulted(new AggregateException(jobError, stopError));
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
