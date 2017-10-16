@@ -15,11 +15,6 @@
     <AssemblyName>ServiceName</AssemblyName> 
   </PropertyGroup>
     
-  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <DebugType>Full</DebugType>
-    <DebugSymbols>True</DebugSymbols>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="NWheels.Microservices" Version="0.0.0-REPLACE" />
   </ItemGroup>

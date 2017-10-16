@@ -12,11 +12,6 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <DebugType>Full</DebugType>
-    <DebugSymbols>True</DebugSymbols>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\Kernel\NWheels.Kernel\NWheels.Kernel.csproj" />
     <ProjectReference Include="..\..\Compilation\NWheels.Compilation\NWheels.Compilation.csproj" />

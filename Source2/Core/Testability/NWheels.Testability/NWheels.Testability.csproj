@@ -13,11 +13,6 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <DebugType>Full</DebugType>
-    <DebugSymbols>True</DebugSymbols>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="FluentAssertions" Version="4.19.4" />

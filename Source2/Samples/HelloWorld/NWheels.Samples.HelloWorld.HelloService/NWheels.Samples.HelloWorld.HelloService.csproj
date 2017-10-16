@@ -15,11 +15,6 @@
     <AssemblyName>hello</AssemblyName> 
   </PropertyGroup>
     
-  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <DebugType>Full</DebugType>
-    <DebugSymbols>True</DebugSymbols>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\..\Core\Microservices\NWheels.Microservices\NWheels.Microservices.csproj" />
   </ItemGroup>
