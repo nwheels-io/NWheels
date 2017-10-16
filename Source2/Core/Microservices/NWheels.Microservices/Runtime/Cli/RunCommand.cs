@@ -14,6 +14,7 @@ namespace NWheels.Microservices.Runtime.Cli
         private readonly MutableBootConfiguration _bootConfig;
         private bool _debugLogLevel;
         private bool _verboseLogLevel;
+        private bool _useStdinForSignal;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -30,6 +31,7 @@ namespace NWheels.Microservices.Runtime.Cli
         {
             syntax.DefineOption("d|debug", ref _debugLogLevel, "Set log level to Debug");
             syntax.DefineOption("v|verbose", ref _verboseLogLevel, "Set log level to Verbose");
+            syntax.DefineOption("s|stdin-signal", ref _useStdinForSignal, "Treat end of standard input as signal to exit");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -53,5 +55,9 @@ namespace NWheels.Microservices.Runtime.Cli
             _host.RunDaemon(cancellation, TimeSpan.FromSeconds(30), out bool stoppedWithinTimeout);
             return (stoppedWithinTimeout ? 0 : -3);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public override bool UseStdinForSignal => _useStdinForSignal;
     }
 }

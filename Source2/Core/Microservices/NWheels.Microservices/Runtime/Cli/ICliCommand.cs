@@ -19,6 +19,7 @@ namespace NWheels.Microservices.Runtime.Cli
         int Execute(CancellationToken cancellation);
         string Name { get; }
         string HelpText { get; }
+        bool UseStdinForSignal { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -30,7 +30,7 @@ namespace NWheels.Testability
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private readonly string _projectFolderPath;
+        private readonly string _projectFilePath;
         private readonly CancellationTokenSource _timeoutCancellation;
         private readonly Stopwatch _clock;
         private readonly List<string> _output; 
@@ -42,9 +42,9 @@ namespace NWheels.Testability
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceProcess(string projectFolderRelativePath)
+        public MicroserviceProcess(string projectFileRelativePath)
         {
-            _projectFolderPath = Path.Combine(_s_testBinaryFolderPath, projectFolderRelativePath);
+            _projectFilePath = Path.Combine(_s_testBinaryFolderPath, projectFileRelativePath);
 
             _timeoutCancellation = new CancellationTokenSource();
             _clock = new Stopwatch();
@@ -131,10 +131,13 @@ namespace NWheels.Testability
             var info = new ProcessStartInfo() {
                 FileName = GetExecutableFileName(),
                 Arguments = GetExecutableArguments(),
-                WorkingDirectory = _projectFolderPath,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true
             };
+
+            // Assert.False(
+            //     true, 
+            //     $"MicroserviceProcess:\r\n- executable > {info.FileName}\r\n- arguments  > {info.Arguments}");
 
             _process = Process.Start(info);
         }
@@ -161,25 +164,25 @@ namespace NWheels.Testability
 
         private string GetExecutableArguments()
         {
-            var escapeQuote = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? '"' : '\'');
-            var arguments = string.Join(" ", _arguments.Select(escapeSpacesWithQuotes)); 
+            var quoteChar = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? '"' : '\'');
+            var arguments = string.Join(" ", _arguments.Select(escapeSpaces)); 
 
             if (IsCoverageEnabled)
             {
                 var resolvedArguments = _s_coverageArgsTemplate
-                    .Replace(_s_coverageProjectPlaceholder, _projectFolderPath)
+                    .Replace(_s_coverageProjectPlaceholder, escapeSpaces(_projectFilePath))
                     .Replace(_s_coverageArgumentsPlaceholder, arguments);
 
                 return resolvedArguments;
             }
             else 
             {
-                return $"run --no-restore --no-build -- {arguments}";
+                return $"run --project {escapeSpaces(_projectFilePath)} --no-restore --no-build -- {arguments}";
             }
 
-            string escapeSpacesWithQuotes(string s)
+            string escapeSpaces(string s)
             {
-                return (s.Contains(" ") ? escapeQuote + s + escapeQuote : s);
+                return (s.Contains(" ") ? quoteChar + s + quoteChar : s);
             }
         }
 

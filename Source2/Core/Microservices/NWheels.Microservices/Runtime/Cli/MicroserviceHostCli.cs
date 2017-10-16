@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using NWheels.Kernel.Api.Logging;
 using NWheels.Microservices.Api;
 
@@ -25,6 +26,7 @@ namespace NWheels.Microservices.Runtime.Cli
     {
         private readonly CancellationTokenSource _cancellation;
         private MicroserviceHost _host;
+        private Task _stdinSignalTask;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -90,6 +92,11 @@ namespace NWheels.Microservices.Runtime.Cli
             var activeCommand = FindActiveCommand(commands, parsedArgs);   // will Environment.Exit(1) if not found
             activeCommand.ValidateArguments(parsedArgs);                   // will Environment.Exit(1) if not valid
 
+            if (activeCommand.UseStdinForSignal)
+            {
+                _stdinSignalTask = Task.Factory.StartNew(SignalWhenStdinClosed);
+            }
+
             try
             {
                 return activeCommand.Execute(_cancellation.Token);
@@ -99,6 +106,10 @@ namespace NWheels.Microservices.Runtime.Cli
                 ColorConsole.Log(LogLevel.Critical, $"Microservice faulted!{Environment.NewLine}{e}");
                 var exitCode = (e is CliCommandFailedException commandFailure ? commandFailure.ExitCode : -2);
                 return exitCode;
+            }
+            finally
+            {
+                EnsureProperlyStopped();
             }
         }
 
@@ -135,6 +146,29 @@ namespace NWheels.Microservices.Runtime.Cli
             catch
             {
                 // swallow exceptions to avoid crash
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void SignalWhenStdinClosed()
+        {
+            try
+            {
+                while (!_cancellation.IsCancellationRequested)
+                {
+                    var readLineTask = Console.In.ReadLineAsync();
+                    readLineTask.Wait(_cancellation.Token);
+                    
+                    if (readLineTask.Result == null)
+                    {
+                        _cancellation.Cancel();
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // swallow, just exit
             }
         }
 
@@ -177,6 +211,28 @@ namespace NWheels.Microservices.Runtime.Cli
             }
 
             return activeCommand;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void EnsureProperlyStopped()
+        {
+            if (!_cancellation.IsCancellationRequested)
+            {
+                try
+                {
+                    _cancellation.Cancel();
+                }
+                catch
+                {
+                }
+            }
+
+            if (_stdinSignalTask != null)
+            {
+                _stdinSignalTask.Wait(1000);
+                _stdinSignalTask = null;
+            }
         }
     }
 }
