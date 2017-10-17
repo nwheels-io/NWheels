@@ -47,7 +47,7 @@ test_script:
 
     $testRunStatus = "OK"
 
-    $env:NW_SYSTEST_USE_COVER = "True
+    $env:NW_SYSTEST_USE_COVER = "True"
 
     $env:NW_SYSTEST_COVER_EXE = "c:\projects\NWheels\Tools\OpenCover.4.6.519\tools\OpenCover.Console.exe"
 
