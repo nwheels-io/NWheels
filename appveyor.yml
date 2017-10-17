@@ -46,11 +46,16 @@ test_script:
     cd c:\projects\NWheels\Source2
     
     $testRunStatus = "OK"
-	$env:NW_SYSTEST_USE_COVER = "True"
-	$env:NW_SYSTEST_COVER_EXE = "c:\projects\NWheels\Tools\OpenCover.4.6.519\tools\OpenCover.Console.exe"
-	$env:NW_SYSTEST_COVER_ARGS_TEMPLATE = '-target:dotnet.exe "-targetargs:run --project [[PROJECT]] --no-build -- [[ARGS]]" -oldStyle -register:user -filter:"+[NWheels.*]* +[*]NWheels.* -[*.*Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* ' + "-output:c:\projects\NWheels\Source2\CoverageResults.xml -mergeoutput -returntargetcode:1000"
-	$env:NW_SYSTEST_COVER_PROJECT_PLACEHOLDER = "[[PROJECT]]"
-	$env:NW_SYSTEST_COVER_ARGS_PLACEHOLDER = "[[ARGS]]"
+	
+    $env:NW_SYSTEST_USE_COVER = "True"
+	
+    $env:NW_SYSTEST_COVER_EXE = "c:\projects\NWheels\Tools\OpenCover.4.6.519\tools\OpenCover.Console.exe"
+	
+    $env:NW_SYSTEST_COVER_ARGS_TEMPLATE = '-target:dotnet.exe "-targetargs:run --project [[PROJECT]] --no-build -- [[ARGS]]" -oldStyle -register:user -filter:"+[NWheels.*]* +[*]NWheels.* -[*.*Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* ' + "-output:c:\projects\NWheels\Source2\CoverageResults.xml -mergeoutput -returntargetcode:1000"
+	
+    $env:NW_SYSTEST_COVER_PROJECT_PLACEHOLDER = "[[PROJECT]]"
+	
+    $env:NW_SYSTEST_COVER_ARGS_PLACEHOLDER = "[[ARGS]]"
 
     Get-ChildItem -Directory -Recurse -Include *.UnitTests,*.IntegrationTests,*.Tests | Foreach { 
         echo --- "Running Unit + Integration tests in project" $_.fullName ---;     
