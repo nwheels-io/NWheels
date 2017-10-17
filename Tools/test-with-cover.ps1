@@ -36,7 +36,7 @@ if ($unitIntegTests) {
 		}
 
 		$dotnetArgs = '"-targetargs:test ' + $_.fullname + ' --no-build --no-restore -c Debug --filter ""(Purpose=UnitTest)|(Purpose=IntegrationTest)"""';
-		& $scriptDir\Installed\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:dotnet.exe $dotnetArgs -oldStyle -register:user -filter:"+[NWheels.*]* -[*.*Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -output:$topDir\TestResults\CoverageResults.xml -mergeoutput -returntargetcode:1000
+		& $scriptDir\Installed\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:dotnet.exe $dotnetArgs -oldStyle -register:user -filter:"+[NWheels.*]* +[*]NWheels.* -[*.*Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -output:$topDir\TestResults\CoverageResults.xml -mergeoutput -returntargetcode:1000
 
 		if ($LastExitCode -ne 0) { $testRunStatus = "FAIL" }
 	}
@@ -45,7 +45,7 @@ if ($unitIntegTests) {
 if ($systemTests) {
 	$env:NW_SYSTEST_USE_COVER = "True"
 	$env:NW_SYSTEST_COVER_EXE = "$scriptDir\Installed\OpenCover.4.6.519\tools\OpenCover.Console.exe"
-	$env:NW_SYSTEST_COVER_ARGS_TEMPLATE = '-target:dotnet.exe "-targetargs:run --project [[PROJECT]] --no-build -- [[ARGS]]" -oldStyle -register:user -filter:"+[NWheels.*]* +[*]NWheels.* -[*.*Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* ' + "-output:$topDir\TestResults\CoverageResults.xml -returntargetcode:1000"
+	$env:NW_SYSTEST_COVER_ARGS_TEMPLATE = '-target:dotnet.exe "-targetargs:run --project [[PROJECT]] --no-build -- [[ARGS]]" -oldStyle -register:user -filter:"+[NWheels.*]* +[*]NWheels.* -[*.*Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* ' + "-output:$topDir\TestResults\CoverageResults.xml -mergeoutput -returntargetcode:1000"
 	$env:NW_SYSTEST_COVER_PROJECT_PLACEHOLDER = "[[PROJECT]]"
 	$env:NW_SYSTEST_COVER_ARGS_PLACEHOLDER = "[[ARGS]]"
 

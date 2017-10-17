@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NWheels.Microservices.Api;
 
 namespace NWheels.Samples.HelloWorld.HelloService
 {
-    class Program
+    public class Program
     {
         static int Main(string[] args)
         {
@@ -19,6 +20,15 @@ namespace NWheels.Samples.HelloWorld.HelloService
             public override void MicroserviceActivated()
             {
                 Console.WriteLine("HELLO WORLD!!!");
+            }
+        }
+
+        public class HelloTx
+        {
+            public async Task<string> Hello(string name)
+            {
+                await Task.Delay(100);
+                return $"Hello, {name}!";
             }
         }
     }

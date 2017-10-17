@@ -7,10 +7,11 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using NWheels.Microservices.Api;
+using NWheels.Testability;
 
 namespace NWheels.Microservices.UnitTests.Api
 {
-    public class AssemblyLocationMapTests
+    public class AssemblyLocationMapTests : TestBase.UnitTest
     {
         [Fact]
         public void CanAddAssemblyDirectories()

@@ -6,10 +6,11 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using Xunit;
+using NWheels.Testability;
 
 namespace NWheels.Kernel.UnitTests.Api.Extensions
 {
-    public class StringExtensionsTests
+    public class StringExtensionsTests : TestBase.UnitTest
     {
         [Theory]
         [InlineData("PrefixEndOfString", "Prefix", "EndOfString")]

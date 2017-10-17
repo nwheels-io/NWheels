@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Xunit;
+using NWheels.Testability;
 
 namespace NWheels.Kernel.UnitTests.Api.Primitives
 {
-    public class RevertableSequenceTests
+    public class RevertableSequenceTests : TestBase.UnitTest
     {
         [Fact]
         public void NewInstance_State_NotPerformed()

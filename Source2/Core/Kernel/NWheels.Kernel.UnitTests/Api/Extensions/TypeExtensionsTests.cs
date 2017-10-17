@@ -4,10 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
+using NWheels.Testability;
 
 namespace NWheels.Kernel.UnitTests.Api.Extensions
 {
-    public class TypeExtensionsTests
+    public class TypeExtensionsTests : TestBase.UnitTest
     {
         [Theory]
         [InlineData(typeof(TypeExtensionsTests), "NWheels.Kernel.UnitTests")]

@@ -5,10 +5,11 @@ using System.Runtime.CompilerServices;
 using Xunit;
 using FluentAssertions;
 using NWheels.Kernel.Api.Exceptions;
+using NWheels.Testability;
 
 namespace NWheels.Kernel.UnitTests.Api.Primitives
 {
-    public class StateMachineTests
+    public class StateMachineTests : TestBase.UnitTest
     {
         [Fact]
         public void NewInstance_InitialState()

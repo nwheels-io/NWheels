@@ -6,10 +6,11 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using Xunit;
+using NWheels.Testability;
 
 namespace NWheels.Kernel.UnitTests.Api.Extensions
 {
-    public class PathUtilityTests
+    public class PathUtilityTests : TestBase.UnitTest
     {
         [Fact]
         public void ExpandPathFromBinary_RelativePath_Expanded()
