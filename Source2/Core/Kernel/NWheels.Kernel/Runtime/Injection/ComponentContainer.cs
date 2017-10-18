@@ -42,9 +42,51 @@ namespace NWheels.Kernel.Runtime.Injection
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TService ResolveWithArguments<TService, TArg1>(TArg1 arg1)
+        {
+            return _container.Resolve<TService>(TypedParameter.From(arg1));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TService ResolveWithArguments<TService, TArg1, TArg2>(TArg1 arg1, TArg2 arg2)
+        {
+            return _container.Resolve<TService>(TypedParameter.From(arg1), TypedParameter.From(arg2));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TService ResolveWithArguments<TService>(params object[] arguments)
+        {
+            return _container.Resolve<TService>(MakeTypedParameters(arguments));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TService ResolveNamed<TService>(string name)
         {
             return _container.ResolveNamed<TService>(name);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TService ResolveNamedWithArguments<TService, TArg1>(string name, TArg1 arg1)
+        {
+            return _container.ResolveNamed<TService>(name, TypedParameter.From(arg1));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TService ResolveNamedWithArguments<TService, TArg1, TArg2>(string name, TArg1 arg1, TArg2 arg2)
+        {
+            return _container.ResolveNamed<TService>(name, TypedParameter.From(arg1), TypedParameter.From(arg2));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TService ResolveNamedWithArguments<TService>(string name, params object[] arguments)
+        {
+            return _container.ResolveNamed<TService>(name, MakeTypedParameters(arguments));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -70,9 +112,23 @@ namespace NWheels.Kernel.Runtime.Injection
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public object ResolveWithArguments(Type serviceType, params object[] arguments)
+        {
+            return _container.Resolve(serviceType, MakeTypedParameters(arguments));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public object ResolveNamed(Type serviceType, string name)
         {
             return _container.ResolveNamed(name, serviceType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public object ResolveNamedWithArguments(Type serviceType, string name, params object[] arguments)
+        {
+            return _container.ResolveNamed(name, serviceType, MakeTypedParameters(arguments));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -107,6 +163,16 @@ namespace NWheels.Kernel.Runtime.Injection
             {
                 _container.ComponentRegistry.Register(componentRegistration);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        private IEnumerable<TypedParameter> MakeTypedParameters(IEnumerable<object> arguments)
+        {
+            return arguments.Select(arg => new TypedParameter(
+                type: arg?.GetType() ?? typeof(Object), 
+                value: arg
+            ));
         }
     }
 }

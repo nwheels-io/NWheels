@@ -12,5 +12,12 @@ namespace NWheels.Kernel.Api.Extensions
         {
             return (IInternalComponentContainer)container;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public static IInternalComponentContainerBuilder AsInternal(this IComponentContainerBuilder containerBuilder)
+        {
+            return (IInternalComponentContainerBuilder)containerBuilder;
+        }
     }
 }

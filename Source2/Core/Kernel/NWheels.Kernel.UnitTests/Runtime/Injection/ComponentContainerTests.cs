@@ -253,6 +253,236 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
+        public void ResolveWithArguments_One()
+        {
+            //-- arrange
+
+            var builder = new ComponentContainerBuilder();
+            builder.RegisterComponentType<ComponentAWithParam>().ForService<IServiceA>();
+
+            var containerUnderTest = builder.CreateComponentContainer();
+
+            //-- act
+
+            var resolved = containerUnderTest.ResolveWithArguments<IServiceA, TimeSpan>(TimeSpan.FromSeconds(123));
+
+            //-- assert
+
+            resolved.Should().NotBeNull();
+            resolved.Should().BeOfType<ComponentAWithParam>();
+            
+            ((ComponentAWithParam)resolved).Value.Should().Be(TimeSpan.FromSeconds(123));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void ResolveWithArguments_Two()
+        {
+            //-- arrange
+
+            var componentB = new ComponentB();
+
+            var builder = new ComponentContainerBuilder();
+            builder.RegisterComponentType<ComponentAWithManyParams>().SingleInstance().ForService<IServiceA>();
+            builder.RegisterComponentInstance(componentB).ForService<IServiceB>();
+
+            var containerUnderTest = builder.CreateComponentContainer();
+
+            //-- act
+
+            var resolved = containerUnderTest.ResolveWithArguments<IServiceA, TimeSpan, DayOfWeek>(TimeSpan.FromSeconds(123), DayOfWeek.Tuesday);
+
+            //-- assert
+
+            resolved.Should().NotBeNull();
+            resolved.Should().BeOfType<ComponentAWithManyParams>();
+            
+            ((ComponentAWithManyParams)resolved).ServiceB.Should().BeSameAs(componentB);
+            ((ComponentAWithManyParams)resolved).DayValue.Should().Be(DayOfWeek.Tuesday);
+            ((ComponentAWithManyParams)resolved).TimeValue.Should().Be(TimeSpan.FromSeconds(123));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void ResolveWithArguments_Array()
+        {
+            //-- arrange
+
+            var componentB = new ComponentB();
+
+            var builder = new ComponentContainerBuilder();
+            builder.RegisterComponentType<ComponentAWithManyParams>().SingleInstance().ForService<IServiceA>();
+            builder.RegisterComponentInstance(componentB).ForService<IServiceB>();
+
+            var containerUnderTest = builder.CreateComponentContainer();
+
+            //-- act
+
+            var resolved = containerUnderTest.ResolveWithArguments<IServiceA>(TimeSpan.FromSeconds(123), DayOfWeek.Tuesday);
+
+            //-- assert
+
+            resolved.Should().NotBeNull();
+            resolved.Should().BeOfType<ComponentAWithManyParams>();
+            
+            ((ComponentAWithManyParams)resolved).ServiceB.Should().BeSameAs(componentB);
+            ((ComponentAWithManyParams)resolved).DayValue.Should().Be(DayOfWeek.Tuesday);
+            ((ComponentAWithManyParams)resolved).TimeValue.Should().Be(TimeSpan.FromSeconds(123));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void ResolveWithArguments_NonGeneric()
+        {
+            //-- arrange
+
+            var componentB = new ComponentB();
+
+            var builder = new ComponentContainerBuilder();
+            builder.RegisterComponentType<ComponentAWithManyParams>().SingleInstance().ForService<IServiceA>();
+            builder.RegisterComponentInstance(componentB).ForService<IServiceB>();
+
+            var containerUnderTest = builder.CreateComponentContainer();
+
+            //-- act
+
+            var resolved = containerUnderTest.ResolveWithArguments(typeof(IServiceA), TimeSpan.FromSeconds(123), DayOfWeek.Tuesday);
+
+            //-- assert
+
+            resolved.Should().NotBeNull();
+            resolved.Should().BeOfType<ComponentAWithManyParams>();
+            
+            ((ComponentAWithManyParams)resolved).ServiceB.Should().BeSameAs(componentB);
+            ((ComponentAWithManyParams)resolved).DayValue.Should().Be(DayOfWeek.Tuesday);
+            ((ComponentAWithManyParams)resolved).TimeValue.Should().Be(TimeSpan.FromSeconds(123));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void ResolveNamedWithArguments_One()
+        {
+            //-- arrange
+
+            var builder = new ComponentContainerBuilder();
+            builder.RegisterComponentType<ComponentA>().NamedForService<IServiceA>("X");
+            builder.RegisterComponentType<ComponentAWithParam>().NamedForService<IServiceA>("Y");
+            builder.RegisterComponentType<ComponentA>().NamedForService<IServiceA>("Z");
+
+            var containerUnderTest = builder.CreateComponentContainer();
+
+            //-- act
+
+            var resolved = containerUnderTest.ResolveNamedWithArguments<IServiceA, TimeSpan>("Y", TimeSpan.FromSeconds(123));
+
+            //-- assert
+
+            resolved.Should().NotBeNull();
+            resolved.Should().BeOfType<ComponentAWithParam>();
+            
+            ((ComponentAWithParam)resolved).Value.Should().Be(TimeSpan.FromSeconds(123));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void ResolveNamedWithArguments_Two()
+        {
+            //-- arrange
+
+            var componentB = new ComponentB();
+
+            var builder = new ComponentContainerBuilder();
+            builder.RegisterComponentInstance(componentB).ForService<IServiceB>();
+            builder.RegisterComponentType<ComponentA>().NamedForService<IServiceA>("X");
+            builder.RegisterComponentType<ComponentAWithManyParams>().NamedForService<IServiceA>("Y");
+            builder.RegisterComponentType<ComponentA>().NamedForService<IServiceA>("Z");
+
+            var containerUnderTest = builder.CreateComponentContainer();
+
+            //-- act
+
+            var resolved = containerUnderTest.ResolveNamedWithArguments<IServiceA, TimeSpan, DayOfWeek>("Y", TimeSpan.FromSeconds(123), DayOfWeek.Tuesday);
+
+            //-- assert
+
+            resolved.Should().NotBeNull();
+            resolved.Should().BeOfType<ComponentAWithManyParams>();
+            
+            ((ComponentAWithManyParams)resolved).ServiceB.Should().BeSameAs(componentB);
+            ((ComponentAWithManyParams)resolved).DayValue.Should().Be(DayOfWeek.Tuesday);
+            ((ComponentAWithManyParams)resolved).TimeValue.Should().Be(TimeSpan.FromSeconds(123));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void ResolveNamedWithArguments_Array()
+        {
+            //-- arrange
+
+            var componentB = new ComponentB();
+
+            var builder = new ComponentContainerBuilder();
+            builder.RegisterComponentInstance(componentB).ForService<IServiceB>();
+            builder.RegisterComponentType<ComponentA>().NamedForService<IServiceA>("X");
+            builder.RegisterComponentType<ComponentAWithManyParams>().NamedForService<IServiceA>("Y");
+            builder.RegisterComponentType<ComponentA>().NamedForService<IServiceA>("Z");
+
+            var containerUnderTest = builder.CreateComponentContainer();
+
+            //-- act
+
+            var resolved = containerUnderTest.ResolveNamedWithArguments<IServiceA>("Y", TimeSpan.FromSeconds(123), DayOfWeek.Tuesday);
+
+            //-- assert
+
+            resolved.Should().NotBeNull();
+            resolved.Should().BeOfType<ComponentAWithManyParams>();
+            
+            ((ComponentAWithManyParams)resolved).ServiceB.Should().BeSameAs(componentB);
+            ((ComponentAWithManyParams)resolved).DayValue.Should().Be(DayOfWeek.Tuesday);
+            ((ComponentAWithManyParams)resolved).TimeValue.Should().Be(TimeSpan.FromSeconds(123));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void ResolveNamedWithArguments_NonGeneric()
+        {
+            //-- arrange
+
+            var componentB = new ComponentB();
+
+            var builder = new ComponentContainerBuilder();
+            builder.RegisterComponentInstance(componentB).ForService<IServiceB>();
+            builder.RegisterComponentType<ComponentA>().NamedForService<IServiceA>("X");
+            builder.RegisterComponentType<ComponentAWithManyParams>().NamedForService<IServiceA>("Y");
+            builder.RegisterComponentType<ComponentA>().NamedForService<IServiceA>("Z");
+
+            var containerUnderTest = builder.CreateComponentContainer();
+
+            //-- act
+
+            var resolved = containerUnderTest.ResolveNamedWithArguments(typeof(IServiceA), "Y", TimeSpan.FromSeconds(123), DayOfWeek.Tuesday);
+
+            //-- assert
+
+            resolved.Should().NotBeNull();
+            resolved.Should().BeOfType<ComponentAWithManyParams>();
+            
+            ((ComponentAWithManyParams)resolved).ServiceB.Should().BeSameAs(componentB);
+            ((ComponentAWithManyParams)resolved).DayValue.Should().Be(DayOfWeek.Tuesday);
+            ((ComponentAWithManyParams)resolved).TimeValue.Should().Be(TimeSpan.FromSeconds(123));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void TryResolve_ComponentRegistered_Resolved()
         {
             //-- arrange
@@ -487,6 +717,27 @@ namespace NWheels.Kernel.UnitTests.Runtime.Injection
         }
         public class ComponentC : IServiceC, ISpecialComponent, IAnyComponent
         {
+        }
+        public class ComponentAWithParam : IServiceA
+        {
+            public ComponentAWithParam(TimeSpan value)
+            {
+                Value = value;
+            }
+            public TimeSpan Value { get; }
+        }
+        public class ComponentAWithManyParams : IServiceA
+        {
+            public ComponentAWithManyParams(IServiceB serviceB, DayOfWeek dayValue, TimeSpan timeValue)
+            {
+                this.ServiceB = serviceB;
+                this.DayValue = dayValue;
+                this.TimeValue = timeValue;
+            }
+
+            public IServiceB ServiceB { get; }
+            public DayOfWeek DayValue { get; }
+            public TimeSpan TimeValue { get; }
         }
     }
 }
