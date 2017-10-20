@@ -24,6 +24,10 @@ namespace NWheels.Kernel.Api.Injection
         IComponentRegistrationBuilder SingleInstance();
         IComponentRegistrationBuilder InstancePerDependency();
         IComponentInstantiationBuilder WithParameter<T>(T value);
+        IComponentInstantiationBuilder WithAdapterParameter<TAdapter, TConfig>(AdapterInjectionPort<TAdapter, TConfig> injectionPort)
+            where TAdapter : class;
+        IComponentInstantiationBuilder WithAdapterConfigurationParameter<TAdapter, TConfig>(AdapterInjectionPort<TAdapter, TConfig> injectionPort)
+            where TAdapter : class;
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

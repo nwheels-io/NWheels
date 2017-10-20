@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using NWheels.Kernel.Api.Injection;
 
-namespace NWheels.Kernel.Runtime.Injection
+namespace NWheels.Kernel.Api.Injection
 {
     public interface IFeatureLoaderPhaseExtension
     {
@@ -14,10 +14,5 @@ namespace NWheels.Kernel.Runtime.Injection
         void BeforeCompileComponents(IComponentContainer comcomponents);
         void BeforeContributeCompiledComponents(IComponentContainer comcomponents);
         void AfterContributeCompiledComponents(IComponentContainer comcomponents);
-    }
-
-    public interface IFeatureLoaderWithPhaseExtension : IFeatureLoader
-    {
-        IFeatureLoaderPhaseExtension PhaseExtension { get; }
     }
 }

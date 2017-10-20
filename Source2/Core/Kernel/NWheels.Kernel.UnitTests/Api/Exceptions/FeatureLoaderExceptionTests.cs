@@ -30,7 +30,7 @@ namespace NWheels.Kernel.UnitTests.Api.Exceptions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class TestFeature : FeatureLoaderBase
+        public class TestFeature : AdvancedFeature
         {
         }
     }

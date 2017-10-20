@@ -282,14 +282,14 @@ namespace NWheels.Microservices.UnitTests.Api
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class TestDefaultFeatureLoader : FeatureLoaderBase
+        private class TestDefaultFeatureLoader : AdvancedFeature
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [FeatureLoader(Name = "Named")]
-        private class TestNamedFeatureLoader : FeatureLoaderBase
+        private class TestNamedFeatureLoader : AdvancedFeature
         {
         }
 

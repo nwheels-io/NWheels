@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace NWheels.Kernel.Api.Injection
 {
     [ExcludeFromCodeCoverage]
-    public abstract class FeatureLoaderBase : IFeatureLoader
+    public abstract class AdvancedFeature : IFeatureLoader, IFeatureLoaderWithPhaseExtension
     {
         public virtual void ContributeConfigSections(IComponentContainerBuilder newComponents)
         {
@@ -39,5 +39,9 @@ namespace NWheels.Kernel.Api.Injection
         public virtual void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IFeatureLoaderPhaseExtension PhaseExtension { get; protected set; }
     }
 }

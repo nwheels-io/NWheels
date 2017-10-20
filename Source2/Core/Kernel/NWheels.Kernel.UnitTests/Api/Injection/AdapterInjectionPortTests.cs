@@ -13,7 +13,7 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
     using NWheels.Kernel.Runtime.Injection;
     using PortsAndAdapters;
 
-    public class PortsAndAdaptersPoc : TestBase.UnitTest
+    public class AdapterInjectionPortTests : TestBase.UnitTest
     {
         [Fact]
         public void OneProgrammingModel_OnePort_OneAdapter()
@@ -23,8 +23,9 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
             var consumingModelFeature = new PortsAndAdapters.ConsumingModel.Runtime.ConsumingModelFeature();
             var supplierAdapterFeature = new PortsAndAdapters.SupplyingModel.Adapters.Abcd.AbcdFeature();
             var appFeature = new PortsAndAdapters.App.Module.FirstAppFeature();
+            var unusedPortFeature = new PortsAndAdapters.App.Module.UnusedPortFeature();
 
-            IComponentContainer container = LoadFeatures(consumingModelFeature, supplierAdapterFeature, appFeature);
+            IComponentContainer container = LoadFeatures(consumingModelFeature, supplierAdapterFeature, appFeature, unusedPortFeature);
 
             //-- act
 
@@ -176,7 +177,7 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
             {
             }
 
-            public class FirstAppFeature : FeatureLoaderBase
+            public class FirstAppFeature : AdvancedFeature
             {
                 public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
                 {
@@ -188,7 +189,7 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
                 public SupplierConfiguration Configuration { get; set; }
             }
 
-            public class SecondAppFeature : FeatureLoaderBase
+            public class SecondAppFeature : AdvancedFeature
             {
                 public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
                 {
@@ -200,6 +201,18 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
                 }
                 public SupplierConfiguration Configuration { get; set; }
                 public bool SuppressAbcd { get; set; }
+            }
+
+            public class UnusedPortFeature : AdvancedFeature
+            {
+                public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
+                {
+                    var unusedPort = new SupplierAdapterInjectionPort(newComponents, new SupplierConfiguration() {
+                        Value = "ZZZ"
+                    });
+
+                    newComponents.RegisterAdapterPort(unusedPort);
+                }
             }
         }
 
@@ -222,7 +235,7 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
                         configureSupplier?.Invoke(configuration);
                         
                         var supplierPort = new SupplierAdapterInjectionPort(builder, configuration);
-                        builder.RegisterComponentInstance(supplierPort);
+                        builder.RegisterAdapterPort(supplierPort);
 
                         var registration = new ConsumingModelRegistration(typeof(TAppSpecificInterface), supplierPort);
                         builder.RegisterComponentInstance(registration);
@@ -249,9 +262,8 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
                 using ConsumingModel.Api;
                 using SupplyingModel.Api;
 
-                public class ConsumingModelFeature : FeatureLoaderBase
+                public class ConsumingModelFeature : AdvancedFeature
                 {
-                    private readonly Dictionary<Type, ConsumingModelRegistration> _registrationByAppSpecificType = new Dictionary<Type, ConsumingModelRegistration>();
                     private readonly Dictionary<Type, Type> _generatedTypeByAppSpecificType = new Dictionary<Type, Type>();
 
                     public override void CompileComponents(IComponentContainer existingComponents)
@@ -260,44 +272,42 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
 
                         foreach (var registration in allRegistrations)
                         {
-                            if (!_registrationByAppSpecificType.ContainsKey(registration.AppSpecificModelType))
-                            {
-                                _registrationByAppSpecificType.Add(registration.AppSpecificModelType, registration);
-                            }
-                            else
-                            {
-                                throw new Exception($"ConsumingModel for '{registration.AppSpecificModelType.FullName}' was already contributed. Duplicates are not allowed.");
-                            }
-                        }
-
-                        foreach (var appSpecificType in _registrationByAppSpecificType.Keys.ToArray())
-                        {
-                            // here ConsumingModel_of_Xxxxxx classes are generated...
-                            // below is mockup code...
-                            if (appSpecificType == typeof(App.Module.IFirstAppSpecificInterface))
-                            {
-                                _generatedTypeByAppSpecificType[appSpecificType] = typeof(GeneratedCode.ConsumingModel_of_App_Module_FirstAppSpecificInterface);
-                            }
-                            else if (appSpecificType == typeof(App.Module.ISecondAppSpecificInterface))
-                            {
-                                _generatedTypeByAppSpecificType[appSpecificType] = typeof(GeneratedCode.ConsumingModel_of_App_Module_SecondAppSpecificInterface);
-                            }
+                            GenerateAppSpecificModel(registration.AppSpecificModelType);
                         }
                     }
 
                     public override void ContributeCompiledComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
                     {
-                        foreach (var pair in _generatedTypeByAppSpecificType)
+                        var allRegistrations = existingComponents.ResolveAll<ConsumingModelRegistration>();
+
+                        foreach (var registration in allRegistrations)
                         {
-                            var appSpecificType = pair.Key;
-                            var generatedComponentType = pair.Value;
-                            var registration = _registrationByAppSpecificType[appSpecificType];
+                            var generatedComponentType = _generatedTypeByAppSpecificType[registration.AppSpecificModelType];
 
                             newComponents
                                 .RegisterComponentType(generatedComponentType)
-                                .WithParameter<SupplierAdapterInjectionPort>(registration.SupplierPort)
+                                .WithAdapterParameter(registration.SupplierPort)
                                 .InstancePerDependency()
-                                .ForServices(appSpecificType);
+                                .ForServices(registration.AppSpecificModelType);
+                        }
+                    }
+
+                    private void GenerateAppSpecificModel(Type appSpecificType)
+                    {
+                        if (_generatedTypeByAppSpecificType.ContainsKey(appSpecificType))
+                        {
+                            return;
+                        }
+
+                        // here ConsumingModel_of_Xxxxxx classes are generated...
+                        // below is mockup code...
+                        if (appSpecificType == typeof(App.Module.IFirstAppSpecificInterface))
+                        {
+                            _generatedTypeByAppSpecificType[appSpecificType] = typeof(GeneratedCode.ConsumingModel_of_App_Module_FirstAppSpecificInterface);
+                        }
+                        else if (appSpecificType == typeof(App.Module.ISecondAppSpecificInterface))
+                        {
+                            _generatedTypeByAppSpecificType[appSpecificType] = typeof(GeneratedCode.ConsumingModel_of_App_Module_SecondAppSpecificInterface);
                         }
                     }
                 }
@@ -307,18 +317,18 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
             {
                 public class ConsumingModel_of_App_Module_FirstAppSpecificInterface : App.Module.IFirstAppSpecificInterface
                 {
-                    public ConsumingModel_of_App_Module_FirstAppSpecificInterface(SupplyingModel.Api.SupplierAdapterInjectionPort supplierPort)
+                    public ConsumingModel_of_App_Module_FirstAppSpecificInterface(SupplyingModel.Api.IAdapterToSupplier supplier)
                     {
-                        this.Supplier = supplierPort.Resolve();
+                        this.Supplier = supplier;
                     }
                     public SupplyingModel.Api.IAdapterToSupplier Supplier { get; }
                 }
 
                 public class ConsumingModel_of_App_Module_SecondAppSpecificInterface : App.Module.ISecondAppSpecificInterface
                 {
-                    public ConsumingModel_of_App_Module_SecondAppSpecificInterface(SupplyingModel.Api.SupplierAdapterInjectionPort supplierPort)
+                    public ConsumingModel_of_App_Module_SecondAppSpecificInterface(SupplyingModel.Api.IAdapterToSupplier supplier)
                     {
-                        this.Supplier = supplierPort.Resolve();
+                        this.Supplier = supplier;
                     }
                     public SupplyingModel.Api.IAdapterToSupplier Supplier { get; }
                 }
@@ -359,26 +369,24 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
         {
             using SupplyingModel.Api;
 
-            public class AbcdFeature : FeatureLoaderBase
+            public class AbcdFeature : AdvancedFeature
             {
                 public override void ContributeAdapterComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
                 {
-                    newComponents.RegisterComponentType<AbcdAdapter>().InstancePerDependency();
-
                     var allPorts = existingComponents.ResolveAll<SupplierAdapterInjectionPort>();
 
                     foreach (var port in allPorts.Where(p => !p.Configuration.SuppressAbcd))
                     {
-                        port.Assign<AbcdAdapter>();
+                        port.Assign<AbcdAdapter>(newComponents);
                     }
                 }
             }
 
             public class AbcdAdapter : IAdapterToSupplier
             {
-                public AbcdAdapter(SupplierAdapterInjectionPort port)
+                public AbcdAdapter(SupplierConfiguration configuration)
                 {
-                    Configuration = port.Configuration;
+                    Configuration = configuration;
                 }
                 public SupplierConfiguration Configuration { get; }
             }
@@ -390,7 +398,7 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
         {
             using SupplyingModel.Api;
 
-            public class EfghFeature : FeatureLoaderBase
+            public class EfghFeature : AdvancedFeature
             {
                 public override void ContributeAdapterComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
                 {
@@ -400,16 +408,16 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
 
                     foreach (var port in allPorts.Where(p => p.AdapterComponentType == null))
                     {
-                        port.Assign<EfghAdapter>();
+                        port.Assign<EfghAdapter>(newComponents);
                     }
                 }
             }
 
             public class EfghAdapter : IAdapterToSupplier
             {
-                public EfghAdapter(SupplierAdapterInjectionPort port)
+                public EfghAdapter(SupplierConfiguration configuration)
                 {
-                    Configuration = port.Configuration;
+                    Configuration = configuration;
                 }
                 public SupplierConfiguration Configuration { get; }
             }

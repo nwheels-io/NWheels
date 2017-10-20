@@ -148,7 +148,7 @@ namespace NWheels.Microservices.Api
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [FeatureLoader(Name = "MicroserviceHostBuilderContributions")]
-        public class ContributionsFeatureLoader : FeatureLoaderBase
+        public class ContributionsFeatureLoader : AdvancedFeature
         {
             public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
             {

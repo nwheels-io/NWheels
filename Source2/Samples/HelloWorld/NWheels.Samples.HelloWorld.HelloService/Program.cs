@@ -10,6 +10,9 @@ namespace NWheels.Samples.HelloWorld.HelloService
         {
             var cli = new MicroserviceHostBuilder("HelloService")
                 .UseLifecycleComponent<HelloComponent>()
+                .ContributeComponents((existingComponents, newComponents) => {
+                    //newComponents.ContributeHttpEndpoint(listenPortNumbr)
+                })
                 .BuildCli();
 
             return cli.Run(args);

@@ -3,32 +3,39 @@ using NWheels.Kernel.Api.Extensions;
 
 namespace NWheels.Kernel.Api.Injection
 {
-    public abstract class AdapterInjectionPort<TAdapterInterface, TAdapterConfiguration>
+    public abstract class AdapterInjectionPort<TAdapterInterface, TAdapterConfiguration> : IAdapterInjectionPort
         where TAdapterInterface : class
     {
-        private readonly IComponentContainer _componentContainer;
+        private static int _s_lastPortKey = 0;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private readonly int _portKey;
+        private readonly IInternalComponentContainer _componentContainer;
+        private readonly TAdapterConfiguration _configuration;
         private Type _adapterComponentType = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         protected AdapterInjectionPort(IComponentContainerBuilder containerBuilder, TAdapterConfiguration defaultConfiguration)
         {
+            _portKey = ++_s_lastPortKey;
             _componentContainer = containerBuilder.AsInternal().RootContainer;
-            this.Configuration = defaultConfiguration;
+            _configuration = defaultConfiguration;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Assign<TAdapterComponent>()
+        public void Assign<TAdapterComponent>(IComponentContainerBuilder newComponents)
             where TAdapterComponent : class, TAdapterInterface
         {
-            Assign(typeof(TAdapterComponent));
+            Assign(typeof(TAdapterComponent), newComponents);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Assign(Type adapterComponentType)
-        {
+        public void Assign(Type adapterComponentType, IComponentContainerBuilder newComponents)
+        {                        
             if (adapterComponentType == null)
             {
                 throw new ArgumentNullException(nameof(adapterComponentType));
@@ -40,6 +47,7 @@ namespace NWheels.Kernel.Api.Injection
             }
 
             _adapterComponentType = adapterComponentType;
+            newComponents.RegisterAdapterComponentType<TAdapterInterface, TAdapterConfiguration>(this, adapterComponentType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -51,13 +59,25 @@ namespace NWheels.Kernel.Api.Injection
                 throw new InvalidOperationException("Adapter component type was not assigned.");
             }
 
-            TAdapterInterface adapterInstance = (TAdapterInterface)_componentContainer.ResolveWithArguments(_adapterComponentType, this);
+            var adapterInstance = _componentContainer.ResolveAdapter(this);
             return adapterInstance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TAdapterConfiguration Configuration { get; }
+        public int PortKey => _portKey;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TAdapterConfiguration Configuration => _configuration;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Type AdapterInterfaceType => typeof(TAdapterInterface);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Type AdapterConfigurationType => typeof(TAdapterConfiguration);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NWheels.Kernel.Api.Injection;
+using System.Reflection;
 
 namespace NWheels.Kernel.Runtime.Injection
 {
@@ -163,6 +164,18 @@ namespace NWheels.Kernel.Runtime.Injection
             {
                 _container.ComponentRegistry.Register(componentRegistration);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TAdapterInterface ResolveAdapter<TAdapterInterface, TAdapterConfig>(AdapterInjectionPort<TAdapterInterface, TAdapterConfig> port)
+            where TAdapterInterface : class
+        {
+            var adapterInstance = (TAdapterInterface)_container.ResolveKeyed(
+                port.PortKey, 
+                typeof(TAdapterInterface));
+
+            return adapterInstance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

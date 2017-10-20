@@ -290,67 +290,67 @@ namespace NWheels.Microservices.UnitTests.Runtime
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DefaultFeatureLoader]
-        public class KR_D1 : FeatureLoaderBase
+        public class KR_D1 : AdvancedFeature
         {
         }
         [DefaultFeatureLoader]
-        public class KR_D2 : FeatureLoaderBase
+        public class KR_D2 : AdvancedFeature
         {
         }
         [FeatureLoader(Name = "N1")]
-        public class KR_N1 : FeatureLoaderBase
+        public class KR_N1 : AdvancedFeature
         {
         }
         [FeatureLoader(Name = "N2")]
-        public class KR_N2 : FeatureLoaderBase
+        public class KR_N2 : AdvancedFeature
         {
         }
         [DefaultFeatureLoader]
-        public class M1_D1 : FeatureLoaderBase
+        public class M1_D1 : AdvancedFeature
         {
         }
         [DefaultFeatureLoader]
-        public class M1_D2 : FeatureLoaderBase
+        public class M1_D2 : AdvancedFeature
         {
         }
         [FeatureLoader(Name = "N1")]
-        public class M1_N1 : FeatureLoaderBase
+        public class M1_N1 : AdvancedFeature
         {
         }
         [FeatureLoader(Name = "N2")]
-        public class M1_N2 : FeatureLoaderBase
+        public class M1_N2 : AdvancedFeature
         {
         }
         [DefaultFeatureLoader]
-        public class M2_D1 : FeatureLoaderBase
+        public class M2_D1 : AdvancedFeature
         {
         }
         [DefaultFeatureLoader]
-        public class M2_D2 : FeatureLoaderBase
+        public class M2_D2 : AdvancedFeature
         {
         }
         [FeatureLoader(Name = "N1")]
-        public class M2_N1 : FeatureLoaderBase
+        public class M2_N1 : AdvancedFeature
         {
         }
         [FeatureLoader(Name = "N2")]
-        public class M2_N2 : FeatureLoaderBase
+        public class M2_N2 : AdvancedFeature
         {
         }
         [DefaultFeatureLoader]
-        public class M3_D1 : FeatureLoaderBase
+        public class M3_D1 : AdvancedFeature
         {
         }
         [DefaultFeatureLoader]
-        public class M3_D2 : FeatureLoaderBase
+        public class M3_D2 : AdvancedFeature
         {
         }
         [FeatureLoader(Name = "N1")]
-        public class M3_N1 : FeatureLoaderBase
+        public class M3_N1 : AdvancedFeature
         {
         }
         [FeatureLoader(Name = "N2")]
-        public class M3_N2 : FeatureLoaderBase
+        public class M3_N2 : AdvancedFeature
         {
         }
 

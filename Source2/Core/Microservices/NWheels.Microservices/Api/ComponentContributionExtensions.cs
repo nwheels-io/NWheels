@@ -8,9 +8,9 @@ namespace NWheels.Microservices.Api
 {
     public static class ComponentContributionExtensions
     {
-        public static void ContributeLifecycleComponent<T>(this IComponentContainerBuilder builder) where T : class, ILifecycleComponent
+        public static IComponentConditionBuilder ContributeLifecycleComponent<T>(this IComponentContainerBuilder builder) where T : class, ILifecycleComponent
         {
-            builder.RegisterComponentType<T>().SingleInstance().ForService<ILifecycleComponent>();
+            return builder.RegisterComponentType<T>().SingleInstance().ForService<ILifecycleComponent>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

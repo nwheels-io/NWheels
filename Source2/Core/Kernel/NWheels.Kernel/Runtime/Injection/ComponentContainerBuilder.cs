@@ -50,6 +50,26 @@ namespace NWheels.Kernel.Runtime.Injection
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void RegisterAdapterPort<TPort>(TPort port)
+            where TPort : class, IAdapterInjectionPort
+        {
+            _containerBuilder.RegisterInstance(port).Keyed<TPort>(port.PortKey).As<TPort, IAdapterInjectionPort>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RegisterAdapterComponentType<TAdapterInterface, TAdapterConfig>(
+            AdapterInjectionPort<TAdapterInterface, TAdapterConfig> adapterInjectionPort, 
+            Type adapterComponentType)
+            where TAdapterInterface : class
+        {
+            _containerBuilder.RegisterType(adapterComponentType)
+                .Keyed<TAdapterInterface>(adapterInjectionPort.PortKey)
+                .WithParameter(PortConfigParameter.FromPort(adapterInjectionPort));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IInternalComponentContainer CreateComponentContainer()
         {
             var underlyingContainer = _containerBuilder.Build();
@@ -109,6 +129,24 @@ namespace NWheels.Kernel.Runtime.Injection
             public IComponentInstantiationBuilder WithParameter<T>(T value)
             {
                 InnerAsReflectionActivator().WithParameter(new TypedParameter(typeof(T), value));
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IComponentInstantiationBuilder WithAdapterParameter<TAdapter, TConfig>(AdapterInjectionPort<TAdapter, TConfig> injectionPort)
+                where TAdapter : class
+            {
+                InnerAsReflectionActivator().WithParameter(PortAdapterParameter.FromPort(injectionPort));
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IComponentInstantiationBuilder WithAdapterConfigurationParameter<TAdapter, TConfig>(AdapterInjectionPort<TAdapter, TConfig> injectionPort)
+                where TAdapter : class
+            {
+                InnerAsReflectionActivator().WithParameter(PortConfigParameter.FromPort(injectionPort));
                 return this;
             }
 
