@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using NWheels.Communication.Api;
@@ -15,13 +16,9 @@ namespace NWheels.Communication.Adapters.AspNetCore
         {
             var allAdapterPorts = existingComponents.ResolveAll<HttpEndpointAdapterInjectionPort>();
 
-            foreach (var adapterPort in allAdapterPorts)
+            foreach (var adapterPort in allAdapterPorts.Where(p => p.AdapterComponentType == null))
             {
-                adapterPort.Assign<AspNetCoreHttpEndpoint>();
-                newComponents.RegisterComponentType<AspNetCoreHttpEndpoint>()
-                    .WithParameter(adapterPort)
-                    .SingleInstance()
-                    .ForServices<ICommunicationEndpoint, ILifecycleComponent>();
+                adapterPort.Assign<AspNetCoreHttpEndpoint>(newComponents);
             }
         }
     }
