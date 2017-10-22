@@ -34,10 +34,8 @@ namespace NWheels.Communication.Api.Extensions
                 throw new ArgumentException("Endpoint name must be a non-empty string", nameof(name));
             }
 
-            var configuration = builder.AsInternal().RootContainer.Resolve<IHttpEndpointConfigElement>();
-            var injectionPort = new HttpEndpointAdapterInjectionPort(builder, configuration); 
-
-            builder.RegisterComponentInstance(injectionPort);
+            var adapterPort = new HttpEndpointAdapterInjectionPort(builder, configure); 
+            builder.RegisterAdapterPort(adapterPort);
         }
     }
 }

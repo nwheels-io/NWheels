@@ -44,19 +44,19 @@ namespace NWheels.Kernel.Api.Injection
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual void ContributeConfigSections(IComponentContainerBuilder newComponents)
+        public virtual void ContributeConfigSections(IComponentContainerBuilder newComponents)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual void ContributeConfiguration(IComponentContainer existingComponents)
+        public virtual void ContributeConfiguration(IComponentContainer existingComponents)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
+        public virtual void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {
         }
     }

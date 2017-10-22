@@ -8,8 +8,9 @@ using NWheels.Communication.Api.Http;
 using NWheels.Kernel.Api.Injection;
 using NWheels.Microservices.Api;
 
-namespace NWheels.Communication.Adapters.AspNetCore
+namespace NWheels.Communication.Adapters.AspNetCore.Runtime
 {
+    [DefaultFeatureLoader]
     public class AspNetCoreFeature : AdvancedFeature
     {
         public override void ContributeAdapterComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
@@ -18,7 +19,7 @@ namespace NWheels.Communication.Adapters.AspNetCore
 
             foreach (var adapterPort in allAdapterPorts.Where(p => p.AdapterComponentType == null))
             {
-                adapterPort.Assign<AspNetCoreHttpEndpoint>(newComponents);
+                adapterPort.Assign<KestrelHttpEndpoint>(newComponents);
             }
         }
     }

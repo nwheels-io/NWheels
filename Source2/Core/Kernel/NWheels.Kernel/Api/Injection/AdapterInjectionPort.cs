@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using NWheels.Kernel.Api.Extensions;
 
 namespace NWheels.Kernel.Api.Injection
@@ -12,16 +13,33 @@ namespace NWheels.Kernel.Api.Injection
 
         private readonly int _portKey;
         private readonly IInternalComponentContainer _componentContainer;
-        private readonly TAdapterConfiguration _configuration;
+        private readonly Func<IComponentContainer, TAdapterConfiguration> _configurationFactory;
+        private readonly Action<TAdapterConfiguration> _configurator;
+        private TAdapterConfiguration _configuration;
         private Type _adapterComponentType = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        protected AdapterInjectionPort(IComponentContainerBuilder containerBuilder, TAdapterConfiguration defaultConfiguration)
+        protected AdapterInjectionPort(
+            IComponentContainerBuilder containerBuilder, 
+            TAdapterConfiguration configuration)
         {
             _portKey = ++_s_lastPortKey;
             _componentContainer = containerBuilder.AsInternal().RootContainer;
-            _configuration = defaultConfiguration;
+            _configuration = configuration;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        protected AdapterInjectionPort(
+            IComponentContainerBuilder containerBuilder, 
+            Func<IComponentContainer, TAdapterConfiguration> configurationFactory, 
+            Action<TAdapterConfiguration> configurator)
+        {
+            _portKey = ++_s_lastPortKey;
+            _componentContainer = containerBuilder.AsInternal().RootContainer;
+            _configurationFactory = configurationFactory;
+            _configurator = configurator;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,7 +65,9 @@ namespace NWheels.Kernel.Api.Injection
             }
 
             _adapterComponentType = adapterComponentType;
-            newComponents.RegisterAdapterComponentType<TAdapterInterface, TAdapterConfiguration>(this, adapterComponentType);
+            
+            var registration = newComponents.RegisterAdapterComponentType<TAdapterInterface, TAdapterConfiguration>(this, adapterComponentType);
+            CompleteAdapterComponentRegistration(registration);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -69,10 +89,6 @@ namespace NWheels.Kernel.Api.Injection
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TAdapterConfiguration Configuration => _configuration;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public Type AdapterInterfaceType => typeof(TAdapterInterface);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -81,6 +97,29 @@ namespace NWheels.Kernel.Api.Injection
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TAdapterConfiguration Configuration 
+        {
+            get
+            {
+                if (_configuration == null && _configurationFactory != null)
+                {
+                    _configuration = _configurationFactory(_componentContainer);
+                    _configurator?.Invoke(_configuration);
+                }
+
+                return _configuration;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Type AdapterComponentType => _adapterComponentType;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ExcludeFromCodeCoverage]
+        protected virtual void CompleteAdapterComponentRegistration(IComponentRegistrationBuilder registration)
+        {
+        }
     }
 }

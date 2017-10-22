@@ -22,7 +22,7 @@ namespace NWheels.Kernel.Api.Injection
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void RegisterAdapterComponentType<TAdapterInterface, TAdapterConfig>(
+        IComponentRegistrationBuilder RegisterAdapterComponentType<TAdapterInterface, TAdapterConfig>(
             AdapterInjectionPort<TAdapterInterface, TAdapterConfig> adapterInjectionPort, 
             Type adapterComponentType)
             where TAdapterInterface : class;

@@ -16,6 +16,57 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
     public class AdapterInjectionPortTests : TestBase.UnitTest
     {
         [Fact]
+        public void Configuration_WithConfigObject_ReturnConfigObject()
+        {
+            //-- arrange
+
+            var containerBuilder = new ComponentContainerBuilder();
+            var configuration = new MockAdapterConfig();
+            var port = new MockPortWithConfigObject(containerBuilder, configuration);
+
+            //-- act
+
+            var result = port.Configuration;
+
+            //-- assert
+
+            result.Should().BeSameAs(configuration);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void Configuration_WithConfigObjectFactory_CreateConfigObjectOnce()
+        {
+            //-- arrange
+
+            var containerBuilder0 = new ComponentContainerBuilder();
+            containerBuilder0.RegisterComponentType<MockAdapterConfig>().InstancePerDependency().ForService<IMockAdapterConfig>();
+            var container0 = containerBuilder0.CreateComponentContainer();
+
+            var containerBuilder1 = new ComponentContainerBuilder(container0);
+            var factoryCallCount = 0;
+
+            var port = new MockPortWithConfigFactory(containerBuilder1, config => {
+                factoryCallCount++;
+                config.Value = "DEF";
+            });
+
+            //-- act
+
+            var result1 = port.Configuration;
+            var result2 = port.Configuration;
+
+            //-- assert
+
+            factoryCallCount.Should().Be(1);
+            result1.Should().BeOfType<MockAdapterConfig>().Which.Value.Should().Be("DEF");
+            result2.Should().BeSameAs(result1);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
         public void OneProgrammingModel_OnePort_OneAdapter()
         {
             //-- arrange
@@ -156,6 +207,57 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
                 {
                     action(feature);
                 }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IMockAdapterService
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IMockAdapterConfig
+        {
+            string Value { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class MockAdapterConfig : IMockAdapterConfig
+        {
+            public string Value { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class MockPortWithConfigObject : AdapterInjectionPort<IMockAdapterService, MockAdapterConfig>
+        {
+            public MockPortWithConfigObject(
+                IComponentContainerBuilder containerBuilder, 
+                MockAdapterConfig configuration) 
+                : base(containerBuilder, configuration)
+            {
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class MockPortWithConfigFactory : AdapterInjectionPort<IMockAdapterService, IMockAdapterConfig>
+        {
+            public MockPortWithConfigFactory(
+                IComponentContainerBuilder containerBuilder, 
+                Action<IMockAdapterConfig> configurator) 
+                : base(containerBuilder, MockAdapterConfigFactory, configurator)
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static IMockAdapterConfig MockAdapterConfigFactory(IComponentContainer components)
+            {
+                return components.Resolve<IMockAdapterConfig>();
             }
         }
     }

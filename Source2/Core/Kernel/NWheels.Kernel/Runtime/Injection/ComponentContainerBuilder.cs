@@ -58,14 +58,16 @@ namespace NWheels.Kernel.Runtime.Injection
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void RegisterAdapterComponentType<TAdapterInterface, TAdapterConfig>(
+        public IComponentRegistrationBuilder RegisterAdapterComponentType<TAdapterInterface, TAdapterConfig>(
             AdapterInjectionPort<TAdapterInterface, TAdapterConfig> adapterInjectionPort, 
             Type adapterComponentType)
             where TAdapterInterface : class
         {
-            _containerBuilder.RegisterType(adapterComponentType)
+            var registration = _containerBuilder.RegisterType(adapterComponentType)
                 .Keyed<TAdapterInterface>(adapterInjectionPort.PortKey)
                 .WithParameter(PortConfigParameter.FromPort(adapterInjectionPort));
+            
+            return new RegistrationBuilderWrapper<object, ConcreteReflectionActivatorData, SingleRegistrationStyle>(registration);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

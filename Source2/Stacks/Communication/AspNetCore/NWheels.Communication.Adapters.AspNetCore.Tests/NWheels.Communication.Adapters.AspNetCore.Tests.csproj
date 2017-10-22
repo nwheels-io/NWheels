@@ -34,4 +34,18 @@
     <Folder Include="SystemApi\" />
   </ItemGroup>
 
+    <ItemGroup>
+    <Folder Include="System\wwwroot\Static1\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TestFiles\wwwroot\Static1\test.png" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="TestFiles\wwwroot\Static2\data.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="TestFiles\wwwroot\Static2\index.html" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
