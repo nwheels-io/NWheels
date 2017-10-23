@@ -13,24 +13,27 @@ using Microsoft.Extensions.FileProviders;
 using NWheels.Communication.Api;
 using NWheels.Communication.Api.Http;
 using NWheels.Kernel.Api.Extensions;
+using NWheels.Kernel.Api.Injection;
 using NWheels.Microservices.Api;
 
 namespace NWheels.Communication.Adapters.AspNetCore.Runtime
 {
     public class KestrelHttpEndpoint : LifecycleComponentBase, IHttpEndpoint
     {
-        private readonly string _name;
+        private readonly IComponentContainer _components;
         private readonly IHttpEndpointConfigElement _configuration;
+        private readonly string _name;
         //private Func<HttpContext, Task> _handler;
         private ImmutableArray<string> _listenUrls;
         private volatile IWebHost _host;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public KestrelHttpEndpoint(IHttpEndpointConfigElement configuration)
+        public KestrelHttpEndpoint(IComponentContainer components,  IHttpEndpointConfigElement configuration)
         {
-            _name = configuration.Name;
+            _components = components;
             _configuration = configuration;
+            _name = configuration.Name;
             //TODO: _handler = port.OnRequest;
         }
 
@@ -69,6 +72,7 @@ namespace NWheels.Communication.Adapters.AspNetCore.Runtime
             builder.UseKestrel(ConfigureKestrelServer);
             //builder.UseUrls(_listenUrls.ToArray());
             builder.Configure(ConfigureWebHost);
+
 
             _host = builder.Build();
             _host.Start();
@@ -126,11 +130,11 @@ namespace NWheels.Communication.Adapters.AspNetCore.Runtime
                 ConfigureStaticFolders(app);
             }
 
-            //TODO
-            // if (_handler != null)
-            // {
-            //     app.Run(HandleNonStaticRequest);
-            // }
+            foreach (var middlewareType in _configuration.MiddlewarePipeline)
+            {
+                var middlewareInstance = (ICommunicationMiddleware<HttpContext>)_components.Resolve(middlewareType);
+                app.Use(middlewareInstance.OnMessage);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

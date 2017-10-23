@@ -18,7 +18,7 @@ namespace NWheels.Communication.Api.Http
         // }
         public HttpEndpointAdapterInjectionPort(
             IComponentContainerBuilder containerBuilder, 
-            Action<IHttpEndpointConfigElement> configurator) 
+            ConfiguratorAction configurator) 
             : base(containerBuilder, ConfigurationFactory, configurator)
         {
         }

@@ -13,6 +13,10 @@ using NWheels.Communication.Api.Extensions;
 using Xunit;
 using FluentAssertions;
 using NWheels.Communication.Api.Http;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using NWheels.Communication.Api;
+using System.Linq;
 
 namespace NWheels.Communication.Adapters.AspNetCore.Tests.Integration
 {
@@ -23,14 +27,10 @@ namespace NWheels.Communication.Adapters.AspNetCore.Tests.Integration
         {
             //-- arrange
 
-            Action<MicroserviceHostBuilder> testCaseFeatures = (hostBuilder) => {
-                hostBuilder.UseHttpEndpoint(configure: endpoint => {
-                    endpoint.Port = 5000;
-                    endpoint.StaticFolders.Add(new TestHttpStaticFolderConfig() {
-                        LocalRootPath = Path.Combine(TestFilesFolderPath, "wwwroot/Static1".ToPathString()),
-                        RequestBasePath = "/static/files/one"
-                    });
-                });
+            Action<MicroserviceHostBuilder> testCaseFeatures = (hostBuilder) =>  {
+                hostBuilder.UseHttpEndpoint(configure: endpoint => endpoint
+                    .ListenPort(5000)
+                    .StaticFolder("/static/files/one", localPath: new[] { TestFilesFolderPath, "wwwroot/Static1" }));
             };
 
             //-- act
@@ -45,6 +45,39 @@ namespace NWheels.Communication.Adapters.AspNetCore.Tests.Integration
             //-- assert
 
             AssertHttpResponse(response, HttpStatusCode.OK, "application/javascript", "wwwroot/Static1/test.js");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void CanServeNonStaticContent()
+        {
+            //-- arrange
+
+            Action<MicroserviceHostBuilder> testCaseFeatures = (hostBuilder) =>  {
+                hostBuilder.UseHttpEndpoint(configure: endpoint => endpoint
+                    .ListenPort(5000)
+                    .Middleware<TestNonStaticMiddleware>()
+                );
+            };
+
+            //-- act
+
+            HttpResponseMessage response;
+
+            using (var microservice = StartTestMicroservice(testCaseFeatures))
+            {
+                response = MakeHttpRequest(5000, HttpMethod.Get, "/my/dynamic/path");
+            }
+
+            //-- assert
+
+            AssertHttpResponse(
+                response,
+                expectedStatusCode: HttpStatusCode.OK,
+                expectedContentType: "application/json",
+                expectedContentFilePath: null,
+                expectedContentAsString: "{my:1,dynamic:2,path:3}");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -79,6 +112,7 @@ namespace NWheels.Communication.Adapters.AspNetCore.Tests.Integration
                 return response;
             }
         }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private void AssertHttpResponse(
@@ -112,7 +146,7 @@ namespace NWheels.Communication.Adapters.AspNetCore.Tests.Integration
         private void AssertResponseContentsEqual(HttpResponseMessage response, string expectedContentFilePath)
         {
             var actualContents = response.Content.ReadAsStreamAsync().Result;
-            var expectedFileFullPath = Path.Combine(TestBinaryFolderPath, expectedContentFilePath.ToPathString());
+            var expectedFileFullPath = Path.Combine(TestFilesFolderPath, expectedContentFilePath.ToPathString());
 
             using (var expectedContents = File.OpenRead(expectedFileFullPath))
             {
@@ -160,6 +194,35 @@ namespace NWheels.Communication.Adapters.AspNetCore.Tests.Integration
                 newComponents.RegisterComponentType<TestHttpEndpointConfiguration>()
                     .InstancePerDependency()
                     .ForService<IHttpEndpointConfigElement>();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public class TestNonStaticMiddleware : ICommunicationMiddleware<HttpContext>
+        {
+            public async Task OnMessage(HttpContext context, Func<Task> next)
+            {
+                await Task.Yield(); // simulate async execution
+
+                var parts = context.Request.Path.Value.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                var properties = string.Join(",", parts.Select((p, index) => $"{p}:{index + 1}"));
+
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = 200;
+
+                using (var writer = new StreamWriter(context.Response.Body))
+                {
+                    writer.Write("{" + properties + "}");
+                    writer.Flush();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public void OnError(Exception error, Action next)
+            {
+                next();
             }
         }
     }

@@ -44,6 +44,7 @@
 
   <ItemGroup>
     <None Update="TestFiles\wwwroot\Static1\test.png" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="TestFiles\wwwroot\Static1\test.js" CopyToOutputDirectory="PreserveNewest" />
     <None Update="TestFiles\wwwroot\Static2\data.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="TestFiles\wwwroot\Static2\index.html" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

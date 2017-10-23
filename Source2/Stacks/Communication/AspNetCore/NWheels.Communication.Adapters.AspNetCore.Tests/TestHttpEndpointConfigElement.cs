@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using NWheels.Communication.Api.Http;
+using NWheels.Configuration.Api;
 using NWheels.Testability;
 using Xunit;
 
@@ -10,16 +11,27 @@ namespace NWheels.Communication.Adapters.AspNetCore.Tests
     {
         public TestHttpEndpointConfiguration()
         {
-            StaticFolders = new List<IHttpStaticFolderConfig>();
+            StaticFolders = new HttpStaticFolderConfigList();
+            MiddlewarePipeline = new List<Type>();
         }
 
         public int Port { get; set; }
 
         public IHttpsConfig Https { get; set; }
 
-        public IList<IHttpStaticFolderConfig> StaticFolders { get; set; }
+        public IConfigElementList<IHttpStaticFolderConfig> StaticFolders { get; }
 
         public string Name { get; set; }
+
+        public IList<Type> MiddlewarePipeline { get; set; }
+
+        private class HttpStaticFolderConfigList : List<IHttpStaticFolderConfig>, IConfigElementList<IHttpStaticFolderConfig>
+        {
+            public IHttpStaticFolderConfig NewItem()
+            {
+                return new TestHttpStaticFolderConfig();
+            }
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------

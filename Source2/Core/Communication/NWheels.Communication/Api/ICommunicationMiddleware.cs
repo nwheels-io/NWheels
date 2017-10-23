@@ -13,7 +13,7 @@ namespace NWheels.Communication.Api
 
     public interface ICommunicationMiddleware<TMessageContext> : ICommunicationMiddleware
     {
-        Task OnMessage(TMessageContext context, ICommunicationMiddleware<TMessageContext> next);
-        void OnError(Exception error, ICommunicationMiddleware<TMessageContext> next);
+        Task OnMessage(TMessageContext context, Func<Task> next);
+        void OnError(Exception error, Action next);
     }
 }

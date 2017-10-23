@@ -12,7 +12,8 @@ namespace NWheels.Communication.Api.Http
     {
         int Port { get; set; }
         IHttpsConfig Https { get; set; }
-        IList<IHttpStaticFolderConfig> StaticFolders { get; }
+        IConfigElementList<IHttpStaticFolderConfig> StaticFolders { get; }
+        IList<Type> MiddlewarePipeline { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,7 +34,7 @@ namespace NWheels.Communication.Api.Http
     {
         string RequestBasePath { get; set; }
         string LocalRootPath { get; set; }
-        IList<string> DefaultFiles { get; }
+        IList<string> DefaultFiles { get; set; }
         string CacheControl { get; set; }
         string DefaultContentType { get; set; }
         bool EnableDirectoryBrowsing { get; set; }
