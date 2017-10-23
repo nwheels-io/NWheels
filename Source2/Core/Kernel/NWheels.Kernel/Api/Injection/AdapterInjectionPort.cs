@@ -14,7 +14,7 @@ namespace NWheels.Kernel.Api.Injection
         private readonly int _portKey;
         private readonly IInternalComponentContainer _componentContainer;
         private readonly Func<IComponentContainer, TAdapterConfiguration> _configurationFactory;
-        private readonly Action<TAdapterConfiguration> _configurator;
+        private readonly ConfiguratorAction _configurator;
         private TAdapterConfiguration _configuration;
         private Type _adapterComponentType = null;
 
@@ -34,12 +34,23 @@ namespace NWheels.Kernel.Api.Injection
         protected AdapterInjectionPort(
             IComponentContainerBuilder containerBuilder, 
             Func<IComponentContainer, TAdapterConfiguration> configurationFactory, 
-            Action<TAdapterConfiguration> configurator)
+            ConfiguratorAction configurator)
         {
             _portKey = ++_s_lastPortKey;
             _componentContainer = containerBuilder.AsInternal().RootContainer;
             _configurationFactory = configurationFactory;
             _configurator = configurator;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void Configure(IComponentContainerBuilder newComponents)
+        {
+            if (_configuration == null && _configurationFactory != null)
+            {
+                _configuration = _configurationFactory(_componentContainer);
+                _configurator?.Invoke(_configuration, _componentContainer, newComponents);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -97,19 +108,7 @@ namespace NWheels.Kernel.Api.Injection
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TAdapterConfiguration Configuration 
-        {
-            get
-            {
-                if (_configuration == null && _configurationFactory != null)
-                {
-                    _configuration = _configurationFactory(_componentContainer);
-                    _configurator?.Invoke(_configuration);
-                }
-
-                return _configuration;
-            }
-        }
+        public TAdapterConfiguration Configuration => _configuration;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -121,5 +120,12 @@ namespace NWheels.Kernel.Api.Injection
         protected virtual void CompleteAdapterComponentRegistration(IComponentRegistrationBuilder registration)
         {
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public delegate void ConfiguratorAction(
+            TAdapterConfiguration config, 
+            IComponentContainer existingComponents, 
+            IComponentContainerBuilder newComponents);
     }
 }

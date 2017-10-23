@@ -524,11 +524,30 @@ namespace NWheels.Microservices.Runtime
                     FeatureLoaders, Logger.FeaturesContributingComponents, Logger.FeatureContributingComponents,
                     (feature, newComponents) => feature.ContributeComponents(this.ModuleComponents, newComponents));
 
+                doConfigureAdapterPorts();
+
                 ExecuteFeatureLoaderPhaseExtensions(FeatureLoaders, extension => extension.BeforeContributeAdapterComponents);
 
                 ExecuteFeatureLoaderPhase(
                     FeatureLoaders, Logger.FeaturesContributingAdapterComponents, Logger.FeatureContributingAdapterComponents,
                     (feature, newComponents) => feature.ContributeAdapterComponents(this.ModuleComponents, newComponents));
+            }
+
+            void doConfigureAdapterPorts()
+            {
+                Logger.ConfiguringAdapterInjectionPorts().RunActivityOrThrow(() => {
+                    var newComponents = new ComponentContainerBuilder(this.ModuleComponents);
+                    var allPorts = this.ModuleComponents.ResolveAll<IAdapterInjectionPort>();
+
+                    foreach (var port in allPorts)
+                    {
+                        Logger.ConfiguringAdapterPort(port.GetType()).RunActivityOrThrow(() => {
+                            port.Configure(newComponents);
+                        });
+                    }
+                    
+                    this.ModuleComponents.Merge(newComponents);
+                });
             }
 
             return ExecuteStateTransitionPhase(doConfigure, Logger.Configuring, Logger.Configured, Logger.FailedToConfigure);

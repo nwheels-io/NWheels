@@ -97,6 +97,12 @@ namespace NWheels.Microservices.Runtime
         IExecutionPathActivity FeaturesContributingAdapterComponents();
 
         [LogVerbose]
+        IExecutionPathActivity ConfiguringAdapterInjectionPorts();
+
+        [LogVerbose]
+        IExecutionPathActivity ConfiguringAdapterPort(Type portType);
+
+        [LogVerbose]
         IExecutionPathActivity FeatureContributingAdapterComponents(Type loader);
 
         [LogVerbose]

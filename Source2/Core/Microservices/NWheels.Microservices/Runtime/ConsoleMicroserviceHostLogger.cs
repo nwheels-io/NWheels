@@ -676,6 +676,29 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IExecutionPathActivity ConfiguringAdapterInjectionPorts()
+        {
+            if (_logLevel <= LogLevel.Verbose)
+            {
+                ColorConsole.Log(LogLevel.Verbose, nameof(ConfiguringAdapterInjectionPorts));
+            }
+            return new StubActivity(nameof(ConfiguringAdapterInjectionPorts));
+        }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IExecutionPathActivity ConfiguringAdapterPort(Type portType)
+        {
+            if (_logLevel <= LogLevel.Verbose)
+            {
+                ColorConsole.Log(LogLevel.Verbose, $"{nameof(ConfiguringAdapterPort)}: {portType.FriendlyName()}");
+            }
+            return new StubActivity($"{nameof(ConfiguringAdapterPort)}: {portType.FriendlyName()}");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private class StubActivity : IExecutionPathActivity
         {
             public StubActivity(string text)
