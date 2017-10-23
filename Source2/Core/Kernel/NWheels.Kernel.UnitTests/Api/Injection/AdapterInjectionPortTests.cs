@@ -26,6 +26,7 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
 
             //-- act
 
+            port.Configure(containerBuilder);
             var result = port.Configuration;
 
             //-- assert
@@ -47,12 +48,14 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
             var containerBuilder1 = new ComponentContainerBuilder(container0);
             var factoryCallCount = 0;
 
-            var port = new MockPortWithConfigFactory(containerBuilder1, config => {
+            var port = new MockPortWithConfigFactory(containerBuilder1, (config, existingComponents, newComponents)  => {
                 factoryCallCount++;
                 config.Value = "DEF";
             });
 
             //-- act
+
+            port.Configure(containerBuilder1);
 
             var result1 = port.Configuration;
             var result2 = port.Configuration;
@@ -248,7 +251,7 @@ namespace NWheels.Kernel.UnitTests.Api.Injection
         {
             public MockPortWithConfigFactory(
                 IComponentContainerBuilder containerBuilder, 
-                Action<IMockAdapterConfig> configurator) 
+                ConfiguratorAction configurator) 
                 : base(containerBuilder, MockAdapterConfigFactory, configurator)
             {
             }
