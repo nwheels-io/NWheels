@@ -114,9 +114,12 @@ namespace NWheels.Communication.Adapters.AspNetCore.Runtime
             {
                 _listenUrls = _listenUrls.Add($"https://0.0.0.0:{_configuration.Https.Port}");
 
-                options.Listen(IPAddress.Any, _configuration.Port, listenOptions => {
+                options.Listen(IPAddress.Any, _configuration.Https.Port, listenOptions =>
+                {
+                    var fullCertFilePath = PathUtility.ExpandPathFromBinary(_configuration.Https.CertFilePath);
+                    
                     listenOptions.NoDelay = true;
-                    listenOptions.UseHttps(_configuration.Https.CertFilePath, _configuration.Https.CertFilePassword);
+                    listenOptions.UseHttps(fullCertFilePath, _configuration.Https.CertFilePassword);
                 });
             }
         }
@@ -178,7 +181,7 @@ namespace NWheels.Communication.Adapters.AspNetCore.Runtime
 
         private string GetStaticWebContentFolderPath(IHttpStaticFolderConfig folder)
         {
-            var path = folder.LocalRootPath.DefaultIfNullOrEmpty(Directory.GetCurrentDirectory());
+            var path = PathUtility.ExpandPathFromBinary(folder.LocalRootPath);
 
             if (Path.IsPathRooted(path))
             {

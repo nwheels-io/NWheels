@@ -47,6 +47,7 @@
     <None Update="TestFiles\wwwroot\Static1\test.js" CopyToOutputDirectory="PreserveNewest" />
     <None Update="TestFiles\wwwroot\Static2\data.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="TestFiles\wwwroot\Static2\index.html" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="TestFiles\cert\sslcert.pfx" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

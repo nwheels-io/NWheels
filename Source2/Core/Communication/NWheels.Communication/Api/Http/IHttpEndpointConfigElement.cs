@@ -14,6 +14,7 @@ namespace NWheels.Communication.Api.Http
         IHttpsConfig Https { get; set; }
         IConfigElementList<IHttpStaticFolderConfig> StaticFolders { get; }
         IList<Type> MiddlewarePipeline { get; }
+        IHttpsConfig NewHttpsConfig();
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -21,10 +22,10 @@ namespace NWheels.Communication.Api.Http
     [ConfigurationElement]
     public interface IHttpsConfig
     {
-        int Port { get; }
-        bool RequireHttps { get; }
-        string CertFilePath { get; }
-        string CertFilePassword { get; }
+        int Port { get; set; }
+        bool RequireHttps { get; set; }
+        string CertFilePath { get; set; }
+        string CertFilePassword { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -185,3 +185,5 @@ Source2/.vs/NWheels/v15/sqlite3/*
 
 # Installed tools
 Tools/Installed/
+
+.idea

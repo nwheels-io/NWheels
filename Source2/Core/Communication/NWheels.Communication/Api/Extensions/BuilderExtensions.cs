@@ -14,12 +14,12 @@ namespace NWheels.Communication.Api.Extensions
 {
     public static class BuilderExtensions
     {
-        public static void UseHttpEndpoint(
+        public static MicroserviceHostBuilder UseHttpEndpoint(
             this MicroserviceHostBuilder builder, 
             string name = "Default", 
             Action<HttpEndpointConfigurationBuilder> configure = null)
         {
-            builder.ContributeComponents((exitingComponents, newComponents) => {
+            return builder.ContributeComponents((exitingComponents, newComponents) => {
                 newComponents.ContributeHttpEndpoint(name, configure);
             });
         }
@@ -36,14 +36,14 @@ namespace NWheels.Communication.Api.Extensions
                 throw new ArgumentException("Endpoint name must be a non-empty string", nameof(name));
             }
 
-            HttpEndpointAdapterInjectionPort.ConfiguratorAction configurator = 
-                (config, exisgingComponents, newComponents) => {
-                    var configBuilder = new HttpEndpointConfigurationBuilder(newComponents, config);
-                    configure(configBuilder);
-                };
-
-            var adapterPort = new HttpEndpointAdapterInjectionPort(builder, configurator); 
+            var adapterPort = new HttpEndpointAdapterInjectionPort(builder, DoConfigure); 
             builder.RegisterAdapterPort(adapterPort);
+
+            void DoConfigure(IHttpEndpointConfigElement config, IComponentContainer exisgingComponents, IComponentContainerBuilder newComponents)
+            {
+                var configBuilder = new HttpEndpointConfigurationBuilder(newComponents, config);
+                configure(configBuilder);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -63,9 +63,22 @@ namespace NWheels.Communication.Api.Extensions
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public HttpEndpointConfigurationBuilder ListenPort(int number)
+            public HttpEndpointConfigurationBuilder ListenOnPort(int number)
             {
                 _configElement.Port = number;
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public HttpEndpointConfigurationBuilder HttpsListenOnPort(int number, string certFilePath, string certFilePassword)
+            {
+                _configElement.Https = _configElement.NewHttpsConfig();
+                _configElement.Https.Port = number;
+                _configElement.Https.RequireHttps = true;
+                _configElement.Https.CertFilePath = certFilePath;
+                _configElement.Https.CertFilePassword = certFilePassword;
+
                 return this;
             }
 

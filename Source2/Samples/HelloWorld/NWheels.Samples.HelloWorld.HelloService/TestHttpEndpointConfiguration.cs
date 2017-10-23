@@ -1,11 +1,17 @@
 using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
+using NWheels.Microservices.Api;
+using NWheels.Communication.Api.Extensions;
+using Microsoft.AspNetCore.Http;
+using NWheels.Communication.Api;
+using System.Linq;
+using System.IO;
+using Microsoft.Extensions.Primitives;
 using NWheels.Communication.Api.Http;
+using System.Collections.Generic;
 using NWheels.Configuration.Api;
-using NWheels.Testability;
-using Xunit;
 
-namespace NWheels.Communication.Adapters.AspNetCore.Tests
+namespace NWheels.Samples.HelloWorld.HelloService
 {
     public class TestHttpEndpointConfiguration : IHttpEndpointConfigElement
     {

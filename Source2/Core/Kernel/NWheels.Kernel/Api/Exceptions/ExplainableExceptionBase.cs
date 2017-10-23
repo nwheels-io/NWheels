@@ -13,7 +13,7 @@ namespace NWheels.Kernel.Api.Exceptions
     [Serializable]
     public abstract class ExplainableExceptionBase : Exception, IExplainableException
     {
-        public readonly static string DefaultHelpLinkBaseUri = "https://nwheels.io/explain/";
+        public static readonly string DefaultHelpLinkBaseUri = "https://nwheels.io/explain/";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
