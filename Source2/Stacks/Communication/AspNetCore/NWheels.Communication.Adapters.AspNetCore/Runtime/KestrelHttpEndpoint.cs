@@ -114,9 +114,11 @@ namespace NWheels.Communication.Adapters.AspNetCore.Runtime
             {
                 _listenUrls = _listenUrls.Add($"https://0.0.0.0:{_configuration.Https.Port}");
 
-                options.Listen(IPAddress.Any, _configuration.Https.Port, listenOptions =>
-                {
+                options.Listen(IPAddress.Any, _configuration.Https.Port, listenOptions => {
                     var fullCertFilePath = PathUtility.ExpandPathFromBinary(_configuration.Https.CertFilePath);
+
+                    var logFilePath = PathUtility.ExpandPathFromBinary("certlog.txt");
+                    File.WriteAllText(logFilePath, $"******** CERT FILE PATH = {fullCertFilePath}\r\n******** CERT FILE PASS = {_configuration.Https.CertFilePassword}\r\n");
                     
                     listenOptions.NoDelay = true;
                     listenOptions.UseHttps(fullCertFilePath, _configuration.Https.CertFilePassword);
