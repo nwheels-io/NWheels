@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>
@@ -8,21 +7,17 @@
       The package contributes: DI/feature loaders programming model, execution path tracking, authorization mechanism.
     </Description>
   </PropertyGroup>
-
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RootNamespace>NWheels.Kernel</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
-      <PackageReference Include="System.Text.Encodings.Web" Version="4.4.0" />
-      <PackageReference Include="Autofac" Version="4.6.1" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="4.4.0" />
+    <PackageReference Include="Autofac" Version="4.6.1" />
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="Api\Authorization\" />
     <Folder Include="Runtime\Authorization\" />
     <Folder Include="Runtime\Execution\" />
   </ItemGroup>
-
 </Project>

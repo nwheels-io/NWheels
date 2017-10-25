@@ -75,7 +75,7 @@ namespace NWheels.Testability
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void RunDaemon(string[] arguments, Action onUpAndRunning, TimeSpan? startTimeout, TimeSpan? stopTimeout)
+        public void RunDaemon(string[] arguments, Action onUpAndRunning, TimeSpan? startTimeout = null, TimeSpan? stopTimeout = null)
         {
             var effectiveArguments = arguments.Concat(new[] { "--stdin-signal" }).ToArray();
             StartProcess(effectiveArguments);
