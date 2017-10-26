@@ -95,7 +95,9 @@ namespace NWheels.Kernel.UnitTests.Api.Primitives
             //-- assert
 
             thread1.Exception.Should().BeNull(because: "ShouldThrow<SafeLockException> must successfully validate");
-            clock.Elapsed.Should().BeGreaterOrEqualTo(TimeSpan.FromMilliseconds(100), because: "Acquire() must wait for the specified timeout of 100ms");
+            clock.Elapsed.Should().BeGreaterOrEqualTo(
+                TimeSpan.FromMilliseconds(90), // 10 ms tolerance 
+                because: "Acquire() must wait for the specified timeout of 100ms");
 
             exception.Should().NotBeNull();
             exception.Reason.Should().Be(nameof(SafeLockException.TimedOutWaitingForAccess));
