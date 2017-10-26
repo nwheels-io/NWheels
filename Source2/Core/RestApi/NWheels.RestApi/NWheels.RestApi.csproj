@@ -1,5 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>
@@ -7,11 +6,9 @@
       The package contributes: RESTful API programming model, REST API service component, protocol adapter port.
     </Description>
   </PropertyGroup>
-
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\Kernel\NWheels.Kernel\NWheels.Kernel.csproj" />
     <ProjectReference Include="..\..\Compilation\NWheels.Compilation\NWheels.Compilation.csproj" />
@@ -19,5 +16,4 @@
     <ProjectReference Include="..\..\Logging\NWheels.Logging\NWheels.Logging.csproj" />
     <ProjectReference Include="..\..\Configuration\NWheels.Configuration\NWheels.Configuration.csproj" />
   </ItemGroup>
-
 </Project>
