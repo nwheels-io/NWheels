@@ -311,7 +311,7 @@ Single-project convention is preferred when multiple projects separated by test 
 
 ### C# coding style
 
-Many aspects of coding style are automatically enforced by Visual Studio. There are settings and snippet files that have to be imported - see [First-timers](#first-timers) for details.  
+Many aspects of coding style are automatically enforced by Visual Studio. There are settings and snippet files that have to be imported - see [First-timers](#first-timers-read-here) for details.  
 
 1. **Tabs and line endings**
 
