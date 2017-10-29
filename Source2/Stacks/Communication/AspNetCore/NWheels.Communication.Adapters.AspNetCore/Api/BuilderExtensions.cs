@@ -6,7 +6,7 @@ namespace NWheels.Communication.Adapters.AspNetCore.Api
 {
     public static class BuilderExtensions
     {
-        public static MicroserviceHostBuilder UseAspNetCore(this MicroserviceHostBuilder hostBuilder)
+        public static MicroserviceHostBuilder UseAspNetCoreAdapter(this MicroserviceHostBuilder hostBuilder)
         {
             hostBuilder.UseFrameworkFeature<AspNetCoreFeature>();
             return hostBuilder;

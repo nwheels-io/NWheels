@@ -14,9 +14,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Core\Microservices\NWheels.Microservices\NWheels.Microservices.csproj" />
     <ProjectReference Include="..\..\..\Core\Communication\NWheels.Communication\NWheels.Communication.csproj" />
+    <ProjectReference Include="..\..\..\Core\RestApi\NWheels.RestApi\NWheels.RestApi.csproj" />
     <ProjectReference Include="..\..\..\Stacks\Communication\AspNetCore\NWheels.Communication.Adapters.AspNetCore\NWheels.Communication.Adapters.AspNetCore.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="microservice.xml" CopyToOutputDirectory="PreserveNewest" />
     <None Update="sslcert.pfx" CopyToOutputDirectory="PreserveNewest" />
     <None Update="WebFiles\index.html" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

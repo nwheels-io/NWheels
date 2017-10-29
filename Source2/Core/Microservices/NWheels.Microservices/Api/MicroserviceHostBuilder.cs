@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Linq;
 using NWheels.Kernel.Api.Injection;
 using System.Xml.Linq;
+using NWheels.Kernel.Api.Extensions;
 using NWheels.Kernel.Api.Primitives;
 using NWheels.Microservices.Runtime.Cli;
 using NWheels.Kernel.Api.Logging;
@@ -90,12 +91,24 @@ namespace NWheels.Microservices.Api
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceHostBuilder ContributeComponents(Action<IComponentContainer, IComponentContainerBuilder> contributor)
+        public MicroserviceHostBuilder UseComponents(Action<IComponentContainer, IComponentContainerBuilder> contributor)
         {
             var contribution = new ComponentContribution(contributor);
             BootConfig.BootComponents.Register(builder => builder.RegisterComponentInstance(contribution));
             UseApplicationFeature<ContributionsFeatureLoader>();
 
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MicroserviceHostBuilder UseMicroserviceXml(string filePath)
+        {
+            var xml = XElement.Load(
+                PathUtility.ExpandPathFromBinary(filePath), 
+                LoadOptions.PreserveWhitespace | LoadOptions.SetBaseUri | LoadOptions.SetLineInfo);            
+            
+            MicroserviceXmlReader.PopulateBootConfiguration(xml, BootConfig);
             return this;
         }
 

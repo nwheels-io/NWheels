@@ -142,9 +142,11 @@ namespace NWheels.Microservices.Runtime
 
             if (foundAssembly == null)
             {
-                foundAssembly = Assembly.Load(new AssemblyName() {
-                    Name = name
-                });
+                var assemblyFilePath = PathUtility.ExpandPathFromBinary(name + ".dll");
+                foundAssembly = Assembly.LoadFrom(assemblyFilePath);
+                //foundAssembly = Assembly.Load(new AssemblyName() {
+                //    Name = name
+                //});
                 //foundAssembly = _assemblyLoadContext.LoadFromAssemblyName(new AssemblyName() {
                 //    Name = name
                 //});

@@ -17,7 +17,7 @@ namespace NWheels.Microservices.Api
 
         public static MicroserviceHostBuilder UseLifecycleComponent<T>(this MicroserviceHostBuilder host) where T : class, ILifecycleComponent
         {
-            host.ContributeComponents((existing, builder) => builder.ContributeLifecycleComponent<T>());
+            host.UseComponents((existing, builder) => builder.ContributeLifecycleComponent<T>());
             return host;
         }
     }

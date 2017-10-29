@@ -16,11 +16,10 @@ namespace NWheels.Communication.Api.Extensions
     {
         public static MicroserviceHostBuilder UseHttpEndpoint(
             this MicroserviceHostBuilder builder, 
-            string name = "Default", 
             Action<HttpEndpointConfigurationBuilder> configure = null)
         {
-            return builder.ContributeComponents((exitingComponents, newComponents) => {
-                newComponents.ContributeHttpEndpoint(name, configure);
+            return builder.UseComponents((exitingComponents, newComponents) => {
+                newComponents.ContributeHttpEndpoint(configure);
             });
         }
 
@@ -28,21 +27,15 @@ namespace NWheels.Communication.Api.Extensions
         
         public static void ContributeHttpEndpoint(
             this IComponentContainerBuilder builder, 
-            string name = "Default", 
             Action<HttpEndpointConfigurationBuilder> configure = null)
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentException("Endpoint name must be a non-empty string", nameof(name));
-            }
-
             var adapterPort = new HttpEndpointAdapterInjectionPort(builder, DoConfigure); 
             builder.RegisterAdapterPort(adapterPort);
 
             void DoConfigure(IHttpEndpointConfigElement config, IComponentContainer exisgingComponents, IComponentContainerBuilder newComponents)
             {
                 var configBuilder = new HttpEndpointConfigurationBuilder(newComponents, config);
-                configure(configBuilder);
+                configure?.Invoke(configBuilder);
             }
         }
 
@@ -63,18 +56,31 @@ namespace NWheels.Communication.Api.Extensions
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public HttpEndpointConfigurationBuilder ListenOnPort(int number)
+            public HttpEndpointConfigurationBuilder Name(string name)
             {
-                _configElement.Port = number;
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    throw new ArgumentException("Endpoint name must be a non-empty string", nameof(name));
+                }
+
+                _configElement.Name = name;
+                return this;
+            }
+            
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public HttpEndpointConfigurationBuilder Http(int port)
+            {
+                _configElement.Port = port;
                 return this;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public HttpEndpointConfigurationBuilder HttpsListenOnPort(int number, string certFilePath, string certFilePassword)
+            public HttpEndpointConfigurationBuilder Https(int port, string certFilePath, string certFilePassword)
             {
                 _configElement.Https = _configElement.NewHttpsConfig();
-                _configElement.Https.Port = number;
+                _configElement.Https.Port = port;
                 _configElement.Https.RequireHttps = true;
                 _configElement.Https.CertFilePath = certFilePath;
                 _configElement.Https.CertFilePassword = certFilePassword;
@@ -115,6 +121,11 @@ namespace NWheels.Communication.Api.Extensions
 
                 return this;
             }
+            
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IComponentContainer ExistingComponents => _containerBuilder.AsInternal().RootContainer;
+            public IComponentContainerBuilder NewComponents => _containerBuilder;
         }
     }
 }

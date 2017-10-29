@@ -10,10 +10,21 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Communication\NWheels.Communication\NWheels.Communication.csproj">
+      <Project>{041CD519-5128-495C-A25D-9E5A2F2915E0}</Project>
+      <Name>NWheels.Communication</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Kernel\NWheels.Kernel\NWheels.Kernel.csproj" />
     <ProjectReference Include="..\..\Compilation\NWheels.Compilation\NWheels.Compilation.csproj" />
     <ProjectReference Include="..\..\MetaObjects\NWheels.MetaObjects\NWheels.MetaObjects.csproj" />
     <ProjectReference Include="..\..\Logging\NWheels.Logging\NWheels.Logging.csproj" />
     <ProjectReference Include="..\..\Configuration\NWheels.Configuration\NWheels.Configuration.csproj" />
+    <ProjectReference Include="..\..\Microservices\NWheels.Microservices\NWheels.Microservices.csproj">
+      <Project>{57EBA938-434A-42A9-ADD1-8F8F8A80D0A2}</Project>
+      <Name>NWheels.Microservices</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CodeGen" />
   </ItemGroup>
 </Project>

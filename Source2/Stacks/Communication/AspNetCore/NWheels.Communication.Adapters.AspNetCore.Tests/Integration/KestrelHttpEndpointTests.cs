@@ -29,7 +29,7 @@ namespace NWheels.Communication.Adapters.AspNetCore.Tests.Integration
 
             Action<MicroserviceHostBuilder> testCaseFeatures = (hostBuilder) =>  {
                 hostBuilder.UseHttpEndpoint(configure: endpoint => endpoint
-                    .ListenOnPort(5000)
+                    .Http(5000)
                     .StaticFolder("/static/files/one", localPath: new[] { TestFilesFolderPath, "wwwroot/Static1" }));
             };
 
@@ -56,7 +56,7 @@ namespace NWheels.Communication.Adapters.AspNetCore.Tests.Integration
 
             Action<MicroserviceHostBuilder> testCaseFeatures = (hostBuilder) =>  {
                 hostBuilder.UseHttpEndpoint(configure: endpoint => endpoint
-                    .ListenOnPort(5000)
+                    .Http(5000)
                     .StaticFolder("/static/files/one", localPath: new[] { TestFilesFolderPath, "wwwroot/Static1" })
                     .StaticFolder("/static/files/two", localPath: new[] { TestFilesFolderPath, "wwwroot/Static2" }));
             };
@@ -86,7 +86,7 @@ namespace NWheels.Communication.Adapters.AspNetCore.Tests.Integration
 
             Action<MicroserviceHostBuilder> testCaseFeatures = (hostBuilder) =>  {
                 hostBuilder.UseHttpEndpoint(configure: endpoint => endpoint
-                    .ListenOnPort(5000)
+                    .Http(5000)
                     .StaticFolder(
                         "/static", 
                         localPath: new[] { TestFilesFolderPath, "wwwroot/Static2" },
@@ -118,7 +118,7 @@ namespace NWheels.Communication.Adapters.AspNetCore.Tests.Integration
 
             Action<MicroserviceHostBuilder> testCaseFeatures = (hostBuilder) =>  {
                 hostBuilder.UseHttpEndpoint(configure: endpoint => endpoint
-                    .ListenOnPort(5000)
+                    .Http(5000)
                     .Middleware<TestDynamicContentMiddleware>()
                 );
             };
@@ -151,7 +151,7 @@ namespace NWheels.Communication.Adapters.AspNetCore.Tests.Integration
 
             Action<MicroserviceHostBuilder> testCaseFeatures = (hostBuilder) =>  {
                 hostBuilder.UseHttpEndpoint(configure: endpoint => endpoint
-                    .ListenOnPort(5000)
+                    .Http(5000)
                     .StaticFolder("/static/one", localPath: new[] { TestFilesFolderPath, "wwwroot/Static1" })
                     .StaticFolder("/static/two", localPath: new[] { TestFilesFolderPath, "wwwroot/Static2" }, defaultFiles: new[] { "index.html" })
                     .Middleware<TestDynamicContentMiddleware>());
@@ -184,8 +184,8 @@ namespace NWheels.Communication.Adapters.AspNetCore.Tests.Integration
 
             Action<MicroserviceHostBuilder> testCaseFeatures = (hostBuilder) =>  {
                 hostBuilder.UseHttpEndpoint(configure: endpoint => endpoint
-                    .ListenOnPort(5000)
-                    .HttpsListenOnPort(5001, "TestFiles/cert/sslcert.pfx".ToPathString(), "12345")
+                    .Http(5000)
+                    .Https(5001, "TestFiles/cert/sslcert.pfx".ToPathString(), "12345")
                     .StaticFolder("/static/one", localPath: new[] { TestFilesFolderPath, "wwwroot/Static1" })
                     .Middleware<TestDynamicContentMiddleware>());
             };
@@ -212,7 +212,7 @@ namespace NWheels.Communication.Adapters.AspNetCore.Tests.Integration
         {
             var hostBuilder = new MicroserviceHostBuilder("test");
             
-            hostBuilder.UseAspNetCore();
+            hostBuilder.UseAspNetCoreAdapter();
             hostBuilder.UseFrameworkFeature<TestConfigurationFeature>();
             testCaseFeatures?.Invoke(hostBuilder);
             

@@ -1,21 +1,15 @@
-using System;
-using System.Threading.Tasks;
-using NWheels.Microservices.Api;
-using NWheels.Communication.Api.Extensions;
-using Microsoft.AspNetCore.Http;
-using NWheels.Communication.Api;
-using System.Linq;
-using System.IO;
-using Microsoft.Extensions.Primitives;
-using NWheels.Communication.Api.Http;
+﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using NWheels.Communication.Api.Http;
 using NWheels.Configuration.Api;
 
-namespace NWheels.Samples.HelloWorld.HelloService
+namespace NWheels.Samples.HelloWorld.HelloService.AotCompiled
 {
-    public class TestHttpEndpointConfiguration : IHttpEndpointConfigElement
+    [GeneratedCode(tool: "NWheels", version: "0.1.0-0.dev.1")]
+    public class HttpEndpointConfigElement : IHttpEndpointConfigElement
     {
-        public TestHttpEndpointConfiguration()
+        public HttpEndpointConfigElement()
         {
             StaticFolders = new HttpStaticFolderConfigList();
             MiddlewarePipeline = new List<Type>();
@@ -33,21 +27,21 @@ namespace NWheels.Samples.HelloWorld.HelloService
 
         public IHttpsConfig NewHttpsConfig()
         {
-            return new TestHttpsConfig();
+            return new HttpsConfig();
         }
 
         private class HttpStaticFolderConfigList : List<IHttpStaticFolderConfig>, IConfigElementList<IHttpStaticFolderConfig>
         {
             public IHttpStaticFolderConfig NewItem()
             {
-                return new TestHttpStaticFolderConfig();
+                return new HttpStaticFolderConfig();
             }
         }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class TestHttpsConfig : IHttpsConfig
+    public class HttpsConfig : IHttpsConfig
     {
         public int Port { get; set; }
 
@@ -60,7 +54,7 @@ namespace NWheels.Samples.HelloWorld.HelloService
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class TestHttpStaticFolderConfig : IHttpStaticFolderConfig
+    public class HttpStaticFolderConfig : IHttpStaticFolderConfig
     {
         public string RequestBasePath { get; set; }
 

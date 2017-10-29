@@ -4,11 +4,11 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <PropertyGroup>
+    <OutputPath>..\NWheels.Samples.HelloWorld.HelloService\bin\$(Configuration)\</OutputPath>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <RuntimeIdentifiers>win10-x64;linux-x64</RuntimeIdentifiers>
-    <AssemblyName>hello</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Core\Microservices\NWheels.Microservices\NWheels.Microservices.csproj" />

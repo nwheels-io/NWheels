@@ -4,26 +4,7 @@ using System.Threading.Tasks;
 
 namespace NWheels.RestApi.Api
 {
-    public interface IResourceHandler
-    {
-        string FullPath { get; }
-        string ClassifierPath { get; }
-        string Description { get; }
-        Type KeyType { get; }
-        Type DataType { get; }
-        bool CanGetById { get; }
-        bool CanGetByQuery { get; }
-        bool CanPostNew { get; }
-        bool CanPostById { get; }
-        bool CanPatchById { get; }
-        bool CanPatchByQuery { get; }
-        bool CanDeleteById { get; }
-        bool CanDeleteByQuery { get; }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public interface IResourceHandler<TData> : IResourceHandler
+    public interface IResourceHandler<TData> : IResourceDescription
     {
         Task<IEnumerable<TData>> GetByQuery(IResourceQuery query);
         Task PostNew(TData data);
@@ -33,7 +14,7 @@ namespace NWheels.RestApi.Api
     
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
     
-    public interface IResourceHandler<in TId, TData> : IResourceHandler<TData>
+    public interface IResourceHanlder<in TId, TData> : IResourceHandler<TData>
     {
         Task<TData> GetById(TId id);
         Task PostById(TId id, TData data);

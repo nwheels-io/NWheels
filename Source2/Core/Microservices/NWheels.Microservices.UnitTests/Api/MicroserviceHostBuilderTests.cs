@@ -219,11 +219,11 @@ namespace NWheels.Microservices.UnitTests.Api
 
             //-- act
 
-            builder.ContributeComponents((existingComponents, newComponents) => {
+            builder.UseComponents((existingComponents, newComponents) => {
                 newComponents.RegisterComponentInstance(componentOne);
                 newComponents.RegisterComponentInstance(componentTwo);
             });
-            builder.ContributeComponents((existingComponents, newComponents) => newComponents.RegisterComponentInstance(componentThree));
+            builder.UseComponents((existingComponents, newComponents) => newComponents.RegisterComponentInstance(componentThree));
                 
             var host = builder.BuildHost();
             host.Configure(CancellationToken.None);
