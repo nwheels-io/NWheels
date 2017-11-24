@@ -59,7 +59,7 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
                 arguments: new[] { "run" }, 
                 onUpAndRunning: () => {
                     var bot = new HttpBot(baseUrl: "http://127.0.0.1:5000");
-                    jsonResponse = bot.Get("/hello?name=TEST").ResponseBodyAsJsonDynamic();
+                    jsonResponse = bot.Post("/api/tx/Hello/Hello?name=TEST").ResponseBodyAsJsonDynamic();
                     htmlResponse = bot.Get("/files").ResponseBodyAsString();
                 },
                 startTimeout: TimeSpan.FromSeconds(10),
