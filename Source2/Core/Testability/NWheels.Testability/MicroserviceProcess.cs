@@ -37,7 +37,7 @@ namespace NWheels.Testability
         private string[] _arguments;
         private TimeSpan? _timeout;
         private Process _process;
-        private Exception _errorReadingOutput;
+        private List<Exception> _errors;
         private int? _exitCode;
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -49,6 +49,7 @@ namespace NWheels.Testability
             _timeoutCancellation = new CancellationTokenSource();
             _clock = new Stopwatch();
             _output = new List<string>();
+            _errors = new List<Exception>();
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -63,14 +64,15 @@ namespace NWheels.Testability
             }
             catch (Exception e)
             {
-                _errorReadingOutput = e;
+                _errors.Add(e);
             }
             finally
             {
-                StopTimelyOrThrow();
+                TryStopTimely();
             }
 
             _exitCode = _process.ExitCode;
+            MicroserviceProcessException.ThrowIfFailed(this);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -84,36 +86,45 @@ namespace NWheels.Testability
             {
                 // TODO: replace with IPC listener
                 var upAndRunningMessage = nameof(IMicroserviceHostLogger.RunningInDaemonMode);
+
                 var status = ReadStandardOutput(
-                     shouldContinueAfter: line => !line.Contains(upAndRunningMessage),  
-                     timeout: startTimeout);
+                    shouldContinueAfter: line => !line.Contains(upAndRunningMessage),
+                    timeout: startTimeout);
 
                 if (status == OutputReadStatus.StopCondition)
                 {
                     onUpAndRunning();
                 }
-                else
-                {
-                    throw new Exception("Microservice has failed to start.");
-                }
             }
             catch (Exception e)
             {
-                _errorReadingOutput = e;
+                _errors.Add(e);
             }
             finally
             {
                 _process.StandardInput.Close();
-                StopTimelyOrThrow(stopTimeout);
+                TryStopTimely(stopTimeout);
             }
 
             _exitCode = _process.ExitCode;
+            MicroserviceProcessException.ThrowIfFailed(this);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void CopyOutput(StringBuilder destination)
+        {
+            foreach (var line in _output)
+            {
+                destination.AppendLine(line);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IReadOnlyList<string> Output => _output;
         public int? ExitCode => _exitCode;
+        public IReadOnlyList<Exception> Errors => _errors;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -121,7 +132,7 @@ namespace NWheels.Testability
         {
             _arguments = arguments;
             _timeout = timeout;
-            _errorReadingOutput = null;
+            _errors = new List<Exception>();
 
             if (timeout.HasValue)
             {
@@ -213,36 +224,47 @@ namespace NWheels.Testability
                     return OutputReadStatus.EndOfFile;
                 }
 
+                _output.Add(line);
+
                 if (shouldContinueAfter != null && !shouldContinueAfter(line))
                 {
                     return OutputReadStatus.StopCondition;
                 }
-
-                _output.Add(line);
             }
 
-            throw new TimeoutException("Timed out waiting for microservice process to complete.");
+            var timeoutMessage = $"Timed out waiting for microservice process to {(shouldContinueAfter != null ? "start" : "exit")}.";
+            throw new TimeoutException(timeoutMessage);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void StopTimelyOrThrow(TimeSpan? stopTimeout = null)
+        private bool TryStopTimely(TimeSpan? stopTimeout = null)
         {
-            int stopTimeoutMilliseconds = 1000;
+            try
+            {
+                ReadStandardOutput(timeout: stopTimeout);
+                return true;
+            }
+            catch (Exception e)
+            {
+                _errors.Add(e);
+                return false;
+            }
+            //int stopTimeoutMilliseconds = 1000;
 
-            if (stopTimeout.HasValue)
-            {
-                stopTimeoutMilliseconds = (int)stopTimeout.Value.TotalMilliseconds;
-            } 
-            else if (_timeout.HasValue)
-            {
-                stopTimeoutMilliseconds = (int)Math.Max(100, _timeout.Value.Subtract(_clock.Elapsed).TotalMilliseconds);
-            }
+            //if (stopTimeout.HasValue)
+            //{
+            //    stopTimeoutMilliseconds = (int)stopTimeout.Value.TotalMilliseconds;
+            //} 
+            //else if (_timeout.HasValue)
+            //{
+            //    stopTimeoutMilliseconds = (int)Math.Max(100, _timeout.Value.Subtract(_clock.Elapsed).TotalMilliseconds);
+            //}
             
-            if (!_process.WaitForExit(stopTimeoutMilliseconds) && _errorReadingOutput == null)
-            {
-                throw new TimeoutException("Timed out waiting for microservice process to complete.");
-            }
+            //if (!_process.WaitForExit(stopTimeoutMilliseconds) && _errorReadingOutput == null)
+            //{
+            //    throw new TimeoutException("Timed out waiting for microservice process to complete.");
+            //}
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -274,7 +296,8 @@ namespace NWheels.Testability
         private enum OutputReadStatus
         {
             EndOfFile,
-            StopCondition
+            StopCondition,
+            ReadFailure
         }
     }
 }

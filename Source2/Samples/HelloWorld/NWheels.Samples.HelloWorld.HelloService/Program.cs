@@ -13,22 +13,31 @@ namespace NWheels.Samples.HelloWorld.HelloService
     {
         static int Main(string[] args)
         {
-            var cli = new MicroserviceHostBuilder("HelloService")
-                .UseRestApiModel()
-                .UseAspNetCoreAdapter()
-                .UseHttpEndpoint(endpoint => endpoint
-                    .Http(port: 5000)
-                    .Https(port: 5001, certFilePath: "sslcert.pfx", certFilePassword: "12345")
-                    .StaticFolder("/files", localPath: new[] { "WebFiles" }, defaultFiles: new[] { "index.html" })
-                    .RestApiMiddleware<NWheelsV1Protocol>("/api/", resourceTypes: typeof(HelloTx))
-                )
-                .UseComponents((existingComponents, newComponents) => {
-                    newComponents.RegisterComponentType<HelloTx>().InstancePerDependency();
-                })
-                .UseMicroserviceXml("microservice.xml")
-                .BuildCli();
+            try
+            {
+                var cli = new MicroserviceHostBuilder("HelloService")
+                    .UseRestApiModel()
+                    .UseAspNetCoreAdapter()
+                    .UseHttpEndpoint(endpoint => endpoint
+                        .Http(port: 5000)
+                        .Https(port: 5001, certFilePath: "sslcert.pfx", certFilePassword: "12345")
+                        .StaticFolder("/files", localPath: new[] { "WebFiles" }, defaultFiles: new[] { "index.html" })
+                        .RestApiMiddleware<NWheelsV1Protocol>("/api/", resourceTypes: typeof(HelloTx))
+                    )
+                    .UseComponents((existingComponents, newComponents) => {
+                        newComponents.RegisterComponentType<HelloTx>().InstancePerDependency();
+                    })
+                    .UseMicroserviceXml("microservice.xml")
+                    .BuildCli();
 
-            return cli.Run(args);
+                return cli.Run(args);
+            }
+            catch (Exception e)
+            { 
+                Console.WriteLine(e.ToString());
+            }
+
+            return -1;
         }
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
