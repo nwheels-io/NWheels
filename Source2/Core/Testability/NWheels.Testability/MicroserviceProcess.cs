@@ -71,7 +71,11 @@ namespace NWheels.Testability
                 TryStopTimely();
             }
 
-            _exitCode = _process.ExitCode;
+            if (_process.HasExited)
+            {
+                _exitCode = _process.ExitCode;
+            }
+
             MicroserviceProcessException.ThrowIfFailed(this);
         }
 
@@ -106,7 +110,11 @@ namespace NWheels.Testability
                 TryStopTimely(stopTimeout);
             }
 
-            _exitCode = _process.ExitCode;
+            if (_process.HasExited)
+            {
+                _exitCode = _process.ExitCode;
+            }
+
             MicroserviceProcessException.ThrowIfFailed(this);
         }
 
