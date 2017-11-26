@@ -36,6 +36,8 @@ namespace NWheels.Testability
             StringBuilder message = new StringBuilder("Microservice process failure!");
 
             message.AppendLine($" Exit code: {(process.ExitCode.HasValue ? process.ExitCode.ToString() : "N/A")}");
+            message.AppendLine($"Executable: {process.GetExecutableFileName()}");
+            message.AppendLine($"Arguments: {process.GetExecutableArguments()}");
 
             foreach (var error in process.Errors)
             {

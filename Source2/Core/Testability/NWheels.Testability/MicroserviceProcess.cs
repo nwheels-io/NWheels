@@ -120,6 +120,50 @@ namespace NWheels.Testability
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string GetExecutableFileName()
+        {
+            if (IsCoverageEnabled)
+            {
+                return _s_coverageExecutable;
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return "dotnet.exe";
+            }
+            else
+            {
+                return "dotnet";
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string GetExecutableArguments()
+        {
+            var quoteChar = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? '"' : '\'');
+            var arguments = string.Join(" ", _arguments.Select(escapeSpaces));
+
+            if (IsCoverageEnabled)
+            {
+                var resolvedArguments = _s_coverageArgsTemplate
+                    .Replace(_s_coverageProjectPlaceholder, escapeSpaces(_projectFilePath))
+                    .Replace(_s_coverageArgumentsPlaceholder, arguments);
+
+                return resolvedArguments;
+            }
+            else
+            {
+                return $"run --project {escapeSpaces(_projectFilePath)} --no-restore --no-build -- {arguments}";
+            }
+
+            string escapeSpaces(string s)
+            {
+                return (s.Contains(" ") ? quoteChar + s + quoteChar : s);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void CopyOutput(StringBuilder destination)
         {
             foreach (var line in _output)
@@ -159,50 +203,6 @@ namespace NWheels.Testability
             //     $"MicroserviceProcess:\r\n- executable > {info.FileName}\r\n- arguments  > {info.Arguments}");
 
             _process = Process.Start(info);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private string GetExecutableFileName()
-        {
-            if (IsCoverageEnabled)
-            {
-                return _s_coverageExecutable;
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return "dotnet.exe";
-            }
-            else
-            {
-                return "dotnet";
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private string GetExecutableArguments()
-        {
-            var quoteChar = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? '"' : '\'');
-            var arguments = string.Join(" ", _arguments.Select(escapeSpaces)); 
-
-            if (IsCoverageEnabled)
-            {
-                var resolvedArguments = _s_coverageArgsTemplate
-                    .Replace(_s_coverageProjectPlaceholder, escapeSpaces(_projectFilePath))
-                    .Replace(_s_coverageArgumentsPlaceholder, arguments);
-
-                return resolvedArguments;
-            }
-            else 
-            {
-                return $"run --project {escapeSpaces(_projectFilePath)} --no-restore --no-build -- {arguments}";
-            }
-
-            string escapeSpaces(string s)
-            {
-                return (s.Contains(" ") ? quoteChar + s + quoteChar : s);
-            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -31,7 +31,7 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
                 onUpAndRunning: () => { 
                     upAndRunningCount++; 
                 },
-                startTimeout: TimeSpan.FromSeconds(10),
+                startTimeout: TimeSpan.FromSeconds(30),
                 stopTimeout: TimeSpan.FromSeconds(10));
 
             //-- assert
@@ -62,7 +62,7 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
                     jsonResponse = bot.Post("/api/tx/Hello/Hello?name=TEST").ResponseBodyAsJsonDynamic();
                     htmlResponse = bot.Get("/files").ResponseBodyAsString();
                 },
-                startTimeout: TimeSpan.FromSeconds(10),
+                startTimeout: TimeSpan.FromSeconds(30),
                 stopTimeout: TimeSpan.FromSeconds(10));
 
             //-- assert
