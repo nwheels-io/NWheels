@@ -19,7 +19,4 @@
     <ProjectReference Include="..\..\Testability\NWheels.Testability\NWheels.Testability.csproj" />
     <ProjectReference Include="..\NWheels.RestApi\NWheels.RestApi.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Runtime" />
-  </ItemGroup>
 </Project>
