@@ -18,6 +18,5 @@
   <ItemGroup>
     <Folder Include="Api\Authorization\" />
     <Folder Include="Runtime\Authorization\" />
-    <Folder Include="Runtime\Execution\" />
   </ItemGroup>
 </Project>

@@ -14,5 +14,8 @@ namespace NWheels.RestApi.Api
 
         [LogError]
         void RestApiBadRequest(string resourceUrl, string verb);
+
+        [LogError]
+        void RestApiBadRequest(string resourceUrl, string verb, Exception error);
     }
 }

@@ -1,11 +1,13 @@
 using System;
 using System.IO;
+using System.Net.Http;
 using Xunit;
 using FluentAssertions;
 using NWheels.Communication.Api.Http;
 using NWheels.Kernel.Api.Extensions;
 using NWheels.Testability;
 using NWheels.Samples.HelloWorld;
+using NWheels.Testability.Extensions;
 
 namespace NWheels.Samples.HelloWorld.Tests.SystemApi
 {
@@ -52,36 +54,34 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
 
             //-- act
             
-            dynamic jsonResponse = null;
+            string jsonResponse = null;
             string htmlResponse = null;
-            
+
             microservice.RunDaemon(
-                arguments: new[] { "run" }, 
+                arguments: new[] { "run" },
                 onUpAndRunning: () => {
-                    var bot = new HttpBot(baseUrl: "http://127.0.0.1:5000");
-                    jsonResponse = bot.Post("/api/tx/Hello/Hello?name=TEST").ResponseBodyAsJsonDynamic();
-                    htmlResponse = bot.Get("/files").ResponseBodyAsString();
+                    jsonResponse = MakeHttpRequest(5000, HttpMethod.Post, "/api/tx/Hello/Hello", "{name:'TEST'}").Result;
+                    htmlResponse = MakeHttpRequest(5000, HttpMethod.Get, "/files", expectedContentType: "text/html").Result;
                 },
                 startTimeout: TimeSpan.FromSeconds(30),
                 stopTimeout: TimeSpan.FromSeconds(10));
 
             //-- assert
 
-            microservice.ExitCode.Should().Be(0);
+            AssertMicroserviceOutput(microservice, () => {
 
-            ((object)jsonResponse).Should().NotBeNull();
-            string result = jsonResponse.result;
-            result.Should().Be("Hello, TEST!");
+                jsonResponse.Should().BeJson("{result:'Hello, TEST!'}");
+                htmlResponse.Should().NotBeNull();
 
-            htmlResponse.Should().NotBeNull();
-            
-            var indexHtmlFilePath = PathUtility.ExpandPathFromBinary(Path.Combine(
-                Path.GetDirectoryName(MicroserviceProjectRelativePath), 
-                "WebFiles", 
-                "index.html"));
-            
-            var expectedHtmlResponse = File.ReadAllText(indexHtmlFilePath);
-            htmlResponse.Should().Be(expectedHtmlResponse);
+                var indexHtmlFilePath = PathUtility.ExpandPathFromBinary(Path.Combine(
+                    Path.GetDirectoryName(MicroserviceProjectRelativePath),
+                    "WebFiles",
+                    "index.html"));
+
+                var expectedHtmlResponse = File.ReadAllText(indexHtmlFilePath);
+                htmlResponse.Should().Be(expectedHtmlResponse);
+
+            });
         }
     }
 }

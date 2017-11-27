@@ -174,6 +174,24 @@ namespace NWheels.Testability
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string GetFormattedOutput(string startWith = null)
+        {
+            var formatted = new StringBuilder();
+
+            if (startWith != null)
+            {
+                formatted.Append(startWith);
+            }
+
+            formatted.AppendLine("------ Output ------");
+            CopyOutput(formatted);
+            formatted.AppendLine("--- End of Output ---");
+
+            return formatted.ToString();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IReadOnlyList<string> Output => _output;
         public int? ExitCode => _exitCode;
         public IReadOnlyList<Exception> Errors => _errors;

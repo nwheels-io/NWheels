@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -39,9 +40,25 @@ namespace NWheels.Samples.HelloWorld.HelloService.AotCompiled
             {
                 var invocation = new HelloTxHelloMethodInvocation();
 
-                if (context.Request.Query.TryGetValue("name", out StringValues nameValues))
+                try
                 {
-                    invocation.Input.Name = nameValues.ToString();
+                    using (var reader = new StreamReader(context.Request.Body))
+                    {
+                        using (var json = new JsonTextReader(reader))
+                        {
+                            if (!json.Read() || !HelloTxHelloMethodInvocation.InputMessageSerializer.DeserializeFromJson(json, ref invocation.Input))
+                            {
+                                _logger.RestApiBadRequest(_handler.UriPath, context.Request.Method);
+                                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                                return;
+                            }
+                        }
+                    }
+                }
+                catch (Exception error)
+                {
+                    _logger.RestApiBadRequest(_handler.UriPath, context.Request.Method, error);
+                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 }
 
                 try

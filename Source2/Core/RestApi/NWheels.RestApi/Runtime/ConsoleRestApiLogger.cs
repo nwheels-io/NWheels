@@ -50,5 +50,17 @@ namespace NWheels.RestApi.Runtime
                 ColorConsole.Log(LogLevel.Error, $"{nameof(RestApiBadRequest)}: {nameof(resourceUrl)}={resourceUrl}, {nameof(verb)}={verb}");
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RestApiBadRequest(string resourceUrl, string verb, Exception error)
+        {
+            if (_logLevel <= LogLevel.Error)
+            {
+                ColorConsole.Log(
+                    LogLevel.Error, 
+                    $"{nameof(RestApiBadRequest)}: {nameof(resourceUrl)}={resourceUrl}, {nameof(verb)}={verb}, {nameof(error)}={error}");
+            }
+        }
     }
 }
