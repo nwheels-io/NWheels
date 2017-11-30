@@ -20,6 +20,6 @@
   <ItemGroup>
     <None Update="microservice.xml" CopyToOutputDirectory="PreserveNewest" />
     <None Update="sslcert.pfx" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="WebFiles\index.html" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="WebFiles\**\*.*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

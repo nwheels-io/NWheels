@@ -1,8 +1,8 @@
 import { combineReducers } from 'redux'
 import { routerReducer } from 'react-router-redux'
-import counter from './counter'
+import HomePage from './HomePage/logic'
 
 export default combineReducers({
-  router: routerReducer,
-  counter
+    router: routerReducer,
+    HomePage,
 })

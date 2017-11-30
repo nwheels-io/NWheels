@@ -3,7 +3,7 @@ import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 import { ConnectedRouter } from 'react-router-redux'
 import store, { history } from './store'
-import App from './containers/app'
+import HelloWorldApp from './HelloWorldApp/render'
 
 import './index.css'
 
@@ -13,7 +13,7 @@ render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
       <div>
-        <App />
+        <HelloWorldApp />
       </div>
     </ConnectedRouter>
   </Provider>,

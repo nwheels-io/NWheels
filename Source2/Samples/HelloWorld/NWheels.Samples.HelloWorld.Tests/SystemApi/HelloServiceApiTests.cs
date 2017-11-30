@@ -61,7 +61,7 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
                 arguments: new[] { "run" },
                 onUpAndRunning: () => {
                     jsonResponse = MakeHttpRequest(5000, HttpMethod.Post, "/api/tx/Hello/Hello", "{name:'TEST'}").Result;
-                    htmlResponse = MakeHttpRequest(5000, HttpMethod.Get, "/files", expectedContentType: "text/html").Result;
+                    htmlResponse = MakeHttpRequest(5000, HttpMethod.Get, "/", expectedContentType: "text/html").Result;
                 },
                 startTimeout: TimeSpan.FromSeconds(30),
                 stopTimeout: TimeSpan.FromSeconds(10));

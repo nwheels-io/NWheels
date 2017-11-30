@@ -21,7 +21,7 @@ namespace NWheels.Samples.HelloWorld.HelloService
                     .UseHttpEndpoint(endpoint => endpoint
                         .Http(port: 5000)
                         .Https(port: 5001, certFilePath: "sslcert.pfx", certFilePassword: "12345")
-                        .StaticFolder("/files", localPath: new[] { "WebFiles" }, defaultFiles: new[] { "index.html" })
+                        .StaticFolder("/", localPath: new[] { "WebFiles" }, defaultFiles: new[] { "index.html" })
                         .RestApiMiddleware<NWheelsV1Protocol>("/api/", resourceTypes: typeof(HelloTx))
                     )
                     .UseComponents((existingComponents, newComponents) => {
