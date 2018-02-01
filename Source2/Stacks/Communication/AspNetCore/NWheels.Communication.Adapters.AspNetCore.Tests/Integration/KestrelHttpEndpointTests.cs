@@ -233,17 +233,27 @@ namespace NWheels.Communication.Adapters.AspNetCore.Tests.Integration
 
         private HttpResponseMessage MakeHttpRequest(bool https, int endpointPort, HttpMethod method, string pathAndQuery)
         {
-            using (var client = new HttpClient())
+            using (var handler = new HttpClientHandler())
             {
-                var protocol = (https ? "https" : "http");
-                var requestUri = $"{protocol}://localhost:{endpointPort}/{pathAndQuery.TrimStart('/')}";
-                var httpTask = client.SendAsync(new HttpRequestMessage(method, requestUri), HttpCompletionOption.ResponseContentRead, CancellationToken.None);
-                var completed = httpTask.Wait(10000);
+                handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => {
+                    return true;
+                };
+                    
+                using (var client = new HttpClient(handler))
+                {
+                    var protocol = (https ? "https" : "http");
+                    var requestUri = $"{protocol}://localhost:{endpointPort}/{pathAndQuery.TrimStart('/')}";
+                    var httpTask = client.SendAsync(
+                        new HttpRequestMessage(method, requestUri),
+                        HttpCompletionOption.ResponseContentRead,
+                        CancellationToken.None);
+                    var completed = httpTask.Wait(10000);
 
-                completed.Should().BeTrue(because: "HTTP request must complete within allotted timeout.");
+                    completed.Should().BeTrue(because: "HTTP request must complete within allotted timeout.");
 
-                var response = httpTask.Result;
-                return response;
+                    var response = httpTask.Result;
+                    return response;
+                }
             }
         }
 
