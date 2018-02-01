@@ -66,6 +66,7 @@ namespace NWheels.Testability
                 string path, 
                 string content = null,
                 string contentType = "application/json",
+                HttpStatusCode expectedStatusCode = HttpStatusCode.OK,
                 string expectedContentType = "application/json",
                 TimeSpan? timeout = null)
             {
@@ -88,14 +89,14 @@ namespace NWheels.Testability
                     }
 
                     var response = httpTask.Result;
-                    response.StatusCode.Should().Be(HttpStatusCode.OK, because: "requets must complete successfully");
+                    response.StatusCode.Should().Be(expectedStatusCode, because: $"requet must complete with status {expectedStatusCode}");
 
                     if (expectedContentType != null)
                     {
                         response.Content.Headers.ContentType.MediaType.Should().Be(expectedContentType, because: $"response must be '{expectedContentType}'");
                     }
 
-                    var responseText = response.Content.ReadAsStringAsync().Result;
+                    var responseText = response?.Content?.ReadAsStringAsync().Result;
                     return responseText;
                 }
             }

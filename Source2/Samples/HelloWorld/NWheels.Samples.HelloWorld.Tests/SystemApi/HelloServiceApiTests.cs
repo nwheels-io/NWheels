@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using Xunit;
 using FluentAssertions;
@@ -46,7 +47,7 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         [Fact]
-        public void CanInvokeHelloWorldTx()
+        public void HelloWorldTx_InvokeProperly_Success()
         {
             //-- arrange
 
@@ -82,6 +83,62 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
                 htmlResponse.Should().Be(expectedHtmlResponse);
 
             });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void HelloWorldTx_SendInvalidVerb_ReceiveBadRequest()
+        {
+            //-- arrange
+
+            var microservice = new MicroserviceProcess(MicroserviceProjectRelativePath);
+
+            //-- act
+
+            string jsonResponse = null;
+
+            microservice.RunDaemon(
+                arguments: new[] { "run" },
+                onUpAndRunning: () => {
+                    jsonResponse = MakeHttpRequest(
+                        5000, HttpMethod.Get, "/api/tx/Hello/Hello", "{name:'TEST'}", 
+                        expectedStatusCode: HttpStatusCode.BadRequest, expectedContentType: null).Result;
+                },
+                startTimeout: TimeSpan.FromSeconds(30),
+                stopTimeout: TimeSpan.FromSeconds(10));
+
+            //-- assert
+
+            AssertMicroserviceOutput(microservice, () => { });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void HelloWorldTx_SendInvalidJson_ReceiveBadRequest()
+        {
+            //-- arrange
+
+            var microservice = new MicroserviceProcess(MicroserviceProjectRelativePath);
+
+            //-- act
+
+            string jsonResponse = null;
+
+            microservice.RunDaemon(
+                arguments: new[] { "run" },
+                onUpAndRunning: () => {
+                    jsonResponse = MakeHttpRequest(
+                        5000, HttpMethod.Post, "/api/tx/Hello/Hello", "{bad:'BAD'}",
+                        expectedStatusCode: HttpStatusCode.BadRequest, expectedContentType: null).Result;
+                },
+                startTimeout: TimeSpan.FromSeconds(30),
+                stopTimeout: TimeSpan.FromSeconds(10));
+
+            //-- assert
+
+            AssertMicroserviceOutput(microservice, () => { });
         }
     }
 }
