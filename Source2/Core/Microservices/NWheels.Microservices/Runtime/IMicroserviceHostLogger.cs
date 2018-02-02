@@ -138,41 +138,41 @@ namespace NWheels.Microservices.Runtime
         [LogWarning]
         void NoLifecycleComponentsLoaded();
 
-        [LogVerbose]
-        IExecutionPathActivity LifecycleComponentsMicroserviceLoading();
+        //[LogVerbose]
+        //IExecutionPathActivity LifecycleComponentsMicroserviceLoading();
 
-        [LogVerbose]
-        IExecutionPathActivity LifecycleComponentsLoad();
+        //[LogVerbose]
+        //IExecutionPathActivity LifecycleComponentsLoad();
 
-        [LogVerbose]
-        IExecutionPathActivity LifecycleComponentsMicroserviceLoaded();
+        //[LogVerbose]
+        //IExecutionPathActivity LifecycleComponentsMicroserviceLoaded();
 
-        [LogVerbose]
-        IExecutionPathActivity LifecycleComponentsMicroserviceActivating();
+        //[LogVerbose]
+        //IExecutionPathActivity LifecycleComponentsMicroserviceActivating();
 
-        [LogVerbose]
-        IExecutionPathActivity LifecycleComponentsActivate();
+        //[LogVerbose]
+        //IExecutionPathActivity LifecycleComponentsActivate();
 
-        [LogVerbose]
-        IExecutionPathActivity LifecycleComponentsMicroserviceActivated();
+        //[LogVerbose]
+        //IExecutionPathActivity LifecycleComponentsMicroserviceActivated();
 
-        [LogVerbose]
-        IExecutionPathActivity LifecycleComponentsMicroserviceMaybeDeactivating();
+        //[LogVerbose]
+        //IExecutionPathActivity LifecycleComponentsMicroserviceMaybeDeactivating();
 
-        [LogVerbose]
-        IExecutionPathActivity LifecycleComponentsMayDeactivate();
+        //[LogVerbose]
+        //IExecutionPathActivity LifecycleComponentsMayDeactivate();
 
-        [LogVerbose]
-        IExecutionPathActivity LifecycleComponentsMicroserviceMaybeDeactivated();
+        //[LogVerbose]
+        //IExecutionPathActivity LifecycleComponentsMicroserviceMaybeDeactivated();
 
-        [LogVerbose]
-        IExecutionPathActivity LifecycleComponentsMicroserviceMaybeUnloading();
+        //[LogVerbose]
+        //IExecutionPathActivity LifecycleComponentsMicroserviceMaybeUnloading();
 
-        [LogVerbose]
-        IExecutionPathActivity LifecycleComponentsMayUnload();
+        //[LogVerbose]
+        //IExecutionPathActivity LifecycleComponentsMayUnload();
 
-        [LogVerbose]
-        IExecutionPathActivity LifecycleComponentsMicroserviceMaybeUnloaded();
+        //[LogVerbose]
+        //IExecutionPathActivity LifecycleComponentsMicroserviceMaybeUnloaded();
 
         [LogError]
         MicroserviceHostException LifecycleComponentFailed(Type componentType, string lifecycleMethod, Exception error);

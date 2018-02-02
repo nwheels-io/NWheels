@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if false // HttpBot is excluded because it isn't covered with any tests
+
+using System;
 using System.Collections.Specialized;
 using System.Dynamic;
 using System.Globalization;
@@ -698,3 +700,5 @@ namespace NWheels.Communication.Api.Http
         }
     }
 }
+
+#endif

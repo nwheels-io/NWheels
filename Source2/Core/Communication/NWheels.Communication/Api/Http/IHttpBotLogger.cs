@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if false // HttpBot is excluded because it isn't covered with any tests
+
+    using System;
 using NWheels.Kernel.Api.Logging;
 
 namespace NWheels.Communication.Api.Http
@@ -29,3 +31,5 @@ namespace NWheels.Communication.Api.Http
         void ResponsePayload(string format, string contents);
     }
 }
+
+#endif

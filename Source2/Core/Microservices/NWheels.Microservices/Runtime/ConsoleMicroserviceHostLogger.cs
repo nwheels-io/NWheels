@@ -421,6 +421,8 @@ namespace NWheels.Microservices.Runtime
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+#if false
+
         public IExecutionPathActivity LifecycleComponentsActivate()
         {
             if (_logLevel <= LogLevel.Verbose)
@@ -551,6 +553,7 @@ namespace NWheels.Microservices.Runtime
             return new StubActivity(nameof(LifecycleComponentsMicroserviceMaybeUnloading));
         }
 
+#endif
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Loaded()

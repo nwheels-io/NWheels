@@ -82,6 +82,8 @@ namespace NWheels.Microservices.Runtime
                 ValidateNotDisposed();
 
                 StateScheduler.QueueTrigger(MicroserviceTrigger.Configure);
+
+                Logger.StartingInState(StateScheduler.CurrentState);
                 RunStateMachineUpTo(MicroserviceState.Configured, cancellation);
             }
         }
@@ -97,6 +99,7 @@ namespace NWheels.Microservices.Runtime
                 StateScheduler.QueueTrigger(MicroserviceTrigger.Configure);
                 StateScheduler.QueueTrigger(MicroserviceTrigger.Compile);
 
+                Logger.StartingInState(StateScheduler.CurrentState);
                 RunStateMachineUpTo(MicroserviceState.CompiledStopped, cancellation);
             }
         }
@@ -123,6 +126,7 @@ namespace NWheels.Microservices.Runtime
                     StateScheduler.QueueTrigger(MicroserviceTrigger.Activate);
                 }
 
+                Logger.StartingInState(StateScheduler.CurrentState);
                 RunStateMachineUpTo(targetState, cancellation);
             }
         }
@@ -500,6 +504,11 @@ namespace NWheels.Microservices.Runtime
 
                 this.ModuleComponents = InitializeModuleComponentContainer();
                 this.FeatureLoaders = ModuleLoader.GetBootFeatureLoaders().ToList();
+
+                foreach (var feature in this.FeatureLoaders)
+                {
+                    Logger.UsingFeatureLoader(feature.GetType());
+                }
 
                 doFeatureLoaderPhases();
             }

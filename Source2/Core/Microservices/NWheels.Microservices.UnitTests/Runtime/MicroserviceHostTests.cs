@@ -13,6 +13,7 @@ using System.Threading;
 using System.Xml.Linq;
 using NWheels.Microservices.Api.Exceptions;
 using System.Threading.Tasks;
+using NWheels.Kernel.Api.Logging;
 
 namespace NWheels.Microservices.UnitTests.Runtime
 {
@@ -2046,6 +2047,7 @@ namespace NWheels.Microservices.UnitTests.Runtime
             var bootLog = new TestLog();
             var runLog = new TestLog();
             var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
+                .Configure(bootConfig => bootConfig.LogLevel = LogLevel.Debug)
                 .UseBootComponents(builder => {
                     builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
                     builder.RegisterComponentInstance(bootLog);
@@ -2124,7 +2126,10 @@ namespace NWheels.Microservices.UnitTests.Runtime
             var bootLog = new TestLog();
             var runLog = new TestLog();
             var host = (MicroserviceHost)new MicroserviceHostBuilder("Test")
-                .Configure(bootConfig => bootConfig.IsBatchJobMode = true)
+                .Configure(bootConfig => {
+                    bootConfig.IsBatchJobMode = true;
+                    bootConfig.LogLevel = LogLevel.Debug;
+                })
                 .UseBootComponents(builder => {
                     builder.RegisterComponentType<TestModuleLoader>().ForService<IModuleLoader>();
                     builder.RegisterComponentInstance(bootLog);
