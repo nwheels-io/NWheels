@@ -8,6 +8,6 @@ $env:NW_SYSTEST_COVER_ARGS_PLACEHOLDER = "[[ARGS]]"
 
 dotnet test C:\Home\NWheels\Source2\Samples\HelloWorld\NWheels.Samples.HelloWorld.Tests\NWheels.Samples.HelloWorld.Tests.csproj --no-build
 
-& "C:\Home\NWheels\Tools\Installed\ReportGenerator.2.5.11\tools\ReportGenerator.exe" -reports:C:\Temp\sys_test_cover.xml -targetdir:C:\Temp\sys_test_cover
+& "C:\Home\NWheels\Tools\Installed\ReportGenerator.3.1.2\tools\ReportGenerator.exe" -reports:C:\Temp\sys_test_cover.xml -targetdir:C:\Temp\sys_test_cover
 
 Invoke-Item C:\Temp\sys_test_cover\index.htm

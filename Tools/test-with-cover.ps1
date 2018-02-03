@@ -66,6 +66,6 @@ if ($testRunStatus -ne "OK") {
     throw "Some test runs FAILED"
 }
 
-& "$scriptDir\Installed\ReportGenerator.2.5.11\tools\ReportGenerator.exe" -reports:$topDir\TestResults\CoverageResults.xml -targetdir:$topDir\TestResults\CoverageReport
+& "$scriptDir\Installed\ReportGenerator.3.1.2\tools\ReportGenerator.exe" -reports:$topDir\TestResults\CoverageResults.xml -targetdir:$topDir\TestResults\CoverageReport
 
 Invoke-Item $topDir\TestResults\CoverageReport\index.htm
