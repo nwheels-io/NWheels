@@ -60,49 +60,6 @@ namespace NWheels.Testability
         [Trait(Traits.NamePurpose, Traits.ValuePurposeSystemApiTest)]
         public abstract class SystemApiTest : AbstractTest
         {
-            protected async Task<string> MakeHttpRequest(
-                int port, 
-                HttpMethod method, 
-                string path, 
-                string content = null,
-                string contentType = "application/json",
-                HttpStatusCode expectedStatusCode = HttpStatusCode.OK,
-                string expectedContentType = "application/json",
-                TimeSpan? timeout = null)
-            {
-                using (var client = new HttpClient())
-                {
-                    var requestUri = $"http://localhost:{port}/{path.TrimStart('/')}";
-                    var request = new HttpRequestMessage(method, requestUri);
-
-                    if (method != HttpMethod.Get)
-                    {
-                        request.Content = new StringContent(content, Encoding.UTF8, contentType);
-                    }
-
-                    var httpTask = client.SendAsync(request, HttpCompletionOption.ResponseContentRead, CancellationToken.None);
-                    var effectiveTimeout = timeout.GetValueOrDefault(TimeSpan.FromSeconds(10));
-
-                    if (await Task.WhenAny(httpTask, Task.Delay(effectiveTimeout)) != httpTask)
-                    {
-                        Assert.True(false, "HTTP request didn't complete within allotted timeout.");
-                    }
-
-                    var response = httpTask.Result;
-                    response.StatusCode.Should().Be(expectedStatusCode, because: $"requet must complete with status {expectedStatusCode}");
-
-                    if (expectedContentType != null)
-                    {
-                        response.Content.Headers.ContentType.MediaType.Should().Be(expectedContentType, because: $"response must be '{expectedContentType}'");
-                    }
-
-                    var responseText = response?.Content?.ReadAsStringAsync().Result;
-                    return responseText;
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
             protected void AssertMicroserviceOutput(MicroserviceProcess microservice, Action assertions)
             {
                 try

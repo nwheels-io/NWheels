@@ -61,8 +61,8 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
             microservice.RunDaemon(
                 arguments: new[] { "run" },
                 onUpAndRunning: () => {
-                    jsonResponse = MakeHttpRequest(5000, HttpMethod.Post, "/api/tx/Hello/Hello", "{name:'TEST'}").Result;
-                    htmlResponse = MakeHttpRequest(5000, HttpMethod.Get, "/", expectedContentType: "text/html").Result;
+                    jsonResponse = HttpAssert.MakeLocalHttpRequest(5000, HttpMethod.Post, "/api/tx/Hello/Hello", "{name:'TEST'}").Result;
+                    htmlResponse = HttpAssert.MakeLocalHttpRequest(5000, HttpMethod.Get, "/", expectedContentType: "text/html").Result;
                 },
                 startTimeout: TimeSpan.FromSeconds(30),
                 stopTimeout: TimeSpan.FromSeconds(10));
@@ -101,7 +101,7 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
             microservice.RunDaemon(
                 arguments: new[] { "run" },
                 onUpAndRunning: () => {
-                    jsonResponse = MakeHttpRequest(
+                    jsonResponse = HttpAssert.MakeLocalHttpRequest(
                         5000, HttpMethod.Get, "/api/tx/Hello/Hello", "{name:'TEST'}", 
                         expectedStatusCode: HttpStatusCode.BadRequest, expectedContentType: null).Result;
                 },
@@ -129,7 +129,7 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
             microservice.RunDaemon(
                 arguments: new[] { "run" },
                 onUpAndRunning: () => {
-                    jsonResponse = MakeHttpRequest(
+                    jsonResponse = HttpAssert.MakeLocalHttpRequest(
                         5000, HttpMethod.Post, "/api/tx/Hello/Hello", "{bad:'BAD'}",
                         expectedStatusCode: HttpStatusCode.BadRequest, expectedContentType: null).Result;
                 },
