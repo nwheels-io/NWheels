@@ -33,18 +33,26 @@ namespace NWheels.Testability
         private readonly string _projectFilePath;
         private readonly CancellationTokenSource _timeoutCancellation;
         private readonly Stopwatch _clock;
-        private readonly List<string> _output; 
+        private readonly List<string> _output;
+        private readonly IProcessHandler _processHandler;
         private string[] _arguments;
         private TimeSpan? _timeout;
-        private Process _process;
         private List<Exception> _errors;
         private int? _exitCode;
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public MicroserviceProcess(string projectFileRelativePath)
+            : this(projectFileRelativePath, new RealProcessHandler())
+        {
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MicroserviceProcess(string projectFileRelativePath, IProcessHandler processHandler)
         {
             _projectFilePath = Path.Combine(_s_testBinaryFolderPath, projectFileRelativePath);
+            _processHandler = processHandler;
 
             _timeoutCancellation = new CancellationTokenSource();
             _clock = new Stopwatch();
@@ -71,9 +79,9 @@ namespace NWheels.Testability
                 TryStopTimely();
             }
 
-            if (_process.HasExited)
+            if (_processHandler.HasExited)
             {
-                _exitCode = _process.ExitCode;
+                _exitCode = _processHandler.ExitCode;
             }
 
             MicroserviceProcessException.ThrowIfFailed(this);
@@ -106,13 +114,13 @@ namespace NWheels.Testability
             }
             finally
             {
-                _process.StandardInput.Close();
+                _processHandler.CloseInput();
                 TryStopTimely(stopTimeout);
             }
 
-            if (_process.HasExited)
+            if (_processHandler.HasExited)
             {
-                _exitCode = _process.ExitCode;
+                _exitCode = _processHandler.ExitCode;
             }
 
             MicroserviceProcessException.ThrowIfFailed(this);
@@ -220,7 +228,7 @@ namespace NWheels.Testability
             //     true, 
             //     $"MicroserviceProcess:\r\n- executable > {info.FileName}\r\n- arguments  > {info.Arguments}");
 
-            _process = Process.Start(info);
+            _processHandler.Start(info);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -234,7 +242,7 @@ namespace NWheels.Testability
 
             while (!effectiveTimeoutCancellation.IsCancellationRequested)
             {
-                var readLineTask = _process.StandardOutput.ReadLineAsync();
+                var readLineTask = _processHandler.ReadOntputLineAsync();
                 try
                 {
                     readLineTask.Wait(effectiveTimeoutCancellation.Token);
