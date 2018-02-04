@@ -32,7 +32,7 @@ namespace NWheels.Testability.Tests.Unit
 
             //-- act
 
-            microserviceProcess.RunBatchJob(new string[0], TimeSpan.FromSeconds(1000));
+            microserviceProcess.RunBatchJob(new string[0], TimeSpan.FromSeconds(10));
 
             //-- assert
 

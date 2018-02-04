@@ -37,9 +37,15 @@ build_script:
     
     echo "Assembly build version: $assembly_build_version"
     
+    echo "--- current time is $(Get-Date) ---"
+
     dotnet build -c Debug -p:Version=$assembly_build_version -p:DebugType=Full -p:DebugSymbols=True
 
+    echo "--- current time is $(Get-Date) ---"
+
     dotnet build -c Release -p:Version=$assembly_build_version
+
+    echo "--- current time is $(Get-Date) ---"
     
 test_script:
 - ps: >-
@@ -74,15 +80,19 @@ test_script:
     $rootStore.Close()
 
     Get-ChildItem -Directory -Recurse -Include *.UnitTests,*.IntegrationTests,*.Tests | Foreach { 
+        echo "--- current time is $(Get-Date) ---"        
         echo --- "Running Unit + Integration tests in project" $_.fullName ---;     
         $dotnetArgs = '"-targetargs:test ' + $_.fullname + ' --no-build --no-restore -c Debug --filter ""(Purpose=UnitTest)|(Purpose=IntegrationTest)"""';
         c:\projects\NWheels\Tools\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:dotnet.exe $dotnetArgs -oldStyle -register:user -filter:"+[NWheels.*]* +[*]NWheels.* -[*.*Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -output:c:\projects\NWheels\Source2\CoverageResults.xml -mergeoutput -returntargetcode:1000
+        echo "--- current time is $(Get-Date) ---"        
         if ($LastExitCode -ne 0) { $testRunStatus = "FAIL" }
     }
 
     Get-ChildItem -Directory -Recurse -Include *.SystemApiTests,*.SystemUITests,*.Tests | Foreach { 
+        echo "--- current time is $(Get-Date) ---"        
         echo --- "Running System API + UI tests in project" $_.fullName ---;     
         dotnet test $_.fullname --no-build -c Debug --filter "(Purpose=SystemApiTest)|(Purpose=SystemUITest)"
+        echo "--- current time is $(Get-Date) ---"        
         if ($LastExitCode -ne 0) { $testRunStatus = "FAIL" }
     }
 
@@ -114,6 +124,8 @@ after_test:
    
 on_success:
 - ps: >-
+    echo "--- current time is $(Get-Date) ---"
+
     cd c:\projects\NWheels\Source2
 
     Get-ChildItem -File -Recurse -Include *.nupkg | Foreach {appveyor PushArtifact $_.fullName}
