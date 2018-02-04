@@ -1,23 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.Testability
+namespace NWheels.Kernel.Api.Primitives
 {
-    public interface IProcessHandler : IDisposable
+    public interface IOperatingSystemProcess : IDisposable
     {
         void Start(ProcessStartInfo startInfo);
-        Task<string> ReadOntputLineAsync();
+        Task<string> ReadOutputLineAsync();
         void CloseInput();
+        bool WaitForExit(TimeSpan timeout);
+        bool WasStarted { get; }
         bool HasExited { get; }
         int ExitCode { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public sealed class RealProcessHandler : IProcessHandler
+    public sealed class RealOperatingSystemProcess : IOperatingSystemProcess
     {
         private Process _process;
 
@@ -42,7 +45,7 @@ namespace NWheels.Testability
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Task<string> ReadOntputLineAsync()
+        public Task<string> ReadOutputLineAsync()
         {
             ValidateStarted();
             return _process.StandardOutput.ReadLineAsync();
@@ -58,14 +61,19 @@ namespace NWheels.Testability
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool HasExited
+        public bool WaitForExit(TimeSpan timeout)
         {
-            get
-            {
-                ValidateStarted();
-                return _process.HasExited;
-            }
+            ValidateStarted();
+            return _process.WaitForExit((int) timeout.TotalMilliseconds);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool WasStarted => _process != null;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool HasExited => _process != null && _process.HasExited;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

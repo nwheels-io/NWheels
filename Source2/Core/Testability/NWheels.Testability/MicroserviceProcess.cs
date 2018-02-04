@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NWheels.Kernel.Api.Extensions;
+using NWheels.Kernel.Api.Primitives;
 using NWheels.Microservices.Runtime;
 using Xunit;
 
@@ -15,16 +16,6 @@ namespace NWheels.Testability
 {
     public class MicroserviceProcess
     {
-        private static readonly string _s_useCoverage = 
-            System.Environment.GetEnvironmentVariable(EnvironmentVariables.UseCoverage);
-        private static readonly string _s_coverageExecutable = 
-            System.Environment.GetEnvironmentVariable(EnvironmentVariables.CoverageExecutable);
-        private static readonly string _s_coverageArgsTemplate = 
-            System.Environment.GetEnvironmentVariable(EnvironmentVariables.CoverageArgsTemplate);
-        private static readonly string _s_coverageProjectPlaceholder = 
-            System.Environment.GetEnvironmentVariable(EnvironmentVariables.CoverageProjectPlaceholder);
-        private static readonly string _s_coverageArgumentsPlaceholder = 
-            System.Environment.GetEnvironmentVariable(EnvironmentVariables.CoverageArgumentsPlaceholder);
         private static readonly string _s_testBinaryFolderPath = 
             Path.GetDirectoryName(typeof(MicroserviceProcess).Assembly.Location);
 
@@ -34,7 +25,9 @@ namespace NWheels.Testability
         private readonly CancellationTokenSource _timeoutCancellation;
         private readonly Stopwatch _clock;
         private readonly List<string> _output;
-        private readonly IProcessHandler _processHandler;
+        private readonly IOperatingSystemProcess _processHandler;
+        private readonly IOperatingSystemEnvironment _environmentHandler;
+        private readonly EnvironmentVariables _environment;
         private string[] _arguments;
         private TimeSpan? _timeout;
         private List<Exception> _errors;
@@ -43,17 +36,22 @@ namespace NWheels.Testability
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public MicroserviceProcess(string projectFileRelativePath)
-            : this(projectFileRelativePath, new RealProcessHandler())
+            : this(projectFileRelativePath, new RealOperatingSystemProcess(), new RealOperatingSystemEnvironment())
         {
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MicroserviceProcess(string projectFileRelativePath, IProcessHandler processHandler)
+        public MicroserviceProcess(
+            string projectFileRelativePath, 
+            IOperatingSystemProcess processHandler, 
+            IOperatingSystemEnvironment environmentHandler)
         {
-            _projectFilePath = Path.Combine(_s_testBinaryFolderPath, projectFileRelativePath);
+            _projectFilePath = PathUtility.CombineNormalize(_s_testBinaryFolderPath, projectFileRelativePath);
             _processHandler = processHandler;
+            _environmentHandler = environmentHandler;
 
+            _environment = new EnvironmentVariables(environmentHandler);
             _timeoutCancellation = new CancellationTokenSource();
             _clock = new Stopwatch();
             _output = new List<string>();
@@ -130,11 +128,11 @@ namespace NWheels.Testability
 
         public string GetExecutableFileName()
         {
-            if (IsCoverageEnabled)
+            if (_environment.IsCoverageEnabled)
             {
-                return _s_coverageExecutable;
+                return _environment.CoverageExecutable;
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            else if (_environmentHandler.IsOSPlatform(OSPlatform.Windows))
             {
                 return "dotnet.exe";
             }
@@ -151,17 +149,19 @@ namespace NWheels.Testability
             var quoteChar = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? '"' : '\'');
             var arguments = string.Join(" ", _arguments.Select(escapeSpaces));
 
-            if (IsCoverageEnabled)
+            if (_environment.IsCoverageEnabled)
             {
-                var resolvedArguments = _s_coverageArgsTemplate
-                    .Replace(_s_coverageProjectPlaceholder, escapeSpaces(_projectFilePath))
-                    .Replace(_s_coverageArgumentsPlaceholder, arguments);
+                var resolvedArguments = _environment.CoverageArgsTemplate
+                    .Replace(_environment.CoverageProjectPlaceholder, escapeSpaces(_projectFilePath))
+                    .Replace(_environment.CoverageArgumentsPlaceholder, arguments);
 
                 return resolvedArguments;
             }
             else
             {
-                return $"run --project {escapeSpaces(_projectFilePath)} --no-restore --no-build -- {arguments}";
+                return (
+                    $"run --project {escapeSpaces(_projectFilePath)} --no-restore --no-build" + 
+                    (arguments.Length > 0 ? $"-- {arguments}" : ""));
             }
 
             string escapeSpaces(string s)
@@ -242,7 +242,7 @@ namespace NWheels.Testability
 
             while (!effectiveTimeoutCancellation.IsCancellationRequested)
             {
-                var readLineTask = _processHandler.ReadOntputLineAsync();
+                var readLineTask = _processHandler.ReadOutputLineAsync();
                 try
                 {
                     readLineTask.Wait(effectiveTimeoutCancellation.Token);
@@ -301,22 +301,9 @@ namespace NWheels.Testability
             //}
         }
 
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static bool IsCoverageEnabled
-        {
-            get
-            {
-                return (
-                    !string.IsNullOrEmpty(_s_useCoverage) && 
-                    !string.IsNullOrEmpty(_s_coverageExecutable) && 
-                    !string.IsNullOrEmpty(_s_coverageArgsTemplate));
-            }
-        }
-
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        public static class EnvironmentVariables
+        public static class EnvironmentVariableNames
         {
             public const string UseCoverage = "NW_SYSTEST_USE_COVER";
             public const string CoverageExecutable = "NW_SYSTEST_COVER_EXE";
@@ -332,6 +319,35 @@ namespace NWheels.Testability
             EndOfFile,
             StopCondition,
             ReadFailure
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private struct EnvironmentVariables
+        {
+            public EnvironmentVariables(IOperatingSystemEnvironment osEnvironment)
+            {
+                UseCoverage = osEnvironment.GetEnvironmentVariable(EnvironmentVariableNames.UseCoverage);
+                CoverageExecutable = osEnvironment.GetEnvironmentVariable(EnvironmentVariableNames.CoverageExecutable);
+                CoverageArgsTemplate = osEnvironment.GetEnvironmentVariable(EnvironmentVariableNames.CoverageArgsTemplate);
+                CoverageProjectPlaceholder = osEnvironment.GetEnvironmentVariable(EnvironmentVariableNames.CoverageProjectPlaceholder);
+                CoverageArgumentsPlaceholder = osEnvironment.GetEnvironmentVariable(EnvironmentVariableNames.CoverageArgumentsPlaceholder);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool IsCoverageEnabled => (
+                !string.IsNullOrEmpty(UseCoverage) &&
+                !string.IsNullOrEmpty(CoverageExecutable) &&
+                !string.IsNullOrEmpty(CoverageArgsTemplate));
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string UseCoverage { get; }
+            public string CoverageExecutable { get; }
+            public string CoverageArgsTemplate { get; }
+            public string CoverageProjectPlaceholder { get; }
+            public string CoverageArgumentsPlaceholder { get; }
         }
     }
 }

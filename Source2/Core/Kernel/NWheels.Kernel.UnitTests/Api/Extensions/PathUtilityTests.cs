@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using Xunit;
 using NWheels.Testability;
@@ -117,6 +118,31 @@ namespace NWheels.Kernel.UnitTests.Api.Extensions
 
             outputForEmptyArray.Should().Be(binaryFolder);
             outputForEmptyString.Should().Be(binaryFolder);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Theory]
+        [InlineData("/aaa/bbb", "/aaa/bbb")]
+        [InlineData("/aaa/bbb/../ccc", "/aaa/ccc")]
+        [InlineData("/aaa/bbb/../../ccc", "/ccc")]
+        [InlineData("/aaa/bbb/../../ccc/../ddd/eee", "/ddd/eee")]
+        [InlineData("/", "/")]
+        public void CanNormalizeCombinedPath(string input, string expectedOutput)
+        {
+            var platformizedInput = 
+                (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? @"C:" : "") + 
+                input.Replace('/', Path.DirectorySeparatorChar);
+
+            var actualOutput = PathUtility.NormalizeCombinedPath(platformizedInput);
+
+            //-- assert
+
+            var deplatformizedOutput = actualOutput
+                .Replace(@"C:\", "/")
+                .Replace(Path.DirectorySeparatorChar, '/');
+
+            deplatformizedOutput.Should().Be(expectedOutput);
         }
     }
 }

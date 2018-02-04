@@ -17,7 +17,7 @@ namespace NWheels.Kernel.Api.Extensions
         {
             if (!string.IsNullOrEmpty(path))
             {
-                return Path.Combine(_s_binaryFolderPath, path.ToPathString());
+                return NormalizeCombinedPath(Path.Combine(_s_binaryFolderPath, path.ToPathString()));
             }
 
             return _s_binaryFolderPath;
@@ -37,10 +37,25 @@ namespace NWheels.Kernel.Api.Extensions
                     allPathParts[i + 1] = pathParts[i].ToPathString();
                 }
 
-                return Path.Combine(allPathParts);
+                return NormalizeCombinedPath(Path.Combine(allPathParts));
             }
 
             return _s_binaryFolderPath;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string CombineNormalize(params string[] pathParts)
+        {
+            return NormalizeCombinedPath(Path.Combine(pathParts));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string NormalizeCombinedPath(string path)
+        {
+            var normalized = Path.GetFullPath(new Uri(path).LocalPath);
+            return normalized;
         }
     }
 }
