@@ -207,7 +207,7 @@ namespace NWheels.Testability.Tests.Unit
                 contentType: "test/request",
                 expectedStatusCode: HttpStatusCode.OK,
                 expectedContentType: "test/response",
-                timeout: TimeSpan.FromMilliseconds(20000)
+                timeout: TimeSpan.FromMilliseconds(2000)
             ).Result;
 
             Console.WriteLine($"MakeRequest_CompleteWithinTimeout_Pass: elapsed time = {clock.Elapsed}");

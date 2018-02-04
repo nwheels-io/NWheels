@@ -23,7 +23,7 @@ namespace NWheels.Testability.Tests.Unit
 
             var processMock = new OSProcessMock(
                 new OSProcessMock.StdoutStep("Hello world"),
-                new OSProcessMock.DelayStep(50),
+                //new OSProcessMock.DelayStep(50),
                 new OSProcessMock.StdoutStep("DONE"),
                 new OSProcessMock.ExitStep(exitCode: 0));
             processMock.Starting += assertStartInfo;
