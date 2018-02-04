@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NWheels.Kernel.Api.Extensions;
@@ -15,6 +16,9 @@ namespace NWheels.Testability.Tests.Unit
         [Fact]
         public void RunBatchJob_Success()
         {
+            var context = SynchronizationContext.Current;
+            Console.WriteLine($"SynchronizationContext.Current is {context?.GetType()?.FullName ?? "NULL"}");
+
             //-- arrange
 
             var environmentMock = new OSEnvironmentMock() {
