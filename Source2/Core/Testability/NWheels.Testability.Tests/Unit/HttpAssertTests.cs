@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -195,6 +196,8 @@ namespace NWheels.Testability.Tests.Unit
 
             //-- act & assert
 
+            var clock = Stopwatch.StartNew();
+
             var responseContent = HttpAssert.MakeRequest(
                 mockHandler,
                 origin: "http://test.host",
@@ -204,8 +207,10 @@ namespace NWheels.Testability.Tests.Unit
                 contentType: "test/request",
                 expectedStatusCode: HttpStatusCode.OK,
                 expectedContentType: "test/response",
-                timeout: TimeSpan.FromMilliseconds(200)
+                timeout: TimeSpan.FromMilliseconds(20000)
             ).Result;
+
+            Console.WriteLine($"MakeRequest_CompleteWithinTimeout_Pass: elapsed time = {clock.Elapsed}");
 
             responseContent.Should().Be("TEST-RESPONSE-BODY");
         }

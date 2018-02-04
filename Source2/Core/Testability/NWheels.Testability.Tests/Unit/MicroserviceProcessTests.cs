@@ -28,11 +28,16 @@ namespace NWheels.Testability.Tests.Unit
                 new OSProcessMock.ExitStep(exitCode: 0));
             processMock.Starting += assertStartInfo;
 
+            var clock = Stopwatch.StartNew();
+
             var microserviceProcess = new MicroserviceProcess(@"MyProject\my.csproj", processMock, environmentMock);
 
             //-- act
 
-            microserviceProcess.RunBatchJob(new string[0], TimeSpan.FromSeconds(10));
+
+            microserviceProcess.RunBatchJob(new string[0], TimeSpan.FromSeconds(20));
+
+            Console.WriteLine($"MakeRequest_CompleteWithinTimeout_Pass: elapsed time = {clock.Elapsed}");
 
             //-- assert
 
