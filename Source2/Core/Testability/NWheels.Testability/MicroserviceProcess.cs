@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using NWheels.Kernel.Api.Extensions;
 using NWheels.Kernel.Api.Primitives;
 using NWheels.Microservices.Runtime;
+using NWheels.Testability.Extensions;
 using Xunit;
 
 namespace NWheels.Testability
@@ -70,11 +71,14 @@ namespace NWheels.Testability
             }
             catch (Exception e)
             {
-                _errors.Add(e);
+                _errors.Add(e.Flatten());
             }
             finally
             {
-                TryStopTimely();
+                if (!_timeoutCancellation.IsCancellationRequested)
+                {
+                    TryStopTimely();
+                }
             }
 
             if (_processHandler.HasExited)

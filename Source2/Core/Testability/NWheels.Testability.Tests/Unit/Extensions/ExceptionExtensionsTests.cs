@@ -81,5 +81,66 @@ namespace NWheels.Testability.Tests.Unit.Extensions
 
             act.ShouldThrow<ArgumentNullException>();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void FlattenException_NonAggregate_ReturnAsIs()
+        {
+            //-- arrange
+
+            var inner = new Exception("TEST-INNER-ERROR");
+            var input = new Exception("TEST-ERROR", inner);
+
+            //-- act
+
+            var output = input.Flatten();
+
+            //-- assert
+
+            output.Should().BeSameAs(input);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void FlattenException_AggregatesOneInner_ReturnInner()
+        {
+            //-- arrange
+
+            var inner = new Exception("TEST-ERROR");
+            Exception input = new AggregateException(inner);
+
+            //-- act
+
+            var output = input.Flatten(); // ExceptionExtensions.Flatten
+
+            //-- assert
+
+            output.Should().BeSameAs(inner);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Fact]
+        public void FlattenException_AggregatesMany_ReturnFlattened()
+        {
+            //-- arrange
+
+            var inner1 = new Exception("TEST-ERROR-1");
+            var inner2 = new Exception("TEST-ERROR-2");
+            var inner3 = new Exception("TEST-ERROR-3");
+            var innerAggregate = new AggregateException(inner2, inner3);
+            Exception input = new AggregateException(inner1, innerAggregate);
+
+            //-- act
+
+            var output = input.Flatten(); // ExceptionExtensions.Flatten
+
+            //-- assert
+
+            var outputAggregate = (AggregateException)output;
+            outputAggregate.InnerExceptions.Should().Equal(inner1, inner2, inner3);
+        }
     }
 }

@@ -20,5 +20,24 @@ namespace NWheels.Testability.Extensions
 
             return result;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static Exception Flatten(this Exception exception)
+        {
+            if (exception is AggregateException aggregate)
+            {
+                if (aggregate.InnerExceptions.Count == 1)
+                {
+                    return aggregate.InnerExceptions[0];
+                }
+                else
+                {
+                    return aggregate.Flatten();
+                }
+            }
+
+            return exception;
+        }
     }
 }

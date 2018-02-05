@@ -55,7 +55,6 @@ namespace NWheels.Testability
         public async Task<string> ReadOutputLineAsync()
         {
             ValidateStarted();
-            //await Task.Yield();
 
             while (_script.Count > 0)
             {

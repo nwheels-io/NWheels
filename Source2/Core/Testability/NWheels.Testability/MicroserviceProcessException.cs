@@ -9,7 +9,7 @@ namespace NWheels.Testability
     public class MicroserviceProcessException : Exception
     {
         public MicroserviceProcessException(MicroserviceProcess process) 
-            : base(FormatMessage(process))
+            : base(FormatMessage(process), IncludeInnerExceptions(process))
         {
         }
 
@@ -50,6 +50,21 @@ namespace NWheels.Testability
             message.AppendLine("--- End of Output ---");
 
             return message.ToString();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static Exception IncludeInnerExceptions(MicroserviceProcess process)
+        {
+            switch (process.Errors?.Count)
+            {
+                case 0:
+                    return null;
+                case 1:
+                    return process.Errors[0];
+                default:
+                    return new AggregateException(process.Errors).Flatten();
+            }
         }
     }
 }
