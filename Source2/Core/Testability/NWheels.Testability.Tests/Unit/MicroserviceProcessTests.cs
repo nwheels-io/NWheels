@@ -26,7 +26,7 @@ namespace NWheels.Testability.Tests.Unit
 
             var processMock = new OSProcessMock(
                 new OSProcessMock.StdoutStep("Hello world"),
-                new OSProcessMock.DelayStep(50),
+                //new OSProcessMock.DelayStep(50),
                 new OSProcessMock.StdoutStep("DONE"),
                 new OSProcessMock.ExitStep(exitCode: 0));
             processMock.Starting += assertStartInfo;
@@ -151,7 +151,7 @@ namespace NWheels.Testability.Tests.Unit
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //[Fact] // ignored -- not completed
+        [Fact] 
         public void RunDaemon_Success()
         {
             //-- arrange
@@ -198,7 +198,7 @@ namespace NWheels.Testability.Tests.Unit
                 log.Add("Starting");
                 startInfo.FileName.Should().Be("dotnet.exe");
                 startInfo.Arguments.Should().Be(
-                    $@"run --project {PathUtility.ExpandPathFromBinary(@"MyProject\my.csproj")} --no-restore --no-build --stdin-signal");
+                    $@"run --project {PathUtility.ExpandPathFromBinary(@"MyProject\my.csproj")} --no-restore --no-build -- --stdin-signal");
             }
         }
     }

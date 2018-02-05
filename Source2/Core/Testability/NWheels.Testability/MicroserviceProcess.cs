@@ -165,7 +165,7 @@ namespace NWheels.Testability
             {
                 return (
                     $"run --project {escapeSpaces(_projectFilePath)} --no-restore --no-build" + 
-                    (arguments.Length > 0 ? $"-- {arguments}" : ""));
+                    (arguments.Length > 0 ? $" -- {arguments}" : ""));
             }
 
             string escapeSpaces(string s)
