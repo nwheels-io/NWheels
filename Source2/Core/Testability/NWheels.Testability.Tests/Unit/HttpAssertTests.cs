@@ -188,7 +188,7 @@ namespace NWheels.Testability.Tests.Unit
 
             var mockHandler = new MockHttpHandler(
                 async request => {
-                    await Task.Delay(10);
+                    //await Task.Delay(10);
                     return new HttpResponseMessage(HttpStatusCode.OK) {
                         Content = new StringContent("TEST-RESPONSE-BODY", Encoding.UTF8, "test/response")
                     };
@@ -207,7 +207,7 @@ namespace NWheels.Testability.Tests.Unit
                 contentType: "test/request",
                 expectedStatusCode: HttpStatusCode.OK,
                 expectedContentType: "test/response",
-                timeout: TimeSpan.FromMilliseconds(2000)
+                timeout: TimeSpan.FromMilliseconds(20000)
             ).Result;
 
             Console.WriteLine($"MakeRequest_CompleteWithinTimeout_Pass: elapsed time = {clock.Elapsed}");

@@ -35,7 +35,7 @@ namespace NWheels.Testability.Tests.Unit
             //-- act
 
             var microserviceProcess = new MicroserviceProcess(@"MyProject\my.csproj", processMock, environmentMock);
-            microserviceProcess.RunBatchJob(new string[0], TimeSpan.FromSeconds(5));
+            microserviceProcess.RunBatchJob(new string[0], TimeSpan.FromSeconds(20));
 
             //-- assert
 
@@ -61,7 +61,7 @@ namespace NWheels.Testability.Tests.Unit
 
             var processMock = new OSProcessMock(
                 new OSProcessMock.StdoutStep("Hello world"),
-                new OSProcessMock.DelayStep(50),
+                //new OSProcessMock.DelayStep(50),
                 new OSProcessMock.StdoutStep("FAILED!"),
                 new OSProcessMock.ExitStep(exitCode: 12));
             processMock.InputClosed += assertInputNotClosed;
@@ -69,7 +69,7 @@ namespace NWheels.Testability.Tests.Unit
             var microserviceProcess = new MicroserviceProcess(@"MyProject\my.csproj", processMock, environmentMock);
 
             Action act = () => {
-                microserviceProcess.RunBatchJob(new string[0], TimeSpan.FromSeconds(5));
+                microserviceProcess.RunBatchJob(new string[0], TimeSpan.FromSeconds(20));
             };
 
             //-- act & assert
@@ -102,7 +102,7 @@ namespace NWheels.Testability.Tests.Unit
             var microserviceProcess = new MicroserviceProcess(@"MyProject\my.csproj", processMock, environmentMock);
 
             Action act = () => {
-                microserviceProcess.RunBatchJob(new string[0], TimeSpan.FromSeconds(55));
+                microserviceProcess.RunBatchJob(new string[0], TimeSpan.FromSeconds(20));
             };
 
             //-- act & assert
@@ -135,7 +135,7 @@ namespace NWheels.Testability.Tests.Unit
             var microserviceProcess = new MicroserviceProcess(@"MyProject\my.csproj", processMock, environmentMock);
 
             Action act = () => {
-                microserviceProcess.RunBatchJob(new string[0], TimeSpan.FromMilliseconds(50));
+                microserviceProcess.RunBatchJob(new string[0], TimeSpan.FromMilliseconds(20));
             };
 
             //-- act & assert
