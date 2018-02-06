@@ -8,9 +8,9 @@ namespace NWheels.Testability.Extensions
 {
     public static class StringAssertionsExtensions
     {
-        public static AndConstraint<StringAssertions> BeJson(this StringAssertions assertions, string expectedJson, string because = "", params object[] becauseArgs)
+        public static AndConstraint<StringAssertions> BeJson(this StringAssertions assertions, string expectedJson, string because = "")
         {
-            JsonAssert.AreEqual(assertions.Subject, expectedJson, because, becauseArgs);
+            JsonAssert.AreEqual(assertions.Subject, expectedJson, because);
             return new AndConstraint<StringAssertions>(assertions);
         }
     }

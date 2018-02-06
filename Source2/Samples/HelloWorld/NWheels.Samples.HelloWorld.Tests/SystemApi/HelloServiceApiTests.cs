@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
 using NWheels.Communication.Api.Http;
@@ -20,7 +21,7 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         [Fact]
-        public void CanStartAndStop()
+        public async Task CanStartAndStop()
         {
             //-- arrange
 
@@ -29,10 +30,11 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
 
             //-- act
 
-            microservice.RunDaemon(
+            await microservice.RunDaemonAsync(
                 arguments: new[] { "run" }, 
-                onUpAndRunning: () => { 
-                    upAndRunningCount++; 
+                onUpAndRunningAsync: () => { 
+                    upAndRunningCount++;
+                    return Task.CompletedTask;
                 },
                 startTimeout: TimeSpan.FromSeconds(30),
                 stopTimeout: TimeSpan.FromSeconds(10));
@@ -47,7 +49,7 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         [Fact]
-        public void HelloWorldTx_InvokeProperly_Success()
+        public async Task HelloWorldTx_InvokeProperly_Success()
         {
             //-- arrange
 
@@ -58,11 +60,11 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
             string jsonResponse = null;
             string htmlResponse = null;
 
-            microservice.RunDaemon(
+            await microservice.RunDaemonAsync(
                 arguments: new[] { "run" },
-                onUpAndRunning: () => {
-                    jsonResponse = HttpAssert.MakeLocalHttpRequest(5000, HttpMethod.Post, "/api/tx/Hello/Hello", "{name:'TEST'}").Result;
-                    htmlResponse = HttpAssert.MakeLocalHttpRequest(5000, HttpMethod.Get, "/", expectedContentType: "text/html").Result;
+                onUpAndRunningAsync: async () => {
+                    jsonResponse = await HttpAssert.MakeLocalHttpRequest(5000, HttpMethod.Post, "/api/tx/Hello/Hello", "{name:'TEST'}");
+                    htmlResponse = await HttpAssert.MakeLocalHttpRequest(5000, HttpMethod.Get, "/", expectedContentType: "text/html");
                 },
                 startTimeout: TimeSpan.FromSeconds(30),
                 stopTimeout: TimeSpan.FromSeconds(10));
@@ -88,7 +90,7 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void HelloWorldTx_SendInvalidVerb_ReceiveBadRequest()
+        public async Task HelloWorldTx_SendInvalidVerb_ReceiveBadRequest()
         {
             //-- arrange
 
@@ -98,12 +100,12 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
 
             string jsonResponse = null;
 
-            microservice.RunDaemon(
+            await microservice.RunDaemonAsync(
                 arguments: new[] { "run" },
-                onUpAndRunning: () => {
-                    jsonResponse = HttpAssert.MakeLocalHttpRequest(
+                onUpAndRunningAsync: async () => {
+                    jsonResponse = await HttpAssert.MakeLocalHttpRequest(
                         5000, HttpMethod.Get, "/api/tx/Hello/Hello", "{name:'TEST'}", 
-                        expectedStatusCode: HttpStatusCode.BadRequest, expectedContentType: null).Result;
+                        expectedStatusCode: HttpStatusCode.BadRequest, expectedContentType: null);
                 },
                 startTimeout: TimeSpan.FromSeconds(30),
                 stopTimeout: TimeSpan.FromSeconds(10));
@@ -116,7 +118,7 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void HelloWorldTx_SendInvalidJson_ReceiveBadRequest()
+        public async Task HelloWorldTx_SendInvalidJson_ReceiveBadRequest()
         {
             //-- arrange
 
@@ -126,12 +128,12 @@ namespace NWheels.Samples.HelloWorld.Tests.SystemApi
 
             string jsonResponse = null;
 
-            microservice.RunDaemon(
+            await microservice.RunDaemonAsync(
                 arguments: new[] { "run" },
-                onUpAndRunning: () => {
-                    jsonResponse = HttpAssert.MakeLocalHttpRequest(
+                onUpAndRunningAsync: async () => {
+                    jsonResponse = await HttpAssert.MakeLocalHttpRequest(
                         5000, HttpMethod.Post, "/api/tx/Hello/Hello", "{bad:'BAD'}",
-                        expectedStatusCode: HttpStatusCode.BadRequest, expectedContentType: null).Result;
+                        expectedStatusCode: HttpStatusCode.BadRequest, expectedContentType: null);
                 },
                 startTimeout: TimeSpan.FromSeconds(30),
                 stopTimeout: TimeSpan.FromSeconds(10));

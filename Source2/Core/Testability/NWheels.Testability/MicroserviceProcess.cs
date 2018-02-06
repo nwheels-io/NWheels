@@ -23,17 +23,15 @@ namespace NWheels.Testability
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         private readonly string _projectFilePath;
-        private readonly CancellationTokenSource _timeoutCancellation;
         private readonly Stopwatch _clock;
         private readonly List<string> _output;
         private readonly IOperatingSystemProcess _processHandler;
         private readonly IOperatingSystemEnvironment _environmentHandler;
         private readonly EnvironmentVariables _environment;
         private string[] _arguments;
-        private TimeSpan? _timeout;
         private List<Exception> _errors;
         private int? _exitCode;
-
+        
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public MicroserviceProcess(string projectFileRelativePath)
@@ -53,7 +51,6 @@ namespace NWheels.Testability
             _environmentHandler = environmentHandler;
 
             _environment = new EnvironmentVariables(environmentHandler);
-            _timeoutCancellation = new CancellationTokenSource();
             _clock = new Stopwatch();
             _output = new List<string>();
             _errors = new List<Exception>();
@@ -61,13 +58,14 @@ namespace NWheels.Testability
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void RunBatchJob(string[] arguments, TimeSpan timeout)
+        public async Task RunBatchJobAsync(string[] arguments, TimeSpan timeout)
         {
-            StartProcess(arguments, timeout);
+            Stopwatch clock = Stopwatch.StartNew();
+            StartProcess(arguments);
 
             try
             {
-                ReadStandardOutput();
+                await ReadStandardOutput(timeout);
             }
             catch (Exception e)
             {
@@ -75,9 +73,9 @@ namespace NWheels.Testability
             }
             finally
             {
-                if (!_timeoutCancellation.IsCancellationRequested)
+                if (!_processHandler.HasExited && !HasTimedOut())
                 {
-                    TryStopTimely();
+                    await TryStopTimely(timeout.Subtract(clock.Elapsed));
                 }
             }
 
@@ -91,23 +89,22 @@ namespace NWheels.Testability
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void RunDaemon(string[] arguments, Action onUpAndRunning, TimeSpan? startTimeout = null, TimeSpan? stopTimeout = null)
+        public async Task RunDaemonAsync(string[] arguments, Func<Task> onUpAndRunningAsync, TimeSpan? startTimeout = null, TimeSpan? stopTimeout = null)
         {
             var effectiveArguments = arguments.Concat(new[] { "--stdin-signal" }).ToArray();
             StartProcess(effectiveArguments);
 
             try
             {
-                // TODO: replace with IPC listener
                 var upAndRunningMessage = nameof(IMicroserviceHostLogger.RunningInDaemonMode);
 
-                var status = ReadStandardOutput(
-                    shouldContinueAfter: line => !line.Contains(upAndRunningMessage),
-                    timeout: startTimeout);
+                var status = await ReadStandardOutput(
+                    startTimeout ?? TimeSpan.FromMinutes(1),
+                    shouldBreakIf: line => line.Contains(upAndRunningMessage));
 
-                if (status == OutputReadStatus.StopCondition)
+                if (status == OutputReadStatus.BreakCondition)
                 {
-                    onUpAndRunning();
+                    await onUpAndRunningAsync();
                 }
             }
             catch (Exception e)
@@ -116,8 +113,11 @@ namespace NWheels.Testability
             }
             finally
             {
-                _processHandler.CloseInput();
-                TryStopTimely(stopTimeout);
+                if (!_processHandler.HasExited && !HasTimedOut())
+                {
+                    _processHandler.CloseInput();
+                    await TryStopTimely(stopTimeout ?? TimeSpan.FromMinutes(1));
+                }
             }
 
             if (_processHandler.HasExited)
@@ -210,16 +210,10 @@ namespace NWheels.Testability
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void StartProcess(string[] arguments, TimeSpan? timeout = null)
+        private void StartProcess(string[] arguments)
         {
             _arguments = arguments;
-            _timeout = timeout;
             _errors = new List<Exception>();
-
-            if (timeout.HasValue)
-            {
-                _timeoutCancellation.CancelAfter(timeout.Value);
-            }
 
             var info = new ProcessStartInfo() {
                 FileName = GetExecutableFileName(),
@@ -237,51 +231,50 @@ namespace NWheels.Testability
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private OutputReadStatus ReadStandardOutput(Func<string, bool> shouldContinueAfter = null, TimeSpan? timeout = null)
+        private async Task<OutputReadStatus> ReadStandardOutput(TimeSpan timeout, Func<string, bool> shouldBreakIf = null)
         {
-            var effectiveTimeoutCancellation = (
-                timeout.HasValue 
-                ? new CancellationTokenSource(timeout.Value)
-                : _timeoutCancellation);   
+            var timeoutCancellation = new CancellationTokenSource();
+            var timeoutTask = Task.Delay(timeout, timeoutCancellation.Token);
 
-            while (!effectiveTimeoutCancellation.IsCancellationRequested)
+            while (true)
             {
                 var readLineTask = _processHandler.ReadOutputLineAsync();
-                try
+                var isTimedOut = (await Task.WhenAny(readLineTask, timeoutTask) == timeoutTask);
+
+                if (isTimedOut)
                 {
-                    readLineTask.Wait(effectiveTimeoutCancellation.Token);
+                    var timeoutMessage = $"Timed out waiting for microservice process to {(shouldBreakIf != null ? "start" : "exit")}.";
+                    throw new TimeoutException(timeoutMessage);
                 }
-                catch (OperationCanceledException) 
-                {
-                    break;
-                }
-                
+
                 var line = readLineTask.Result;
                 if (line == null)
                 {
+                    timeoutCancellation.Cancel();
                     return OutputReadStatus.EndOfFile;
                 }
 
                 _output.Add(line);
 
-                if (shouldContinueAfter != null && !shouldContinueAfter(line))
+                if (shouldBreakIf != null && shouldBreakIf(line))
                 {
-                    return OutputReadStatus.StopCondition;
+                    timeoutCancellation.Cancel();
+                    return OutputReadStatus.BreakCondition;
                 }
             }
-
-            var timeoutMessage = $"Timed out waiting for microservice process to {(shouldContinueAfter != null ? "start" : "exit")}.";
-            throw new TimeoutException(timeoutMessage);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private bool TryStopTimely(TimeSpan? stopTimeout = null)
+        private async Task<bool> TryStopTimely(TimeSpan stopTimeout)
         {
+            var minStopTimeout = TimeSpan.FromSeconds(3);
+            var effectiveStopTimeout = (stopTimeout < minStopTimeout ? minStopTimeout : stopTimeout);
+
             try
             {
-                ReadStandardOutput(timeout: stopTimeout);
-                return true;
+                var status = await ReadStandardOutput(effectiveStopTimeout);
+                return (status == OutputReadStatus.EndOfFile);
             }
             catch (Exception e)
             {
@@ -306,7 +299,14 @@ namespace NWheels.Testability
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
+
+        private bool HasTimedOut()
+        {
+            return Errors.OfType<TimeoutException>().Any();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static class EnvironmentVariableNames
         {
             public const string UseCoverage = "NW_SYSTEST_USE_COVER";
@@ -321,7 +321,7 @@ namespace NWheels.Testability
         private enum OutputReadStatus
         {
             EndOfFile,
-            StopCondition,
+            BreakCondition,
             ReadFailure
         }
 
