@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NWheels.Testability.Extensions;
@@ -105,21 +106,24 @@ namespace NWheels.Testability.Tests.Unit.Extensions
         [Fact]
         public void ShouldThrowExceptionAsync_NoExceptionThrown_AssertFailed()
         {
-            //-- arrange
+            using (UseSynchronizationContext(null))
+            {
+                //-- arrange
 
-            Func<Task> action = async () => {
-                await Task.CompletedTask;
-            };
+                    Func<Task> action = async () => {
+                    await Task.CompletedTask;
+                };
 
-            Action underTest = () => {
-                action.ShouldThrowExceptionAsync<ATestException>(because: "this is the test")
-                    .Wait(10000).Should().BeTrue(because: "async action must complete");
-            };
+                Action underTest = () => {
+                    action.ShouldThrowExceptionAsync<ATestException>(because: "this is the test")
+                        .Wait(10000).Should().BeTrue(because: "async action must complete");
+                };
 
-            //-- act & assert
+                //-- act & assert
 
-            underTest.ShouldThrow<XunitException>().Which.Message.Should().Contain(
-                $"Expected {typeof(ATestException).FullName} because this is the test, but no exception was thrown.");
+                underTest.ShouldThrow<XunitException>().Which.Message.Should().Contain(
+                    $"Expected {typeof(ATestException).FullName} because this is the test, but no exception was thrown.");
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -127,22 +131,29 @@ namespace NWheels.Testability.Tests.Unit.Extensions
         [Fact]
         public void ShouldThrowExceptionAsync_UnexpectedExceptionThrown_AssertFailed()
         {
-            //-- arrange
+            using (UseSynchronizationContext(null))
+            { 
+                //-- arrange
 
-            Func<Task> action = async () => {
-                await Task.Delay(1);
-                throw new DivideByZeroException("TEST-ERROR");
-            };
+                Func<Task> action = async () => {
+                    await Task.Delay(1);
+                    throw new DivideByZeroException("TEST-ERROR");
+                };
 
-            Action underTest = () => {
-                action.ShouldThrowExceptionAsync<ATestException>(because: "this is the test")
-                    .Wait(10000).Should().BeTrue(because: "async action must complete");
-            };
+                Action underTest = () => {
+                    action.ShouldThrowExceptionAsync<ATestException>(because: "this is the test")
+                        .Wait(10000)
+                        .Should()
+                        .BeTrue(because: "async action must complete");
+                };
 
-            //-- act & assert
+                //-- act & assert
 
-            underTest.ShouldThrow<XunitException>().Which.Message.Should().Contain(
-                $"Expected {typeof(ATestException).FullName} because this is the test, but caught System.DivideByZeroException : TEST-ERROR");
+                underTest.ShouldThrow<XunitException>()
+                    .Which.Message.Should()
+                    .Contain(
+                        $"Expected {typeof(ATestException).FullName} because this is the test, but caught System.DivideByZeroException : TEST-ERROR");
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -150,20 +161,21 @@ namespace NWheels.Testability.Tests.Unit.Extensions
         [Fact]
         public void ShouldNotThrowExceptionAsync_NoExceptionThrown_AssertPassed()
         {
-            //-- arrange
+            using (UseSynchronizationContext(null))
+            {
+                //-- arrange
 
-            Func<Task> action = async () => {
-                await Task.CompletedTask;
-            };
+                Func<Task> action = async () => { await Task.CompletedTask; };
 
-            Action underTest = () => {
-                action.ShouldNotThrowExceptionAsync<ATestException>(because: "this is the test")
-                    .Wait(10000).Should().BeTrue(because: "async action must complete");
-            };
+                Action underTest = () => {
+                    action.ShouldNotThrowExceptionAsync<ATestException>(because: "this is the test")
+                        .Wait(10000).Should().BeTrue(because: "async action must complete");
+                };
 
-            //-- act & assert
+                //-- act & assert
 
-            underTest.ShouldNotThrow();
+                underTest.ShouldNotThrow();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -171,22 +183,25 @@ namespace NWheels.Testability.Tests.Unit.Extensions
         [Fact]
         public void ShouldNotThrowExceptionAsync_ForbiddenExceptionThrown_AssertFailed()
         {
-            //-- arrange
+            using (UseSynchronizationContext(null))
+            {
+                //-- arrange
 
-            Func<Task> action = async () => {
-                await Task.CompletedTask;
-                throw new ATestException("FORBIDDEN-ERROR");
-            };
+                    Func<Task> action = async () => {
+                    await Task.CompletedTask;
+                    throw new ATestException("FORBIDDEN-ERROR");
+                };
 
-            Action underTest = () => {
-                action.ShouldNotThrowExceptionAsync<ATestException>(because: "this is the test")
-                    .Wait(10000).Should().BeTrue(because: "async action must complete");
-            };
+                Action underTest = () => {
+                    action.ShouldNotThrowExceptionAsync<ATestException>(because: "this is the test")
+                        .Wait(10000).Should().BeTrue(because: "async action must complete");
+                };
 
-            //-- act & assert
+                //-- act & assert
 
-            underTest.ShouldThrow<XunitException>().Which.Message.Should().Contain(
-                $"Expected no {typeof(ATestException).FullName} because this is the test, but caught {typeof(ATestException).FullName} : FORBIDDEN-ERROR");
+                underTest.ShouldThrow<XunitException>().Which.Message.Should().Contain(
+                    $"Expected no {typeof(ATestException).FullName} because this is the test, but caught {typeof(ATestException).FullName} : FORBIDDEN-ERROR");
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -194,20 +209,23 @@ namespace NWheels.Testability.Tests.Unit.Extensions
         [Fact]
         public void ShouldNotThrowAnyExceptionAsync_NoExceptionThrown_AssertPassed()
         {
-            //-- arrange
+            using (UseSynchronizationContext(null))
+            {
+                //-- arrange
 
-            Func<Task> action = async () => {
-                await Task.CompletedTask;
-            };
+                    Func<Task> action = async () => {
+                    await Task.CompletedTask;
+                };
 
-            Action underTest = () => {
-                action.ShouldNotThrowAnyExceptionAsync(because: "this is the test")
-                    .Wait(10000).Should().BeTrue(because: "async action must complete");
-            };
+                Action underTest = () => {
+                    action.ShouldNotThrowAnyExceptionAsync(because: "this is the test")
+                        .Wait(10000).Should().BeTrue(because: "async action must complete");
+                };
 
-            //-- act & assert
+                //-- act & assert
 
-            underTest.ShouldNotThrow();
+                underTest.ShouldNotThrow();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -215,22 +233,25 @@ namespace NWheels.Testability.Tests.Unit.Extensions
         [Fact]
         public void ShouldNotThrowAnyExceptionAsync_ExceptionThrown_AssertFailed()
         {
-            //-- arrange
+            using (UseSynchronizationContext(null))
+            {
+                //-- arrange
 
-            Func<Task> action = async () => {
-                await Task.CompletedTask;
-                throw new DivideByZeroException("TEST-ERROR");
-            };
+                    Func<Task> action = async () => {
+                    await Task.CompletedTask;
+                    throw new DivideByZeroException("TEST-ERROR");
+                };
 
-            Action underTest = () => {
-                action.ShouldNotThrowAnyExceptionAsync(because: "this is the test")
-                    .Wait(10000).Should().BeTrue(because: "async action must complete");
-            };
+                Action underTest = () => {
+                    action.ShouldNotThrowAnyExceptionAsync(because: "this is the test")
+                        .Wait(10000).Should().BeTrue(because: "async action must complete");
+                };
 
-            //-- act & assert
+                //-- act & assert
 
-            underTest.ShouldThrow<XunitException>().Which.Message.Should().Contain(
-                $"Expected no exceptions because this is the test, but caught System.DivideByZeroException : TEST-ERROR");
+                underTest.ShouldThrow<XunitException>().Which.Message.Should().Contain(
+                    $"Expected no exceptions because this is the test, but caught System.DivideByZeroException : TEST-ERROR");
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

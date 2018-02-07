@@ -38,7 +38,14 @@ namespace NWheels.Testability
         public abstract class AbstractTest
         {
             protected string TestBinaryFolderPath => _s_testBinaryFolderPath;            
-            protected string TestFilesFolderPath => _s_testFilesFolderPath;            
+            protected string TestFilesFolderPath => _s_testFilesFolderPath;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected SynchronizationContextScope UseSynchronizationContext(SynchronizationContext context)
+            {
+                return new SynchronizationContextScope(context);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
