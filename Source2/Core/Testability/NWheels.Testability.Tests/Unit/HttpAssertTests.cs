@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using NWheels.Testability.Extensions;
 using Xunit;
 
 namespace NWheels.Testability.Tests.Unit
@@ -35,7 +36,7 @@ namespace NWheels.Testability.Tests.Unit
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void MakeRequest_Get_RequestCorrectlyComposed()
+        public async Task MakeRequest_Get_RequestCorrectlyComposed()
         {
             //-- arrange
 
@@ -50,18 +51,18 @@ namespace NWheels.Testability.Tests.Unit
 
             //-- act & assert
 
-            HttpAssert.MakeRequest(
+            await HttpAssert.MakeRequest(
                 mockHandler,
                 origin: "https://test.host:12345",
                 method: HttpMethod.Get,
                 path: "example/path",
-                expectedContentType: null).Wait();
+                expectedContentType: null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void MakeRequest_NonGet_RequestCorrectlyComposed()
+        public async Task MakeRequest_NonGet_RequestCorrectlyComposed()
         {
             //-- arrange
 
@@ -79,20 +80,20 @@ namespace NWheels.Testability.Tests.Unit
 
             //-- act & assert
 
-            HttpAssert.MakeRequest(
+            await HttpAssert.MakeRequest(
                 mockHandler,
                 origin: "http://test.host",
                 method: HttpMethod.Put,
                 path: "example/path?q=v",
                 content: "TEST-REQUEST-BODY",
                 contentType: "example/test",
-                expectedContentType: null).Wait();
+                expectedContentType: null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void MakeRequest_ResponseAsExpected_Pass()
+        public async Task MakeRequest_ResponseAsExpected_Pass()
         {
             //-- arrange
 
@@ -105,7 +106,7 @@ namespace NWheels.Testability.Tests.Unit
 
             //-- act & assert
 
-            var responseContent = HttpAssert.MakeRequest(
+            var responseContent = await HttpAssert.MakeRequest(
                 mockHandler,
                 origin: "http://test.host",
                 method: HttpMethod.Post,
@@ -113,7 +114,7 @@ namespace NWheels.Testability.Tests.Unit
                 content: "TEST-REQUEST-BODY",
                 contentType: "test/request",
                 expectedStatusCode: HttpStatusCode.Created,
-                expectedContentType: "test/response").Result;
+                expectedContentType: "test/response");
 
             responseContent.Should().Be("TEST-RESPONSE-BODY");
         }
@@ -121,7 +122,7 @@ namespace NWheels.Testability.Tests.Unit
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void MakeRequest_WrongHttpStatus_Fail()
+        public async Task MakeRequest_WrongHttpStatus_Fail()
         {
             //-- arrange
 
@@ -134,24 +135,24 @@ namespace NWheels.Testability.Tests.Unit
 
             //-- act & assert
 
-            Action act = () => {
-                HttpAssert.MakeRequest(
+            Func<Task> act = async () => {
+                await HttpAssert.MakeRequest(
                     mockHandler,
                     origin: "http://test.host",
                     method: HttpMethod.Get,
                     path: "example/path",
                     expectedStatusCode: HttpStatusCode.Created
-                ).Wait();
+                );
             };
 
-            var exception = act.ShouldThrow<Xunit.Sdk.XunitException>().Which;
+            var exception = await act.ShouldThrowExceptionAsync<Xunit.Sdk.XunitException>();
             exception.Message.Should().Contain("because requet must complete with status Created");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void MakeRequest_WrongResponseContentType_Fail()
+        public async Task MakeRequest_WrongResponseContentType_Fail()
         {
             //-- arrange
 
@@ -164,31 +165,31 @@ namespace NWheels.Testability.Tests.Unit
 
             //-- act & assert
 
-            Action act = () => {
-                HttpAssert.MakeRequest(
+            Func<Task> act = async () => {
+                await HttpAssert.MakeRequest(
                     mockHandler,
                     origin: "http://test.host",
                     method: HttpMethod.Get,
                     path: "example/path",
                     expectedStatusCode: HttpStatusCode.OK,
                     expectedContentType: "test/response"
-                ).Wait();
+                );
             };
 
-            var exception = act.ShouldThrow<Xunit.Sdk.XunitException>().Which;
+            var exception = await act.ShouldThrowExceptionAsync<Xunit.Sdk.XunitException>();
             exception.Message.Should().Contain("because response must be 'test/response'");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void MakeRequest_CompleteWithinTimeout_Pass()
+        public async Task MakeRequest_CompleteWithinTimeout_Pass()
         {
             //-- arrange
 
             var mockHandler = new MockHttpHandler(
                 async request => {
-                    //await Task.Delay(10);
+                    await Task.Delay(10);
                     return new HttpResponseMessage(HttpStatusCode.OK) {
                         Content = new StringContent("TEST-RESPONSE-BODY", Encoding.UTF8, "test/response")
                     };
@@ -198,7 +199,7 @@ namespace NWheels.Testability.Tests.Unit
 
             var clock = Stopwatch.StartNew();
 
-            var responseContent = HttpAssert.MakeRequest(
+            var responseContent = await HttpAssert.MakeRequest(
                 mockHandler,
                 origin: "http://test.host",
                 method: HttpMethod.Post,
@@ -207,8 +208,7 @@ namespace NWheels.Testability.Tests.Unit
                 contentType: "test/request",
                 expectedStatusCode: HttpStatusCode.OK,
                 expectedContentType: "test/response",
-                timeout: TimeSpan.FromMilliseconds(20000)
-            ).Result;
+                timeout: TimeSpan.FromMilliseconds(20000));
 
             Console.WriteLine($"MakeRequest_CompleteWithinTimeout_Pass: elapsed time = {clock.Elapsed}");
 
@@ -218,7 +218,7 @@ namespace NWheels.Testability.Tests.Unit
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Fact]
-        public void MakeRequest_TakeLongerThanTimeout_Fail()
+        public async Task MakeRequest_TakeLongerThanTimeout_Fail()
         {
             //-- arrange
 
@@ -230,8 +230,8 @@ namespace NWheels.Testability.Tests.Unit
 
             //-- act & assert
 
-            Action act = () => {
-                HttpAssert.MakeRequest(
+            Func<Task> act = async () => {
+                await HttpAssert.MakeRequest(
                     mockHandler,
                     origin: "http://test.host",
                     method: HttpMethod.Post,
@@ -240,11 +240,10 @@ namespace NWheels.Testability.Tests.Unit
                     contentType: "test/request",
                     expectedStatusCode: HttpStatusCode.OK,
                     expectedContentType: null,
-                    timeout: TimeSpan.FromMilliseconds(10)
-                ).Wait();
+                    timeout: TimeSpan.FromMilliseconds(10));
             };
 
-            var exception = act.ShouldThrow<Xunit.Sdk.XunitException>().Which;
+            var exception = await act.ShouldThrowExceptionAsync<Xunit.Sdk.XunitException>();
             exception.Message.Should().Contain("request didn't complete within allotted timeout");
         }
     }
