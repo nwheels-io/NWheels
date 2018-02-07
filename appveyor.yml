@@ -21,7 +21,7 @@ nuget:
 
 before_build:
 - cmd: >-
-    cd c:\projects\NWheels\Source2
+    cd c:\projects\NWheels\Source
 
     dotnet --version
 
@@ -49,7 +49,7 @@ build_script:
     
 test_script:
 - ps: >-
-    cd c:\projects\NWheels\Source2
+    cd c:\projects\NWheels\Source
 
     $testRunStatus = "OK"
 
@@ -57,13 +57,13 @@ test_script:
 
     $env:NW_SYSTEST_COVER_EXE = "c:\projects\NWheels\Tools\OpenCover.4.6.519\tools\OpenCover.Console.exe"
 
-    $env:NW_SYSTEST_COVER_ARGS_TEMPLATE = '-target:dotnet.exe "-targetargs:run --project [[PROJECT]] --no-build -- [[ARGS]]" -oldStyle -register:user -filter:"+[NWheels.*]* +[*]NWheels.* -[*.*Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* ' + "-output:c:\projects\NWheels\Source2\CoverageResults.xml -mergeoutput -returntargetcode:1000"
+    $env:NW_SYSTEST_COVER_ARGS_TEMPLATE = '-target:dotnet.exe "-targetargs:run --project [[PROJECT]] --no-build -- [[ARGS]]" -oldStyle -register:user -filter:"+[NWheels.*]* +[*]NWheels.* -[*.*Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* ' + "-output:c:\projects\NWheels\Source\CoverageResults.xml -mergeoutput -returntargetcode:1000"
 
     $env:NW_SYSTEST_COVER_PROJECT_PLACEHOLDER = "[[PROJECT]]"
 
     $env:NW_SYSTEST_COVER_ARGS_PLACEHOLDER = "[[ARGS]]"
     
-    $cert_path = "C:\projects\NWheels\Source2\Samples\HelloWorld\NWheels.Samples.HelloWorld.HelloService\sslcert.pfx"
+    $cert_path = "C:\projects\NWheels\Source\Samples\HelloWorld\NWheels.Samples.HelloWorld.HelloService\sslcert.pfx"
     
     $cert_password = ConvertTo-SecureString "12345" -AsPlainText -Force
     
@@ -83,7 +83,7 @@ test_script:
         echo "--- current time is $(Get-Date) ---"        
         echo --- "Running Unit + Integration tests in project" $_.fullName ---;     
         $dotnetArgs = '"-targetargs:test ' + $_.fullname + ' --no-build --no-restore -c Debug --filter ""(Purpose=UnitTest)|(Purpose=IntegrationTest)"""';
-        c:\projects\NWheels\Tools\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:dotnet.exe $dotnetArgs -oldStyle -register:user -filter:"+[NWheels.*]* +[*]NWheels.* -[*.*Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -output:c:\projects\NWheels\Source2\CoverageResults.xml -mergeoutput -returntargetcode:1000
+        c:\projects\NWheels\Tools\OpenCover.4.6.519\tools\OpenCover.Console.exe -target:dotnet.exe $dotnetArgs -oldStyle -register:user -filter:"+[NWheels.*]* +[*]NWheels.* -[*.*Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -output:c:\projects\NWheels\Source\CoverageResults.xml -mergeoutput -returntargetcode:1000
         echo "--- current time is $(Get-Date) ---"        
         if ($LastExitCode -ne 0) { $testRunStatus = "FAIL" }
     }
@@ -102,7 +102,7 @@ test_script:
 
 after_test:
 - ps: >-
-    dir -Path c:\projects\NWheels\Source2\Templates\NWheels.Template\ -Recurse -Filter *.csproj | ForEach-Object {    
+    dir -Path c:\projects\NWheels\Source\Templates\NWheels.Template\ -Recurse -Filter *.csproj | ForEach-Object {    
         echo "Patching: $($_.FullName)"
         (Get-Content -Path $_.FullName) -replace "0.0.0-REPLACE", $env:APPVEYOR_BUILD_VERSION | Set-Content $_.FullName
         echo "AFTER PATCH:"
@@ -112,21 +112,21 @@ after_test:
 - cmd: >-
     cd c:\projects\NWheels
 
-    codecov -f "c:\projects\NWheels\Source2\CoverageResults.xml"
+    codecov -f "c:\projects\NWheels\Source\CoverageResults.xml"
     
-    cd c:\projects\NWheels\Source2
+    cd c:\projects\NWheels\Source
 
     echo %APPVEYOR_BUILD_VERSION%
     
     dotnet pack -c Release --no-build -p:Version=%APPVEYOR_BUILD_VERSION% -p:Authors="felix-b" -p:Copyright="Copyright 2014 Felix Berman and contributors" -p:PackageLicenseUrl="https://github.com/felix-b/NWheels/blob/master/LICENSE" -p:PackageProjectUrl="http://nwheels.io" -p:PackageIconUrl="https://github.com/felix-b/NWheels/raw/master/Docs/Images/logo-132.png"
 
-    nuget pack c:\projects\NWheels\Source2\Templates\NWheels.Template\NWheels.Template.nuspec -Properties Version=%APPVEYOR_BUILD_VERSION%
+    nuget pack c:\projects\NWheels\Source\Templates\NWheels.Template\NWheels.Template.nuspec -Properties Version=%APPVEYOR_BUILD_VERSION%
    
 on_success:
 - ps: >-
     echo "--- current time is $(Get-Date) ---"
 
-    cd c:\projects\NWheels\Source2
+    cd c:\projects\NWheels\Source
 
     Get-ChildItem -File -Recurse -Include *.nupkg | Foreach {appveyor PushArtifact $_.fullName}
     

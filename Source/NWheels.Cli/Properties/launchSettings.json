@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "NWheels.Cli": {
-      "commandName": "Project",
-      "commandLineArgs": "run NWheels.Samples.FirstHappyPath --no-publish",
-      "workingDirectory": "$(SolutionDir)"
-    }
-  }
-}

@@ -10,7 +10,7 @@ $scriptPath = $MyInvocation.MyCommand.Path
 $scriptDir = Split-Path $scriptPath
 Write-host "Script directory is $scriptDir"
 
-$topDir = "$scriptDir\..\Source2";
+$topDir = "$scriptDir\..\Source";
 
 If ($subFolder) {
     $topDir = "$topDir\$subFolder";
@@ -24,7 +24,7 @@ Remove-Item -Recurse -Force $topDir\TestResults
 New-Item -ItemType Directory -Force -Path $topDir\TestResults | Out-Null
 
 if ($buildSolution) {
-	& dotnet build "$scriptDir\..\Source2\NWheels.sln" --no-incremental -c Debug -p:DebugType=Full -p:DebugSymbols=True
+	& dotnet build "$scriptDir\..\Source\NWheels.sln" --no-incremental -c Debug -p:DebugType=Full -p:DebugSymbols=True
 }
 
 if ($unitIntegTests) {
