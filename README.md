@@ -1,6 +1,6 @@
 Linux|Windows|Coverage
 -----|-------|--------
-TBD|[![Build status](https://ci.appveyor.com/api/projects/status/qcm23727dm8dplk5/branch/master?svg=true)](https://ci.appveyor.com/project/felix-b/nwheels-bk3vs/branch/master)|[![Coverage Status](https://coveralls.io/repos/github/felix-b/NWheels/badge.svg?branch=master)](https://coveralls.io/github/felix-b/NWheels?branch=master)
+TBD|[![Build status](https://ci.appveyor.com/api/projects/status/qcm23727dm8dplk5/branch/master?svg=true)](https://ci.appveyor.com/project/felix-b/nwheels-bk3vs/branch/master)|[![codecov](https://codecov.io/gh/felix-b/NWheels/branch/master/graph/badge.svg)](https://codecov.io/gh/felix-b/NWheels/branch/master)
 
 Welcome to NWheels
 =======
@@ -10,6 +10,8 @@ Welcome to NWheels
 From our experience, commonality in the needs of enterprise application projects is significantly higher than variability. 
 
 Based on that, we aim to let flexibly designed, performant, feature-rich software systems be built at significantly lower costs, within significantly shorter timeframes. 
+
+<br/>
 
 # How It Works
 
