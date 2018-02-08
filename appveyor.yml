@@ -131,5 +131,5 @@ on_success:
     Get-ChildItem -File -Recurse -Include *.nupkg | Foreach {appveyor PushArtifact $_.fullName}
     
 ## Pause build until file from desktop will be removed
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#on_finish:
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
