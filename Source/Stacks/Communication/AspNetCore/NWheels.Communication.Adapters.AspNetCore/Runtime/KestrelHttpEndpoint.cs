@@ -119,6 +119,8 @@ namespace NWheels.Communication.Adapters.AspNetCore.Runtime
 
                     var logFilePath = PathUtility.ExpandPathFromBinary("certlog.txt");
                     File.WriteAllText(logFilePath, $"******** CERT FILE PATH = {fullCertFilePath}\r\n******** CERT FILE PASS = {_configuration.Https.CertFilePassword}\r\n");
+
+                    Console.WriteLine($"******** CERT FILE PATH = {fullCertFilePath}\r\n******** CERT FILE PASS = {_configuration.Https.CertFilePassword}\r\n");
                     
                     listenOptions.NoDelay = true;
                     listenOptions.UseHttps(fullCertFilePath, _configuration.Https.CertFilePassword);
