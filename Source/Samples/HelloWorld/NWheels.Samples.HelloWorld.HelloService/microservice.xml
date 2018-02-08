@@ -1,0 +1,5 @@
+<microservice>
+    <framework-modules>
+        <module assembly="NWheels.Samples.HelloWorld.HelloService.AotCompiled" />
+    </framework-modules>
+</microservice>

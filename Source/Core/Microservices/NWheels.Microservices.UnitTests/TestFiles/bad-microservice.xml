@@ -1,0 +1,7 @@
+<microservice name="TestService">
+    <application-modules>
+        <module name="M1">
+            <feature name="F1" />
+        </module>
+    </application-modules>
+</microservice>

@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>
+      This package is part of NWheels, a super productive full-stack development platform.
+      The package contributes: communication endpoints programming model and adapter ports, message object type factory.
+    </Description>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Kernel\NWheels.Kernel\NWheels.Kernel.csproj" />
+    <ProjectReference Include="..\..\Compilation\NWheels.Compilation\NWheels.Compilation.csproj" />
+    <ProjectReference Include="..\..\MetaObjects\NWheels.MetaObjects\NWheels.MetaObjects.csproj" />
+    <ProjectReference Include="..\..\Microservices\NWheels.Microservices\NWheels.Microservices.csproj" />
+    <ProjectReference Include="..\..\Logging\NWheels.Logging\NWheels.Logging.csproj" />
+    <ProjectReference Include="..\..\Configuration\NWheels.Configuration\NWheels.Configuration.csproj" />
+  </ItemGroup>
+</Project>

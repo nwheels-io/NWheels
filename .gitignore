@@ -179,3 +179,11 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+
+# Visual Studio caches
+Source2/.vs/*
+
+# Installed tools
+Tools/Installed/
+
+.idea

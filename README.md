@@ -7,22 +7,29 @@ Welcome to NWheels
 
 <img align="left" src="Docs/Images/logo-132.png"/>
 
-Based on our experience, commonality in the needs of enterprise application projects is significantly higher than variability. 
+From our experience, commonality in the needs of enterprise application projects is significantly higher than variability. 
 
-We take this as an opportunity to let software vendors build and operate way larger and flexible software, with way smaller teams, within way shorter timeframes. 
+Based on that, we aim to let flexibly designed, performant, feature-rich software systems be built at significantly lower costs, within significantly shorter timeframes. 
+
+# How It Works
 
 <img align="right" src="Docs/Images/nwheels-concept-thumb.png"/>
 
-<br/>
+## What vs. How is half the key
 
-## How it works
+We eliminate manual coding and maintenance of mechanically repetitive parts throughout the stack (UI, RESTful API, DB, including fine-grained access control and deployment images, to name just a few). 
 
-- recurring and common requirements are covered out of the box
-- architectural concept is based on microservices, implemented by [hexagonal ("ports-and-adapters")](http://alistair.cockburn.us/Hexagonal+architecture) design pattern
-- technology stacks are abstracted with concise C# programming models; the models are translated into technology-specific implementations (manual overrides allowed). Example:
-  - UI model in C#, translated into an npm project of a single-page web app based on either React, Angular, or Polymer - depending on picked technology - saving thousands lines of code to write and maintain.
-- expertise in common problem domains is shared through reusable domain modules
-- everything is extensible and pluggable
+These are derived from application models enriched with _what_ as opposed to _how_. The rich models allow deriving sensible implementations with minimal effort (the 80/20 law, and we want 90/10).
+
+Yet, NWheels won't stand on your way when creativity and uniqueness are desired. Manual control can easily be taken at any level.
+
+## Share & Reuse is the second half 
+
+We provide an API medium and foundation for creating, sharing, and reusing pluggable building blocks. These scale from solving small recurring problems, to implementing feature-rich subsystems in common business and infrastructural domains (examples are _CMS_; _CRM_; _Shopping cart_; _Stock exchange_; _SaaS & customizations_; _Application security_; _i18n_ - to name just a few). 
+
+The core of NWheels is built itself in the same way.
+
+## 30,000 Feet View
 
 <p align="center" style="text-align:center">
 <br/>

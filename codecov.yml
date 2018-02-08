@@ -1,0 +1,10 @@
+coverage:
+  precision: 1
+  round: down
+  range: "70...80"
+  status:
+    project:
+      default:
+        target: 80
+        threshold: 5
+        if_not_found: success

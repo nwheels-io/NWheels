@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RuntimeIdentifiers>win10-x64;linux-x64</RuntimeIdentifiers>
+    <AssemblyName>hello</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Core\Microservices\NWheels.Microservices\NWheels.Microservices.csproj" />
+    <ProjectReference Include="..\..\..\Core\Communication\NWheels.Communication\NWheels.Communication.csproj" />
+    <ProjectReference Include="..\..\..\Core\RestApi\NWheels.RestApi\NWheels.RestApi.csproj" />
+    <ProjectReference Include="..\..\..\Stacks\Communication\AspNetCore\NWheels.Communication.Adapters.AspNetCore\NWheels.Communication.Adapters.AspNetCore.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="microservice.xml" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="sslcert.pfx" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="WebFiles\**\*.*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
