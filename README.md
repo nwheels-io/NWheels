@@ -1,6 +1,6 @@
 Linux|Windows|Coverage
 -----|-------|--------
-TBD|[![Build status](https://ci.appveyor.com/api/projects/status/qcm23727dm8dplk5/branch/master?svg=true)](https://ci.appveyor.com/project/felix-b/nwheels-bk3vs/branch/master)|[![codecov](https://codecov.io/gh/felix-b/NWheels/branch/master/graph/badge.svg)](https://codecov.io/gh/felix-b/NWheels/branch/master)
+TBD|[![Build status](https://ci.appveyor.com/api/projects/status/qcm23727dm8dplk5/branch/master?svg=true)](https://ci.appveyor.com/project/felix-b/nwheels-bk3vs/branch/master)|[![Coverage Status](https://coveralls.io/repos/github/felix-b/NWheels/badge.svg?branch=master)](https://coveralls.io/github/felix-b/NWheels?branch=master)
 
 Welcome to NWheels
 =======
@@ -9,25 +9,25 @@ Welcome to NWheels
 
 From our experience, commonality in the needs of enterprise application projects is significantly higher than variability. 
 
-Based on that, we aim to let flexibly designed, performant, feature-rich software systems be built at significantly lower costs, within significantly shorter timeframes. 
+Based on that, we distilled a concept, which allows development and maintenance of flexibly designed, performant, feature-rich software systems at significantly lower costs, within significantly shorter timeframes. 
 
-<br/>
-
-# How It Works
+# The Concept
 
 <img align="right" src="Docs/Images/nwheels-concept-thumb.png"/>
 
-## What vs. How is half the key
+## What over How
 
-We eliminate manual coding and maintenance of mechanically repetitive parts throughout the stack (UI, RESTful API, DB, including fine-grained access control and deployment images, to name just a few). 
+We eliminate manual authoring and maintenance of mechanically repetitive parts throughout the application stack. We derive these from application models enriched with _what_ as opposed to _how_. 
 
-These are derived from application models enriched with _what_ as opposed to _how_. The rich models allow deriving sensible implementations with minimal effort (the 80/20 law, and we want 90/10).
+The rich models allow generating sensible implementations of application layers and aspects, including UI, RESTful API, databases, authorization controls, microservices, container images, and more. 
 
-Yet, NWheels won't stand on your way when creativity and uniqueness are desired. Manual control can easily be taken at any level.
+## Manual Override
 
-## Share & Reuse is the second half 
+NWheels won't stand on your way wherever you want to touch the bare metals, or go creative and unique. It readily steps back and lets you override generated pieces at any level. You can even _eject_ NWheels at any moment. [Read more...]()
 
-We provide an API medium and foundation for creating, sharing, and reusing pluggable building blocks. These scale from solving small recurring problems, to implementing feature-rich subsystems in common business and infrastructural domains (examples are _CMS_; _CRM_; _Shopping cart_; _Stock exchange_; _SaaS & customizations_; _Application security_; _i18n_ - to name just a few). 
+## Share & Reuse
+
+We provide an API medium for creating, sharing, and reusing pluggable building blocks. These scale from solving small recurring problems, to implementing feature-rich subsystems in common business and infrastructural domains (examples are _CRM_, _Stock exchange_, _SaaS & customizations_, _Application security_, _i18n_ - to name just a few). 
 
 The core of NWheels is built itself in the same way.
 
