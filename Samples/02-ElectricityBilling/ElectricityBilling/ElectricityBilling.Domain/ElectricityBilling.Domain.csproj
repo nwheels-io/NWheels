@@ -4,4 +4,12 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Payments\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NWheelsTempApiLib\NWheelsTempApiLib.csproj" />
+  </ItemGroup>
+
 </Project>

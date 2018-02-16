@@ -17,35 +17,39 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SensorService", "SensorServ
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.SensorService", "ElectricityBilling.SensorService\ElectricityBilling.SensorService.csproj", "{DDC47990-070A-43C6-BE97-B858EC5F0E97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.Domain.UnitTests", "ElectricityBilling.Domain.UnitTests\ElectricityBilling.Domain.UnitTests.csproj", "{389A4A1F-152A-404F-8044-19ADBAE682F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.Domain.UnitTests", "ElectricityBilling.Domain.UnitTests\ElectricityBilling.Domain.UnitTests.csproj", "{389A4A1F-152A-404F-8044-19ADBAE682F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.CustomerService.Tests", "ElectricityBilling.CustomerService.Tests\ElectricityBilling.CustomerService.Tests.csproj", "{9B02EBD7-100D-4EE9-8323-044DE3D1B805}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.CustomerService.Tests", "ElectricityBilling.CustomerService.Tests\ElectricityBilling.CustomerService.Tests.csproj", "{9B02EBD7-100D-4EE9-8323-044DE3D1B805}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.SensorService.Tests", "ElectricityBilling.SensorService.Tests\ElectricityBilling.SensorService.Tests.csproj", "{97FF038B-C54B-4337-BDB4-2DE8E491BD42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.SensorService.Tests", "ElectricityBilling.SensorService.Tests\ElectricityBilling.SensorService.Tests.csproj", "{97FF038B-C54B-4337-BDB4-2DE8E491BD42}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BillingService", "BillingService", "{2FEC4ADB-A417-419C-A8F5-A780A2FBFEEC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.BillingService", "ElectricityBilling.BillingService\ElectricityBilling.BillingService.csproj", "{3231E082-2CDA-4754-8D9C-D18A8A1E7503}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.BillingService", "ElectricityBilling.BillingService\ElectricityBilling.BillingService.csproj", "{3231E082-2CDA-4754-8D9C-D18A8A1E7503}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.BillingService.Tests", "ElectricityBilling.BillingService.Tests\ElectricityBilling.BillingService.Tests.csproj", "{CD89DFFF-B143-4171-855C-DAFBA0F0499D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.BillingService.Tests", "ElectricityBilling.BillingService.Tests\ElectricityBilling.BillingService.Tests.csproj", "{CD89DFFF-B143-4171-855C-DAFBA0F0499D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LoginService", "LoginService", "{CBF27AD1-318E-429F-B1B3-DCC806F2DA48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.LoginService", "ElectricityBilling.LoginService\ElectricityBilling.LoginService.csproj", "{33E491CB-C27F-4335-BC49-100CBB4CC5FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.LoginService", "ElectricityBilling.LoginService\ElectricityBilling.LoginService.csproj", "{33E491CB-C27F-4335-BC49-100CBB4CC5FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.LoginService.Tests", "ElectricityBilling.LoginService.Tests\ElectricityBilling.LoginService.Tests.csproj", "{B3F9EC28-9BDA-48F7-B1A3-ABD57D9BFA10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.LoginService.Tests", "ElectricityBilling.LoginService.Tests\ElectricityBilling.LoginService.Tests.csproj", "{B3F9EC28-9BDA-48F7-B1A3-ABD57D9BFA10}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PaymentService", "PaymentService", "{1D9A9F85-9D4F-49E5-BC18-0503B684C49B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.PaymentService", "ElectricityBilling.PaymentService\ElectricityBilling.PaymentService.csproj", "{88B44283-DEE3-413A-AD3B-EF4DF76DAD41}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.PaymentService", "ElectricityBilling.PaymentService\ElectricityBilling.PaymentService.csproj", "{88B44283-DEE3-413A-AD3B-EF4DF76DAD41}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.PaymentService.Tests", "ElectricityBilling.PaymentService.Tests\ElectricityBilling.PaymentService.Tests.csproj", "{5A43461C-C87D-4C4E-B28C-012F72C8032C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.PaymentService.Tests", "ElectricityBilling.PaymentService.Tests\ElectricityBilling.PaymentService.Tests.csproj", "{5A43461C-C87D-4C4E-B28C-012F72C8032C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BillingJob", "BillingJob", "{8274A13B-C48D-4ADC-8679-C117412D99E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.BillingJob", "ElectricityBilling.BillingJob\ElectricityBilling.BillingJob.csproj", "{448209FE-1096-4A56-BC0B-FD299703C7D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.BillingJob", "ElectricityBilling.BillingJob\ElectricityBilling.BillingJob.csproj", "{448209FE-1096-4A56-BC0B-FD299703C7D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.BillingJob.Tests", "ElectricityBilling.BillingJob.Tests\ElectricityBilling.BillingJob.Tests.csproj", "{315D45FB-CF8D-4C9B-93FE-52F98936EA8B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.BillingJob.Tests", "ElectricityBilling.BillingJob.Tests\ElectricityBilling.BillingJob.Tests.csproj", "{315D45FB-CF8D-4C9B-93FE-52F98936EA8B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheelsTempApiLib", "NWheelsTempApiLib\NWheelsTempApiLib.csproj", "{8A827962-4E2A-4035-9371-C0F834207791}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NWheelsTemp", "NWheelsTemp", "{3A259C2D-5312-4BB7-9773-42CE7C81E447}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -109,6 +113,10 @@ Global
 		{315D45FB-CF8D-4C9B-93FE-52F98936EA8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{315D45FB-CF8D-4C9B-93FE-52F98936EA8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{315D45FB-CF8D-4C9B-93FE-52F98936EA8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A827962-4E2A-4035-9371-C0F834207791}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A827962-4E2A-4035-9371-C0F834207791}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A827962-4E2A-4035-9371-C0F834207791}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A827962-4E2A-4035-9371-C0F834207791}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -134,6 +142,7 @@ Global
 		{8274A13B-C48D-4ADC-8679-C117412D99E4} = {6C309D89-9205-49D5-9A30-F8F91625EE8B}
 		{448209FE-1096-4A56-BC0B-FD299703C7D3} = {8274A13B-C48D-4ADC-8679-C117412D99E4}
 		{315D45FB-CF8D-4C9B-93FE-52F98936EA8B} = {8274A13B-C48D-4ADC-8679-C117412D99E4}
+		{8A827962-4E2A-4035-9371-C0F834207791} = {3A259C2D-5312-4BB7-9773-42CE7C81E447}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6E814767-B621-42F5-8878-FA1A896392EF}
