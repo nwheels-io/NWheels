@@ -1,6 +1,7 @@
 ﻿using System;
 using ElectricityBilling.Domain.Sensors;
-using NWheelsTempApiLib;
+using NWheels;
+using NWheels.Ddd;
 
 namespace ElectricityBilling.Domain.Billing
 {
@@ -13,6 +14,6 @@ namespace ElectricityBilling.Domain.Billing
         public DateTime? ValidUntil { get; private set; }
 
         public EntityRef<string, SensorEntity> Sensor { get; }
-
+        public EntityRef<long, PricingPlanEntity> PricingPlan { get; }
     }
 }

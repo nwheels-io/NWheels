@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using NWheelsTempApiLib;
+using NWheels;
+using NWheels.Ddd;
+using NWheels.I18n;
 
 namespace ElectricityBilling.Domain.Basics
 {
@@ -29,6 +31,5 @@ namespace ElectricityBilling.Domain.Basics
 
         [MemberContract.InjectedDependency]
         protected IThisDomainObjectServices ThisObject { get; }
-
     }
 }

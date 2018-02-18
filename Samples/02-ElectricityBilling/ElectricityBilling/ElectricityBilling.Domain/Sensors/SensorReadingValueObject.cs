@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using NWheelsTempApiLib;
+using NWheels;
+using NWheels.Ddd;
 
 namespace ElectricityBilling.Domain.Sensors
 {

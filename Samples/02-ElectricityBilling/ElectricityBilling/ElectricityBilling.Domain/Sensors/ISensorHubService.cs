@@ -1,9 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace ElectricityBilling.Domain.Sensors
 {
     public interface ISensorHubService
     {
-        Task PostSensorStatusChangeAsync(string sensorId, bool active);
+        Task RequestSensorActivationChangeAsync(string sensorId, bool active);
+        event SensorReadingReceivedHandler SensorReadingReceived;
     }
+
+    public delegate Task SensorReadingReceivedHandler(DateTime timestamp, string sensorId, decimal kwh);
 }

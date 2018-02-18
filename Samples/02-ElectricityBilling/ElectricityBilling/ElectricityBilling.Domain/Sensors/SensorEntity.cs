@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using NWheelsTempApiLib;
+using NWheels;
 using ElectricityBilling.Domain.Basics;
 using ElectricityBilling.Domain.Accounts;
+using NWheels.Authorization;
 
 namespace ElectricityBilling.Domain.Sensors
 {
@@ -24,7 +25,7 @@ namespace ElectricityBilling.Domain.Sensors
         [SecurityContract.Require(ElectricityBillingClaim.DeviceAdmin)]
         public async Task Activate()
         {
-            await SensorHub.PostSensorStatusChangeAsync(this.Id, active: true);
+            await SensorHub.RequestSensorActivationChangeAsync(this.Id, active: true);
             this.IsActive = true;
         }
 
@@ -33,7 +34,7 @@ namespace ElectricityBilling.Domain.Sensors
         [SecurityContract.Require(ElectricityBillingClaim.DeviceAdmin)]
         public async Task Deactivate()
         {
-            await SensorHub.PostSensorStatusChangeAsync(this.Id, active: false);
+            await SensorHub.RequestSensorActivationChangeAsync(this.Id, active: false);
             this.IsActive = false;
         }
 

@@ -2,27 +2,22 @@
 using System.Collections.Generic;
 using System.Text;
 using ElectricityBilling.Domain.Basics;
-using NWheelsTempApiLib;
+using NWheels;
+using NWheels.I18n;
 
 namespace ElectricityBilling.Domain.Customers
 {
     public abstract class ContactDetailValueObject
     {
-        public abstract string ToDisplayString(ILocalizationService localization);
+        public bool IsPrimary { get; internal set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public class EmailContactValueObject : ContactDetailValueObject
     {
-        public override string ToDisplayString(ILocalizationService localization)
-        {
-            return this.EmailAddress;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [MemberContract.Semantics.Email]
+        [MemberContract.Semantics.EmailAddress]
+        [MemberContract.Presentation.DefaultObjectDisplay]
         public string EmailAddress { get; set; }
     }
 
@@ -30,13 +25,7 @@ namespace ElectricityBilling.Domain.Customers
 
     public class PostalContactValueObject : ContactDetailValueObject
     {
-        public override string ToDisplayString(ILocalizationService localization)
-        {
-            return PostalAddress.ToDisplayString(localization);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
+        [MemberContract.Presentation.DefaultObjectDisplay]
         public PostalAddressValueObject PostalAddress { get; set; }
     }
 
@@ -44,13 +33,8 @@ namespace ElectricityBilling.Domain.Customers
 
     public class PhoneContactValueObject : ContactDetailValueObject
     {
-        public override string ToDisplayString(ILocalizationService localization)
-        {
-            return PostalAddress.ToDisplayString(localization);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public PostalAddressValueObject PostalAddress { get; set; }
+        [MemberContract.Semantics.PhoneNumber]
+        [MemberContract.Presentation.DefaultObjectDisplay]
+        public string PhoneNumber { get; set; }
     }
 }

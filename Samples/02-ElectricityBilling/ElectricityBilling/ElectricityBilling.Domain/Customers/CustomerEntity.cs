@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using ElectricityBilling.Domain.Basics;
-using NWheelsTempApiLib;
+using ElectricityBilling.Domain.Billing;
+using NWheels;
+using NWheels.Ddd;
 
 namespace ElectricityBilling.Domain.Customers
 {
@@ -13,10 +15,13 @@ namespace ElectricityBilling.Domain.Customers
 
         public string PersonIdentity { get; set; }
 
-        public PersonNameValueObject PersonName { get; set; }
+        public ValueObject<PersonNameValueObject> PersonName { get; set; }
 
-        public IList<ContactDetailValueObject> ContactDetails { get; }
+        //TODO: add validation that one and only one contact detail's IsPrimary is true
+        public ValueObjectList<ContactDetailValueObject> ContactDetails { get; }
 
-        public PostalAddressValueObject BillingAddress { get; set; }
+        public ValueObject<PostalAddressValueObject> BillingAddress { get; set; }
+
+        public EntitySet<long, ContractEntity> Contracts { get; }
     }
 }

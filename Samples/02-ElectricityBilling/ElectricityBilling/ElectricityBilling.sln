@@ -51,6 +51,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheelsTempApiLib", "NWheel
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NWheelsTemp", "NWheelsTemp", "{3A259C2D-5312-4BB7-9773-42CE7C81E447}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.SensorService.HubIntegrationStub", "ElectricityBilling.SensorService.HubIntegrationStub\ElectricityBilling.SensorService.HubIntegrationStub.csproj", "{54565FA6-A6B3-4C02-A899-D6B38A19CFA0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -117,6 +119,10 @@ Global
 		{8A827962-4E2A-4035-9371-C0F834207791}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A827962-4E2A-4035-9371-C0F834207791}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A827962-4E2A-4035-9371-C0F834207791}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54565FA6-A6B3-4C02-A899-D6B38A19CFA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54565FA6-A6B3-4C02-A899-D6B38A19CFA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54565FA6-A6B3-4C02-A899-D6B38A19CFA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54565FA6-A6B3-4C02-A899-D6B38A19CFA0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -143,6 +149,7 @@ Global
 		{448209FE-1096-4A56-BC0B-FD299703C7D3} = {8274A13B-C48D-4ADC-8679-C117412D99E4}
 		{315D45FB-CF8D-4C9B-93FE-52F98936EA8B} = {8274A13B-C48D-4ADC-8679-C117412D99E4}
 		{8A827962-4E2A-4035-9371-C0F834207791} = {3A259C2D-5312-4BB7-9773-42CE7C81E447}
+		{54565FA6-A6B3-4C02-A899-D6B38A19CFA0} = {532ADCB5-D069-4471-A697-0E5E624285EE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6E814767-B621-42F5-8878-FA1A896392EF}
