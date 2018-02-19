@@ -57,12 +57,27 @@ namespace NWheels
             public class CurrencyAttribute : Attribute
             {
             }
+            public class UtcAttribute : Attribute
+            {
+            }
+            public class PasswordAttribute : Attribute
+            {
+            }
         }
 
         public static class Validation
         {
             public class NonNegativeAttribute : Attribute
             {
+            }
+            public class UniqueAttribute : Attribute
+            {
+            }
+            public class MaxLength : Attribute
+            {
+                public MaxLength(int length)
+                {
+                }
             }
         }
 
