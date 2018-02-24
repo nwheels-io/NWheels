@@ -6,20 +6,25 @@ using NWheels;
 using NWheels.Authorization;
 using NWheels.DB;
 using NWheels.Ddd;
-using DB = NWheels.DB;
 
 namespace ElectricityBilling.Domain.Billing
 {
-    [DB.TypeContract.View]
+    [NWheels.DB.TypeContract.View(over: typeof(PricingPlanEntity))]
     public class PricingPlanContractView
     {
-        [DB.MemberContract.MapToMember(typeof(PricingPlanEntity), nameof(PricingPlanEntity.Id))]
-        public long PricingPlanId { get; }
+        [NWheels.DB.MemberContract.MapToMember(typeof(PricingPlanEntity), nameof(PricingPlanEntity.Id))]
+        private readonly PricingPlanEntity.Ref _pricingPlan;
 
-        [DB.MemberContract.MapToMember(typeof(ContractEntity), nameof(ContractEntity.Id))]
-        public long ContractId { get; }
+        [NWheels.DB.MemberContract.MapToMember(typeof(ContractEntity), nameof(ContractEntity.Id))]
+        private readonly ContractEntity.Ref _contract;
 
-        [DB.MemberContract.MapToMember(typeof(CustomerEntity), nameof(CustomerEntity.Id))]
-        public long CustomerId { get; }
+        [NWheels.DB.MemberContract.MapToMember(typeof(CustomerEntity), nameof(CustomerEntity.Id))]
+        private readonly CustomerEntity.Ref _customer;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public PricingPlanEntity.Ref PricingPlan => _pricingPlan;
+        public ContractEntity.Ref Contract => _contract;
+        public CustomerEntity.Ref Customer => _customer;
     }
 }

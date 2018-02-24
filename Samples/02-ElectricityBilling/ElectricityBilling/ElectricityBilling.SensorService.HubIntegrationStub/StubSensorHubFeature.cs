@@ -7,7 +7,7 @@ using NWheels.Microservices;
 namespace ElectricityBilling.SensorService.HubIntegrationStub
 {
     [DefaultFeatureLoader]
-    public class IntegrationStubFeature : FeatureLoaderBase
+    public class StubSensorHubFeature : FeatureLoaderBase
     {
         public override void ContributeComponents(IComponentContainer existingComponents, IComponentContainerBuilder newComponents)
         {

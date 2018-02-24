@@ -48,5 +48,16 @@ namespace ElectricityBilling.Domain.Sensors
 
         [MemberContract.InjectedDependency]
         protected ISensorHubService SensorHub { get; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public struct Ref
+        {
+            public readonly string Id;
+            #region Generated code
+            public Ref(string id) => this.Id = id;
+            public static implicit operator Ref(SensorEntity entity) => new Ref(entity.Id);
+            #endregion
+        }
     }
 }

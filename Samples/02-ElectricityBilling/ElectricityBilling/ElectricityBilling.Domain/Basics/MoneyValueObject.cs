@@ -8,22 +8,27 @@ namespace ElectricityBilling.Domain.Basics
     [TypeContract.Presentation.DefaultFormat("{Amount:#,##0.00} {CurrencyCode}")]
     public struct MoneyValueObject
     {
+        private readonly decimal _amount;
+        private readonly string _currencyCode;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public MoneyValueObject(decimal amount, string currencyCode = null)
         {
-            this.Amount = amount;
-            this.CurrencyCode = currencyCode;
+            _amount = amount;
+            _currencyCode = currencyCode;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public decimal Amount { get; }
-        public string CurrencyCode { get; }
+        public decimal Amount => _amount;
+        public string CurrencyCode => _currencyCode;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static MoneyValueObject operator *(decimal x, MoneyValueObject y)
         {
-            return new MoneyValueObject(x * y.Amount, y.CurrencyCode);
+            return new MoneyValueObject(x * y._amount, y._currencyCode);
         }
     }
 }

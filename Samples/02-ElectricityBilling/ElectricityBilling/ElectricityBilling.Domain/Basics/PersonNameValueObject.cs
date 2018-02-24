@@ -6,19 +6,26 @@ namespace ElectricityBilling.Domain.Basics
 {
     public struct PersonNameValueObject
     {
+        private readonly string _title;
+        private readonly string _firstName;
+        private readonly string _lastName;
+        private readonly string _middleName;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public PersonNameValueObject(string title, string firstName, string lastName, string middleName)
         {
-            Title = title;
-            FirstName = firstName;
-            LastName = lastName;
-            MiddleName = middleName;
+            _title = title;
+            _firstName = firstName;
+            _lastName = lastName;
+            _middleName = middleName;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string Title { get; }
-        public string FirstName { get; }
-        public string LastName { get; }
-        public string MiddleName { get; }
+        public string Title => _title;
+        public string FirstName => _firstName;
+        public string LastName => _lastName;
+        public string MiddleName => _middleName;
     }
 }

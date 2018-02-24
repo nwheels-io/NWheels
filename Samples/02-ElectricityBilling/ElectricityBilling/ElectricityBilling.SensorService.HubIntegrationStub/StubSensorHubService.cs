@@ -11,7 +11,11 @@ namespace ElectricityBilling.SensorService.HubIntegrationStub
             throw new NotImplementedException();
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public event SensorReadingReceivedHandler SensorReadingReceived;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private async Task OnSensorReadingReceived(DateTime timestamp, string sensorId, decimal kwh)
         {
