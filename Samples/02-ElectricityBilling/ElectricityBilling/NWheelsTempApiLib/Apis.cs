@@ -8,6 +8,9 @@ using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using NWheels.Ddd;
 using NWheels.I18n;
+using NWheels.Microservices;
+using NWheels.RestApi;
+using NWheels.UI.Components;
 
 namespace NWheels
 {
@@ -692,8 +695,92 @@ namespace NWheels
 
     namespace UI
     {
-        public class WebReactReduxStack
+        namespace Web
         {
+            public class WebReactReduxStack
+            {
+            }
+
+            public static class MicroserviceHostBuilderExtensions
+            {
+                public static MicroserviceHostBuilder ExposeWebApp<TWebApp>(
+                    this MicroserviceHostBuilder hostBuilder,
+                    string baseUrlPath = "/")
+                {
+                    return hostBuilder;
+                }
+            }
+
+            public class WebPage<TViewModel> : BaseComponent<TViewModel>
+            {
+            }
+
+        }
+
+        public static class Empty
+        {
+            public class ViewModel { }
+        }
+
+        public class ClientSideScript
+        {
+            
+        }
+
+        public class ClientSidePromiseBase
+        {
+            public ClientSidePromise Catch<TException>(Action<ClientSideError> onError)
+            {
+                return new ClientSidePromise();
+            }
+            public ClientSidePromise Finally(Action onFinally)
+            {
+                return new ClientSidePromise();
+            }
+        }
+
+        public class ClientSidePromise : ClientSidePromiseBase
+        {
+            public ClientSidePromise Then(Action onSuccess)
+            {
+                return new ClientSidePromise();
+            }
+            public ClientSidePromise<TResult> Then<TResult>(Func<TResult> onSuccess)
+            {
+                return new ClientSidePromise<TResult>();
+            }
+        }
+
+        public class ClientSidePromise<T> : ClientSidePromiseBase
+        {
+            public ClientSidePromise Then(Action<T> onSuccess)
+            {
+                return new ClientSidePromise();
+            }
+            public ClientSidePromise<TResult> Then<TResult>(Func<T, TResult> onSuccess)
+            {
+                return new ClientSidePromise<TResult>();
+            }
+        }
+
+        public class ClientSideError
+        {
+        }
+
+        namespace Components
+        {
+            public abstract class BaseComponent<TViewModel>
+            {
+                public virtual void Controller(ClientSideScript script, TViewModel model)
+                {
+                }
+
+                protected void OnLoad(Action<ClientSideScript> script) {  }
+            }
+
+            public class ViewComponent<TViewModel> : BaseComponent<TViewModel>
+            {
+            }
         }
     }
 

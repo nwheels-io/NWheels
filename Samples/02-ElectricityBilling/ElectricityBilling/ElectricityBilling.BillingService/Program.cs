@@ -24,6 +24,7 @@ namespace ElectricityBilling.BillingService
                     catalog.AddDomainRepository<ElectricityBillingContext, ContractEntity>();
                     catalog.AddDomainRepository<ElectricityBillingContext, PricingPlanEntity>();
                     catalog.AddDomainRepository<ElectricityBillingContext, InvoiceEntity>();
+                    catalog.AddDomainTransaction<ElectricityBillingContext>(x => x.AssignContractTx(0, "", 0));
                 });
             });
         }
