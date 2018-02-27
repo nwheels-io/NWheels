@@ -7,6 +7,9 @@ namespace ElectricityBilling.Domain.Billing
 {
     public struct InvoiceRowValueObject
     {
+        [NWheels.DB.MemberContract.ManyToOne]
+        private readonly ContractEntity.Ref _contract;
+
         private readonly PriceValueObject _price;
 
         [MemberContract.Required]
@@ -15,14 +18,16 @@ namespace ElectricityBilling.Domain.Billing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public InvoiceRowValueObject(PriceValueObject price, string description)
+        public InvoiceRowValueObject(ContractEntity.Ref contract, PriceValueObject price, string description)
         {
+            _contract = contract;
             _price = price;
             _description = description;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ContractEntity.Ref Contract => _contract;
         public PriceValueObject Price => _price;
         public string Description => _description;
     }

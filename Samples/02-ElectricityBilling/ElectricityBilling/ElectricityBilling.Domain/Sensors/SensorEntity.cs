@@ -57,6 +57,7 @@ namespace ElectricityBilling.Domain.Sensors
             #region Generated code
             public Ref(string id) => this.Id = id;
             public static implicit operator Ref(SensorEntity entity) => new Ref(entity.Id);
+            public static implicit operator Ref(string id) => new Ref(id);
             #endregion
         }
     }

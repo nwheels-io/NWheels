@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ElectricityBilling.Domain.Basics;
+using ElectricityBilling.Domain.Customers;
 using ElectricityBilling.Domain.Sensors;
 using NWheels;
 using NWheels.DB;
@@ -35,7 +36,9 @@ namespace ElectricityBilling.Domain.Billing
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override async Task<PriceValueObject> CalculatePriceAsync(IAsyncEnumerable<SensorReadingValueObject> orderedReadings)
+        public override async Task<PriceValueObject> CalculatePriceAsync(
+            CustomerEntity customer, 
+            IAsyncEnumerable<SensorReadingValueObject> orderedReadings)
         {
             using (var enumerator = await orderedReadings.GetEnumeratorAsync())
             {
@@ -56,13 +59,17 @@ namespace ElectricityBilling.Domain.Billing
                     }
 
                     var calculatedPrice = totalKwh * _pricePerKwh;
-                    return new PriceValueObject(calculatedPrice, derivationMemos: new string[] {
-                        _localizables.FirstReading(ref firstReading),
-                        _localizables.LastReading(ref lastReading),
-                        _localizables.PeriodConsumptionKwh(totalKwh),
-                        _localizables.FlatRate(ref _pricePerKwh),
-                        _localizables.TotalPrice(ref calculatedPrice)
-                    });
+
+                    using (_localizables.UseCulture(customer.Culture))
+                    {
+                        return new PriceValueObject(calculatedPrice, derivationMemos: new string[] {
+                            _localizables.FirstReading(ref firstReading),
+                            _localizables.LastReading(ref lastReading),
+                            _localizables.PeriodConsumptionKwh(totalKwh),
+                            _localizables.FlatRate(ref _pricePerKwh),
+                            _localizables.TotalPrice(ref calculatedPrice)
+                        });
+                    }
                 }
             }
 
@@ -79,6 +86,9 @@ namespace ElectricityBilling.Domain.Billing
         [NWheels.I18n.TypeContract.Localizables(DefaultCulture = "en-US")]
         public interface IFlatRateLocalizables
         {
+            [NWheels.I18n.MemberContract.CultureScopeMethod]
+            IDisposable UseCulture(string cultureNameOrNull);
+
             [NWheels.I18n.MemberContract.InDefaultCulture("Begin of period: {reading.KwhValue:0.0000} kWh, read on {reading.UtcTimestamp:D}")]
             string FirstReading(ref SensorReadingValueObject reading);
 

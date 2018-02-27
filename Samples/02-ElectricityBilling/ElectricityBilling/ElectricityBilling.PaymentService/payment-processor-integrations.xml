@@ -1,0 +1,5 @@
+﻿<microservice name="SensorService">
+  <customization-modules>
+    <module assembly="ElectricityBilling.PaymentService.Integration.PayPal" />
+  </customization-modules>
+</microservice>

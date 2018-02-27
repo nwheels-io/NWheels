@@ -21,7 +21,7 @@ namespace ElectricityBilling.CustomerService
                 host.UseRestApi<AspNetCoreSwaggerStack>();
                 host.UseApplicationFeature<AutoDiscoverAssemblyOf<ElectricityBillingContext>>();
                 host.ExposeRestApiResources(catalog => {
-                    catalog.AddDomainContextRepository<ElectricityBillingContext, CustomerEntity>();
+                    catalog.AddDomainRepository<ElectricityBillingContext, CustomerEntity>();
                 });
             });
         }

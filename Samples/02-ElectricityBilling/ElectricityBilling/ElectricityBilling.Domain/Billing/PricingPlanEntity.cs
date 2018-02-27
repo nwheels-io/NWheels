@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ElectricityBilling.Domain.Basics;
+using ElectricityBilling.Domain.Customers;
 using ElectricityBilling.Domain.Sensors;
 using NWheels;
 using NWheels.DB;
@@ -49,7 +50,7 @@ namespace ElectricityBilling.Domain.Billing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public abstract Task<PriceValueObject> CalculatePriceAsync(IAsyncEnumerable<SensorReadingValueObject> orderedReadings);
+        public abstract Task<PriceValueObject> CalculatePriceAsync(CustomerEntity customer, IAsyncEnumerable<SensorReadingValueObject> orderedReadings);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -98,6 +99,7 @@ namespace ElectricityBilling.Domain.Billing
             #region Generated code
             public Ref(long id) => this.Id = id;
             public static implicit operator Ref(PricingPlanEntity entity) => new Ref(entity.Id);
+            public static implicit operator Ref(long id) => new Ref(id);
             #endregion
         }
 

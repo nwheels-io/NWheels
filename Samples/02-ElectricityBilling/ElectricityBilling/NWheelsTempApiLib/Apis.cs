@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Serialization;
@@ -215,6 +216,9 @@ namespace NWheels
             public class YearAttribute : Attribute
             {
             }
+            public class CultureAttribute : Attribute
+            {
+            }
         }
 
         public static class Validation
@@ -320,6 +324,9 @@ namespace NWheels
                 {
                 }
             }
+            public class CultureScopeMethod : Attribute
+            {
+            }
         }
     }
 
@@ -332,8 +339,8 @@ namespace NWheels
 
         public interface IUnitOfWork : IDisposable
         {
-            Task Commit();
-            Task Discard();
+            Task CommitAsync();
+            Task DiscardAsync();
         }
     }
 
@@ -426,6 +433,7 @@ namespace NWheels
             IAsyncEnumerable<TOther> OfType<TOther>();
             Task<IAsyncEnumerator<T>> GetEnumeratorAsync();
             Task ForEachAsync(Func<T, Task> actionAsync);
+            Task ForEachAsync(Action<T> action);
             Task<bool> AnyAsync();
             Task<long> CountAsync();
             Task<T> FirstAsync();
@@ -433,7 +441,18 @@ namespace NWheels
             Task<T> LastAsync();
             Task<T> LastOrDefaultAsync();
             Task<List<T>> ToListAsync();
+            Task<Dictionary<TKey, T>> ToDictionaryAsync<TKey>(Func<T, TKey> keySelector);
+            Task<Dictionary<TKey, TValue>> ToDictionaryAsync<TKey, TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector);
             Task<T[]> ToArrayAsync();
+        }
+
+        public static class AsyncEnumerableExtensions
+        {
+            public static Task<Dictionary<TKey, TValue>> ToDictionaryAsync<TKey, TValue>(
+                this IAsyncEnumerable<KeyValuePair<TKey, TValue>> query)
+            {
+                return query.ToDictionaryAsync<TKey, TValue>(x => x.Key, x => x.Value);
+            }
         }
 
         public interface IAsyncGrouping<TKey, TElement> : IAsyncEnumerable<TElement>
@@ -650,14 +669,14 @@ namespace NWheels
 
         public static class ResourceCatalogBuilderExtensions
         {
-            public static ResourceCatalogBuilder AddDomainContextTx<TContext>(
+            public static ResourceCatalogBuilder AddDomainTransaction<TContext>(
                 this ResourceCatalogBuilder catalogBuilder, 
                 Expression<Func<TContext, Task>> tx)
             {
                 return catalogBuilder;
             }
 
-            public static ResourceCatalogBuilder AddDomainContextRepository<TContext, TAggregate>(this ResourceCatalogBuilder catalogBuilder)
+            public static ResourceCatalogBuilder AddDomainRepository<TContext, TAggregate>(this ResourceCatalogBuilder catalogBuilder)
             {
                 return catalogBuilder;
             }

@@ -25,21 +25,48 @@ namespace ElectricityBilling.Domain
             QueryCustomerContractsByPricingPlan(
                 PricingPlanEntity.Ref pricingPlan);
 
-        IAsyncQuery<SensorEntity.Ref> 
-            QueryAssignedSensorsWithinPeriod(
-                IList<CustomerEntity.Ref> optionalCustomers, BillingPeriodValueObject billingPeriod);
+        IAsyncQuery<SensorContractView> 
+            QuerySensorsWithValidContractsWithinPeriod(
+                ICollection<CustomerEntity.Ref> optionalCustomers, BillingPeriodValueObject billingPeriod);
 
         IAsyncQuery<IAsyncGrouping<SensorEntity.Ref, SensorReadingValueObject>> 
             QueryReadingsWithinPeriodGroupedBySensor(
-                IList<SensorEntity.Ref> sensors, BillingPeriodValueObject billingPeriod);
+                ICollection<SensorEntity.Ref> sensors, BillingPeriodValueObject billingPeriod);
 
-        IAsyncQuery<ContractEntity> 
-            QueryValidContractsForSensor(
-                SensorEntity.Ref sensor, BillingPeriodValueObject billingPeriod);
+        //IAsyncQuery<ContractEntity> 
+        //    QueryValidContractsForSensor(
+        //        SensorEntity.Ref sensor, BillingPeriodValueObject billingPeriod);
 
-        IAsyncQuery<ContractCustomerMap>
-            QueryContractCustomerMap(
-                IList<ContractEntity.Ref> contracts);
+        //IAsyncQuery<KeyValuePair<SensorEntity.Ref, ContractEntity.Ref>>
+        //    QuerySensorToContractMap(
+        //        ICollection<SensorEntity.Ref> sensorRefs);
+
+        //IAsyncQuery<KeyValuePair<ContractEntity.Ref, CustomerEntity.Ref>>
+        //    QueryContractToCustomerMap(
+        //        ICollection<ContractEntity.Ref> contractRefs);
+
+        //IAsyncQuery<KeyValuePair<ContractEntity.Ref, PricingPlanEntity.Ref>>
+        //    QueryContractToPricingPlanMap(
+        //        ICollection<ContractEntity.Ref> contractRefs);
+
+        IAsyncQuery<KeyValuePair<CustomerEntity.Ref, CustomerEntity>>
+            QueryCustomersCache(
+                ICollection<CustomerEntity.Ref> customerRefs);
+
+        IAsyncQuery<KeyValuePair<PricingPlanEntity.Ref, PricingPlanEntity>>
+            QueryPricingPlansCache(
+                ICollection<PricingPlanEntity.Ref> pricingPlanRefs);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void InvalidateAllInvoicesWithinPeriod(
+            BillingPeriodValueObject billingPeriod);
+
+        InvoiceEntity 
+            NewInvoice(
+                CustomerEntity.Ref customer, BillingPeriodValueObject billingPeriod, IEnumerable<InvoiceRowValueObject> rows);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         Task StoreReadingTx(
             string sensorId, DateTime utc, decimal kwh);
@@ -47,25 +74,8 @@ namespace ElectricityBilling.Domain
         Task AssignContractTx(
             CustomerEntity.Ref customer, SensorEntity.Ref sensor, PricingPlanEntity.Ref pricingPlan);
 
-        void InvalidateAllInvoicesWithinPeriod(
-            BillingPeriodValueObject billingPeriod);
-
         Task<PricingPlanEntity> GetPricingPlanAsync(
             PricingPlanEntity.Ref pricingPlanRef);
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public struct ContractCustomerMap
-    {
-        public ContractCustomerMap(ContractEntity.Ref contract, CustomerEntity.Ref customer)
-        {
-            Contract = contract;
-            Customer = customer;
-        }
-
-        public readonly ContractEntity.Ref Contract;
-        public readonly CustomerEntity.Ref Customer;
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -83,6 +93,7 @@ namespace ElectricityBilling.Domain
         private readonly IRepository<InvoiceEntity> _invoices;
         private readonly IRepository<ReceiptEntity> _receipts;
         private readonly IRepository<PaymentMethodEntity> _paymentMethods;
+        private readonly IView<SensorContractView> _sensorContracts;
         private readonly IView<PricingPlanContractView> _pricingPlanContracts;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -118,69 +129,120 @@ namespace ElectricityBilling.Domain
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IAsyncQuery<SensorEntity.Ref> QueryAssignedSensorsWithinPeriod(
-            IList<CustomerEntity.Ref> optionalCustomers, BillingPeriodValueObject billingPeriod)
+        public IAsyncQuery<SensorContractView> 
+            QuerySensorsWithValidContractsWithinPeriod(
+                ICollection<CustomerEntity.Ref> optionalCustomerRefs, BillingPeriodValueObject billingPeriod)
         {
-            var sensorRefQuery = _contracts.Query(q => 
-                getContractQuery(q)
-                .Select(x => x.Sensor)
-                .Distinct());
+            return _sensorContracts.Query(view => {
+                var query = view;
 
-            return sensorRefQuery;
-            
-            IQueryable<ContractEntity> getContractQuery(IQueryable<ContractEntity> source)
-            {
-                var contractQuery = source;
-
-                if (optionalCustomers != null)
+                if (optionalCustomerRefs != null)
                 {
-                    contractQuery = contractQuery.Where(x => optionalCustomers.Contains(x.Customer));
+                    query = query.Where(x => optionalCustomerRefs.Contains(x.Contract.Customer.Id));
                 }
 
-                contractQuery = contractQuery.Where(x =>
-                    x.ValidFrom <= billingPeriod.EndDate &&
-                    (x.ValidUntil == null || x.ValidUntil >= billingPeriod.StartDate));
+                query = query.Where(x =>
+                    x.Contract.ValidFrom <= billingPeriod.EndDate &&
+                    (x.Contract.ValidUntil == null || x.Contract.ValidUntil >= billingPeriod.StartDate));
 
-                return contractQuery;
-            }
+                return query;
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IAsyncQuery<IAsyncGrouping<SensorEntity.Ref, SensorReadingValueObject>> 
             QueryReadingsWithinPeriodGroupedBySensor(
-                IList<SensorEntity.Ref> sensors, BillingPeriodValueObject billingPeriod)
+                ICollection<SensorEntity.Ref> sensorRefs, BillingPeriodValueObject billingPeriod)
         {
             return _sensorReadings
                 .Query(q => q
                     .Where(x => 
-                        sensors.Contains(x.Sensor) && 
+                        sensorRefs.Contains(x.Sensor.Id) && 
                         x.UtcTimestamp >= billingPeriod.StartDate && 
                         x.UtcTimestamp <= billingPeriod.EndDate)
                     .OrderBy(x => x.UtcTimestamp))
                 .GroupBy(x => x.Sensor);
         }
 
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //public IAsyncQuery<ContractEntity> QueryValidContractsForSensor(SensorEntity.Ref sensor, BillingPeriodValueObject billingPeriod)
+        //{
+        //    var query =_contracts
+        //        .Query(q => q
+        //            .Where(x => 
+        //                x.Sensor.Id == sensor.Id && 
+        //                x.ValidFrom <= billingPeriod.EndDate && 
+        //                (x.ValidUntil == null || x.ValidUntil >= billingPeriod.StartDate))
+        //            .OrderBy(x => x.ValidFrom));
+
+        //    return query;
+        //}
+
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //public IAsyncQuery<KeyValuePair<SensorEntity.Ref, ContractEntity.Ref>> 
+        //    QuerySensorToContractMap(
+        //        ICollection<SensorEntity.Ref> sensorRefs)
+        //{
+        //    return _contracts.Query(allContracts =>
+        //        from contract in allContracts
+        //        join sensor in _sensors on contract.Sensor.Id equals sensor.Id
+        //        where sensorRefs.Contains(sensor.Id)
+        //        select new KeyValuePair<SensorEntity.Ref, ContractEntity.Ref>(sensor.Id, contract.Id));
+        //}
+
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //public IAsyncQuery<KeyValuePair<ContractEntity.Ref, CustomerEntity.Ref>>
+        //    QueryContractToCustomerMap(
+        //        ICollection<ContractEntity.Ref> contractRefs)
+        //{
+        //    return _contracts.Query(q => q
+        //        .Where(x => contractRefs.Contains(x.Id))
+        //        .Select(x => new KeyValuePair<ContractEntity.Ref, CustomerEntity.Ref>(x, x.Customer)));
+        //}
+
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //public IAsyncQuery<KeyValuePair<ContractEntity.Ref, PricingPlanEntity.Ref>>
+        //    QueryContractToPricingPlanMap(
+        //        ICollection<ContractEntity.Ref> contractRefs)
+        //{
+        //    return _contracts.Query(q => q
+        //        .Where(x => contractRefs.Contains(x.Id))
+        //        .Select(x => new KeyValuePair<ContractEntity.Ref, PricingPlanEntity.Ref>(x, x.PricingPlan)));
+        //}
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IAsyncQuery<ContractEntity> QueryValidContractsForSensor(SensorEntity.Ref sensor, BillingPeriodValueObject billingPeriod)
+        public IAsyncQuery<KeyValuePair<CustomerEntity.Ref, CustomerEntity>> 
+            QueryCustomersCache(
+                ICollection<CustomerEntity.Ref> customerRefs)
         {
-            var query =_contracts
-                .Query(q => q
-                    .Where(x => 
-                        x.Sensor.Id == sensor.Id && 
-                        x.ValidFrom <= billingPeriod.EndDate && 
-                        (x.ValidUntil == null || x.ValidUntil >= billingPeriod.StartDate))
-                    .OrderBy(x => x.ValidFrom));
-
-            return query;
+            return _customers.Query(q => q
+                .Where(cust => customerRefs.Contains(cust.Id))
+                .Select(cust => new KeyValuePair<CustomerEntity.Ref, CustomerEntity>(cust.Id, cust)));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IAsyncQuery<ContractCustomerMap> QueryContractCustomerMap(IList<ContractEntity.Ref> contracts)
+        public IAsyncQuery<KeyValuePair<PricingPlanEntity.Ref, PricingPlanEntity>> 
+            QueryPricingPlansCache(
+                ICollection<PricingPlanEntity.Ref> pricingPlanRefs)
         {
-            return _contracts.Query(q => q.Where(x => contracts.Contains(x.Id)).Select(x => new ContractCustomerMap(x, x.Customer)));
+            return _pricingPlans.Query(q => q
+                .Where(plan => pricingPlanRefs.Contains(plan.Id))
+                .Select(plan => new KeyValuePair<PricingPlanEntity.Ref, PricingPlanEntity>(plan.Id, plan)));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public InvoiceEntity NewInvoice(CustomerEntity.Ref customer, BillingPeriodValueObject billingPeriod, IEnumerable<InvoiceRowValueObject> rows)
+        {
+            var injector = _injectorFactory.Create<CustomerEntity, IOperatingSystemEnvironment>();
+            return _invoices.New(() => new InvoiceEntity(injector, customer, billingPeriod, rows));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -190,8 +252,15 @@ namespace ElectricityBilling.Domain
             using (var unitOfWork = _transactionFactory.NewUnitOfWork())
             {
                 _sensorReadings.New(constructor: () => new SensorReadingValueObject(sensorId, utc, kwh));
-                await unitOfWork.Commit();
+                await unitOfWork.CommitAsync();
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public async Task CustomerLoginTx(string email, string password)
+        {
+            //TBD
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -216,7 +285,7 @@ namespace ElectricityBilling.Domain
                     contractToReplace.ReplaceWith(newContract);
                 }
 
-                await unitOfWork.Commit();
+                await unitOfWork.CommitAsync();
             }
         }
 

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using ElectricityBilling.Domain.Customers;
 using ElectricityBilling.Domain.Sensors;
@@ -14,28 +16,31 @@ namespace ElectricityBilling.Domain.Billing
     public class BillingJob
     {
         private readonly IOperatingSystemEnvironment _environment;
+        private readonly ILocalizables _localizables;
         private readonly IElectricityBillingContext _context;
         private readonly ITransactionFactory _transactionFactory;
         private readonly Arguments _arguments;
         private readonly BillingPeriodValueObject _billingPeriod;
-        private readonly Dictionary<ContractEntity.Ref, PriceValueObject> _pricePerContract;
-        private readonly Dictionary<ContractEntity.Ref, CustomerEntity.Ref> _contractCustomerMap;
+        private readonly Dictionary<SensorEntity.Ref, SensorReferenceData> _referenceDataBySensor;
+        private Dictionary<CustomerEntity.Ref, CustomerEntity> _customersCache;
+        private Dictionary<PricingPlanEntity.Ref, PricingPlanEntity> _pricingPlansCache;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public BillingJob(
-            IOperatingSystemEnvironment environment, 
+            IOperatingSystemEnvironment environment,
+            ILocalizables localizables,
             IElectricityBillingContext context, 
             ITransactionFactory transactionFactory, 
             Arguments arguments)
         {
             _environment = environment;
+            _localizables = localizables;
             _context = context;
             _transactionFactory = transactionFactory;
             _arguments = arguments;
             _billingPeriod = BillingPeriodValueObject.CreateMonthly(arguments.Year, arguments.Month);
-            _pricePerContract = new Dictionary<ContractEntity.Ref, PriceValueObject>();
-            _contractCustomerMap = new Dictionary<ContractEntity.Ref, CustomerEntity.Ref>();
+            _referenceDataBySensor = new Dictionary<SensorEntity.Ref, SensorReferenceData>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -44,61 +49,127 @@ namespace ElectricityBilling.Domain.Billing
         {
             using (var unitOfWork = _transactionFactory.NewUnitOfWork())
             {
-                List<CustomerEntity.Ref> specificCustomers = null;
+                var specificCustomers = await RevertToCleanState();
 
-                if (_arguments.ForceAll)
-                {
-                    _context.InvalidateAllInvoicesWithinPeriod(_billingPeriod);
-                }
-                else
-                {
-                    specificCustomers = await _context.QueryMissingInvoiceCustomers(_billingPeriod).ToListAsync();
-                }
+                await LoadReferenceData(specificCustomers);
+                await ProcessSensorReadings();
 
-                var assignedSensors = await _context.QueryAssignedSensorsWithinPeriod(specificCustomers, _billingPeriod).ToListAsync();
+                CreateInvoices();
 
-                var readingsGroupedBySensorQuery = _context.QueryReadingsWithinPeriodGroupedBySensor(assignedSensors, _billingPeriod);
-                await readingsGroupedBySensorQuery.ForEachAsync(group => ProcessSensorReadingsAsync(sensor: group.Key, readings: group));
-
-                await unitOfWork.Commit();
+                await unitOfWork.CommitAsync();
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private async Task ProcessSensorReadingsAsync(SensorEntity.Ref sensor, IAsyncEnumerable<SensorReadingValueObject> readings)
+        private async Task<ICollection<CustomerEntity.Ref>> RevertToCleanState()
+        {
+            List<CustomerEntity.Ref> specificCustomers = null;
+
+            if (_arguments.ForceAll)
+            {
+                _context.InvalidateAllInvoicesWithinPeriod(_billingPeriod);
+            }
+            else
+            {
+                specificCustomers = await _context.QueryMissingInvoiceCustomers(_billingPeriod).ToListAsync();
+            }
+
+            return specificCustomers;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private async Task LoadReferenceData(ICollection<CustomerEntity.Ref> optionalSpecificCustomers)
+        {
+            var referenceDataQuery = _context.QuerySensorsWithValidContractsWithinPeriod(optionalSpecificCustomers, _billingPeriod);
+
+            await referenceDataQuery.ForEachAsync(sensorContract => {
+                if (!_referenceDataBySensor.TryGetValue(sensorContract.Sensor.Id, out SensorReferenceData sensorData))
+                {
+                    sensorData = new SensorReferenceData(sensorContract.Sensor);
+                    _referenceDataBySensor[sensorContract.Sensor.Id] = sensorData;
+                }
+                sensorData.AddContract(sensorContract.Contract);
+            });
+
+            await LoadCaches();
+
+            foreach (var contractData in _referenceDataBySensor.Values.SelectMany(r => r.Contracts))
+            {
+                contractData.Customer = _customersCache[contractData.Contract.Customer.Id];
+                contractData.PricingPlan = _pricingPlansCache[contractData.Contract.PricingPlan.Id];
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private async Task ProcessSensorReadings()
+        {
+            var sensorRefs = _referenceDataBySensor.Keys;
+            var readingsGroupedBySensorQuery = _context.QueryReadingsWithinPeriodGroupedBySensor(sensorRefs, _billingPeriod);
+
+            await readingsGroupedBySensorQuery.ForEachAsync(readingsGroup => {
+                return ProcessOneSensorReadingsAsync(sensor: readingsGroup.Key, readings: readingsGroup);
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private async Task LoadCaches()
+        {
+            var customerRefs = _referenceDataBySensor.Values
+                .SelectMany(refData => refData.Contracts)
+                .Select(contractData => new CustomerEntity.Ref(contractData.Customer.Id))
+                .ToList();
+
+            var pricingPlanRefs = _referenceDataBySensor.Values
+                .SelectMany(refData => refData.Contracts)
+                .Select(contractData => new PricingPlanEntity.Ref(contractData.Contract.PricingPlan.Id))
+                .ToList();
+
+            var customersCacheTask = _context.QueryCustomersCache(customerRefs).ToDictionaryAsync();
+            var pricingPlansCacheTask = _context.QueryPricingPlansCache(pricingPlanRefs).ToDictionaryAsync();
+            await Task.WhenAll(customersCacheTask, pricingPlansCacheTask);
+
+            _customersCache = customersCacheTask.Result;
+            _pricingPlansCache = pricingPlansCacheTask.Result;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private async Task ProcessOneSensorReadingsAsync(SensorEntity.Ref sensor, IAsyncEnumerable<SensorReadingValueObject> readings)
         {
             using (var readingEnumerator = await readings.GetEnumeratorAsync())
             {
-                var contracts = _context.QueryValidContractsForSensor(sensor, _billingPeriod);
+                var data = _referenceDataBySensor[sensor];
 
-                if (await readingEnumerator.MoveNextAsync())
+                foreach (var contractRefData in data.Contracts.OrderBy(x => x.Contract.ValidFrom))
                 {
-                    await contracts.ForEachAsync(async contract => {
-                        // ReSharper disable once AccessToDisposedClosure
-                        var price = await CalculatePriceForContract(contract, readingEnumerator);
-                        _pricePerContract[contract] = price;
-                    });
+                    var price = await CalculatePriceForContract(contractRefData, readingEnumerator);
+                    contractRefData.Price = price;
                 }
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private async Task<PriceValueObject> CalculatePriceForContract(ContractEntity contract, IAsyncEnumerator<SensorReadingValueObject> readingEnumerator)
+        private async Task<PriceValueObject> CalculatePriceForContract(
+            ContractReferenceData contractRefData, 
+            IAsyncEnumerator<SensorReadingValueObject> readingEnumerator)
         {
             int skippedBeforeContract = 0;
-            var contractReadings = new List<SensorReadingValueObject>(capacity: GetEstimatedNumberOfReadings(contract));
+            var contractReadings = new List<SensorReadingValueObject>(capacity: GetEstimatedNumberOfReadings(contractRefData.Contract));
 
             do
             {
                 var reading = readingEnumerator.Current;
 
-                if (reading.UtcTimestamp < contract.ValidFrom)
+                if (reading.UtcTimestamp < contractRefData.Contract.ValidFrom)
                 {
                     skippedBeforeContract++;
                 }
-                else if (reading.UtcTimestamp >= contract.ValidUntil)
+                else if (reading.UtcTimestamp >= contractRefData.Contract.ValidUntil)
                 {
                     break;
                 }
@@ -110,30 +181,46 @@ namespace ElectricityBilling.Domain.Billing
 
             if (skippedBeforeContract > 0)
             {
-                //TODO: log warning
+                //TODO: log warning - readings during period not covered by any contract
             }
 
-            var pricingPlan = await _context.GetPricingPlanAsync(contract.PricingPlan);
-            var price = await pricingPlan.CalculatePriceAsync(contractReadings.AsAsync());
+            var price = await contractRefData.PricingPlan.CalculatePriceAsync(contractRefData.Customer, contractReadings.AsAsync());
 
             return price;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private async Task CreateInvoices()
+        private void CreateInvoices()
         {
-            //TODO: implement this
+            var contractGroupsByCustomer = _referenceDataBySensor.Values
+                .SelectMany(refData => refData.Contracts)
+                .GroupBy(c => new CustomerEntity.Ref(c.Customer.Id));
 
-            var contracts = _pricePerContract.Keys.ToList();
-            await _context.QueryContractCustomerMap(contracts).ForEachAsync(pair => {
-                _contractCustomerMap[pair.Contract] = pair.Customer;
-                return Task.CompletedTask;
-            });
+            foreach (var customerContractGroup in contractGroupsByCustomer)
+            {
+                var invoiceRows = customerContractGroup.Select(contractRefData => new InvoiceRowValueObject(
+                        contractRefData.Contract.Id,
+                        contractRefData.Price,
+                        FormatInvoiceRowDescription(contractRefData))).ToList();
 
-            var contractGroupsByCustomer = _contractCustomerMap.GroupBy(x => x.Value).ToList();
+                _context.NewInvoice(customerContractGroup.Key, _billingPeriod, invoiceRows);
+            }
+        }
 
-            //TBD...
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string FormatInvoiceRowDescription(ContractReferenceData contractRefData)
+        {
+            var culture = (
+                contractRefData.Customer.Culture != null
+                    ? CultureInfo.GetCultureInfo(contractRefData.Customer.Culture)
+                    : Thread.CurrentThread.CurrentCulture);
+
+            var description = _localizables.DescriptionPerSensorContract(
+                culture, contractRefData.Sensor, contractRefData.Contract, contractRefData.PricingPlan);
+
+            return description;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -157,6 +244,63 @@ namespace ElectricityBilling.Domain.Billing
             // if false, only missing invoices are recalculated;
             // if true, all existing invoices for the billing period are invalidated
             public bool ForceAll { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [NWheels.I18n.TypeContract.Localizables(DefaultCulture = "en-US")]
+        public interface ILocalizables
+        {
+            [NWheels.I18n.MemberContract.InDefaultCulture("{sensor.Location:PostalAddress} (sensor # {sensor.Id}), {pricingPlan.Description}")]
+            string DescriptionPerSensorContract(CultureInfo culture, SensorEntity sensor, ContractEntity contract, PricingPlanEntity pricingPlan);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class SensorReferenceData
+        {
+            private readonly List<ContractReferenceData> _contracts = new List<ContractReferenceData>();
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public SensorReferenceData(SensorEntity sensor)
+            {
+                this.Sensor = sensor;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ContractReferenceData AddContract(ContractEntity contract)
+            {
+                var contractData = new ContractReferenceData(this, contract);
+                _contracts.Add(contractData);
+                return contractData;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public SensorEntity Sensor { get; }
+            public IReadOnlyList<ContractReferenceData> Contracts => _contracts;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class ContractReferenceData
+        {
+            public ContractReferenceData(SensorReferenceData owner, ContractEntity contract)
+            {
+                this.Owner = owner;
+                this.Contract = contract;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public SensorReferenceData Owner { get; }
+            public SensorEntity Sensor => Owner.Sensor;
+            public ContractEntity Contract { get; }
+            public CustomerEntity Customer { get; set; }
+            public PricingPlanEntity PricingPlan { get; set; }
+            public PriceValueObject Price { get; set; }
         }
     }
 }

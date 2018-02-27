@@ -26,8 +26,8 @@ namespace ElectricityBilling.SensorService
                 host.UseMicroserviceXml("sensor-hub-integration.xml");
                 host.UseLifecycleComponent<SensorReadingSubscription>();
                 host.ExposeRestApiResources(catalog => {
-                    catalog.AddDomainContextTx<ElectricityBillingContext>(x => x.StoreReadingTx(null, DateTime.MinValue, 0));
-                    catalog.AddDomainContextRepository<ElectricityBillingContext, SensorEntity>();
+                    catalog.AddDomainTransaction<ElectricityBillingContext>(x => x.StoreReadingTx(null, DateTime.MinValue, 0));
+                    catalog.AddDomainRepository<ElectricityBillingContext, SensorEntity>();
                 });
             });
         }

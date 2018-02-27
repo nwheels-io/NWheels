@@ -53,7 +53,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NWheelsTemp", "NWheelsTemp"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.SensorService.HubIntegrationStub", "ElectricityBilling.SensorService.HubIntegrationStub\ElectricityBilling.SensorService.HubIntegrationStub.csproj", "{54565FA6-A6B3-4C02-A899-D6B38A19CFA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.PaymentService.Integration.PayPal", "ElectricityBilling.PaymentService.Integration.PayPal\ElectricityBilling.PaymentService.Integration.PayPal.csproj", "{4C3C0A9F-2749-4128-9E67-64632A693887}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.PaymentService.Integration.PayPal", "ElectricityBilling.PaymentService.Integration.PayPal\ElectricityBilling.PaymentService.Integration.PayPal.csproj", "{4C3C0A9F-2749-4128-9E67-64632A693887}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apps", "Apps", "{D60A6A42-8933-4A31-B14A-2783FD32468C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dashboard", "Dashboard", "{287D2415-14EA-4AD2-86FE-342E649B0F46}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Admin", "Admin", "{257979FC-F7B3-4CF5-BDC4-ACA781BED356}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -157,6 +163,8 @@ Global
 		{8A827962-4E2A-4035-9371-C0F834207791} = {3A259C2D-5312-4BB7-9773-42CE7C81E447}
 		{54565FA6-A6B3-4C02-A899-D6B38A19CFA0} = {532ADCB5-D069-4471-A697-0E5E624285EE}
 		{4C3C0A9F-2749-4128-9E67-64632A693887} = {1D9A9F85-9D4F-49E5-BC18-0503B684C49B}
+		{287D2415-14EA-4AD2-86FE-342E649B0F46} = {D60A6A42-8933-4A31-B14A-2783FD32468C}
+		{257979FC-F7B3-4CF5-BDC4-ACA781BED356} = {D60A6A42-8933-4A31-B14A-2783FD32468C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6E814767-B621-42F5-8878-FA1A896392EF}

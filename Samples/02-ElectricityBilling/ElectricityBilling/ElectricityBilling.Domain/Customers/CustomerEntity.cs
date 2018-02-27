@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using ElectricityBilling.Domain.Basics;
 using ElectricityBilling.Domain.Billing;
@@ -20,6 +21,9 @@ namespace ElectricityBilling.Domain.Customers
         private string _emailAddress;
 
         private PersonNameValueObject _personName;
+
+        [MemberContract.Semantics.Culture]
+        private string _culture;
 
         private readonly List<ContactDetailValueObject> _contactDetails = new List<ContactDetailValueObject>();
 
@@ -51,6 +55,14 @@ namespace ElectricityBilling.Domain.Customers
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string Culture
+        {
+            get => _culture;
+            set => _culture = value;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public List<ContactDetailValueObject> ContactDetails => _contactDetails;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -69,6 +81,7 @@ namespace ElectricityBilling.Domain.Customers
             #region Generated code
             public Ref(long id) => this.Id = id;
             public static implicit operator Ref(CustomerEntity entity) => new Ref(entity.Id);
+            public static implicit operator Ref(long id) => new Ref(id);
             #endregion
         }
     }
