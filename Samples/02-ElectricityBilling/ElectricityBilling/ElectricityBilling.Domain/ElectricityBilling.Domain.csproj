@@ -4,14 +4,16 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;1705;</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\NWheelsTempApiLib\NWheelsTempApiLib.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="System.Collections.Immutable">
-      <HintPath>..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.netcore.app\2.0.0\ref\netcoreapp2.0\System.Collections.Immutable.dll</HintPath>
-    </Reference>
+    <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
   </ItemGroup>
 
 </Project>
