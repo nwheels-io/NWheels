@@ -76,6 +76,8 @@ namespace ElectricityBilling.Domain
 
         Task<PricingPlanEntity> GetPricingPlanAsync(
             PricingPlanEntity.Ref pricingPlanRef);
+
+        Task CustomerLoginTx(string email, string password);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

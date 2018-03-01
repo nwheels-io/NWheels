@@ -692,98 +692,6 @@ namespace NWheels
         {
         }
     }
-
-    namespace UI
-    {
-        namespace Web
-        {
-            public class WebReactReduxStack
-            {
-            }
-
-            public static class MicroserviceHostBuilderExtensions
-            {
-                public static MicroserviceHostBuilder ExposeWebApp<TWebApp>(
-                    this MicroserviceHostBuilder hostBuilder,
-                    string baseUrlPath = "/")
-                {
-                    return hostBuilder;
-                }
-            }
-
-            public class WebPage<TViewModel> : BaseComponent<TViewModel>
-            {
-            }
-
-        }
-
-        public static class Empty
-        {
-            public class ViewModel { }
-        }
-
-        public class ClientSideScript
-        {
-            
-        }
-
-        public class ClientSidePromiseBase
-        {
-            public ClientSidePromise Catch<TException>(Action<ClientSideError> onError)
-            {
-                return new ClientSidePromise();
-            }
-            public ClientSidePromise Finally(Action onFinally)
-            {
-                return new ClientSidePromise();
-            }
-        }
-
-        public class ClientSidePromise : ClientSidePromiseBase
-        {
-            public ClientSidePromise Then(Action onSuccess)
-            {
-                return new ClientSidePromise();
-            }
-            public ClientSidePromise<TResult> Then<TResult>(Func<TResult> onSuccess)
-            {
-                return new ClientSidePromise<TResult>();
-            }
-        }
-
-        public class ClientSidePromise<T> : ClientSidePromiseBase
-        {
-            public ClientSidePromise Then(Action<T> onSuccess)
-            {
-                return new ClientSidePromise();
-            }
-            public ClientSidePromise<TResult> Then<TResult>(Func<T, TResult> onSuccess)
-            {
-                return new ClientSidePromise<TResult>();
-            }
-        }
-
-        public class ClientSideError
-        {
-        }
-
-        namespace Components
-        {
-            public abstract class BaseComponent<TViewModel>
-            {
-                public virtual void Controller(ClientSideScript script, TViewModel model)
-                {
-                }
-
-                protected void OnLoad(Action<ClientSideScript> script) {  }
-            }
-
-            public class ViewComponent<TViewModel> : BaseComponent<TViewModel>
-            {
-            }
-        }
-    }
-
     namespace Microservices
     {
         public interface IComponentContainer
@@ -903,6 +811,231 @@ namespace NWheels
             {
                 return Task.FromResult(0);
             }
+        }
+    }
+
+    namespace UI
+    {
+        public static class TypeContract
+        {
+            public class TemplateUrlAttribute : Attribute
+            {
+                public TemplateUrlAttribute(string url)
+                {
+                }
+            }
+        }
+
+        public static class MemberContract
+        {
+            public class TemplatePlaceholderAttribute : Attribute
+            {
+                public TemplatePlaceholderAttribute(string placeholderName)
+                {
+                }
+            }
+
+            public class InitialViewAttribute : Attribute
+            {
+                public InitialViewAttribute(Type componenType)
+                {
+                }
+            }
+
+            public static class Storage
+            {
+                public class ClientMachineAttribute : Attribute
+                {
+                }
+            }
+        }
+
+        public static class Empty
+        {
+            public class Model { }
+            public class Session { }
+        }
+
+        public class ClientScript
+        {
+            public ClientPromise BLOCK(Action script)
+            {
+                return new ClientPromise();
+            }
+
+            public ClientPromise IF(Expression<Func<bool>> condition, Func<ClientPromise> @then, Func<ClientPromise> @else = null)
+            {
+                return new ClientPromise();
+            }
+
+            public ServerComponent<TComponent> GetServerComponent<TComponent>()
+            {
+                return new ServerComponent<TComponent>();
+            }
+
+            public ClientPromise RaiseEvent(ClientEvent @event)
+            {
+                return new ClientPromise();
+            }
+
+            public ClientPromise MutateModel(Expression<Func<object>> newModel)
+            {
+                return new ClientPromise();
+            }
+
+            public ClientPromise RaiseEvent<TData>(ClientEvent<TData> @event, Expression<Func<TData>> data)
+            {
+                return new ClientPromise();
+            }
+
+            public class ServerComponent<TComponent>
+            {
+                public ClientPromise Invoke(Expression<Func<TComponent, Task>> invocation)
+                {
+                    return new ClientPromise();
+                }
+
+                public ClientPromise<TOutput> Invoke<TOutput>(Expression<Func<TComponent, Task<TOutput>>> invocation)
+                {
+                    return new ClientPromise<TOutput>();
+                }
+            }
+        }
+
+        public class ClientPromiseBase
+        {
+            public ClientPromise Catch<TException>(Action<ClientError> onError)
+            {
+                return new ClientPromise();
+            }
+            public ClientPromise Finally(Action onFinally)
+            {
+                return new ClientPromise();
+            }
+        }
+
+        public class ClientPromise : ClientPromiseBase
+        {
+            public ClientPromise Then(Func<ClientPromise> onSuccess)
+            {
+                return new ClientPromise();
+            }
+            public ClientPromise<TResult> Then<TResult>(Func<ClientPromise<TResult>> onSuccess)
+            {
+                return new ClientPromise<TResult>();
+            }
+        }
+
+        public class ClientPromise<T> : ClientPromiseBase
+        {
+            public ClientPromise Then(Action<T> onSuccess)
+            {
+                return new ClientPromise();
+            }
+            public ClientPromise<TResult> Then<TResult>(Func<T, TResult> onSuccess)
+            {
+                return new ClientPromise<TResult>();
+            }
+        }
+
+        public class ClientEvent
+        {
+            public void Subscribe(BaseComponent handlerComponent, Func<ClientPromise> handlerScript)
+            {
+            }
+        }
+
+        public class ClientEvent<TData>
+        {
+            public void Subscribe(BaseComponent handlerComponent, Func<TData, ClientPromise> handler)
+            {
+            }
+        }
+
+        public class ClientError
+        {
+        }
+
+        namespace Components
+        {
+            public abstract class BaseComponent
+            {
+                public class ConfigureAttribute : Attribute
+                {
+                    public string TemplatePlaceholder { get; set; }
+                    public bool BindToParentModel { get; set; }
+                    public string ParentModelMember { get; set; }
+                }
+            }
+
+            public abstract class BaseComponent<TModel> : BaseComponent
+            {
+                public virtual void Controller()
+                {
+                }
+
+                public void OnLoad(Action handler)
+                {
+                    handler?.Invoke();
+                }
+
+                public ClientScript Script { get; }
+                public TModel Model { get; }
+            }
+
+            public static class FrameComponent
+            {
+                public class ConfigureAttribute : BaseComponent.ConfigureAttribute
+                {
+                    public Type InitialView { get; set; }
+                }
+            }
+
+            public class FrameComponent<TModel> : BaseComponent<TModel>
+            {
+                public ClientPromise NavigateTo<TComponent>()
+                {
+                    return new ClientPromise();
+                }
+            }
+
+            public static class TransactionComponent
+            {
+                public class ConfigureAttribute : BaseComponent.ConfigureAttribute
+                {
+                }
+            }
+
+            public class TransactionComponent<TModel> : BaseComponent<TModel>
+            {
+                private readonly ClientEvent _onSubmit;
+                private readonly ClientEvent _onCompleted;
+
+                public ClientEvent OnSubmit => _onSubmit;
+                public ClientEvent OnCompleted => _onSubmit;
+            }
+        }
+
+        namespace Web
+        {
+            public class WebReactReduxStack
+            {
+            }
+
+            public static class MicroserviceHostBuilderExtensions
+            {
+                public static MicroserviceHostBuilder ExposeWebApp<TWebApp>(
+                    this MicroserviceHostBuilder hostBuilder,
+                    string baseUrlPath = "/")
+                {
+                    return hostBuilder;
+                }
+            }
+
+            public abstract class WebPage<TViewModel> : BaseComponent<TViewModel>
+            {
+            }
+
         }
     }
 }
