@@ -6,11 +6,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using NWheels.Compilation.CodeModel;
 using NWheels.Ddd;
 using NWheels.I18n;
 using NWheels.Microservices;
 using NWheels.RestApi;
 using NWheels.UI.Components;
+using Expression = System.Linq.Expressions.Expression;
 
 namespace NWheels
 {
@@ -814,6 +816,280 @@ namespace NWheels
         }
     }
 
+    namespace Compilation
+    {
+        public class CodeWriter
+        {
+            public IfStatementWriter IF(Expr condition) { return new IfStatementWriter();}
+            public PromiseExprWriter CALL(Expr target, string memberName, params Expr[] arguments) { return new PromiseExprWriter(); }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class IfStatementWriter
+            {
+                ElseStatementWriter THEN(params Statement[] block) { return new ElseStatementWriter(); }
+            }
+
+            public class ElseStatementWriter : IfStatementWriter
+            {
+                public ElseStatementWriter ELSE(params Statement[] block) { return new ElseStatementWriter(); }
+                public ElseStatementWriter ELSE_IF(params Statement[] block) { return new ElseStatementWriter(); }
+                public IfStatement END_IF(params Statement[] block) { return new IfStatement(); }
+            }
+
+            public class PromiseExprWriter
+            {
+                public PromiseExprWriter THEN(params Statement[] block) { return new PromiseExprWriter(); }
+                public PromiseExprWriter CATCH<TException>(params Statement[] block) { return new PromiseExprWriter(); }
+                public PromiseExprWriter CATCH(TypeRef exceptionType, params Statement[] block) { return new PromiseExprWriter(); }
+                public PromiseExprWriter CATCH(params Statement[] block) { return new PromiseExprWriter(); }
+                public PromiseExprWriter FINALLY(params Statement[] block) { return new PromiseExprWriter(); }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class CodeWriter<TContext> : CodeWriter
+        {
+            public IfStatementWriter IF(Expression<Func<TContext, bool>> condition) { return new IfStatementWriter(); }
+            public PromiseExprWriter CALL<TTarget>(Expression<Func<TContext, TTarget, Task>> invocation) { return new PromiseExprWriter(); }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        namespace CodeModel
+        {
+            public class TypeRef
+            {
+                public string TypeName { get; set; }
+                public Type ClrType { get; set; }
+
+                public static readonly TypeRef Void = new TypeRef();
+            }
+
+            public abstract class Statement
+            {
+            }
+
+            public abstract class Expr
+            {
+                public TypeRef Type { get; set; }
+            }
+
+            public enum Operator
+            {
+                UnaryLogicalNot,
+                UnaryBitwiseNot,
+                UnaryPrefixIncrement,
+                UnaryPrefixDecrement,
+                UnaryPostfixIncrement,
+                UnaryPostfixDecrement,
+                LogicalOr,
+                LogicalAnd,
+                BitwiseOr,
+                BitwiseAnd,
+                BitwiseXor,
+                Equal,
+                NotEqual,
+                Greater,
+                GreaterOrEqual,
+                Less,
+                LessOrEqual,
+                Plus,
+                Minus,
+                Multiply,
+                Divide
+            }
+
+            public class CastExpr : Expr
+            {
+                public Expr Expression { get; set; }
+            }
+
+            public class ConstantExpr : Expr
+            {
+                public object Value { get; set; }
+            }
+
+            public class UnaryExpr : Expr
+            {
+                public Operator Operator { get; set; }
+                public Expr Operand { get; set; }
+            }
+
+            public class BinaryExpr : Expr
+            {
+                public Operator Operator { get; set; }
+                public Expr Left { get; set; }
+                public Expr Right { get; set; }
+            }
+
+            public class LocalExpr : Expr
+            {
+                public string Name { get; set; }
+            }
+
+            public class ParameterExpr : Expr
+            {
+                public string Name { get; set; }
+            }
+
+            public class MemberExpr : Expr
+            {
+                public Expr Target { get; set; }
+                public TypeRef TargetType { get; set; }
+                public string Name { get; set; }
+            }
+
+            public class AssignmentExpr : Expr
+            {
+                public Expr Destination { get; set; }
+                public Expr Value { get; set; }
+            }
+
+            public class CallExpr : MemberExpr
+            {
+                public List<Expr> Arguments { get; set; }
+            }
+
+            public class NamedArgumentExpr : Expr
+            {
+                public string Name { get; set; }
+                public Expr Value { get; set; }
+            }
+
+            public class IndexExpr : Expr
+            {
+                public Expr Target { get; set; }
+                public Expr Index { get; set; }
+            }
+
+            public class NewObjectExpr : Expr
+            {
+                public List<Expr> ConstructorArguments { get; set; }
+            }
+
+            public class NewArrayExpr : Expr
+            {
+                public TypeRef ElementType { get; set; }
+                public Expr Length { get; set; }
+            }
+
+            public class BlockStatement : Statement
+            {
+                public List<Statement> Statements { get; set; }
+            }
+
+            public class EvalStatement : Statement
+            {
+                public Expr Expression { get; set; }
+            }
+
+            public class IfStatement : Statement
+            {
+                public Expr Condition { get; set; }
+                public Statement Then { get; set; }
+                public Statement Else { get; set; }
+            }
+
+            public abstract class LoopStatement : Statement
+            {
+                public Expr Condition { get; set; }
+                public Statement Body { get; set; }
+            }
+
+            public class WhileStatement : LoopStatement
+            {
+            }
+
+            public class DoWhileStatement : LoopStatement
+            {
+            }
+
+            public class ForStatement : LoopStatement
+            {
+                public List<Expr> Initializers { get; set; }
+                public List<Expr> Iterators { get; set; }
+            }
+
+            public class BreakStatement : Statement
+            {
+            }
+
+            public class ContinueStatement : Statement
+            {
+            }
+
+            public class TryStatement : Statement
+            {
+                public Statement TryBlock { get; set; }
+                public List<CatchBlock> CatchBlocks { get; set; }
+                public Statement FinallyBlock { get; set; }
+            }
+
+            public class CatchBlock
+            {
+                public Type ExceptionType { get; set; }
+                public Expr ExceptionFilter { get; set; }
+                public Statement Body { get; set; }
+            }
+
+            public class SwitchStatement : Statement
+            {
+                public Expr Expression { get; set; }
+                public List<CaseBlock> CaseBlocks { get; set; }
+                public Statement DefaultBlock { get; set; }
+            }
+
+            public class CaseBlock
+            {
+                public Expr Value { get; set; }
+                public Expr Filter { get; set; }
+                public Statement Body { get; set; }
+                public bool Break { get; set; }
+            }
+
+            public class TernaryExpr : Expr
+            {
+                public Expr Conditon;
+                public Expr First;
+                public Expr Second;
+            }
+
+            public class PromiseExpr : Expr
+            {
+                public List<PromiseExpr> Continuations { get; set; }
+            }
+
+            public class ThenPromiseExpr : PromiseExpr
+            {
+                public PromiseExpr Promise { get; set; }
+                public Statement Block { get; set; }
+            }
+
+            public class CatchPromiseExpr : PromiseExpr
+            {
+                public TypeRef ExceptionType { get; set; }
+                public PromiseExpr Promise { get; set; }
+                public Statement Block { get; set; }
+            }
+
+            public class FinallyPromiseExpr : PromiseExpr
+            {
+                public PromiseExpr Promise { get; set; }
+                public Statement Block { get; set; }
+            }
+
+            public class AwaitExpr : Expr
+            {
+                public PromiseExpr Promise { get; set; }
+            }
+        }
+    }
+
     namespace UI
     {
         public static class TypeContract
@@ -855,6 +1131,7 @@ namespace NWheels
             public class Model { }
             public class Session { }
         }
+
 
         public class ClientScript
         {
