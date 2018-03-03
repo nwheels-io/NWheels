@@ -183,6 +183,7 @@ namespace NWheels
             }
             public class PasswordClearAttribute : Attribute
             {
+                public bool ShouldConfirm { get; set; }
             }
             public class PasswordCipherAttribute : Attribute
             {
@@ -871,8 +872,8 @@ namespace NWheels
                 public PromiseExprWriter THEN(params Statement[] block) { return new PromiseExprWriter(); }
                 public PromiseExprWriter THEN(Func<Expr, Statement> block) { return new PromiseExprWriter(); }
                 public PromiseExprWriter THEN<TResult>(Func<Expr<TResult>, Statement> block) { return new PromiseExprWriter(); }
-                public PromiseExprWriter CATCH<TException>(params Statement[] block) { return new PromiseExprWriter(); }
-                public PromiseExprWriter CATCH(TypeRef exceptionType, params Statement[] block) { return new PromiseExprWriter(); }
+                public PromiseExprWriter CATCH<TFault>(Func<Expr<TFault>, Statement> block) { return new PromiseExprWriter(); }
+                public PromiseExprWriter CATCH(TypeRef faultType, Func<Expr, Statement> block) { return new PromiseExprWriter(); }
                 public PromiseExprWriter CATCH(params Statement[] block) { return new PromiseExprWriter(); }
                 public PromiseExprWriter FINALLY(params Statement[] block) { return new PromiseExprWriter(); }
 
@@ -1209,17 +1210,17 @@ namespace NWheels
 
         public class ClientCodeWriter<TContext> : CodeWriter<TContext>
         {
-            public PromiseExprWriter RAISE_EVENT(Event @event, Expr data = null)
+            public PromiseExprWriter FIRE(Event @event, Expr data = null)
             {
                 return new PromiseExprWriter();
             }
 
-            public PromiseExprWriter RAISE_EVENT<TData>(Event<TData> @event, Expression<Func<TData>> data)
+            public PromiseExprWriter FIRE<TData>(Event<TData> @event, Expression<Func<TData>> data)
             {
                 return new PromiseExprWriter();
             }
 
-            public Expr MUTATE_MODEL(Expression<Func<object>> newModel)
+            public Expr MUTATE<T>(T target, Expression<Func<T>> newValue)
             {
                 return new PromiseExprWriter();
             }
@@ -1271,6 +1272,7 @@ namespace NWheels
             public class Command
             {
                 public Event OnExecute { get; }
+                public Event<CommandStateQuery> OnUpdate { get; }
 
                 public class ConfigureAttribute : Attribute
                 {
@@ -1278,7 +1280,14 @@ namespace NWheels
                     public CommandImportance Importance { get; set; }
                     public string Text { get; set; }
                     public string Icon { get; set; }
+                    public bool HideIfDisabled { get; set; }
+                    public bool ShowIfNotAuthorized { get; set; }
                 }
+            }
+
+            public class CommandStateQuery
+            {
+                public bool Enabled { get; set; }
             }
 
             public class Command<TData>
@@ -1302,11 +1311,15 @@ namespace NWheels
                 {
                 }
 
+                protected TModel Model { get; }
+                protected ClientCodeWriter<TModel> CodeWriter { get; }
+                protected Event OnInit { get; }
+                protected Event OnShow { get; }
+            }
 
-                public TModel Model { get; }
-                public ClientCodeWriter<TModel> CodeWriter { get; }
-                public Event OnInit { get; }
-                public Event OnShow { get; }
+            public abstract class NavigationTargetComponent<TModel, TNavigationArgs> : BaseComponent<TModel>
+            {
+                protected Event<TNavigationArgs> OnNavigatedHere { get; }
             }
 
             public static class FrameComponent
@@ -1323,12 +1336,64 @@ namespace NWheels
                 {
                     return new PromiseExpr();
                 }
+
+                public PromiseExpr NavigateTo<TArgs>(BaseComponent destination, Expression<Func<TArgs>> arguments)
+                {
+                    return new PromiseExpr();
+                }
             }
 
             public static class TransactionComponent
             {
                 public class ConfigureAttribute : BaseComponent.ConfigureAttribute
                 {
+                }
+            }
+
+            public enum AlertSeverity
+            {
+                Default,
+                Success,
+                Info,
+                Warning,
+                Danger
+            }
+
+            [Flags]
+            public enum AlertResponses
+            {
+                None = 0,
+                OK = 0x1,
+                Cancel = 0x2,
+                OKCancel = OK | Cancel,
+                Yes = 0x4,
+                No = 0x8,
+                Dismiss = 0x10,
+                YesNo = Yes | No,
+                YesNoCancel = Yes | No | Cancel,
+            }
+
+            public enum AlertBehavior
+            {
+                Sticky,
+                Toast,
+                Modal
+            }
+
+            public class AlertComponent : BaseComponent<AlertComponent.AlertModel>
+            {
+                public class ConfigureAttribute : Attribute
+                {
+                    public string Text { get; set; }
+                    public AlertSeverity Severity { get; set; }
+                    public AlertResponses Responses { get; set; }
+                    public AlertBehavior Behavior { get; set; }
+                }
+
+                public class AlertModel
+                {
+                    public string Text { get; set; }
+                    public AlertSeverity Severity { get; set; }
                 }
             }
 
