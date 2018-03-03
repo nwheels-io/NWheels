@@ -16,10 +16,20 @@ namespace ElectricityBilling.DashboardWebApp.Pages
             InitialView = typeof(LoginComponent))]
         private readonly FrameComponent<Empty.Model> _formFrame;
 
+        private readonly LoginComponent _login;
+        private readonly ForgotPasswordComponent _forgotPassword;
+        private readonly SignUpComponent _signUp;
+        private readonly ChangePasswordComponent _changePassword;
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void Controller()
         {
+            var g = this.CodeWriter;
+
+            _login.OnForgotPassword.Subscribe(_formFrame.NavigateTo(_forgotPassword));
+            _login.OnSignUp.Subscribe(_formFrame.NavigateTo(_signUp));
+            _login.OnPasswordExpired.Subscribe(_formFrame.NavigateTo(_changePassword));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -29,35 +39,66 @@ namespace ElectricityBilling.DashboardWebApp.Pages
             [TransactionComponent.Configure(BindToParentModel = true)]
             private readonly TransactionComponent<LoginModel> _loginTx;
 
+            private readonly Event<CustomerLoginResult> _onLoggedIn;
+            private readonly Event<CustomerLoginResult> _onPasswordExpired;
+
+            [Command.Configure(Importance = CommandImportance.Utility)]
+            private readonly Command _forgotPassword;
+
+            [Command.Configure(Importance = CommandImportance.Utility)]
+            private readonly Command _signUp;
+
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override void Controller()
             {
-                _loginTx.OnSubmit.Subscribe(this, () => Script.BLOCK(() => {
+                var g = this.CodeWriter;
 
-                    Script.IF(() => Model.RememberMe,
-                        () => Script.MutateModel(() => new LoginModel {
-                            LoginCookie = null
-                        })
-                    );
+                this.OnInit.Subscribe(
+                    g.IF(() => Model.RememberMe && Model.LoginCookie != null).THEN(
+                        g.RETURN(
+                            g.CALL<IElectricityBillingContext>(
+                                x => x.CustomerLoginByCookieTx(Model.LoginCookie)
+                            )
+                            .THEN(loginResult => g.RAISE_EVENT(_onLoggedIn, loginResult))
+                        )
+                    )
+                );
 
-                    Script.GetServerComponent<IElectricityBillingContext>()
-                        .Invoke(x => x
-                            .CustomerLoginTx(_loginTx.Model.Email, _loginTx.Model.Password));
+                _loginTx.OnSubmit.Subscribe(
+                    g.MUTATE_MODEL(() => new LoginModel { LoginCookie = null }),
+                    g.RETURN(
+                        g.CALL<IElectricityBillingContext>(
+                            x => x.CustomerLoginTx(Model.Email, Model.Password, Model.RememberMe)
+                        ).THEN<CustomerLoginResult>(loginResult => 
+                            g.MUTATE_MODEL(() => new LoginModel {
+                                LoginCookie = loginResult.Value.LoginCookie,
+                                LoginResult = loginResult.Value
+                            }
+                        ))
+                    )
+                );
 
-                    Script.RaiseEvent(OnLoggedIn);
-
-                }));
+                _loginTx.OnCompleted.Subscribe(
+                    g.RAISE_EVENT(_onLoggedIn, () => Model.LoginResult)
+                );
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public ClientEvent OnLoggedIn { get; }
+            public Event<CustomerLoginResult> OnLoggedIn => _onLoggedIn;
+            public Event OnPasswordExpired => _onPasswordExpired;
+            public Event OnForgotPassword => _forgotPassword.OnExecute;
+            public Event OnSignUp => _signUp.OnExecute;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public class LoginModel
             {
+                [NWheels.UI.MemberContract.Storage.ClientMachine]
+                [NWheels.MemberContract.Presentation.Hidden]
+                public string LoginCookie { get; set; }
+
                 [NWheels.MemberContract.Semantics.EmailAddress]
                 public string Email { get; set; }
 
@@ -67,26 +108,26 @@ namespace ElectricityBilling.DashboardWebApp.Pages
                 [NWheels.UI.MemberContract.Storage.ClientMachine]
                 public bool RememberMe { get; set; }
 
-                [NWheels.UI.MemberContract.Storage.ClientMachine]
-                public string LoginCookie { get; set; }
+                [NWheels.UI.MemberContract.Output]
+                public CustomerLoginResult LoginResult { get; set; }
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class ForgotPasswordComponent
+        public class ForgotPasswordComponent : BaseComponent
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class SignUpComponent
+        public class SignUpComponent : BaseComponent
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class ChangePasswordComponent
+        public class ChangePasswordComponent : BaseComponent
         {
         }
     }

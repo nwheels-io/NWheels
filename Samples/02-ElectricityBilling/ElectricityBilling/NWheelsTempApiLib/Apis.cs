@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using NWheels.Compilation;
 using NWheels.Compilation.CodeModel;
 using NWheels.Ddd;
 using NWheels.I18n;
@@ -109,6 +110,10 @@ namespace NWheels
                 {
                 }
             }
+        }
+
+        public class DataTransferObject : Attribute
+        {
         }
 
         public class InjectorAttribute : Attribute
@@ -258,6 +263,10 @@ namespace NWheels
                 public DefaultObjectDisplayAttribute(string formatPattern)
                 {
                 }
+            }
+
+            public class HiddenAttribute : Attribute
+            {
             }
         }
     }
@@ -820,14 +829,34 @@ namespace NWheels
     {
         public class CodeWriter
         {
+            public Statement BEGIN(params Statement[] statements) { return new BlockStatement { Statements = statements.ToList() }; }
+            public Statement RETURN(Expr retVal = null) { return new ReturnStatement { ReturnValue = retVal }; }
+            public AwaitExpr AWAIT(PromiseExpr promise) { return new AwaitExpr { Promise = promise }; }
+            public Statement THROW(Expr exception = null) { return new ThrowStatement { Exception = exception }; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public IfStatementWriter IF(Expr condition) { return new IfStatementWriter();}
+            public IfStatementWriter IF(Expression<Func<bool>> condition) { return new IfStatementWriter(); }
+            public PromiseExprWriter CALL<TTarget>(Expression<Func<TTarget, Task>> invocation) { return new PromiseExprWriter(); }
             public PromiseExprWriter CALL(Expr target, string memberName, params Expr[] arguments) { return new PromiseExprWriter(); }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public class IfStatementWriter
+            public abstract class StatementWriterBase
             {
-                ElseStatementWriter THEN(params Statement[] block) { return new ElseStatementWriter(); }
+                protected abstract Statement GetStatement();
+
+                public static implicit operator Statement(StatementWriterBase x)
+                {
+                    return x.GetStatement();
+                }
+            }
+
+            public class IfStatementWriter : StatementWriterBase
+            {
+                public ElseStatementWriter THEN(params Statement[] block) { return new ElseStatementWriter(); }
+                protected override Statement GetStatement() { return new IfStatement(); }
             }
 
             public class ElseStatementWriter : IfStatementWriter
@@ -840,10 +869,22 @@ namespace NWheels
             public class PromiseExprWriter
             {
                 public PromiseExprWriter THEN(params Statement[] block) { return new PromiseExprWriter(); }
+                public PromiseExprWriter THEN(Func<Expr, Statement> block) { return new PromiseExprWriter(); }
+                public PromiseExprWriter THEN<TResult>(Func<Expr<TResult>, Statement> block) { return new PromiseExprWriter(); }
                 public PromiseExprWriter CATCH<TException>(params Statement[] block) { return new PromiseExprWriter(); }
                 public PromiseExprWriter CATCH(TypeRef exceptionType, params Statement[] block) { return new PromiseExprWriter(); }
                 public PromiseExprWriter CATCH(params Statement[] block) { return new PromiseExprWriter(); }
                 public PromiseExprWriter FINALLY(params Statement[] block) { return new PromiseExprWriter(); }
+
+                public static implicit operator PromiseExpr(PromiseExprWriter x)
+                {
+                    return new PromiseExpr();
+                }
+
+                public static implicit operator Statement(PromiseExprWriter x)
+                {
+                    return new EvalStatement{Expression = x};
+                }
             }
         }
 
@@ -851,11 +892,6 @@ namespace NWheels
 
         public class CodeWriter<TContext> : CodeWriter
         {
-            public IfStatementWriter IF(Expression<Func<TContext, bool>> condition) { return new IfStatementWriter(); }
-            public PromiseExprWriter CALL<TTarget>(Expression<Func<TContext, TTarget, Task>> invocation) { return new PromiseExprWriter(); }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -877,6 +913,26 @@ namespace NWheels
             public abstract class Expr
             {
                 public TypeRef Type { get; set; }
+
+                public T As<T>()
+                {
+                    return default(T);
+                }
+
+                public static implicit operator Statement(Expr x)
+                {
+                    return new EvalStatement {Expression = x};
+                }
+            }
+
+            public class Expr<T> : Expr
+            {
+                public T Value { get; set; }
+
+                public static implicit operator T(Expr<T> expr)
+                {
+                    return default(T);
+                }
             }
 
             public enum Operator
@@ -907,6 +963,11 @@ namespace NWheels
             public class CastExpr : Expr
             {
                 public Expr Expression { get; set; }
+            }
+
+            public class CastExpr<T> : CastExpr
+            {
+                public T Value { get; set; }
             }
 
             public class ConstantExpr : Expr
@@ -988,6 +1049,11 @@ namespace NWheels
                 public Expr Expression { get; set; }
             }
 
+            public class ReturnStatement : Statement
+            {
+                public Expr ReturnValue { get; set; }
+            }
+
             public class IfStatement : Statement
             {
                 public Expr Condition { get; set; }
@@ -1021,6 +1087,11 @@ namespace NWheels
 
             public class ContinueStatement : Statement
             {
+            }
+
+            public class ThrowStatement : Statement
+            {
+                public Expr Exception { get; set; }
             }
 
             public class TryStatement : Statement
@@ -1118,6 +1189,10 @@ namespace NWheels
                 }
             }
 
+            public class OutputAttribute : Attribute
+            {
+            }
+
             public static class Storage
             {
                 public class ClientMachineAttribute : Attribute
@@ -1132,102 +1207,24 @@ namespace NWheels
             public class Session { }
         }
 
-
-        public class ClientScript
+        public class ClientCodeWriter<TContext> : CodeWriter<TContext>
         {
-            public ClientPromise BLOCK(Action script)
+            public PromiseExprWriter RAISE_EVENT(Event @event, Expr data = null)
             {
-                return new ClientPromise();
+                return new PromiseExprWriter();
             }
 
-            public ClientPromise IF(Expression<Func<bool>> condition, Func<ClientPromise> @then, Func<ClientPromise> @else = null)
+            public PromiseExprWriter RAISE_EVENT<TData>(Event<TData> @event, Expression<Func<TData>> data)
             {
-                return new ClientPromise();
+                return new PromiseExprWriter();
             }
 
-            public ServerComponent<TComponent> GetServerComponent<TComponent>()
+            public Expr MUTATE_MODEL(Expression<Func<object>> newModel)
             {
-                return new ServerComponent<TComponent>();
-            }
-
-            public ClientPromise RaiseEvent(ClientEvent @event)
-            {
-                return new ClientPromise();
-            }
-
-            public ClientPromise MutateModel(Expression<Func<object>> newModel)
-            {
-                return new ClientPromise();
-            }
-
-            public ClientPromise RaiseEvent<TData>(ClientEvent<TData> @event, Expression<Func<TData>> data)
-            {
-                return new ClientPromise();
-            }
-
-            public class ServerComponent<TComponent>
-            {
-                public ClientPromise Invoke(Expression<Func<TComponent, Task>> invocation)
-                {
-                    return new ClientPromise();
-                }
-
-                public ClientPromise<TOutput> Invoke<TOutput>(Expression<Func<TComponent, Task<TOutput>>> invocation)
-                {
-                    return new ClientPromise<TOutput>();
-                }
+                return new PromiseExprWriter();
             }
         }
 
-        public class ClientPromiseBase
-        {
-            public ClientPromise Catch<TException>(Action<ClientError> onError)
-            {
-                return new ClientPromise();
-            }
-            public ClientPromise Finally(Action onFinally)
-            {
-                return new ClientPromise();
-            }
-        }
-
-        public class ClientPromise : ClientPromiseBase
-        {
-            public ClientPromise Then(Func<ClientPromise> onSuccess)
-            {
-                return new ClientPromise();
-            }
-            public ClientPromise<TResult> Then<TResult>(Func<ClientPromise<TResult>> onSuccess)
-            {
-                return new ClientPromise<TResult>();
-            }
-        }
-
-        public class ClientPromise<T> : ClientPromiseBase
-        {
-            public ClientPromise Then(Action<T> onSuccess)
-            {
-                return new ClientPromise();
-            }
-            public ClientPromise<TResult> Then<TResult>(Func<T, TResult> onSuccess)
-            {
-                return new ClientPromise<TResult>();
-            }
-        }
-
-        public class ClientEvent
-        {
-            public void Subscribe(BaseComponent handlerComponent, Func<ClientPromise> handlerScript)
-            {
-            }
-        }
-
-        public class ClientEvent<TData>
-        {
-            public void Subscribe(BaseComponent handlerComponent, Func<TData, ClientPromise> handler)
-            {
-            }
-        }
 
         public class ClientError
         {
@@ -1235,6 +1232,60 @@ namespace NWheels
 
         namespace Components
         {
+            public class Event
+            {
+                public void Subscribe(params Statement[] handlerBlock)
+                {
+                }
+
+                public class ConfigureAttribute : Attribute
+                {
+                    public string SourceComponent { get; set; }
+                    public string SourceEvent { get; set; }
+                }
+            }
+
+            public class Event<TData> : Event
+            {
+                public void Subscribe(Func<Expr<TData>, Statement> handler)
+                {
+                }
+            }
+
+            public enum CommandSeverity
+            {
+                Default,
+                Read,
+                Write,
+                Destroy
+            }
+
+            public enum CommandImportance
+            {
+                Default,
+                Pirmary,
+                Secondary,
+                Utility
+            }
+
+            public class Command
+            {
+                public Event OnExecute { get; }
+
+                public class ConfigureAttribute : Attribute
+                {
+                    public CommandSeverity Severity { get; set; }
+                    public CommandImportance Importance { get; set; }
+                    public string Text { get; set; }
+                    public string Icon { get; set; }
+                }
+            }
+
+            public class Command<TData>
+            {
+                public Event<TData> OnExecute { get; }
+            }
+
             public abstract class BaseComponent
             {
                 public class ConfigureAttribute : Attribute
@@ -1251,13 +1302,11 @@ namespace NWheels
                 {
                 }
 
-                public void OnLoad(Action handler)
-                {
-                    handler?.Invoke();
-                }
 
-                public ClientScript Script { get; }
                 public TModel Model { get; }
+                public ClientCodeWriter<TModel> CodeWriter { get; }
+                public Event OnInit { get; }
+                public Event OnShow { get; }
             }
 
             public static class FrameComponent
@@ -1270,9 +1319,9 @@ namespace NWheels
 
             public class FrameComponent<TModel> : BaseComponent<TModel>
             {
-                public ClientPromise NavigateTo<TComponent>()
+                public PromiseExpr NavigateTo(BaseComponent destination)
                 {
-                    return new ClientPromise();
+                    return new PromiseExpr();
                 }
             }
 
@@ -1285,11 +1334,11 @@ namespace NWheels
 
             public class TransactionComponent<TModel> : BaseComponent<TModel>
             {
-                private readonly ClientEvent _onSubmit;
-                private readonly ClientEvent _onCompleted;
+                private readonly Event _onSubmit;
+                private readonly Event _onCompleted;
 
-                public ClientEvent OnSubmit => _onSubmit;
-                public ClientEvent OnCompleted => _onSubmit;
+                public Event OnSubmit => _onSubmit;
+                public Event OnCompleted => _onCompleted;
             }
         }
 

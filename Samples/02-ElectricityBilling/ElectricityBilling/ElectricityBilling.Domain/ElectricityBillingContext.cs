@@ -77,7 +77,23 @@ namespace ElectricityBilling.Domain
         Task<PricingPlanEntity> GetPricingPlanAsync(
             PricingPlanEntity.Ref pricingPlanRef);
 
-        Task CustomerLoginTx(string email, string password);
+        Task<CustomerLoginResult> 
+            CustomerLoginTx(
+                string email, string password, bool remember);
+
+        Task<CustomerLoginResult>
+            CustomerLoginByCookieTx(
+                string loginCookie);
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [NWheels.TypeContract.DataTransferObject]
+    public class CustomerLoginResult
+    {
+        public long UserId { get; set; }
+        public string FullName { get; set; }
+        public string LoginCookie { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -260,9 +276,15 @@ namespace ElectricityBilling.Domain
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public async Task CustomerLoginTx(string email, string password)
+        public async Task<CustomerLoginResult> CustomerLoginTx(string email, string password, bool remember)
         {
             //TBD
+            return new CustomerLoginResult();
+        }
+
+        public Task<CustomerLoginResult> CustomerLoginByCookieTx(string loginCookie)
+        {
+            throw new NotImplementedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
