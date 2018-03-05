@@ -1,8 +1,10 @@
 ﻿using System;
 using ElectricityBilling.Domain;
 using NWheels.DB;
+using NWheels.DB.Adapters.EFCore;
 using NWheels.Ddd;
 using NWheels.Logging;
+using NWheels.Logging.Adapters.Elastic;
 using NWheels.Microservices;
 using NWheels.RestApi;
 

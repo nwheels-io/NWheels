@@ -4,11 +4,14 @@ using NWheels.Microservices;
 using ElectricityBilling.Domain;
 using ElectricityBilling.Domain.Sensors;
 using NWheels.DB;
+using NWheels.DB.Adapters.EFCore;
 using NWheels.Logging;
 using NWheels.RestApi;
 using NWheels.Transactions;
 using NWheels.UI;
 using NWheels.Ddd;
+using NWheels.Logging.Adapters.Elastic;
+using NWheels.RestApi.Adapters.AspNetCoreSwagger;
 
 namespace ElectricityBilling.SensorService
 {
@@ -21,7 +24,6 @@ namespace ElectricityBilling.SensorService
                 host.UseDB<EFCoreStack>();
                 host.UseDdd();
                 host.UseRestApi<AspNetCoreSwaggerStack>();
-                //host.UseUidl<WebReactReduxStack>();
                 host.UseApplicationFeature<AutoDiscoverAssemblyOf<ElectricityBillingContext>>();
                 host.UseMicroserviceXml("sensor-hub-integration.xml");
                 host.UseLifecycleComponent<SensorReadingSubscription>();

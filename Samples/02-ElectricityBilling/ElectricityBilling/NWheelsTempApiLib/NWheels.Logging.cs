@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ElectricityBilling.DashboardWebApp
+namespace NWheels
 {
-    public class DashboardUIApp
+    namespace Loggging
     {
 
     }

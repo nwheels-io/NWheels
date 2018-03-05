@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using ElectricityBilling.Domain.Payments;
 using NWheels;
+using NWheels.Ddd;
 
 namespace ElectricityBilling.PaymentService.Integration.PayPal
 {

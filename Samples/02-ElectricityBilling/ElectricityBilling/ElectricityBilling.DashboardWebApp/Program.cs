@@ -1,8 +1,11 @@
 ﻿using System;
 using ElectricityBilling.Domain;
 using NWheels.Logging;
+using NWheels.Logging.Adapters.Elastic;
 using NWheels.Microservices;
 using NWheels.RestApi;
+using NWheels.RestApi.Adapters.AspNetCoreSwagger;
+using NWheels.UI.Adapters.WebReactRedux;
 using NWheels.UI.Web;
 
 namespace ElectricityBilling.DashboardWebApp
@@ -17,7 +20,7 @@ namespace ElectricityBilling.DashboardWebApp
                 host.UseRestApi<AspNetCoreSwaggerStack>();
                 host.UseUidl<WebReactReduxStack>();
                 host.UseApplicationFeature<AutoDiscoverAssemblyOf<ElectricityBillingContext>>();
-                host.ExposeWebApp<DashboardUIApp>(baseUrlPath: "/");
+                host.ExposeWebApp<DashboardWebApp>(baseUrlPath: "/");
             });
         }
     }

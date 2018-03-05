@@ -10,11 +10,9 @@ using NWheels.UI.Web;
 namespace ElectricityBilling.DashboardWebApp.Pages
 {
     [NWheels.UI.TypeContract.TemplateUrl("theme://page?type=login")]
-    public class LoginPage : WebPage<Empty.Model>
+    public class LoginPage : WebPage<Empty.Model, Empty.Args>
     {
-        [FrameComponent.Configure(
-            TemplatePlaceholder = "Form", 
-            InitialView = typeof(LoginComponent))]
+        [FrameComponent.Configure(TemplatePlaceholder = "Form")]
         private readonly FrameComponent<Empty.Model> _formFrame;
 
         private readonly LoginComponent _loginComponent;
@@ -23,97 +21,76 @@ namespace ElectricityBilling.DashboardWebApp.Pages
         private readonly ChangePasswordComponent _changePasswordComponent;
 
         [Command.Configure(Importance = CommandImportance.Utility)]
-        private Command _forgotPassword { get; }
+        private readonly Command _forgotPassword;
 
         [Command.Configure(Importance = CommandImportance.Utility)]
-        private Command _signUp { get; }
+        private readonly Command _signUp;
+
+        [Command.Configure(Importance = CommandImportance.Utility)]
+        private readonly Command _logIn;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void Controller()
         {
-            var g = this.CodeWriter;
+            OnInit += () => _formFrame.NavigateTo(_loginComponent);
 
-            _loginComponent.OnPasswordExpired.Subscribe(args => 
-                _formFrame.NavigateTo(_changePasswordComponent, () => args.Value));
-
-            _signUp.OnExecute.Subscribe(_formFrame.NavigateTo(_signUpComponent));
-            _forgotPassword.OnExecute.Subscribe(_formFrame.NavigateTo(_forgotPasswordComponent));
+            _loginComponent.OnPasswordExpired += (args) => _formFrame.NavigateTo(_changePasswordComponent, args);
+            _forgotPassword.OnExecute += () => _formFrame.NavigateTo(_forgotPasswordComponent);
+            _signUp.OnExecute += () => _formFrame.NavigateTo(_signUpComponent);
+            _logIn.OnExecute += () => _formFrame.NavigateTo(_loginComponent);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Event<CustomerLoginResult> OnLoggedIn => _loginComponent.OnLoggedIn;
+        public event Action<CustomerLoginResult> OnLoggedIn;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class LoginComponent : BaseComponent<LoginComponent.LoginModel>
         {
-            [TransactionComponent.Configure(BindToParentModel = true)]
+            [NWheels.UI.MemberContract.BindToParentModel]
             private readonly TransactionComponent<LoginModel> _loginTx;
-
-            [Command.Configure(Importance = CommandImportance.Utility)]
-            private readonly Command _forgotPassword;
-
-            [Command.Configure(Importance = CommandImportance.Utility)]
-            private readonly Command _signUp;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public LoginComponent()
             {
-                
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override void Controller()
             {
-                var g = this.CodeWriter;
+                OnInit += async () => {
+                    if (Model.RememberMe && Model.LoginCookie != null)
+                    {
+                        Model.LoginResult = await ServerComponent<IElectricityBillingContext>().CustomerLoginByCookieTx(Model.LoginCookie);
+                        OnLoggedIn(Model.LoginResult);
+                    }
+                };
 
-                this.OnInit.Subscribe(
-                    g.IF(() => Model.RememberMe && Model.LoginCookie != null).THEN(
-                        g.RETURN(
-                            g.CALL<IElectricityBillingContext>(
-                                x => x.CustomerLoginByCookieTx(Model.LoginCookie)
-                            )
-                            .THEN(loginResult => g.FIRE(OnLoggedIn, loginResult))
-                        )
-                    )
-                );
+                _loginTx.OnSubmit += async () => {
+                    Model.LoginCookie = null;
 
-                _loginTx.OnSubmit.Subscribe(
-                    g.MUTATE(Model, () => new LoginModel { LoginCookie = null }),
-                    g.RETURN(
-                        g.CALL<IElectricityBillingContext>(
-                            x => x.CustomerLoginTx(Model.Email, Model.Password, Model.RememberMe)
-                        ).THEN<CustomerLoginResult>(loginResult => 
-                            g.MUTATE(Model, () => new LoginModel {
-                                LoginCookie = loginResult.Value.LoginCookie,
-                                LoginResult = loginResult.Value
-                            }
-                        ))
-                        .CATCH<LoginFault>(fault => g.BEGIN(
-                            g.IF(() => fault.Value == LoginFault.PasswordExpired).THEN(
-                                g.FIRE(OnPasswordExpired, () => new PasswordExpiredEventArgs {
-                                    Email = Model.Email
-                                })
-                            ).ELSE(
-                                g.THROW()
-                            )        
-                        ))
-                    )
-                );
-
-                _loginTx.OnCompleted.Subscribe(
-                    g.FIRE(OnLoggedIn, () => Model.LoginResult)
-                );
+                    try
+                    {
+                        Model.LoginResult = await ServerComponent<IElectricityBillingContext>().CustomerLoginByCookieTx(Model.LoginCookie);
+                        Model.LoginCookie = Model.LoginResult.LoginCookie;
+                    }
+                    catch (ServerFaultException<LoginFault> error) when (error.Code == LoginFault.PasswordExpired)
+                    {
+                        OnPasswordExpired(new EmailArgs {
+                            Email = Model.Email
+                        });
+                    }
+                };
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public Event<CustomerLoginResult> OnLoggedIn { get; }
-            public Event<PasswordExpiredEventArgs> OnPasswordExpired { get; }
+            public event Action<CustomerLoginResult> OnLoggedIn;
+            public event Action<EmailArgs> OnPasswordExpired;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -139,15 +116,20 @@ namespace ElectricityBilling.DashboardWebApp.Pages
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class PasswordExpiredEventArgs
+        public class EmailArgs
         {
             public string Email { get; set; }
         }
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class ForgotPasswordComponent : BaseComponent
+        public class ForgotPasswordComponent : BaseComponent<ForgotPasswordComponent.ForgotPasswordModel>
         {
+            public class ForgotPasswordModel
+            {
+                [NWheels.MemberContract.Semantics.EmailAddress]
+                public string Email { get; set; }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -158,23 +140,32 @@ namespace ElectricityBilling.DashboardWebApp.Pages
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class ChangePasswordComponent : NavigationTargetComponent<ChangePasswordComponent.ChangePasswordModel, PasswordExpiredEventArgs>
+        public class ChangePasswordComponent : NavigationTargetComponent<ChangePasswordComponent.ChangePasswordModel, EmailArgs>
         {
             [TransactionComponent.Configure(BindToParentModel = true)]
             private readonly TransactionComponent<ChangePasswordModel> _changePasswordTx;
 
-            private readonly AlertComponent _passwordExpiredAlert;
+            private readonly ILocalizables _localizables;
+
+            public ChangePasswordComponent(ILocalizables localizables)
+            {
+                _localizables = localizables;
+            }
 
             public override void Controller()
             {
-                var g = CodeWriter;
+                OnNavigatedHere += (args) => {
+                    Model.Email = args.Email;
+                };
 
-                OnNavigatedHere.Subscribe(args => g.BEGIN(
-                    g.MUTATE(Model, () => new ChangePasswordModel {
-                        Email = args.Value.Email
-                    })
-                ));
+                _changePasswordTx.OnSubmit += async () => {
+                    await ServerComponent<IElectricityBillingContext>().CustomerChangePasswordTx(Model.Email, Model.OldPassword, Model.NewPassword);
+                    await Alert(AlertSeverity.Success, AlertBehavior.Toast, _localizables.PasswordSuccessfullyChanged);
+                    Done();
+                };
             }
+
+            public event Action Done;
 
             public class ChangePasswordModel
             {
@@ -186,6 +177,11 @@ namespace ElectricityBilling.DashboardWebApp.Pages
 
                 [NWheels.MemberContract.Semantics.PasswordClear(ShouldConfirm = true)]
                 public string NewPassword { get; set; }
+            }
+
+            public interface ILocalizables
+            {
+                string PasswordSuccessfullyChanged { get; }
             }
         }
     }

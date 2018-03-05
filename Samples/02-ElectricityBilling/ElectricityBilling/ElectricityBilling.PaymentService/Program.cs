@@ -2,10 +2,13 @@
 using ElectricityBilling.Domain;
 using ElectricityBilling.Domain.Payments;
 using NWheels.DB;
+using NWheels.DB.Adapters.EFCore;
 using NWheels.Ddd;
 using NWheels.Logging;
+using NWheels.Logging.Adapters.Elastic;
 using NWheels.Microservices;
 using NWheels.RestApi;
+using NWheels.RestApi.Adapters.AspNetCoreSwagger;
 
 namespace ElectricityBilling.PaymentService
 {

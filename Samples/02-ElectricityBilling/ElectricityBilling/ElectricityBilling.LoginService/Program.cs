@@ -2,10 +2,13 @@
 using ElectricityBilling.Domain;
 using ElectricityBilling.Domain.Accounts;
 using NWheels.DB;
+using NWheels.DB.Adapters.EFCore;
 using NWheels.Ddd;
 using NWheels.Logging;
+using NWheels.Logging.Adapters.Elastic;
 using NWheels.Microservices;
 using NWheels.RestApi;
+using NWheels.RestApi.Adapters.AspNetCoreSwagger;
 
 namespace ElectricityBilling.LoginService
 {
@@ -21,7 +24,7 @@ namespace ElectricityBilling.LoginService
                 host.UseApplicationFeature<AutoDiscoverAssemblyOf<ElectricityBillingContext>>();
                 host.ExposeRestApiResources(catalog => {
                     catalog.AddDomainRepository<ElectricityBillingContext, UserAccountEntity>();
-                    catalog.AddDomainTransaction<ElectricityBillingContext>(x => x.CustomerLoginTx(null, null));
+                    catalog.AddDomainTransaction<ElectricityBillingContext>(x => x.CustomerLoginTx(null, null, false));
                 });
             });
         }

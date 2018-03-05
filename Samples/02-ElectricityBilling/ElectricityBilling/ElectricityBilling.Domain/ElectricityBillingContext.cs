@@ -84,6 +84,11 @@ namespace ElectricityBilling.Domain
         Task<CustomerLoginResult>
             CustomerLoginByCookieTx(
                 string loginCookie);
+
+        Task CustomerChangePasswordTx(
+            string email, 
+            string oldPassword, 
+            string newPassword);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -282,7 +287,16 @@ namespace ElectricityBilling.Domain
             return new CustomerLoginResult();
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Task<CustomerLoginResult> CustomerLoginByCookieTx(string loginCookie)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Task CustomerChangePasswordTx(string email, string oldPassword, string newPassword)
         {
             throw new NotImplementedException();
         }
