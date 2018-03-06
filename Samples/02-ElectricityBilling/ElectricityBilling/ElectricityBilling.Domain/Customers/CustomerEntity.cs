@@ -73,6 +73,13 @@ namespace ElectricityBilling.Domain.Customers
             set => _billingAddress = value;
         }
 
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [MemberContract.Validation.MaxLength(1000)]
+        [MemberContract.Semantics.SensitiveCipher]
+        public string SignUpToken { get; private set; }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public struct Ref

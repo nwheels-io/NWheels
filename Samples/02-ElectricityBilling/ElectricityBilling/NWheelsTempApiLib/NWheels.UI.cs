@@ -347,6 +347,24 @@ namespace NWheels
                 }
             }
 
+            public class FormComponent<TModel> : BaseComponent<TModel>
+            {
+                public FormField<T> GetField<T>(Func<TModel, T> field)
+                {
+                    return new FormField<T>();
+                }
+            }
+
+            public class FormField<T>
+            {
+                public event Func<T, Task> OnValidateUniqueValue;
+            }
+
+            public class ContentComponent<TModel> : BaseComponent<TModel>
+            {
+                //TBD...
+            }
+
             public static class TransactionComponent
             {
                 public class ConfigureAttribute : BaseComponent.ConfigureAttribute
@@ -356,6 +374,8 @@ namespace NWheels
 
             public class TransactionComponent<TModel> : BaseComponent<TModel>
             {
+                public FormComponent<TModel> InputForm { get; }
+
                 public event Func<Task> OnSubmit;
                 public event Action OnCompleted;
             }

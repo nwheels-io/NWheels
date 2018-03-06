@@ -89,6 +89,10 @@ namespace ElectricityBilling.Domain
             string email, 
             string oldPassword, 
             string newPassword);
+
+        Task<CustomerLoginResult> CustomerSignUpTx(CustomerSignUpData data);
+
+        Task ValidateUniqueCustomerLogin(string loginEmail);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -99,6 +103,22 @@ namespace ElectricityBilling.Domain
         public long UserId { get; set; }
         public string FullName { get; set; }
         public string LoginCookie { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [NWheels.TypeContract.DataTransferObject]
+    public class CustomerSignUpData
+    {
+        [NWheels.MemberContract.Semantics.SensitiveCipher]
+        public string SignUpToken { get; set; }
+
+        [NWheels.MemberContract.Semantics.EmailAddress]
+        [NWheels.MemberContract.Validation.Unique]
+        public string LoginEmail { get; set; }
+
+        [NWheels.MemberContract.Semantics.PasswordClear(ShouldConfirm = true)]
+        public string Password { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -297,6 +317,20 @@ namespace ElectricityBilling.Domain
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Task CustomerChangePasswordTx(string email, string oldPassword, string newPassword)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Task<CustomerLoginResult> CustomerSignUpTx(CustomerSignUpData data)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Task ValidateUniqueCustomerLogin(string loginEmail)
         {
             throw new NotImplementedException();
         }

@@ -99,7 +99,7 @@ namespace NWheels
             {
                 public bool ShouldConfirm { get; set; }
             }
-            public class PasswordCipherAttribute : Attribute
+            public class SensitiveCipherAttribute : Attribute
             {
             }
             public class StreetAttribute : Attribute

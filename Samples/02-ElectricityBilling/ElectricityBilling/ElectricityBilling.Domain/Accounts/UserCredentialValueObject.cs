@@ -58,7 +58,7 @@ namespace ElectricityBilling.Domain.Accounts
     public struct PasswordValueObject
     {
         [MemberContract.Required]
-        [MemberContract.Semantics.PasswordCipher]
+        [MemberContract.Semantics.SensitiveCipher]
         private readonly ImmutableArray<byte> _hash;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
