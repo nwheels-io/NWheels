@@ -13,7 +13,7 @@ namespace ElectricityBilling.DashboardWebApp.Pages
     public class LoginPage : WebPage<Empty.Model, LoginPage.SignUpArgs>
     {
         [FrameComponent.Configure(TemplatePlaceholder = "Form")]
-        private readonly FrameComponent<Empty.Model> _formFrame;
+        private readonly FrameComponent _formFrame;
 
         private readonly LoginComponent _loginComponent;
 
@@ -37,7 +37,7 @@ namespace ElectricityBilling.DashboardWebApp.Pages
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void Controller()
+        protected override void Controller()
         {
             OnNavigatedHere += args => {
                 if (args.SignUpToken != null)
@@ -82,7 +82,7 @@ namespace ElectricityBilling.DashboardWebApp.Pages
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public override void Controller()
+            protected override void Controller()
             {
                 OnInit += async () => {
                     if (Model.RememberMe && Model.LoginCookie != null)
@@ -163,7 +163,7 @@ namespace ElectricityBilling.DashboardWebApp.Pages
         {
             private readonly TransactionComponent<CustomerSignUpData> _signUpTx;
 
-            public override void Controller()
+            protected override void Controller()
             {
                 OnNavigatedHere += (args) => {
                     Model.SignUpToken = args.SignUpToken;
@@ -184,7 +184,7 @@ namespace ElectricityBilling.DashboardWebApp.Pages
             //TBD...
             private readonly ContentComponent<Empty.Model> _content;
 
-            public override void Controller()
+            protected override void Controller()
             {
             }
         }
@@ -203,7 +203,7 @@ namespace ElectricityBilling.DashboardWebApp.Pages
                 _localizables = localizables;
             }
 
-            public override void Controller()
+            protected override void Controller()
             {
                 OnNavigatedHere += (args) => {
                     Model.Email = args.Email;

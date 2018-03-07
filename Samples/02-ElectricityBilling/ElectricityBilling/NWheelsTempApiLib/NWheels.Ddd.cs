@@ -251,6 +251,9 @@ namespace NWheels
             public class BoundedContextAttribute : Attribute
             {
             }
+            public class AggregateAttribute : Attribute
+            {
+            }
         }
 
         public static class ResourceCatalogBuilderExtensions

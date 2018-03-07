@@ -76,6 +76,9 @@ namespace NWheels
 
         public static class Semantics
         {
+            public class OrderByAttribute : Attribute
+            {
+            }
             public class StartRangeAttribute : Attribute
             {
                 public StartRangeAttribute()

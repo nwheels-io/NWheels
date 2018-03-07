@@ -61,9 +61,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dashboard", "Dashboard", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Admin", "Admin", "{257979FC-F7B3-4CF5-BDC4-ACA781BED356}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.DashboardWebApp", "ElectricityBilling.DashboardWebApp\ElectricityBilling.DashboardWebApp.csproj", "{9A38C1CF-B868-474C-97D5-C35DD81F013F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.DashboardWebApp", "ElectricityBilling.DashboardWebApp\ElectricityBilling.DashboardWebApp.csproj", "{9A38C1CF-B868-474C-97D5-C35DD81F013F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricityBilling.AdminWebApp", "ElectricityBilling.AdminWebApp\ElectricityBilling.AdminWebApp.csproj", "{DF1093B1-6FD6-4AF4-B39D-39289229F933}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElectricityBilling.AdminWebApp", "ElectricityBilling.AdminWebApp\ElectricityBilling.AdminWebApp.csproj", "{DF1093B1-6FD6-4AF4-B39D-39289229F933}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TodoList", "TodoList", "{61D92556-2C43-4CDA-A916-E5CC6089C19C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoListApp", "TodoListApp\TodoListApp.csproj", "{863FCBB4-E0E3-4D8C-8130-E672718BF202}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -147,6 +151,10 @@ Global
 		{DF1093B1-6FD6-4AF4-B39D-39289229F933}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF1093B1-6FD6-4AF4-B39D-39289229F933}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF1093B1-6FD6-4AF4-B39D-39289229F933}.Release|Any CPU.Build.0 = Release|Any CPU
+		{863FCBB4-E0E3-4D8C-8130-E672718BF202}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{863FCBB4-E0E3-4D8C-8130-E672718BF202}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{863FCBB4-E0E3-4D8C-8130-E672718BF202}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{863FCBB4-E0E3-4D8C-8130-E672718BF202}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -179,6 +187,7 @@ Global
 		{257979FC-F7B3-4CF5-BDC4-ACA781BED356} = {D60A6A42-8933-4A31-B14A-2783FD32468C}
 		{9A38C1CF-B868-474C-97D5-C35DD81F013F} = {287D2415-14EA-4AD2-86FE-342E649B0F46}
 		{DF1093B1-6FD6-4AF4-B39D-39289229F933} = {257979FC-F7B3-4CF5-BDC4-ACA781BED356}
+		{863FCBB4-E0E3-4D8C-8130-E672718BF202} = {61D92556-2C43-4CDA-A916-E5CC6089C19C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6E814767-B621-42F5-8878-FA1A896392EF}

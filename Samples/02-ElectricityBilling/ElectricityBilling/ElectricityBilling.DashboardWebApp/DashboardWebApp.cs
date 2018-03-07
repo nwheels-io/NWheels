@@ -7,15 +7,14 @@ using NWheels.UI.Web;
 
 namespace ElectricityBilling.DashboardWebApp
 {
-    public class DashboardWebApp : WebApp<Empty.Session, Empty.Args> 
+    public class DashboardWebApp : WebApp<Empty.Session, LoginPage.SignUpArgs> 
     {
         private LoginPage _login { get; }
 
-        public override void Controller()
+        protected override void Controller()
         {
-            //OnInit 
+            OnNavigatedHere += (args) => NavigateTo(_login, args);
 
-            base.Controller();
         }
     }
 }

@@ -19,6 +19,9 @@ namespace NWheels
                 {
                 }
             }
+            public class DefaultComponentAttribute : Attribute
+            {
+            }
         }
 
         public static class MemberContract
@@ -216,8 +219,57 @@ namespace NWheels
                 Utility
             }
 
-            public abstract class BaseUIApp<TModel, TArgs> : NavigationTargetComponent<TModel, TArgs>
+            [Flags]
+            public enum RowReOrderOptions
             {
+                None = 0,
+                Edit = 0x01,
+                Arrows = 0x02,
+                DragDrop = 0x04
+            }
+
+            public enum CrudDataOption
+            {
+                Model,
+                Repository,
+                Query
+            }
+
+            public interface INavigationTargetComponent<TNavigationArgs>
+            {
+            }
+
+            public interface INavigationSourceComponent
+            {
+                Task NavigateTo(BaseComponent destination);
+                Task NavigateTo<TArgs>(INavigationTargetComponent<TArgs> destination, TArgs arguments);
+            }
+
+            public class StyleConfiguration
+            {
+                public FontConfiguration Font { get; }
+
+                public class FontConfiguration
+                {
+                    public void StrikeThrough()
+                    {
+                    }
+                }
+            }
+
+            public abstract class BaseUIApp<TModel, TArgs> : 
+                NavigationTargetComponent<TModel, TArgs>, 
+                INavigationSourceComponent
+            {
+                public Task NavigateTo(BaseComponent destination)
+                {
+                    return Task.CompletedTask;
+                }
+
+                public Task NavigateTo<TArgs>(INavigationTargetComponent<TArgs> destination, TArgs arguments)
+                {
+                    return Task.CompletedTask;
+                }
             }
 
             public class Command
@@ -312,7 +364,11 @@ namespace NWheels
 
             public abstract class BaseComponent<TModel> : BaseComponent
             {
-                public virtual void Controller()
+                protected virtual void Configuraiton()
+                {
+                }
+
+                protected virtual void Controller()
                 {
                 }
 
@@ -321,29 +377,36 @@ namespace NWheels
                 protected event Action OnShow;
             }
 
-            public abstract class NavigationTargetComponent<TModel, TNavigationArgs> : BaseComponent<TModel>
+            public abstract class NavigationTargetComponent<TModel, TNavigationArgs> : 
+                BaseComponent<TModel>, 
+                INavigationTargetComponent<TNavigationArgs>
             {
                 protected event Action<TNavigationArgs> OnNavigatedHere;
             }
 
-            public static class FrameComponent
-            {
-                public class ConfigureAttribute : BaseComponent.ConfigureAttribute
-                {
-                    public string InitialViewMember { get; set; }
-                }
-            }
+            //public static class FrameComponent
+            //{
+            //    public class ConfigureAttribute : BaseComponent.ConfigureAttribute
+            //    {
+            //        public string InitialViewMember { get; set; }
+            //    }
+            //}
 
-            public class FrameComponent<TModel> : BaseComponent<TModel>
+            public class FrameComponent : BaseComponent<Empty.Model>, INavigationSourceComponent
             {
                 public Task NavigateTo(BaseComponent destination)
                 {
                     return Task.CompletedTask;
                 }
 
-                public Task NavigateTo<TDestModel, TArgs>(NavigationTargetComponent<TDestModel, TArgs> destination, TArgs arguments)
+                public Task NavigateTo<TArgs>(INavigationTargetComponent<TArgs> destination, TArgs arguments)
                 {
                     return Task.CompletedTask;
+                }
+
+                public class ConfigureAttribute : BaseComponent.ConfigureAttribute
+                {
+                    public string InitialViewMember { get; set; }
                 }
             }
 
@@ -362,7 +425,7 @@ namespace NWheels
 
             public class ContentComponent<TModel> : BaseComponent<TModel>
             {
-                //TBD...
+                //TBD
             }
 
             public static class TransactionComponent
@@ -378,6 +441,106 @@ namespace NWheels
 
                 public event Func<Task> OnSubmit;
                 public event Action OnCompleted;
+            }
+
+            public class ToolbarComponent : BaseComponent<Empty.Model>
+            {
+                public event Func<object> OnStructure;
+            }
+
+            public class DropDownComponent : BaseComponent<Empty.Model>
+            {
+                public ToolbarComponent Contents { get; }
+            }
+
+            public class MenuItemComponent : BaseComponent<Empty.Model>
+            {
+                public event Action OnSelected;
+            }
+
+            public static class DataDrivenMenuComponent
+            {
+                public class ConfigureAttribute : Attribute
+                {
+                    public string TextFormat { get; set; }
+                    public string[] GroupBy { get; set; }
+                }
+            }
+
+            public class DataDrivenMenuComponent<TItem> : BaseComponent<DataDrivenMenuComponent<TItem>.ItemsModel>
+            {
+                public event Func<IEnumerable<TItem>> OnDataQuery;
+                public event Action<TItem> OnItemSelected;
+
+                public class ItemsModel
+                {
+                    IEnumerable<TItem> Items { get; }
+                }
+            }
+
+            public static class DataGridComponent
+            {
+                public class ConfigureAttribute : Attribute
+                {
+                    public RowReOrderOptions RowReOrder { get; set; }
+                }
+            }
+
+            public class DataGridComponent<TItem> : BaseComponent<IEnumerable<TItem>>
+            {
+                public ColumnsConfiguration Columns { get; }
+                public RowsConfiguration Rows { get; }
+
+                public class ColumnsConfiguration
+                {
+                    public ColumnsConfiguration ConfigureAll(params Func<TItem, object>[] fields)
+                    {
+                        return this;
+                    }
+
+                    public ColumnsConfiguration Configure(Func<TItem, object> field, ushort? relativeWidth)
+                    {
+                        return this;
+                    }
+                }
+
+                public class RowsConfiguration
+                {
+                    public RowsConfiguration StyleIf(Func<TItem, bool> condition, Action<StyleConfiguration> style)
+                    {
+                        return this;           
+                    }
+                }
+            }
+
+            public static class CrudComponent
+            {
+                public class ConfigureAttribute : Attribute
+                {
+                    public CrudDataOption DataOption { get; set; }
+                }
+            }
+
+            public class CrudComponent<TItem> : BaseComponent<CrudComponent<TItem>.CrudModel>
+            {
+                public DataGridComponent<TItem> Grid { get; }
+                public FormComponent<TItem> Form { get; }
+
+                public event Func<IEnumerable<TItem>> OnQueryData;
+
+                public class CrudModel
+                {
+                    public List<TItem> LocalData { get; set; }
+                }
+            }
+
+            public class AdminComponent
+            {
+                public ToolbarComponent Toolbar { get; }
+                public ToolbarComponent Navigation { get; }
+                public ToolbarComponent Utilities { get; }
+                public ToolbarComponent Status { get; }
+                public FrameComponent ViewFrame { get; }
             }
         }
 
@@ -399,6 +562,13 @@ namespace NWheels
 
             public abstract class WebApp<TModel, TArgs> : BaseUIApp<TModel, TArgs>
             {
+            }
+
+            public static class TypeContract
+            {
+                public class IndexPageAttribute : NWheels.UI.TypeContract.DefaultComponentAttribute
+                {
+                }
             }
         }
     }
