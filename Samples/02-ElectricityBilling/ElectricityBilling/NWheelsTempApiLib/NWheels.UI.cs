@@ -228,7 +228,7 @@ namespace NWheels
                 DragDrop = 0x04
             }
 
-            public enum CrudDataOption
+            public enum DataSourceOption
             {
                 Model,
                 Repository,
@@ -245,8 +245,19 @@ namespace NWheels
                 Task NavigateTo<TArgs>(INavigationTargetComponent<TArgs> destination, TArgs arguments);
             }
 
+            public interface IStructureBuilder
+            {
+                object ToggleGroup<T>(object structure, Action<T> onChange);
+            }
+
+            public static class Structure
+            {
+                public static IStructureBuilder Builder => null;
+            }
+
             public class StyleConfiguration
             {
+                public void Class(string className) { }
                 public FontConfiguration Font { get; }
 
                 public class FontConfiguration
@@ -364,7 +375,7 @@ namespace NWheels
 
             public abstract class BaseComponent<TModel> : BaseComponent
             {
-                protected virtual void Configuraiton()
+                protected virtual void Configuration()
                 {
                 }
 
@@ -372,9 +383,20 @@ namespace NWheels
                 {
                 }
 
+                protected Binding<T> Bind<T>(T targetMember)
+                {
+                    return new Binding<T>();
+                }
+
                 protected TModel Model { get; }
                 protected event Func<Task> OnInit;
                 protected event Action OnShow;
+
+                protected class Binding<T>
+                {
+                    public void To(Func<TModel, T> modelMember) { }
+                    public void To<S>(Func<TModel, S> modelMember, Func<S, T> transform) { }
+                }
             }
 
             public abstract class NavigationTargetComponent<TModel, TNavigationArgs> : 
@@ -445,12 +467,25 @@ namespace NWheels
 
             public class ToolbarComponent : BaseComponent<Empty.Model>
             {
-                public event Func<object> OnStructure;
+                public object Structure { get; set; }
             }
 
             public class DropDownComponent : BaseComponent<Empty.Model>
             {
                 public ToolbarComponent Contents { get; }
+            }
+
+            public class ToggleGroupComponent : BaseComponent<Empty.Model>
+            {
+                public object Structure { get; set; }
+            }
+
+            public class LinkComponent : BaseComponent<Empty.Model>
+            {
+                public string Text { get; set; }
+                public string Icon { get; set; }
+
+                public event Func<Task> OnClick;
             }
 
             public class MenuItemComponent : BaseComponent<Empty.Model>
@@ -478,6 +513,21 @@ namespace NWheels
                 }
             }
 
+            public static class DataSourceComponent
+            {
+                public class ConfigureAttribute : Attribute
+                {
+                    public DataSourceOption DataOption { get; set; }
+                }
+            }
+
+            public class DataSourceComponent<TRecord>
+            {
+                public IEnumerable<TRecord> Source { get; set; }
+                public IEnumerable<TRecord> Query { get; set; }
+                public DataSourceOption DataOption { get; set; }
+            }
+
             public static class DataGridComponent
             {
                 public class ConfigureAttribute : Attribute
@@ -488,25 +538,26 @@ namespace NWheels
 
             public class DataGridComponent<TItem> : BaseComponent<IEnumerable<TItem>>
             {
-                public ColumnsConfiguration Columns { get; }
-                public RowsConfiguration Rows { get; }
+                public RowReOrderOptions RowReOrder { get; set; }
+                public GridColumnsConfiguration Columns { get; }
+                public GridRowsConfiguration Rows { get; }
 
-                public class ColumnsConfiguration
+                public class GridColumnsConfiguration
                 {
-                    public ColumnsConfiguration ConfigureAll(params Func<TItem, object>[] fields)
+                    public GridColumnsConfiguration ConfigureAll(params Func<TItem, object>[] fields)
                     {
                         return this;
                     }
 
-                    public ColumnsConfiguration Configure(Func<TItem, object> field, ushort? relativeWidth)
+                    public GridColumnsConfiguration Configure(Func<TItem, object> field, ushort? relativeWidth)
                     {
                         return this;
                     }
                 }
 
-                public class RowsConfiguration
+                public class GridRowsConfiguration
                 {
-                    public RowsConfiguration StyleIf(Func<TItem, bool> condition, Action<StyleConfiguration> style)
+                    public GridRowsConfiguration StyleIf(Func<TItem, bool> condition, Action<StyleConfiguration> style)
                     {
                         return this;           
                     }
@@ -517,12 +568,12 @@ namespace NWheels
             {
                 public class ConfigureAttribute : Attribute
                 {
-                    public CrudDataOption DataOption { get; set; }
                 }
             }
 
             public class CrudComponent<TItem> : BaseComponent<CrudComponent<TItem>.CrudModel>
             {
+                public DataSourceComponent<TItem> Data { get; }
                 public DataGridComponent<TItem> Grid { get; }
                 public FormComponent<TItem> Form { get; }
 
