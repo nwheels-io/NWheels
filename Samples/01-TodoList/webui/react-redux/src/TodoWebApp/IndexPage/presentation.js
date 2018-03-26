@@ -1,13 +1,15 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const Item = ({text, icon}) => (
+const Label = ({text, icon}) => (
     <span>
         {text}
     </span>
 )
 
-const ToggleOption = ({value, isSelected, children}) => {
+const Option = ({value, children}) => (null)
+
+const ToggleOption = ({isSelected, onClick, children}) => {
     if (isSelected) {
         return children()
     } 
@@ -29,12 +31,15 @@ const ToggleGroup = ({selectedIndex, onChange, children}) => (
     <ul>
         {React.Children.map(this.props.children, (child, index) => {
             return (
-                <ToggleOption value=    
-
+                <ToggleOption 
+                    isSelected={index === selectedIndex} 
+                    onClick={() => { 
+                        // dispatch action
+                    }} 
+                >
+                    {child.props.children}
+                </ToggleOption>
             )
-            const clonedChild = React.cloneElement(child, {
-                isSelected: index == selectedIndex
-            })
         })}
     </ul>
 )
@@ -42,7 +47,7 @@ const ToggleGroup = ({selectedIndex, onChange, children}) => (
 const Toolbar = (doneOption) => (
     <div>
         Show:
-        <ToggleGroup>
+        <ToggleGroup selectedIndex={0}>
             <Option value={null}>All</Option>
             <Option value={false}>Active</Option>
             <Option value={true}>Completed</Option>
@@ -50,9 +55,9 @@ const Toolbar = (doneOption) => (
     </div>
 )
 
-const IndexPage = () => (
+const IndexPage = (doneOption) => (
     <div>
-        <Toolbar />
+        <Toolbar doneOption={doneOption} />
         <table>
             <thead>
                 <tr>
@@ -79,6 +84,5 @@ const IndexPage = () => (
         </table>
     </div>
 )
-
 
 export default IndexPage;

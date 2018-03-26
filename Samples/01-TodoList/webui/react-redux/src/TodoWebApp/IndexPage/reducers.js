@@ -3,7 +3,6 @@ import { combineReducers } from 'redux'
 const Toolbar = (state, action) => {
     if (!state) {
         state = {
-            options: ['AAA', 'BBB', 'CCC'],
             selectedIndex: 0
         }
     }
