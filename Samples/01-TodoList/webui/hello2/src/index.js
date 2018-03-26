@@ -3,7 +3,7 @@ import { render } from 'react-dom'
 import './index.css';
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
-import { IndexPage, IndexPageReducer } from './IndexPage';
+import { IndexPageComponent, IndexPageReducer } from './IndexPage';
 import registerServiceWorker from './registerServiceWorker';
 
 const store = createStore(
@@ -13,7 +13,7 @@ const store = createStore(
 
 render (
     <Provider store={store}>
-        <IndexPage />
+        <IndexPageComponent />
     </Provider>,
     document.getElementById('root')
 )

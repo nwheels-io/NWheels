@@ -7,7 +7,7 @@ import {
 import { combineReducers } from 'redux'
 import { Provider } from 'react-redux'
 import { namespaced } from 'redux-subspace'
-import { SubspaceProvider } from 'react-redux-subspace'
+import { SubspaceProvider, subspaced } from 'react-redux-subspace'
 import * as Counter from './components/Counter';
 
 const HomeComponent = () => (
@@ -19,9 +19,13 @@ const HomeComponent = () => (
 const CountersOneComponent = () => (
     <div>
         <h2>Counters One</h2>
-        <Counter.UIComponent initialValue="123" />
+        <SubspaceProvider mapState={(state) => state.c1} namespace="c1">
+            <Counter.UIComponent initialValue={123} step={1} />
+        </SubspaceProvider>
         <br />
-        <Counter.UIComponent initialValue="456" />
+        <SubspaceProvider mapState={(state) => state.c2} namespace="c2">
+            <Counter.UIComponent initialValue={456} step={2} />
+        </SubspaceProvider>
     </div>
 )
 const CountersOneReducer = combineReducers({
@@ -32,9 +36,13 @@ const CountersOneReducer = combineReducers({
 const CountersTwoComponent = () => (
     <div>
         <h2>Counters Two</h2>
-        <Counter.UIComponent initialValue="-11" />
+        <SubspaceProvider mapState={(state) => state.c3} namespace="c3">
+            <Counter.UIComponent initialValue={-11} step={1} />
+        </SubspaceProvider>
         <br />
-        <Counter.UIComponent initialValue="-22" />
+        <SubspaceProvider mapState={(state) => state.c4} namespace="c4">
+            <Counter.UIComponent initialValue={-22} step={2} />
+        </SubspaceProvider>
     </div>
 )
 const CountersTwoReducer = combineReducers({
@@ -42,7 +50,7 @@ const CountersTwoReducer = combineReducers({
     c4: namespaced('c4')(Counter.UIReducer)
 })
 
-const ToolBar = () => (
+const ToolBarComponent = () => (
     <nav>
         <Link to="/">Home</Link>
         {' | '}
@@ -52,22 +60,17 @@ const ToolBar = () => (
     </nav>
 )
 
-export const IndexPage = () => (
+export const IndexPageComponent = () => (
     <Router>
         <div>
-            <ToolBar />
+            <ToolBarComponent />
             <hr />
             <Route exact path="/" component={HomeComponent} />
-            <SubspaceProvider mapState={(state) => state.one}>
-                <Route path="/counters1" component={CountersOneComponent} />
-            </SubspaceProvider>
-            <SubspaceProvider mapState={(state) => state.two}>
-                <Route path="/counters2" component={CountersTwoComponent} />
-            </SubspaceProvider>
+            <Route path="/counters1" component={subspaced((state) => state.one, 'one')(CountersOneComponent)} />
+            <Route path="/counters2" component={subspaced((state) => state.two, 'two')(CountersTwoComponent)} />
         </div>
     </Router>
 );
-
 export const IndexPageReducer = combineReducers({
     one: namespaced('one')(CountersOneReducer),
     two: namespaced('two')(CountersTwoReducer)
