@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types'
 import {
     BrowserRouter as Router,
     Route,
@@ -11,11 +12,15 @@ import { SubspaceProvider, subspaced } from 'react-redux-subspace'
 import * as Counter from './components/Counter';
 import * as Spreadsheet from './components/Spreadsheet';
 
-const HomeComponent = () => (
+const HomeComponent = ({}, context) => (
     <div>
         <h2>Home</h2>
+        {context.theme.renderDemo()}
     </div>
 )
+HomeComponent.contextTypes = {
+    theme: PropTypes.object.isRequired
+}
 
 const CountersOneComponent = () => (
     <div>
