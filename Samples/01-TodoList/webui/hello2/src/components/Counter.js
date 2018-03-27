@@ -21,28 +21,14 @@ const actionDecrement = (count) => {
 }
 
 const mapStateToProps = (state, ownProps) => {
-    let delta = ownProps.step * (state.increments - state.decrements)
     return {
-        ...state,
-        delta,
-        currentValue: ownProps.initialValue + delta
+        props: new UIProps(ownProps.initialValue, ownProps.step, state.increments, state.decrements)
     }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
-        incrementOne: () => {
-            dispatch(actionIncrement(1))
-        },
-        decrementOne: () => {
-            dispatch(actionDecrement(1))
-        },
-        incrementMany: (count) => {
-            dispatch(actionIncrement(count))
-        },
-        decrementMany: (count) => {
-            dispatch(actionDecrement(count))
-        }
+        actions: new UIActions(dispatch)
     }
 }
 
@@ -63,30 +49,65 @@ export const UIReducer = (state = { increments: 0, decrements: 0 }, action) => {
     }
 }
 
-const UIView = ({ initialValue, currentValue, delta, increments, decrements, incrementOne, decrementOne }) => (
+export class UIProps {
+    constructor(initialValue, step, increments, decrements) {
+        this._initialValue = initialValue
+        this._step = step
+        this._increments = increments
+        this._decrements = decrements
+        this._delta = step * (increments - decrements)
+    }
+    get initialValue() {
+        return this._initialValue
+    }
+    get step() {
+        return this._step
+    }
+    get delta() {
+        return this._delta
+    }
+    get currentValue() {
+        return this._initialValue + this._delta
+    }
+    get increments() {
+        return this._increments
+    }
+    get decrements() {
+        return this._decrements
+    }
+}
+
+export class UIActions {
+    constructor(dispatch) {
+        this._dispatch = dispatch
+    }
+    incrementOne() {
+        this._dispatch(actionIncrement(1))
+    }
+    decrementOne() {
+        this._dispatch(actionDecrement(1))
+    }
+    incrementMany(count) {
+        this._dispatch(actionIncrement(count))
+    }
+    decrementMany(count) {
+        this._dispatch(actionDecrement(count))
+    }
+}
+
+const UIView = ({ props, actions }, context) => (
     <React.Fragment>
-        <span>Initial:</span>
-        <span><strong>{initialValue}</strong></span>
-
-        <span>Current:</span>
-        <span><strong>{currentValue}</strong></span>
-
-        <span>Delta:</span>
-        <span><strong>{delta}</strong></span>
-
-        <button onClick={() => incrementOne()}>Increment ({increments})</button>
-        <button onClick={() => decrementOne()}>Decrement ({decrements})</button>
+        {context.theme.render.Counter(props, actions, context)}
     </React.Fragment>
 )
 
 UIView.propTypes = {
-    initialValue: PropTypes.number.isRequired,
-    currentValue: PropTypes.number.isRequired,
-    delta: PropTypes.number.isRequired,
-    increments: PropTypes.number.isRequired,
-    decrements: PropTypes.number.isRequired,
-    incrementOne: PropTypes.func.isRequired,
-    decrementOne: PropTypes.func.isRequired
+    props: PropTypes.instanceOf(UIProps).isRequired,
+    actions: PropTypes.instanceOf(UIActions).isRequired
+}
+
+UIView.contextTypes = {
+    theme: PropTypes.object.isRequired
 }
 
 export const UIComponent = connect(

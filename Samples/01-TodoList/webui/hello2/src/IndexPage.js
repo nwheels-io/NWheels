@@ -15,7 +15,7 @@ import * as Spreadsheet from './components/Spreadsheet';
 const HomeComponent = ({}, context) => (
     <div>
         <h2>Home</h2>
-        {context.theme.renderDemo()}
+        {context.theme.render.Demo()}
     </div>
 )
 HomeComponent.contextTypes = {
