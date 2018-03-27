@@ -1,0 +1,38 @@
+div.Component_Counter {
+    display: inline-block;
+    margin: 8px;
+    border: 1px solid darkgray;
+    padding: 5px;
+    background-color: lightgray;
+    color: darkgray;
+}
+
+.Component_Counter span {
+    display: inline-block;
+    margin: 2px;
+    padding: 2px;
+    background-color: whitesmoke;
+}
+
+.Component_Counter.positive span {
+    color: green;
+}
+
+.Component_Counter.negative span {
+    color: red;
+}
+
+.Component_Counter button {
+    margin: 2px;
+    padding: 3px;
+    font-size: 16pt;
+    cursor: pointer;
+}
+
+.Component_Counter button.increment {
+    color: green;
+}
+
+.Component_Counter button.decrement {
+    color: red;
+}
