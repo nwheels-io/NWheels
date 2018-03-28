@@ -5,66 +5,65 @@ import { connect } from 'react-redux'
 
 const ACTION_ROW_APPEND = 'SPREADSHEET__ROW_APPEND'
 
-const actionRowAppend = () => {
-    return { type: ACTION_ROW_APPEND }
-}
-
-const mapStateToProps = (state, ownProps) => {
-    return {
-        items: state.items
-    }
-}
-
-const mapDispatchToProps = (dispatch, ownProps) => {
-    return {
-        appendRow: () => {
-            dispatch(actionRowAppend())
-        }
-    }
-}
-
 export const UIReducer = (state = { items: [], nextKey: 1 }, action) => {
     switch (action.type) {
         case ACTION_ROW_APPEND:
-            let newItems = state.items.slice()
-            newItems.push({ key: state.nextKey, value: 'Value#' + state.nextKey })
-            const newState = {
+            let nextItems = state.items.slice()
+            nextItems.push({ key: state.nextKey, value: 'Value#' + state.nextKey })
+            const nextState = {
                 ...state,
                 nextKey: state.nextKey + 1,
-                items: newItems
+                items: nextItems
             }
-            return newState
+            return nextState
         default:
             return state
     }
 }
 
-const UIView = ({ appendRow, items }) => (
-    <div>
-        <table>
-            <thead>
-                <tr>
-                    <td>Key</td>
-                    <td>Value</td>
-                </tr>
-            </thead>
-            <tbody>
-                {items.map(item => (
-                    <tr>
-                        <td>{item.key}</td>
-                        <td>{item.value}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-        <div>
-            <a onClick={() => appendRow()}>Add</a>
-        </div>
-    </div>
-)
+export class UIProps {
+    constructor(items) {
+        this._items = items
+    }
+    get items() {
+        return this._items
+    }
+}
+
+export class UIActions {
+    constructor(dispatch) {
+        this._dispatch = dispatch
+    }
+    appendRow() {
+        this._dispatch( {
+            type: ACTION_ROW_APPEND
+        })
+    }
+}
+
+const UIView = ({ props, actions }, context) => {
+    return context.theme.render.Spreadsheet(props, actions, context)
+}
+
 UIView.propTypes = {
-    items: PropTypes.array.isRequired,
-    appendRow: PropTypes.func.isRequired
+    props: PropTypes.instanceOf(UIProps).isRequired,
+    actions: PropTypes.instanceOf(UIActions).isRequired
+}
+
+UIView.contextTypes = {
+    theme: PropTypes.object.isRequired
+}
+
+const mapStateToProps = (state, ownProps) => {
+    return {
+        props: new UIProps(state.items)
+    }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        actions: new UIActions(dispatch)
+    }
 }
 
 export const UIComponent = connect(

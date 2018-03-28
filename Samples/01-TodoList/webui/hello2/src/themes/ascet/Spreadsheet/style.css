@@ -1,0 +1,16 @@
+div.Component_Spreadsheet {
+    width:100%;
+    background-color:red;
+}
+
+.Component_Spreadsheet table {
+    border-collapse: collapse
+}
+
+.Component_Spreadsheet table td {
+    border: 1px solid gray;
+}
+
+.Component_Spreadsheet table thead tr {
+    background-color: lightgray;
+}

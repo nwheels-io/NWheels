@@ -6,32 +6,6 @@ import { connect } from 'react-redux'
 const ACTION_INCREMENT = 'COUNTER__INCREMENT'
 const ACTION_DECREMENT = 'COUNTER__DECREMENT'
 
-const actionIncrement = (count) => {
-    return {
-        type: ACTION_INCREMENT,
-        count
-    }
-}
-
-const actionDecrement = (count) => {
-    return {
-        type: ACTION_DECREMENT,
-        count
-    }
-}
-
-const mapStateToProps = (state, ownProps) => {
-    return {
-        props: new UIProps(ownProps.initialValue, ownProps.step, state.increments, state.decrements)
-    }
-}
-
-const mapDispatchToProps = (dispatch, ownProps) => {
-    return {
-        actions: new UIActions(dispatch)
-    }
-}
-
 export const UIReducer = (state = { increments: 0, decrements: 0 }, action) => {
     switch (action.type) {
         case ACTION_INCREMENT:
@@ -82,24 +56,34 @@ export class UIActions {
         this._dispatch = dispatch
     }
     incrementOne() {
-        this._dispatch(actionIncrement(1))
+        this._dispatch( {
+            type: ACTION_INCREMENT,
+            count: 1
+        })
     }
     decrementOne() {
-        this._dispatch(actionDecrement(1))
+        this._dispatch( {
+            type: ACTION_DECREMENT,
+            count: 1
+        })
     }
     incrementMany(count) {
-        this._dispatch(actionIncrement(count))
+        this._dispatch( {
+            type: ACTION_INCREMENT,
+            count
+        })
     }
     decrementMany(count) {
-        this._dispatch(actionDecrement(count))
+        this._dispatch( {
+            type: ACTION_DECREMENT,
+            count
+        })
     }
 }
 
-const UIView = ({ props, actions }, context) => (
-    <React.Fragment>
-        {context.theme.render.Counter(props, actions, context)}
-    </React.Fragment>
-)
+const UIView = ({ props, actions }, context) => {
+    return context.theme.render.Counter(props, actions, context)
+}
 
 UIView.propTypes = {
     props: PropTypes.instanceOf(UIProps).isRequired,
@@ -108,6 +92,18 @@ UIView.propTypes = {
 
 UIView.contextTypes = {
     theme: PropTypes.object.isRequired
+}
+
+const mapStateToProps = (state, ownProps) => {
+    return {
+        props: new UIProps(ownProps.initialValue, ownProps.step, state.increments, state.decrements)
+    }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        actions: new UIActions(dispatch)
+    }
 }
 
 export const UIComponent = connect(

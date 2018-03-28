@@ -8,14 +8,14 @@ export const UIRender = (props, actions, context) => (
         'positive': props.delta > 0,
         'negative': props.delta < 0
     })}>
-        <span>Initial:</span>
-        <span><strong>{props.initialValue}</strong></span>
+        <span className="label">Initial</span>
+        <span className="value">{props.initialValue}</span>
 
-        <span>Current:</span>
-        <span><strong>{props.currentValue}</strong></span>
+        <span className="label">Current</span>
+        <span className="value">{props.currentValue}</span>
 
-        <span>Delta:</span>
-        <span><strong>{props.delta}</strong></span>
+        <span className="label">Delta</span>
+        <span className="value">{props.delta}</span>
 
         <button className="increment" onClick={() => actions.incrementOne()}>Increment ({props.increments})</button>
         <button className="decrement" onClick={() => actions.decrementOne()}>Decrement ({props.decrements})</button>
