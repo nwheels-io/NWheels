@@ -3,6 +3,12 @@ import PropTypes from 'prop-types'
 import { combineReducers } from 'redux'
 import { connect } from 'react-redux'
 
+export const SPREADSHEET_COLUMN_TYPE_KEY = 'KEY'
+export const SPREADSHEET_COLUMN_TYPE_INPUT = 'INPUT'
+export const SPREADSHEET_COLUMN_TYPE_ORDER = 'ORDER'
+export const SPREADSHEET_COLUMN_TYPE_COMMAND = 'COMMAND'
+export const SPREADSHEET_COLUMN_TYPE_STATUS = 'STATUS'
+
 const ACTION_ROW_APPEND = 'SPREADSHEET__ROW_APPEND'
 
 export const UIReducer = (state = { items: [], nextKey: 1 }, action) => {
@@ -21,12 +27,35 @@ export const UIReducer = (state = { items: [], nextKey: 1 }, action) => {
     }
 }
 
+export class Column extends React.Component {
+    constructor(props) {
+        super(props)
+        this._title = props.title
+        this._type = props.type
+        this._width = props.width
+        this._field = props.field
+    }
+    render() {
+        return null
+    }
+    get title() { return this._title }
+    get type() { return this._type }
+    get width() { return this._width }
+    get field() { return this._field }
+}
+
 export class UIProps {
-    constructor(items) {
+    constructor(children, items) {
         this._items = items
+        this._columns = React.Children
+            .toArray(children)
+            .map(child => new Column(child.props))
     }
     get items() {
         return this._items
+    }
+    get columns() {
+        return this._columns
     }
 }
 
@@ -56,7 +85,7 @@ UIView.contextTypes = {
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        props: new UIProps(state.items)
+        props: new UIProps(ownProps.children, state.items)
     }
 }
 
@@ -70,3 +99,4 @@ export const UIComponent = connect(
     mapStateToProps,
     mapDispatchToProps
 )(UIView)
+

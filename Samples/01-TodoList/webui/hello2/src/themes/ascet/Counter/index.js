@@ -3,7 +3,7 @@ import * as Counter from './../../../components/Counter'
 import './style.css';
 import classnames from 'classnames'
 
-export const UIRender = (props, actions, context) => (
+export default (props, actions, context) => (
     <div className={classnames('Component_Counter', {
         'positive': props.delta > 0,
         'negative': props.delta < 0

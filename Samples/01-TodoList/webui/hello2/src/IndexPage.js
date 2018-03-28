@@ -60,7 +60,13 @@ const TodoListComponent = () => (
     <div>
         <h2>TODO List</h2>
         <SubspaceProvider mapState={(state) => state.s1} namespace="s1">
-            <Spreadsheet.UIComponent />
+            <Spreadsheet.UIComponent>
+                <Spreadsheet.Column title="No." type={Spreadsheet.SPREADSHEET_COLUMN_TYPE_KEY} field="key" width={75} />
+                <Spreadsheet.Column title="Order" type={Spreadsheet.SPREADSHEET_COLUMN_TYPE_ORDER} field="order" width={75} />
+                <Spreadsheet.Column title="Value" type={Spreadsheet.SPREADSHEET_COLUMN_TYPE_INPUT} field="value" width={200} />
+                <Spreadsheet.Column title="Action" type={Spreadsheet.SPREADSHEET_COLUMN_TYPE_COMMAND} />
+                <Spreadsheet.Column title="Status" type={Spreadsheet.SPREADSHEET_COLUMN_TYPE_STATUS} />
+            </Spreadsheet.UIComponent>
         </SubspaceProvider>
     </div>
 )
@@ -80,7 +86,7 @@ const ToolBarComponent = () => (
     </nav>
 )
 
-export const IndexPageComponent = () => (
+export const UIComponent = () => (
     <Router>
         <div>
             <ToolBarComponent />
@@ -92,7 +98,7 @@ export const IndexPageComponent = () => (
         </div>
     </Router>
 );
-export const IndexPageReducer = combineReducers({
+export const UIReducer = combineReducers({
     one: namespaced('one')(CountersOneReducer),
     two: namespaced('two')(CountersTwoReducer),
     todo: namespaced('todo')(TodoListReducer)

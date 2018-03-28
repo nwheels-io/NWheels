@@ -2,8 +2,8 @@ import React from 'react';
 import { render } from 'react-dom'
 import PropTypes from 'prop-types'
 
-import * as Counter from './Counter'
-import * as Spreadsheet from './Spreadsheet'
+import Counter from './Counter'
+import Spreadsheet from './Spreadsheet'
 
 class ThemeRender {
     Demo() {
@@ -13,8 +13,8 @@ class ThemeRender {
             </div>
         )
     }
-    get Counter() { return Counter.UIRender }
-    get Spreadsheet() { return Spreadsheet.UIRender }
+    get Counter() { return Counter }
+    get Spreadsheet() { return Spreadsheet }
 }
 
 export class AscetTheme extends React.Component {

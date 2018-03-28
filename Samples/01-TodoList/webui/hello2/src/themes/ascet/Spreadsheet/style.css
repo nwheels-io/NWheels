@@ -1,16 +1,22 @@
 div.Component_Spreadsheet {
     width:100%;
-    background-color:red;
+    background-color:white;
 }
 
 .Component_Spreadsheet table {
-    border-collapse: collapse
+    border-collapse: collapse;
+    width: 100%;
 }
 
 .Component_Spreadsheet table td {
-    border: 1px solid gray;
+    border: 1px solid rgb(180, 180, 180);
 }
 
 .Component_Spreadsheet table thead tr {
-    background-color: lightgray;
+    background-color: rgb(216, 216, 216);
+}
+
+.Component_Spreadsheet td.type-KEY {
+    color: gray;
+    background-color: rgb(226, 226, 226);
 }
