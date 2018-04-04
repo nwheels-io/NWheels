@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types'
 import { combineReducers } from 'redux'
 import { connect } from 'react-redux'
+import { AbstractDataSource } from './DataSource'
 
 export const SPREADSHEET_COLUMN_TYPE_KEY = 'KEY'
 export const SPREADSHEET_COLUMN_TYPE_INPUT = 'INPUT'
@@ -9,22 +10,59 @@ export const SPREADSHEET_COLUMN_TYPE_ORDER = 'ORDER'
 export const SPREADSHEET_COLUMN_TYPE_COMMAND = 'COMMAND'
 export const SPREADSHEET_COLUMN_TYPE_STATUS = 'STATUS'
 
-const ACTION_ROW_APPEND = 'SPREADSHEET__ROW_APPEND'
+const ACTION_GET_ALL           = 'SPREADSHEET_GET_ALL'
+const ACTION_GET_ALL_BEGAN     = 'SPREADSHEET_GET_ALL_BEGAN'
+const ACTION_GET_ALL_COMPLETED = 'SPREADSHEET_GET_ALL_COMPLETED'
+const ACTION_GET_ALL_FAILED    = 'SPREADSHEET_GET_ALL_FAILED'
 
-export const UIReducer = (state = { items: [], nextKey: 1 }, action) => {
-    switch (action.type) {
-        case ACTION_ROW_APPEND:
-            let nextItems = state.items.slice()
-            nextItems.push({ key: state.nextKey, value: 'Value#' + state.nextKey })
-            const nextState = {
-                ...state,
-                nextKey: state.nextKey + 1,
-                items: nextItems
-            }
-            return nextState
-        default:
-            return state
+const ACTION_VALUE_SET         = 'SPREADSHEET_VALUE_SET'
+
+const ACTION_SAVE_BEGAN        = 'SPREADSHEET_SAVE_BEGAN'
+const ACTION_SAVE_COMPLETED    = 'SPREADSHEET_SAVE_COMPLETED'
+const ACTION_SAVE_FAILED       = 'SPREADSHEET_SAVE_FAILED'
+
+const ACTION_DELETE_BEGAN      = 'SPREADSHEET_DELETE_BEGAN'
+const ACTION_DELETE_COMPLETED  = 'SPREADSHEET_DELETE_COMPLETED'
+const ACTION_DELETE_FAILED     = 'SPREADSHEET_DELETE_FAILED'
+
+class UIStateMachine {
+    static SPREADSHEET_GET_ALL(state, { dataSource }) {
+        return (dispatch) => {
+            dispatch({type: ACTION_GET_ALL_BEGAN})
+            dataSource.getAll()
+                .then(result => {
+                    dispatch({
+                        type: ACTION_GET_ALL_COMPLETED, 
+                        data: result.records
+                    })
+                })
+                .catch(error => {
+                    dispatch({
+                        type: ACTION_GET_ALL_FAILED, 
+                        error
+                    })
+                })
+        }
     }
+    static SPREADSHEET_GET_ALL_BEGAN(state) {
+        return {
+            ...state,
+            isReady: false
+        }
+    }
+    static SPREADSHEET_GET_ALL_FAILED(state, { error }) {
+        return {
+            ...state,
+            isReady: false
+        }
+    }
+}
+
+export const UIReducer = (state = { rows: [], isReady: false }, action) => {
+    if (UIStateMachine[action.type]) {
+        return UIStateMachine[action.type](state, action)
+    }
+    return state
 }
 
 export class Column extends React.Component {
@@ -80,7 +118,8 @@ UIView.propTypes = {
 }
 
 UIView.contextTypes = {
-    theme: PropTypes.object.isRequired
+    theme: PropTypes.object.isRequired,
+    dataSource: PropTypes.instanceOf(AbstractDataSource)
 }
 
 const mapStateToProps = (state, ownProps) => {
