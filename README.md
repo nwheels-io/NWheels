@@ -153,7 +153,7 @@ public class HelloWorldApp : WebApp<Empty.SessionState>
 - If running in docker container: 
   - Print container IP address:
     ```bash
-    $ docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' nwheels-demo
+    $ docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' nwheels-demo
     ```
   - Browse to http://_container_ip_address_:5000
 
