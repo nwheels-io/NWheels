@@ -3,13 +3,14 @@
 Welcome to NWheels
 =====
 
-Full-stack application framework, which lets you code intentions, and generates implementations per your technology choices. 
-
+You code intentions, and NWheels generates implementations per your technology choices. You can maintain intentions as code for the long run, or eject at any time.
 
 [![Build](https://img.shields.io/appveyor/ci/felix-b/metaprograms/master.svg)](https://ci.appveyor.com/project/felix-b/metaprograms)
 [![Tests](https://img.shields.io/appveyor/tests/felix-b/metaprograms/master.svg)](https://ci.appveyor.com/project/felix-b/metaprograms)
 [![Coverage](https://img.shields.io/codecov/c/github/nwheels-io/metaprograms/master.svg)](https://codecov.io/gh/nwheels-io/MetaPrograms)
 [![Nuget](https://img.shields.io/nuget/vpre/MetaPrograms.svg)](http://www.nuget.org/packages/MetaPrograms/)
+
+
 
 # How it works
 
