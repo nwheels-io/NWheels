@@ -1,19 +1,27 @@
+<img align="left" src="Docs/Images/logo-132.png"/>
+
 Welcome to NWheels
 =====
 
+Full-stack application framework, which lets you code intentions, and generates implementations per your technology choices. 
 
-<img align="left" src="Docs/Images/logo-132.png"/>
 
-An ejectable full-stack application framework, which lets you code intentions, and generates implementations per your technology choices. 
+[![Build](https://img.shields.io/appveyor/ci/felix-b/metaprograms/master.svg)](https://ci.appveyor.com/project/felix-b/metaprograms)
+[![Tests](https://img.shields.io/appveyor/tests/felix-b/metaprograms/master.svg)](https://ci.appveyor.com/project/felix-b/metaprograms)
+[![Coverage](https://img.shields.io/codecov/c/github/nwheels-io/metaprograms/master.svg)](https://codecov.io/gh/nwheels-io/MetaPrograms)
+[![Nuget](https://img.shields.io/nuget/vpre/MetaPrograms.svg)](http://www.nuget.org/packages/MetaPrograms/)
 
+# How it works
+
+<img src="Docs/nwheels-hexagonal-layers.png" align="right">
+
+
+### Why 
 - Reduce costs and timeframes
 - Stop re-inventing the wheel 
 - Work both fast and right, starting on day one
 - Share and reuse adaptable solutions in business domains 
 
-# How it works
-
-<img src="Docs/nwheels-hexagonal-layers.png" align="right">
 
 ## Features
 
