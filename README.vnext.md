@@ -2,7 +2,7 @@
 
 # Welcome to NWheels
 
-Code-first full-stack application framework, which lets you work both fast and right, starting on day one.
+A code-first full-stack application framework, which aims to save you 90% of effort.
 
 [![Build](https://img.shields.io/appveyor/ci/felix-b/metaprograms/master.svg)](https://ci.appveyor.com/project/felix-b/metaprograms)
 [![Tests](https://img.shields.io/appveyor/tests/felix-b/metaprograms/master.svg)](https://ci.appveyor.com/project/felix-b/metaprograms)
