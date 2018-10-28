@@ -1,7 +1,6 @@
 <img align="left" src="Docs/Images/logo-132.png"/>
 
-Welcome to NWheels
-=====
+# Welcome to NWheels
 
 You code intentions, and NWheels generates production-ready full-stack application per your technology choices. You can maintain intentions as code for the long run, or eject at any time.
 
