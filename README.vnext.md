@@ -4,6 +4,8 @@ An ejectable full-stack application framework, which lets you code intentions, a
 
 ## Features
 
+<img src="Docs/nwheels-hexagonal-layers.png" align="right">
+
 - Intentions-as-code
 - Technology abstraction
 - Testability of your application
