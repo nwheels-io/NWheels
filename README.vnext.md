@@ -1,6 +1,6 @@
 <img align="left" src="Docs/Images/logo-132.png"/>
 
-# Welcome to NWheels
+## Welcome to NWheels
 
 A code-first full-stack application framework, which aims to save 80% of development efforts.
 
