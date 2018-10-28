@@ -1,10 +1,22 @@
-NWheels
+Welcome to NWheels
 =====
+
+
+<img align="left" src="Docs/Images/logo-132.png"/>
+
 An ejectable full-stack application framework, which lets you code intentions, and generates implementations per your technology choices. 
+
+- Reduce costs and timeframes
+- Stop re-inventing the wheel 
+- Work both fast and right, starting on day one
+- Share and reuse adaptable solutions in business domains 
+
+# How it works
+
+<img src="Docs/nwheels-hexagonal-layers.png" align="right">
 
 ## Features
 
-<img src="Docs/nwheels-hexagonal-layers.png" align="right">
 
 - Intentions-as-code
 - Technology abstraction
@@ -24,10 +36,6 @@ An ejectable full-stack application framework, which lets you code intentions, a
 
 ## Why
 
-- Reduce costs and timeframes
-- Stop re-inventing the wheel 
-- Work both fast and right, starting on day one
-- Share and reuse adaptable solutions in business domains 
 
 ## Demo
 
