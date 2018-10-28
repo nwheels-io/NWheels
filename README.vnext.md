@@ -2,7 +2,7 @@
 
 # Welcome to NWheels
 
-You code intentions, and NWheels generates production-ready full-stack application per your technology choices. You can maintain intentions as code for the long run, or eject at any time.
+Code-first full-stack application framework, which lets you work both fast and right, starting on day one.
 
 [![Build](https://img.shields.io/appveyor/ci/felix-b/metaprograms/master.svg)](https://ci.appveyor.com/project/felix-b/metaprograms)
 [![Tests](https://img.shields.io/appveyor/tests/felix-b/metaprograms/master.svg)](https://ci.appveyor.com/project/felix-b/metaprograms)
@@ -15,6 +15,8 @@ You code intentions, and NWheels generates production-ready full-stack applicati
 
 <img src="Docs/nwheels-hexagonal-layers.png" align="right">
 
+- You code intentions, and NWheels generates production-ready full-stack application per your technology choices.
+- You can maintain intentions as code for the long run, or eject at any time, taking ownership of generated projects.
 
 ### Why 
 - Reduce costs and timeframes
