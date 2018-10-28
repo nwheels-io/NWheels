@@ -3,7 +3,7 @@
 Welcome to NWheels
 =====
 
-You code intentions, and NWheels generates implementations per your technology choices. You can maintain intentions as code for the long run, or eject at any time.
+You code intentions, and NWheels generates production-ready full-stack application per your technology choices. You can maintain intentions as code for the long run, or eject at any time.
 
 [![Build](https://img.shields.io/appveyor/ci/felix-b/metaprograms/master.svg)](https://ci.appveyor.com/project/felix-b/metaprograms)
 [![Tests](https://img.shields.io/appveyor/tests/felix-b/metaprograms/master.svg)](https://ci.appveyor.com/project/felix-b/metaprograms)
