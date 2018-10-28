@@ -2,23 +2,21 @@
 
 ## Welcome to NWheels
 
-A code-first full-stack application framework, which aims to save 80% of development efforts.
+A **code-first full-stack** application framework, which aims to **save 80%** of development efforts.
 
 [![Build](https://img.shields.io/appveyor/ci/felix-b/metaprograms/master.svg)](https://ci.appveyor.com/project/felix-b/metaprograms)
 [![Tests](https://img.shields.io/appveyor/tests/felix-b/metaprograms/master.svg)](https://ci.appveyor.com/project/felix-b/metaprograms)
 [![Coverage](https://img.shields.io/codecov/c/github/nwheels-io/metaprograms/master.svg)](https://codecov.io/gh/nwheels-io/MetaPrograms)
 [![Nuget](https://img.shields.io/nuget/vpre/MetaPrograms.svg)](http://www.nuget.org/packages/MetaPrograms/)
 
-
-
 # How it works
 
 <img src="Docs/nwheels-hexagonal-layers.png" align="right">
 
-1. Application is expressed with a minimalistic amount of intentions-as-code, on top of programming model APIs.
-  - If your application consists of multiple (micro)services, repeat these steps per each microservice
-  - Programming model cover common requirements and concerns, such as Authorization, UI, DB, Deployment, etc.
-1. 
+- Everything is a service: UI apps, micro-frontends, and backend (micro)services 
+- A service is expressed with a minimalistic amount of _intentions as code_ on top of _programming model APIs_.
+  - Programming models represent common areas of requirements, such as authorization, UI, data access, deployment, etc.
+  -   
 
 You code intentions, and NWheels generates production-ready full-stack application per your technology choices.
 - You can maintain intentions as code for the long run, or eject at any time, taking ownership of generated projects.
