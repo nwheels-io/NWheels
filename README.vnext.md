@@ -15,7 +15,12 @@ A code-first full-stack application framework, which aims to save 80% of develop
 
 <img src="Docs/nwheels-hexagonal-layers.png" align="right">
 
-- You code intentions, and NWheels generates production-ready full-stack application per your technology choices.
+1. Application is expressed with a minimalistic amount of intentions-as-code, on top of programming model APIs.
+  - If your application consists of multiple (micro)services, repeat these steps per each microservice
+  - Programming model cover common requirements and concerns, such as Authorization, UI, DB, Deployment, etc.
+1. 
+
+You code intentions, and NWheels generates production-ready full-stack application per your technology choices.
 - You can maintain intentions as code for the long run, or eject at any time, taking ownership of generated projects.
 
 ### Why 
