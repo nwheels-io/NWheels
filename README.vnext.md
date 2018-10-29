@@ -13,6 +13,11 @@ A **code-first full-stack** application framework, which aims to **save 80%** of
 
 <img src="Docs/nwheels-hexagonal-layers.png" align="right">
 
+- **Intentions as code**: express your application with minimal amount of code clean from technology details
+- **Programming models**: APIs on top of which _intentions_ are coded; on the outer side, the _intentions_ are digested into _metadata_ for _technology adapters_.
+- **Technology adapters**: pluggable code generators, which take _metadata_ as input from _programming models_, and generate code  
+
+
 - Everything is a service: UI apps, micro-frontends, and backend (micro)services 
 - A service is expressed with a minimalistic amount of _intentions as code_ on top of _programming model APIs_.
   - Programming models represent common areas of requirements, such as authorization, UI, data access, deployment, etc.
