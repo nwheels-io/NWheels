@@ -11,7 +11,7 @@ A **code-first full-stack** application framework, which aims to **save 80%** of
 
 # How it works
 
-<img src="Docs/nwheels-hexagonal-layers.png" align="right">
+<img src="Docs/nwheels-hexagon-new.png" align="right">
 
 - **Intentions as code**: express your application with minimal amount of code clean from technology details
 - **Programming models**: APIs on top of which _intentions_ are coded; on the outer side, the _intentions_ are digested into _metadata_ for _technology adapters_.
