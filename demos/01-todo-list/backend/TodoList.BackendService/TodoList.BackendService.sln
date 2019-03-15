@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoList.BackendService", "TodoList.BackendService\TodoList.BackendService.csproj", "{B1285944-CAA5-4C8E-9F20-4800174BFC64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoList.BackendService.Tests", "TodoList.BackendService.Tests\TodoList.BackendService.Tests.csproj", "{915A4A3D-68CC-406E-99BA-C0D0EBE53BB8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B1285944-CAA5-4C8E-9F20-4800174BFC64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1285944-CAA5-4C8E-9F20-4800174BFC64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1285944-CAA5-4C8E-9F20-4800174BFC64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1285944-CAA5-4C8E-9F20-4800174BFC64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{915A4A3D-68CC-406E-99BA-C0D0EBE53BB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{915A4A3D-68CC-406E-99BA-C0D0EBE53BB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{915A4A3D-68CC-406E-99BA-C0D0EBE53BB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{915A4A3D-68CC-406E-99BA-C0D0EBE53BB8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

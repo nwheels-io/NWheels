@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Folder Include="Mutations" />
+        <Folder Include="wwwroot\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.App" />
+        <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
+        <PackageReference Include="MongoDB.Driver" Version="2.7.3" />
+        <PackageReference Include="GraphQL" Version="2.4.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Queries\**" />
+      <Compile Include="Queries\HelloWorldQuery.cs" />
+      <Compile Include="Queries\TodoItemQuery.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Queries\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Queries\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="Queries\**" />
+    </ItemGroup>
+
+</Project>
