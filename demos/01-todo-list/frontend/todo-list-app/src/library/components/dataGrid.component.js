@@ -5,7 +5,8 @@ const initialState = {
     nextKey: -1,
     isLoaded: false,
     isLoadFailed: false,
-    items: []
+    items: [],
+    selectedCell: null
 };
 
 const mergeItemChanges = (item, newKey, newState, newDataProps) => {
@@ -51,7 +52,8 @@ const Reducer = (ID) => (state = initialState, action) => {
             );
             return {
                 ...state,
-                items
+                items,
+                selectedCell: null
             };
         case 'DATAGRID_ITEM_COMMIT_FINISHED':
             itemState = (action.success ? 'UNCHANGED' : 'FAILED');
@@ -87,8 +89,14 @@ const Reducer = (ID) => (state = initialState, action) => {
         case 'DATAGRID_REMOVE_ITEM':
             return { 
                 ...state, 
-                items: state.items.filter(item => item.key !== action.key)
+                items: state.items.filter(item => item.key !== action.key),
+                selectedCell: null
             };
+        case 'DATAGRID_SELECT_CELL':
+            return {
+                ...state,
+                selectedCell: { row: action.row, col: action.col }
+            }; 
     }
 
     return state;
@@ -143,6 +151,13 @@ const ActionCreators = {
             isDeleting,
             success
         };
+    },
+    selectCell: (row, col) => {
+        return {
+            type: 'DATAGRID_SELECT_CELL',
+            row,
+            col
+        }
     }
 };
 
@@ -208,11 +223,12 @@ const Connector = (ID) => (skin) => connect(
             isLoaded: ownState.isLoaded,
             isLoadFailed: ownState.isLoadFailed,
             items: ownState.items,
-            nextKey: ownState.nextKey
+            nextKey: ownState.nextKey,
+            selectedCell: ownState.selectedCell
         };
     },
     (dispatch) => {
-        return {
+        return {    
             beginLoadItems: () => {
                 dispatch(ThunkCreators.beginLoadItems(ID));
             },
@@ -221,6 +237,9 @@ const Connector = (ID) => (skin) => connect(
             },
             beginCommitItem: (key, itemPropChanges, isDeleting) => {
                 dispatch(ThunkCreators.beginCommitItem(ID, key, itemPropChanges, isDeleting));
+            },
+            selectCell: (row, col) => {
+                dispatch(ActionCreators.selectCell(row, col));
             }
         };
     }
