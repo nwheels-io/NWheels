@@ -2,7 +2,7 @@ import React from "react";
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
-import { prepareComponent, PubSub, DataGrid, Form, SoloPage } from '../../library/components';
+import { prepareComponent, PubSub, DAL, DataGrid, Form, SoloPage } from '../../library/components';
 import { DemoMinimal as skin } from '../../library/skins';
 
 const IndexSoloPage = prepareComponent(SoloPage, 'index', skin.SoloPage);
@@ -24,14 +24,15 @@ function buildIndexPageStore() {
 const store = buildIndexPageStore();
 
 export const IndexPage = (props) => {
-    const onNewItemAdd = new PubSub.Event('indexSoloPage/newItemForm/add');
+    const onNewItemAdd = PubSub.Event('indexSoloPage/newItemForm/add');
+    const todoItemDAL = DAL.GraphQL('todoItem', 'http://localhost:3001/api/graphql');
 
     return (
         <Provider store={store}>
             <IndexSoloPage.Component>
                 <NewItemForm.Component 
                     fields={[
-                        { name: 'title', label: 'New Item' }
+                        { name: 'description', label: 'New Item' }
                     ]} 
                     actions={[
                         { name: 'add', label: 'Add', onExecute: (data) => onNewItemAdd.fire(data) }
@@ -39,9 +40,10 @@ export const IndexPage = (props) => {
                     pushResetForm={onNewItemAdd} 
                 />
                 <TodosDataGrid.Component 
-                    columns = {[
+                    dal={todoItemDAL} 
+                    columns={[
                         { title: 'ID', field: 'id', type: 'key' },
-                        { title: 'Title', field: 'title', type: 'string', editor: 'text' },
+                        { title: 'Description', field: 'description', type: 'string', editor: 'text' },
                         { title: 'Done', field: 'done', type: 'bool', editor: 'check' }
                     ]}
                     pushAddItem={onNewItemAdd} 

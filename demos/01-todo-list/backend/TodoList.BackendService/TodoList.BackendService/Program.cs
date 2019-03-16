@@ -19,7 +19,7 @@ namespace TodoList.BackendService
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) => WebHost
             .CreateDefaultBuilder(args)
-            .UseKestrel(options => options.ListenLocalhost(port: 3000))
+            .UseKestrel(options => options.ListenLocalhost(port: 3001))
             .UseStartup<Startup>();
     }
 }

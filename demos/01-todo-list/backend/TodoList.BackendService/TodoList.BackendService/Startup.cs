@@ -24,6 +24,8 @@ namespace TodoList.BackendService
 {
     public class Startup
     {
+        private const string CorsPolicyName = "RestApiCorsPolicy";
+        
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -34,6 +36,14 @@ namespace TodoList.BackendService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options => options.AddPolicy(
+                CorsPolicyName, 
+                policy => policy
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .WithOrigins("http://localhost:3000")
+            ));            
+            
             services.AddSingleton<ITodoItemRepository>(new TodoItemRepository(new MongoDBConfig {
                 Host = "localhost",
                 Database = "todo_list",
@@ -58,11 +68,11 @@ namespace TodoList.BackendService
             //app.UseMvc();
             //var schema = new Schema { Query = new HelloWorldQuery() };
 
+            app.UseCors(CorsPolicyName); 
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
-            app.Run(async (context) =>
-            {
+            app.Run(async (context) => {
                 if (context.Request.Path.StartsWithSegments("/api/graphql")
                     && string.Equals(context.Request.Method, "POST", StringComparison.OrdinalIgnoreCase))
                 {
@@ -80,6 +90,7 @@ namespace TodoList.BackendService
                         }).ConfigureAwait(false);
 
                         var json = new DocumentWriter(indent: true).Write(result);
+                        context.Response.ContentType = "application/json";
                         await context.Response.WriteAsync(json);
                     }
                 }

@@ -9,7 +9,9 @@ export class DataGrid extends Component {
 
     componentDidMount() {
         this.props.pushAddItem && this.props.pushAddItem.addListener(this.handleNewItem);
-        this.props.beginLoadItems();
+        if (!this.props.isLoaded) {
+            this.props.beginLoadItems(this.props.dal, this.props.columns.map(col => col.field));
+        }
     }
 
     componentWillUnmount() {
@@ -62,7 +64,7 @@ export class DataGrid extends Component {
 
     handleNewItem(data) {
         this.props.addItem(data);
-        this.props.beginCommitItem(this.props.nextKey, data, false);
+        this.props.beginCommitItem(this.props.dal, this.props.nextKey, data, false);
     }
 
     renderCellTD(rowIndex, colIndex, col, item) {

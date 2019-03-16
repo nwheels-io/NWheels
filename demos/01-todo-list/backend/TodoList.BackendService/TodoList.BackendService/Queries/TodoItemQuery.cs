@@ -10,8 +10,8 @@ namespace TodoList.BackendService.Queries
     {
         public TodoItemQuery()
         {
-            Field<TodoItemGraph>(
-                name: "todos",
+            Field<ListGraphType<TodoItemGraph>>(
+                name: "todoItem",
                 arguments: new QueryArguments(
                     new QueryArgument<IntGraphType> { Name = "id" },
                     new QueryArgument<StringGraphType> { Name = "description" },

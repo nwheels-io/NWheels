@@ -163,22 +163,36 @@ const ActionCreators = {
 let MOCK_SERVER_ID = 114;
 
 const ThunkCreators = {
-    beginLoadItems: (ID) => {
+    beginLoadItems: (dal, ID, fields) => {
         return (dispatch) => {
             dispatch(ActionCreators.loadStarted());
-            setTimeout(() => {
-                dispatch(ActionCreators.loadFinished(
-                    [
-                        { key: 111, state: 'UNCHANGED', data: { id: 111, title: 'AAA', done: true } },
-                        { key: 112, state: 'UNCHANGED', data: { id: 112, title: 'BBB', done: false } },
-                        { key: 113, state: 'UNCHANGED', data: { id: 113, title: 'CCC', done: false } }
-                    ],
-                    true    
-                ));
-            }, 5000);
+            // setTimeout(() => {
+            //     
+            //         [
+            //             { key: 111, state: 'UNCHANGED', data: { id: 111, title: 'AAA', done: true } },
+            //             { key: 112, state: 'UNCHANGED', data: { id: 112, title: 'BBB', done: false } },
+            //             { key: 113, state: 'UNCHANGED', data: { id: 113, title: 'CCC', done: false } }
+            //         ],
+            //         true    
+            //     ));
+            // }, 5000);
+            
+            dal.retrieve(fields)
+                .then(dataArray => {
+                    const items = dataArray.map(data => ({
+                        key: data.id, //TODO: parameterize this
+                        state: 'UNCHANGED',
+                        data
+                    }));
+                    dispatch(ActionCreators.loadFinished(items, true));
+                })
+                .catch(error => {
+                    console.error(error);
+                    dispatch(ActionCreators.loadFinished(null, false));
+                });
         };
     },
-    beginCommitItem: (ID, itemKey, itemPropChanges, isDeleting) => {
+    beginCommitItem: (dal, ID, itemKey, itemPropChanges, isDeleting) => {
         return (dispatch, getState) => {
             const ownState = getState()[ID];
             const item = ownState.items.find(item => item.key === itemKey);
@@ -207,7 +221,7 @@ const ThunkCreators = {
                 if (isDeleting) {
                     dispatch(ActionCreators.removeItem(itemKey));
                 } else {
-                    const serverId = item.id || MOCK_SERVER_ID++;
+                    const serverId = item.data.id || MOCK_SERVER_ID++;
                     dispatch(ActionCreators.itemCommitFinished(itemKey, serverId, {id: serverId}, isDeleting, true));
                 }
             }, 3000);
@@ -228,17 +242,17 @@ const Connector = (ID) => (skin) => connect(
     },
     (dispatch) => {
         return {    
-            beginLoadItems: () => {
-                dispatch(ThunkCreators.beginLoadItems(ID));
-            },
             addItem: (newItemProps) => {
                 dispatch(ActionCreators.addItem(newItemProps));
             },
-            beginCommitItem: (key, itemPropChanges, isDeleting) => {
-                dispatch(ThunkCreators.beginCommitItem(ID, key, itemPropChanges, isDeleting));
-            },
             selectCell: (row, col) => {
                 dispatch(ActionCreators.selectCell(row, col));
+            },
+            beginLoadItems: (dal, fields) => {
+                dispatch(ThunkCreators.beginLoadItems(dal, ID, fields));
+            },
+            beginCommitItem: (dal, key, itemPropChanges, isDeleting) => {
+                dispatch(ThunkCreators.beginCommitItem(dal, ID, key, itemPropChanges, isDeleting));
             }
         };
     }
