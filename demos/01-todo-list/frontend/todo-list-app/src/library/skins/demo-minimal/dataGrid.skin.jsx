@@ -69,6 +69,7 @@ export class DataGrid extends Component {
         const selection = this.props.selectedCell;
         const isEditMode = (
             item.state === 'UNCHANGED' &&
+            !!col.editor &&
             selection && 
             selection.row === rowIndex && 
             selection.col === colIndex);
@@ -77,26 +78,50 @@ export class DataGrid extends Component {
             <td key={colIndex} onClick={() => this.props.selectCell(rowIndex, colIndex)}>
                 {(isEditMode 
                     ? this.renderCellEditor(rowIndex, colIndex, col, item)
-                    : this.renderCellValue(rowIndex, colIndex, col, item)                 )}
+                    : this.renderCellValue(rowIndex, colIndex, col, item)                 
+                )}
             </td>
         );
     }
 
     renderCellValue(rowIndex, colIndex, col, item) {
-        return item.data[col.field] || '';
+        switch (col.type) {
+            case 'bool':
+                if (item.state === 'UNCHANGED' && col.editor === 'check') {
+                    return this.renderCellEditor(rowIndex, colIndex, col, item);
+                } else {
+                    return (<input type='checkbox' defaultChecked={!!item.data[col.field]} disabled={true} />); 
+                }
+            default:
+                return item.data[col.field] || '';
+        }
     }
 
     renderCellEditor(rowIndex, colIndex, col, item) {
-        return (<input 
-            type='text' 
-            defaultValue={item.data[col.field] || ''} 
-            onBlur={(e) => {
-                const newValue = e.target.value;
-                if (newValue !== item.data[col.field]) {
-                    this.props.beginCommitItem(item.key, {[col.field]: newValue}, false);
-                }
-            }}
-        />);
+        switch (col.editor) {
+            case 'text':    
+                return (<input 
+                    type='text' 
+                    defaultValue={item.data[col.field] || ''} 
+                    onBlur={(e) => {
+                        const newValue = e.target.value;
+                        if (newValue !== item.data[col.field]) {
+                            this.props.beginCommitItem(item.key, {[col.field]: newValue}, false);
+                        }
+                    }}
+                />);
+            case 'check':    
+                return (<input 
+                    type='checkbox' 
+                    defaultChecked={!!item.data[col.field]} 
+                    onClick={(e) => {
+                        const newValue = e.target.checked;
+                        if (newValue !== item.data[col.field]) {
+                            this.props.beginCommitItem(item.key, {[col.field]: newValue}, false);
+                        }
+                    }}
+                />);
+        }
     }
 }
 

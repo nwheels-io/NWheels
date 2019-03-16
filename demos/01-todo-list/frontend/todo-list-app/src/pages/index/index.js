@@ -40,9 +40,9 @@ export const IndexPage = (props) => {
                 />
                 <TodosDataGrid.Component 
                     columns = {[
-                        { title: 'ID', field: 'id' },
-                        { title: 'Title', field: 'title' },
-                        { title: 'Done', field: 'done' }
+                        { title: 'ID', field: 'id', type: 'key' },
+                        { title: 'Title', field: 'title', type: 'string', editor: 'text' },
+                        { title: 'Done', field: 'done', type: 'bool', editor: 'check' }
                     ]}
                     pushAddItem={onNewItemAdd} 
                 />

@@ -1,5 +1,4 @@
 import { connect } from 'react-redux';
-import { Action } from 'rxjs/internal/scheduler/Action';
 
 const initialState = {
     nextKey: -1,
@@ -170,9 +169,9 @@ const ThunkCreators = {
             setTimeout(() => {
                 dispatch(ActionCreators.loadFinished(
                     [
-                        { key: 111, state: 'UNCHANGED', data: { id: 111, title: 'AAA', dont: true } },
-                        { key: 112, state: 'UNCHANGED', data: { id: 112, title: 'BBB', dont: false } },
-                        { key: 113, state: 'UNCHANGED', data: { id: 113, title: 'CCC', dont: false } }
+                        { key: 111, state: 'UNCHANGED', data: { id: 111, title: 'AAA', done: true } },
+                        { key: 112, state: 'UNCHANGED', data: { id: 112, title: 'BBB', done: false } },
+                        { key: 113, state: 'UNCHANGED', data: { id: 113, title: 'CCC', done: false } }
                     ],
                     true    
                 ));
