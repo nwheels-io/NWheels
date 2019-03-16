@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { throws } from "assert";
 
 export class DataGrid extends Component {
     constructor(props) {
@@ -8,6 +9,7 @@ export class DataGrid extends Component {
 
     componentDidMount() {
         this.props.pushAddItem && this.props.pushAddItem.addListener(this.handleNewItem);
+        this.props.beginLoadItems();
     }
 
     componentWillUnmount() {
@@ -15,10 +17,20 @@ export class DataGrid extends Component {
     }
 
     render() {
+        if (!this.props.isLoaded) {
+            return (
+                <div>
+                    {(this.props.isLoadFailed ? 'LOAD FAILED!' : 'LOADING....')}
+                </div>
+            );
+        }
+
         return (
             <table>
                 <thead>
                     <tr>
+                        <th>KEY</th>
+                        <th>STATE</th>
                         {this.props.columns.map((col, index) => (
                             <th key={index}>{col.title}</th>
                         ))}
@@ -26,9 +38,11 @@ export class DataGrid extends Component {
                 </thead>
                 <tbody>
                     {this.props.items.map(item => (
-                        <tr key={item['$key']}>
+                        <tr key={item.key}>
+                            <td>{item.key}</td>
+                            <td>{item.state}</td>
                             {this.props.columns.map((col, index) => (
-                                <td key={index}>{item[col.field]}</td>
+                                <td key={index}>{item.data[col.field] || ''}</td>
                             ))}
                         </tr>
                     ))}
@@ -38,7 +52,7 @@ export class DataGrid extends Component {
     }
 
     handleNewItem(data) {
-        this.props.add(data)
+        this.props.addItem(data)
     }
 }
 

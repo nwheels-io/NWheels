@@ -1,6 +1,7 @@
 import React from "react";
-import { createStore, combineReducers } from 'redux';
+import { createStore, combineReducers, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
+import thunk from 'redux-thunk';
 import { prepareComponent, PubSub, DataGrid, Form, SoloPage } from '../../library/components';
 import { DemoMinimal as skin } from '../../library/skins';
 
@@ -9,12 +10,15 @@ const NewItemForm = prepareComponent(Form, 'newItem', skin.Form);
 const TodosDataGrid = prepareComponent(DataGrid, 'todos', skin.DataGrid);
 
 function buildIndexPageStore() {
-    const reducer = combineReducers({
+    const rootReducer = combineReducers({
         ...IndexSoloPage.Reducers,
         ...NewItemForm.Reducers,
         ...TodosDataGrid.Reducers
     });
-    return createStore(reducer);
+    return createStore(
+        rootReducer,
+        applyMiddleware(thunk)
+    );
 }
 
 const store = buildIndexPageStore();
@@ -36,7 +40,7 @@ export const IndexPage = (props) => {
                 />
                 <TodosDataGrid.Component 
                     columns = {[
-                        { title: 'ID', field: '$key' },
+                        { title: 'ID', field: 'id' },
                         { title: 'Title', field: 'title' },
                         { title: 'Done', field: 'done' }
                     ]}
