@@ -8,9 +8,10 @@ const initialState = {
     items: []
 };
 
-const mergeItemChanges = (item, newState, newDataProps) => {
+const mergeItemChanges = (item, newKey, newState, newDataProps) => {
     return {
         ...item, 
+        key: newKey || item.key,
         state: newState || item.state, 
         data: { 
             ...item.data, 
@@ -46,7 +47,7 @@ const Reducer = (ID) => (state = initialState, action) => {
             items = replaceItem(
                 state.items, 
                 action.key, 
-                (item) => mergeItemChanges(item, itemState, {})
+                (item) => mergeItemChanges(item, null, itemState, action.itemPropChanges || {})
             );
             return {
                 ...state,
@@ -57,7 +58,7 @@ const Reducer = (ID) => (state = initialState, action) => {
             items = replaceItem(
                 state.items, 
                 action.key, 
-                (item) => mergeItemChanges(item, itemState, {})
+                (item) => mergeItemChanges(item, action.newKey, itemState, action.itemPropChanges || {})
             );
             return {
                 ...state,
@@ -72,7 +73,7 @@ const Reducer = (ID) => (state = initialState, action) => {
             return { 
                 ...state, 
                 nextKey: state.nextKey - 1,
-                items: [...state.items, newItem] 
+                items: [...state.items, newItem]
             };
         case 'DATAGRID_CHANGE_ITEM':
             return { 
@@ -80,7 +81,7 @@ const Reducer = (ID) => (state = initialState, action) => {
                 items: replaceItem(
                     state.items, 
                     action.key, 
-                    item => mergeItemChanges(item, item.state, action.itemPropChanges)
+                    item => mergeItemChanges(item, null, item.state, action.itemPropChanges || {})
                 )
             };
         case 'DATAGRID_REMOVE_ITEM':
@@ -133,10 +134,11 @@ const ActionCreators = {
             isDeleting
         };
     },
-    itemCommitFinished: (key, itemPropChanges, isDeleting, success) => {
+    itemCommitFinished: (key, newKey, itemPropChanges, isDeleting, success) => {
         return {
             type: 'DATAGRID_ITEM_COMMIT_FINISHED',
             key,
+            newKey,
             itemPropChanges,
             isDeleting,
             success
@@ -144,30 +146,55 @@ const ActionCreators = {
     }
 };
 
+let MOCK_SERVER_ID = 114;
+
 const ThunkCreators = {
-    beginLoadItems: () => {
+    beginLoadItems: (ID) => {
         return (dispatch) => {
             dispatch(ActionCreators.loadStarted());
             setTimeout(() => {
                 dispatch(ActionCreators.loadFinished(
                     [
                         { key: 111, state: 'UNCHANGED', data: { id: 111, title: 'AAA', dont: true } },
-                        { key: 222, state: 'UNCHANGED', data: { id: 222, title: 'BBB', dont: false } },
-                        { key: 333, state: 'UNCHANGED', data: { id: 333, title: 'CCC', dont: false } }
+                        { key: 112, state: 'UNCHANGED', data: { id: 112, title: 'BBB', dont: false } },
+                        { key: 113, state: 'UNCHANGED', data: { id: 113, title: 'CCC', dont: false } }
                     ],
                     true    
                 ));
             }, 5000);
         };
     },
-    beginCommitItem: (itemKey, itemPropChanges, isDeleting) => {
-        return (dispatch) => {
+    beginCommitItem: (ID, itemKey, itemPropChanges, isDeleting) => {
+        return (dispatch, getState) => {
+            const ownState = getState()[ID];
+            const item = ownState.items.find(item => item.key === itemKey);
+            if (!item) {
+                return;
+            }
+
+            if (item.state === 'NEW' && isDeleting) {
+                dispatch(ActionCreators.removeItem(itemKey));
+                return;
+            }
+
+            if (!isDeleting && itemPropChanges) {
+                dispatch(ActionCreators.changeItem(itemKey, itemPropChanges));
+            }
+
             dispatch(ActionCreators.itemCommitStarted(itemKey, itemPropChanges, isDeleting));
+            
+            console.log('SENDING TO SERVER', {
+                action: (item.state === 'NEW' ? 'CREATE' : (isDeleting ? 'DELETE' : 'UPDATE')),
+                key: (item.state === 'NEW' ? undefined : item.key), 
+                changes: (isDeleting ? undefined : itemPropChanges)
+            });
+
             setTimeout(() => {
                 if (isDeleting) {
                     dispatch(ActionCreators.removeItem(itemKey));
                 } else {
-                    dispatch(ActionCreators.itemCommitFinished(itemKey, itemPropChanges, isDeleting, true));
+                    const serverId = item.id || MOCK_SERVER_ID++;
+                    dispatch(ActionCreators.itemCommitFinished(itemKey, serverId, {id: serverId}, isDeleting, true));
                 }
             }, 3000);
         };
@@ -180,19 +207,20 @@ const Connector = (ID) => (skin) => connect(
         return { 
             isLoaded: ownState.isLoaded,
             isLoadFailed: ownState.isLoadFailed,
-            items: ownState.items
+            items: ownState.items,
+            nextKey: ownState.nextKey
         };
     },
     (dispatch) => {
         return {
             beginLoadItems: () => {
-                dispatch(ThunkCreators.beginLoadItems());
+                dispatch(ThunkCreators.beginLoadItems(ID));
             },
             addItem: (newItemProps) => {
                 dispatch(ActionCreators.addItem(newItemProps));
             },
             beginCommitItem: (key, itemPropChanges, isDeleting) => {
-                dispatch(ThunkCreators.beginCommitItem(key, itemPropChanges, isDeleting));
+                dispatch(ThunkCreators.beginCommitItem(ID, key, itemPropChanges, isDeleting));
             }
         };
     }

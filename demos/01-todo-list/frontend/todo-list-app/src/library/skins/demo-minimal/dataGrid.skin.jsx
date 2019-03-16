@@ -34,6 +34,7 @@ export class DataGrid extends Component {
                         {this.props.columns.map((col, index) => (
                             <th key={index}>{col.title}</th>
                         ))}
+                        <th>ACTIONS</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,6 +45,14 @@ export class DataGrid extends Component {
                             {this.props.columns.map((col, index) => (
                                 <td key={index}>{item.data[col.field] || ''}</td>
                             ))}
+                            <td>
+                                <button
+                                    disabled={item.state !== 'UNCHANGED'} 
+                                    onClick={() => this.props.beginCommitItem(item.key, {}, true)}
+                                >
+                                    X
+                                </button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
@@ -52,7 +61,8 @@ export class DataGrid extends Component {
     }
 
     handleNewItem(data) {
-        this.props.addItem(data)
+        this.props.addItem(data);
+        this.props.beginCommitItem(this.props.nextKey, data, false);
     }
 }
 
