@@ -16,9 +16,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using TodoList.BackendService.Graphs;
-using TodoList.BackendService.Queries;
+using TodoList.BackendService.Middleware;
 using TodoList.BackendService.Repositories;
+using TodoList.BackendService.Schemas;
 
 namespace TodoList.BackendService
 {
@@ -53,8 +53,15 @@ namespace TodoList.BackendService
                     Password = "example"
                 }
             }));
+
+            services.AddSingleton<ITodoItemRepository>(new MockInMemoryRepository());
             
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddScoped<IDependencyResolver>(s => new FuncDependencyResolver(s.GetRequiredService));
+            services.AddScoped<ISchema, TodoListSchema>();
+            services.AddScoped<TodoListQuery>();
+            services.AddScoped<TodoListMutation>();
+            services.AddScoped<TodoItemGraph>();
+            services.AddScoped<TodoItemInputGraph>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -65,36 +72,10 @@ namespace TodoList.BackendService
                 app.UseDeveloperExceptionPage();
             }
 
-            //app.UseMvc();
-            //var schema = new Schema { Query = new HelloWorldQuery() };
-
             app.UseCors(CorsPolicyName); 
             app.UseDefaultFiles();
             app.UseStaticFiles();
-
-            app.Run(async (context) => {
-                if (context.Request.Path.StartsWithSegments("/api/graphql")
-                    && string.Equals(context.Request.Method, "POST", StringComparison.OrdinalIgnoreCase))
-                {
-                    string body;
-                    using (var streamReader = new StreamReader(context.Request.Body))
-                    {
-                        body = await streamReader.ReadToEndAsync();
-
-                        var request = JsonConvert.DeserializeObject<GraphQLRequest>(body);
-                        var schema = new Schema { Query = new TodoItemQuery() };
-
-                        var result = await new DocumentExecuter().ExecuteAsync(doc => {
-                            doc.Schema = schema;
-                            doc.Query = request.Query;
-                        }).ConfigureAwait(false);
-
-                        var json = new DocumentWriter(indent: true).Write(result);
-                        context.Response.ContentType = "application/json";
-                        await context.Response.WriteAsync(json);
-                    }
-                }
-            });
+            app.UseMiddleware<GraphQLMiddleware>();            
         }
     }
 }

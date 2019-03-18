@@ -2,13 +2,8 @@ namespace TodoList.BackendService.Domain
 {
     public class TodoItem
     {
-        public TodoItem(int id)
-        {
-            Id = id;
-        }
-
-        public int Id;
-        public string Description;
-        public bool Done;
+        public int Id { get; set; }
+        public string Description { get; set; }
+        public bool Done { get; set; }
     }    
 }

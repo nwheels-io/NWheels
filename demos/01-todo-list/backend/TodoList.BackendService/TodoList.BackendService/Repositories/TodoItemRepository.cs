@@ -22,9 +22,14 @@ namespace TodoList.BackendService.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<TodoItem>> GetByQuery(string description, bool? done)
+        public async Task<IEnumerable<TodoItem>> GetByQuery(int? id, string description, bool? done)
         {
             var query = GetTodoItemCollection().AsQueryable();
+
+            if (id != null)
+            {
+                query = query.Where(x => x.Id == id.Value);
+            }
 
             if (description != null)
             {
@@ -38,6 +43,19 @@ namespace TodoList.BackendService.Repositories
 
             var buffer = await query.ToListAsync();
             return buffer;
+        }
+
+        public async Task<TodoItem> Create(string description, bool done)
+        {
+            var item = new TodoItem {
+                Id = 0,
+                Description = description,
+                Done = done
+            };
+
+            await GetTodoItemCollection().InsertOneAsync(item);
+
+            return item;
         }
 
         public Task Update(TodoItem item)

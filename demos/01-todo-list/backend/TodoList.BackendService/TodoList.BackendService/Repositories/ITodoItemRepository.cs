@@ -7,8 +7,9 @@ namespace TodoList.BackendService.Repositories
     public interface ITodoItemRepository
     {
         Task<TodoItem> GetById(int id);
-        Task<IEnumerable<TodoItem>> GetByQuery(string description, bool? done);
+        Task<IEnumerable<TodoItem>> GetByQuery(int? id, string description, bool? done);
+        Task<TodoItem> Create(string description, bool done);
         Task Update(TodoItem item);
-        Task Delete(IEnumerable<int> id);
+        Task Delete(IEnumerable<int> ids);
     }
 }
