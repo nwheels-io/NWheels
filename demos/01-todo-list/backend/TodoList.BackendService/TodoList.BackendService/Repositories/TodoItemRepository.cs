@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
@@ -22,26 +23,25 @@ namespace TodoList.BackendService.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<TodoItem>> GetByQuery(int? id, string description, bool? done)
+        public async Task<IEnumerable<TodoItem>> GetByQuery(
+            QueryFilter<TodoItem> where = null, 
+            QueryFilter<TodoItem> orderBy = null)
         {
-            var query = GetTodoItemCollection().AsQueryable();
+            IQueryable<TodoItem> query = GetTodoItemCollection().AsQueryable();
 
-            if (id != null)
+            if (where != null)
             {
-                query = query.Where(x => x.Id == id.Value);
+                query = where(query);
             }
 
-            if (description != null)
+            if (orderBy != null)
             {
-                query = query.Where(x => x.Description.Contains(description));
+                query = orderBy(query);
             }
 
-            if (done.HasValue)
-            {
-                query = query.Where(x => x.Done == done);
-            }
+            var mongoQuery = (IMongoQueryable<TodoItem>)query;
+            var buffer = await mongoQuery.ToListAsync();
 
-            var buffer = await query.ToListAsync();
             return buffer;
         }
 

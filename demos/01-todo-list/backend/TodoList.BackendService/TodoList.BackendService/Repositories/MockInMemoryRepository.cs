@@ -20,13 +20,23 @@ namespace TodoList.BackendService.Repositories
             return _exampleData.FirstOrDefault(item => item.Id == id);
         }
 
-        public async Task<IEnumerable<TodoItem>> GetByQuery(int? id, string description, bool? done)
+        public async Task<IEnumerable<TodoItem>> GetByQuery(
+            QueryFilter<TodoItem> where = null, 
+            QueryFilter<TodoItem> orderBy = null)
         {
-            return _exampleData.Where(item =>    
-                (!id.HasValue || id.Value == item.Id) &&
-                (description == null || item.Description.Contains(description)) &&
-                (!done.HasValue || done.Value == item.Done)
-            );
+            var query = _exampleData.AsQueryable();
+
+            if (where != null)
+            {
+                query = where(query);
+            }
+
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            return query.ToArray();
         }
 
         public async Task<TodoItem> Create(string description, bool done)

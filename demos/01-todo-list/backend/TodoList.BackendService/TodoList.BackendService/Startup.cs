@@ -54,7 +54,7 @@ namespace TodoList.BackendService
                 }
             }));
 
-            services.AddSingleton<ITodoItemRepository>(new MockInMemoryRepository());
+            //services.AddSingleton<ITodoItemRepository>(new MockInMemoryRepository());
             
             services.AddScoped<IDependencyResolver>(s => new FuncDependencyResolver(s.GetRequiredService));
             services.AddScoped<ISchema, TodoListSchema>();
@@ -62,6 +62,8 @@ namespace TodoList.BackendService
             services.AddScoped<TodoListMutation>();
             services.AddScoped<TodoItemGraph>();
             services.AddScoped<TodoItemInputGraph>();
+            services.AddScoped<OrderByDirectionType>();
+            services.AddScoped<TodoItemOrderGraph>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
