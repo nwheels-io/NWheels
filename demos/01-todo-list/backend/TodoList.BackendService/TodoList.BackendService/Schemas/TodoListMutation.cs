@@ -10,19 +10,19 @@ namespace TodoList.BackendService.Schemas
         {
             Field<TodoItemGraph, TodoItem>()
                 .Name("create")
-                .Argument<NonNullGraphType<TodoItemInputGraph>>("item", "new item data")
+                .Argument<NonNullGraphType<TodoItemInputGraph>>("data", "new item data")
                 .ResolveAsync(ctx => {
-                    var item = ctx.GetArgument<TodoItem>("item");
+                    var item = ctx.GetArgument<TodoItem>("data");
                     return repository.Create(item.Description, item.Done);
                 });
             
             Field<TodoItemGraph, TodoItem>()
                 .Name("update")
-                .Argument<NonNullGraphType<TodoItemInputGraph>>("item", "item patch data")
+                .Argument<NonNullGraphType<TodoItemInputGraph>>("data", "item patch data")
                 .ResolveAsync(async ctx => {
-                    var item = ctx.GetArgument<TodoItem>("item");
-                    await repository.Update(item);
-                    return new TodoItem { Id = item.Id };
+                    var patch = ctx.GetArgument<TodoItemPatch>("data");
+                    await repository.Update(patch);
+                    return new TodoItem { Id = patch.Id };
                 });
 
             Field<TodoItemGraph, TodoItem>()

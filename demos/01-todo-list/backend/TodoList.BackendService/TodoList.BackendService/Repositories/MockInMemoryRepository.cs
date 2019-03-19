@@ -41,10 +41,19 @@ namespace TodoList.BackendService.Repositories
             return newItem;
         }
 
-        public async Task Update(TodoItem item)
+        public async Task Update(TodoItemPatch patch)
         {
-            var index = _exampleData.FindIndex(x => x.Id == item.Id);
-            _exampleData[index] = item; 
+            var item = _exampleData.First(x => x.Id == patch.Id);
+            
+            if (patch.Description != null)
+            {
+                item.Description = patch.Description;
+            }
+
+            if (patch.Done.HasValue)
+            {
+                item.Done = patch.Done.Value;
+            }
         }
 
         public async Task Delete(IEnumerable<int> ids)

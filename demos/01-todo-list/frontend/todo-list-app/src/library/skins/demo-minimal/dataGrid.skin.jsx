@@ -50,7 +50,7 @@ export class DataGrid extends Component {
                             <td>
                                 <button
                                     disabled={item.state !== 'UNCHANGED'} 
-                                    onClick={() => this.props.beginCommitItem(item.key, {}, true)}
+                                    onClick={() => this.props.beginCommitItem(this.props.dal, item.key, {}, true)}
                                 >
                                     X
                                 </button>
@@ -108,7 +108,7 @@ export class DataGrid extends Component {
                     onBlur={(e) => {
                         const newValue = e.target.value;
                         if (newValue !== item.data[col.field]) {
-                            this.props.beginCommitItem(item.key, {[col.field]: newValue}, false);
+                            this.props.beginCommitItem(this.props.dal, item.key, {[col.field]: newValue}, false);
                         }
                     }}
                 />);
@@ -119,7 +119,7 @@ export class DataGrid extends Component {
                     onClick={(e) => {
                         const newValue = e.target.checked;
                         if (newValue !== item.data[col.field]) {
-                            this.props.beginCommitItem(item.key, {[col.field]: newValue}, false);
+                            this.props.beginCommitItem(this.props.dal, item.key, {[col.field]: newValue}, false);
                         }
                     }}
                 />);

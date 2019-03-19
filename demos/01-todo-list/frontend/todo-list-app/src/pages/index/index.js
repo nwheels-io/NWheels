@@ -25,7 +25,7 @@ const store = buildIndexPageStore();
 
 export const IndexPage = (props) => {
     const onNewItemAdd = PubSub.Event('indexSoloPage/newItemForm/add');
-    const todoItemDAL = DAL.GraphQL('todoItem', 'http://localhost:3001/api/graphql');
+    const todoItemDAL = DAL.GraphQL('http://localhost:3001/api/graphql/todoItem');
 
     return (
         <Provider store={store}>

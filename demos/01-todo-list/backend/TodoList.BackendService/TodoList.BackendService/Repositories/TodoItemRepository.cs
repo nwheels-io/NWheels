@@ -58,10 +58,23 @@ namespace TodoList.BackendService.Repositories
             return item;
         }
 
-        public Task Update(TodoItem item)
+        public Task Update(TodoItemPatch patch)
         {
+            var builder = Builders<TodoItem>.Update;
+            var updates = new List<UpdateDefinition<TodoItem>>();
+
+            if (patch.Description != null)
+            {
+                updates.Add(builder.Set(x => x.Description, patch.Description));
+            }
+
+            if (patch.Done.HasValue)
+            {
+                updates.Add(builder.Set(x => x.Done, patch.Done.Value));
+            }
+
             return GetTodoItemCollection()
-                .ReplaceOneAsync(ById<TodoItem, int>(item.Id), item);
+                .UpdateOneAsync(ById<TodoItem, int>(patch.Id), builder.Combine(updates));
         }
 
         public Task Delete(IEnumerable<int> ids)

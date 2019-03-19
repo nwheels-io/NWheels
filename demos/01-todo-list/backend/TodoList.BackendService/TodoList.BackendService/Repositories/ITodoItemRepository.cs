@@ -9,7 +9,7 @@ namespace TodoList.BackendService.Repositories
         Task<TodoItem> GetById(int id);
         Task<IEnumerable<TodoItem>> GetByQuery(int? id, string description, bool? done);
         Task<TodoItem> Create(string description, bool done);
-        Task Update(TodoItem item);
+        Task Update(TodoItemPatch patch);
         Task Delete(IEnumerable<int> ids);
     }
 }

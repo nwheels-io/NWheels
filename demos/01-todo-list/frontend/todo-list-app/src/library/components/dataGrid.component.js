@@ -210,21 +210,38 @@ const ThunkCreators = {
             }
 
             dispatch(ActionCreators.itemCommitStarted(itemKey, itemPropChanges, isDeleting));
-            
-            console.log('SENDING TO SERVER', {
-                action: (item.state === 'NEW' ? 'CREATE' : (isDeleting ? 'DELETE' : 'UPDATE')),
-                key: (item.state === 'NEW' ? undefined : item.key), 
-                changes: (isDeleting ? undefined : itemPropChanges)
-            });
 
-            setTimeout(() => {
-                if (isDeleting) {
-                    dispatch(ActionCreators.removeItem(itemKey));
-                } else {
-                    const serverId = item.data.id || MOCK_SERVER_ID++;
-                    dispatch(ActionCreators.itemCommitFinished(itemKey, serverId, {id: serverId}, isDeleting, true));
-                }
-            }, 3000);
+            let promise;
+            if (item.state === 'NEW') {
+                promise = dal.create(itemPropChanges)
+            } else if (!isDeleting) {
+                promise = dal.update(itemKey, itemPropChanges);
+            } else {
+                promise = dal.delete(itemKey);
+            }
+
+            if (isDeleting) {
+                promise.then(() => dispatch(ActionCreators.removeItem(itemKey)));
+            } else {
+                promise.then(serverPropChanges => dispatch(ActionCreators.itemCommitFinished(itemKey, serverPropChanges.id, serverPropChanges, isDeleting, true)));
+            }
+
+            promise.catch(err => dispatch(ActionCreators.itemCommitFinished(itemKey, null, null, isDeleting, false)));
+
+            // console.log('SENDING TO SERVER', {
+            //     action: (item.state === 'NEW' ? 'CREATE' : (isDeleting ? 'DELETE' : 'UPDATE')),
+            //     key: (item.state === 'NEW' ? undefined : item.key), 
+            //     changes: (isDeleting ? undefined : itemPropChanges)
+            // });
+
+            // setTimeout(() => {
+            //     if (isDeleting) {
+            //         dispatch(ActionCreators.removeItem(itemKey));
+            //     } else {
+            //         const serverId = item.data.id || MOCK_SERVER_ID++;
+            //         dispatch(ActionCreators.itemCommitFinished(itemKey, serverId, {id: serverId}, isDeleting, true));
+            //     }
+            // }, 3000);
         };
     },
 }
