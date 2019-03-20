@@ -5,7 +5,9 @@ const initialState = {
     isLoaded: false,
     isLoadFailed: false,
     items: [],
-    selectedCell: null
+    selectedCell: null,
+    columnFilter: {},
+    columnSort: {}
 };
 
 const mergeItemChanges = (item, newKey, newState, newDataProps) => {
@@ -34,9 +36,16 @@ const Reducer = (ID) => (state = initialState, action) => {
 
     switch (action.type) {
         case 'DATAGRID_LOAD_STARTED':
-            return initialState;
+            return {
+                ...state,
+                isLoaded: false,
+                isLoadFailed: false,
+                items: [],
+                selectCell: null
+            };
         case 'DATAGRID_LOAD_FINISHED':
             return {
+                ...state,
                 nextKey: initialState.nextKey,
                 isLoaded: action.success,
                 isLoadFailed: !action.success,
@@ -96,9 +105,19 @@ const Reducer = (ID) => (state = initialState, action) => {
                 ...state,
                 selectedCell: { row: action.row, col: action.col }
             }; 
+        case 'DATAGRID_COLUMN_SET_SORT':
+            return {
+                ...state,
+                columnSort: (action.field ? { [action.field]: action.ascending } : null)
+            }; 
+        case 'DATAGRID_COLUMN_SET_FILTER':
+            return {
+                ...state,
+                columnFilter: {...state.columnFilter, [action.field]: action.value}
+            }; 
+        default:
+            return state;
     }
-
-    return state;
 };
 
 const ActionCreators = {
@@ -157,6 +176,20 @@ const ActionCreators = {
             row,
             col
         }
+    },
+    setColumnSort: (field, ascending) => {
+        return {
+            type: 'DATAGRID_COLUMN_SET_SORT',
+            field,
+            ascending
+        };
+    },
+    setColumnFilter: (field, value) => {
+        return {
+            type: 'DATAGRID_COLUMN_SET_FILTER',
+            field,
+            value
+        };
     }
 };
 
@@ -164,20 +197,12 @@ let MOCK_SERVER_ID = 114;
 
 const ThunkCreators = {
     beginLoadItems: (dal, ID, fields) => {
-        return (dispatch) => {
+        return (dispatch, getState) => {
             dispatch(ActionCreators.loadStarted());
-            // setTimeout(() => {
-            //     
-            //         [
-            //             { key: 111, state: 'UNCHANGED', data: { id: 111, title: 'AAA', done: true } },
-            //             { key: 112, state: 'UNCHANGED', data: { id: 112, title: 'BBB', done: false } },
-            //             { key: 113, state: 'UNCHANGED', data: { id: 113, title: 'CCC', done: false } }
-            //         ],
-            //         true    
-            //     ));
-            // }, 5000);
             
-            dal.retrieve(fields)
+            const ownState = getState()[ID];
+
+            dal.retrieve(fields, ownState.columnFilter, ownState.columnSort)
                 .then(dataArray => {
                     const items = dataArray.map(data => ({
                         key: data.id, //TODO: parameterize this
@@ -227,23 +252,20 @@ const ThunkCreators = {
             }
 
             promise.catch(err => dispatch(ActionCreators.itemCommitFinished(itemKey, null, null, isDeleting, false)));
-
-            // console.log('SENDING TO SERVER', {
-            //     action: (item.state === 'NEW' ? 'CREATE' : (isDeleting ? 'DELETE' : 'UPDATE')),
-            //     key: (item.state === 'NEW' ? undefined : item.key), 
-            //     changes: (isDeleting ? undefined : itemPropChanges)
-            // });
-
-            // setTimeout(() => {
-            //     if (isDeleting) {
-            //         dispatch(ActionCreators.removeItem(itemKey));
-            //     } else {
-            //         const serverId = item.data.id || MOCK_SERVER_ID++;
-            //         dispatch(ActionCreators.itemCommitFinished(itemKey, serverId, {id: serverId}, isDeleting, true));
-            //     }
-            // }, 3000);
         };
     },
+    setColumnSort: (dal, ID, fields, field, ascending) => {
+        return (dispatch) => {
+            dispatch(ActionCreators.setColumnSort(field, ascending));
+            dispatch(ThunkCreators.beginLoadItems(dal, ID, fields));
+        }
+    },
+    setColumnFilter: (dal, ID, fields, field, value) => {
+        return (dispatch) => {
+            dispatch(ActionCreators.setColumnFilter(field, value));
+            dispatch(ThunkCreators.beginLoadItems(dal, ID, fields));
+        }
+    }
 }
 
 const Connector = (ID) => (skin) => connect(
@@ -254,7 +276,9 @@ const Connector = (ID) => (skin) => connect(
             isLoadFailed: ownState.isLoadFailed,
             items: ownState.items,
             nextKey: ownState.nextKey,
-            selectedCell: ownState.selectedCell
+            selectedCell: ownState.selectedCell,
+            columnSort: ownState.columnSort,
+            columnFilter: ownState.columnFilter
         };
     },
     (dispatch) => {
@@ -270,6 +294,12 @@ const Connector = (ID) => (skin) => connect(
             },
             beginCommitItem: (dal, key, itemPropChanges, isDeleting) => {
                 dispatch(ThunkCreators.beginCommitItem(dal, ID, key, itemPropChanges, isDeleting));
+            },
+            setColumnSort: (dal, fields, field, ascending) => {
+                dispatch(ThunkCreators.setColumnSort(dal, ID, fields, field, ascending));
+            },
+            setColumnFilter: (dal, fields, field, value) => {
+                dispatch(ThunkCreators.setColumnFilter(dal, ID, fields, field, value));
             }
         };
     }

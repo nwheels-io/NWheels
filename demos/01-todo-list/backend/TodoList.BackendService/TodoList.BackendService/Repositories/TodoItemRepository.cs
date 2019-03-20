@@ -47,8 +47,10 @@ namespace TodoList.BackendService.Repositories
 
         public async Task<TodoItem> Create(string description, bool done)
         {
+            var id = await _db.TakeNextSequenceNumber(id: "todo_items");
+            
             var item = new TodoItem {
-                Id = 0,
+                Id = id,
                 Description = description,
                 Done = done
             };
