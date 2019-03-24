@@ -1,5 +1,53 @@
 import React, { Component } from "react";
 
+const CellEditor = ({rowIndex, colIndex, col, item, isFilter, onCommitValue}) => {
+
+    function commitValue(newValue) {
+        if (newValue !== item.data[col.field]) {
+            onCommitValue(newValue);
+            // if (options && options.isFilter) {
+            //     this.props.setColumnFilter(this.props.dal, this.getFields(), col.field, newValue);
+            // } else {
+            //     this.props.beginCommitItem(this.props.dal, item.key, {[col.field]: newValue}, false);
+            // }
+        }
+    }
+
+    switch (col.editor) {
+        case 'text':    
+            return (<input 
+                type='text' 
+                defaultValue={item.data[col.field] || ''} 
+                onBlur={(e) => commitValue(e.target.value)}
+            />);
+        case 'check':    
+            if (isFilter) {
+                return (
+                    <select 
+                        defaultValue={JSON.stringify(item.data[col.field]) || ''}
+                        onChange={e => {
+                            const filterValue = (e.target.value === '' ? undefined : JSON.parse(e.target.value));
+                            commitValue(filterValue);
+                        }}
+                    >
+                        <option value=''>- no filter -</option>
+                        <option value='true'>YES</option>
+                        <option value='false'>NO</option>
+                    </select>
+                );
+            } else {
+                return (<input 
+                    type='checkbox' 
+                    defaultChecked={!!item.data[col.field]} 
+                    onClick={(e) => commitValue(e.target.checked)}
+                />);
+            }
+        default:
+            return (<span>(unsupported)</span>);
+    }
+
+};
+
 export class DataGrid extends Component {
     constructor(props) {
         super(props);
@@ -26,6 +74,8 @@ export class DataGrid extends Component {
             );
         }
 
+        const RowComponent = this.props.getRowComponent();
+
         return (
             <table>
                 <thead>
@@ -38,21 +88,13 @@ export class DataGrid extends Component {
                 </thead>
                 <tbody>
                     {this.props.items.map((item, rowIndex) => (
-                        <tr key={item.key}>
-                            <td>{item.key}</td>
-                            <td>{item.state}</td>
-                            {this.props.columns.map((col, colIndex) => {
-                                return this.renderCellTD(rowIndex, colIndex, col, item);
-                            })}
-                            <td>
-                                <button
-                                    disabled={item.state !== 'UNCHANGED'} 
-                                    onClick={() => this.props.beginCommitItem(this.props.dal, item.key, {}, true)}
-                                >
-                                    X
-                                </button>
-                            </td>
-                        </tr>
+                        <RowComponent 
+                            key={item.key}
+                            stateID={this.props.stateID}
+                            dal={this.props.dal}
+                            columns={this.props.columns}
+                            rowIndex={rowIndex}
+                        />
                     ))}
                 </tbody>
             </table>
@@ -60,8 +102,7 @@ export class DataGrid extends Component {
     }
 
     handleNewItem(data) {
-        this.props.addItem(data);
-        this.props.beginCommitItem(this.props.dal, this.props.nextKey, data, false);
+        this.props.beginCommitNewItem(this.props.dal, data);
     }
 
     renderCellTH(colIndex, col) {
@@ -95,12 +136,80 @@ export class DataGrid extends Component {
         if (col.type !== 'key') {
             return (
                 <div>
-                    {this.renderCellEditor(-1, colIndex, col, { data: this.props.columnFilter }, { isFilter: true })}
+                    <CellEditor 
+                        rowIndex={-1} 
+                        colIndex={colIndex} 
+                        col={col} 
+                        item={{ data: this.props.columnFilter }} 
+                        isFilter={true}
+                        onCommitValue={newValue => this.props.setColumnFilter(this.props.dal, this.getFields(), col.field, newValue)} 
+                    />
                     <button onClick={e => this.props.setColumnFilter(this.props.dal, this.getFields(), col.field, undefined)}>x</button>
                 </div>
             );
         } 
         return null;
+    }
+
+    commitCellEditorValue(col, item, options, newValue) {
+        if (newValue !== item.data[col.field]) {
+            if (options && options.isFilter) {
+                this.props.setColumnFilter(this.props.dal, this.getFields(), col.field, newValue);
+            } else {
+                this.props.beginCommitItem(this.props.dal, item.key, {[col.field]: newValue}, false);
+            }
+        }
+    }
+
+    getColumnSortBoxAscending(optionValue) {
+        switch (optionValue) {
+            case 'ASC': return true;
+            case 'DESC': return false;
+            default: return undefined;
+        }
+    }
+
+    getColumnSortBoxValue(ascending) {
+        if (typeof ascending !== 'boolean') {
+            return '';
+        }
+        return (ascending ? 'ASC' : 'DESC');
+    }
+
+    getFields() {
+        return this.props.columns.map(col => col.field);
+    }
+
+    static get rowComponent() {
+        return DataGridRow;
+    }
+}
+
+class DataGridRow extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        const item = this.props.item;
+
+        return (
+            <tr key={item.key}>
+                <td>{item.key}</td>
+                <td>{item.state}</td>
+                {this.props.columns.map((col, colIndex) => {
+                    return this.renderCellTD(this.props.rowIndex, colIndex, col, item);
+                })}
+                <td>
+                    <button
+                        disabled={item.state !== 'UNCHANGED'} 
+                        onClick={() => this.props.beginCommitItem(this.props.dal, item.key, {}, true)}
+                    >
+                        X
+                    </button>
+                </td>
+            </tr>
+        );
     }
 
     renderCellTD(rowIndex, colIndex, col, item) {
@@ -135,72 +244,16 @@ export class DataGrid extends Component {
         }
     }
 
-    renderCellEditor(rowIndex, colIndex, col, item, options) {
-        switch (col.editor) {
-            case 'text':    
-                return (<input 
-                    type='text' 
-                    defaultValue={item.data[col.field] || ''} 
-                    onBlur={(e) => {
-                        const newValue = e.target.value;
-                        this.commitCellEditorValue(col, item, options, newValue);
-                    }}
-                />);
-            case 'check':    
-                if (options && options.isFilter) {
-                    return (
-                        <select 
-                            defaultValue={JSON.stringify(item.data[col.field]) || ''}
-                            onChange={e => {
-                                const filterValue = (e.target.value === '' ? undefined : JSON.parse(e.target.value));
-                                this.commitCellEditorValue(col, item, options, filterValue);
-                            }}
-                        >
-                            <option value=''>- no filter -</option>
-                            <option value='true'>YES</option>
-                            <option value='false'>NO</option>
-                        </select>
-                    );
-                } else {
-                    return (<input 
-                        type='checkbox' 
-                        defaultChecked={!!item.data[col.field]} 
-                        onClick={(e) => {
-                            const newValue = e.target.checked;
-                            this.commitCellEditorValue(col, item, options, newValue);
-                        }}
-                    />);
-                }
-        }
-    }
-
-    commitCellEditorValue(col, item, options, newValue) {
-        if (newValue !== item.data[col.field]) {
-            if (options && options.isFilter) {
-                this.props.setColumnFilter(this.props.dal, this.getFields(), col.field, newValue);
-            } else {
-                this.props.beginCommitItem(this.props.dal, item.key, {[col.field]: newValue}, false);
-            }
-        }
-    }
-
-    getColumnSortBoxAscending(optionValue) {
-        switch (optionValue) {
-            case 'ASC': return true;
-            case 'DESC': return false;
-            default: return undefined;
-        }
-    }
-
-    getColumnSortBoxValue(ascending) {
-        if (typeof ascending !== 'boolean') {
-            return '';
-        }
-        return (ascending ? 'ASC' : 'DESC');
-    }
-
-    getFields() {
-        return this.props.columns.map(col => col.field);
+    renderCellEditor(rowIndex, colIndex, col, item) {
+        return (
+            <CellEditor 
+                rowIndex={rowIndex} 
+                colIndex={colIndex} 
+                col={col} 
+                item={item} 
+                isFilter={false}
+                onCommitValue={newValue => this.props.beginCommitItem(this.props.dal, item.key, {[col.field]: newValue}, false)} 
+            />
+        )
     }
 }
-

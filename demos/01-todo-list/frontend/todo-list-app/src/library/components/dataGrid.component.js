@@ -193,8 +193,6 @@ const ActionCreators = {
     }
 };
 
-let MOCK_SERVER_ID = 114;
-
 const ThunkCreators = {
     beginLoadItems: (dal, ID, fields) => {
         return (dispatch, getState) => {
@@ -215,6 +213,13 @@ const ThunkCreators = {
                     console.error(error);
                     dispatch(ActionCreators.loadFinished(null, false));
                 });
+        };
+    },
+    beginCommitNewItem: (dal, ID, newItemProps) => {
+        return (dispatch, getState) => {
+            const ownState = getState()[ID];
+            dispatch(ActionCreators.addItem(newItemProps));
+            dispatch(ThunkCreators.beginCommitItem(dal, ID, ownState.nextKey, newItemProps, false));
         };
     },
     beginCommitItem: (dal, ID, itemKey, itemPropChanges, isDeleting) => {
@@ -272,6 +277,7 @@ const Connector = (ID) => (skin) => connect(
     (state) => { 
         const ownState = state[ID];
         return { 
+            stateID: ID,
             isLoaded: ownState.isLoaded,
             isLoadFailed: ownState.isLoadFailed,
             items: ownState.items,
@@ -282,19 +288,22 @@ const Connector = (ID) => (skin) => connect(
         };
     },
     (dispatch) => {
+        const rowComponent = RowConnector(ID)(skin.rowComponent);
+
         return {    
-            addItem: (newItemProps) => {
-                dispatch(ActionCreators.addItem(newItemProps));
-            },
-            selectCell: (row, col) => {
-                dispatch(ActionCreators.selectCell(row, col));
-            },
+            getRowComponent: () => rowComponent,
+            // selectCell: (row, col) => {
+            //     dispatch(ActionCreators.selectCell(row, col));
+            // },
             beginLoadItems: (dal, fields) => {
                 dispatch(ThunkCreators.beginLoadItems(dal, ID, fields));
             },
-            beginCommitItem: (dal, key, itemPropChanges, isDeleting) => {
-                dispatch(ThunkCreators.beginCommitItem(dal, ID, key, itemPropChanges, isDeleting));
+            beginCommitNewItem: (dal, newItemProps) => {
+                dispatch(ThunkCreators.beginCommitNewItem(dal, ID, newItemProps));
             },
+            // beginCommitItem: (dal, key, itemPropChanges, isDeleting) => {
+            //     dispatch(ThunkCreators.beginCommitItem(dal, ID, key, itemPropChanges, isDeleting));
+            // },
             setColumnSort: (dal, fields, field, ascending) => {
                 dispatch(ThunkCreators.setColumnSort(dal, ID, fields, field, ascending));
             },
@@ -304,6 +313,29 @@ const Connector = (ID) => (skin) => connect(
         };
     }
 )(skin);
+
+const RowConnector = (ID) => connect(
+    (state, ownProps) => {
+        const ownState = state[ownProps.stateID];
+        return {
+            dal: ownProps.dal,
+            columns: ownProps.columns,
+            rowIndex: ownProps.rowIndex, 
+            item: ownState.items[ownProps.rowIndex],
+            selectedCell: ownState.selectedCell
+        }
+    },
+    (dispatch) => {
+        return {    
+            selectCell: (row, col) => {
+                dispatch(ActionCreators.selectCell(row, col));
+            },
+            beginCommitItem: (dal, key, itemPropChanges, isDeleting) => {
+                dispatch(ThunkCreators.beginCommitItem(dal, ID, key, itemPropChanges, isDeleting));
+            },
+        };
+    }
+)
 
 export const DataGrid = {
     Connector,
