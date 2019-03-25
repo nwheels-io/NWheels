@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 namespace NWheels.UI.Model
 {
 
-    public new class DataGridProps<T> : PropsOf<DataGrid<T>>
+    public class DataGridProps<T> : PropsOf<DataGrid<T>>
     {
         public IList<DataGridColumnProps<T>> Columns;
 
@@ -23,9 +23,9 @@ namespace NWheels.UI.Model
         public DataGridProps<T> WithDataSource(Func<IDataSourceFactory<T>, IDataSource<T>> dataSource) => default;
         public DataGridProps<T> WithAutoColumns() => default;
         public DataGridProps<T> WithColumns(params Func<T, object>[] fields) => default;
-        public DataGridProps<T> WithEditorInline() => default;
-        public DataGridProps<T> WithAppenderInline() => default;
-        public DataGridProps<T> WithAppenderInlineForm(Form<T> form) => default;
+        public DataGridProps<T> WithInlineEditor() => default;
+        public DataGridProps<T> WithAppenderRow() => default;
+        public DataGridProps<T> WithAppenderForm(Form<T> form) => default;
     }
 
     public class DataGridColumnProps<T>

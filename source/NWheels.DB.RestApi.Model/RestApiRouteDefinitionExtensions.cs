@@ -6,11 +6,14 @@ namespace NWheels.DB.RestApi.Model
 {
     public static class RestApiRouteDefinitionExtensions
     {
-        public static IDbCrudRestApiRouteDefinition<TDB> CrudOverDB<TDB>(this IRestApiRouteImplementation definition) => default;
-    }
+        public static RestApiRoute<ICrudService<TEntity>> CrudOverDB<TDB, TEntity>(
+            this IRestApiRouteImplementation definition,
+            Func<TDB, DBCollection<TEntity>> collection
+        ) => default;
 
-    public interface IDbCrudRestApiRouteDefinition<TDB>
-    {
-        RestApiRoute<ICrudService<T>> Collection<T>(Func<TDB, DBCollection<T>> collection);
+        public static RestApiRoute<ICrudService<TEntity>> GraphQLOverDB<TDB, TEntity>(
+            this IRestApiRouteImplementation definition,
+            Func<TDB, DBCollection<TEntity>> collection
+        ) => default;
     }
 }

@@ -13,9 +13,20 @@ namespace NWheels.UI.Model
 
         public FormProps<T> WithAutoFields() => default;
         public FormProps<T> WithFields(params Func<T, object>[] fields) => default;
-        public FormProps<T> WithActions(params FormActionProps<T>[] actions) => default;
+        public FormProps<T> WithAction(string id, Action<FormActionProps<T>> setProps = null) => default;
+        public FormProps<T> WithSubmitAction(string id = "submit", Action<FormActionProps<T>> setProps = null) => default;
+        public FormProps<T> WithResetAction(string id = "reset", Action<FormActionProps<T>> setProps = null) => default;
     }
 
+    public enum FormActionSemantics
+    {
+        Submit,
+        Reset,
+        Apply,
+        Cancel,
+        Close
+    }
+    
     public class FormFieldProps<T>
     {
     }
@@ -23,8 +34,14 @@ namespace NWheels.UI.Model
     public class FormActionProps<T>
     {
         public string Id;
+        public FormActionSemantics? Semantics;
         public Func<T, bool> OnUpdate;
         public Func<T, Task> OnExecute;
+
+        public FormActionProps<T> WithSemantics(FormActionSemantics semantics) => default;
+        public FormActionProps<T> WithUpdate(Func<T, bool> onUpdate) => default;
+        public FormActionProps<T> WithUpdate(Func<T, Task<bool>> onUpdate) => default;
+        public FormActionProps<T> WithExecute(Func<T, Task> onExecute) => default;
     }
 
     public class Form<T> : UIComponent<FormProps<T>, Empty.State>
