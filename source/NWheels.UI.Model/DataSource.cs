@@ -9,7 +9,11 @@ namespace NWheels.UI.Model
     {
     }
     
-    public interface IDataSourceFactory<T>
+    public interface IDataSourceFactory
+    {
+    }
+    
+    public interface IDataSourceFactory<T> : IDataSourceFactory
     {
         IDataSource<T> Transient { get; }
     }

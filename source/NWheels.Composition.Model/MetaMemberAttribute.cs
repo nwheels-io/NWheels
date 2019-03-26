@@ -1,6 +1,6 @@
 using System;
 
-namespace NWheels.Package.Model
+namespace NWheels.Composition.Model
 {
     [AttributeUsage(
         AttributeTargets.Class | 

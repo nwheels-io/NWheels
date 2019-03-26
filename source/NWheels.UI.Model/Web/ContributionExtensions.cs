@@ -1,5 +1,5 @@
 using NWheels.Domain.Model;
-using NWheels.Package.Model;
+using NWheels.Composition.Model;
 
 namespace NWheels.UI.Model.Web
 {
@@ -13,7 +13,7 @@ namespace NWheels.UI.Model.Web
 
     public class WebAppConfig
     {
-        [Required]
+        [ValueContract.Required]
         public string BaseUrl = null;
     }
 }

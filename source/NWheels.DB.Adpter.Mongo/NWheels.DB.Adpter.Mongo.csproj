@@ -6,11 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
+      <ProjectReference Include="..\NWheels.Composition.Model\NWheels.Composition.Model.csproj" />
+      <ProjectReference Include="..\NWheels.DB.Model\NWheels.DB.Model.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\NWheels.Composition.Model\NWheels.Composition.Model.csproj" />
-      <ProjectReference Include="..\NWheels.Domain.Model\NWheels.Domain.Model.csproj" />
-    </ItemGroup>
 </Project>

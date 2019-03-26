@@ -1,4 +1,4 @@
-﻿namespace NWheels.Package.Model
+﻿namespace NWheels.Composition.Model
 {
     public abstract class Package
     {

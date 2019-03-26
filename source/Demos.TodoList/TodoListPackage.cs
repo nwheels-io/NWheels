@@ -2,11 +2,12 @@ using Demos.TodoList.Api;
 using Demos.TodoList.DB;
 using Demos.TodoList.UI;
 using NWheels.DB.Model;
-using NWheels.Deployment.Model;
-using NWheels.Domain.Model;
-using NWheels.Package.Model;
+using NWheels.DevOps.Model;
+using NWheels.Composition.Model;
 using NWheels.RestApi.Model;
 using NWheels.UI.Model.Web;
+using static NWheels.Domain.Model.SemanticContract;
+using static NWheels.Domain.Model.ValueContract;
 
 namespace Demos.TodoList
 {
@@ -34,11 +35,13 @@ namespace Demos.TodoList
         
         public class EnvironmentConfig
         {
-            [Secret, Required]
+            [Required, Secret, ConnectionString]
             public string DBConnectionString = null;
-            [Required]
+
+            [Required, Url]
             public string WebAppUrl = null;
-            [Required]
+            
+            [Required, Url]
             public string RestApiUrl = null;
         }
     }

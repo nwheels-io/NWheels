@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\NWheels.Package.Model\NWheels.Package.Model.csproj" />
+      <ProjectReference Include="..\NWheels.Composition.Model\NWheels.Composition.Model.csproj" />
     </ItemGroup>
 
 </Project>

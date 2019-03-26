@@ -1,5 +1,5 @@
-using NWheels.Deployment.Model;
-using NWheels.Package.Model;
+using NWheels.DevOps.Model;
+using NWheels.Composition.Model;
 
 namespace Demos.TodoList.DevOps
 {

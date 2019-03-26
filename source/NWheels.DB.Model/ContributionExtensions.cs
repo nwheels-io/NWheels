@@ -1,5 +1,5 @@
 using System;
-using NWheels.Package.Model;
+using NWheels.Composition.Model;
 
 namespace NWheels.DB.Model
 {

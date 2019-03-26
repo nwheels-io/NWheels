@@ -1,7 +1,7 @@
 using System;
-using NWheels.Package.Model;
+using NWheels.Composition.Model;
 
-namespace NWheels.Deployment.Model
+namespace NWheels.DevOps.Model
 {
     public abstract class Microservice<TConfig> : Package<TConfig>
         where TConfig : class, new()

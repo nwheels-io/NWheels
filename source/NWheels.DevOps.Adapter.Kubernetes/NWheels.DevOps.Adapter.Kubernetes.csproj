@@ -2,15 +2,12 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <LangVersion>7.3</LangVersion>
+        <RootNamespace>NWheels.DevOps.Adapter.Gke</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
+      <ProjectReference Include="..\NWheels.Composition.Model\NWheels.Composition.Model.csproj" />
+      <ProjectReference Include="..\NWheels.DevOps.Model\NWheels.DevOps.Model.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\NWheels.Composition.Model\NWheels.Composition.Model.csproj" />
-      <ProjectReference Include="..\NWheels.Domain.Model\NWheels.Domain.Model.csproj" />
-    </ItemGroup>
 </Project>

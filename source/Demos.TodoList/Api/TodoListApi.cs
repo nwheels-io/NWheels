@@ -7,7 +7,8 @@ namespace Demos.TodoList.Api
 {
     public class TodoListApi : RestApiModel
     {
-        public RestApiRoute<ICrudService<TodoItemEntity>> TodoItem =>
+        [Route]
+        public ICrudService<TodoItemEntity> TodoItem =>
             RestApiRoute.Implementation.GraphQLOverDB<TodoListDB, TodoItemEntity>(
                 db => db.TodoItems
             );

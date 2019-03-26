@@ -1,3 +1,4 @@
+using Demos.TodoList.Api;
 using Demos.TodoList.Domain;
 using NWheels.UI.Model;
 using NWheels.UI.Model.Web;
@@ -8,8 +9,7 @@ namespace Demos.TodoList.UI
 {
     public class TodoListWebApp : WebApp<Empty.Props, Empty.State>
     {
-        [IndexPage]
-        public TodoPage Todos => new TodoPage();
+        public TodoPage Index => new TodoPage();
     }
 
     public class TodoPage : SoloComponentPage<Empty.Props, Empty.State>
@@ -28,7 +28,7 @@ namespace Demos.TodoList.UI
             .WithAutoColumns()
             .WithInlineEditor()
             .WithAppenderForm(NewTodoForm)
-            .WithDataSource(factory => factory.BackendRestApiCrud())
+            .WithDataSource(factory => factory.BackendRestApi<TodoListApi>().Route(api => api.TodoItem))
         );
     }
 }
