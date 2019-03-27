@@ -2,7 +2,8 @@
 
 ## Welcome to NWheels
 
-**CURRENT STATUS**: the `master` branch is **Gen2**, in incubation phase. Field-tested **Gen1** can be found in [gen-1 branch](https://github.com/nwheels-io/NWheels/tree/gen-1). **Gen1** proved to have conceptual flaws, which **Gen2** comes to fix. **Gen2** is a set of opinionated policies on top of transpilation mechanism by [MetaPrograms project](https://github.com/nwheels-io/MetaPrograms).
+**CURRENT STATUS**: the `master` branch is **Gen2**, in incubation phase. Field-tested **Gen1** can be found in  [gen-1 branch](https://github.com/nwheels-io/NWheels/tree/gen-1). **Gen1** proved to have some conceptual flaws, which **Gen2** comes to fix. Most important, **Gen2** is a set of policies on top of transpilation engine by [MetaPrograms project](https://github.com/nwheels-io/MetaPrograms).
+
 
 # How it works
 
