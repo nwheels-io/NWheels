@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RootNamespace>NWheels.DevOps.Adapter.Gke</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NWheels.Composition.Model\NWheels.Composition.Model.csproj" />
+      <ProjectReference Include="..\NWheels.DevOps.Model\NWheels.DevOps.Model.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NWheels.Composition.Model\NWheels.Composition.Model.csproj" />
+      <ProjectReference Include="..\NWheels.UI.Model\NWheels.UI.Model.csproj" />
+    </ItemGroup>
+
+</Project>

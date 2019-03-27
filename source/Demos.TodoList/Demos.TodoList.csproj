@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>7.3</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\NWheels.Composition.Model\NWheels.Composition.Model.csproj" />
+        <ProjectReference Include="..\NWheels.DevOps.Model\NWheels.DevOps.Model.csproj" />
+        <ProjectReference Include="..\NWheels.Domain.Model\NWheels.Domain.Model.csproj" />
+        <ProjectReference Include="..\NWheels.DB.Model\NWheels.DB.Model.csproj" />
+        <ProjectReference Include="..\NWheels.DB.RestApi.Model\NWheels.DB.RestApi.Model.csproj" />
+        <ProjectReference Include="..\NWheels.RestApi.Model\NWheels.RestApi.Model.csproj" />
+        <ProjectReference Include="..\NWheels.UI.Model\NWheels.UI.Model.csproj" />
+        <ProjectReference Include="..\NWheels.UI.RestApi.Model\NWheels.UI.RestApi.Model.csproj" />
+    </ItemGroup>
+
+</Project>
