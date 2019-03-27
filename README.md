@@ -1,16 +1,52 @@
-# Welcome to NWheels
+<img align="left" src="docs/images/logo-132.png"/>
 
-## How it works
+## Welcome to NWheels
 
-1. You are provided with a DSL for every typical aspect of enterprise application (e.g., UI, DDD, DB, authorization, monitoring, CI/CD, and many more). 
+CURRENT STATUS: the `master` branch is **GEN2**, which is in incubation phase. The field-proven **GEN1** is in the `gen-1` branch. Yet **GEN1** has several flaws in the concept, which **GEN2** comes to fix.
 
-1. You write small amount of code in these DSL. Your code is clean from technology details, and expresses the distilled concept of your application.
 
-1. You pick technology adapters for every aspect involved in your code. For example: UI -> web/React, REST API -> node/Express, DDD -> TypeScript, DB -> MongoDB, Monitoring -> Elastic, and others. You can setup different technology stacks for different components of your application (such as microservices or UI apps).
+# How it works
 
-1. You build the project, and the DSLs get transpiled into production-ready human-maintainable codebase per technology choices you've made. You also get a CI/CD pipeline ready to deploy your application to production.
+<img src="docs/images/nwheels-hexagon-2.png" align="right">
 
-1. You maintain and enhance the application in the DSL code. You can just scaffold, prototype, or experiment with alternative domain models. But you can also stick to DSL in the long run. That would be a great cost saver and velocity booster for your project.
+- **Intents as code**: express your application with minimal amount of code clean from technology details
+- **Programming model DSLs**: APIs on top of which _intents_ are coded; on the outer side, the _intents_ are digested into _metadata_ for _technology adapters_.
+- **Technology adapters**: pluggable code generators, which take _metadata_ as input from _programming models_, and generate code for concrete platforms and frameworks
+- **Generated implementations**: production-ready human-maintainable codebase, including CI/CD pipeline
 
-1. You can eject at any moment: just stop maintaining the DSL code, and start maintaining the generated codebase.
+Maintain your code in DSLs in the long run, because DSLs are great cost saver and velocity booster. Alternatively, use NWheels as a scaffolding or prototyping tool. 
+
+You can eject at any moment: just drop the DSLs and start maintaining generated codebase. You should only eject when you absolutely have to.
+
+# Getting started
+
+## Installation
+
+### Prerequisites
+
+- A machine running Linux, macOS, or Windows
+- .NET Core SDK 2.1 or higher
+
+### Install CLI
+
+```
+$ dotnet tool install -g nwheels --version 2.0.0-alpha1
+```
+
+## Demo
+
+```
+$ git clone https://github.com/nwheels-io/NWheels.git nwheels
+$ cd nwheels/demos/01-todo-list
+$ dotnet run
+```
+
+## Creating your own application
+
+```
+$ dotnet new nwheels MyFirstApp
+$ cd MyFirstApp
+$ dotnet run
+```
+
 
