@@ -1,4 +1,5 @@
 using Demos.TodoList.Api;
+using Demos.TodoList.DevOps;
 using Demos.TodoList.Domain;
 using NWheels.Composition.Model;
 using NWheels.UI.Model;
@@ -6,35 +7,31 @@ using NWheels.UI.Model.Web;
 using NWheels.UI.Model.Web.Templates;
 using NWheels.UI.RestApi.Model;
 
-namespace Demos.TodoList.UI
+namespace Demos.TodoList.FrontEnd
 {
-    public class TodoListWebApp : WebApp<Empty.Props, Empty.State>
+    public class TodoListWebApp : WebApp<TodoListUrlsConfig, Empty.State>
     {
-        private readonly TodoListApi _backendApi;
-
-        public TodoListWebApp(TodoListApi backendApi)
+        public TodoListWebApp(TodoListUrlsConfig props) : base(props)
         {
-            _backendApi = backendApi;
         }
-        
-        [Include]
-        TodoPage Index => new TodoPage(_backendApi);
+
+        TodoPage Index => new TodoPage(Props);
     }
 
-    public class TodoPage : SoloComponentPage
+    public class TodoPage : SoloComponentPage<TodoListUrlsConfig, Empty.State>
     {
-        public TodoPage(TodoListApi backendApi)
+        public TodoPage(TodoListUrlsConfig props) : base(props)
         {
-            this.BackendApi = backendApi;
         }
-        
-        private TodoListApi BackendApi { get; }
-        
+
+        [Include]
+        BackendApiProxy<TodoListApi> Backend => new BackendApiProxy<TodoListApi>(Props.BackendApiUrl);
+
         public override UIComponent SoloComponent => new StackLayout(props => props
             .Row(NewTodoForm)
             .Row(TodoGrid)
         );
-        
+     
         [Include]
         Form<TodoItemEntity> NewTodoForm => new Form<TodoItemEntity>(props => props
             .WithFields(t => t.Title)
@@ -46,7 +43,7 @@ namespace Demos.TodoList.UI
             .WithAutoColumns()
             .WithInlineEditor()
             .WithAppenderForm(NewTodoForm)
-            .WithDataSource(BackendApi.TodoItems.AsDataSource())
+            .WithDataSource(Backend.Api.TodoItems.AsDataSource())
         );
     }
 }

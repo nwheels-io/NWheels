@@ -1,9 +1,9 @@
 using Demos.TodoList.Api;
-using Demos.TodoList.DB;
-using NWheels.DevOps.Model;
+using Demos.TodoList.DevOps;
 using NWheels.Composition.Model;
+using NWheels.DevOps.Model;
 
-namespace Demos.TodoList.DevOps
+namespace Demos.TodoList.BackEnd
 {
     public class TodoListService : Microservice<TodoListEnvConfig>
     {

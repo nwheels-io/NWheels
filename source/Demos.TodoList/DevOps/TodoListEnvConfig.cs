@@ -4,15 +4,21 @@ using static NWheels.Domain.Model.ValueContract;
 
 namespace Demos.TodoList.DevOps
 {
-    public class TodoListEnvConfig
+    public class TodoListUrlsConfig
     {
-        [Required, Secret, ConnectionString]
-        public string DBConnectionString = null;
-
-        [Required, Url]
+        [Required, Url, FromEnvVar, FromCliArg]
         public string WebAppUrl = null;
             
-        [Required, Url]
-        public string RestApiUrl = null;
+        [Required, Url, FromEnvVar, FromCliArg]
+        public string BackendApiUrl = null;
+    }
+
+    public class TodoListEnvConfig
+    {
+        [Required] 
+        public TodoListUrlsConfig Urls = null; 
+        
+        [Required, Secret, ConnectionString, FromEnvVar, FromCliArg]
+        public string DBConnectionString = null;
     }
 }

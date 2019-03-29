@@ -1,8 +1,7 @@
-using Demos.TodoList.DevOps;
 using NWheels.Composition.Model;
 using NWheels.DevOps.Adapters.Environments.Gke;
 
-namespace Demo.HelloWorld
+namespace Demos.TodoList.DevOps
 {
     public class StagingEnvironment : GkeEnvironment<TodoListEnvConfig>
     {
@@ -12,6 +11,6 @@ namespace Demo.HelloWorld
         }
         
         [Include]
-        public TodoListDeployment TodoList => new TodoListDeployment(Config); 
+        public CommonEnvironment Common => new CommonEnvironment(Config); 
     }
 }

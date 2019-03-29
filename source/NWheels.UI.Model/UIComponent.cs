@@ -35,7 +35,5 @@ namespace NWheels.UI.Model
         protected TComponent FromProps<TComponent>(PropsOf<TComponent> props)
             where TComponent : UIComponent
             => default;
-        
-        protected TApi BackendProxy<TApi>() => default;
     }
 }

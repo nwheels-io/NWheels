@@ -1,6 +1,6 @@
 using System;
 using System.Net;
-using Demos.TodoList.DB;
+using Demos.TodoList.BackEnd;
 using Demos.TodoList.Domain;
 using NWheels.Composition.Model;
 using NWheels.DB.RestApi.Model;
@@ -8,7 +8,7 @@ using NWheels.RestApi.Model;
 
 namespace Demos.TodoList.Api
 {
-    public class TodoListApi : RestApiModel
+    public class TodoListApi : RestApiModel, ITodoListApi
     {
         private readonly TodoListDB _db;
         
