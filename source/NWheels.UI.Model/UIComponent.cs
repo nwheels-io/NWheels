@@ -12,6 +12,10 @@ namespace NWheels.UI.Model
 
     public abstract class UIComponent
     {
+        public static implicit operator UIComponent(string text)
+        {
+            return new TextContent(text);
+        }
     }
         
         

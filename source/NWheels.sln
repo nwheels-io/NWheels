@@ -18,25 +18,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Domain.Model", "NWh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demos.TodoList", "Demos.TodoList\Demos.TodoList.csproj", "{12416787-87A2-4BCD-B6EF-D7AB30B41A1A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.DB.Adpter.Mongo", "NWheels.DB.Adpter.Mongo\NWheels.DB.Adpter.Mongo.csproj", "{8FC7240D-0BCB-44F0-A779-6A5A75184DB6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.DB.Adpters", "NWheels.DB.Adpters\NWheels.DB.Adpters.csproj", "{8FC7240D-0BCB-44F0-A779-6A5A75184DB6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.DevOps.Adapter.Kubernetes", "NWheels.DevOps.Adapter.Kubernetes\NWheels.DevOps.Adapter.Kubernetes.csproj", "{76A9EFBB-2410-4D67-9F6A-AA586515DB34}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.RestApi.Adapters", "NWheels.RestApi.Adapters\NWheels.RestApi.Adapters.csproj", "{B1E2AA07-4935-48E2-A10B-AA1ED01B0F00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.RestApi.Adapter.AspNetCore", "NWheels.RestApi.Adapter.AspNetCore\NWheels.RestApi.Adapter.AspNetCore.csproj", "{B1E2AA07-4935-48E2-A10B-AA1ED01B0F00}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.UI.Adapters", "NWheels.UI.Adapters\NWheels.UI.Adapters.csproj", "{910DDC38-EE89-4D8A-B69B-B7CDAB0B50CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.UI.Adapter.ReactRedux", "NWheels.UI.Adapter.ReactRedux\NWheels.UI.Adapter.ReactRedux.csproj", "{910DDC38-EE89-4D8A-B69B-B7CDAB0B50CF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.UI.RestApi.Adapters", "NWheels.UI.RestApi.Adapters\NWheels.UI.RestApi.Adapters.csproj", "{75454EAC-DFCA-418A-8194-DB3D1D6C2171}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.UI.RestApi.Adapter.AspNetCore", "NWheels.UI.RestApi.Adapter.AspNetCore\NWheels.UI.RestApi.Adapter.AspNetCore.csproj", "{75454EAC-DFCA-418A-8194-DB3D1D6C2171}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.DevOps.Adapters", "NWheels.DevOps.Adapters\NWheels.DevOps.Adapters.csproj", "{FCF866CB-7372-4FB6-82D3-4376EEE1CD98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.UI.RestApi.Adapter.ReactRedux", "NWheels.UI.RestApi.Adapter.ReactRedux\NWheels.UI.RestApi.Adapter.ReactRedux.csproj", "{35816B8B-9796-4BC6-9FF0-422F1A375C5E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.DB.RestApi.Adapters", "NWheels.DB.RestApi.Adapters\NWheels.DB.RestApi.Adapters.csproj", "{817CEC6B-5104-48D1-98E8-D3D1DAC37F61}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.DevOps.Adapter.Docker", "NWheels.DevOps.Adapter.Docker\NWheels.DevOps.Adapter.Docker.csproj", "{E78B1022-D631-4D30-B7E2-1D2DDFB67C92}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.DevOps.Adapter.AppVeyor", "NWheels.DevOps.Adapter.AppVeyor\NWheels.DevOps.Adapter.AppVeyor.csproj", "{FCF866CB-7372-4FB6-82D3-4376EEE1CD98}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.DevOps.Adapter.Elastic", "NWheels.DevOps.Adapter.Elastic\NWheels.DevOps.Adapter.Elastic.csproj", "{9393098D-9300-4F46-9F86-BB06ADFCD889}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.DB.RestApi.Adapter.Mongo", "NWheels.DB.RestApi.Adapter.Mongo\NWheels.DB.RestApi.Adapter.Mongo.csproj", "{817CEC6B-5104-48D1-98E8-D3D1DAC37F61}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo.HelloWorld", "Demo.HelloWorld\Demo.HelloWorld.csproj", "{6B854931-A2B9-48CA-BDBE-87B8CCB2A1A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -84,10 +78,6 @@ Global
 		{8FC7240D-0BCB-44F0-A779-6A5A75184DB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FC7240D-0BCB-44F0-A779-6A5A75184DB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FC7240D-0BCB-44F0-A779-6A5A75184DB6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{76A9EFBB-2410-4D67-9F6A-AA586515DB34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{76A9EFBB-2410-4D67-9F6A-AA586515DB34}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{76A9EFBB-2410-4D67-9F6A-AA586515DB34}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{76A9EFBB-2410-4D67-9F6A-AA586515DB34}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B1E2AA07-4935-48E2-A10B-AA1ED01B0F00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B1E2AA07-4935-48E2-A10B-AA1ED01B0F00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1E2AA07-4935-48E2-A10B-AA1ED01B0F00}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -100,25 +90,17 @@ Global
 		{75454EAC-DFCA-418A-8194-DB3D1D6C2171}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75454EAC-DFCA-418A-8194-DB3D1D6C2171}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75454EAC-DFCA-418A-8194-DB3D1D6C2171}.Release|Any CPU.Build.0 = Release|Any CPU
-		{35816B8B-9796-4BC6-9FF0-422F1A375C5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{35816B8B-9796-4BC6-9FF0-422F1A375C5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{35816B8B-9796-4BC6-9FF0-422F1A375C5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{35816B8B-9796-4BC6-9FF0-422F1A375C5E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E78B1022-D631-4D30-B7E2-1D2DDFB67C92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E78B1022-D631-4D30-B7E2-1D2DDFB67C92}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E78B1022-D631-4D30-B7E2-1D2DDFB67C92}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E78B1022-D631-4D30-B7E2-1D2DDFB67C92}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FCF866CB-7372-4FB6-82D3-4376EEE1CD98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FCF866CB-7372-4FB6-82D3-4376EEE1CD98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCF866CB-7372-4FB6-82D3-4376EEE1CD98}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCF866CB-7372-4FB6-82D3-4376EEE1CD98}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9393098D-9300-4F46-9F86-BB06ADFCD889}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9393098D-9300-4F46-9F86-BB06ADFCD889}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9393098D-9300-4F46-9F86-BB06ADFCD889}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9393098D-9300-4F46-9F86-BB06ADFCD889}.Release|Any CPU.Build.0 = Release|Any CPU
 		{817CEC6B-5104-48D1-98E8-D3D1DAC37F61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{817CEC6B-5104-48D1-98E8-D3D1DAC37F61}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{817CEC6B-5104-48D1-98E8-D3D1DAC37F61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{817CEC6B-5104-48D1-98E8-D3D1DAC37F61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B854931-A2B9-48CA-BDBE-87B8CCB2A1A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B854931-A2B9-48CA-BDBE-87B8CCB2A1A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B854931-A2B9-48CA-BDBE-87B8CCB2A1A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B854931-A2B9-48CA-BDBE-87B8CCB2A1A4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

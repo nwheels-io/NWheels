@@ -19,30 +19,14 @@
         }
         
         public TConfig Config { get; }
-        
-        protected abstract void Contribute(IContributions contributions);
     }
 
-    public abstract class AutomaticPackage : Package<EmptyConfiguration>
+    public class AutomaticPackage : Package<EmptyConfiguration>
     {
-        [MetaMember]
-        protected override void Contribute(IContributions contributions)
-        {            
-        }
     }
 
     public class EmptyConfiguration
     {
     }
-    
-    public interface IContributions
-    {
-    }
-
-    public static class PackageContributionsExtensions
-    {
-        public static void IncludePackage(this IContributions contributions, Package package)
-        {
-        }
-    } 
+   
 }

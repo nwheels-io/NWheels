@@ -10,7 +10,7 @@ namespace NWheels.UI.RestApi.Model
 
         public interface IBackendRestApiSyntax<TModel>
         {
-            IDataSource<TEntity> Route<TEntity>(Func<TModel, ICrudService<TEntity>> routeSelector);
+            IDataSource<TEntity> Route<TEntity>(Func<TModel, CrudService<TEntity>> routeSelector);
         }
     }
 }

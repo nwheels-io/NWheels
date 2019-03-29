@@ -3,7 +3,11 @@ using NWheels.Composition.Model;
 
 namespace NWheels.DevOps.Model
 {
-    public abstract class Microservice<TConfig> : Package<TConfig>
+    public interface IMicroservice
+    {
+    }
+    
+    public abstract class Microservice<TConfig> : Package<TConfig>, IMicroservice
         where TConfig : class, new()
     {
         protected Microservice(string name, TConfig config, MicroserviceOptions options)

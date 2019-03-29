@@ -7,4 +7,10 @@ namespace NWheels.UI.Model.Web
     public abstract class WebApp<TProps, TState> : UIComponent<TProps, TState>, IWebApp
     {
     }
+
+    public class SinglePageWebApp<TPage> : WebApp<Empty.Props, Empty.State>
+        where TPage : IWebPage
+    {
+        public TPage Index;
+    }
 }
