@@ -5,6 +5,7 @@ using NWheels.DevOps.Adapters.Microservices.DotNet;
 using NWheels.DevOps.Model;
 using NWheels.RestApi.Adapters.AspNetCore;
 using NWheels.UI.Adapters.Web.ReactRedux;
+using NWheels.UI.Model.Web;
 
 namespace Demos.TodoList.DevOps
 {
@@ -17,11 +18,13 @@ namespace Demos.TodoList.DevOps
 
         private TodoListService Service => new TodoListService(EnvConfig);
 
+        private TodoListWebApp WebApp => new TodoListWebApp(Service.RestApi);
+
         [Include]
-        public ReactReduxWebApp WebAppComponent => new TodoListWebApp().AsReactReduxWebApp();
+        public ReactReduxWebApp WebAppComponent => WebApp.AsReactReduxWebApp();
 
         [Include] 
-        public DotNetMicroservice MicroserviceComponent => Service.AsDotNetMicroservice(
+        public DotNetMicroservice ServiceComponent => Service.AsDotNetMicroservice(
             () => Service.RestApi.AsAspNetCoreServer(),
             () => Service.Database.AsDotNetOdmToMongoDB()
         );

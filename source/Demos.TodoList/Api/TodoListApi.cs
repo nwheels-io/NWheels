@@ -18,6 +18,6 @@ namespace Demos.TodoList.Api
         }
         
         [Include]
-        public GraphQLApiRoute<TodoItemEntity> TodoItem => _db.TodoItems.AsGraphQLApiRoute();
+        public GraphQLApiRoute<TodoItemEntity> TodoItems => _db.TodoItems.AsGraphQLApiRoute();
     }
 }

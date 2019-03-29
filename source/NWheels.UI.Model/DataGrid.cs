@@ -10,7 +10,7 @@ namespace NWheels.UI.Model
     {
         public IList<DataGridColumnProps<T>> Columns;
 
-        public IDataSource<T> DataSource;
+        public DataSource<T> DataSource;
 
         public IDataGridEditor<T> Editor;
 
@@ -20,7 +20,7 @@ namespace NWheels.UI.Model
         
         public IDataGridPager<T> Pager;
 
-        public DataGridProps<T> WithDataSource(Func<IDataSourceFactory<T>, IDataSource<T>> dataSource) => default;
+        public DataGridProps<T> WithDataSource(DataSource<T> dataSource) => default;
         public DataGridProps<T> WithAutoColumns() => default;
         public DataGridProps<T> WithColumns(params Func<T, object>[] fields) => default;
         public DataGridProps<T> WithInlineEditor() => default;

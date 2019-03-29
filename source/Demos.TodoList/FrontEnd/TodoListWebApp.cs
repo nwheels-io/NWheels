@@ -8,12 +8,28 @@ using NWheels.UI.RestApi.Model;
 
 namespace Demos.TodoList.UI
 {
-    public class TodoListWebApp : SinglePageWebApp<TodoPage>
+    public class TodoListWebApp : WebApp<Empty.Props, Empty.State>
     {
+        private readonly TodoListApi _backendApi;
+
+        public TodoListWebApp(TodoListApi backendApi)
+        {
+            _backendApi = backendApi;
+        }
+        
+        [Include]
+        TodoPage Index => new TodoPage(_backendApi);
     }
 
     public class TodoPage : SoloComponentPage
     {
+        public TodoPage(TodoListApi backendApi)
+        {
+            this.BackendApi = backendApi;
+        }
+        
+        private TodoListApi BackendApi { get; }
+        
         public override UIComponent SoloComponent => new StackLayout(props => props
             .Row(NewTodoForm)
             .Row(TodoGrid)
@@ -30,7 +46,7 @@ namespace Demos.TodoList.UI
             .WithAutoColumns()
             .WithInlineEditor()
             .WithAppenderForm(NewTodoForm)
-            .WithDataSource(factory => factory.BackendRestApi<TodoListApi>().Route(api => api.TodoItem))
+            .WithDataSource(BackendApi.TodoItems.AsDataSource())
         );
     }
 }

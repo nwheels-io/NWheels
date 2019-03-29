@@ -1,20 +1,10 @@
 namespace NWheels.UI.Model
 {
-    public static class DataSource<T>
-    {
-        public static IDataSourceFactory<T> GetFactories() => default;
-    }
-
-    public interface IDataSource<T>
+    public abstract class DataSource
     {
     }
     
-    public interface IDataSourceFactory
+    public abstract class DataSource<TEntity> : DataSource
     {
-    }
-    
-    public interface IDataSourceFactory<T> : IDataSourceFactory
-    {
-        IDataSource<T> Transient { get; }
     }
 }

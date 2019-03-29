@@ -9,7 +9,7 @@ namespace NWheels.UI.Model.Web
     }
 
     public class SinglePageWebApp<TPage> : WebApp<Empty.Props, Empty.State>
-        where TPage : IWebPage
+        where TPage : class, IWebPage, new()
     {
         public TPage Index;
     }
