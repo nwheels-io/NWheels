@@ -11,5 +11,4 @@
       <ProjectReference Include="..\NWheels.UI.Adapters\NWheels.UI.Adapters.csproj" />
       <ProjectReference Include="..\NWheels.UI.Model\NWheels.UI.Model.csproj" />
     </ItemGroup>
-
 </Project>
