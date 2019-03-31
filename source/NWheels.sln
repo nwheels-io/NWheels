@@ -40,6 +40,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaPrograms.CSharp", "..\.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaPrograms.JavaScript", "..\..\MetaPrograms\Source\MetaPrograms.JavaScript\MetaPrograms.JavaScript.csproj", "{2548BF65-1E02-4675-86EF-10CDEA6C7FD2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Cli", "NWheels.Cli\NWheels.Cli.csproj", "{BA9C8B91-E1CA-443F-8B5D-E4BB752D1C17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -126,5 +128,9 @@ Global
 		{2548BF65-1E02-4675-86EF-10CDEA6C7FD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2548BF65-1E02-4675-86EF-10CDEA6C7FD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2548BF65-1E02-4675-86EF-10CDEA6C7FD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA9C8B91-E1CA-443F-8B5D-E4BB752D1C17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA9C8B91-E1CA-443F-8B5D-E4BB752D1C17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA9C8B91-E1CA-443F-8B5D-E4BB752D1C17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA9C8B91-E1CA-443F-8B5D-E4BB752D1C17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

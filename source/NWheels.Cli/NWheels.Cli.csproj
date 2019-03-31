@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <LangVersion>7.3</LangVersion>
+        <AssemblyName>dotnet-nw</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NWheels.Build\NWheels.Build.csproj" />
+    </ItemGroup>
+
+</Project>

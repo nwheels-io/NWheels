@@ -3,19 +3,19 @@ using NWheels.Composition.Model.Parsers;
 
 namespace NWheels.Build
 {
-    public class ParserContributionRegistry : ProgrammingModelEntryPoint.IParserContributionRegistry
+    public class ParserContributionRegistry : IParserContributionRegistry
     {
         public void RegisterParsers(ContainerBuilder builder)
         {
             throw new System.NotImplementedException();
         }
 
-        void ProgrammingModelEntryPoint.IParserContributionRegistry.ContributeNonRootParser<TUnit, TParser>()
+        void IParserContributionRegistry.ContributeNonRootUnitParser<TUnit, TParser>()
         {
             throw new System.NotImplementedException();
         }
 
-        void ProgrammingModelEntryPoint.IParserContributionRegistry.ContributeRootParser<TUnit, TParser>()
+        void IParserContributionRegistry.ContributeRootUnitParser<TUnit, TParser>()
         {
             throw new System.NotImplementedException();
         }

@@ -5,4 +5,9 @@
         <LangVersion>7.3</LangVersion>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\MetaPrograms\Source\MetaPrograms.CSharp\MetaPrograms.CSharp.csproj" />
+      <ProjectReference Include="..\..\..\MetaPrograms\Source\MetaPrograms\MetaPrograms.csproj" />
+    </ItemGroup>
+
 </Project>
