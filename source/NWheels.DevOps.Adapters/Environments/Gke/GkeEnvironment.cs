@@ -1,12 +1,8 @@
-using NWheels.DevOps.Model;
+using NWheels.Composition.Model;
 
 namespace NWheels.DevOps.Adapters.Environments.Gke
 {
-    public abstract class GkeEnvironment<TConfig> : Environment<TConfig>
+    public class GkeEnvironment : TechnologyAdaptedComponent
     {
-        protected GkeEnvironment(string name, string role, TConfig config) 
-            : base(name, role, config)
-        {
-        }
     }
 }

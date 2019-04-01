@@ -1,9 +1,10 @@
 using NWheels.Composition.Model;
 using NWheels.DevOps.Adapters.Environments.Local;
+using NWheels.DevOps.Model;
 
 namespace Demos.TodoList.DevOps
 {
-    public class DevEnvironment : LocalMachineEnvironment<TodoListEnvConfig>
+    public class DevEnvironment : Environment<TodoListEnvConfig>
     {
         public DevEnvironment()
             : base(name: "local", role: "dev", config: DefaultLocalConfig)

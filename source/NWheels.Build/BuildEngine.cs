@@ -7,7 +7,7 @@ using Autofac;
 using MetaPrograms.CSharp.Reader;
 using MetaPrograms.Members;
 using Microsoft.CodeAnalysis;
-using NWheels.Composition.Model.Parsers;
+using NWheels.Composition.Model.Metadata;
 
 namespace NWheels.Build
 {
@@ -26,19 +26,18 @@ namespace NWheels.Build
             Console.WriteLine($"Starting build: project {Path.GetFileNameWithoutExtension(_options.ProjectFilePath)}");
             
             var projectAssembly = LoadProjectAssembly();
-            var programmingModelAssemblies = DiscoverProgrammingModelAssemblies(projectAssembly);
-            var programmingModels = programmingModelAssemblies.SelectMany(DiscoverProgrammingModels);
-            var parserRegistry = RegisterParsers(programmingModels);
+            var modelAssemblies = DiscoverProgrammingModelAssemblies(projectAssembly);
+            var modelEntryPoints = LoadAllModelEntryPoints(modelAssemblies);
+            var parserRegistry = RegisterParsers(modelEntryPoints);
             
             _services = BuildServiceContainer(parserRegistry);
 
             var workspace = LoadProjectWorkspace();
-            var allUnitDeclarations = DiscoverModelUnitDeclarations(workspace);
-            var allUnits = PreprocessModelUnits(allUnitDeclarations);
-            var parsedRootUnits = ParseRootModelUnits(allUnits);
+            var declarations = DiscoverModelDeclarations(workspace);
+            var metadata = ParseModelDeclarations(declarations);
 
-            parsedRootUnits.ToList().ForEach(unit => 
-                Console.WriteLine($"Parsed unit: {unit.FullName} : ${unit.GetType().FullName}"));
+            metadata.ToList().ForEach(obj => 
+                Console.WriteLine($"Parsed root meta-object: [{obj.QualifiedName}](${obj.GetType().FullName})"));
 
             return true;
         }
@@ -80,31 +79,51 @@ namespace NWheels.Build
             return modelAssemblies;
         }
 
-        private IEnumerable<ProgrammingModelEntryPoint> DiscoverProgrammingModels(Assembly programmingModelAssembly)
+        private ProgrammingModelEntryPoint[] LoadAllModelEntryPoints(IEnumerable<Assembly> modelAssemblies)
         {
-            var attributes = programmingModelAssembly.GetCustomAttributes<ProgrammingModelAttribute>();
+            var allEntryPoints = modelAssemblies
+                .SelectMany(LoadProgrammingModelEntryPoints)
+                .ToArray();
+
+            Console.WriteLine($"Loaded {allEntryPoints.Length} programming model entry point(s)");
+            
+            return allEntryPoints;
+        }
+
+        private IEnumerable<ProgrammingModelEntryPoint> LoadProgrammingModelEntryPoints(Assembly modelAssembly)
+        {
+            var attributes = modelAssembly.GetCustomAttributes<ProgrammingModelAttribute>();
             var entryPoints = new List<ProgrammingModelEntryPoint>();
             
             foreach (var attribute in attributes)
             {
                 var entryPoint = (ProgrammingModelEntryPoint)Activator.CreateInstance(attribute.EntryPointClass);
-                Console.WriteLine($"Loaded programming model entry point: {entryPoint.GetType().FullName}");
+                Console.WriteLine($"Loaded model entry point: {entryPoint.GetType().FullName}");
 
                 entryPoints.Add(entryPoint);
             }
-            
-            Console.WriteLine($"Loaded {entryPoints.Count} programming model entry point(s)");
+
             return entryPoints;
         }
 
-        private ParserContributionRegistry RegisterParsers(IEnumerable<ProgrammingModelEntryPoint> programmingModels)
+        private ModelParserRegistry RegisterParsers(IEnumerable<ProgrammingModelEntryPoint> programmingModels)
         {
-            throw new NotImplementedException();
+            var registry = new ModelParserRegistry();
+            
+            foreach (var entryPoint in programmingModels)
+            {
+                Console.WriteLine($"Invoking model entry point: {entryPoint.GetType().FullName}");
+                entryPoint.ContributeParsers(registry);
+            }
+
+            return registry;
         }
 
-        private IContainer BuildServiceContainer(ParserContributionRegistry parsers)
+        private IContainer BuildServiceContainer(ModelParserRegistry modelParsers)
         {
-            throw new NotImplementedException();
+            var builder = new ContainerBuilder();
+            modelParsers.RegisterParsers(builder);
+            return builder.Build();
         }
 
         private Workspace LoadProjectWorkspace()
@@ -112,17 +131,12 @@ namespace NWheels.Build
             throw new NotImplementedException();
         }
         
-        private IEnumerable<TypeMember> DiscoverModelUnitDeclarations(Workspace workspace)
+        private IEnumerable<TypeMember> DiscoverModelDeclarations(Workspace workspace)
         {
             throw new NotImplementedException();
         }
 
-        private IEnumerable<ProgrammingModelUnit> PreprocessModelUnits(IEnumerable<TypeMember> declarations)
-        {
-            throw new NotImplementedException();
-        }
-
-        private IEnumerable<ProgrammingModelUnit> ParseRootModelUnits(IEnumerable<ProgrammingModelUnit> modelUnits)
+        private IEnumerable<MetaObject> ParseModelDeclarations(IEnumerable<TypeMember> declarations)
         {
             throw new NotImplementedException();
         }
