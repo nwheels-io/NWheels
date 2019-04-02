@@ -19,26 +19,25 @@ namespace NWheels.Build
             Console.WriteLine($"{_registrations.Count} parser(s) registered");
         }
 
-        void IModelParserRegistry.Add<TUnit, TParser>()
+        void IModelParserRegistry.RegisterParser<TParser>()
         {
             Console.WriteLine($"Registering non-root parser {typeof(TParser).FullName}");
             
             _registrations.Add(builder => builder
                 .RegisterType<TParser>()
                 .AsSelf()
-                .As<ModelParser<TUnit>, IModelParser<TUnit>, IAnyModelParser>()
+                .As<ModelParser>()
                 .InstancePerDependency());
         }
 
-        void IModelParserRegistry.AddRoot<TUnit, TParser>()
+        void IModelParserRegistry.RegisterRootParser<TParser>()
         {
             Console.WriteLine($"Registering root parser {typeof(TParser).FullName}");
 
             _registrations.Add(builder => builder
                 .RegisterType<TParser>()
                 .AsSelf()
-                .As<ModelParser<TUnit>, IModelParser<TUnit>, IAnyModelParser>()
-                .As<IRootModelParser<TUnit>, IAnyRootModelParser>()
+                .As<ModelParser, IRootModelParser>()
                 .InstancePerDependency());
         }
     }

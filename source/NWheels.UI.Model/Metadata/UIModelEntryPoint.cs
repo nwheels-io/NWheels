@@ -11,7 +11,7 @@ namespace NWheels.UI.Model.Metadata
     {
         public override void ContributeParsers(IModelParserRegistry parsers)
         {
-            parsers.AddRoot<IWebApp, WebAppParser>();
+            parsers.RegisterParser<WebAppParser>();
         }
     }
 }

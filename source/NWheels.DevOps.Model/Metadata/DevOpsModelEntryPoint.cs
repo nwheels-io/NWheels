@@ -9,7 +9,7 @@ namespace NWheels.DevOps.Model.Metadata
     {
         public override void ContributeParsers(IModelParserRegistry parsers)
         {
-            parsers.AddRoot<AnyEnvironment, EnvironmentParser>();
+            parsers.RegisterRootParser<EnvironmentParser>();
         }
     }
 }

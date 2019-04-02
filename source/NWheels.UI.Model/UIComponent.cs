@@ -1,4 +1,5 @@
 ﻿using System;
+using NWheels.Composition.Model.Metadata;
 
 namespace NWheels.UI.Model
 {
@@ -9,7 +10,7 @@ namespace NWheels.UI.Model
             => default(TComponent);
     }
 
-
+    [ModelElement]
     public abstract class UIComponent
     {
         public static implicit operator UIComponent(string text)
@@ -17,7 +18,6 @@ namespace NWheels.UI.Model
             return new TextContent(text);
         }
     }
-        
         
     public abstract class UIComponent<TProps, TState> : UIComponent
     {

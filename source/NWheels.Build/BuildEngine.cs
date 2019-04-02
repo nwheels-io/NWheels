@@ -16,7 +16,7 @@ namespace NWheels.Build
     public class BuildEngine
     {
         private readonly BuildOptions _options;
-        //private IContainer _services;
+        private IContainer _services;
         
         public BuildEngine(BuildOptions options)
         {
@@ -28,11 +28,37 @@ namespace NWheels.Build
             Console.WriteLine($"Starting build: project {Path.GetFileNameWithoutExtension(_options.ProjectFilePath)}");
 
             var workspace = LoadProjectWorkspace();
-            var codeModel = ReadCodeModel(workspace);
-            var declarations = DiscoverModelDeclarations(codeModel);
+            var (code, reader) = ReadSourceCode(workspace);
+            var parseableMembers = DiscoverParseableMembers(code);
+            var modelAssemblyRefs = DiscoverModelAssemblyReferences(reader, parseableMembers);
+            var modelAssemblies = LoadModelAssemblies(modelAssemblyRefs).ToArray();
+            var modelEntryPoints = LoadModelEntryPoints(modelAssemblies);
+            var parserRegistry = RegisterParsers(modelEntryPoints);
+            
+            _services = BuildServiceContainer(parserRegistry);
+            
+            
+//            modelMembers.Select(decl => {
+//                var typeSymbol = decl.Bindings.OfType<INamedTypeSymbol>().FirstOrDefault();
+//                if (typeSymbol != null && typeSymbol.ContainingAssembly != null)
+//                {
+//                    var reference =reader.Compilations
+//                        .Select(c => c.GetMetadataReference(typeSymbol.ContainingAssembly))
+//                        .OfType<PortableExecutableReference>()
+//                        .FirstOrDefault();
+//
+//                    return (symbol: typeSymbol, path: reference?.FilePath);
+//                    //typeSymbol.ContainingAssembly.Identity
+//                }
+//
+//                return (symbol: typeSymbol, path: null);
+//            }).ToList().ForEach(item => {
+//                var (symbol, path) = item;
+//                Console.WriteLine($"{symbol.Name} -> {path ?? "???"}");
+//            });
 
-            declarations.ToList().ForEach(decl => Console.WriteLine($"Discovered type: {decl.FullName}"));
-
+            
+            
 //            var projectAssembly = LoadProjectAssembly();
 //            var modelAssemblies = DiscoverProgrammingModelAssemblies(projectAssembly).ToArray();
 //            var modelEntryPoints = LoadAllModelEntryPoints(modelAssemblies);
@@ -48,7 +74,92 @@ namespace NWheels.Build
 
             return true;
         }
+        
+        private Workspace LoadProjectWorkspace()
+        {
+            Console.WriteLine("--- project loader: starting ---");
+            
+            var loader = new BuildalyzerWorkspaceLoader();
+            var workspace = loader.LoadWorkspace(new[] { _options.ProjectFilePath });
 
+            Console.WriteLine("--- project loader: success ---");
+            
+            return workspace;
+        }
+        
+        private (ImperativeCodeModel code, RoslynCodeModelReader reader) ReadSourceCode(Workspace workspace)
+        {
+            var reader = new RoslynCodeModelReader(workspace, new ClrTypeResolver());
+            reader.Read();
+
+            var code = reader.GetCodeModel();
+            return (code, reader);
+        }
+
+        private IEnumerable<TypeMember> DiscoverParseableMembers(ImperativeCodeModel codeModel)
+        {
+            var parseableMembers = codeModel
+                .TopLevelMembers
+                .OfType<TypeMember>()
+                .Where(IsParseableMember)
+                .Select(member => {
+                    Console.WriteLine($"Discovered parseable member: {member.FullName}");
+                    return member;
+                })
+                .ToArray();
+
+            Console.WriteLine($"Discovered {parseableMembers.Length} parseable member(s).");
+            return parseableMembers;
+
+            bool IsParseableMember(TypeMember member)
+            {
+                return (
+                    member.AssemblyName != null && 
+                    !member.AssemblyName.StartsWith("NWheels.") &&
+                    member.BaseType?.Namespace?.StartsWith("NWheels.") == true);
+            }
+        }
+
+        private IEnumerable<PortableExecutableReference> DiscoverModelAssemblyReferences(
+            RoslynCodeModelReader reader, 
+            IEnumerable<TypeMember> parseableMembers)
+        {
+            return parseableMembers
+                .Select(TryGetModelAbstraction)
+                .Select(reader.TryGetAssemblyPEReference)
+                .Where(reference => reference?.FilePath != null)
+                .Distinct()
+                .ToArray();
+
+            TypeMember TryGetModelAbstraction(TypeMember parseable)
+            {
+                while (parseable != null && !parseable.FullName.StartsWith("NWheels."))
+                {
+                    parseable = parseable.BaseType;
+                }
+
+                return parseable;
+            }
+        }
+
+        
+        private IEnumerable<Assembly> LoadModelAssemblies(IEnumerable<PortableExecutableReference> references)
+        {
+            var assemblies = new List<Assembly>();
+            
+            foreach (var reference in references)
+            {
+                var assembly = Assembly.LoadFrom(reference.FilePath);
+                assemblies.Add(assembly);
+
+                Console.WriteLine($"Loaded programming model assembly: {assembly.FullName}");
+            }
+            
+            Console.WriteLine($"Loaded {assemblies.Count} programming model assemblies");
+            return assemblies;
+        }
+
+        
         private Assembly LoadProjectAssembly()
         {
             var assemblyFilePath = Path.Combine(
@@ -68,6 +179,12 @@ namespace NWheels.Build
             return assembly;
         }
 
+
+//        private IEnumerable<TypeMember> DiscoverProgrammindModelTypes()
+//        {
+//            
+//        }
+        
         private IEnumerable<Assembly> DiscoverProgrammingModelAssemblies(Assembly projectAssembly)
         {
             var referencedAssemblies = LoadReferencedAssemblies(projectAssembly);
@@ -86,10 +203,10 @@ namespace NWheels.Build
             return modelAssemblies;
         }
 
-        private ProgrammingModelEntryPoint[] LoadAllModelEntryPoints(IEnumerable<Assembly> modelAssemblies)
+        private ProgrammingModelEntryPoint[] LoadModelEntryPoints(IEnumerable<Assembly> modelAssemblies)
         {
             var allEntryPoints = modelAssemblies
-                .SelectMany(LoadProgrammingModelEntryPoints)
+                .SelectMany(LoadEntryPointsFromAssembly)
                 .ToArray();
 
             Console.WriteLine($"Loaded {allEntryPoints.Length} programming model entry point(s)");
@@ -97,7 +214,7 @@ namespace NWheels.Build
             return allEntryPoints;
         }
 
-        private IEnumerable<ProgrammingModelEntryPoint> LoadProgrammingModelEntryPoints(Assembly modelAssembly)
+        private IEnumerable<ProgrammingModelEntryPoint> LoadEntryPointsFromAssembly(Assembly modelAssembly)
         {
             var attributes = modelAssembly.GetCustomAttributes<ProgrammingModelAttribute>();
             var entryPoints = new List<ProgrammingModelEntryPoint>();
@@ -133,33 +250,7 @@ namespace NWheels.Build
             return builder.Build();
         }
 
-        private Workspace LoadProjectWorkspace()
-        {
-            Console.WriteLine("--- project loader: starting ---");
-            
-            var loader = new BuildalyzerWorkspaceLoader();
-            var workspace = loader.LoadWorkspace(new[] { _options.ProjectFilePath });
-
-            Console.WriteLine("--- project loader: success ---");
-            
-            return workspace;
-        }
-        
-        private ImperativeCodeModel ReadCodeModel(Workspace workspace)
-        {
-            var reader = new RoslynCodeModelReader(workspace, new ClrTypeResolver());
-            reader.Read();
-
-            var codeModel = reader.GetCodeModel();
-            return codeModel;
-        }
-
-        private IEnumerable<TypeMember> DiscoverModelDeclarations(ImperativeCodeModel codeModel)
-        {
-            return codeModel.TopLevelMembers.OfType<TypeMember>();
-        }
-
-        private IEnumerable<MetaObject> ParseModelDeclarations(IEnumerable<TypeMember> declarations)
+        private IEnumerable<MetaElement> ParseModelDeclarations(IEnumerable<TypeMember> declarations)
         {
             throw new NotImplementedException();
         }

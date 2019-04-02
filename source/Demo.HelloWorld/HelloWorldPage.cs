@@ -7,6 +7,9 @@ namespace Demo.HelloWorld
     class HelloWorldPage : WebPage
     {
         [Include]
-        UIComponent Hello => "Hello, world!"; 
+        UIComponent Hello => new TextContent("Hello, world!"); 
+        
+        // TODO: use implicit conversion:
+        // UIComponent Hello => "Hello, world!"; 
     }
 }

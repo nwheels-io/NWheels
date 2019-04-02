@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+this file conceptually illustrates result of preprocessing the sources
+it is for documentation purposes only
+ -->
+<GenericModel>
+
+    <GenericModelElement
+        abstraction="NWheels.UI.Model.Web.IWebPage"
+        concreteType="Demo.HelloWorld.HelloWorldPage"
+        baseType="NWheels.UI.Model.Web.WebPage"
+        parserType="NWheels.UI.Model.Impl.Parsers.Web.WebPageParser"
+    >
+
+        <BaseGenericArguments />
+        <BaseConstructorArguments />
+
+        <Children>
+            <Discriminator type="NWheels.UI.Model.UIComponent">
+                <Child name="Hello" kind="TextContent">
+                    <GenericArguments />
+                    <ConstructorArguments>
+                        <Argument name="text">Hello, world!</Argument>                        
+                    </ConstructorArguments>
+                    <TechnologyAdapter />
+                </Child>
+            </Discriminator>
+        </Children>
+            
+    </GenericModelElement>
+
+    <!--
+    <GenericModelElement
+        abstraction="NWheels.UI.Model.IWebApp"
+        concreteType="NWheels.UI.Model.Web.SinglePageWebApp(TPage)"
+        baseType="NWheels.UI.Model.Web.WebApp(TProps,TState)"
+        parserType="NWheels.UI.Model.Impl.Parsers.Web.WebAppParser"
+    >
+
+        <BaseGenericArguments>
+            <GenericArgument name="TProps" type="NWheels.UI.Model.Empty.Props" />
+            <GenericArgument name="TState" type="NWheels.UI.Model.Empty.State" />
+        </BaseGenericArguments>
+
+        <BaseConstructorArguments>
+            <Argument name="props">
+                <NewObjectExpression type="NWheels.UI.Model.Empty.Props" />
+            </Argument>
+        </BaseConstructorArguments>
+
+        <Children>Demo.HelloWorld.HelloWorldPage
+            <Discriminator type="NWheels.UI.Model.Web.IWebPage">
+                <Child name="Index" genericType="TPage">
+                    <GenericArguments />
+                    <ConstructorArguments />
+                    <TechnologyAdapter />
+                </Child>
+            </Discriminator>
+        </Children>
+
+    </GenericModelElement>
+    -->
+    
+    <GenericModelElement
+        abstraction="NWheels.DevOps.Model.AnyEnvironment"    
+        concreteType="Demo.HelloWorld.ProductionEnvironment" 
+        baseType="NWheels.DevOps.Model.Environment(TConfig)"
+        parserType="NWheels.DevOps.Model.Impl.Parsers.EnvironmentParser"
+    >
+
+        <BaseGenericArguments>
+            <GenericArgument name="TConfig" type="NWheels.Composition.Model.EmptyConfiguration" />
+        </BaseGenericArguments>
+
+        <BaseConstructorArguments>
+            <Argument name="name">prod</Argument>
+            <Argument name="role">prod</Argument>
+            <Argument name="config">
+                <NewObjectExpression type="NWheels.DevOps.Model.EmptyConfiguration" />
+            </Argument>
+        </BaseConstructorArguments>
+
+        <Children>
+            <Discriminator type="NWheels.Composition.Model.TechnologyAdaptedComponent">
+                <Child name="HelloWorldSite" type="NWheels.UI.Model.Web.SinglePageWebApp(TPage)">
+                    <GenericArguments />
+                    <ConstructorArguments />
+                    <TechnologyAdapter type="NWheels.DevOps.Adapters.Environments.Gke.GkeTechnologyAdapter">
+                        <GenericArguments />
+                        <ConstructorArguments>
+                            <Argument name="zone">us-central</Argument>
+                            <Argument name="project">nwheels-demos</Argument>
+                        </ConstructorArguments>
+                    </TechnologyAdapter>
+                </Child>
+            </Discriminator>
+        </Children>
+
+    </GenericModelElement>
+
+    <NWheels.DevOps.Model.SystemMain type="Demo.HelloWorld.Main" base="NWheels.DevOps.Model.SystemMain">
+
+        <GenericParameters />
+        <BaseGenericArguments />
+        <ConstructorParameters />
+        <BaseConstructorArguments />
+
+        <Children>
+            <Discriminator type="AnyEnvironment">
+                <Child name="Production" type="Demo.HelloWorld.ProductionEnvironment">
+                    <GenericArguments />
+                    <ConstructorArguments />
+                    <TechnologyAdapter type="NWheels.DevOps.Adapters.Environments.Gke.GkeTechnologyAdapter">
+                        <GenericArguments />
+                        <ConstructorArguments>
+                            <Argument name="zone">us-central</Argument>
+                            <Argument name="project">nwheels-demos</Argument>
+                        </ConstructorArguments>
+                    </TechnologyAdapter>
+                </Child>
+            </Discriminator>
+        </Children>
+        
+    </NWheels.DevOps.Model.SystemMain>
+    
+    
+</GenericModel>
+
+
+
+<TechnologyAdapter type="NWheels.UI.Adapters.Web.StaticHtml.StaticHtmlTechnologyAdapter">
+<GenericArguments />
+<ConstructorArguments />
+</TechnologyAdapter>

@@ -1,7 +1,9 @@
 using NWheels.Composition.Model;
+using NWheels.Composition.Model.Metadata;
 
 namespace NWheels.DevOps.Model
 {
+    [ModelElement]
     public abstract class AnyEnvironment : ICanInclude<AnyDeployment>, ICanInclude<TechnologyAdaptedComponent>
     {
     }

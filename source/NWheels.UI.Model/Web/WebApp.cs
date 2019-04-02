@@ -1,6 +1,8 @@
+using NWheels.Composition.Model;
+
 namespace NWheels.UI.Model.Web
 {
-    public interface IWebApp
+    public interface IWebApp : ICanInclude<IWebPage>
     {
     }
     
@@ -19,6 +21,7 @@ namespace NWheels.UI.Model.Web
         {
         }
 
-        public TPage Index;
+        [Include]
+        public TPage Index => new TPage();
     }
 }

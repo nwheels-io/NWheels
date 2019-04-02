@@ -10,7 +10,10 @@ namespace Demo.HelloWorld
     public class Main : SystemMain
     {
         [Include]
-        GkeEnvironment Production => new ProductionEnvironment().AsGkeEnvironment();
+        GkeEnvironment Production => new ProductionEnvironment().AsGkeEnvironment(
+            zone: "us-central",
+            project: "nwheels-demos"
+        );
     }
 
     public class ProductionEnvironment : Environment<EmptyConfiguration>
