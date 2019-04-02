@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Autofac;
+using MetaPrograms;
 using MetaPrograms.CSharp.Reader;
+using MetaPrograms.CSharp.Reader.Reflection;
 using MetaPrograms.Members;
 using Microsoft.CodeAnalysis;
 using NWheels.Composition.Model.Metadata;
@@ -14,7 +16,7 @@ namespace NWheels.Build
     public class BuildEngine
     {
         private readonly BuildOptions _options;
-        private IContainer _services;
+        //private IContainer _services;
         
         public BuildEngine(BuildOptions options)
         {
@@ -24,20 +26,25 @@ namespace NWheels.Build
         public bool Build()
         {
             Console.WriteLine($"Starting build: project {Path.GetFileNameWithoutExtension(_options.ProjectFilePath)}");
-            
-            var projectAssembly = LoadProjectAssembly();
-            var modelAssemblies = DiscoverProgrammingModelAssemblies(projectAssembly);
-            var modelEntryPoints = LoadAllModelEntryPoints(modelAssemblies);
-            var parserRegistry = RegisterParsers(modelEntryPoints);
-            
-            _services = BuildServiceContainer(parserRegistry);
 
             var workspace = LoadProjectWorkspace();
-            var declarations = DiscoverModelDeclarations(workspace);
-            var metadata = ParseModelDeclarations(declarations);
+            var codeModel = ReadCodeModel(workspace);
+            var declarations = DiscoverModelDeclarations(codeModel);
 
-            metadata.ToList().ForEach(obj => 
-                Console.WriteLine($"Parsed root meta-object: [{obj.QualifiedName}](${obj.GetType().FullName})"));
+            declarations.ToList().ForEach(decl => Console.WriteLine($"Discovered type: {decl.FullName}"));
+
+//            var projectAssembly = LoadProjectAssembly();
+//            var modelAssemblies = DiscoverProgrammingModelAssemblies(projectAssembly).ToArray();
+//            var modelEntryPoints = LoadAllModelEntryPoints(modelAssemblies);
+//            var parserRegistry = RegisterParsers(modelEntryPoints);
+//            
+//            _services = BuildServiceContainer(parserRegistry);
+//
+//            var declarations = DiscoverModelDeclarations(workspace);
+//            var metadata = ParseModelDeclarations(declarations);
+//
+//            metadata.ToList().ForEach(obj => 
+//                Console.WriteLine($"Parsed root meta-object: [{obj.QualifiedName}](${obj.GetType().FullName})"));
 
             return true;
         }
@@ -128,12 +135,28 @@ namespace NWheels.Build
 
         private Workspace LoadProjectWorkspace()
         {
-            throw new NotImplementedException();
+            Console.WriteLine("--- project loader: starting ---");
+            
+            var loader = new BuildalyzerWorkspaceLoader();
+            var workspace = loader.LoadWorkspace(new[] { _options.ProjectFilePath });
+
+            Console.WriteLine("--- project loader: success ---");
+            
+            return workspace;
         }
         
-        private IEnumerable<TypeMember> DiscoverModelDeclarations(Workspace workspace)
+        private ImperativeCodeModel ReadCodeModel(Workspace workspace)
         {
-            throw new NotImplementedException();
+            var reader = new RoslynCodeModelReader(workspace, new ClrTypeResolver());
+            reader.Read();
+
+            var codeModel = reader.GetCodeModel();
+            return codeModel;
+        }
+
+        private IEnumerable<TypeMember> DiscoverModelDeclarations(ImperativeCodeModel codeModel)
+        {
+            return codeModel.TopLevelMembers.OfType<TypeMember>();
         }
 
         private IEnumerable<MetaObject> ParseModelDeclarations(IEnumerable<TypeMember> declarations)

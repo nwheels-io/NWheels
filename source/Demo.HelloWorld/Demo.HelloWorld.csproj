@@ -5,10 +5,20 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\NWheels.Composition.Model\NWheels.Composition.Model.csproj" />
-      <ProjectReference Include="..\NWheels.DevOps.Adapters\NWheels.DevOps.Adapters.csproj" />
-      <ProjectReference Include="..\NWheels.DevOps.Model\NWheels.DevOps.Model.csproj" />
-      <ProjectReference Include="..\NWheels.UI.Adapters\NWheels.UI.Adapters.csproj" />
-      <ProjectReference Include="..\NWheels.UI.Model\NWheels.UI.Model.csproj" />
+      <Reference Include="NWheels.Composition.Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\NWheels.Composition.Model\bin\Debug\netstandard2.0\NWheels.Composition.Model.dll</HintPath>
+      </Reference>
+      <Reference Include="NWheels.DevOps.Adapters, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\NWheels.DevOps.Adapters\bin\Debug\netstandard2.0\NWheels.DevOps.Adapters.dll</HintPath>
+      </Reference>
+      <Reference Include="NWheels.DevOps.Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\NWheels.DevOps.Model\bin\Debug\netstandard2.0\NWheels.DevOps.Model.dll</HintPath>
+      </Reference>
+      <Reference Include="NWheels.UI.Adapters, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\NWheels.UI.Adapters\bin\Debug\netstandard2.0\NWheels.UI.Adapters.dll</HintPath>
+      </Reference>
+      <Reference Include="NWheels.UI.Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\NWheels.UI.Model\bin\Debug\netstandard2.0\NWheels.UI.Model.dll</HintPath>
+      </Reference>
     </ItemGroup>
 </Project>

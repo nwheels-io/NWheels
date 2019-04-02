@@ -7,9 +7,9 @@ namespace NWheels.DevOps.Model.Metadata
 {
     public class DevOpsModelEntryPoint : ProgrammingModelEntryPoint
     {
-        public override void ContributeParsers(IModelParserRegistry modelParsers)
+        public override void ContributeParsers(IModelParserRegistry parsers)
         {
-            throw new System.NotImplementedException();
+            parsers.AddRoot<AnyEnvironment, EnvironmentParser>();
         }
     }
 }
