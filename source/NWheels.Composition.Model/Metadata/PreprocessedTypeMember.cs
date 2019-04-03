@@ -5,18 +5,18 @@ using MetaPrograms.Members;
 
 namespace NWheels.Composition.Model.Metadata
 {
-    public class MetaElement
+    public class PreprocessedTypeMember
     {
-        public MetaElement(
-            MetaElement parent,
+        public PreprocessedTypeMember(
+            PreprocessedTypeMember parent,
             MetaAttribute parentAttribute,
             string name,
             string qualifiedName,
             TypeMember abstraction,
             TypeMember concreteMember,
             IReadOnlyList<MetaAttribute> attributes,
-            IReadOnlyList<MetaElement> children,
-            IReadOnlyDictionary<TypeMember, IReadOnlyList<MetaElement>> childrenByAbstraction)
+            IReadOnlyList<PreprocessedTypeMember> children,
+            IReadOnlyDictionary<TypeMember, IReadOnlyList<PreprocessedTypeMember>> childrenByAbstraction)
         {
             Parent = parent;
             ParentAttribute = parentAttribute;
@@ -29,7 +29,7 @@ namespace NWheels.Composition.Model.Metadata
             ChildrenByAbstraction = childrenByAbstraction;
         }
 
-        public MetaElement Parent { get; }
+        public PreprocessedTypeMember Parent { get; }
 
         public MetaAttribute ParentAttribute { get; }
 
@@ -43,8 +43,8 @@ namespace NWheels.Composition.Model.Metadata
         
         public IReadOnlyList<MetaAttribute> Attributes { get; }
 
-        public IReadOnlyList<MetaElement> Children { get; }
+        public IReadOnlyList<PreprocessedTypeMember> Children { get; }
         
-        public IReadOnlyDictionary<TypeMember, IReadOnlyList<MetaElement>> ChildrenByAbstraction { get; }
+        public IReadOnlyDictionary<TypeMember, IReadOnlyList<PreprocessedTypeMember>> ChildrenByAbstraction { get; }
     }
 }

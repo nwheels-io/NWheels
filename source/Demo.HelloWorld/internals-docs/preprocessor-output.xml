@@ -3,9 +3,9 @@
 this file conceptually illustrates result of preprocessing the sources
 it is for documentation purposes only
  -->
-<GenericModel>
+<PreprocessorOutput>
 
-    <GenericModelElement
+    <PreprocessedTypeElement
         abstraction="NWheels.UI.Model.Web.IWebPage"
         concreteType="Demo.HelloWorld.HelloWorldPage"
         baseType="NWheels.UI.Model.Web.WebPage"
@@ -27,41 +27,28 @@ it is for documentation purposes only
             </Discriminator>
         </Children>
             
-    </GenericModelElement>
+    </PreprocessedTypeElement>
 
-    <!--
-    <GenericModelElement
+    
+    <PreprocessedTypeElement
         abstraction="NWheels.UI.Model.IWebApp"
-        concreteType="NWheels.UI.Model.Web.SinglePageWebApp(TPage)"
-        baseType="NWheels.UI.Model.Web.WebApp(TProps,TState)"
-        parserType="NWheels.UI.Model.Impl.Parsers.Web.WebAppParser"
+        concreteType="NWheels.UI.Model.Web.SinglePageWebApp(Demo.HelloWorld.HelloWorldPage)"
+        baseType="NWheels.UI.Model.Web.SinglePageWebApp(TPage)"
+        parserType="NWheels.UI.Model.Impl.Parsers.Web.SinglePageWebAppParser"
+        synthetic="true"
     >
 
         <BaseGenericArguments>
-            <GenericArgument name="TProps" type="NWheels.UI.Model.Empty.Props" />
-            <GenericArgument name="TState" type="NWheels.UI.Model.Empty.State" />
+            <GenericArgument name="TPage" type="Demo.HelloWorld.HelloWorldPage" />
         </BaseGenericArguments>
 
-        <BaseConstructorArguments>
-            <Argument name="props">
-                <NewObjectExpression type="NWheels.UI.Model.Empty.Props" />
-            </Argument>
-        </BaseConstructorArguments>
+        <BaseConstructorArguments />
 
-        <Children>Demo.HelloWorld.HelloWorldPage
-            <Discriminator type="NWheels.UI.Model.Web.IWebPage">
-                <Child name="Index" genericType="TPage">
-                    <GenericArguments />
-                    <ConstructorArguments />
-                    <TechnologyAdapter />
-                </Child>
-            </Discriminator>
-        </Children>
+        <Children />
 
-    </GenericModelElement>
-    -->
+    </PreprocessedTypeElement>
     
-    <GenericModelElement
+    <PreprocessedTypeElement
         abstraction="NWheels.DevOps.Model.AnyEnvironment"    
         concreteType="Demo.HelloWorld.ProductionEnvironment" 
         baseType="NWheels.DevOps.Model.Environment(TConfig)"
@@ -82,23 +69,25 @@ it is for documentation purposes only
 
         <Children>
             <Discriminator type="NWheels.Composition.Model.TechnologyAdaptedComponent">
-                <Child name="HelloWorldSite" type="NWheels.UI.Model.Web.SinglePageWebApp(TPage)">
+                <Child name="HelloWorldSite" type="NWheels.UI.Model.Web.SinglePageWebApp(Demo.HelloWorld.HelloWorldPage)">
                     <GenericArguments />
                     <ConstructorArguments />
-                    <TechnologyAdapter type="NWheels.DevOps.Adapters.Environments.Gke.GkeTechnologyAdapter">
+                    <TechnologyAdapter type="NWheels.UI.Adapters.Web.StaticHtml.StaticHtmlTechnologyAdapter">
                         <GenericArguments />
-                        <ConstructorArguments>
-                            <Argument name="zone">us-central</Argument>
-                            <Argument name="project">nwheels-demos</Argument>
-                        </ConstructorArguments>
+                        <ConstructorArguments />
                     </TechnologyAdapter>
                 </Child>
             </Discriminator>
         </Children>
 
-    </GenericModelElement>
+    </PreprocessedTypeElement>
 
-    <NWheels.DevOps.Model.SystemMain type="Demo.HelloWorld.Main" base="NWheels.DevOps.Model.SystemMain">
+    <PreprocessedTypeElement
+        abstraction="NWheels.DevOps.Model.SystemMain" 
+        concreteType="Demo.HelloWorld.Main" base="NWheels.DevOps.Model.SystemMain"
+        baseType="NWheels.DevOps.Model.SystemMain"
+        parserType="NWheels.DevOps.Model.Impl.Parsers.SystemMainParser"
+    >
 
         <GenericParameters />
         <BaseGenericArguments />
@@ -121,14 +110,6 @@ it is for documentation purposes only
             </Discriminator>
         </Children>
         
-    </NWheels.DevOps.Model.SystemMain>
+    </PreprocessedTypeElement>
     
-    
-</GenericModel>
-
-
-
-<TechnologyAdapter type="NWheels.UI.Adapters.Web.StaticHtml.StaticHtmlTechnologyAdapter">
-<GenericArguments />
-<ConstructorArguments />
-</TechnologyAdapter>
+</PreprocessorOutput>

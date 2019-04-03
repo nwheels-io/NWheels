@@ -10,38 +10,22 @@ namespace NWheels.Build
 {
     public class Preprocessor
     {
-        private readonly Dictionary<TypeMember, MetaElement> _preprocessedMembers = 
-            new Dictionary<TypeMember, MetaElement>();
+        private readonly PreprocessorOutput _output = new PreprocessorOutput();
         
-        public Preprocessor(RoslynCodeModelReader reader, ImperativeCodeModel code)
+        public Preprocessor(ImperativeCodeModel code, RoslynCodeModelReader reader)
         {
-            this.Reader = reader;
             this.Code = code;
+            this.Reader = reader;
         }
 
-        public MetaElement GetMetaElement(TypeMember member)
+        public IReadOnlyPreprocessorOutput Run()
         {
-            if (_preprocessedMembers.TryGetValue(member, out var existingElement))
-            {
-                return existingElement;
-            }
+            throw new NotImplementedException();
 
-            var builder = new MetaElementBuilder(this, member, );
-
-            try
-            {
-                _preprocessedMembers.Add(member, builder.MetaElement);    
-            }
-            catch
-            {
-                _preprocessedMembers.Remove(member);    
-                throw;
-            }
-
-            return builder.MetaElement;
+            return _output;
         }
 
-        public RoslynCodeModelReader Reader { get; }
         public ImperativeCodeModel Code { get; }
+        public RoslynCodeModelReader Reader { get; }
     }
 }

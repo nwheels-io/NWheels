@@ -3,7 +3,7 @@ using NWheels.Composition.Model.Metadata;
 namespace NWheels.UI.Model.Web
 {
 
-    [ModelElement]
+    [ModelParser]
     public interface IWebPage
     {
     }

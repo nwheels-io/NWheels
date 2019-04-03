@@ -7,9 +7,15 @@ namespace NWheels.Composition.Model.Metadata
         AttributeTargets.Class | 
         AttributeTargets.Interface |
         AttributeTargets.Struct,
+        AllowMultiple = false,
         Inherited = true)]
-    public class ModelElementAttribute : Attribute
+    public class ModelParserAttribute : Attribute
     {
-        public Type Parser { get; set; }
+        public ModelParserAttribute(Type parser)
+        {
+            this.Parser = parser;
+        }
+
+        public Type Parser { get; }
     }
 }

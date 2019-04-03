@@ -5,7 +5,7 @@ using NWheels.Composition.Model.Metadata;
 
 namespace NWheels.DevOps.Model
 {
-    [ModelElement]
+    [ModelParser]
     public abstract class SystemMain : ICanInclude<AnyEnvironment>
     {
     }

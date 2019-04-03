@@ -8,11 +8,14 @@ namespace Demos.TodoList
 {
     public class Main : SystemMain
     {
+        private const string GcpZone = "us-central";
+        private const string GcpProject = "nwheels-demo";
+        
         [Include] 
-        GkeEnvironment Production => new ProductionEnvironment().AsGkeEnvironment();
+        GkeEnvironment Production => new ProductionEnvironment().AsGkeEnvironment(GcpZone, GcpProject);
 
         [Include]
-        GkeEnvironment Staging => new StagingEnvironment().AsGkeEnvironment();
+        GkeEnvironment Staging => new StagingEnvironment().AsGkeEnvironment(GcpZone, GcpProject);
 
         [Include]
         LocalMachineEnvironment Dev => new DevEnvironment().AsLocalMachineEnvironment();
