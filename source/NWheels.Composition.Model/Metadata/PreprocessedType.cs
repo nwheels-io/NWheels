@@ -7,6 +7,18 @@ namespace NWheels.Composition.Model.Metadata
 {
     public class PreprocessedType
     {
+        public PreprocessedType()
+        {
+        }
+
+        public PreprocessedType(TypeMember concreteType, ModelParserInfo parserInfo)
+        {
+            this.ConcreteType = concreteType;
+            this.BaseType = concreteType.BaseType;
+            this.Abstraction = parserInfo.Abstraction;
+            this.ParserType = parserInfo.ParserType;
+        }
+
         public TypeMember Abstraction { get; set; }
         public TypeMember ConcreteType { get; set; }
         public TypeMember BaseType { get; set; }

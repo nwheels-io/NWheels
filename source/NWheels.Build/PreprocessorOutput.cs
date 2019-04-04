@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using MetaPrograms.Extensions;
 using MetaPrograms.Members;
 using NWheels.Composition.Model.Metadata;
 
@@ -7,62 +9,79 @@ namespace NWheels.Build
 {
     public class PreprocessorOutput : IReadOnlyPreprocessorOutput
     {
-        private readonly List<PreprocessedType> _all;
-        private readonly Dictionary<TypeMember, PreprocessedType> _byConcreteType;
-        private readonly Dictionary<TypeMember, List<PreprocessedType>> _byBaseType;
-        private readonly Dictionary<TypeMember, List<PreprocessedType>> _byAbstraction;
-        private readonly Dictionary<Type, PreprocessedType> _byParserType;
-        private readonly List<TypeMember> _parserTypes;
-        private readonly List<TypeMember> _technologyAdapterTypes;
+        private static readonly PreprocessedType[] EmptyTypes = new PreprocessedType[0];
+        
+        private readonly List<PreprocessedType> _all = new List<PreprocessedType>();
+        private readonly Dictionary<TypeMember, PreprocessedType> _byConcreteType = new Dictionary<TypeMember, PreprocessedType>();
+        private readonly Dictionary<TypeMember, List<PreprocessedType>> _byAbstraction = new Dictionary<TypeMember, List<PreprocessedType>>();
+        private readonly Dictionary<TypeMember, List<PreprocessedType>> _byBaseType = new Dictionary<TypeMember, List<PreprocessedType>>();
 
-        public void AddPreprocessedType(PreprocessedType member)
+        public void AddType(PreprocessedType type)
         {
-            throw new System.NotImplementedException();
-        }
+            _all.Add(type);
+            _byConcreteType.Add(type.ConcreteType, type);
 
-        public void AddParser(TypeMember type)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void AddTechnologyAdapter(TypeMember type)
-        {
-            throw new System.NotImplementedException();
+            AddToListByKey(type, type.Abstraction, _byAbstraction);
+            AddToListByKey(type, type.BaseType, _byBaseType);
         }
 
         public IEnumerable<PreprocessedType> GetAll()
         {
-            throw new System.NotImplementedException();
+            return _all;
         }
 
-        public IEnumerable<PreprocessedType> GetByParser<TParser>() where TParser : IModelParser
+        public IEnumerable<PreprocessedType> FindByParser<TParser>() where TParser : IModelParser
         {
-            throw new System.NotImplementedException();
+            return _all
+                .Where(type => type.ParserClrType != null)
+                .Where(type => typeof(TParser).IsAssignableFrom(type.ParserClrType));
         }
 
         public IEnumerable<PreprocessedType> GetByAbstraction(TypeMember abstraction)
         {
-            throw new System.NotImplementedException();
+            return TryGetListByKey(abstraction, _byAbstraction);
         }
 
-        public IEnumerable<PreprocessedType> GetByBaseType(TypeMember abstraction)
+        public IEnumerable<PreprocessedType> GetByBaseType(TypeMember baseType)
         {
-            throw new System.NotImplementedException();
+            return TryGetListByKey(baseType, _byBaseType);
         }
 
-        public PreprocessedType TryGetByConcreteType(TypeMember type)
+        public PreprocessedType TryGetByConcreteType(TypeMember concreteType)
         {
-            throw new System.NotImplementedException();
+            if (_byConcreteType.TryGetValue(concreteType, out var type))
+            {
+                return type;
+            }
+
+            return null;
         }
 
-        public IEnumerable<TypeMember> GetParserTypes()
+        private void AddToListByKey<TKey>(PreprocessedType type, TKey key, IDictionary<TKey, List<PreprocessedType>> dictionary)
         {
-            throw new NotImplementedException();
+            List<PreprocessedType> list;
+
+            if (dictionary.TryGetValue(key, out list))
+            {
+                list.Add(type);
+            }
+            else
+            {
+                list = new List<PreprocessedType> { type };
+                dictionary.Add(key, list);
+            }
         }
 
-        public IEnumerable<TypeMember> GetTechnologyAdapterTypes()
+        private IEnumerable<PreprocessedType> TryGetListByKey<TKey>(
+            TKey key,
+            IDictionary<TKey, List<PreprocessedType>> dictionary)
         {
-            throw new NotImplementedException();
+            if (dictionary.TryGetValue(key, out var list))
+            {
+                return list;
+            }
+            
+            return EmptyTypes;
         }
     }
 }
