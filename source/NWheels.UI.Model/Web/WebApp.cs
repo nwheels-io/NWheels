@@ -4,11 +4,11 @@ using NWheels.UI.Model.Impl.Parsers.Web;
 
 namespace NWheels.UI.Model.Web
 {
-    [ModelParser(typeof(WebAppParser))]    
     public interface IWebApp : ICanInclude<IWebPage>
     {
     }
     
+    [ModelParser(typeof(WebAppParser))]    
     public abstract class WebApp<TProps, TState> : UIComponent<TProps, TState>, IWebApp
     {
         protected WebApp(TProps props)

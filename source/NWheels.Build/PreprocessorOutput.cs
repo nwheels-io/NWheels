@@ -22,7 +22,11 @@ namespace NWheels.Build
             _byConcreteType.Add(type.ConcreteType, type);
 
             AddToListByKey(type, type.Abstraction, _byAbstraction);
-            AddToListByKey(type, type.BaseType, _byBaseType);
+
+            if (type.BaseType != null)
+            {
+                AddToListByKey(type, type.BaseType, _byBaseType);
+            }
         }
 
         public IEnumerable<PreprocessedType> GetAll()

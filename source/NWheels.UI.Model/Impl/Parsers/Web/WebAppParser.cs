@@ -6,7 +6,7 @@ namespace NWheels.UI.Model.Impl.Parsers.Web
     {
         public void Parse(IModelParserContext context)
         {
-            throw new System.NotImplementedException();
+            //throw new System.NotImplementedException();
         }
     }
 }

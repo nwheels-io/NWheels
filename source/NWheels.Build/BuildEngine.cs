@@ -71,6 +71,8 @@ namespace NWheels.Build
 
             IDictionary<Type, IModelParser> LoadParsers()
             {
+                Console.WriteLine("Loading parsers");
+                
                 var loaderSession = new ClrTypeLoaderSession(typeLoader);
 
                 foreach (var type in preprocessor.GetAll())
@@ -84,11 +86,16 @@ namespace NWheels.Build
                         });
                 }
 
-                return loaderSession.LoadRequestedTypes<IModelParser>();
+                var result = loaderSession.LoadRequestedTypes<IModelParser>();
+
+                Console.WriteLine($"Loaded {result.Count} parser(s)");
+                return result;
             }
 
             IDictionary<Type, ITechnologyAdapter> LoadTechnologyAdapters()
             {
+                Console.WriteLine("Loading technology adapters");
+
                 var loaderSession = new ClrTypeLoaderSession(typeLoader);
 
                 foreach (var type in preprocessor.GetAll())
@@ -108,11 +115,16 @@ namespace NWheels.Build
                     }
                 }
 
-                return loaderSession.LoadRequestedTypes<ITechnologyAdapter>();
+                var result = loaderSession.LoadRequestedTypes<ITechnologyAdapter>();
+
+                Console.WriteLine($"Loaded {result.Count} technology adapter(s)");
+                return result;
             }
 
             MetadataObject[] ParseModels()
             {
+                Console.WriteLine("Starting model parsing");
+                
                 var result = new List<MetadataObject>();
                 var rootContext = new ModelParserContext(code, reader, preprocessor, result);
 
@@ -120,6 +132,9 @@ namespace NWheels.Build
                 {
                     var parser = parsers[type.ParserClrType];
                     var typeContext = rootContext.WithInput(type);
+                    
+                    Console.WriteLine($"Parsing: [{type.ConcreteType.FullName}] -> [{parser.GetType().FullName}]");
+                    
                     parser.Parse(typeContext);
                 }
 

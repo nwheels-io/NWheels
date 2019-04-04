@@ -3,11 +3,11 @@ using NWheels.UI.Model.Impl.Parsers.Web;
 
 namespace NWheels.UI.Model.Web
 {
-    [ModelParser(typeof(WebPageParser))]
     public interface IWebPage
     {
     }
     
+    [ModelParser(typeof(WebPageParser))]
     public abstract class WebPage<TProps, TState> : UIComponent<TProps, TState>, IWebPage
     {
         public WebPage(TProps props)

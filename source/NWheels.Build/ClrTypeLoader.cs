@@ -33,13 +33,16 @@ namespace NWheels.Build
             foreach (var typesInAssembly in typesByAssemblyRefs)
             {
                 var assemblyRef = typesInAssembly.Key;
-                var assembly = Assembly.LoadFrom(assemblyRef.FilePath);
+                var assembly = GetOrLoadAssembly(assemblyRef.FilePath);
 
                 foreach (var type in typesInAssembly)
                 {
                     var clrType = assembly.GetType(type.FullName, throwOnError: true);
+                    
                     _cachedTypes.Add(type, clrType);
                     result.Add(type, clrType);
+                    
+                    Console.WriteLine($"Loaded type: {clrType.FullName}");
                 }
             }
 
@@ -59,6 +62,20 @@ namespace NWheels.Build
             return (
                 result: cacheHits.ToDictionary(hit => hit.type, hit => hit.clrType),
                 cacheMisses: cacheMisses.Select(miss => miss.type));
+        }
+
+        private Assembly GetOrLoadAssembly(string filePath)
+        {
+            if (_cachedAssemblies.TryGetValue(filePath, out var existingAssembly))
+            {
+                return existingAssembly;
+            }
+            
+            var assembly = Assembly.LoadFrom(filePath);
+            _cachedAssemblies.Add(filePath, assembly);
+
+            Console.WriteLine($"Loaded assembly: {assembly.FullName}");
+            return assembly;
         }
     }
 }

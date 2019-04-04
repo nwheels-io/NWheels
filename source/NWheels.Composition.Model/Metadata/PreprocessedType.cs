@@ -25,9 +25,9 @@ namespace NWheels.Composition.Model.Metadata
         public TypeMember ParserType { get; set; }
         public Type ParserClrType { get; set; }
         public MetadataObject ParsedMetadata { get; set; } 
-        public List<PreprocessedTypeArgument> BaseGenericArguments { get; } 
-        public List<PreprocessedArgument> BaseConstructorArguments { get; } 
-        public List<PreprocessedPropertyGroup> PropertyGroups { get; } 
+        public List<PreprocessedTypeArgument> BaseGenericArguments { get; } = new List<PreprocessedTypeArgument>();
+        public List<PreprocessedArgument> BaseConstructorArguments { get; } = new List<PreprocessedArgument>();
+        public List<PreprocessedPropertyGroup> PropertyGroups { get; } = new List<PreprocessedPropertyGroup>();
     }
 
     public class PreprocessedPropertyGroup
