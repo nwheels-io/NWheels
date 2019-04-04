@@ -5,11 +5,11 @@ namespace NWheels.Composition.Model.Metadata
 {
     public interface IReadOnlyPreprocessorOutput
     {
-        IEnumerable<PreprocessedTypeMember> GetAll();
-        IEnumerable<PreprocessedTypeMember> GetByParser<TParser>() where TParser : IModelParser;
-        IEnumerable<PreprocessedTypeMember> GetByAbstraction(TypeMember abstraction);
-        IEnumerable<PreprocessedTypeMember> GetByBaseType(TypeMember abstraction);
-        PreprocessedTypeMember TryGetByConcreteType(TypeMember type);
+        IEnumerable<PreprocessedType> GetAll();
+        IEnumerable<PreprocessedType> GetByParser<TParser>() where TParser : IModelParser;
+        IEnumerable<PreprocessedType> GetByAbstraction(TypeMember abstraction);
+        IEnumerable<PreprocessedType> GetByBaseType(TypeMember abstraction);
+        PreprocessedType TryGetByConcreteType(TypeMember type);
  
         IEnumerable<TypeMember> GetParserTypes();
         IEnumerable<TypeMember> GetTechnologyAdapterTypes();

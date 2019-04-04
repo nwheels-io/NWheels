@@ -1,5 +1,6 @@
 ﻿using System;
 using NWheels.Composition.Model.Metadata;
+using NWheels.UI.Model.Impl.Parsers;
 
 namespace NWheels.UI.Model
 {
@@ -10,7 +11,7 @@ namespace NWheels.UI.Model
             => default(TComponent);
     }
 
-    [ModelParser]
+    [ModelParser(typeof(UIComponentParser))]
     public abstract class UIComponent
     {
         public static implicit operator UIComponent(string text)

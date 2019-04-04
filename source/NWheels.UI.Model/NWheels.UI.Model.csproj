@@ -13,4 +13,8 @@
       <ProjectReference Include="..\NWheels.Composition.Model\NWheels.Composition.Model.csproj" />
       <ProjectReference Include="..\NWheels.Domain.Model\NWheels.Domain.Model.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Impl\Metadata\Web" />
+    </ItemGroup>
 </Project>

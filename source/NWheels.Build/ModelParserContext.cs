@@ -11,14 +11,14 @@ namespace NWheels.Build
         private readonly RoslynCodeModelReader _codeReader;
         private readonly IReadOnlyPreprocessorOutput _preprocessor;
         private readonly List<MetadataObject> _output;
-        private readonly PreprocessedTypeMember _input;
+        private readonly PreprocessedType _input;
 
         public ModelParserContext(
             ImperativeCodeModel code,
             RoslynCodeModelReader codeReader,
             IReadOnlyPreprocessorOutput preprocessor,
             List<MetadataObject> output = null,
-            PreprocessedTypeMember input = null)
+            PreprocessedType input = null)
         {
             _preprocessor = preprocessor;
             _input = input;
@@ -29,7 +29,7 @@ namespace NWheels.Build
 
         IReadOnlyPreprocessorOutput IModelParserContext.Preprocessor => _preprocessor;
 
-        PreprocessedTypeMember IModelParserContext.Input => _input;
+        PreprocessedType IModelParserContext.Input => _input;
 
         IList<MetadataObject> IModelParserContext.Output => _output;
 
@@ -37,7 +37,7 @@ namespace NWheels.Build
 
         RoslynCodeModelReader IModelParserContext.CodeReader => _codeReader;
 
-        public ModelParserContext WithInput(PreprocessedTypeMember input)
+        public ModelParserContext WithInput(PreprocessedType input)
         {
             return new ModelParserContext(_code, _codeReader, _preprocessor, _output, input);            
         }

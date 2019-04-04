@@ -7,15 +7,15 @@ namespace NWheels.Build
 {
     public class PreprocessorOutput : IReadOnlyPreprocessorOutput
     {
-        private readonly List<PreprocessedTypeMember> _all;
-        private readonly Dictionary<TypeMember, PreprocessedTypeMember> _byConcreteType;
-        private readonly Dictionary<TypeMember, List<PreprocessedTypeMember>> _byBaseType;
-        private readonly Dictionary<TypeMember, List<PreprocessedTypeMember>> _byAbstraction;
-        private readonly Dictionary<Type, PreprocessedTypeMember> _byParserType;
+        private readonly List<PreprocessedType> _all;
+        private readonly Dictionary<TypeMember, PreprocessedType> _byConcreteType;
+        private readonly Dictionary<TypeMember, List<PreprocessedType>> _byBaseType;
+        private readonly Dictionary<TypeMember, List<PreprocessedType>> _byAbstraction;
+        private readonly Dictionary<Type, PreprocessedType> _byParserType;
         private readonly List<TypeMember> _parserTypes;
         private readonly List<TypeMember> _technologyAdapterTypes;
 
-        public void AddPreprocessedType(PreprocessedTypeMember member)
+        public void AddPreprocessedType(PreprocessedType member)
         {
             throw new System.NotImplementedException();
         }
@@ -30,27 +30,27 @@ namespace NWheels.Build
             throw new System.NotImplementedException();
         }
 
-        public IEnumerable<PreprocessedTypeMember> GetAll()
+        public IEnumerable<PreprocessedType> GetAll()
         {
             throw new System.NotImplementedException();
         }
 
-        public IEnumerable<PreprocessedTypeMember> GetByParser<TParser>() where TParser : IModelParser
+        public IEnumerable<PreprocessedType> GetByParser<TParser>() where TParser : IModelParser
         {
             throw new System.NotImplementedException();
         }
 
-        public IEnumerable<PreprocessedTypeMember> GetByAbstraction(TypeMember abstraction)
+        public IEnumerable<PreprocessedType> GetByAbstraction(TypeMember abstraction)
         {
             throw new System.NotImplementedException();
         }
 
-        public IEnumerable<PreprocessedTypeMember> GetByBaseType(TypeMember abstraction)
+        public IEnumerable<PreprocessedType> GetByBaseType(TypeMember abstraction)
         {
             throw new System.NotImplementedException();
         }
 
-        public PreprocessedTypeMember TryGetByConcreteType(TypeMember type)
+        public PreprocessedType TryGetByConcreteType(TypeMember type)
         {
             throw new System.NotImplementedException();
         }

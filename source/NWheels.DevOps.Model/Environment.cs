@@ -1,9 +1,10 @@
 using NWheels.Composition.Model;
 using NWheels.Composition.Model.Metadata;
+using NWheels.DevOps.Model.Metadata;
 
 namespace NWheels.DevOps.Model
 {
-    [ModelParser]
+    [ModelParser(typeof(EnvironmentParser))]
     public abstract class AnyEnvironment : ICanInclude<AnyDeployment>, ICanInclude<TechnologyAdaptedComponent>
     {
     }

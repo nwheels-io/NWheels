@@ -5,9 +5,9 @@ using NWheels.Composition.Model.Metadata;
 
 namespace NWheels.DevOps.Model.Metadata
 {
-    public class EnvironmentParser: IModelParser, IRootModelParser
+    public class EnvironmentParser: IModelParser
     {
-        public override IEnumerable<TypeMember> Abstractions(ImperativeCodeModel codeModel)
+        public void Parse(IModelParserContext context)
         {
             throw new System.NotImplementedException();
         }

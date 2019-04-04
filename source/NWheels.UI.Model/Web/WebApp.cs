@@ -1,7 +1,10 @@
 using NWheels.Composition.Model;
+using NWheels.Composition.Model.Metadata;
+using NWheels.UI.Model.Impl.Parsers.Web;
 
 namespace NWheels.UI.Model.Web
 {
+    [ModelParser(typeof(WebAppParser))]    
     public interface IWebApp : ICanInclude<IWebPage>
     {
     }

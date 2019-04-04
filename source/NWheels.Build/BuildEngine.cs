@@ -9,6 +9,8 @@ using MetaPrograms.CSharp.Reader;
 using MetaPrograms.CSharp.Reader.Reflection;
 using MetaPrograms.Members;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using NWheels.Composition.Model;
 using NWheels.Composition.Model.Metadata;
 
 namespace NWheels.Build
@@ -16,8 +18,7 @@ namespace NWheels.Build
     public class BuildEngine
     {
         private readonly BuildOptions _options;
-        private IContainer _services;
-        
+
         public BuildEngine(BuildOptions options)
         {
             _options = options;
@@ -28,126 +29,113 @@ namespace NWheels.Build
             Console.WriteLine($"Starting build: project {Path.GetFileNameWithoutExtension(_options.ProjectFilePath)}");
 
             var workspace = LoadProjectWorkspace();
-            var (code, reader) = ReadSourceCode(workspace);
-            var preprocessor = PreprocessModels(code, reader);
-            var parsers = LoadParsers(preprocessor.GetParserTypes());
-            var technologyAdapters = LoadTechnologyAdapters(preprocessor.GetTechnologyAdapterTypes());
-            var metadata = ParseModels(code, reader, parsers, technologyAdapters, preprocessor);
+            var (code, reader) = ReadSourceCode();
+            var preprocessor = PreprocessModels();
+            var typeLoader = new ClrTypeLoader(reader);
+            var parsers = LoadParsers();
+            var technologyAdapters = LoadTechnologyAdapters();
+            var metadata = ParseModels();
             var output = new CodeGeneratorOutput();
 
-            RunTechnologyAdapters(metadata, output);
-             
-            
-            
-//            var parseableMembers = DiscoverParseableMembers(code);
-//            var modelAssemblyRefs = DiscoverModelAssemblyReferences(reader, parseableMembers);
-//            var modelAssemblies = LoadModelAssemblies(modelAssemblyRefs).ToArray();
-//            var modelEntryPoints = LoadModelEntryPoints(modelAssemblies);
-//            var parserRegistry = RegisterParsers(modelEntryPoints);
-//            
-//            _services = BuildServiceContainer(parserRegistry);
-            
-            
+            RunTechnologyAdapters();
+
             return true;
-        }
-        
-        private Workspace LoadProjectWorkspace()
-        {
-            Console.WriteLine("--- project loader: starting ---");
-            
-            var loader = new BuildalyzerWorkspaceLoader();
-            var workspace = loader.LoadWorkspace(new[] { _options.ProjectFilePath });
 
-            Console.WriteLine("--- project loader: success ---");
-            
-            return workspace;
-        }
-        
-        private (ImperativeCodeModel code, RoslynCodeModelReader reader) ReadSourceCode(Workspace workspace)
-        {
-            var reader = new RoslynCodeModelReader(workspace, new ClrTypeResolver());
-            reader.Read();
-
-            var code = reader.GetCodeModel();
-            return (code, reader);
-        }
-
-        private IReadOnlyPreprocessorOutput PreprocessModels(ImperativeCodeModel code, RoslynCodeModelReader reader)
-        {
-            var preprocessor = new Preprocessor(code, reader);
-            return preprocessor.Run();
-        }
-
-        private IEnumerable<MetadataObject> ParseModels(
-            ImperativeCodeModel code, 
-            RoslynCodeModelReader reader, 
-            IReadOnlyPreprocessorOutput proprocessor)
-        {
-        }
-
-        private IEnumerable<TypeMember> DiscoverParseableMembers(ImperativeCodeModel codeModel)
-        {
-            var parseableMembers = codeModel
-                .TopLevelMembers
-                .OfType<TypeMember>()
-                .Where(IsParseableMember)
-                .Select(member => {
-                    Console.WriteLine($"Discovered parseable member: {member.FullName}");
-                    return member;
-                })
-                .ToArray();
-
-            Console.WriteLine($"Discovered {parseableMembers.Length} parseable member(s).");
-            return parseableMembers;
-
-            bool IsParseableMember(TypeMember member)
+            Workspace LoadProjectWorkspace()
             {
-                return (
-                    member.AssemblyName != null && 
-                    !member.AssemblyName.StartsWith("NWheels.") &&
-                    member.BaseType?.Namespace?.StartsWith("NWheels.") == true);
+                Console.WriteLine("--- project loader: starting ---");
+
+                var loader = new BuildalyzerWorkspaceLoader();
+                var result = loader.LoadWorkspace(new[] {_options.ProjectFilePath});
+
+                Console.WriteLine("--- project loader: success ---");
+
+                return result;
             }
-        }
 
-        private IEnumerable<PortableExecutableReference> DiscoverModelAssemblyReferences(
-            RoslynCodeModelReader reader, 
-            IEnumerable<TypeMember> parseableMembers)
-        {
-            return parseableMembers
-                .Select(TryGetModelAbstraction)
-                .Select(reader.TryGetAssemblyPEReference)
-                .Where(reference => reference?.FilePath != null)
-                .Distinct()
-                .ToArray();
-
-            TypeMember TryGetModelAbstraction(TypeMember parseable)
+            (ImperativeCodeModel code, RoslynCodeModelReader reader) ReadSourceCode()
             {
-                while (parseable != null && !parseable.FullName.StartsWith("NWheels."))
+                var resultReader = new RoslynCodeModelReader(workspace, new ClrTypeResolver());
+
+                resultReader.Read();
+                var resultCode = resultReader.GetCodeModel();
+
+                return (resultCode, resultReader);
+            }
+
+            IReadOnlyPreprocessorOutput PreprocessModels()
+            {
+                var resultPreprocessor = new Preprocessor(code, reader);
+                return resultPreprocessor.Run();
+            }
+
+            IDictionary<Type, IModelParser> LoadParsers()
+            {
+                var loaderSession = new ClrTypeLoaderSession(typeLoader);
+
+                foreach (var type in preprocessor.GetAll())
                 {
-                    parseable = parseable.BaseType;
+                    var typeRefCopy = type;
+                    
+                    loaderSession.AddRequest(
+                        typeRefCopy.ParserType,
+                        clrType => {
+                            typeRefCopy.ParserClrType = clrType;
+                        });
                 }
 
-                return parseable;
+                return loaderSession.LoadRequestedTypes<IModelParser>();
             }
-        }
 
-        
-        private IEnumerable<Assembly> LoadModelAssemblies(IEnumerable<PortableExecutableReference> references)
-        {
-            var assemblies = new List<Assembly>();
-            
-            foreach (var reference in references)
+            IDictionary<Type, ITechnologyAdapter> LoadTechnologyAdapters()
             {
-                var assembly = Assembly.LoadFrom(reference.FilePath);
-                assemblies.Add(assembly);
+                var loaderSession = new ClrTypeLoaderSession(typeLoader);
 
-                Console.WriteLine($"Loaded programming model assembly: {assembly.FullName}");
+                foreach (var type in preprocessor.GetAll())
+                {
+                    foreach (var propGroup in type.PropertyGroups)
+                    {
+                        foreach (var prop in propGroup.Properties.Where(p => p.TechnologyAdapter != null))
+                        {
+                            var propRefCopy = prop;
+
+                            loaderSession.AddRequest(
+                                prop.TechnologyAdapter.Type,
+                                clrType => {
+                                    propRefCopy.TechnologyAdapter.ClrType = clrType;
+                                });
+                        }
+                    }
+                }
+
+                return loaderSession.LoadRequestedTypes<ITechnologyAdapter>();
             }
-            
-            Console.WriteLine($"Loaded {assemblies.Count} programming model assemblies");
-            return assemblies;
-        }
 
+            MetadataObject[] ParseModels()
+            {
+                var result = new List<MetadataObject>();
+                var rootContext = new ModelParserContext(code, reader, preprocessor, result);
+
+                foreach (var type in preprocessor.GetAll())
+                {
+                    var parser = parsers[type.ParserClrType];
+                    var typeContext = rootContext.WithInput(type);
+                    parser.Parse(typeContext);
+                }
+
+                return result.ToArray();
+            }
+
+            void RunTechnologyAdapters()
+            {
+                foreach (var metadataObj in metadata)
+                {
+                    var adapter = technologyAdapters[metadataObj.TechnologyAdapterType];
+                    var context = new TechnologyAdapterContext(metadataObj, output);
+                    adapter.Execute(context);
+                }
+            }
+        }
     }
 }
 
@@ -303,3 +291,67 @@ namespace NWheels.Build
 //            metadata.ToList().ForEach(obj => 
 //                Console.WriteLine($"Parsed root meta-object: [{obj.QualifiedName}](${obj.GetType().FullName})"));
 
+//
+//
+//        private IEnumerable<TypeMember> DiscoverParseableMembers(ImperativeCodeModel codeModel)
+//        {
+//            var parseableMembers = codeModel
+//                .TopLevelMembers
+//                .OfType<TypeMember>()
+//                .Where(IsParseableMember)
+//                .Select(member => {
+//                    Console.WriteLine($"Discovered parseable member: {member.FullName}");
+//                    return member;
+//                })
+//                .ToArray();
+//
+//            Console.WriteLine($"Discovered {parseableMembers.Length} parseable member(s).");
+//            return parseableMembers;
+//
+//            bool IsParseableMember(TypeMember member)
+//            {
+//                return (
+//                    member.AssemblyName != null && 
+//                    !member.AssemblyName.StartsWith("NWheels.") &&
+//                    member.BaseType?.Namespace?.StartsWith("NWheels.") == true);
+//            }
+//        }
+//
+//        private IEnumerable<PortableExecutableReference> DiscoverModelAssemblyReferences(
+//            RoslynCodeModelReader reader, 
+//            IEnumerable<TypeMember> parseableMembers)
+//        {
+//            return parseableMembers
+//                .Select(TryGetModelAbstraction)
+//                .Select(reader.TryGetAssemblyPEReference)
+//                .Where(reference => reference?.FilePath != null)
+//                .Distinct()
+//                .ToArray();
+//
+//            TypeMember TryGetModelAbstraction(TypeMember parseable)
+//            {
+//                while (parseable != null && !parseable.FullName.StartsWith("NWheels."))
+//                {
+//                    parseable = parseable.BaseType;
+//                }
+//
+//                return parseable;
+//            }
+//        }
+//
+//        
+//        private IEnumerable<Assembly> LoadModelAssemblies(IEnumerable<PortableExecutableReference> references)
+//        {
+//            var assemblies = new List<Assembly>();
+//            
+//            foreach (var reference in references)
+//            {
+//                var assembly = Assembly.LoadFrom(reference.FilePath);
+//                assemblies.Add(assembly);
+//
+//                Console.WriteLine($"Loaded programming model assembly: {assembly.FullName}");
+//            }
+//            
+//            Console.WriteLine($"Loaded {assemblies.Count} programming model assemblies");
+//            return assemblies;
+//        }
