@@ -1,15 +1,13 @@
+using NWheels.Composition.Model.Metadata;
 using NWheels.DevOps.Model;
 
 namespace NWheels.DevOps.Adapters.Environments.Gke
 {
-    public static class GkeEnvironmentTechnologyAdapter
+    public class GkeEnvironmentTechnologyAdapter : ITechnologyAdapter
     {
-        public static GkeEnvironment AsGkeEnvironment<TConfig>(
-            this Environment<TConfig> environment,
-            string zone,
-            string project)
+        public void Execute(ITechnologyAdapterContext context)
         {
-            return new GkeEnvironment(); 
+            throw new System.NotImplementedException();
         }
     }
 }

@@ -1,12 +1,13 @@
+using NWheels.Composition.Model.Metadata;
 using NWheels.UI.Model.Web;
 
 namespace NWheels.UI.Adapters.Web.StaticHtml
 {
-    public static class StaticHtmlTechnologyAdapter
+    public class StaticHtmlTechnologyAdapter : ITechnologyAdapter
     {
-        public static StaticHtmlWebSite AsStaticHtmlWebSite(this IWebApp webApp)
+        public void Execute(ITechnologyAdapterContext context)
         {
-            return default(StaticHtmlWebSite);
+            throw new System.NotImplementedException();
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using MetaPrograms.Expressions;
 using MetaPrograms.Members;
 
@@ -32,8 +33,17 @@ namespace NWheels.Composition.Model.Metadata
 
     public class PreprocessedPropertyGroup
     {
+        public PreprocessedPropertyGroup()
+        {
+        }
+        
+        public PreprocessedPropertyGroup(TypeMember discriminator)
+        {
+            Discriminator = discriminator;
+        }
+
         public TypeMember Discriminator { get; set; }
-        public List<PreprocessedProperty> Properties { get; }
+        public List<PreprocessedProperty> Properties { get; } = new List<PreprocessedProperty>();
     }
     
     public class PreprocessedProperty
@@ -42,8 +52,8 @@ namespace NWheels.Composition.Model.Metadata
         public TypeMember Type { get; set; }
         public AbstractExpression Initializer { get; set; }
         
-        public List<PreprocessedTypeArgument> GenericArguments { get; set; } 
-        public List<PreprocessedArgument> ConstructorArguments { get; set; }
+        public List<PreprocessedTypeArgument> GenericArguments { get; } = new List<PreprocessedTypeArgument>(); 
+        public List<PreprocessedArgument> ConstructorArguments { get; } = new List<PreprocessedArgument>();
         public PreprocessedTechnologyAdapter TechnologyAdapter { get; set; }
     }
 
@@ -51,14 +61,25 @@ namespace NWheels.Composition.Model.Metadata
     {
         public TypeMember Type { get; set; }
         public Type ClrType { get; set; }
-        public List<PreprocessedTypeArgument> GenericArguments { get; } 
-        public List<PreprocessedArgument> ConstructorArguments { get; }
+        public AbstractExpression Initializer { get; set; }
+        public List<PreprocessedTypeArgument> GenericArguments { get; } = new List<PreprocessedTypeArgument>();
+        public List<PreprocessedArgument> AdapterArguments { get; } = new List<PreprocessedArgument>();
     }
 
     public class PreprocessedTypeArgument
     {
         public string Name { get; set; }
+        
         public TypeMember Type { get; set; }
+
+        public static IEnumerable<PreprocessedTypeArgument> FromTypeArguments(TypeMember type) =>
+            type.GenericArguments.Select(FromGenericArgumentOf(type));
+        
+        public static Func<TypeMember, int, PreprocessedTypeArgument> FromGenericArgumentOf(TypeMember type) =>
+            (arg, index) => new PreprocessedTypeArgument {
+                Name = type.GenericParameters[index].Name,
+                Type = arg
+            };
     }
 
     public class PreprocessedArgument
@@ -67,5 +88,16 @@ namespace NWheels.Composition.Model.Metadata
         public bool HasClrValue { get; set; }
         public object ClrValue { get; set; }
         public AbstractExpression ValueExpression { get; set; }
+
+        public static IEnumerable<PreprocessedArgument> FromCallArguments(MethodCallExpression call, int skip = 0) =>
+            call.Arguments.Select(FromArgumentOf(call.Method)).Skip(skip);
+
+        public static Func<Argument, int, PreprocessedArgument> FromArgumentOf(MethodMemberBase method) => 
+            (arg, index) => new PreprocessedArgument {
+                Name = method.Signature.Parameters[index].Name,
+                ValueExpression = arg.Expression,
+                HasClrValue = (arg.Expression as ConstantExpression)?.Value != null,
+                ClrValue = (arg.Expression as ConstantExpression)?.Value
+            };
     }
 }

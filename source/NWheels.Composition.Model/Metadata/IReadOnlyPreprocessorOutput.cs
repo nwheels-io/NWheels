@@ -9,6 +9,7 @@ namespace NWheels.Composition.Model.Metadata
         IEnumerable<PreprocessedType> FindByParser<TParser>() where TParser : IModelParser;
         IEnumerable<PreprocessedType> GetByAbstraction(TypeMember abstraction);
         IEnumerable<PreprocessedType> GetByBaseType(TypeMember abstraction);
+        PreprocessedType GetByConcreteType(TypeMember type);
         PreprocessedType TryGetByConcreteType(TypeMember type);
     }
 }

@@ -1,13 +1,13 @@
+using NWheels.Composition.Model.Metadata;
 using NWheels.DevOps.Model;
 
 namespace NWheels.DevOps.Adapters.Environments.Local
 {
-    public static class LocalEnvironmentTechnologyAdapter
+    public class LocalEnvironmentTechnologyAdapter : ITechnologyAdapter
     {
-        public static LocalMachineEnvironment AsLocalMachineEnvironment<TConfig>(
-            this Environment<TConfig> environment)
+        public void Execute(ITechnologyAdapterContext context)
         {
-            return new LocalMachineEnvironment();
+            throw new System.NotImplementedException();
         }
     }
 }

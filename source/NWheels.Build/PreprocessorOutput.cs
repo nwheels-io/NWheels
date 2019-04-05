@@ -51,6 +51,11 @@ namespace NWheels.Build
             return TryGetListByKey(baseType, _byBaseType);
         }
 
+        public PreprocessedType GetByConcreteType(TypeMember concreteType)
+        {
+            return _byConcreteType[concreteType];
+        }
+
         public PreprocessedType TryGetByConcreteType(TypeMember concreteType)
         {
             if (_byConcreteType.TryGetValue(concreteType, out var type))

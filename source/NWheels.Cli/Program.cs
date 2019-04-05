@@ -23,6 +23,11 @@ namespace NWheels.Cli
 
                 exitCode = success ? 0 : 1;
             }
+            catch (BuildErrorException e)
+            {
+                exitCode = 1;
+                Console.WriteLine(e.Message);
+            }
             catch (Exception e)
             {
                 exitCode = 100;

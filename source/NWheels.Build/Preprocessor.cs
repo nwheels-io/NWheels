@@ -6,6 +6,7 @@ using MetaPrograms;
 using MetaPrograms.CSharp.Reader;
 using MetaPrograms.Expressions;
 using MetaPrograms.Members;
+using MetaPrograms.Statements;
 using Microsoft.CodeAnalysis;
 using NWheels.Composition.Model;
 using NWheels.Composition.Model.Metadata;
@@ -29,22 +30,12 @@ namespace NWheels.Build
 
         public IReadOnlyPreprocessorOutput Run()
         {
-            Console.WriteLine("--- preprocessor: starting ---");
+            Console.WriteLine("--- preprocessor ---");
 
             var output = new PreprocessorOutput();
 
-            try
-            {
-                DiscoverParseableTypes();
-                CompleteParsing();
-            }
-            catch
-            {
-                Console.WriteLine("--- preprocessor: FAILURE ---");
-                throw;
-            }
-
-            Console.WriteLine("--- preprocessor: success ---");
+            DiscoverParseableTypes();
+            CompletePreprocessing();
 
             return output;
 
@@ -59,24 +50,28 @@ namespace NWheels.Build
                 }
             }
 
-            void CompleteParsing()
+            void CompletePreprocessing()
             {
-                foreach (var type in output.GetAll())
+                foreach (var outType in output.GetAll())
                 {
-                    Console.WriteLine($"Preprocessing type: {type.ConcreteType.FullName}");
-                    CompleteParsingOfType(type);
+                    Console.WriteLine($"Type: {outType.ConcreteType.FullName}");
+                    CompletePreprocessingOfType(outType);
                 }
             }
             
-            void CompleteParsingOfType(PreprocessedType type)
+            void CompletePreprocessingOfType(PreprocessedType outType)
             {
-                var parseableProperties = type.ConcreteType.Members
+                //TODO: create correct groups according to ICanInclude<T> interface
+                outType.PropertyGroups.Add(new PreprocessedPropertyGroup(discriminator: null));
+                
+                var parseableProperties = outType.ConcreteType.Members
                     .OfType<PropertyMember>()
                     .Where(IsParseableProperty);
 
-                foreach (var property in parseableProperties)
+                foreach (var inProp in parseableProperties)
                 {
-                    Console.WriteLine($" - property {property.Name}");
+                    Console.WriteLine($"Property: {inProp.DeclaringType.Name}::{inProp.Name}");
+                    PreprocessProperty(outType, inProp);
                 }
             }
 
@@ -102,14 +97,6 @@ namespace NWheels.Build
                 return false;
             }
 
-            bool IsParseableProperty(PropertyMember property)
-            {
-                return (
-                    property.Modifier != MemberModifier.Abstract && 
-                    property.Modifier != MemberModifier.Static && 
-                    property.Attributes.Any(attr => attr.AttributeType == _includeAttributeType));
-            }
-
             bool TryGetParserType(TypeMember type, out TypeMember parserType)
             {
                 var parserTypeExpression = type
@@ -125,7 +112,22 @@ namespace NWheels.Build
                 return (parserType != null);
             }
             
+            bool IsParseableProperty(PropertyMember property)
+            {
+                return (
+                    property.Modifier != MemberModifier.Abstract && 
+                    property.Modifier != MemberModifier.Static && 
+                    property.Attributes.Any(attr => attr.AttributeType == _includeAttributeType));
+            }
+
+            void PreprocessProperty(PreprocessedType outType, PropertyMember inProp)
+            {
+                var propPreprocessor = new PropertyPreprocessor(_code, _reader, output);
+                propPreprocessor.AddProperty(outType, inProp);
+            }
+
         }
+
 
         //            bool TryParseProperty(PropertyMember property, out PreprocessedProperty property)
 //            {
