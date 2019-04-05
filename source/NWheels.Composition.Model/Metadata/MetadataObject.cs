@@ -1,14 +1,23 @@
 using System;
+using System.Net.Http.Headers;
 using MetaPrograms.Members;
 
 namespace NWheels.Composition.Model.Metadata
 {
-    public abstract class MetadataObject
+    public interface IMetadataObject
     {
-        public string Name { get; }
+        MetadataObjectHeader Header { get; } 
+    }
+    
+    public abstract class MetadataObject : IMetadataObject
+    {
+        private readonly MetadataObjectHeader _header;
 
-        public PreprocessedType Preprocessor { get; }
-        public abstract Type TechnologyAdapterType { get; }
-        public abstract Type TechnologyAdapterConfigType { get; }
+        protected MetadataObject(MetadataObjectHeader header)
+        {
+            _header = header;
+        }
+
+        MetadataObjectHeader IMetadataObject.Header => _header;
     }
 }

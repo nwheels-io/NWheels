@@ -7,13 +7,13 @@ namespace NWheels.Build
 {
     public class TechnologyAdapterContext : ITechnologyAdapterContext
     {
-        public TechnologyAdapterContext(MetadataObject input, ICodeGeneratorOutput output)
+        public TechnologyAdapterContext(IMetadataObject input, ICodeGeneratorOutput output)
         {
             Input = input;
             Output = output;
         }
 
-        public MetadataObject Input { get; }
+        public IMetadataObject Input { get; }
         public ICodeGeneratorOutput Output { get; }
     }
 }

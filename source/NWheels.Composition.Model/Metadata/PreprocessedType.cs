@@ -20,6 +20,9 @@ namespace NWheels.Composition.Model.Metadata
             this.ParserType = parserInfo.ParserType;
         }
 
+        public IEnumerable<PreprocessedProperty> GetAllProperties() =>
+            PropertyGroups.SelectMany(group => group.Properties);
+        
         public TypeMember Abstraction { get; set; }
         public TypeMember ConcreteType { get; set; }
         public TypeMember BaseType { get; set; }
@@ -29,6 +32,7 @@ namespace NWheels.Composition.Model.Metadata
         public List<PreprocessedTypeArgument> BaseGenericArguments { get; } = new List<PreprocessedTypeArgument>();
         public List<PreprocessedArgument> BaseConstructorArguments { get; } = new List<PreprocessedArgument>();
         public List<PreprocessedPropertyGroup> PropertyGroups { get; } = new List<PreprocessedPropertyGroup>();
+        public List<PreprocessedProperty> ReferencedBy { get; } = new List<PreprocessedProperty>();
     }
 
     public class PreprocessedPropertyGroup

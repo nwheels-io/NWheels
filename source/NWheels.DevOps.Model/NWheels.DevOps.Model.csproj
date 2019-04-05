@@ -9,8 +9,4 @@
       <ProjectReference Include="..\NWheels.Composition.Model\NWheels.Composition.Model.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Impl\Metadata" />
-    </ItemGroup>
-
 </Project>

@@ -36,6 +36,7 @@ namespace NWheels.Build
 
             DiscoverParseableTypes();
             CompletePreprocessing();
+            PopulateReferencedBy();
 
             return output;
 
@@ -56,6 +57,18 @@ namespace NWheels.Build
                 {
                     Console.WriteLine($"Type: {outType.ConcreteType.FullName}");
                     CompletePreprocessingOfType(outType);
+                }
+            }
+
+            void PopulateReferencedBy()
+            {
+                foreach (var type in output.GetAll())
+                {
+                    foreach (var prop in type.GetAllProperties())
+                    {
+                        var referencedType = output.TryGetByConcreteType(prop.Type);
+                        referencedType?.ReferencedBy.Add(prop);
+                    }
                 }
             }
             

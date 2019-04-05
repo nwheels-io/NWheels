@@ -35,7 +35,7 @@ namespace NWheels.Build
             var parsers = LoadParsers();
             var technologyAdapters = LoadTechnologyAdapters();
             var metadata = ParseModels();
-            var output = new CodeGeneratorOutput();
+            var output = new CodeGeneratorOutput(_options);
 
             RunTechnologyAdapters();
 
@@ -121,7 +121,7 @@ namespace NWheels.Build
                 return result;
             }
 
-            MetadataObject[] ParseModels()
+            IMetadataObject[] ParseModels()
             {
                 Console.WriteLine("Starting model parsing");
                 
@@ -138,16 +138,19 @@ namespace NWheels.Build
                     parser.Parse(typeContext);
                 }
 
-                return result.ToArray();
+                return result.Cast<IMetadataObject>().ToArray();
             }
 
             void RunTechnologyAdapters()
             {
-                foreach (var metadataObj in metadata)
+                foreach (var metaObject in metadata)
                 {
-                    var adapter = technologyAdapters[metadataObj.TechnologyAdapterType];
-                    var context = new TechnologyAdapterContext(metadataObj, output);
-                    adapter.Execute(context);
+                    foreach (var metaAdapter in metaObject.Header.TechnologyAdapters)
+                    {
+                        var adapter = technologyAdapters[metaAdapter.AdapterType];
+                        var context = new TechnologyAdapterContext(metaObject, output);
+                        adapter.Execute(context);
+                    }
                 }
             }
         }

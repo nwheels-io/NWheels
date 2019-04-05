@@ -9,7 +9,7 @@ namespace NWheels.Composition.Model.Metadata
 
     public interface ITechnologyAdapterContext
     {
-        MetadataObject Input { get; }
+        IMetadataObject Input { get; }
         ICodeGeneratorOutput Output { get; }
     }
 }
