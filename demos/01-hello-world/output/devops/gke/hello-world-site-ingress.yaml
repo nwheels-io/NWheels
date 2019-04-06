@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: demo-hello-world
+  name: hello-world-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "demo-hello-world-hello-world-site-ip"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: hello-world-site-service
+          servicePort: 80

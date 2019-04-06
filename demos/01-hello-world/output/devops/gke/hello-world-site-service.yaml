@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: demo-hello-world
+  name: hello-world-site-service
+  labels:
+    purpose: deploy-hello-world
+  annotations:
+    beta.cloud.google.com/backend-config: '{"ports": {"80":"hello-world-site-backend-config"}}'
+spec:
+  type: NodePort
+  selector:
+    purpose: deploy-hello-world
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
