@@ -15,7 +15,7 @@ namespace NWheels.Build
         {
             _buildOptions = buildOptions;
             _basePath = new string[] {
-                Path.Combine(Path.GetDirectoryName(buildOptions.ProjectFilePath), "nwheels-generated-code")
+                Path.Combine(Path.GetDirectoryName(buildOptions.ProjectFilePath), "nwheels.build")
             };
         }
 
