@@ -8,4 +8,8 @@
       <ProjectReference Include="..\NWheels.DevOps.Model\NWheels.DevOps.Model.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="YamlDotNet" Version="6.0.0" />
+    </ItemGroup>
+
 </Project>
