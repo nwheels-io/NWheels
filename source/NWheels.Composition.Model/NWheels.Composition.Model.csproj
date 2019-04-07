@@ -10,8 +10,4 @@
       <ProjectReference Include="..\..\..\MetaPrograms\Source\MetaPrograms\MetaPrograms.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Impl" />
-    </ItemGroup>
-
 </Project>

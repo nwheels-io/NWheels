@@ -1,4 +1,5 @@
 using NWheels.Composition.Model;
+using NWheels.Composition.Model.Impl;
 using NWheels.Composition.Model.Impl.Metadata;
 using NWheels.DevOps.Model.Impl.Parsers;
 

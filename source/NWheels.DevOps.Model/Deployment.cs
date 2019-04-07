@@ -1,4 +1,5 @@
 using NWheels.Composition.Model;
+using NWheels.Composition.Model.Impl;
 
 namespace NWheels.DevOps.Model
 {
