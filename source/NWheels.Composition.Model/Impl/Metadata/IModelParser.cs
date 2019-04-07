@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using MetaPrograms;
 using MetaPrograms.CSharp.Reader;
 
-namespace NWheels.Composition.Model.Metadata
+namespace NWheels.Composition.Model.Impl.Metadata
 {
     public interface IModelParser
     {

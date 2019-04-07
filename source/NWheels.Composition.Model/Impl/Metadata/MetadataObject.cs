@@ -1,8 +1,4 @@
-using System;
-using System.Net.Http.Headers;
-using MetaPrograms.Members;
-
-namespace NWheels.Composition.Model.Metadata
+namespace NWheels.Composition.Model.Impl.Metadata
 {
     public interface IMetadataObject
     {

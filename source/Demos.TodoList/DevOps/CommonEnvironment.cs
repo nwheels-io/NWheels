@@ -2,7 +2,7 @@ using NWheels.Composition.Model;
 
 namespace Demos.TodoList.DevOps
 {
-    public class CommonEnvironment : PartialInclude<TodoListEnvConfig>
+    public class CommonEnvironment : PartialModel<TodoListEnvConfig>
     {
         public CommonEnvironment(TodoListEnvConfig config) : base(config)
         {

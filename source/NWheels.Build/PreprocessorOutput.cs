@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MetaPrograms.Extensions;
 using MetaPrograms.Members;
-using NWheels.Composition.Model.Metadata;
+using NWheels.Composition.Model.Impl.Metadata;
 
 namespace NWheels.Build
 {

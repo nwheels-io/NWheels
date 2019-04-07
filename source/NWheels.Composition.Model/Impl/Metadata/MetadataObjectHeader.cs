@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NWheels.Composition.Model.Metadata
+namespace NWheels.Composition.Model.Impl.Metadata
 {
     public class MetadataObjectHeader
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using MetaPrograms;
 using MetaPrograms.CSharp.Reader;
-using NWheels.Composition.Model.Metadata;
+using NWheels.Composition.Model.Impl.Metadata;
 
 namespace NWheels.Build
 {

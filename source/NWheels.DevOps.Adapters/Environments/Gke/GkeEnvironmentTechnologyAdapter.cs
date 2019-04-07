@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using NWheels.Composition.Model.Metadata;
+using NWheels.Composition.Model.Impl.Metadata;
 using NWheels.DevOps.Adapters.Common.K8sYaml;
 using NWheels.DevOps.Model.Impl.Metadata;
 

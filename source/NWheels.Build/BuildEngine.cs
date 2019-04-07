@@ -11,7 +11,7 @@ using MetaPrograms.Members;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NWheels.Composition.Model;
-using NWheels.Composition.Model.Metadata;
+using NWheels.Composition.Model.Impl.Metadata;
 
 namespace NWheels.Build
 {

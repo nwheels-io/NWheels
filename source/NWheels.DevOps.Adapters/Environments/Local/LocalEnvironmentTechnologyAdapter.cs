@@ -1,4 +1,4 @@
-using NWheels.Composition.Model.Metadata;
+using NWheels.Composition.Model.Impl.Metadata;
 using NWheels.DevOps.Model;
 
 namespace NWheels.DevOps.Adapters.Environments.Local

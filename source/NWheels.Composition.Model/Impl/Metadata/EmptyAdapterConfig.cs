@@ -1,4 +1,4 @@
-namespace NWheels.Composition.Model.Metadata
+namespace NWheels.Composition.Model.Impl.Metadata
 {
     public class EmptyAdapterConfig
     {

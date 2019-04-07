@@ -1,7 +1,7 @@
 using System;
 using Buildalyzer;
 using MetaPrograms;
-using NWheels.Composition.Model.Metadata;
+using NWheels.Composition.Model.Impl.Metadata;
 
 namespace NWheels.Build
 {

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MetaPrograms.Members;
-using NWheels.Composition.Model.Metadata;
 
 namespace NWheels.Build
 {

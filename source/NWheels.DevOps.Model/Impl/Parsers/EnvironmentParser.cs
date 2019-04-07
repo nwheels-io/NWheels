@@ -1,5 +1,5 @@
 using System.Linq;
-using NWheels.Composition.Model.Metadata;
+using NWheels.Composition.Model.Impl.Metadata;
 using NWheels.DevOps.Model.Impl.Metadata;
 
 namespace NWheels.DevOps.Model.Impl.Parsers

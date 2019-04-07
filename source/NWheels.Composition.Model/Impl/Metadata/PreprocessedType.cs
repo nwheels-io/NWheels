@@ -4,7 +4,7 @@ using System.Linq;
 using MetaPrograms.Expressions;
 using MetaPrograms.Members;
 
-namespace NWheels.Composition.Model.Metadata
+namespace NWheels.Composition.Model.Impl.Metadata
 {
     public class PreprocessedType
     {

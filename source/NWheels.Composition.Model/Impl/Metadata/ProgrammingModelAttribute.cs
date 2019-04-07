@@ -1,6 +1,6 @@
 using System;
 
-namespace NWheels.Composition.Model.Metadata
+namespace NWheels.Composition.Model.Impl.Metadata
 {
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     public class ProgrammingModelAttribute : Attribute

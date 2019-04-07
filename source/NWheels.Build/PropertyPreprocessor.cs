@@ -5,7 +5,7 @@ using MetaPrograms.CSharp.Reader;
 using MetaPrograms.Expressions;
 using MetaPrograms.Members;
 using MetaPrograms.Statements;
-using NWheels.Composition.Model.Metadata;
+using NWheels.Composition.Model.Impl.Metadata;
 
 namespace NWheels.Build
 {

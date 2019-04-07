@@ -1,8 +1,8 @@
 namespace NWheels.Composition.Model
 {
-    public abstract class PartialInclude<TConfig>
+    public abstract class PartialModel<TConfig>
     {
-        protected PartialInclude(TConfig config)
+        protected PartialModel(TConfig config)
         {
             Config = config;
         }

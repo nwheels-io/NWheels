@@ -1,5 +1,5 @@
 using NWheels.Composition.Model;
-using NWheels.Composition.Model.Metadata;
+using NWheels.Composition.Model.Impl.Metadata;
 using NWheels.UI.Model.Impl.Parsers.Web;
 
 namespace NWheels.UI.Model.Web

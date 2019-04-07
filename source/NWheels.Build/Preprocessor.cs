@@ -9,7 +9,7 @@ using MetaPrograms.Members;
 using MetaPrograms.Statements;
 using Microsoft.CodeAnalysis;
 using NWheels.Composition.Model;
-using NWheels.Composition.Model.Metadata;
+using NWheels.Composition.Model.Impl.Metadata;
 
 namespace NWheels.Build
 {

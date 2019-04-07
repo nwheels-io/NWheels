@@ -1,6 +1,6 @@
 using MetaPrograms;
 
-namespace NWheels.Composition.Model.Metadata
+namespace NWheels.Composition.Model.Impl.Metadata
 {
     public interface ITechnologyAdapter
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using MetaPrograms.Members;
 
-namespace NWheels.Composition.Model.Metadata
+namespace NWheels.Composition.Model.Impl.Metadata
 {
     public interface IReadOnlyPreprocessorOutput
     {
