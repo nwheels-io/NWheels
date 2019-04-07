@@ -6,14 +6,16 @@ namespace NWheels.DevOps.Model.Impl.Parsers
 {
     public class EnvironmentParser : IModelParser
     {
+        public MetadataObject CreateMetadataObject(IModelPreParserContext context)
+        {
+            return new EnvironmentMetadata(context.Input);
+        }
+
         public void Parse(IModelParserContext context)
         {
-            var metadata = new EnvironmentMetadata(new MetadataObjectHeader(context.Input)) {
-                Dummy = "hello from environment parser!"
-            };
-
-            context.Input.ParsedMetadata = metadata;
-            context.Output.Add(metadata);
+            var output = (EnvironmentMetadata) context.Output;
+            
+            output.Dummy = "hello from environment parser!";
         }
     }
 }

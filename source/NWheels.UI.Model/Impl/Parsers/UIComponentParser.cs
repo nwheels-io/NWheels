@@ -4,9 +4,14 @@ namespace NWheels.UI.Model.Impl.Parsers
 {
     public class UIComponentParser : IModelParser
     {
+        public MetadataObject CreateMetadataObject(IModelPreParserContext context)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public void Parse(IModelParserContext context)
         {
-            //throw new System.NotImplementedException();
+            throw new System.NotImplementedException();
         }
     }
 }

@@ -12,4 +12,8 @@ namespace Demo.HelloWorld
         // TODO: use implicit conversion:
         // UIComponent Hello => "Hello, world!"; 
     }
+
+    class HelloWorldApp : SinglePageWebApp<HelloWorldPage>
+    {
+    }
 }

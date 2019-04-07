@@ -71,7 +71,7 @@ namespace NWheels.Build
 
             IDictionary<Type, IModelParser> LoadParsers()
             {
-                Console.WriteLine("Loading parsers");
+                Console.WriteLine("--- loading parsers ---");
                 
                 var loaderSession = new ClrTypeLoaderSession(typeLoader);
 
@@ -94,7 +94,7 @@ namespace NWheels.Build
 
             IDictionary<Type, ITechnologyAdapter> LoadTechnologyAdapters()
             {
-                Console.WriteLine("Loading technology adapters");
+                Console.WriteLine("--- loading technology adapters ---");
 
                 var loaderSession = new ClrTypeLoaderSession(typeLoader);
 
@@ -123,32 +123,65 @@ namespace NWheels.Build
 
             IMetadataObject[] ParseModels()
             {
-                Console.WriteLine("Starting model parsing");
+                var outputs = new List<MetadataObject>();
                 
-                var result = new List<MetadataObject>();
-                var rootContext = new ModelParserContext(code, reader, preprocessor, result);
+                Console.WriteLine($"--- parsing: pre-creating metadata ---");
+
+                RunModelParsers(outputs, (context, parser) => {
+                    Console.Write($"[{context.Input.ConcreteType.FullName}] -> [{parser.GetType().FullName}] ");
+
+                    var metaObject = parser.CreateMetadataObject(context);
+                    if (metaObject != null)
+                    {
+                        context.AllOutputs.Add(metaObject);
+                    }
+                    context.Input.ParsedMetadata = metaObject;
+
+                    Console.WriteLine($" -> [{metaObject?.GetType().FullName ?? "NULL"}] ");
+                });
+
+                Console.WriteLine($"--- parsing: populating metadata ---");
+
+                RunModelParsers(outputs, (context, parser) => {
+                    Console.WriteLine(
+                        $"[{context.Output?.Header.QualifiedName ?? "NULL"} : {context.Output?.GetType().Name ?? "NULL"}] " + 
+                        $"-> [{parser.GetType().FullName}]");
+                    parser.Parse(context);
+                });
+
+                return outputs.Cast<IMetadataObject>().ToArray();
+            }
+
+            void RunModelParsers(
+                List<MetadataObject> allOutputs,
+                Action<ModelParserContext, IModelParser> action)
+            {
+                var rootContext = new ModelParserContext(code, reader, preprocessor, allOutputs);
 
                 foreach (var type in preprocessor.GetAll())
                 {
                     var parser = parsers[type.ParserClrType];
                     var typeContext = rootContext.WithInput(type);
                     
-                    Console.WriteLine($"Parsing: [{type.ConcreteType.FullName}] -> [{parser.GetType().FullName}]");
-                    
-                    parser.Parse(typeContext);
+                    action(typeContext,parser);
                 }
-
-                return result.Cast<IMetadataObject>().ToArray();
             }
 
             void RunTechnologyAdapters()
             {
+                Console.WriteLine("--- running technology adapters ---");
+                
                 foreach (var metaObject in metadata)
                 {
                     foreach (var metaAdapter in metaObject.Header.TechnologyAdapters)
                     {
                         var adapter = technologyAdapters[metaAdapter.AdapterType];
                         var context = new TechnologyAdapterContext(metaObject, output);
+
+                        Console.WriteLine(
+                            $"[{context.Input?.Header.QualifiedName ?? "NULL"} : {context.Input?.GetType().Name ?? "NULL"}] " + 
+                            $"-> [{adapter.GetType().FullName}]");
+                        
                         adapter.Execute(context);
                     }
                 }

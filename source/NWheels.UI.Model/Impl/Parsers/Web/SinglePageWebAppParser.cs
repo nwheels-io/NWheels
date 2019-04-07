@@ -4,7 +4,7 @@ using NWheels.UI.Model.Impl.Metadata.Web;
 
 namespace NWheels.UI.Model.Impl.Parsers.Web
 {
-    public class WebAppParser : IModelParser
+    public class SinglePageWebAppParser : IModelParser
     {
         public MetadataObject CreateMetadataObject(IModelPreParserContext context)
         {
@@ -14,12 +14,10 @@ namespace NWheels.UI.Model.Impl.Parsers.Web
         public void Parse(IModelParserContext context)
         {
             var siteMeta = (WebAppMetadata) context.Output;
+            var indexPageType = context.Input.ConcreteType.BaseType.GenericArguments[0];
+            var indexPageMeta = (WebPageMetadata)context.GetMetadata(indexPageType);
  
-            var pageMetaQuery = context.Input.GetAllProperties()
-                .Select(prop => context.GetMetadata(prop.Type))
-                .OfType<WebPageMetadata>();
-            
-            siteMeta.Pages.AddRange(pageMetaQuery);
+            siteMeta.Pages.Add(indexPageMeta);
         }
     }
 }

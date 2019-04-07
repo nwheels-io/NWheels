@@ -42,7 +42,7 @@ namespace NWheels.Build
                     _cachedTypes.Add(type, clrType);
                     result.Add(type, clrType);
                     
-                    Console.WriteLine($"Loaded type: {clrType.FullName}");
+                    Console.WriteLine($"- T: {clrType.FullName}");
                 }
             }
 
@@ -74,7 +74,7 @@ namespace NWheels.Build
             var assembly = Assembly.LoadFrom(filePath);
             _cachedAssemblies.Add(filePath, assembly);
 
-            Console.WriteLine($"Loaded assembly: {assembly.FullName}");
+            Console.WriteLine($"ASM: {assembly.FullName}");
             return assembly;
         }
     }
