@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using MetaPrograms;
 
 namespace NWheels.Composition.Model.Impl.Metadata
 {
@@ -19,7 +20,7 @@ namespace NWheels.Composition.Model.Impl.Metadata
         public string QualifiedName { get; }
         public PreprocessedType SourceType { get; }
         public IReadOnlyList<TechnologyAdapterMetadata> TechnologyAdapters { get; }
-        public List<string> DeployableFiles { get; } = new List<string>();
+        public DeploymentScript DeploymentScript { get; } = new DeploymentScript();
 
         public static MetadataObjectHeader NoSourceType()
         {

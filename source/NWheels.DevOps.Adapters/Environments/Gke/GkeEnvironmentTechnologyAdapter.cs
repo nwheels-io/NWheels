@@ -1,15 +1,20 @@
 using System.Collections.Generic;
+using System.Linq;
+using MetaPrograms;
+using Microsoft.Extensions.Logging.Abstractions;
 using NWheels.Composition.Model.Impl.Metadata;
+using NWheels.DevOps.Adapters.Common.Dockerfiles;
 using NWheels.DevOps.Adapters.Common.K8sYaml;
 using NWheels.DevOps.Model.Impl.Metadata;
+using FilePath = MetaPrograms.FilePath;
 
 namespace NWheels.DevOps.Adapters.Environments.Gke
 {
-    public class GkeEnvironmentTechnologyAdapter : ITechnologyAdapter
+    public class GkeEnvironmentTechnologyAdapter : IDeploymentTechnologyAdapter
     {
-        public void Execute(ITechnologyAdapterContext context)
+        public void GenerateOutputs(ITechnologyAdapterContext context)
         {
-            var outputFolder = new[] {"devops", "gke"};
+            var folderPath = new FilePath("devops", "gke");
             var environment = (EnvironmentMetadata)context.Input;
 
             var deployment = new K8sDeployment {
@@ -34,7 +39,7 @@ namespace NWheels.DevOps.Adapters.Environments.Gke
                             Containers = new List<K8sDeployment.TemplateSpecContainerType> {
                                 new K8sDeployment.TemplateSpecContainerType {
                                     Name = "hello-world-site",
-                                    Image = "gcr.io/galvanic-wall-235207/demo-hello-world"
+                                    Image = GetImageGcrName(context)
                                 }
                             }
                         }
@@ -43,10 +48,70 @@ namespace NWheels.DevOps.Adapters.Environments.Gke
             };
             
             context.Output.AddSourceFile(
-                outputFolder,
-                "hello-world-deployment.yaml",
+                folderPath.Append("hello-world-deployment.yaml"),
                 deployment.ToYamlString()
             );
+
+        }
+
+        public void GenerateDeploymentOutputs(ITechnologyAdapterContext context)
+        {
+            var yamlPath = new FilePath("devops", "gke", "hello-world-deployment.yaml");
+
+            GenerateDockerfiles();
+            context.DeploymentScript.AddDeployCommand($"kubectl apply -f {yamlPath.FullPath}");
+            
+            void GenerateDockerfiles()
+            {
+                GenerateMetaObjectDockerfiles(context.Input);
+
+                foreach (var prop in context.Input.Header.SourceType.GetAllProperties())
+                {
+                    if (context.Preprocessor.GetByConcreteType(prop.Type)?.ParsedMetadata is IMetadataObject propMeta)
+                    {
+                        GenerateMetaObjectDockerfiles(propMeta);
+                    }
+                }
+            }
+
+            void GenerateMetaObjectDockerfiles(IMetadataObject meta)
+            {
+                foreach (var image in meta.Header.DeploymentScript.Images)
+                {
+                    GenerateImageDockerfile(image);
+                }
+            }
+
+            void GenerateImageDockerfile(DeploymentImageMetadata image)
+            {
+                var path = image.BuildContextPath.Append("Dockerfile");
+                var contents = image.ToDockerfileText();
+                var gcrName = GetImageGcrName(context);
+                    
+                context.Output.AddSourceFile(path, contents);
+                context.DeploymentScript.AddBuildCommand($"docker build -t {image.Name} -t {gcrName} {image.BuildContextPath.FullPath}");
+                context.DeploymentScript.AddDeployCommand($"docker push {gcrName}");
+            }
+        }
+
+        private Config ParseConfig(ITechnologyAdapterContext context)
+        {
+            return new Config {
+                Project = context.Input.Header.TechnologyAdapters[0].Parameters["project"].ToString(),
+                Zone = context.Input.Header.TechnologyAdapters[0].Parameters["zone"].ToString()
+            };
+        }
+
+        private string GetImageGcrName(ITechnologyAdapterContext context)
+        {
+            var config = ParseConfig(context);
+            return $"gcr.io/{config.Project}/{context.Input.Header.QualifiedName}";
+        }
+        
+        private class Config
+        {
+            public string Project { get; set; }
+            public string Zone { get; set; }
         }
     }
 }

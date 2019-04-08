@@ -7,13 +7,24 @@ namespace NWheels.Build
 {
     public class TechnologyAdapterContext : ITechnologyAdapterContext
     {
-        public TechnologyAdapterContext(IMetadataObject input, ICodeGeneratorOutput output)
+        public TechnologyAdapterContext(
+            IReadOnlyPreprocessorOutput preprocessor, 
+            IMetadataObject input, 
+            ICodeGeneratorOutput output)
         {
+            Preprocessor = preprocessor;
             Input = input;
             Output = output;
         }
 
+        public void AddMessage(string category, string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IReadOnlyPreprocessorOutput Preprocessor { get; }
         public IMetadataObject Input { get; }
         public ICodeGeneratorOutput Output { get; }
+        public IDeploymentScriptBuilder DeploymentScript => Input.Header.DeploymentScript;
     }
 }

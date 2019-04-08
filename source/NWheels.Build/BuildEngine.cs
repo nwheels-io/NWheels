@@ -2,15 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using Autofac;
 using MetaPrograms;
 using MetaPrograms.CSharp.Reader;
 using MetaPrograms.CSharp.Reader.Reflection;
-using MetaPrograms.Members;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NWheels.Composition.Model;
 using NWheels.Composition.Model.Impl.Metadata;
 
 namespace NWheels.Build
@@ -35,9 +30,8 @@ namespace NWheels.Build
             var parsers = LoadParsers();
             var technologyAdapters = LoadTechnologyAdapters();
             var metadata = ParseModels();
-            var output = new CodeGeneratorOutput(_options);
 
-            RunTechnologyAdapters();
+            GenerateOutputs();
 
             return true;
 
@@ -126,7 +120,16 @@ namespace NWheels.Build
                 var outputs = new List<MetadataObject>();
                 
                 Console.WriteLine($"--- parsing: pre-creating metadata ---");
+                PreCreateMetadataObjects(outputs);
 
+                Console.WriteLine($"--- parsing: populating metadata ---");
+                PopulateMetadataObjects(outputs);
+                
+                return outputs.Cast<IMetadataObject>().ToArray();
+            }
+
+            void PreCreateMetadataObjects(List<MetadataObject> outputs)
+            {
                 RunModelParsers(outputs, (context, parser) => {
                     Console.Write($"[{context.Input.ConcreteType.FullName}] -> [{parser.GetType().FullName}] ");
 
@@ -135,23 +138,24 @@ namespace NWheels.Build
                     {
                         context.AllOutputs.Add(metaObject);
                     }
+                    
                     context.Input.ParsedMetadata = metaObject;
 
-                    Console.WriteLine($" -> [{metaObject?.GetType().FullName ?? "NULL"}] ");
+                    Console.WriteLine($"-> [{metaObject?.GetType().FullName ?? "NULL"}] ");
                 });
+            }
 
-                Console.WriteLine($"--- parsing: populating metadata ---");
-
+            void PopulateMetadataObjects(List<MetadataObject> outputs)
+            {
                 RunModelParsers(outputs, (context, parser) => {
                     Console.WriteLine(
                         $"[{context.Output?.Header.QualifiedName ?? "NULL"} : {context.Output?.GetType().Name ?? "NULL"}] " + 
                         $"-> [{parser.GetType().FullName}]");
+                    
                     parser.Parse(context);
                 });
-
-                return outputs.Cast<IMetadataObject>().ToArray();
             }
-
+            
             void RunModelParsers(
                 List<MetadataObject> allOutputs,
                 Action<ModelParserContext, IModelParser> action)
@@ -167,22 +171,42 @@ namespace NWheels.Build
                 }
             }
 
-            void RunTechnologyAdapters()
+            void GenerateOutputs()
             {
-                Console.WriteLine("--- running technology adapters ---");
+                var outputs = new CodeGeneratorOutput(_options);
                 
+                Console.WriteLine("--- generating codebase ---");
+
+                RunTechnologyAdapters<ITechnologyAdapter>(outputs, (context, adapter) => {
+                    adapter.GenerateOutputs(context);
+                });
+
+                Console.WriteLine("--- scripting deployments ---");
+                
+                RunTechnologyAdapters<IDeploymentTechnologyAdapter>(outputs, (context, adapter) => {
+                    adapter.GenerateDeploymentOutputs(context);
+                });
+            }
+            
+            void RunTechnologyAdapters<TBase>(CodeGeneratorOutput outputs, Action<TechnologyAdapterContext, TBase> action) 
+                where TBase : ITechnologyAdapter
+            {
                 foreach (var metaObject in metadata)
                 {
                     foreach (var metaAdapter in metaObject.Header.TechnologyAdapters)
                     {
-                        var adapter = technologyAdapters[metaAdapter.AdapterType];
-                        var context = new TechnologyAdapterContext(metaObject, output);
+                        if (!(technologyAdapters[metaAdapter.AdapterType] is TBase adapter))
+                        {
+                            continue;
+                        }
+
+                        var context = new TechnologyAdapterContext(preprocessor, metaObject, outputs);
 
                         Console.WriteLine(
                             $"[{context.Input?.Header.QualifiedName ?? "NULL"} : {context.Input?.GetType().Name ?? "NULL"}] " + 
                             $"-> [{adapter.GetType().FullName}]");
                         
-                        adapter.Execute(context);
+                        action(context, adapter);
                     }
                 }
             }
