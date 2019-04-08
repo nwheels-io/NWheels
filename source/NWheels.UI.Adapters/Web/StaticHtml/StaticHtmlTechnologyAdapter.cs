@@ -1,8 +1,15 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using MetaPrograms;
+using MetaPrograms.Extensions;
+using Microsoft.CodeAnalysis.VisualBasic;
 using Newtonsoft.Json.Serialization;
 using NWheels.Composition.Model.Impl.Metadata;
+using NWheels.UI.Model.Impl.Metadata;
+using NWheels.UI.Model.Impl.Metadata.Web;
 using NWheels.UI.Model.Web;
 
 namespace NWheels.UI.Adapters.Web.StaticHtml
@@ -11,31 +18,58 @@ namespace NWheels.UI.Adapters.Web.StaticHtml
     {
         public void GenerateOutputs(ITechnologyAdapterContext context)
         {
-            var html = new XElement("html",
-                new XElement("head",
-                    new XElement("title", "Hello World")
-                ),
-                new XElement("body",
-                    new XElement("h1", "Hello, world!")
-                )
-            );
+            var appMeta = (WebAppMetadata) context.Input;
+            var appName = MetadataObject.Header(appMeta).Name.TrimSuffixFragment("App");
+            var appNameWithSiteSuffix = appName.AppendSuffixFragments("Site");
+            var appTitle = appMeta.Title ?? appName.ToString(CasingStyle.Kebab); //TODO: CasingStyle.Human
+            var staticFolderPath = new FilePath("frontend", appNameWithSiteSuffix.ToString(CasingStyle.Kebab), "static");
 
-            var staticFolderPath = new FilePath("frontend", "hello-world-site", "static");
-            var indexPagePath = staticFolderPath.Append("index.html");
+            foreach (var page in appMeta.Pages)
+            {
+                var html = GeneratePageHtml(page);
+                var fileName = page.IsIndex ? "index" : page.Name.ToString(CasingStyle.Kebab);
+                context.Output.AddSourceFile(staticFolderPath.Append($"{fileName}.html"), html.ToString());
+            }
             
-            context.Output.AddSourceFile(indexPagePath, html.ToString());
             context.DeploymentScript.AddImage(BuildSiteImage());
 
             DeploymentImageMetadata BuildSiteImage()
             {
                 return new DeploymentImageMetadata(context) {
-                    Name = "hello-world-site",
+                    Name = appNameWithSiteSuffix.ToString(CasingStyle.Kebab),
                     BuildContextPath = staticFolderPath.Up(1),
                     BaseImage = "nginx",
                     FilesToCopy = {
                         {staticFolderPath.Tail(1), new FilePath("/usr", "share", "nginx", "html")}
                     }
                 };
+            }
+            
+            XElement GeneratePageHtml(WebAppMetadata.PageItem page)
+            {
+                var componentHtmls = page.Metadata.Components.Select(GenerateComponentHtml);
+                var pageTitle = page.IsIndex 
+                    ? appTitle 
+                    : page.Name.ToString(CasingStyle.Kebab); //TODO: CasingStyle.Human 
+            
+                var html = new XElement("html",
+                    new XElement("head",
+                        new XElement("title", pageTitle)
+                    ),
+                    new XElement("body", 
+                        componentHtmls.Cast<object>().ToArray()
+                    )
+                );
+
+                return html;
+            }
+
+            IEnumerable<XElement> GenerateComponentHtml(UIComponentMetadata compMeta)
+            {
+                if (compMeta is TextContentMetadata textContent)
+                {
+                    yield return new XElement("h1", textContent.Text);
+                }
             }
         }
     }

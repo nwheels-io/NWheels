@@ -15,5 +15,7 @@ namespace NWheels.Composition.Model.Impl.Metadata
         }
 
         MetadataObjectHeader IMetadataObject.Header => _header;
+
+        public static MetadataObjectHeader Header(IMetadataObject obj) => obj.Header;
     }
 }

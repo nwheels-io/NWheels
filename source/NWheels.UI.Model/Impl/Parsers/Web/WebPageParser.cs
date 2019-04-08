@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Runtime.InteropServices;
+using MetaPrograms.Expressions;
 using NWheels.Composition.Model.Impl.Metadata;
 using NWheels.UI.Model.Impl.Metadata;
 using NWheels.UI.Model.Impl.Metadata.Web;
@@ -33,12 +34,13 @@ namespace NWheels.UI.Model.Impl.Parsers.Web
             {
                 if (prop.Type == context.Code.GetClrTypeMember<TextContent>())
                 {
-                    return new TextContentMetadata(MetadataObjectHeader.NoSourceType());
+                    return new TextContentMetadata(MetadataObjectHeader.NoSourceType()) {
+                        Text = prop.ConstructorArguments[0].ClrValue as string 
+                    };
                 }
 
                 return null;
             }
         }
-
     }
 }

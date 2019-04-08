@@ -14,10 +14,17 @@ namespace NWheels.UI.Model.Impl.Parsers.Web
         public void Parse(IModelParserContext context)
         {
             var siteMeta = (WebAppMetadata) context.Output;
- 
+
             var pageMetaQuery = context.Input.GetAllProperties()
-                .Select(prop => context.GetMetadata(prop.Type))
-                .OfType<WebPageMetadata>();
+                .Select(prop => new {
+                    prop, 
+                    meta = context.GetMetadata(prop.Type) as WebPageMetadata
+                })
+                .Where(tuple => tuple.meta != null)
+                .Select(tuple => new WebAppMetadata.PageItem {
+                    Name = tuple.prop.Name,
+                    Metadata = tuple.meta
+                });
             
             siteMeta.Pages.AddRange(pageMetaQuery);
         }

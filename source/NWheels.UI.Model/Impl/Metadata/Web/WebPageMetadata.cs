@@ -9,6 +9,7 @@ namespace NWheels.UI.Model.Impl.Metadata.Web
         {
         }
         
+        public string Title { get; set; }
         public List<UIComponentMetadata> Components { get; } = new List<UIComponentMetadata>();
     }
 }

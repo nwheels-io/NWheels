@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MetaPrograms;
 using MetaPrograms.Expressions;
 using MetaPrograms.Members;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 
 namespace NWheels.Composition.Model.Impl.Metadata
 {
@@ -52,7 +55,7 @@ namespace NWheels.Composition.Model.Impl.Metadata
     
     public class PreprocessedProperty
     {
-        public string Name { get; set; }
+        public IdentifierName Name { get; set; }
         public TypeMember Type { get; set; }
         public AbstractExpression Initializer { get; set; }
         
@@ -96,12 +99,38 @@ namespace NWheels.Composition.Model.Impl.Metadata
         public static IEnumerable<PreprocessedArgument> FromCallArguments(MethodCallExpression call, int skip = 0) =>
             call.Arguments.Select(FromArgumentOf(call.Method)).Skip(skip);
 
-        public static Func<Argument, int, PreprocessedArgument> FromArgumentOf(MethodMemberBase method) => 
-            (arg, index) => new PreprocessedArgument {
-                Name = method.Signature.Parameters[index].Name,
-                ValueExpression = arg.Expression,
-                HasClrValue = (arg.Expression as ConstantExpression)?.Value != null,
-                ClrValue = (arg.Expression as ConstantExpression)?.Value
+        public static Func<Argument, int, PreprocessedArgument> FromArgumentOf(MethodMemberBase method) =>
+            (arg, index) => {
+                var hasClrValue = TryGetConstantValue(arg.Expression, out var clrValue);
+
+                return new PreprocessedArgument {
+                    Name = method.Signature.Parameters[index].Name,
+                    ValueExpression = arg.Expression,
+                    HasClrValue = hasClrValue,
+                    ClrValue = clrValue
+                };
             };
+
+        public static bool TryGetConstantValue(AbstractExpression expression, out object value)
+        {
+            if (expression is ConstantExpression constant)
+            {
+                if (constant.Value is Optional<object>)
+                {
+                    var optional = (Optional<object>) constant.Value;
+                    var copyOfValue = optional.HasValue ? optional.Value : null;
+                    value = copyOfValue;
+                    return optional.HasValue;
+                }
+                else
+                {
+                    value = constant.Value;
+                    return (value != null);
+                }
+            }
+
+            value = null;
+            return false;
+        }
     }
 }

@@ -90,6 +90,7 @@ namespace NWheels.Build
             {
                 Console.WriteLine("--- loading technology adapters ---");
 
+                //TODO: share ClrTypeLoaderSession with LoadParsers
                 var loaderSession = new ClrTypeLoaderSession(typeLoader);
 
                 foreach (var type in preprocessor.GetAll())
@@ -181,8 +182,6 @@ namespace NWheels.Build
                     adapter.GenerateOutputs(context);
                 });
 
-                Console.WriteLine("--- scripting deployments ---");
-                
                 RunTechnologyAdapters<IDeploymentTechnologyAdapter>(outputs, (context, adapter) => {
                     adapter.GenerateDeploymentOutputs(context);
                 });

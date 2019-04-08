@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MetaPrograms;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NWheels.Composition.Model.Impl.Metadata
 {
@@ -9,7 +10,9 @@ namespace NWheels.Composition.Model.Impl.Metadata
         public MetadataObjectHeader(PreprocessedType sourceType)
         {
             SourceType = sourceType;
-            QualifiedName = sourceType?.ConcreteType.FullName ?? string.Empty;
+            Name = sourceType?.ConcreteType.Name;
+            Namespace = sourceType?.ConcreteType.Namespace;
+            QualifiedName = sourceType?.ConcreteType.FullName;
             TechnologyAdapters = sourceType?.ReferencedBy
                 .Where(refProp => refProp.TechnologyAdapter != null)
                 .Select(refProp => TechnologyAdapterMetadata.FromSource(refProp.TechnologyAdapter))
@@ -17,6 +20,8 @@ namespace NWheels.Composition.Model.Impl.Metadata
                 ?? new TechnologyAdapterMetadata[0];
         }
 
+        public string Namespace { get; }
+        public IdentifierName Name { get; }
         public string QualifiedName { get; }
         public PreprocessedType SourceType { get; }
         public IReadOnlyList<TechnologyAdapterMetadata> TechnologyAdapters { get; }
