@@ -11,10 +11,10 @@ namespace NWheels.Composition.Model.Impl.Metadata
             this.GenerateOutputs(new TechnologyAdapterContext<TMetadata>(context));
         }
 
-        public abstract void GenerateOutputs(TechnologyAdapterContext<TMetadata> context);
+        protected abstract void GenerateOutputs(TechnologyAdapterContext<TMetadata> context);
     }
 
-    public class TechnologyAdapterContext<TMetadata>
+    public class TechnologyAdapterContext<TMetadata> : ITechnologyAdapterContext
         where TMetadata : IMetadataObject
     {
         private readonly ITechnologyAdapterContext _inner;
@@ -33,6 +33,7 @@ namespace NWheels.Composition.Model.Impl.Metadata
 
         public IReadOnlyPreprocessorOutput Preprocessor => _inner.Preprocessor;
         public TMetadata Input => _input;
+        IMetadataObject ITechnologyAdapterContext.Input => _input;
         public ICodeGeneratorOutput Output => _inner.Output;
         public IDeploymentScriptBuilder DeploymentScript => _inner.DeploymentScript;
     }

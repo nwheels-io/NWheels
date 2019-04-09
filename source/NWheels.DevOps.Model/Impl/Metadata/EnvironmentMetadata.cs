@@ -10,7 +10,5 @@ namespace NWheels.DevOps.Model.Impl.Metadata
             : base(header)
         {
         }
-
-        public string Dummy { get; set; }
     }
 }

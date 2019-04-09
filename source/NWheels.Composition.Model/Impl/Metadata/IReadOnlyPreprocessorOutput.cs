@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using MetaPrograms;
+using MetaPrograms.CSharp.Reader;
 using MetaPrograms.Members;
+using Microsoft.CodeAnalysis;
 
 namespace NWheels.Composition.Model.Impl.Metadata
 {
@@ -11,5 +14,8 @@ namespace NWheels.Composition.Model.Impl.Metadata
         IEnumerable<PreprocessedType> GetByBaseType(TypeMember abstraction);
         PreprocessedType GetByConcreteType(TypeMember type);
         PreprocessedType TryGetByConcreteType(TypeMember type);
+        Workspace Workspace { get; }
+        RoslynCodeModelReader CodeReader { get; }
+        ImperativeCodeModel Code { get; }
     }
 }

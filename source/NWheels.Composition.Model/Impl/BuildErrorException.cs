@@ -2,8 +2,9 @@ using System;
 using System.Linq;
 using MetaPrograms.Members;
 using Microsoft.CodeAnalysis;
+using NWheels.Composition.Model.Impl.Metadata;
 
-namespace NWheels.Build
+namespace NWheels.Composition.Model.Impl
 {
     public class BuildErrorException : Exception
     {
@@ -12,6 +13,14 @@ namespace NWheels.Build
             string message, 
             Exception innerException = null) 
             : base(FormatMemberMessage(member, message), innerException)
+        {
+        }
+
+        public BuildErrorException(
+            IMetadataObject metaObject,
+            string message, 
+            Exception innerException = null) 
+            : this(metaObject.Header.SourceType.ConcreteType, message, innerException)
         {
         }
 

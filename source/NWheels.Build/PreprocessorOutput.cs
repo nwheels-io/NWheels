@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MetaPrograms;
+using MetaPrograms.CSharp.Reader;
 using MetaPrograms.Extensions;
 using MetaPrograms.Members;
+using Microsoft.CodeAnalysis;
 using NWheels.Composition.Model.Impl.Metadata;
 
 namespace NWheels.Build
@@ -15,7 +18,13 @@ namespace NWheels.Build
         private readonly Dictionary<TypeMember, PreprocessedType> _byConcreteType = new Dictionary<TypeMember, PreprocessedType>();
         private readonly Dictionary<TypeMember, List<PreprocessedType>> _byAbstraction = new Dictionary<TypeMember, List<PreprocessedType>>();
         private readonly Dictionary<TypeMember, List<PreprocessedType>> _byBaseType = new Dictionary<TypeMember, List<PreprocessedType>>();
+        private readonly Preprocessor _preprocessor;
 
+        public PreprocessorOutput(Preprocessor preprocessor)
+        {
+            _preprocessor = preprocessor;
+        }
+        
         public void AddType(PreprocessedType type)
         {
             _all.Add(type);
@@ -65,6 +74,10 @@ namespace NWheels.Build
 
             return null;
         }
+
+        public Workspace Workspace => _preprocessor.Workspace;
+        public RoslynCodeModelReader CodeReader => _preprocessor.CodeReader;
+        public ImperativeCodeModel Code => _preprocessor.Code;
 
         private void AddToListByKey<TKey>(PreprocessedType type, TKey key, IDictionary<TKey, List<PreprocessedType>> dictionary)
         {

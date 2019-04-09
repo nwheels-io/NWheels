@@ -15,7 +15,7 @@ namespace NWheels.DevOps.Model.Impl.Parsers
         {
             var output = (EnvironmentMetadata) context.Output;
             
-            output.Dummy = "hello from environment parser!";
+           // output.Dummy = "hello from environment parser!";
         }
     }
 }

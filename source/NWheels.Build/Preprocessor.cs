@@ -32,7 +32,7 @@ namespace NWheels.Build
         {
             Console.WriteLine("--- preprocessor ---");
 
-            var output = new PreprocessorOutput();
+            var output = new PreprocessorOutput(this);
 
             DiscoverParseableTypes();
             CompletePreprocessing();
@@ -138,8 +138,12 @@ namespace NWheels.Build
                 var propPreprocessor = new PropertyPreprocessor(_code, _reader, output);
                 propPreprocessor.AddProperty(outType, inProp);
             }
-
         }
+        
+        public ImperativeCodeModel Code => _code;
+        public RoslynCodeModelReader CodeReader => _reader;
+        public Workspace Workspace => _reader.Workspace;
+
 
 
         //            bool TryParseProperty(PropertyMember property, out PreprocessedProperty property)

@@ -10,17 +10,22 @@ using FilePath = MetaPrograms.FilePath;
 
 namespace NWheels.DevOps.Adapters.Environments.Gke
 {
-    public class GkeEnvironmentTechnologyAdapter : IDeploymentTechnologyAdapter
+    public class GkeEnvironmentTechnologyAdapter : DeploymentTechnologyAdapter<EnvironmentMetadata>
     {
-        public void GenerateOutputs(ITechnologyAdapterContext context)
+        protected override void GenerateOutputs(TechnologyAdapterContext<EnvironmentMetadata> context)
         {
             var folderPath = new FilePath("devops", "gke");
-            var environment = (EnvironmentMetadata)context.Input;
-
+            var gkeNamespace = IdentifierName
+                .Flatten(context.Input.Header.Namespace, CasingStyle.Pascal)
+                .ToString(CasingStyle.Kebab);
+            var environmentName = context.Input.Header.Name.ToString(CasingStyle.Kebab);
+ 
+            
+            
             var deployment = new K8sDeployment {
                 Metadata = new K8sMetadata {
-                    Namespace = "demo-hello-world",
-                    Name = "hello-world-deployment"
+                    Namespace = gkeNamespace,
+                    Name = environmentName
                 },
                 Spec = new K8sDeployment.SpecType {
                     Selector = new K8sSelector {
@@ -51,21 +56,23 @@ namespace NWheels.DevOps.Adapters.Environments.Gke
                 folderPath.Append("hello-world-deployment.yaml"),
                 deployment.ToYamlString()
             );
+            
+            
 
         }
 
-        public void GenerateDeploymentOutputs(ITechnologyAdapterContext context)
+        protected override void GenerateDeploymentOutputs(TechnologyAdapterContext<EnvironmentMetadata> context)
         {
-            var yamlPath = new FilePath("devops", "gke", "hello-world-deployment.yaml");
-
-            GenerateDockerfiles();
-            context.DeploymentScript.AddDeployCommand($"kubectl apply -f {yamlPath.FullPath}");
+            var yamlFolder = new FilePath("devops", "gke");
+            GenerateAllDockerfiles();
             
-            void GenerateDockerfiles()
+            void GenerateAllDockerfiles()
             {
                 GenerateMetaObjectDockerfiles(context.Input);
 
-                foreach (var prop in context.Input.Header.SourceType.GetAllProperties())
+                var sourceType = context.Input.Header.SourceType;
+                
+                foreach (var prop in sourceType.GetAllProperties())
                 {
                     if (context.Preprocessor.GetByConcreteType(prop.Type)?.ParsedMetadata is IMetadataObject propMeta)
                     {
@@ -87,14 +94,29 @@ namespace NWheels.DevOps.Adapters.Environments.Gke
                 var path = image.BuildContextPath.Append("Dockerfile");
                 var contents = image.ToDockerfileText();
                 var gcrName = GetImageGcrName(context);
-                    
+                
+                image.Header.Extensions.Set(new GcrNameExtension { GcrName = gcrName });
+                
                 context.Output.AddSourceFile(path, contents);
                 context.DeploymentScript.AddBuildCommand($"docker build -t {image.Name} -t {gcrName} {image.BuildContextPath.FullPath}");
                 context.DeploymentScript.AddDeployCommand($"docker push {gcrName}");
+                
+                GenerateK8sConfiguration(image);
+            }
+
+            void GenerateK8sConfiguration(DeploymentImageMetadata image)
+            {
+                var configStrategy = GkeConfigStrategy.Create(context, image);
+                var config = configStrategy.BuildConfiguration();
+                var yamlText = config.ToYamlString();
+                var filePath = yamlFolder.Append($"{image.Name}.yaml");
+                
+                context.Output.AddSourceFile(filePath, yamlText);
+                context.DeploymentScript.AddDeployCommand($"kubectl apply -f {filePath}");
             }
         }
 
-        private Config ParseConfig(ITechnologyAdapterContext context)
+        private Config ParseConfig(TechnologyAdapterContext<EnvironmentMetadata> context)
         {
             return new Config {
                 Project = context.Input.Header.TechnologyAdapters[0].Parameters["project"].ToString(),
@@ -102,7 +124,7 @@ namespace NWheels.DevOps.Adapters.Environments.Gke
             };
         }
 
-        private string GetImageGcrName(ITechnologyAdapterContext context)
+        private string GetImageGcrName(TechnologyAdapterContext<EnvironmentMetadata> context)
         {
             var config = ParseConfig(context);
             return $"gcr.io/{config.Project}/{context.Input.Header.QualifiedName}";

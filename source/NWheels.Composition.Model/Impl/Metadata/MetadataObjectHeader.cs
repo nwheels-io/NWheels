@@ -26,6 +26,7 @@ namespace NWheels.Composition.Model.Impl.Metadata
         public PreprocessedType SourceType { get; }
         public IReadOnlyList<TechnologyAdapterMetadata> TechnologyAdapters { get; }
         public DeploymentScript DeploymentScript { get; } = new DeploymentScript();
+        public ExtensionCollection Extensions { get; } = new ExtensionCollection();
 
         public static MetadataObjectHeader NoSourceType()
         {

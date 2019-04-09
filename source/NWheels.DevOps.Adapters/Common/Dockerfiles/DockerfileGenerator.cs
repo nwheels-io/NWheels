@@ -20,6 +20,11 @@ namespace NWheels.DevOps.Adapters.Common.Dockerfiles
                 contents.AppendLine($"COPY {copy.Key.NormalizedFullPath} {copy.Value.NormalizedFullPath}");
             }
 
+            foreach (var port in image.ListenPorts)
+            {
+                contents.AppendLine($"EXPOSE {port}");
+            }
+
             if (image.EntryPointCommand != null)
             {
                 contents.AppendLine($"ENTRYPOINT [ {string.Join(" , ", image.EntryPointCommand.Select(s => $"\"{s}\""))} ]");

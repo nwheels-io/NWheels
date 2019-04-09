@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using NWheels.Build;
+using NWheels.Composition.Model.Impl;
 
 namespace NWheels.Cli
 {
