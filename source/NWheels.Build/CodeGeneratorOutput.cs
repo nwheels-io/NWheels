@@ -11,11 +11,13 @@ namespace NWheels.Build
     {
         private readonly BuildOptions _buildOptions;
         private readonly string _basePath;
+        private readonly Dictionary<string, int> _slocPerFileType;
 
         public CodeGeneratorOutput(BuildOptions buildOptions)
         {
             _buildOptions = buildOptions;
             _basePath = Path.Combine(Path.GetDirectoryName(buildOptions.ProjectFilePath), "nwheels.build");
+            _slocPerFileType = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
         }
 
         public void AddSourceFile(FilePath path, string contents)
@@ -25,8 +27,30 @@ namespace NWheels.Build
             var absolutePath = path.WithBase(_basePath);
             Directory.CreateDirectory(absolutePath.FolderPath);
             File.WriteAllText(absolutePath.FullPath, contents);
+
+            IncrementSlocCount(path, contents);
+        }
+        
+        public IReadOnlyDictionary<string, int> GetSlocPerFileType()
+        {
+            return _slocPerFileType;
         }
 
         public CodeTextOptions TextOptions { get; }
+
+        private void IncrementSlocCount(FilePath path, string contents)
+        {
+            var fileType = Path.GetExtension(path.FileName);
+
+            if (fileType == string.Empty || fileType == ".")
+            {
+                fileType = path.FileName;
+            }
+            
+            var fileLineCount = contents.Count(c => c == '\n');
+            var currentLineCount = (_slocPerFileType.TryGetValue(fileType, out var value) ? value : 0);
+
+            _slocPerFileType[fileType] = currentLineCount + fileLineCount;
+        }
     }
 }

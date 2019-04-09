@@ -19,7 +19,7 @@ namespace NWheels.Build
             _options = options;
         }
 
-        public bool Build()
+        public bool Build(out CodeGeneratorOutput generatedCode)
         {
             Console.WriteLine($"Starting build: project {Path.GetFileNameWithoutExtension(_options.ProjectFilePath)}");
 
@@ -30,9 +30,9 @@ namespace NWheels.Build
             var parsers = LoadParsers();
             var technologyAdapters = LoadTechnologyAdapters();
             var metadata = ParseModels();
-
-            GenerateOutputs();
-
+            
+            generatedCode = GenerateOutputs();
+            
             return true;
 
             Workspace LoadProjectWorkspace()
@@ -172,7 +172,7 @@ namespace NWheels.Build
                 }
             }
 
-            void GenerateOutputs()
+            CodeGeneratorOutput GenerateOutputs()
             {
                 var outputs = new CodeGeneratorOutput(_options);
                 
@@ -185,6 +185,8 @@ namespace NWheels.Build
                 RunTechnologyAdapters<IDeploymentTechnologyAdapter>(outputs, (context, adapter) => {
                     adapter.GenerateDeploymentOutputs(context);
                 });
+
+                return outputs;
             }
             
             void RunTechnologyAdapters<TBase>(CodeGeneratorOutput outputs, Action<TechnologyAdapterContext, TBase> action) 
