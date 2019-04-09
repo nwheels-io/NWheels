@@ -199,7 +199,7 @@ namespace NWheels.Build
                             continue;
                         }
 
-                        var context = new TechnologyAdapterContext(preprocessor, metaObject, outputs);
+                        var context = new TechnologyAdapterContext(preprocessor, metaObject, metaAdapter, outputs);
 
                         Console.WriteLine(
                             $"[{context.Input?.Header.QualifiedName ?? "NULL"} : {context.Input?.GetType().Name ?? "NULL"}] " + 

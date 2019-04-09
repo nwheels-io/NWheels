@@ -10,10 +10,12 @@ namespace NWheels.Build
         public TechnologyAdapterContext(
             IReadOnlyPreprocessorOutput preprocessor, 
             IMetadataObject input, 
+            TechnologyAdapterMetadata adapter,
             ICodeGeneratorOutput output)
         {
             Preprocessor = preprocessor;
             Input = input;
+            Adapter = adapter;
             Output = output;
         }
 
@@ -24,6 +26,7 @@ namespace NWheels.Build
 
         public IReadOnlyPreprocessorOutput Preprocessor { get; }
         public IMetadataObject Input { get; }
+        public TechnologyAdapterMetadata Adapter { get; } 
         public ICodeGeneratorOutput Output { get; }
         public IDeploymentScriptBuilder DeploymentScript => Input.Header.DeploymentScript;
     }

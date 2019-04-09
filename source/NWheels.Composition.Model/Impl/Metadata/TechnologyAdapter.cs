@@ -32,8 +32,8 @@ namespace NWheels.Composition.Model.Impl.Metadata
         }
 
         public IReadOnlyPreprocessorOutput Preprocessor => _inner.Preprocessor;
-        public TMetadata Input => _input;
-        IMetadataObject ITechnologyAdapterContext.Input => _input;
+        public TechnologyAdapterMetadata Adapter => _inner.Adapter;
+        public IMetadataObject Input => _input;
         public ICodeGeneratorOutput Output => _inner.Output;
         public IDeploymentScriptBuilder DeploymentScript => _inner.DeploymentScript;
     }

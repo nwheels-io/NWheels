@@ -19,7 +19,7 @@ namespace NWheels.Composition.Model.Impl.Metadata
         public string[] EntryPointCommand { get; set; }
         public List<int> ListenPorts { get; } = new List<int>();
         public int ReplicaCount { get; set; } = 1;
-        public string PublicAddressName { get; set; } 
+        public string PublicEndpoint { get; set; } 
     }
 
     public enum DeploymentContentType

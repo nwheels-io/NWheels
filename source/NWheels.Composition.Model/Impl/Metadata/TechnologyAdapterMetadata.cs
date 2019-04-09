@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MetaPrograms.CSharp;
 using MetaPrograms.Expressions;
 
 namespace NWheels.Composition.Model.Impl.Metadata
@@ -15,6 +16,7 @@ namespace NWheels.Composition.Model.Impl.Metadata
 
         public Type AdapterType { get; }
         
+        // TODO: support generic arguments, e.g. for a call like AsSomeTechnology<T>()
         // TODO: support configuration classes, not only scalar key-value pairs
         public IReadOnlyDictionary<string, object> Parameters { get; }
 
@@ -22,7 +24,7 @@ namespace NWheels.Composition.Model.Impl.Metadata
         {
             var parameters = source.AdapterArguments.ToDictionary(
                 arg => arg.Name,
-                arg => (arg.ValueExpression as ConstantExpression)?.Value);
+                arg => arg.ValueExpression?.GetConstantValueOrNull());
             
             return new TechnologyAdapterMetadata(source.ClrType, parameters);
         }

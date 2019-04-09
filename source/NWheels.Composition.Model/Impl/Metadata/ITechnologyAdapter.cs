@@ -15,6 +15,7 @@ namespace NWheels.Composition.Model.Impl.Metadata
         void AddMessage(string category, string message);
         IReadOnlyPreprocessorOutput Preprocessor { get; }
         IMetadataObject Input { get; }
+        TechnologyAdapterMetadata Adapter { get; } 
         ICodeGeneratorOutput Output { get; }
         IDeploymentScriptBuilder DeploymentScript { get; }
     }

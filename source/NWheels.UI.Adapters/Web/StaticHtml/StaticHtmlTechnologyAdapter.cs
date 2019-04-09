@@ -31,17 +31,20 @@ namespace NWheels.UI.Adapters.Web.StaticHtml
                 context.Output.AddSourceFile(staticFolderPath.Append($"{fileName}.html"), html.ToString());
             }
             
-            context.DeploymentScript.AddImage(BuildSiteImage());
+            context.DeploymentScript.AddImage(BuildDeploymentImage());
 
-            DeploymentImageMetadata BuildSiteImage()
+            DeploymentImageMetadata BuildDeploymentImage()
             {
+                var publicEndpoint = context.Adapter.Parameters["publicEndpoint"] as string;
+                
                 return new DeploymentImageMetadata(context) {
                     Name = appNameWithSiteSuffix.ToString(CasingStyle.Kebab),
                     BuildContextPath = staticFolderPath.Up(1),
                     BaseImage = "nginx",
                     FilesToCopy = {
                         {staticFolderPath.Tail(1), new FilePath("/usr", "share", "nginx", "html")}
-                    }
+                    },
+                    PublicEndpoint = publicEndpoint
                 };
             }
             

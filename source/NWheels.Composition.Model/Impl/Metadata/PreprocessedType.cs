@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MetaPrograms;
+using MetaPrograms.CSharp;
 using MetaPrograms.Expressions;
 using MetaPrograms.Members;
 using Microsoft.CodeAnalysis;
@@ -101,7 +102,8 @@ namespace NWheels.Composition.Model.Impl.Metadata
 
         public static Func<Argument, int, PreprocessedArgument> FromArgumentOf(MethodMemberBase method) =>
             (arg, index) => {
-                var hasClrValue = TryGetConstantValue(arg.Expression, out var clrValue);
+                object clrValue = null;
+                var hasClrValue = (arg.Expression?.TryGetConstantValue(out clrValue) == true);
 
                 return new PreprocessedArgument {
                     Name = method.Signature.Parameters[index].Name,
@@ -110,27 +112,5 @@ namespace NWheels.Composition.Model.Impl.Metadata
                     ClrValue = clrValue
                 };
             };
-
-        public static bool TryGetConstantValue(AbstractExpression expression, out object value)
-        {
-            if (expression is ConstantExpression constant)
-            {
-                if (constant.Value is Optional<object>)
-                {
-                    var optional = (Optional<object>) constant.Value;
-                    var copyOfValue = optional.HasValue ? optional.Value : null;
-                    value = copyOfValue;
-                    return optional.HasValue;
-                }
-                else
-                {
-                    value = constant.Value;
-                    return (value != null);
-                }
-            }
-
-            value = null;
-            return false;
-        }
     }
 }
