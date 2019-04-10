@@ -10,13 +10,13 @@ namespace NWheels.UI.Model.Impl.Parsers.Web
 {
     public class WebPageParser : IModelParser, IModelParserWithInit
     {
-        private PropertyParsersMap _parsersMap;
+        private PropertyParsersMap _propParsers;
         
         public void Initialize(IModelPreParserContext context)
         {
-            _parsersMap = new PropertyParsersMap(context);
-            _parsersMap.RegisterParsers(new CommonComponentParsers());
-            _parsersMap.RegisterParsers(new WebComponentParsers());
+            _propParsers = new PropertyParsersMap(context);
+            _propParsers.RegisterParsers(new CommonComponentParsers());
+            _propParsers.RegisterParsers(new WebComponentParsers());
         }
 
         public MetadataObject CreateMetadataObject(IModelPreParserContext context)
@@ -30,21 +30,13 @@ namespace NWheels.UI.Model.Impl.Parsers.Web
 
             foreach (var prop in context.Input.GetAllProperties())
             {
-                if (context.TryGetMetadata(prop.Type) is UIComponentMetadata compMeta)
+                var parser = _propParsers.GetParser(prop);
+                var propMeta = parser(prop, context);
+
+                if (propMeta is UIComponentMetadata compMeta)
                 {
                     pageMeta.Components.Add(compMeta);
                 }
-                else
-                {
-                    pageMeta.Components.Add(GetWellKnownCompMeta(prop));
-                }
-            }
-
-            UIComponentMetadata GetWellKnownCompMeta(PreprocessedProperty prop)
-            {
-                var parser = _parsersMap.GetParser(prop);
-                var compMeta = (UIComponentMetadata)parser(prop, context);
-                return compMeta;
             }
         }
     }

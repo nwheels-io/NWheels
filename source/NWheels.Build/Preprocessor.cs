@@ -83,7 +83,7 @@ namespace NWheels.Build
 
                 foreach (var inProp in parseableProperties)
                 {
-                    Console.WriteLine($"Property: {inProp.DeclaringType.Name}::{inProp.Name}");
+                    Console.WriteLine($"prop: {inProp.DeclaringType.Name}::{inProp.Name}");
                     PreprocessProperty(outType, inProp);
                 }
             }

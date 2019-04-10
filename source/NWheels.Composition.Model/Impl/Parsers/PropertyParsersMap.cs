@@ -64,6 +64,11 @@ namespace NWheels.Composition.Model.Impl.Parsers
                 return parser;
             }
 
+            if (_context.Preprocessor.TryGetByConcreteType(componentProp.Type) is PreprocessedType propType)
+            {
+                return (prop, ctx) => ctx.GetMetadata(prop.Type);
+            }
+
             return null;
         }
 

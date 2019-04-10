@@ -1,5 +1,9 @@
+using NWheels.Composition.Model.Impl.Metadata;
+using NWheels.UI.RestApi.Model.Impl.Parsers;
+
 namespace NWheels.UI.RestApi.Model
 {
+    [ModelParser(typeof(BackendApiProxyParser))]
     public abstract class AnyBackendApiProxy
     {
     }

@@ -18,6 +18,13 @@ namespace Demos.TodoList.FrontEnd
         TodoPage Index => new TodoPage(Props);
     }
 
+    public class TodoListApiProxy : BackendApiProxy<TodoListApi>
+    {
+        public TodoListApiProxy(string url) : base(url)
+        {
+        }
+    }
+    
     public class TodoPage : SoloComponentPage<TodoListUrlsConfig, Empty.State>
     {
         public TodoPage(TodoListUrlsConfig props) : base(props)
@@ -25,7 +32,7 @@ namespace Demos.TodoList.FrontEnd
         }
 
         [Include]
-        BackendApiProxy<TodoListApi> Backend => new BackendApiProxy<TodoListApi>(Props.BackendApiUrl);
+        TodoListApiProxy Backend => new TodoListApiProxy(Props.BackendApiUrl);
 
         public override UIComponent SoloComponent => new StackLayout(props => props
             .Row(NewTodoForm)
