@@ -13,6 +13,8 @@ namespace NWheels.UI.Model.Web
         public WebPage(TProps props)
         {
         }
+        
+        public abstract string Title { get; }
     }
 
     public abstract class WebPage : WebPage<Empty.Props, Empty.State>

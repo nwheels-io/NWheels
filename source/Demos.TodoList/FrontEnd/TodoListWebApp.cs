@@ -31,14 +31,16 @@ namespace Demos.TodoList.FrontEnd
         {
         }
 
-        [Include]
-        TodoListApiProxy Backend => new TodoListApiProxy(Props.BackendApiUrl);
+        public override string Title => "Demo Todo List";
 
         public override UIComponent SoloComponent => new StackLayout(props => props
             .Row(NewTodoForm)
             .Row(TodoGrid)
         );
      
+        [Include]
+        TodoListApiProxy Backend => new TodoListApiProxy(Props.BackendApiUrl);
+
         [Include]
         Form<TodoItemEntity> NewTodoForm => new Form<TodoItemEntity>(props => props
             .WithFields(t => t.Title)

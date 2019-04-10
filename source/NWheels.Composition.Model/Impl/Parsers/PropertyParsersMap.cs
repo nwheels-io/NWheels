@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MetaPrograms.Members;
+using Microsoft.CodeAnalysis;
 using NWheels.Composition.Model.Impl.Metadata;
 
 namespace NWheels.Composition.Model.Impl.Parsers
@@ -69,6 +70,16 @@ namespace NWheels.Composition.Model.Impl.Parsers
                 return (prop, ctx) => ctx.GetMetadata(prop.Type);
             }
 
+            var parseableBase = _parserByPropType.Keys
+                .FirstOrDefault(k => k.IsAssignableFrom(componentProp.Type));
+
+            if (!ReferenceEquals(parseableBase, null))
+            {
+                parser = _parserByPropType[parseableBase];
+                _parserByPropType[componentProp.Type] = parser;
+                return parser;
+            }
+            
             return null;
         }
 

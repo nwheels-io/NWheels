@@ -143,26 +143,5 @@ namespace NWheels.Build
         public ImperativeCodeModel Code => _code;
         public RoslynCodeModelReader CodeReader => _reader;
         public Workspace Workspace => _reader.Workspace;
-
-
-
-        //            bool TryParseProperty(PropertyMember property, out PreprocessedProperty property)
-//            {
-//                while (type != null)
-//                {
-//                    if (TryGetParserType(type, out var parserType))
-//                    {
-//                        parserInfo = new ModelParserInfo(type, parserType);
-//                        return true;
-//                    }
-//
-//                    type = type.BaseType;
-//                }
-//
-//                parserInfo = null;
-//                return false;
-//            }
-
-
     }
 }

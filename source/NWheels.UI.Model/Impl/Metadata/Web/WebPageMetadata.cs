@@ -11,5 +11,6 @@ namespace NWheels.UI.Model.Impl.Metadata.Web
         
         public string Title { get; set; }
         public List<UIComponentMetadata> Components { get; } = new List<UIComponentMetadata>();
+        public List<IBackendApiMetadata> BackendApis { get; } = new List<IBackendApiMetadata>();
     }
 }

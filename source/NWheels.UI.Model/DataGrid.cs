@@ -56,7 +56,11 @@ namespace NWheels.UI.Model
     {
     }
 
-    public class DataGrid<T> : UIComponent<DataGridProps<T>, DataGridState<T>>
+    public interface IDataGrid
+    {
+    }
+    
+    public class DataGrid<T> : UIComponent<DataGridProps<T>, DataGridState<T>>, IDataGrid
     {
         public DataGrid(Action<DataGridProps<T>> setProps)
         {

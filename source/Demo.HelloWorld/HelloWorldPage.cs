@@ -6,6 +6,8 @@ namespace Demo.HelloWorld
 {
     class HelloWorldPage : WebPage
     {
+        public override string Title => "NWheels Demo";
+
         [Include]
         UIComponent Hello => new TextContent("Hello, world!"); 
         

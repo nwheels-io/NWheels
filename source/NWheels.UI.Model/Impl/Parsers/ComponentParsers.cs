@@ -5,12 +5,24 @@ using NWheels.UI.Model.Impl.Metadata.Web;
 
 namespace NWheels.UI.Model.Impl.Parsers
 {
-    public class CommonComponentParsers
+    public class ComponentParsers
     {
         public TextContentMetadata TextContent(PreprocessedProperty prop)
         {
             return new TextContentMetadata(MetadataObjectHeader.NoSourceType()) {
                 Text = prop.ConstructorArguments[0].ClrValue as string 
+            };
+        }
+
+        public FormMetadata Form(PreprocessedProperty prop)
+        {
+            return new FormMetadata(MetadataObjectHeader.NoSourceType()) {
+            };
+        }
+
+        public DataGridMetadata DataGrid(PreprocessedProperty prop)
+        {
+            return new DataGridMetadata(MetadataObjectHeader.NoSourceType()) {
             };
         }
     }

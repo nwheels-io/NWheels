@@ -44,7 +44,11 @@ namespace NWheels.UI.Model
         public FormActionProps<T> WithExecute(Func<T, Task> onExecute) => default;
     }
 
-    public class Form<T> : UIComponent<FormProps<T>, Empty.State>
+    public interface IForm
+    {
+    }
+    
+    public class Form<T> : UIComponent<FormProps<T>, Empty.State>, IForm
     {
         public Form(Action<FormProps<T>> setProps)
         {

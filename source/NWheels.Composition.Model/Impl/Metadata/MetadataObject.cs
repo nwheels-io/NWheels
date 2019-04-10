@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace NWheels.Composition.Model.Impl.Metadata
 {
     public interface IMetadataObject
@@ -13,5 +15,7 @@ namespace NWheels.Composition.Model.Impl.Metadata
         }
 
         public MetadataObjectHeader Header { get; }
+        
+        public List<IMetadataObject> UnknownChildren { get; } = new List<IMetadataObject>();
     }
 }
