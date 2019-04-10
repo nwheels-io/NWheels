@@ -8,7 +8,7 @@ namespace Demos.TodoList.BackEnd
     public class TodoListService : Microservice<TodoListEnvConfig>
     {
         public TodoListService(TodoListEnvConfig config) : base(
-            name: "todo-service", 
+            "todo-service", 
             config, 
             new MicroserviceOptions {
                 State = StateOption.Stateless,

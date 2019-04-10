@@ -10,6 +10,11 @@ namespace NWheels.Composition.Model.Impl.Metadata
         MetadataObject CreateMetadataObject(IModelPreParserContext context);
         void Parse(IModelParserContext context);
     }
+
+    public interface IModelParserWithInit
+    {
+        void Initialize(IModelPreParserContext context);
+    }
     
     public interface IModelPreParserContext
     {

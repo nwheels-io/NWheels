@@ -11,7 +11,7 @@ namespace NWheels.UI.Model
             => default(TComponent);
     }
 
-    [ModelParser(typeof(UIComponentParser))]
+    [ModelParser(typeof(CommonComponentParsers))]
     public abstract class UIComponent
     {
         public static implicit operator UIComponent(string text)

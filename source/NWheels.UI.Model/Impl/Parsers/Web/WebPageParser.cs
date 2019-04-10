@@ -2,13 +2,23 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using MetaPrograms.Expressions;
 using NWheels.Composition.Model.Impl.Metadata;
+using NWheels.Composition.Model.Impl.Parsers;
 using NWheels.UI.Model.Impl.Metadata;
 using NWheels.UI.Model.Impl.Metadata.Web;
 
 namespace NWheels.UI.Model.Impl.Parsers.Web
 {
-    public class WebPageParser : IModelParser
+    public class WebPageParser : IModelParser, IModelParserWithInit
     {
+        private PropertyParsersMap _parsersMap;
+        
+        public void Initialize(IModelPreParserContext context)
+        {
+            _parsersMap = new PropertyParsersMap(context);
+            _parsersMap.RegisterParsers(new CommonComponentParsers());
+            _parsersMap.RegisterParsers(new WebComponentParsers());
+        }
+
         public MetadataObject CreateMetadataObject(IModelPreParserContext context)
         {
             return new WebPageMetadata(context.Input);
@@ -32,14 +42,9 @@ namespace NWheels.UI.Model.Impl.Parsers.Web
 
             UIComponentMetadata GetWellKnownCompMeta(PreprocessedProperty prop)
             {
-                if (prop.Type == context.Code.GetClrTypeMember<TextContent>())
-                {
-                    return new TextContentMetadata(MetadataObjectHeader.NoSourceType()) {
-                        Text = prop.ConstructorArguments[0].ClrValue as string 
-                    };
-                }
-
-                return null;
+                var parser = _parsersMap.GetParser(prop);
+                var compMeta = (UIComponentMetadata)parser(prop, context);
+                return compMeta;
             }
         }
     }

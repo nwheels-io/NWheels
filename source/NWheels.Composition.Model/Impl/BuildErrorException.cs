@@ -1,13 +1,29 @@
 using System;
 using System.Linq;
+using System.Runtime.Serialization;
 using MetaPrograms.Members;
 using Microsoft.CodeAnalysis;
 using NWheels.Composition.Model.Impl.Metadata;
 
 namespace NWheels.Composition.Model.Impl
 {
+    [Serializable]
     public class BuildErrorException : Exception
     {
+        public BuildErrorException()
+        {
+        }
+        
+        public BuildErrorException(string message)
+            : base(message)
+        {
+        }
+
+        public BuildErrorException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
+
         public BuildErrorException(
             AbstractMember member,
             string message, 
@@ -21,6 +37,13 @@ namespace NWheels.Composition.Model.Impl
             string message, 
             Exception innerException = null) 
             : this(metaObject.Header.SourceType.ConcreteType, message, innerException)
+        {
+        }
+
+        protected BuildErrorException(
+            SerializationInfo info,
+            StreamingContext context) 
+            : base(info, context)
         {
         }
 

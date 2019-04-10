@@ -58,6 +58,7 @@ namespace NWheels.Composition.Model.Impl.Metadata
     {
         public IdentifierName Name { get; set; }
         public TypeMember Type { get; set; }
+        public PropertyMember Property { get; set; }
         public AbstractExpression Initializer { get; set; }
         
         public List<PreprocessedTypeArgument> GenericArguments { get; } = new List<PreprocessedTypeArgument>(); 

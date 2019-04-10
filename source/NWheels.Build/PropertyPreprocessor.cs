@@ -93,6 +93,7 @@ namespace NWheels.Build
                     ?? throw new BuildErrorException(inProp, "expected 'new' operator to create an instance of a model class");
 
                 outProp.Type = newObj.Type;
+                outProp.Property = inProp;
                 outProp.GenericArguments.AddRange(PreprocessedTypeArgument.FromTypeArguments(newObj.Type));
                 outProp.ConstructorArguments.AddRange(PreprocessedArgument.FromCallArguments(newObj.ConstructorCall));
             }

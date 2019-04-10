@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using MetaPrograms;
 using MetaPrograms.CSharp.Reader;
 using MetaPrograms.CSharp.Reader.Reflection;
@@ -24,6 +26,10 @@ namespace NWheels.Build
             Console.WriteLine($"Starting build: project {Path.GetFileNameWithoutExtension(_options.ProjectFilePath)}");
 
             var workspace = LoadProjectWorkspace();
+            
+            Console.WriteLine($">>>>>> WAITING FOR DEBUGGER: PID = {Process.GetCurrentProcess().Id}");
+            Console.ReadLine();
+            
             var (code, reader) = ReadSourceCode();
             var preprocessor = PreprocessModels();
             var typeLoader = new ClrTypeLoader(reader);
@@ -119,6 +125,7 @@ namespace NWheels.Build
             IMetadataObject[] ParseModels()
             {
                 var outputs = new List<MetadataObject>();
+                InitializeParsers(outputs);
                 
                 Console.WriteLine($"--- parsing: pre-creating metadata ---");
                 PreCreateMetadataObjects(outputs);
@@ -127,6 +134,16 @@ namespace NWheels.Build
                 PopulateMetadataObjects(outputs);
                 
                 return outputs.Cast<IMetadataObject>().ToArray();
+            }
+
+            void InitializeParsers(List<MetadataObject> outputs)
+            {
+                var context = new ModelParserContext(code, reader, preprocessor, outputs);
+                
+                foreach (var parserWithInit in parsers.Values.OfType<IModelParserWithInit>())
+                {
+                    parserWithInit.Initialize(context);
+                }
             }
 
             void PreCreateMetadataObjects(List<MetadataObject> outputs)

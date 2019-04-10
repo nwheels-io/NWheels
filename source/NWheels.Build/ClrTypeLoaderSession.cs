@@ -30,7 +30,7 @@ namespace NWheels.Build
                 existingCallback = callback;
             }
 
-            _typeRequests.Add(type, existingCallback);
+            _typeRequests[type] = existingCallback;
         }
 
         public IDictionary<Type, TBase> LoadRequestedTypes<TBase>()
