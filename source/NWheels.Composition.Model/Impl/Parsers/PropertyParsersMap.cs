@@ -21,7 +21,7 @@ namespace NWheels.Composition.Model.Impl.Parsers
             _context = context;
         }
 
-        public void RegisterParsers(object container)
+        public void RegisterParserMethods(object container)
         {
             foreach (var method in container.GetType().GetMethods())
             {

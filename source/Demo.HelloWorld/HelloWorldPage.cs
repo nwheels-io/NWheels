@@ -15,7 +15,7 @@ namespace Demo.HelloWorld
         // UIComponent Hello => "Hello, world!"; 
     }
 
-    class HelloWorldApp : SinglePageWebApp<HelloWorldPage>
-    {
-    }
+//    class HelloWorldApp : SinglePageWebApp<HelloWorldPage>
+//    {
+//    }
 }

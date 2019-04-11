@@ -18,7 +18,7 @@ namespace NWheels.UI.Model.Web
     }
 
     [ModelParser(typeof(SinglePageWebAppParser))]    
-    public class SinglePageWebApp<TPage> : WebApp<Empty.Props, Empty.State>
+    public sealed class SinglePageWebApp<TPage> : WebApp<Empty.Props, Empty.State>
         where TPage : class, IWebPage, new()
     {
         public SinglePageWebApp() 
@@ -26,7 +26,6 @@ namespace NWheels.UI.Model.Web
         {
         }
 
-        [Include]
         public TPage Index => new TPage();
     }
 }

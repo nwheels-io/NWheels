@@ -55,8 +55,15 @@ namespace NWheels.Build
             {
                 foreach (var outType in output.GetAll())
                 {
-                    Console.WriteLine($"Type: {outType.ConcreteType.FullName}");
-                    CompletePreprocessingOfType(outType);
+                    if (true)//outType.ConcreteType.Status == MemberStatus.Parsed)
+                    {
+                        Console.WriteLine($"TYPE: {outType.ConcreteType.FullName}");
+                        CompletePreprocessingOfType(outType);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"skip: {outType.ConcreteType.FullName}, status = {outType.ConcreteType.Status}");
+                    }
                 }
             }
 
@@ -90,9 +97,7 @@ namespace NWheels.Build
 
             bool IsParseableType(TypeMember type, out ModelParserInfo parserInfo)
             {
-                bool canBeParseable = (type.Status == MemberStatus.Parsed && type.Modifier != MemberModifier.Static);
-
-                if (canBeParseable)
+                if (CanBeParseableType(type))
                 {
                     while (type != null)
                     {
@@ -123,6 +128,22 @@ namespace NWheels.Build
                     : null);
                 
                 return (parserType != null);
+            }
+
+            bool CanBeParseableType(TypeMember type)
+            {
+                if (type.Modifier == MemberModifier.Static || type.Modifier == MemberModifier.Abstract)
+                {
+                    return false;
+                }
+
+                if (type.Status == MemberStatus.Parsed)
+                {
+                    return true;
+                }
+
+                bool hasParserAttribute = (type.TryGetAttribute(_modelParserAttributeType) != null);
+                return hasParserAttribute;
             }
             
             bool IsParseableProperty(PropertyMember property)

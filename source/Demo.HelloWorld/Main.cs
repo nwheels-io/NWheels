@@ -25,8 +25,6 @@ namespace Demo.HelloWorld
         
         [Include]
         public StaticHtmlWebSite HelloWorldSite => 
-            new HelloWorldApp()
-                .AsStaticHtmlWebSite(publicEndpoint: "hello-world-ip-address");
-        //public StaticHtmlWebSite HelloWorldSite => new SinglePageWebApp<HelloWorldPage>().AsStaticHtmlWebSite();
+            new SinglePageWebApp<HelloWorldPage>().AsStaticHtmlWebSite(publicEndpoint: "demo-ip-address");
     }
 }

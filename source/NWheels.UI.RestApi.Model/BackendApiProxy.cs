@@ -3,11 +3,11 @@ using NWheels.UI.RestApi.Model.Impl.Parsers;
 
 namespace NWheels.UI.RestApi.Model
 {
-    [ModelParser(typeof(BackendApiProxyParser))]
     public abstract class AnyBackendApiProxy
     {
     }
     
+    [ModelParser(typeof(BackendApiProxyParser))]
     public class BackendApiProxy<TApi> : AnyBackendApiProxy
     {
         public BackendApiProxy(string url)

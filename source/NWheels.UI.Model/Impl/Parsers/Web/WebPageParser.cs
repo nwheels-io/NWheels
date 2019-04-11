@@ -17,8 +17,8 @@ namespace NWheels.UI.Model.Impl.Parsers.Web
         public void Initialize(IModelPreParserContext context)
         {
             _propParsers = new PropertyParsersMap(context);
-            _propParsers.RegisterParsers(new ComponentParsers());
-            _propParsers.RegisterParsers(new WebComponentParsers());
+            _propParsers.RegisterParserMethods(new ComponentParsers());
+            _propParsers.RegisterParserMethods(new WebComponentParsers());
         }
 
         public MetadataObject CreateMetadataObject(IModelPreParserContext context)

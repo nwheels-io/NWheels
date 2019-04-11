@@ -8,11 +8,25 @@ namespace NWheels.Composition.Model.Impl.Metadata
     public class MetadataObjectHeader
     {
         public MetadataObjectHeader(PreprocessedType sourceType)
+            : this(
+                sourceType, 
+                name: sourceType?.ConcreteType.Name,
+                namespaceName: sourceType?.ConcreteType.Namespace,
+                qualifiedName: sourceType?.ConcreteType.FullName)
+        {
+            
+        }
+
+        public MetadataObjectHeader(
+            PreprocessedType sourceType, 
+            IdentifierName name, 
+            string namespaceName, 
+            string qualifiedName)
         {
             SourceType = sourceType;
-            Name = sourceType?.ConcreteType.Name;
-            Namespace = sourceType?.ConcreteType.Namespace;
-            QualifiedName = sourceType?.ConcreteType.FullName;
+            Name = name;
+            Namespace = namespaceName;
+            QualifiedName = qualifiedName;
             TechnologyAdapters = sourceType?.ReferencedBy
                 .Where(refProp => refProp.TechnologyAdapter != null)
                 .Select(refProp => TechnologyAdapterMetadata.FromSource(refProp.TechnologyAdapter))

@@ -20,7 +20,10 @@ namespace NWheels.UI.Adapters.Web.StaticHtml
         {
             var appMeta = (WebAppMetadata) context.Input;
             var appName = appMeta.Header.Name.TrimSuffixFragment("App");
-            var appNameWithSiteSuffix = appName.AppendSuffixFragments("Site");
+            var appNameWithSiteSuffix = (appName.ToString(CasingStyle.Kebab).EndsWith("-site") 
+                ? appName 
+                : appName.AppendSuffixFragments("Site"));
+            
             var appTitle = appMeta.Title ?? appName.ToString(CasingStyle.Kebab); //TODO: CasingStyle.Human
             var staticFolderPath = new FilePath("frontend", appNameWithSiteSuffix.ToString(CasingStyle.Kebab), "static");
 
