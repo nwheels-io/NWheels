@@ -17,6 +17,14 @@ namespace NWheels.UI.Model.Web
         }
     }
 
+    public abstract class WebApp : WebApp<Empty.Props, Empty.State>
+    {
+        protected WebApp()
+            : base(new Empty.Props())
+        {
+        }
+    }
+
     [ModelParser(typeof(SinglePageWebAppParser))]    
     public sealed class SinglePageWebApp<TPage> : WebApp<Empty.Props, Empty.State>
         where TPage : class, IWebPage, new()

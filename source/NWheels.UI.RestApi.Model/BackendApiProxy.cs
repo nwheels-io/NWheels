@@ -17,5 +17,10 @@ namespace NWheels.UI.RestApi.Model
 
         public string Url { get; }
         public TApi Api => default;
+
+        public static implicit operator TApi(BackendApiProxy<TApi> proxy)
+        {
+            return default;
+        }
     }
 }

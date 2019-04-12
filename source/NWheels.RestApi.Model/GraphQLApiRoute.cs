@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace NWheels.RestApi.Model
 {
@@ -7,5 +8,7 @@ namespace NWheels.RestApi.Model
         public GraphQLApiRoute(Action<ApiRouteConfig<GraphQLService<TEntity>>> config = null) : base(config)
         {
         }
+
+        public IEnumerable<TEntity> Data => null;
     }
 }

@@ -8,7 +8,7 @@ namespace NWheels.UI.Model
         public StackLayoutProps Column(UIComponent component) => default;
     }
     
-    public class StackLayout : UIComponent<StackLayoutProps, Empty.State>
+    public class StackLayout : LayoutComponent<StackLayoutProps, Empty.State>
     {
         public StackLayout(Action<StackLayoutProps> setProps)
         {

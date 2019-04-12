@@ -7,9 +7,9 @@ namespace NWheels.UI.Model.Web.Templates
         protected SoloComponentPage(TProps props) : base(props)
         {
         }
-
+        
         [Include]
-        public abstract UIComponent SoloComponent { get; }        
+        public abstract UIComponent SoloComponent { get; }
     }
 
     public abstract class SoloComponentPage : SoloComponentPage<Empty.Props, Empty.State>

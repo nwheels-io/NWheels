@@ -20,6 +20,19 @@ namespace NWheels.UI.Model
         }
     }
 
+    public class TextContent<T> : TextContent
+    {
+        public TextContent(T data, string format)
+            : base(format)
+        {
+        }
+
+        public TextContent(T data, Func<T, string> format)
+            : base("")
+        {
+        }
+    }
+
     public class TextContentProps : PropsOf<TextContent>
     {
         public string Text;
