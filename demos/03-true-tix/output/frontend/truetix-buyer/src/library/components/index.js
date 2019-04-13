@@ -4,6 +4,6 @@ export { prepareComponent } from './prepareComponent';
 export { DataGrid } from './dataGrid.component'
 export { Form } from './form.component'
 export { Text } from './text.component'
-export { GridLayout } from './gridLayout.component'
+export { GridLayout, GridCell } from './gridLayout.component'
 export { SeatMap } from './seatMap.component'
 export { SoloPage } from './soloPage.component'

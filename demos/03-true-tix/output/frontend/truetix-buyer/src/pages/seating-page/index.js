@@ -2,17 +2,57 @@ import React from "react";
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
-import { prepareComponent, PubSub, DAL, GridLayout, Text, SeatMap } from '../../library/components';
+import { prepareComponent, PubSub, DAL, Text, SeatMap } from '../../library/components';
 import { DemoMinimal as skin } from '../../library/skins';
 import { PageConnector, PageReducer } from './state'
+import { createSeatingApi } from '../../backends/seatingApi';
 
-const PageLayoutGrid = prepareComponent(GridLayout, 'pageLayout', skin.GridLayout);
 const PerformanceInfoText = prepareComponent(Text, 'performanceInfo', skin.Text);
 const SeatMapSeatMap = prepareComponent(SeatMap, 'seatMap', skin.SeatMap);
 const SeatInfoText = prepareComponent(Text, 'seatInfo', skin.Text);
 
+class PureBody extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        const GridLayout = skin.GridLayout;
+        const GridCell = skin.GridCell;
+        const props = this.props;
+
+        return (
+            <GridLayout rows={3} cols={3}>
+                <GridCell row={0} col={1}>
+                    {props.seatingPlan && 
+                        <PerformanceInfoText.Component text={props.seatingPlan.performance.artist} />
+                    }
+                </GridCell>
+                <GridCell row={1} col={1}>
+                    {props.seatingPlan && 
+                        <SeatMapSeatMap.Component 
+                            rows={props.seatingPlan.rows} 
+                            colors={{'sale':'green', 'resale':'orange', 'sold':'red'}} 
+                            onSeatSelected={(seat) => props.seatMapSeatSelected(this.props, seat)} />
+                    }
+                </GridCell>
+                <GridCell row={2} col={1}>
+                    {props.selectedSeatInfo && 
+                        <SeatInfoText.Component text={`Price: ${props.selectedSeatInfo.price}`}/>
+                    }
+                </GridCell>
+            </GridLayout>
+        );
+    }
+    componentDidMount() {
+        this.props.pageReady(this.props);
+    }
+}
+
+const Body = PageConnector(PureBody);
+
 function buildPageStore() {
     const rootReducer = combineReducers({
+        $page: PageReducer,
         ...PerformanceInfoText.Reducers,
         ...SeatInfoText.Reducers,
         ...SeatMapSeatMap.Reducers
@@ -24,32 +64,12 @@ function buildPageStore() {
 }
 
 const store = buildPageStore();
+const seatingApi = createSeatingApi('https://api.tixlab.app/api/graphql');
 
 export const SeatingPage = (props) => {
-    const onSeatMapSeatSelected = PubSub.Event('seatingPage/seatMap/seatSelected');
-    const Body = PageConnector(PureBody);
-
     return (
         <Provider store={store}>
-            <Body />
+            <Body performanceId={12345} seatingApi={seatingApi} />
         </Provider>
     );
 };
-
-const PureBody = (props) => {
-    const PageLayoutGridCell = PageLayoutGrid.getCellComponent();
-    return (
-        <PageLayoutGrid rows={3} cols={3}>
-            <PageLayoutGridCell row={0} col={1}>
-                <PerformanceInfoText text={props.performance.title} />
-            </PageLayoutGridCell>
-            <PageLayoutGridCell row={1} col={1}>
-                <SeatMapSeatMap rows={props.seatingPlan.rows} colors={{'sale':'green', 'resale':'orange', 'sold':'red'}} />
-            </PageLayoutGridCell>
-            <PageLayoutGridCell row={2} col={1}>
-                <SeatInfoText text={props.selectedSeatInfo.title}/>
-            </PageLayoutGridCell>
-        </PageLayoutGrid>
-    );
-}
-

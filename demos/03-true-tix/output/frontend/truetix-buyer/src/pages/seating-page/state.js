@@ -8,16 +8,18 @@ const initialState = {
 
 const Thunks = {
     pageReady({ seatingApi, performanceId }) {
-        return async (dispatch, getState) => {
-            const seatingPlan = await seatingApi.getSeatingMap(performanceId);
-            dispatch({
-                type: 'SEATING_PAGE.SET_SEATING_PLAN',
-                seatingPlan   
+        return (dispatch, getState) => {
+            const seatingPlanPromise = seatingApi.getSeatingMap(performanceId);
+            seatingPlanPromise.then(data => {
+                dispatch({
+                    type: 'SEATING_PAGE.SET_SEATING_PLAN',
+                    seatingPlan: data   
+                });
             });
         };
     },
     seatMapSeatSelected({ seatingApi, performanceId }, seat) {
-        return async (dispatch, getState) => {
+        return (dispatch, getState) => {
             dispatch({
                 type: 'SEATING_PAGE.SET_SELECTED_SEAT_ID',
                 selectedSeatId: seat.id   
@@ -26,10 +28,12 @@ const Thunks = {
                 type: 'SEATING_PAGE.SET_SELECTED_SEAT_INFO',
                 selectedSeatInfo: null   
             });
-            const selectedSeatInfo = await seatingApi.getSeat(performanceId, seat.id);
-            dispatch({
-                type: 'SEATING_PAGE.SET_SELECTED_SEAT_INFO',
-                selectedSeatInfo   
+            const seatInfoPromise = seatingApi.getSeat(performanceId, seat.id);
+            seatInfoPromise.then(data => {
+                dispatch({
+                    type: 'SEATING_PAGE.SET_SELECTED_SEAT_INFO',
+                    selectedSeatInfo: data 
+                });
             });
         };
     }
@@ -60,13 +64,23 @@ export const PageReducer = (state = initialState, action) => {
 export const PageConnector = connect(
     (state, ownProps) => { 
         const ownState = state.$page;
-        return { 
+        const props = { 
             performanceId: ownProps.performanceId,
             seatingApi: ownProps.seatingApi,
             seatingPlan : ownState.seatingPlan,
             selectedSeatId : ownState.selectedSeatId,
             selectedSeatInfo : ownState.selectedSeatInfo
         };
+        return props;
     },
-    (dispatch) => Thunks
+    (dispatch) => {
+        return {
+            pageReady(props) {
+                dispatch(Thunks.pageReady(props));
+            },
+            seatMapSeatSelected(props, seat) {
+                dispatch(Thunks.seatMapSeatSelected(props, seat));
+            }
+        }
+    } 
 );

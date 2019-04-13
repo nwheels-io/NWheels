@@ -138,7 +138,9 @@ function GraphQL(url) {
                 return json.data.update;
             });
             return promise;
-        }
+        },
+
+        sendRequest
     };
 }
 
