@@ -7,7 +7,8 @@ namespace Demo.TrueTix.Api
 {
     public interface ISeatingApi
     {
-        Task<PerformanceSeatingPlan> GetPerformanceSeating(int performanceId, int? seatId = null);
+        Task<PerformanceSeatingPlan> GetSeatingMap(int performanceId);
+        Task<PerformanceSeat> GetSeat(int performanceId, int seatId);
     }
 }
 

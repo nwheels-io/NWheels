@@ -29,13 +29,13 @@ namespace Demo.TrueTix.FrontEnd
             _backendUrl = backendUrl;
             
             PageReady += async _ => {
-                State.SeatingPlan = await SeatingApi.GetPerformanceSeating(performanceId);
+                State.SeatingPlan = await SeatingApi.GetSeatingMap(performanceId);
             };
             
             SeatMap.SeatSelected += async (seat) => {
                 State.SelectedSeatId = seat.Id;
-                State.SelectedSeatInfo = 
-                    (await SeatingApi.GetPerformanceSeating(performanceId, seat.Id)).Rows[0].Seats[0];
+                State.SelectedSeatInfo = null;
+                State.SelectedSeatInfo = await SeatingApi.GetSeat(performanceId, seat.Id);
             };
         }
 
