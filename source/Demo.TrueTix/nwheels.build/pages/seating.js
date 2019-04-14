@@ -94,7 +94,10 @@ const comps = [
         }
     }
 ];
-const pageCorvid = () => $w.onReady(() => $w("#html1").onMessage(event => console.log("got message!", event.data)));
+const wixCode = `import { fetch } from 'wix-fetch';
+\$w.onReady(() => \$w("#html1").onMessage(event => console.log("got message!", event.data)));
+
+`;
 const getCodeAsString = func => {
     const funcStr = func.toString;
     if (funcStr.indexOf("() =>") === 0) 
