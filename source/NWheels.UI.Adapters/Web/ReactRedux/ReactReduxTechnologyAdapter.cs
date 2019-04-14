@@ -1,12 +1,12 @@
-﻿using NWheels.UI.Model.Web;
+using NWheels.Composition.Model.Impl.Metadata;
 
 namespace NWheels.UI.Adapters.Web.ReactRedux
 {
-    public static class ReactReduxTechnologyAdapter 
+    public class ReactReduxTechnologyAdapter : ITechnologyAdapter
     {
-        public static ReactReduxWebApp AsReactReduxWebApp(this IWebApp webApp)
+        public void GenerateOutputs(ITechnologyAdapterContext context)
         {
-            return default(ReactReduxWebApp);
+            //throw new System.NotImplementedException();
         }
     }
 }

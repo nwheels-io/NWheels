@@ -20,6 +20,7 @@ namespace Demo.TrueTix.Domain
     [ValueObject]
     public class PerformanceSeat
     {
+        public int Id { get; }
         public Seat BaseSeat { get; set; }
         public SeatStatus Status { get; set; }
         public SecondarySale Resale { get; set; }

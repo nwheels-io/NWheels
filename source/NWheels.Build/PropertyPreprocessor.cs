@@ -49,6 +49,10 @@ namespace NWheels.Build
                     ParseTechnologyAdapterInitializer(call, out var modelInitializer);
                     ParseModelInitializer(modelInitializer);
                 }
+                else if (getterBody is MemberExpression member)
+                {
+                    ParseModelInitializer(member.Target);
+                }
                 else
                 {
                     ParseModelInitializer(getterBody);

@@ -51,6 +51,12 @@ namespace NWheels.Cli
         {
             Console.WriteLine($"------ generated code summary ------");
 
+            if (slocPerFileType.Count == 0)
+            {
+                Console.WriteLine($"WARNING: nothing was generated.");
+                return;
+            }
+            
             var saveColor = Console.ForegroundColor;
             var typeColWidth = slocPerFileType.Keys.Max(k => k.Length);
             var slocColWidth = slocPerFileType.Values.Max(v => v.ToString("#,###").Length);

@@ -25,5 +25,17 @@ namespace NWheels.UI.Model.Impl.Parsers
             return new DataGridMetadata(MetadataObjectHeader.NoSourceType()) {
             };
         }
+
+        public GridLayoutMetadata GridLayout(PreprocessedProperty prop)
+        {
+            return new GridLayoutMetadata(MetadataObjectHeader.NoSourceType()) {
+            };
+        }
+
+        public SeatingPlanMetadata SeatingPlan(PreprocessedProperty prop)
+        {
+            return new SeatingPlanMetadata(MetadataObjectHeader.NoSourceType()) {
+            };
+        }
     }
 }
