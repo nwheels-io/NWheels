@@ -75,9 +75,9 @@ namespace Demo.TrueTix.FrontEnd
         );
 
         [Include]
-        TextContent PerformanceInfo => new TextContent(FormatPerformance(State.SeatingPlan.Performance)); 
-        
-        [Include]
+        TextContent PerformanceInfo => new TextContent(FormatPerformance(State.SeatingPlan.Performance));
+
+        [Include] 
         TextContent SeatInfo => new TextContent(FormatSeat(State.SelectedSeatInfo));
 
         string FormatPerformance(Performance perf) => $"{perf}";

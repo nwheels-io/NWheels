@@ -2,6 +2,7 @@ using Demo.TrueTix.FrontEnd;
 using NWheels.Composition.Model;
 using NWheels.DevOps.Model;
 using NWheels.UI.Adapters.Web.ReactRedux;
+using NWheels.UI.Adapters.Web.Wix;
 
 namespace Demo.TrueTix.DevOps
 {
@@ -12,8 +13,9 @@ namespace Demo.TrueTix.DevOps
         {
         }
 
-        [Include] public ReactReduxWebApp BuyerApp => 
+        [Include] public WixWebSite BuyerApp => 
             new BuyerApp(Config.BackendUrl)
-                .AsReactReduxWebApp();
+                .AsWixWebSite(backendUrl: "https://api.tixlab.app/api/graphql");
+                //.AsReactReduxWebApp();
     }
 }

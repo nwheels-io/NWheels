@@ -4,7 +4,7 @@ using NWheels.Composition.Model.Impl.Metadata;
 
 namespace NWheels.UI.Model.Impl.Metadata
 {
-    public class SeatingPlanMetadata : MetadataObject, IMetadataOf<SeatingPlan>
+    public class SeatingPlanMetadata : UIComponentMetadata, IMetadataOf<SeatingPlan>
     {
         public SeatingPlanMetadata(MetadataObjectHeader header) : base(header)
         {

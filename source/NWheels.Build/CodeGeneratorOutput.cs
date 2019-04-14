@@ -18,6 +18,8 @@ namespace NWheels.Build
             _buildOptions = buildOptions;
             _basePath = Path.Combine(Path.GetDirectoryName(buildOptions.ProjectFilePath), "nwheels.build");
             _slocPerFileType = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
+            
+            this.TextOptions = new CodeTextOptions(indent: "    ", newLine: System.Environment.NewLine);
         }
 
         public void AddSourceFile(FilePath path, string contents)

@@ -5,6 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\MetaPrograms\Source\MetaPrograms.JavaScript\MetaPrograms.JavaScript.csproj" />
       <ProjectReference Include="..\NWheels.Composition.Model\NWheels.Composition.Model.csproj" />
       <ProjectReference Include="..\NWheels.UI.Model\NWheels.UI.Model.csproj" />
     </ItemGroup>

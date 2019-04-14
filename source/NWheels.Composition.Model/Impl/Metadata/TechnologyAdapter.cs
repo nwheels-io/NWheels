@@ -31,9 +31,10 @@ namespace NWheels.Composition.Model.Impl.Metadata
             _inner.AddMessage(category, message);
         }
 
+        IMetadataObject ITechnologyAdapterContext.Input => _input;
         public IReadOnlyPreprocessorOutput Preprocessor => _inner.Preprocessor;
         public TechnologyAdapterMetadata Adapter => _inner.Adapter;
-        public IMetadataObject Input => _input;
+        public TMetadata Input => _input;
         public ICodeGeneratorOutput Output => _inner.Output;
         public IDeploymentScriptBuilder DeploymentScript => _inner.DeploymentScript;
     }
