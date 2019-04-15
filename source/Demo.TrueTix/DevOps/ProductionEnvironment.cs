@@ -13,9 +13,7 @@ namespace Demo.TrueTix.DevOps
         {
         }
 
-        [Include] public WixWebSite BuyerApp => 
-            new BuyerApp(Config.BackendUrl)
-                .AsWixWebSite(backendUrl: "https://api.tixlab.app/api/graphql");
+        [Include] public WixWebSite BuyerApp => new BuyerApp().AsWixWebSite(backendUrl: "https://api.tixlab.app/api/graphql");
                 //.AsReactReduxWebApp();
     }
 }

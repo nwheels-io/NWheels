@@ -42,15 +42,11 @@ namespace NWheels.UI.Adapters.Web.Wix
             {
                 var module = MODULE(new[] { "pages" }, page.Name, () => {
 
-                    //PRIVATE.FUNCTION("", () => {  //TODO: why doesn't it work?
-                    var printName = page.Name.ToString(CasingStyle.Kebab);
-                    USE("console").DOT("log").INVOKE(ANY($"--- generating page: {printName} ---"));
                     FINAL("pageName", out var @pageName, ANY($"{page.Name}"));
 
                     GenerateComponents();
                     GenerateCorvid();
                     GenerateSave();
-                    //});
 
                     void GenerateComponents()
                     {
@@ -79,15 +75,8 @@ namespace NWheels.UI.Adapters.Web.Wix
 
                         using (CreateCodeContext())
                         {
-                            var corvidModule = MODULE(new string[0], "corvid", () => {
-                                IMPORT.TUPLE("fetch", out var @fetch).FROM("wix-fetch");
-                                USE("$w").DOT("onReady").INVOKE(LAMBDA(() => {
-                                    USE("$w").INVOKE(ANY("#html1")).DOT("onMessage").INVOKE(LAMBDA(@event => {
-                                        USE("console").DOT("log").INVOKE(ANY($"got message!"), @event.DOT("data"));
-                                    }));
-                                }));
-                            });
-                            
+                            var corvidGenerator = new WixCorvidGenerator();
+                            var corvidModule = corvidGenerator.GenerateCorvidModule(context, page);                           
                             corvidWriter.WriteModule(corvidModule);
                         }
 
@@ -96,7 +85,7 @@ namespace NWheels.UI.Adapters.Web.Wix
 
                     void GenerateSave()
                     {
-                        LOADRAW("Web.Wix.Code.upload.js");
+                        INCLUDE("Web.Wix.Code.upload.js");
                     }
                 });
                 

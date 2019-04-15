@@ -1,5 +1,4 @@
 (function() {
-    console.log("--- generating page: seating ---");
     const pageName = "Seating";
     const comps = [
         {
@@ -133,6 +132,28 @@
         }
     ];
     const wixCode = `import { fetch } from 'wix-fetch';
+function fetchGraphQL(query) {
+    fetch(endpointUrl, {
+        method: "POST",
+        mode: "cors",
+        body: JSON.stringify({
+            query: query,
+            variables: null
+        }),
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }
+    })
+    .then((httpResponse) => {
+        if (httpResponse.ok) {
+            return httpResponse.json();
+        }
+        return Promise.reject("Fetch did not succeed");
+    });
+}
+
+;
 \$w.onReady(() => \$w("#html1").onMessage(event => console.log("got message!", event.data)));
 
 `;

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Demo.TrueTix.Domain;
 using NWheels.RestApi.Model;
+using NWheels.UI.RestApi.Model;
 
 namespace Demo.TrueTix.Api
 {

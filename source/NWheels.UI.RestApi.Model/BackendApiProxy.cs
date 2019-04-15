@@ -10,7 +10,7 @@ namespace NWheels.UI.RestApi.Model
     [ModelParser(typeof(BackendApiProxyParser))]
     public class BackendApiProxy<TApi> : AnyBackendApiProxy
     {
-        public BackendApiProxy(string url)
+        public BackendApiProxy(string url = null)
         {
             Url = url;
         }

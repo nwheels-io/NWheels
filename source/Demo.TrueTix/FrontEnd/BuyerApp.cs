@@ -14,26 +14,15 @@ namespace Demo.TrueTix.FrontEnd
 {
     public class BuyerApp : WebApp
     {
-        private readonly string _backendUrl;
-
-        public BuyerApp(string backendUrl)
-        {
-            _backendUrl = backendUrl;    
-        }
-
         [Include]
-        SeatingPage Seating => new SeatingPage(performanceId: 12345, backendUrl: _backendUrl);
+        SeatingPage Seating => new SeatingPage(performanceId: 12345);
     }
 
     public class SeatingPage : WebPage<Empty.Props, SeatingPage.PageState>
     {
-        private readonly string _backendUrl;
-
-        public SeatingPage(int performanceId, string backendUrl)
+        public SeatingPage(int performanceId)
             : base(new Empty.Props())
         {
-            _backendUrl = backendUrl;
-            
             PageReady += async _ => {
                 State.SeatingPlan = await SeatingApi.GetSeatingMap(performanceId);
             };
@@ -48,7 +37,7 @@ namespace Demo.TrueTix.FrontEnd
         public override string Title => "Seats";
 
         [Include]
-        ISeatingApi SeatingApi => new BackendApiProxy<ISeatingApi>(_backendUrl).Api;
+        ISeatingApi SeatingApi => new BackendApiProxy<ISeatingApi>().Api;
 
         [Include]
         public override ILayoutComponent PageLayout => new GridLayout(new UIComponent[,] {
