@@ -9,7 +9,7 @@ namespace NWheels.UI.Adapters.Web.Wix
     public interface IWixComponentGenerator
     {
         WixComponentDefinition GenerateDefinition();
-        XElement GenerateHtml();
+        string GenerateHtml();
     }
 
     public static class WixComponentGenerator
@@ -38,6 +38,6 @@ namespace NWheels.UI.Adapters.Web.Wix
         }
         
         public abstract WixComponentDefinition GenerateDefinition();
-        public virtual XElement GenerateHtml() => null;
+        public virtual string GenerateHtml() => null;
     }
 }

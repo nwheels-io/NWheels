@@ -42,6 +42,7 @@ namespace NWheels.UI.Adapters.Web.Wix
             {
                 var module = MODULE(new[] { "pages" }, page.Name, () => {
 
+                    //PRIVATE.FUNCTION("", () => {  //TODO: why doesn't it work?
                     var printName = page.Name.ToString(CasingStyle.Kebab);
                     USE("console").DOT("log").INVOKE(ANY($"--- generating page: {printName} ---"));
                     FINAL("pageName", out var @pageName, ANY($"{page.Name}"));
@@ -49,6 +50,7 @@ namespace NWheels.UI.Adapters.Web.Wix
                     GenerateComponents();
                     GenerateCorvid();
                     GenerateSave();
+                    //});
 
                     void GenerateComponents()
                     {
@@ -66,7 +68,7 @@ namespace NWheels.UI.Adapters.Web.Wix
 
                         return new WixComponentEntry {
                             CompDef = generator.GenerateDefinition(),
-                            Html = generator.GenerateHtml()?.ToString()
+                            Html = generator.GenerateHtml()
                         };
                     }
                     
@@ -98,7 +100,7 @@ namespace NWheels.UI.Adapters.Web.Wix
                     }
                 });
                 
-                codeWriter.WriteModule(module);
+                codeWriter.WriteModule(module, privateScope: true);
             }
         }
 

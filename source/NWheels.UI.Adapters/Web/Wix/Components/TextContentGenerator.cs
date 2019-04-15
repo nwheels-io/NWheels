@@ -28,9 +28,10 @@ namespace NWheels.UI.Adapters.Web.Wix.Components
                 },
                 Props = new Dictionary<string, object> {
                     {"type", "WRichTextProperties"},
-                    {"isHidden", false}, //TODO: visibility aspect 
+                    {"isHidden", false}, //TODO: conditional visibility? 
                     {"brightness", 1},
-                    {"packed", false}
+                    {"packed", false},
+                    {"metadata", new WixComponentMetadata()}
                 },
                 Connections = new WixComponentConnections {
                     Items = new List<WixComponentConnectionItem> {

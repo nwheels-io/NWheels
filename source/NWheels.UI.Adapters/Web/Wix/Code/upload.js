@@ -53,7 +53,7 @@
             editorSessionId: getQueryParam('editorSessionId')
         });
     
-        console.log('saveHtml request', saveHtmlUrl)
+        console.log('saveHtml request', saveHtmlUrl);
         return fetch(
             saveHtmlUrl,
             {
@@ -62,9 +62,9 @@
                     "accept": "*/*",
                     "accept-language": "en-US,en;q=0.9,ru;q=0.8,he;q=0.7,es;q=0.6",
                     "content-type": "application/json; charset=utf-8",
-                    "x-xsrf-token": "1554886602|Bz-PyXsapNGf"
+                    "x-xsrf-token": getCookie("XSRF-TOKEN")
                 },
-                "referrer": "https://editor.wix.com/html/editor/web/renderer/edit/b8674fbf-81de-419a-afe8-39e123201dda?metaSiteId=69721ac4-1ce3-40ff-806c-5ce7f6fb9761",
+                "referrer": "https://editor.wix.com/html/editor/web/renderer/edit",
                 "referrerPolicy": "no-referrer-when-downgrade",
                 "body": JSON.stringify({html: htmlText}),
                 "method": "POST",
@@ -107,4 +107,20 @@
     
     function getQueryParam(name) {
         return window.location.search.substring(1).split('&').map(q => q.split('=')).find(pp => pp[0] === name)[1]
+    }
+
+    function getCookie(cname) {
+        var name = cname + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for(var i = 0; i <ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
     }

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hall</title>
+    <script
+            src="https://code.jquery.com/jquery-3.4.0.min.js"
+            integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg="
+            crossorigin="anonymous"></script>
+    <style>
+        .hall-row {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+
+        .hall-seat {
+            flex: 0 0 40px;
+            height: 40px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: 3px;
+            border: 1px solid black;
+        }
+
+        .hall-seat.sale {
+            background-color: darkseagreen;
+        }
+        .hall-seat.resale {
+            background-color: goldenrod;
+        }
+        .hall-seat.sold {
+            background-color: indianred;
+        }
+    </style>
+</head>
+<body onLoad="ready()">
+<script>
+    window.onmessage = function(event){
+
+        if (event.data && Array.isArray(event.data)) {
+            var $hall = $('#hall').empty()
+            $.each(event.data, function(rowIndex, row) {
+                var $row = $('<div class="hall-row" />').appendTo($hall);
+                $.each(row.seats, function(seatIndex, seat) {
+                    var $seat = $('<div class="hall-seat" />')
+                        .text('$' + (seat.price || 'N/A'))
+                        .appendTo($row)
+                        .addClass(seat.status)
+                        .on('click', function(e) {
+                            handleSeatClick(rowIndex +1, seatIndex +1, seat);
+                        })
+                });
+            });
+        }
+        else {
+            console.log("HTML Code Element received a generic message:");
+            console.log(event.data);
+        }
+    };
+
+    function handleSeatClick(rowNum, seatNum, seat){
+
+        window.parent.postMessage({
+            "type":"click",
+            // "label":label,
+            "value": $.extend({rowNum: rowNum, seatNum: seatNum}, seat)
+        } , "*");
+    }
+
+    function ready(){
+        window.parent.postMessage({"type":"ready"}, "*");
+    }
+
+</script>
+
+<div id="hall" class="hall">
+
+</div>
+
+</body>
+</html>
