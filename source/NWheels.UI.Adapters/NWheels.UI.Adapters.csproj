@@ -10,4 +10,8 @@
       <ProjectReference Include="..\NWheels.UI.Model\NWheels.UI.Model.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <EmbeddedResource Include="Web\Wix\Code\upload.js" />
+    </ItemGroup>
+    
 </Project>

@@ -94,13 +94,7 @@ namespace NWheels.UI.Adapters.Web.Wix
 
                     void GenerateSave()
                     {
-                        FINAL("getCodeAsString", out var @getCodeAsString, LAMBDA(@func => {
-                            FINAL("funcStr", out var @funcStr, @func.DOT("toString"));
-                            DO.IF(@funcStr.DOT("indexOf").INVOKE(ANY("() =>")).EQ(ANY(0))).THEN(() => {
-                                DO.RETURN(@funcStr.DOT("substring").INVOKE(ANY(6)));
-                            });
-                            DO.RETURN(@funcStr);
-                        }));
+                        LOADRAW("Web.Wix.Code.upload.js");
                     }
                 });
                 
