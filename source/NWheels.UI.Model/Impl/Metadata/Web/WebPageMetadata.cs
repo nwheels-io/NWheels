@@ -3,7 +3,7 @@ using NWheels.Composition.Model.Impl.Metadata;
 
 namespace NWheels.UI.Model.Impl.Metadata.Web
 {
-    public class WebPageMetadata : MetadataObject
+    public class WebPageMetadata : UIComponentMetadata
     {
         public WebPageMetadata(MetadataObjectHeader header) : base(header)
         {

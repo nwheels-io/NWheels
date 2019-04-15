@@ -17,6 +17,15 @@ namespace NWheels.Composition.Model.Impl.Metadata
             
         }
 
+        public MetadataObjectHeader(PreprocessedProperty sourceProperty)
+            : this(
+                sourceProperty.PreprocessedType, 
+                name: sourceProperty.Name,
+                namespaceName: sourceProperty.Type.Namespace,
+                qualifiedName: $"{sourceProperty.Type.FullName}.{sourceProperty.Name}")
+        {
+        }
+
         public MetadataObjectHeader(
             PreprocessedType sourceType, 
             IdentifierName name, 
@@ -44,7 +53,7 @@ namespace NWheels.Composition.Model.Impl.Metadata
 
         public static MetadataObjectHeader NoSourceType()
         {
-            return new MetadataObjectHeader(null);
+            return new MetadataObjectHeader(null, null, null, null);
         }
 
         public static implicit operator MetadataObjectHeader(PreprocessedType sourceType)

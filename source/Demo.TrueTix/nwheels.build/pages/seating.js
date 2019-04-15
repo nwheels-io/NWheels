@@ -1,5 +1,31 @@
 (function() {
     const pageName = "Seating";
+    const wixCode = `import { fetch } from 'wix-fetch';
+function fetchGraphQL(query) {
+    fetch(endpointUrl, {
+        method: "POST",
+        mode: "cors",
+        body: JSON.stringify({
+            query: query,
+            variables: null
+        }),
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }
+    })
+    .then((httpResponse) => {
+        if (httpResponse.ok) {
+            return httpResponse.json();
+        }
+        return Promise.reject("Fetch did not succeed");
+    });
+}
+
+;
+\$w.onReady(() => \$w("#html1").onMessage(event => console.log("got message!", event.data)));
+
+`;
     const comps = [
         {
             html: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Hall</title>\n    <script\n            src=\"https://code.jquery.com/jquery-3.4.0.min.js\"\n            integrity=\"sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg=\"\n            crossorigin=\"anonymous\"></script>\n    <style>\n        .hall-row {\n            display: flex;\n            flex-direction: row;\n            justify-content: center;\n        }\n\n        .hall-seat {\n            flex: 0 0 40px;\n            height: 40px;\n            text-align: center;\n            display: flex;\n            flex-direction: column;\n            justify-content: center;\n            margin: 3px;\n            border: 1px solid black;\n        }\n\n        .hall-seat.sale {\n            background-color: darkseagreen;\n        }\n        .hall-seat.resale {\n            background-color: goldenrod;\n        }\n        .hall-seat.sold {\n            background-color: indianred;\n        }\n    </style>\n</head>\n<body onLoad=\"ready()\">\n<script>\n    window.onmessage = function(event){\n\n        if (event.data && Array.isArray(event.data)) {\n            var $hall = $('#hall').empty()\n            $.each(event.data, function(rowIndex, row) {\n                var $row = $('<div class=\"hall-row\" />').appendTo($hall);\n                $.each(row.seats, function(seatIndex, seat) {\n                    var $seat = $('<div class=\"hall-seat\" />')\n                        .text('$' + (seat.price || 'N/A'))\n                        .appendTo($row)\n                        .addClass(seat.status)\n                        .on('click', function(e) {\n                            handleSeatClick(rowIndex +1, seatIndex +1, seat);\n                        })\n                });\n            });\n        }\n        else {\n            console.log(\"HTML Code Element received a generic message:\");\n            console.log(event.data);\n        }\n    };\n\n    function handleSeatClick(rowNum, seatNum, seat){\n\n        window.parent.postMessage({\n            \"type\":\"click\",\n            // \"label\":label,\n            \"value\": $.extend({rowNum: rowNum, seatNum: seatNum}, seat)\n        } , \"*\");\n    }\n\n    function ready(){\n        window.parent.postMessage({\"type\":\"ready\"}, \"*\");\n    }\n\n</script>\n\n<div id=\"hall\" class=\"hall\">\n\n</div>\n\n</body>\n</html>",
@@ -131,32 +157,6 @@
             }
         }
     ];
-    const wixCode = `import { fetch } from 'wix-fetch';
-function fetchGraphQL(query) {
-    fetch(endpointUrl, {
-        method: "POST",
-        mode: "cors",
-        body: JSON.stringify({
-            query: query,
-            variables: null
-        }),
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        }
-    })
-    .then((httpResponse) => {
-        if (httpResponse.ok) {
-            return httpResponse.json();
-        }
-        return Promise.reject("Fetch did not succeed");
-    });
-}
-
-;
-\$w.onReady(() => \$w("#html1").onMessage(event => console.log("got message!", event.data)));
-
-`;
         //------------------------------------------------------------------------------------
     // UPLOAD THROUGH DOCUMENT SERVICES (temporary solution)
     //------------------------------------------------------------------------------------

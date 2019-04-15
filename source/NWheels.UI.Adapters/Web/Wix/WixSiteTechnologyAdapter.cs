@@ -44,8 +44,8 @@ namespace NWheels.UI.Adapters.Web.Wix
 
                     FINAL("pageName", out var @pageName, ANY($"{page.Name}"));
 
-                    GenerateComponents();
                     GenerateCorvid();
+                    GenerateComponents();
                     GenerateSave();
 
                     void GenerateComponents()

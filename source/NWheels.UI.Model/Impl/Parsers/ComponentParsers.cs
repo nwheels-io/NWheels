@@ -9,32 +9,32 @@ namespace NWheels.UI.Model.Impl.Parsers
     {
         public TextContentMetadata TextContent(PreprocessedProperty prop)
         {
-            return new TextContentMetadata(MetadataObjectHeader.NoSourceType()) {
+            return new TextContentMetadata(new MetadataObjectHeader(prop)) {
                 Text = prop.ConstructorArguments[0].ClrValue as string 
             };
         }
 
         public FormMetadata Form(PreprocessedProperty prop)
         {
-            return new FormMetadata(MetadataObjectHeader.NoSourceType()) {
+            return new FormMetadata(new MetadataObjectHeader(prop)) {
             };
         }
 
         public DataGridMetadata DataGrid(PreprocessedProperty prop)
         {
-            return new DataGridMetadata(MetadataObjectHeader.NoSourceType()) {
+            return new DataGridMetadata(new MetadataObjectHeader(prop)) {
             };
         }
 
         public GridLayoutMetadata GridLayout(PreprocessedProperty prop)
         {
-            return new GridLayoutMetadata(MetadataObjectHeader.NoSourceType()) {
+            return new GridLayoutMetadata(new MetadataObjectHeader(prop)) {
             };
         }
 
         public SeatingPlanMetadata SeatingPlan(PreprocessedProperty prop)
         {
-            return new SeatingPlanMetadata(MetadataObjectHeader.NoSourceType()) {
+            return new SeatingPlanMetadata(new MetadataObjectHeader(prop)) {
             };
         }
     }
