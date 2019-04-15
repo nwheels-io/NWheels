@@ -124,6 +124,7 @@ namespace NWheels.UI.Model.Impl.Parsers.Web
                 UIFunctionMetadata ParseFunction(AnonymousDelegateExpression lambda)
                 {
                     var result = new UIFunctionMetadata();
+                    result.Lambda = lambda;
                     
                     foreach (var statement in lambda.Body.Statements.OfType<ExpressionStatement>())
                     {

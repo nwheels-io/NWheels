@@ -13,6 +13,7 @@
     <ItemGroup>
         <EmbeddedResource Include="Web\Wix\Code\upload.js" />
         <EmbeddedResource Include="Web\Wix\Code\backend-client.js" />
+        <EmbeddedResource Include="Web\Wix\Code\corvid-correct.js" />
         <EmbeddedResource Include="Web\Wix\Code\seating-plan-component.html" />
     </ItemGroup>
     

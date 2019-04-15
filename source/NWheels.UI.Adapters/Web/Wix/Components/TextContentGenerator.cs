@@ -19,7 +19,7 @@ namespace NWheels.UI.Adapters.Web.Wix.Components
                     Width = 980,
                     Height = 31,
                     X = 0,
-                    Y = 388
+                    Y = GridLayoutGenerator.NextY
                 },
                 Data = new Dictionary<string, object> {
                     {"type", "StyledText"},
@@ -37,7 +37,7 @@ namespace NWheels.UI.Adapters.Web.Wix.Components
                     Items = new List<WixComponentConnectionItem> {
                         new WixComponentConnectionItem {
                             Type = "WixCodeConnectionItem",
-                            Role = "text1" //TODO: auto-generate this
+                            Role = CompMeta.Header.Name
                         }
                     }
                 }

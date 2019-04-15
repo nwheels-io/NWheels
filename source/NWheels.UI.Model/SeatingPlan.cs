@@ -22,8 +22,8 @@ namespace NWheels.UI.Model
 
     public class SeatingPlan : UIComponent<Empty.Props, Empty.State>
     {
-        public SeatingPlan(
-            IEnumerable<SeatingPlanRow> rows,
+        public SeatingPlan(object data,
+            //IEnumerable<SeatingPlanRow> rows,
             Dictionary<object, Color> colorByType)
         {
         }

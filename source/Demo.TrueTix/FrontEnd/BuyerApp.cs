@@ -48,14 +48,7 @@ namespace Demo.TrueTix.FrontEnd
 
         [Include] 
         SeatingPlan SeatPlan => new SeatingPlan(
-            rows: State.SeatingPlan.Rows.Select((r, rowIndex) => new SeatingPlanRow {
-                Seats = r.Seats.Select((s, seatIndex) => new SeatingPlanSeat() {
-                   Id = s.Id,
-                   Type = s.Status.ToString(),
-                   RowLabel = (rowIndex + 1).ToString(),
-                   SeatLabel = (seatIndex + 1).ToString()
-                }).ToList()
-            }),
+            data: State.SeatingPlan.Rows,
             colorByType: new Dictionary<object, Color> {
                 { SeatStatus.Sale, Color.Green },
                 { SeatStatus.Resale, Color.Orange },
@@ -64,14 +57,10 @@ namespace Demo.TrueTix.FrontEnd
         );
 
         [Include]
-        TextContent PerformanceInfo => new TextContent(FormatPerformance(State.SeatingPlan.Performance));
+        TextContent PerformanceInfo => new TextContent(State.SeatingPlan.Performance);
 
         [Include] 
-        TextContent SeatInfo => new TextContent(FormatSeat(State.SelectedSeatInfo));
-
-        string FormatPerformance(Performance perf) => $"{perf}";
-
-        string FormatSeat(PerformanceSeat seat) => $"{seat}";
+        TextContent SeatInfo => new TextContent(State.SelectedSeatInfo);
 
         public class PageState
         {

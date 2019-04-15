@@ -5,8 +5,8 @@ namespace NWheels.UI.Model
 {
     public class TextContent : UIComponent<TextContentProps, Empty.State>
     {
-        public TextContent(string text)
-            : this(props => props.WithText(text))
+        public TextContent(object text)
+            : this(props => props.WithText(text as string))
         {
         }
 

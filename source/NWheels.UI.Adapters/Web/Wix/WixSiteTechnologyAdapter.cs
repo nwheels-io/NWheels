@@ -10,6 +10,8 @@ using MetaPrograms.JavaScript.Fluent;
 using MetaPrograms.JavaScript.Writer;
 using Microsoft.CodeAnalysis;
 using NWheels.Composition.Model.Impl.Metadata;
+using NWheels.UI.Adapters.Web.Wix.Components;
+using NWheels.UI.Model;
 using NWheels.UI.Model.Impl.Metadata;
 using NWheels.UI.Model.Impl.Metadata.Web;
 using static MetaPrograms.Fluent.Generator;
@@ -62,10 +64,13 @@ namespace NWheels.UI.Adapters.Web.Wix
                     {
                         var generator = WixComponentGenerator.GetGenerator(comp);
 
-                        return new WixComponentEntry {
+                        var entry = new WixComponentEntry {
                             CompDef = generator.GenerateDefinition(),
                             Html = generator.GenerateHtml()
                         };
+
+                        GridLayoutGenerator.NextY += entry.CompDef.Layout.Height + 10;
+                        return entry;
                     }
                     
                     void GenerateCorvid()

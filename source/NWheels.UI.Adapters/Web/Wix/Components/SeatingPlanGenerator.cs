@@ -19,9 +19,9 @@ namespace NWheels.UI.Adapters.Web.Wix.Components
                 Style = "htco1",
                 Layout = new WixComponentLayout {
                     Width = 980,
-                    Height = 359,
+                    Height = 400,
                     X = 0,
-                    Y = 0
+                    Y = GridLayoutGenerator.NextY
                 },
                 Data = new Dictionary<string, object> {
                     {"type", "HtmlComponent"},
@@ -39,7 +39,7 @@ namespace NWheels.UI.Adapters.Web.Wix.Components
                     Items = new List<WixComponentConnectionItem> {
                         new WixComponentConnectionItem {
                             Type = "WixCodeConnectionItem",
-                            Role = "html1" //TODO: auto-generate this
+                            Role = CompMeta.Header.Name
                         }
                     }
                 }

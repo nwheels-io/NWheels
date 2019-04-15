@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq.Expressions;
+using MetaPrograms.Expressions;
 
 namespace NWheels.UI.Model.Impl.Metadata
 {
@@ -10,6 +12,7 @@ namespace NWheels.UI.Model.Impl.Metadata
     
     public class UIFunctionMetadata
     {
+        public AnonymousDelegateExpression Lambda { get; set; }
         public List<UIBehavior> Steps { get; set; } = new List<UIBehavior>();
     }
 

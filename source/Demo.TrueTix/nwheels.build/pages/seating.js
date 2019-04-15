@@ -1,8 +1,9 @@
 (function() {
     const pageName = "Seating";
     const wixCode = `import { fetch } from 'wix-fetch';
+const endpointUrl = "https://api.tixlab.app/api/graphql";
 function fetchGraphQL(query) {
-    fetch(endpointUrl, {
+    return fetch(endpointUrl, {
         method: "POST",
         mode: "cors",
         body: JSON.stringify({
@@ -23,7 +24,34 @@ function fetchGraphQL(query) {
 }
 
 ;
-\$w.onReady(() => \$w("#html1").onMessage(event => console.log("got message!", event.data)));
+let pageState = { };
+const pushStateToComps = () => {
+    \$w("#SeatPlan").postMessage(pageState.seatingPlan.rows);
+    \$w("#PerformanceInfo").text = pageState.seatingPlan && pageState.seatingPlan.performance.artist;
+    \$w("#SeatInfo").text = pageState.selectedSeatInfo && \`Selected seat status: \${pageState.selectedSeatInfo.status}, price: \\\$\${pageState.selectedSeatInfo.price || 'N/A'}\`;
+};
+\$w.onReady(async () => {
+    const res = await fetchGraphQL(
+        \`query {seatingMap(id:\${12345}) {
+            performance { artist, date, venue {  title, location }},
+            rows {seats { id, status, price }}
+        }}\`
+    );
+    console.log('QUERY RESULT > ', res);
+    pageState.seatingPlan = res.data.seatingMap;  
+    pushStateToComps();
+    \$w("#SeatPlan").onMessage(async (event) => {
+        if (event.data.type === 'click') {
+            pageState.selectedSeatInfo = (await fetchGraphQL(
+                \`query { seat(performanceId:\${12345}, seatId:\${event.data.value.id}) { price, status } }\`
+            )).data.seat;
+        }
+        pushStateToComps();
+    });
+});
+
+
+;
 
 `;
     const comps = [
@@ -36,9 +64,9 @@ function fetchGraphQL(query) {
                 style: "htco1",
                 layout: {
                     width: 980,
-                    height: 359,
+                    height: 400,
                     x: 0,
-                    y: 0,
+                    y: 100,
                     scale: 1,
                     rotationInDegrees: 0,
                     fixedPosition: false
@@ -48,7 +76,7 @@ function fetchGraphQL(query) {
                     items: [
                         {
                             type: "WixCodeConnectionItem",
-                            role: "html1"
+                            role: "SeatPlan"
                         }
                     ]
                 },
@@ -77,7 +105,7 @@ function fetchGraphQL(query) {
                     width: 980,
                     height: 31,
                     x: 0,
-                    y: 388,
+                    y: 510,
                     scale: 1,
                     rotationInDegrees: 0,
                     fixedPosition: false
@@ -87,7 +115,7 @@ function fetchGraphQL(query) {
                     items: [
                         {
                             type: "WixCodeConnectionItem",
-                            role: "text1"
+                            role: "PerformanceInfo"
                         }
                     ]
                 },
@@ -122,7 +150,7 @@ function fetchGraphQL(query) {
                     width: 980,
                     height: 31,
                     x: 0,
-                    y: 388,
+                    y: 551,
                     scale: 1,
                     rotationInDegrees: 0,
                     fixedPosition: false
@@ -132,7 +160,7 @@ function fetchGraphQL(query) {
                     items: [
                         {
                             type: "WixCodeConnectionItem",
-                            role: "text1"
+                            role: "SeatInfo"
                         }
                     ]
                 },
