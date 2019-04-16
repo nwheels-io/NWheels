@@ -2,48 +2,103 @@
 
 ## Welcome to NWheels
 
-**CURRENT STATUS**: the `master` branch is **Gen2**, and it's in incubation phase. The field-tested **Gen1** is in the [gen-1 branch](https://github.com/nwheels-io/NWheels/tree/gen-1). **Gen1** proved to have a few flaws in the concept, which **Gen2** comes to fix. **Gen2** is actually a set of opinionated policies on top of transpilation mechanism provided by [MetaPrograms project](https://github.com/nwheels-io/MetaPrograms).
+An ejectable way to develop and maintain software of any scale with tiny amount of code, written in DSLs dedicated to every layer and aspect. [Read full introduction]().
 
-# How it works
-
-<img src="docs/images/nwheels-hexagon-2.png" align="right">
-
-- **Intents as code**: express your application with minimal amount of code clean from technology details
-- **Programming models DSLs**: APIs on top of which intents are coded; every layer and aspect has a dedicated DSL backed by programming model. Programming models digest DSL intents into metadata for technology adapters.
-- **Technology adapters**: pluggable code generators, which take metadata as input from programming models, and generate code for concrete platforms, products, and frameworks
-- **Generated implementations**: production-ready human-maintainable codebases, including CI/CD pipeline
-
-Maintain your code in DSLs in the long run, because DSLs are great cost saver and velocity booster. Alternatively, use NWheels as a scaffolding or prototyping tool. 
-
-Eject at any moment: drop the DSLs and start maintaining the generated codebase. There is no reverse engineering: only eject when you absolutely have to.
+**CURRENT STATUS**: incubation of **v2**. The field-tested **v1** can be found in the [this branch](https://github.com/nwheels-io/NWheels/tree/gen-1).
 
 # Getting started
 
-## Installation
+WARNING: we're in early alpha, expect failures
 
-### Prerequisites
+## Prerequisites
 
-- A machine running Linux, macOS, or Windows
+- Machine running Linux, macOS, or Windows
 - .NET Core SDK 2.1 or higher
+- A C# IDE. The popular ones are VSCode, Visual Studio (Windows only), Rider
 
-### Install CLI
+## Hello World
+
+Create a minimalistic application that consists of a static web page saying "Hello World".
+
+### Step 2. Create project
+
+1. Create a new class library project:
+
+    ```
+    $ mkdir hello-world
+    $ cd hello-wolrd
+    $ dotnet new classlib -f netstandard 2.0
+    $ rm *.cs
+    ```
+
+2. Add necessary packages:
+
+    ```
+    $ dotnet add package NWheels.Build
+    $ dotnet add package NWheels.UI.Model
+    $ dotnet add package NWheels.UI.Adapters
+    $ dotnet add package NWheels.DevOps.Model
+    $ dotnet add package NWheels.DevOps.Adapters
+    ```
+
+3. Open the project in an editor or IDE of your choice. For example, to open the project in VSCode, run:
+
+    ```
+    $ code .
+    ```
+
+### Step 2. Declare intents
+
+1. We want to create a web page that displays "Hello, world"
+
+    `HelloPage.cs`
+    
+    ```c#
+    using NWheels.UI.Model;
+    using NWheels.UI.Model.Web;
+    
+    namespace HelloWorld
+    {
+        class HelloPage : WebPage
+        {
+            TextContent Hello => "Hello, world!"
+        }
+    }
+    ```
+
+1. We want the page to be deployed as static HTML:
+
+     `HelloEnvironment.cs`
+
+    ```c#
+    using NWheels.DevOps.Model;
+    using NWheels.UI.Adapters.Web.StaticHtml;
+
+    namespace HelloWorld
+    {
+        class HelloEnvironment : Environment<EmptyConfiguration>
+        {
+            StaticHtmlSite HelloSite => 
+                new SinglePageWebApp<HelloPage>().AsStaticHtmlSite();
+        }
+    }
+    ```
+
+### Step 3. Run locally
+
+In the console, run:
 
 ```
-$ dotnet tool install -g nwheels --version 2.0.0-alpha1
+$ dotnet start
 ```
-## Demo
+
+If everything goes right, a browser will pop up displaying our web page with the "Hello, world!" text. The console output should state this:
 
 ```
-$ git clone https://github.com/nwheels-io/NWheels.git nwheels
-$ cd nwheels/demos/01-todo-list
-$ dotnet run
-```
-## Creating your own application
-
-```
-$ dotnet new nwheels MyFirstApp
-$ cd MyFirstApp
-$ dotnet run
+Starting local environment: HelloEnvironment
+Starting web server for SinglePageWebApp<HelloPage>
+- listening at http://localhost:3000
+Local environment is up. Press ^C to shut down...
 ```
 
 # DSLs and technology adapters
