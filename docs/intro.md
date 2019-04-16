@@ -28,11 +28,12 @@
 - The generated code is well structured for easy maintenance, as if it was written by a competent developer
 - Generated codebases include DevOps pipelines that release and monitor your software
 
-## What are the drawbacks:
+## What are the drawbacks?
 
-- None are known
-- If anything goes wrong, eject at any moment: drop the DSLs, and start maintaining generated codebase. The generated code contains no traces of NWheels.
+NWheels is a cutting edge approach, with all the associated consequences.
+
+If anything goes wrong, you are able to eject at any moment: drop the DSLs, and start maintaining generated codebase. The generated code contains no traces of NWheels.
 
 ## Can it actually work?
 
-- Two serious proprietary real-world applications were built with NWheels v1. Both are in production, and the concept had proven to be right. Yet we realized flaws in our implementation approach. Hence we've started NWheels v2, which comes to fix the flaws.
+Two serious proprietary real-world applications were built with NWheels v1. Both are in production, and the concept had proven to be right. Yet we realized flaws in our implementation approach. Hence we've started NWheels v2, which comes to fix the flaws.

@@ -1,10 +1,10 @@
 <img align="left" src="docs/images/logo-132.png"/>
 
-## Welcome to NWheels
+# Welcome to NWheels
 
-An ejectable way to develop and maintain software of any scale with tiny amount of code, written in DSLs dedicated to every layer and aspect. [Read full introduction]().
+An ejectable way to develop and maintain software of any scale with tiny amount of code, written in DSLs dedicated to every layer and aspect. [Read full introduction](docs/).
 
-**CURRENT STATUS**: incubation of **v2**. The field-tested **v1** can be found in the [this branch](https://github.com/nwheels-io/NWheels/tree/gen-1).
+> CURRENT STATUS: incubation of **v2**. The field-tested **v1** can be found in the [this branch](https://github.com/nwheels-io/NWheels/tree/gen-1).
 
 # Getting started
 
