@@ -1,4 +1,4 @@
-<img align="left" src="docs/images/logo-132.png"/>
+<img align="left" src="docs/images/logo-132x164.png"/>
 
 # Welcome to NWheels
 
