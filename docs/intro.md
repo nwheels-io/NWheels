@@ -11,12 +11,12 @@
 
 ## Who NWheels is good for:
 
-- **[Greenfield projects]()**: work both fast and right, starting on day one 
-- **[Startups]()**: a crazy shortcut, you probably won't need angels
-- **[Freelance]()**: complete projects lightning fast
-- **[Prototyping or scaffolding]()**: instant visible results and feedback from business
-- **[Designing domain models]()**: try what-if alternative designs in no time, picking up the winner
-- **[Willing to go DDD]()**: DDD DSL greatly lowers the costs, more projects will profit
+- **[Greenfield projects]()**: work both fast and right, starting on day one [[Explain]()]
+- **[Startups]()**: game changer, you probably won't need angels [[Explain]()]
+- **[Freelance]()**: complete projects lightning fast [[Explain]()]
+- **[Prototyping or scaffolding]()**: instant visible results and feedback from business [[Explain]()]
+- **[Designing domain models]()**: try what-if alternative designs in no time, picking up the winner [[Explain]()]
+- **[Willing to go DDD]()**: DSLs allow for low-cost DDD, most projects would profit [[Explain]()]
 
 ## How it works:
 
@@ -30,9 +30,14 @@
 
 ## What are the drawbacks?
 
-NWheels is a cutting edge approach, with all the associated consequences.
+NWheels is a cutting edge approach, with all the associated consequences. But you can always use the Eject button.
 
-If anything goes wrong, you are able to eject at any moment: drop the DSLs, and start maintaining generated codebase. The generated code contains no traces of NWheels.
+## Eject button
+
+If anything goes wrong, you are able to eject at any moment:
+
+- drop the DSLs, and start maintaining generated codebase
+- the generated code contains no traces of NWheels
 
 ## Can it actually work?
 

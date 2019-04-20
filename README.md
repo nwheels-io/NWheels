@@ -2,19 +2,25 @@
 
 # Welcome to NWheels
 
-An ejectable way to develop and maintain software of any scale with tiny amount of code, written in DSLs dedicated to every layer and aspect. [Read full introduction](docs/).
+An ejectable way to develop and maintain software of any scale with tiny amount of code in domain-specific langauges (DSL). Every layer and aspect have dedicated DSLs, which allow declaring intents through code, together with arbitrary logic. The DSLs are then transpiled into working codebases in selected languages and technology stacks. [Read full introduction](docs/).
 
-> CURRENT STATUS: incubation of **v2**. The field-tested **v1** can be found in the [this branch](https://github.com/nwheels-io/NWheels/tree/gen-1).
+CURRENT STATUS: incubation of **v2**. The field-tested **v1** can be found in [gen-1 branch](https://github.com/nwheels-io/NWheels/tree/gen-1).
 
 # Getting started
 
 WARNING: we're in early alpha, expect failures
 
-## Prerequisites
+## Prerequisites 
+
+### Production
+
+
+
+### Development
 
 - Machine running Linux, macOS, or Windows
 - .NET Core SDK 2.1 or higher
-- A C# IDE. The popular ones are VSCode, Visual Studio (Windows only), Rider
+- (Recommended) C# IDE. The popular ones are VSCode, Visual Studio (Windows only), Rider
 
 ## Hello World
 
