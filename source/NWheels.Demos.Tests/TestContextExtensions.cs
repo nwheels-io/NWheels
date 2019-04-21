@@ -15,8 +15,7 @@ namespace NWheels.Demos.Tests
                 "..",
                 "..",
                 "demos",
-                demoName,
-                "dsl"
+                demoName
             );
         }
     }

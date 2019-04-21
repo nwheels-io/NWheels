@@ -1,5 +1,6 @@
 using System.IO;
 using MetaPrograms.Testability;
+using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
 using NWheels.Build;
 using Shouldly;
@@ -11,6 +12,7 @@ namespace NWheels.Demos.Tests
         [Test]
         public void TranspilesAsExpected()
         {
+            
             var output = new TestCodeGeneratorOutput();
             var engine = new BuildEngine(new BuildOptions {
                 ProjectFilePath = DemoProjectFilePath
