@@ -1,12 +1,9 @@
+using MetaPrograms;
+
 namespace NWheels.Build
 {
     public class BuildOptions
     {
-        public BuildOptions(string projectFilePath)
-        {
-            ProjectFilePath = projectFilePath;
-        }
-
-        public string ProjectFilePath { get; }
+        public string ProjectFilePath { get; set; }
     }
 }

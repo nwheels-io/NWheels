@@ -55,15 +55,8 @@ namespace NWheels.Build
             {
                 foreach (var outType in output.GetAll())
                 {
-                    if (true)//outType.ConcreteType.Status == MemberStatus.Parsed)
-                    {
-                        Console.WriteLine($"TYPE: {outType.ConcreteType.FullName}");
-                        CompletePreprocessingOfType(outType);
-                    }
-                    else
-                    {
-                        Console.WriteLine($"skip: {outType.ConcreteType.FullName}, status = {outType.ConcreteType.Status}");
-                    }
+                    Console.WriteLine($"TYPE: {outType.ConcreteType.FullName}");
+                    CompletePreprocessingOfType(outType);
                 }
             }
 

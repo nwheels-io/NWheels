@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using MetaPrograms;
+using Microsoft.Build.Tasks.Hosting;
 using NWheels.Build;
 using NWheels.Composition.Model.Impl;
 
@@ -20,9 +22,12 @@ namespace NWheels.Cli
 
             try
             {
-                var options = new BuildOptions(args[0]);
+                var options = new BuildOptions {
+                    ProjectFilePath = args[0],
+                };
                 var engine = new BuildEngine(options);
-                var success = engine.Build(out var output); 
+                var output = new CodeGeneratorOutput(options);
+                var success = engine.Build(output); 
 
                 exitCode = success ? 0 : 1;
 

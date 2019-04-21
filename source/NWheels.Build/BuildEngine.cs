@@ -21,7 +21,7 @@ namespace NWheels.Build
             _options = options;
         }
 
-        public bool Build(out CodeGeneratorOutput generatedCode)
+        public bool Build(ICodeGeneratorOutput output)
         {
             Console.WriteLine($"Starting build: project {Path.GetFileNameWithoutExtension(_options.ProjectFilePath)}");
 
@@ -37,7 +37,7 @@ namespace NWheels.Build
             var technologyAdapters = LoadTechnologyAdapters();
             var metadata = ParseModels();
             
-            generatedCode = GenerateOutputs();
+            GenerateOutputs();
             
             return true;
 
@@ -189,24 +189,20 @@ namespace NWheels.Build
                 }
             }
 
-            CodeGeneratorOutput GenerateOutputs()
+            void GenerateOutputs()
             {
-                var outputs = new CodeGeneratorOutput(_options);
-                
                 Console.WriteLine("--- generating codebase ---");
 
-                RunTechnologyAdapters<ITechnologyAdapter>(outputs, (context, adapter) => {
+                RunTechnologyAdapters<ITechnologyAdapter>((context, adapter) => {
                     adapter.GenerateOutputs(context);
                 });
 
-                RunTechnologyAdapters<IDeploymentTechnologyAdapter>(outputs, (context, adapter) => {
+                RunTechnologyAdapters<IDeploymentTechnologyAdapter>((context, adapter) => {
                     adapter.GenerateDeploymentOutputs(context);
                 });
-
-                return outputs;
             }
             
-            void RunTechnologyAdapters<TBase>(CodeGeneratorOutput outputs, Action<TechnologyAdapterContext, TBase> action) 
+            void RunTechnologyAdapters<TBase>(Action<TechnologyAdapterContext, TBase> action) 
                 where TBase : ITechnologyAdapter
             {
                 foreach (var metaObject in metadata)
@@ -218,7 +214,7 @@ namespace NWheels.Build
                             continue;
                         }
 
-                        var context = new TechnologyAdapterContext(preprocessor, metaObject, metaAdapter, outputs);
+                        var context = new TechnologyAdapterContext(preprocessor, metaObject, metaAdapter, output);
 
                         Console.WriteLine(
                             $"[{context.Input?.Header.QualifiedName ?? "NULL"} : {context.Input?.GetType().Name ?? "NULL"}] " + 
