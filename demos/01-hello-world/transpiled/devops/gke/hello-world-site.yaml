@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: demo-hello-world
+  name: hello-world-site-deployment
+spec:
+  selector:
+    matchLabels:
+      component: hello-world-site
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: hello-world-site
+    spec:
+      containers:
+      - name: hello-world-site
+        image: gcr.io/nwheels-demos/hello-world-site
+---
+apiVersion: cloud.google.com/v1beta1
+kind: BackendConfig
+metadata:
+  namespace: demo-hello-world
+  name: hello-world-site-backend-config
+spec:
+  cdn:
+    enabled: true
+    cachePolicy:
+      includeHost: true
+      includeProtocol: true
+      includeQueryString: true
+---
+apiVersion: apps/v1
+kind: Service
+metadata:
+  namespace: demo-hello-world
+  name: hello-world-site-service
+  labels:
+    component: hello-world-site
+  annotations:
+    beta.cloud.google.com/backend-config: '{"ports": {"80":"hello-world-site-backend-config"} }'
+spec:
+  type: NodePort
+  selector:
+    component: hello-world-site
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: demo-hello-world
+  name: hello-world-site-ingress
+  labels:
+    component: hello-world-site
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: demo-ip-address
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: hello-world-site-service
+          servicePort: 80

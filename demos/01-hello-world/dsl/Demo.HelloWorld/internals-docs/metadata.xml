@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+this file conceptually illustrates metadata created by programming models
+it is for documentation purposes only
+ -->
+<Metadata>
+
+    <WebApp
+        name="HelloWorld"
+        technologyAdapterType="NWheels.UI.Adapters.Web.StaticHtml.StaticHtmlTechnologyAdapter"
+    >
+        <Pages>
+            <WebPage name="HelloWorld">
+                <Components>
+                    <TextContent text="Hello, world!" />
+                </Components>
+            </WebPage>
+        </Pages>
+        <TechnologyConfig>
+            <StaticHtmlWebSiteConfig />
+        </TechnologyConfig>
+    </WebApp>
+
+    <Environment
+        name="Production"
+        technologyAdapterType="NWheels.DevOps.Adapters.Environments.Gke.GkeTechnologyAdapter"
+    >
+        <Deployments />
+        <Components>
+            <WebApp
+                name="HelloWorld"
+                technologyAdapterType="NWheels.UI.Adapters.Web.StaticHtml.StaticHtmlTechnologyAdapter"
+            >
+                <Pages>
+                    <WebPage name="HelloWorld">
+                        <Components>
+                            <TextContent text="Hello, world!" />
+                        </Components>
+                    </WebPage>
+                </Pages>
+                <TechnologyConfig>
+                    <StaticHtmlWebSiteConfig />
+                </TechnologyConfig>
+            </WebApp>
+        </Components>
+        <TechnologyConfig>
+            <GkeEnvironmentConfig zone="us-central" project="nwheels-demos" />
+        </TechnologyConfig>
+    </Environment>
+
+    <SystemMain 
+        name="Main"
+        technologyAdapterType="NWheels.DevOps.Adapters.SystemMain.SystemMainAdapter"
+    >
+        <Environments>
+            <Environment
+                name="Production"
+                technologyAdapterType="NWheels.DevOps.Adapters.Environments.Gke.GkeTechnologyAdapter"
+            >
+                <Deployments />
+                <Components>
+                    <WebApp
+                        name="HelloWorld"
+                        technologyAdapterType="NWheels.UI.Adapters.Web.StaticHtml.StaticHtmlTechnologyAdapter"
+                    >
+                        <Pages>
+                            <WebPage name="HelloWorld">
+                                <Components>
+                                    <TextContent text="Hello, world!" />
+                                </Components>
+                            </WebPage>
+                        </Pages>
+                        <TechnologyConfig>
+                            <StaticHtmlWebSiteConfig />
+                        </TechnologyConfig>
+                    </WebApp>
+                </Components>
+                <TechnologyConfig>
+                    <GkeEnvironmentConfig zone="us-central" project="nwheels-demos" />
+                </TechnologyConfig>
+            </Environment>
+        </Environments>
+        <TechnologyConfig>
+            <SystemMainConfig />
+        </TechnologyConfig>
+    </SystemMain>
+
+</Metadata>

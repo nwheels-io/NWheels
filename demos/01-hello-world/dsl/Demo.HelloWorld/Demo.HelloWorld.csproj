@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Reference Include="NWheels.Composition.Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\..\..\source\NWheels.Composition.Model\bin\Debug\netstandard2.0\NWheels.Composition.Model.dll</HintPath>
+      </Reference>
+      <Reference Include="NWheels.DevOps.Adapters, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\..\..\source\NWheels.DevOps.Adapters\bin\Debug\netstandard2.0\NWheels.DevOps.Adapters.dll</HintPath>
+      </Reference>
+      <Reference Include="NWheels.DevOps.Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\..\..\source\NWheels.DevOps.Model\bin\Debug\netstandard2.0\NWheels.DevOps.Model.dll</HintPath>
+      </Reference>
+      <Reference Include="NWheels.UI.Adapters, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\..\..\source\NWheels.UI.Adapters\bin\Debug\netstandard2.0\NWheels.UI.Adapters.dll</HintPath>
+      </Reference>
+      <Reference Include="NWheels.UI.Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\..\..\source\NWheels.UI.Model\bin\Debug\netstandard2.0\NWheels.UI.Model.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+</Project>
