@@ -10,6 +10,7 @@ namespace NWheels.Build
 {
     public class ClrTypeLoader
     {
+        private readonly PluginAssemblyLoadContext _loadContext;
         private readonly RoslynCodeModelReader _reader;
         private readonly Dictionary<string, Assembly> _cachedAssemblies = new Dictionary<string, Assembly>();
         private readonly Dictionary<TypeMember, Type> _cachedTypes = new Dictionary<TypeMember, Type>();
@@ -17,6 +18,7 @@ namespace NWheels.Build
 
         public ClrTypeLoader(RoslynCodeModelReader reader)
         {
+            _loadContext = new PluginAssemblyLoadContext();
             _reader = reader;
         }
 
@@ -70,8 +72,8 @@ namespace NWheels.Build
             {
                 return existingAssembly;
             }
-            
-            var assembly = Assembly.LoadFrom(filePath);
+
+            var assembly = _loadContext.LoadWithDependencyResolver(filePath); 
             _cachedAssemblies.Add(filePath, assembly);
 
             Console.WriteLine($"ASM: {assembly.FullName}");
