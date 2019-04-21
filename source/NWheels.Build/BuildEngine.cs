@@ -26,10 +26,8 @@ namespace NWheels.Build
             Console.WriteLine($"Starting build: project {Path.GetFileNameWithoutExtension(_options.ProjectFilePath)}");
 
             var workspace = LoadProjectWorkspace();
-            
-            Console.WriteLine($">>>>>> WAITING FOR DEBUGGER: PID = {Process.GetCurrentProcess().Id}");
-            Console.ReadLine();
-            
+            WaitForDebugger();
+
             var (code, reader) = ReadSourceCode();
             var preprocessor = PreprocessModels();
             var typeLoader = new ClrTypeLoader(reader);
@@ -51,6 +49,15 @@ namespace NWheels.Build
                 Console.WriteLine("--- project loader: success ---");
 
                 return result;
+            }
+
+            void WaitForDebugger()
+            {
+                if (_options.WaitForDebugger)
+                {
+                    Console.WriteLine($">>>>>> WAITING FOR DEBUGGER: PID = {Process.GetCurrentProcess().Id}");
+                    Console.ReadLine();
+                }
             }
 
             (ImperativeCodeModel code, RoslynCodeModelReader reader) ReadSourceCode()
@@ -225,6 +232,7 @@ namespace NWheels.Build
                 }
             }
         }
+
     }
 }
 
