@@ -1,22 +1,20 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using LibGit2Sharp;
+using MetaPrograms;
 using NUnit.Framework;
 
 namespace NWheels.Demos.Tests
 {
     public static class TestContextExtensions
     {
-        public static string GetDemoRootDirectory(this TestContext context, string demoName)
+        public static FilePath GetDemoRootDirectory(this TestContext context, string demoName)
         {
-            return Path.Combine(
-                context.TestDirectory,
-                "..",
-                "..",
-                "..",
-                "..",
-                "..",
-                "demos",
-                demoName
-            );
+            return FilePath.Parse(context.TestDirectory)
+                .Up(5)
+                .Append("demos", demoName);
         }
     }
 }
