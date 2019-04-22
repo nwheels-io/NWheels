@@ -7,7 +7,7 @@ using Shouldly;
 
 namespace NWheels.Demos.Tests
 {
-    public class HelloWorldTests
+    public class TodoListTests
     {
         [Test]
         public void TranspilesAsExpected()
@@ -28,10 +28,10 @@ namespace NWheels.Demos.Tests
         }
 
         private static FilePath DemoRootDirectory =>
-            TestContext.CurrentContext.GetDemoRootDirectory("01-hello-world");
+            TestContext.CurrentContext.GetDemoRootDirectory("02-todo-list");
 
         private static FilePath DemoProjectFile =>
-            DemoRootDirectory.Append("dsl", "Demo.HelloWorld", "Demo.HelloWorld.csproj");
+            DemoRootDirectory.Append("dsl", "Demo.TodoList", "Demo.TodoList.csproj");
 
         private static FilePath DemoTranspiledDirectory =>
             DemoRootDirectory.Append("transpiled");

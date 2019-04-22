@@ -16,9 +16,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.DevOps.Model", "NWh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Domain.Model", "NWheels.Domain.Model\NWheels.Domain.Model.csproj", "{326A7930-AA75-4521-9AA7-011CB4E92263}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demos.TodoList", "Demos.TodoList\Demos.TodoList.csproj", "{12416787-87A2-4BCD-B6EF-D7AB30B41A1A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo.TodoList", "Demo.TodoList\Demo.TodoList.csproj", "{12416787-87A2-4BCD-B6EF-D7AB30B41A1A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.DB.Adpters", "NWheels.DB.Adpters\NWheels.DB.Adpters.csproj", "{8FC7240D-0BCB-44F0-A779-6A5A75184DB6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.DB.Adapters", "NWheels.DB.Adapters\NWheels.DB.Adapters.csproj", "{8FC7240D-0BCB-44F0-A779-6A5A75184DB6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.RestApi.Adapters", "NWheels.RestApi.Adapters\NWheels.RestApi.Adapters.csproj", "{B1E2AA07-4935-48E2-A10B-AA1ED01B0F00}"
 EndProject
