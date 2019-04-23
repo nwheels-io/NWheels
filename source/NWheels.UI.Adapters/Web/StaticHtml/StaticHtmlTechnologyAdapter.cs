@@ -1,16 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using MetaPrograms;
-using MetaPrograms.Extensions;
-using Microsoft.CodeAnalysis.VisualBasic;
-using Newtonsoft.Json.Serialization;
 using NWheels.Composition.Model.Impl.Metadata;
 using NWheels.UI.Model.Impl.Metadata;
 using NWheels.UI.Model.Impl.Metadata.Web;
-using NWheels.UI.Model.Web;
 
 namespace NWheels.UI.Adapters.Web.StaticHtml
 {

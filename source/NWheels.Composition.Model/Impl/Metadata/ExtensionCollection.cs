@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using MetaPrograms.CSharp.Reader;
 
 namespace NWheels.Composition.Model.Impl.Metadata
 {

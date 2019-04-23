@@ -10,7 +10,7 @@
     <ItemGroup>
         <PackageReference Include="YamlDotNet" Version="6.0.0" />
         <ProjectReference Include="..\NWheels.Build\NWheels.Build.csproj" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.9.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" Version="2.9.0" />
         <PackageReference Include="Buildalyzer" Version="2.1.0" />
         <PackageReference Include="Buildalyzer.Workspaces" Version="2.1.0" />
     </ItemGroup>

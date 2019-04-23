@@ -5,8 +5,6 @@ using MetaPrograms;
 using MetaPrograms.CSharp;
 using MetaPrograms.Expressions;
 using MetaPrograms.Members;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 
 namespace NWheels.Composition.Model.Impl.Metadata
 {

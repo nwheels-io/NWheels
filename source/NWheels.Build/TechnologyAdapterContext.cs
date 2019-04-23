@@ -1,5 +1,4 @@
 using System;
-using Buildalyzer;
 using MetaPrograms;
 using NWheels.Composition.Model.Impl.Metadata;
 
