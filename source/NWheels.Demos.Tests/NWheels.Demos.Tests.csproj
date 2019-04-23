@@ -17,6 +17,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\MetaPrograms\Source\MetaPrograms.Testability\MetaPrograms.Testability.csproj" />
+      <ProjectReference Include="..\..\demos\01-hello-world\dsl\Demo.HelloWorld\Demo.HelloWorld.csproj" />
+      <ProjectReference Include="..\..\demos\02-todo-list\dsl\Demo.TodoList\Demo.TodoList.csproj" />
       <ProjectReference Include="..\NWheels.Build\NWheels.Build.csproj" />
     </ItemGroup>
 

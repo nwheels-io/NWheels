@@ -5,48 +5,20 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Reference Include="NWheels.Composition.Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\source\NWheels.Composition.Model\bin\Debug\netstandard2.0\NWheels.Composition.Model.dll</HintPath>
-      </Reference>
-      <Reference Include="NWheels.DB.Adapters, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\source\NWheels.DB.Adapters\bin\Debug\netstandard2.0\NWheels.DB.Adapters.dll</HintPath>
-      </Reference>
-      <Reference Include="NWheels.DB.RestApi.Adapters, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\source\NWheels.DB.RestApi.Adapters\bin\Debug\netstandard2.0\NWheels.DB.RestApi.Adapters.dll</HintPath>
-      </Reference>
-      <Reference Include="NWheels.DevOps.Adapters, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\source\NWheels.DevOps.Adapters\bin\Debug\netstandard2.0\NWheels.DevOps.Adapters.dll</HintPath>
-      </Reference>
-      <Reference Include="NWheels.DevOps.Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\source\NWheels.DevOps.Model\bin\Debug\netstandard2.0\NWheels.DevOps.Model.dll</HintPath>
-      </Reference>
-      <Reference Include="NWheels.Domain.Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\source\NWheels.Domain.Model\bin\Debug\netstandard2.0\NWheels.Domain.Model.dll</HintPath>
-      </Reference>
-      <Reference Include="NWheels.DB.Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\source\NWheels.DB.Model\bin\Debug\netstandard2.0\NWheels.DB.Model.dll</HintPath>
-      </Reference>
-      <Reference Include="NWheels.DB.RestApi.Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\source\NWheels.DB.RestApi.Model\bin\Debug\netstandard2.0\NWheels.DB.RestApi.Model.dll</HintPath>
-      </Reference>
-      <Reference Include="NWheels.RestApi.Adapters, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\source\NWheels.RestApi.Adapters\bin\Debug\netstandard2.0\NWheels.RestApi.Adapters.dll</HintPath>
-      </Reference>
-      <Reference Include="NWheels.RestApi.Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\source\NWheels.RestApi.Model\bin\Debug\netstandard2.0\NWheels.RestApi.Model.dll</HintPath>
-      </Reference>
-      <Reference Include="NWheels.UI.Adapters, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\source\NWheels.UI.Adapters\bin\Debug\netstandard2.0\NWheels.UI.Adapters.dll</HintPath>
-      </Reference>
-      <Reference Include="NWheels.UI.Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\source\NWheels.UI.Model\bin\Debug\netstandard2.0\NWheels.UI.Model.dll</HintPath>
-      </Reference>
-      <Reference Include="NWheels.UI.RestApi.Adapters, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\source\NWheels.UI.RestApi.Adapters\bin\Debug\netstandard2.0\NWheels.UI.RestApi.Adapters.dll</HintPath>
-      </Reference>
-      <Reference Include="NWheels.UI.RestApi.Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\source\NWheels.UI.RestApi.Model\bin\Debug\netstandard2.0\NWheels.UI.RestApi.Model.dll</HintPath>
-      </Reference>
+      <ProjectReference Include="..\..\..\..\source\NWheels.Composition.Model\NWheels.Composition.Model.csproj" />
+      <ProjectReference Include="..\..\..\..\source\NWheels.DB.Adapters\NWheels.DB.Adapters.csproj"/>
+      <ProjectReference Include="..\..\..\..\source\NWheels.DB.RestApi.Adapters\NWheels.DB.RestApi.Adapters.csproj"/>
+      <ProjectReference Include="..\..\..\..\source\NWheels.DevOps.Adapters\NWheels.DevOps.Adapters.csproj" />
+      <ProjectReference Include="..\..\..\..\source\NWheels.DevOps.Model\NWheels.DevOps.Model.csproj" />
+      <ProjectReference Include="..\..\..\..\source\NWheels.Domain.Model\NWheels.Domain.Model.csproj" />
+      <ProjectReference Include="..\..\..\..\source\NWheels.DB.Model\NWheels.DB.Model.csproj" />
+      <ProjectReference Include="..\..\..\..\source\NWheels.DB.RestApi.Model\NWheels.DB.RestApi.Model.csproj" />
+      <ProjectReference Include="..\..\..\..\source\NWheels.RestApi.Adapters\NWheels.RestApi.Adapters.csproj" />
+      <ProjectReference Include="..\..\..\..\source\NWheels.RestApi.Model\NWheels.RestApi.Model.csproj" />
+      <ProjectReference Include="..\..\..\..\source\NWheels.UI.Adapters\NWheels.UI.Adapters.csproj" />
+      <ProjectReference Include="..\..\..\..\source\NWheels.UI.Model\NWheels.UI.Model.csproj" />
+      <ProjectReference Include="..\..\..\..\source\NWheels.UI.RestApi.Adapters\NWheels.UI.RestApi.Adapters.csproj" />
+      <ProjectReference Include="..\..\..\..\source\NWheels.UI.RestApi.Model\NWheels.UI.RestApi.Model.csproj" />
     </ItemGroup>
 
 </Project>
