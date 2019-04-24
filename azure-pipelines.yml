@@ -13,5 +13,6 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+- script: git clone https://github.com/felix-b/MetaPrograms.git ../MetaPrograms
 - script: cd source && dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
