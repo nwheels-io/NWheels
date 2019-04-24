@@ -16,3 +16,8 @@ steps:
 - script: git clone https://github.com/felix-b/MetaPrograms.git ../MetaPrograms
 - script: cd source && dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: test
+    projects: '**/*.Tests/*.csproj'
+    arguments: '--configuration $(buildConfiguration)'
