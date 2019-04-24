@@ -2,9 +2,11 @@
 
 # Welcome to NWheels
 
-An ejectable way to develop and maintain software of any scale with tiny amount of code in domain-specific langauges (DSL). Every layer and aspect have dedicated DSLs, which allow declaring intents through code, together with arbitrary logic. The DSLs are then transpiled into working codebases in selected languages and technology stacks. [Read full introduction](docs/).
+[![Build Status](https://nwheels-io.visualstudio.com/nwheels.io/_apis/build/status?definition=1&branchName=master)](https://nwheels-io.visualstudio.com/nwheels.io/_build?definitionId=1)
 
-CURRENT STATUS: incubation of **v2**. The field-tested **v1** can be found in [gen-1 branch](https://github.com/nwheels-io/NWheels/tree/gen-1).
+An ejectable way to develop and maintain software of any scale with tiny amount of code. Every layer and aspect is coded in a dedicated domain-specific language (DSL). The DSLs are transpiled into working codebases in selected languages and technology stacks, which look as if they were coded manually. [Read full introduction](docs/intro.md).
+
+CURRENT STATUS: incubation of **v2**. Field-tested **v1** can be found in [gen-1 branch](https://github.com/nwheels-io/NWheels/tree/gen-1).
 
 # Getting started
 
